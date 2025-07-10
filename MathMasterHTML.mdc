@@ -129,23 +129,24 @@ Main Scene Hierarchy:
 
 **Problem Types & Formats:**
 
-**Easy Level (Addition/Subtraction):**
+**Beginner (Addition/Subtraction):**
 - Pattern 1: `x + a = b` (e.g., "x + 5 = 12")
 - Pattern 2: `a + x = b` (e.g., "8 + x = 15") 
 - Pattern 3: `a + x - c = b` (e.g., "10 + x - 4 = 16")
 - 50 problems total with integer solutions
-- Solution range: 2-15
+- 
 
-**Medium Level (Multiplication):**
-- Format: `ax = b` (e.g., "5x = 20")
-- Factor range: 2-20
-- Solution range: 2-15
-- Product limit: ≤300
-- 50 problems auto-generated
+**Warrior Level (Multiplication):**
+- Format: `a + b - c + X = d` (e.g., "2 + 3 - 1 + x = 10")
+- format: `a - b + c + X = d` (e.g., "5 - 2 + x = 8") 
+- 50 problems total with integer solutions
+- 50 predefined problems with integer solutions
+- Results always whole numbers
 
-**Division Level:**
-- Format 1: `a/x = b` (e.g., "18/x = 6")
-- Format 2: `x/a = b` (e.g., "x/2 = 6")
+**Master Level:**
+- Format 1: `a ÷ b + c - x = d` (e.g., "2 ÷ 3 + 1 - x = 1")
+- Format 2: `a ÷ b - c + x = d` (e.g., "2 ÷ 3 - 1 + x = 1")
+- Format 3: `a ÷ b + c - d = x` (e.g., "2 ÷ 3 + 1 - 2 = x")
 - 50 predefined problems with integer solutions
 - Division results always whole numbers
 
@@ -158,7 +159,7 @@ Main Scene Hierarchy:
 ### 3.2 Falling Symbols System
 **File: FallingSymbolsManager.cs**
 
-**Symbol Set**: "0123456789Xx +-=÷×*/()"
+**Symbol Set**: "0123456789Xx +-=÷×*/()" **IMPORTANT**
 
 **Animation Specifications:**
 - Continuous generation at top of screen
@@ -180,13 +181,13 @@ Main Scene Hierarchy:
 **Display Rules:**
 - Initially invisible until Help button is clicked
 - Step-by-step revelation based on player progress
-- Character-by-character unlocking system
-- Visual coordination with lock animation progress
+- Character/symbol-by-character/symbol "unlocking" system
+- Visual coordination with lock animation progress (displayed in left/Progress window)
 - Proper spacing and formatting for readability
 
 **Character Management:**
-- Each character individually trackable
-- Visibility state per character position
+- Each character/symbol individually trackable
+- Visibility state per character position <---- important
 - Color coding: revealed vs. unrevealed
 - Animation effects for character revelation
 - Coordinate system for precise positioning
