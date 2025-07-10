@@ -1,0 +1,526 @@
+# MathMaster 2.0 - Recreation Development Specification
+
+## Project Overview
+**Platform**: 2D Game Engine  
+**Target Platforms**: Multi-touch devices (BenQ interactive displays, tablets, desktop)  
+**Programming Language**: C#  
+**Architecture**: Modular component-based system with separate files for each game aspect  
+
+## Core Game Concept
+MathMaster is an educational algebra game where players solve step-by-step math problems by clicking on falling symbols to reveal solution steps. The game features interactive worm creatures that steal symbols, requiring player intervention, and sophisticated visual effects including particle systems, lock animations, and teleportation effects.
+
+---
+
+## PHASE 1: CORE ARCHITECTURE & FOUNDATION
+
+### 1.1 Project Setup
+
+- **Rendering Pipeline**: 2D Rendering Engine for enhanced 2D effects
+- **Input System**: Custom Input System with multi-touch support
+- **Canvas Setup**: Screen Space - Overlay with scaling for different resolutions
+
+### 1.2 Scene Structure
+```
+Main Scene Hierarchy:
+├── GameManager (Core game logic)
+├── UIManager (Interface management)
+├── BackgroundManager (Matrix rain effects)
+├── SymbolCanvasA (Falling symbols area)
+├── SolutionCanvasB (Solution display area)  
+├── ParticleSystemManager (All visual effects)
+├── AudioManager (Sound effects)
+└── TouchManager (Multi-touch input handling)
+```
+
+### 1.3 Core Scripts Structure
+**File: GameManager.cs**
+- Central game state management
+- Level progression logic
+- Problem loading and solution verification
+- Save/load game state functionality
+- Performance monitoring and optimization
+
+**File: TouchManager.cs**
+- Multi-touch input detection and processing
+- Touch gesture recognition (tap, hold, swipe)
+- Touch target validation and interaction dispatch
+- Platform-specific touch sensitivity adjustment
+
+---
+
+## PHASE 2: VISUAL FOUNDATION & UI SYSTEMS
+
+### 2.1 Welcome Screen System
+**File: WelcomeScreenManager.cs**
+
+**Visual Elements:**
+- **Background**: Solid black (#000000) with Matrix-style falling code
+- **Title Display**: 
+  - "MATH MASTER" text with glowing green effect (#00FF00)
+  - Multiple shadow layers for 3D depth effect
+  - Font: Courier New Bold, scaled to 2x base size
+- **Subtitle**: 
+  - "Algebra" text with pulsating gold glow effect
+  - Positioned below title with 30px offset
+  - Pulsating opacity from 30% to 80% using sine wave
+- **Inspirational Quote**: 
+  - Marcus Aurelius quote: "If it is not right, do not do it; if it is not true, do not say it."
+  - Gold color (#FFD700) with 35% transparency
+  - Positioned center screen with black outline for depth
+- **Creator Credit**: 
+  - "Created By Teacher Evan (Ewaldt Botha)" 
+  - 50% smaller font, 50% transparency, bottom center
+- **Continue Instruction**: 
+  - "Click to continue" text at bottom
+  - Light green color (#AAFFAA)
+- **Logo Integration**: 
+  - Mathematical symbol logo between "Algebra" and quote
+  - Calculated positioning based on available space
+  - Minimum 30px height requirement
+
+**Animation Requirements:**
+- Algebra text pulsating at 0.08 radian increment per frame
+- Matrix background symbols falling continuously
+- Smooth transition to level select on any touch input
+- All text with black outlines for readability
+
+### 2.2 Level Select Screen System
+**File: LevelSelectManager.cs**
+
+**UI Layout:**
+- **Fullscreen Background**: Same Matrix effect as welcome screen
+- **Title**: "MathMaster" in large font (36pt)
+- **Level Buttons**: 
+  - "Easy" - Addition/Subtraction problems
+  - "Medium" - Multiplication problems  
+  - "Medium too" - Division problems (EXACT button text required)
+- **Button Specifications**:
+  - Size: 30 width × 3 height units
+  - Font: 24pt
+  - Border: 3px thickness
+  - Centered layout with increased padding
+- **Back Button**: 
+  - "Back to Welcome" functionality
+  - 14pt font size
+  - Positioned at bottom
+
+**Touch Interaction:**
+- Multi-touch support for all buttons
+- Visual feedback on touch (button highlight)
+- Smooth transitions between screens
+- Escape key support for desktop platforms
+
+### 2.3 Matrix Background System
+**File: MatrixBackgroundManager.cs**
+
+**Implementation Requirements:**
+- Symbols to rain down: Numerals (0-9), and math symbols (X, -, /, =, +, x)
+- Green color scheme matching Matrix aesthetic
+- Continuous animation at 48 FPS
+- Depth layers for visual complexity
+- Performance optimization for mobile devices
+
+---
+
+## PHASE 3: CORE GAMEPLAY SYSTEMS
+
+### 3.1 Problem Generation & Management
+**File: ProblemManager.cs**
+
+**Problem Types & Formats:**
+
+**Easy Level (Addition/Subtraction):**
+- Pattern 1: `x + a = b` (e.g., "x + 5 = 12")
+- Pattern 2: `a + x = b` (e.g., "8 + x = 15") 
+- Pattern 3: `a + x - c = b` (e.g., "10 + x - 4 = 16")
+- 50 problems total with integer solutions
+- Solution range: 2-15
+
+**Medium Level (Multiplication):**
+- Format: `ax = b` (e.g., "5x = 20")
+- Factor range: 2-20
+- Solution range: 2-15
+- Product limit: ≤300
+- 50 problems auto-generated
+
+**Division Level:**
+- Format 1: `a/x = b` (e.g., "18/x = 6")
+- Format 2: `x/a = b` (e.g., "x/2 = 6")
+- 50 predefined problems with integer solutions
+- Division results always whole numbers
+
+**Solution Step Generation:**
+- Algebraic manipulation steps showing work
+- Each step reveals progressive solution
+- Step-by-step validation for educational value
+- Unicode character normalization for matching
+
+### 3.2 Falling Symbols System
+**File: FallingSymbolsManager.cs**
+
+**Symbol Set**: "0123456789Xx +-=÷×*/()"
+
+**Animation Specifications:**
+- Continuous generation at top of screen
+- Variable falling speeds (randomized)
+- Multiple symbols on screen simultaneously
+- Collision detection with touch input
+- Symbol removal on correct selection
+- Visual feedback for incorrect selections
+
+**Touch Interaction:**
+- Multi-touch support for rapid symbol selection
+- Touch area optimization for fingers (larger hit boxes)
+- Visual highlight on touch contact
+- Immediate feedback for correct/incorrect selections
+
+### 3.3 Solution Display System
+**File: SolutionDisplayManager.cs**
+
+**Display Rules:**
+- Initially invisible until Help button is clicked
+- Step-by-step revelation based on player progress
+- Character-by-character unlocking system
+- Visual coordination with lock animation progress
+- Proper spacing and formatting for readability
+
+**Character Management:**
+- Each character individually trackable
+- Visibility state per character position
+- Color coding: revealed vs. unrevealed
+- Animation effects for character revelation
+- Coordinate system for precise positioning
+
+---
+
+## PHASE 4: INTERACTIVE GAMEPLAY ELEMENTS
+
+### 4.1 Worm Animation System
+**File: WormAnimationManager.cs**
+
+**Worm Specifications:**
+- **Appearance**: Segmented creatures with 8 body segments
+- **Colors**: Earthy tones with random variation per worm
+- **Size**: 12px base segment size with slight randomization
+- **Maximum Count**: 4 worms simultaneously
+- **Animation**: Smooth movement with segment following
+
+**Behavioral System:**
+- **Movement**: Random direction changes, edge bouncing
+- **Targeting**: Symbol stealing behavior with visual indicators
+- **Transport Animation**: Smooth symbol theft with teleportation effects
+- **Player Interaction**: Clickable to stop symbol theft
+- **Speed Variation**: Dynamic speed changes during gameplay events
+
+**Visual Features:**
+- **Eyes**: Blinking animation with random timing
+- **Mouth**: Opening/closing states during feeding
+- **Color Cycling**: LSD-style rainbow effects during celebration
+- **Particle Trails**: Following movement for enhanced visual appeal
+- **Collision Effects**: Explosion animations when clicked
+
+**Symbol Interaction:**
+- **Detection Range**: Proximity-based symbol targeting
+- **Theft Animation**: 1-second smooth movement to symbol
+- **Transport Effect**: Symbol follows worm to off-screen
+- **Player Intervention**: Click worm to save symbol
+- **Feedback**: Visual and audio confirmation of intervention
+
+### 4.2 Help System
+**File: HelpSystemManager.cs**
+
+**Help Button Functionality:**
+- **Visibility Toggle**: Makes solution canvas visible on first click
+- **Character Revelation**: Reveals next required character in sequence
+- **Educational Hints**: Contextual algebra assistance
+- **Progressive Disclosure**: Step-by-step solution guidance
+- **Visual Feedback**: Flash effect on helped character
+
+**Help Display Features:**
+- **Positioning**: Left side of solution area
+- **Content**: Algebra explanation based on current step
+- **Formatting**: Clear, educational text formatting
+- **Visibility**: Only shown when help button activated
+- **Updates**: Dynamic content based on current problem state
+
+**Educational Content:**
+- Step explanation (e.g., "Isolate the variable by subtracting 5 from both sides")
+- Symbol meaning clarification
+- Next step guidance
+- Error prevention hints
+
+### 4.3 Teleportation & Particle Effects
+**File: EffectsManager.cs**
+
+**Teleportation System:**
+- **Symbol Transport**: Smooth movement from falling area to solution area
+- **Portal Effects**: Circular expanding animations at start/end points
+- **Trail Animation**: Particle trail following transported symbol
+- **Timing**: 1-second animation duration
+- **Visual Feedback**: Color coding for correct (green) vs. incorrect (red)
+
+**Particle Systems:**
+- **Types**: Orbital, explosion, wave, glow, spiral
+- **Performance**: Maximum 50 particles, 30 FPS target
+- **Colors**: Theme-based palettes per difficulty level
+- **Lifetime**: 60 frames for particles, 45 for sparkles
+- **Physics**: Gravity, air resistance, collision detection
+
+**Effect Triggers:**
+- Character revelation effects
+- Symbol teleportation trails
+- Worm interaction explosions
+- Lock unlocking celebrations
+- Level completion fireworks
+- Error feedback shockwaves
+
+---
+
+## PHASE 5: PROGRESSION & FEEDBACK SYSTEMS
+
+### 5.1 Lock Animation System
+**File: LockAnimationManager.cs**
+
+**Visual Design:**
+- **Lock Structure**: Multi-segment lock with shackle, body, keyhole
+- **Segment Count**: Variable based on solution step count
+- **Color Themes**: 
+  - Easy: Red locked → Green unlocked
+  - Medium: Blue locked → Yellow unlocked  
+  - Division: Purple locked → Teal unlocked
+
+**Animation Sequence:**
+- **Progressive Unlocking**: One segment per completed solution step
+- **Flash Effects**: Bright flash when segment unlocks (150ms duration)
+- **Particle Burst**: Explosion of themed particles per unlock
+- **Glow Effects**: Pulsating glow around unlocked segments
+- **Final Celebration**: Complete lock opening with fireworks (3 seconds)
+
+**Performance Features:**
+- **Particle Limits**: 50 max particles, performance monitoring
+- **Frame Rate**: 30 FPS target with optimization
+- **Memory Management**: Proper cleanup of visual elements
+- **Resize Support**: Dynamic scaling for different screen sizes
+
+### 5.2 Error Handling & Feedback
+**File: FeedbackManager.cs**
+
+**Error Animation System:**
+- **Screen Shake**: Intensity-based shaking for incorrect actions
+- **Red Flash Overlay**: Brief red screen flash for major errors
+- **Crack Effects**: Visual cracks appearing on repeated errors
+- **Sound Effects**: Audio feedback for different error types
+- **Text Messages**: Informative error messages with helpful hints
+
+**Progress Feedback:**
+- **Character Flash**: Green flash for correct character selection
+- **Step Completion**: Visual celebration for completed solution steps
+- **Success Messages**: Encouraging text for milestone achievements
+- **Percentage Display**: Progress indication for current problem
+
+### 5.3 Level Progression System
+**File: LevelProgressionManager.cs**
+
+**Level Completion:**
+- **Detection**: All solution characters revealed and verified
+- **Celebration**: 3-second delay before popup to show final state
+- **Statistics**: Completion time, accuracy, help usage tracking
+- **Popup Options**: Continue to next level or retry current level
+
+**Save System:**
+- **Auto-save**: Every 10 seconds during gameplay
+- **State Persistence**: Current problem, revealed characters, progress
+- **Cross-session**: Resume exactly where player left off
+- **Clear on Exit**: Clean state when intentionally exiting level
+
+**Difficulty Scaling:**
+- **Problem Selection**: Avoid recent problems (3-problem history)
+- **Adaptive Hints**: More help for struggling players
+- **Time Tracking**: Performance analytics for improvement
+
+---
+
+## PHASE 6: MULTI-TOUCH OPTIMIZATION
+
+### 6.1 Touch Input Enhancement
+**File: MultiTouchManager.cs**
+
+**Touch Detection:**
+- **Simultaneous Input**: Support for multiple finger inputs
+- **Touch Differentiation**: Unique handling per touch point
+- **Gesture Recognition**: Tap, hold, swipe gesture detection
+- **Palm Rejection**: Ignore accidental palm touches on tablets
+
+**Interactive Element Optimization:**
+- **Hit Box Sizing**: Larger touch areas for finger interaction
+- **Visual Feedback**: Immediate response to touch contact
+- **Touch Validation**: Ensure intended target selection
+- **Accessibility**: Support for different finger sizes
+
+**Platform-Specific Adjustments:**
+- **BenQ Displays**: Optimized for large interactive screens
+- **Tablets**: Finger-friendly interface scaling
+- **Desktop**: Mouse input with hover effects
+- **Hybrid Devices**: Automatic input method detection
+
+### 6.2 UI Scaling & Layout
+**File: ResponsiveLayoutManager.cs**
+
+**Screen Adaptation:**
+- **Resolution Independence**: Vector-based UI scaling
+- **Aspect Ratio Support**: Wide, standard, and tall screen ratios
+- **Element Positioning**: Proportional layout system
+- **Font Scaling**: Dynamic text sizing based on screen size
+
+**Touch Target Optimization:**
+- **Minimum Size**: 44x44px minimum touch targets
+- **Spacing**: Adequate spacing between interactive elements
+- **Visual Hierarchy**: Clear indication of interactive elements
+- **Feedback**: Immediate visual response to touch input
+
+---
+
+## PHASE 7: AUDIO & POLISH
+
+### 7.1 Audio System
+**File: AudioManager.cs**
+
+**Sound Effects:**
+- **Symbol Selection**: Positive chime for correct selection
+- **Error Feedback**: Negative tone for incorrect actions
+- **Worm Interactions**: Playful sounds for creature interactions
+- **Lock Unlocking**: Satisfying mechanical sounds
+- **Level Completion**: Triumphant completion fanfare
+- **Background Ambience**: Subtle electronic/mathematical atmosphere
+
+**Audio Implementation:**
+- **Dynamic Mixing**: Adjustable volume for different effect types
+- **Spatial Audio**: Positional audio for on-screen events
+- **Compression**: Optimized audio files for mobile deployment
+- **Accessibility**: Visual indicators for audio cues
+
+### 7.2 Performance Optimization
+**File: PerformanceManager.cs**
+
+**Optimization Strategies:**
+- **Object Pooling**: Reuse of frequently created/destroyed objects
+- **Particle Culling**: Remove off-screen particles automatically
+- **Frame Rate Management**: Dynamic quality adjustment
+- **Memory Monitoring**: Garbage collection optimization
+- **Battery Efficiency**: Power-conscious animation settings
+
+**Platform-Specific Performance:**
+- **Mobile Optimization**: Reduced particle counts on lower-end devices
+- **Desktop Enhancement**: Higher quality effects on powerful hardware
+- **Adaptive Quality**: Automatic performance scaling
+- **Debug Tools**: Performance monitoring in development builds
+
+---
+
+## PHASE 8: TESTING & DEPLOYMENT
+
+### 8.1 Testing Requirements
+**Multi-Touch Testing:**
+- **Simultaneous Input**: Multiple fingers interacting with different elements
+- **Gesture Accuracy**: Precise touch target detection
+- **Response Time**: Immediate feedback to touch input
+- **Edge Cases**: Handling unexpected touch patterns
+
+**Educational Validation:**
+- **Mathematical Accuracy**: Verify all problems and solutions
+- **Learning Progression**: Ensure appropriate difficulty scaling
+- **Hint Effectiveness**: Validate educational value of help system
+- **User Experience**: Age-appropriate interface and interactions
+
+### 8.2 Deployment Configuration
+**Build Settings:**
+- **Platform Targets**: Windows, macOS, Android, iOS
+- **Input Systems**: Touch, mouse, keyboard support
+- **Resolution Settings**: Multiple aspect ratios and DPI support
+- **Performance Profiles**: Different quality settings per platform
+
+**Distribution:**
+- **Standalone Executables**: Windows/Mac desktop versions
+- **Mobile Apps**: Play Store and App Store deployment
+- **Web Version**: WebGL build for browser access
+- **Educational Licensing**: Appropriate licensing for classroom use
+
+---
+
+## TECHNICAL SPECIFICATIONS
+
+### File Structure Summary:
+```
+Scripts/
+├── Core/
+│   ├── GameManager.cs
+│   ├── TouchManager.cs
+│   └── PerformanceManager.cs
+├── UI/
+│   ├── WelcomeScreenManager.cs
+│   ├── LevelSelectManager.cs
+│   └── ResponsiveLayoutManager.cs
+├── Gameplay/
+│   ├── ProblemManager.cs
+│   ├── FallingSymbolsManager.cs
+│   ├── SolutionDisplayManager.cs
+│   └── HelpSystemManager.cs
+├── Animation/
+│   ├── WormAnimationManager.cs
+│   ├── LockAnimationManager.cs
+│   ├── EffectsManager.cs
+│   └── MatrixBackgroundManager.cs
+├── Systems/
+│   ├── FeedbackManager.cs
+│   ├── LevelProgressionManager.cs
+│   ├── MultiTouchManager.cs
+│   └── AudioManager.cs
+└── Data/
+    ├── ProblemData.cs
+    ├── QuoteData.cs
+    └── ConfigurationData.cs
+```
+
+### Unity Components Required:
+- **Canvas Group**: For UI element group management
+- **Animation Controller**: For complex animation sequences
+- **Particle System**: For visual effects
+- **Audio Source**: For sound effect management
+- **Event System**: For input handling
+- **Canvas Scaler**: For resolution independence
+
+### Third-Party Assets (Optional):
+- **TextMeshPro**: Enhanced text rendering
+- **DOTween**: Smooth animation tweening
+- **Particle Effect Packages**: Additional visual effects
+- **Audio Packages**: Professional sound effects
+
+---
+
+## SUCCESS CRITERIA
+
+### Educational Effectiveness:
+- Students can solve algebra problems step-by-step
+- Clear visual feedback reinforces learning
+- Help system provides meaningful guidance
+- Progress tracking motivates continued learning
+
+### Technical Performance:
+- Smooth 60 FPS performance on target devices
+- Responsive multi-touch input handling
+- Stable memory usage without leaks
+- Fast loading times between levels
+
+### User Experience:
+- Intuitive touch interface for all ages
+- Engaging visual effects that enhance learning
+- Clear feedback for all user actions
+- Accessible design for diverse learners
+
+### Platform Compatibility:
+- Seamless operation on BenQ interactive displays
+- Excellent tablet experience with finger-friendly interface
+- Desktop compatibility with mouse/keyboard
+- Cross-platform consistency in gameplay
+
+This specification provides a complete roadmap for recreating MathMaster with enhanced visual effects while maintaining all current gameplay mechanics and educational value. The modular architecture ensures maintainable code and the multi-touch optimization guarantees excellent performance on interactive displays and tablets. 

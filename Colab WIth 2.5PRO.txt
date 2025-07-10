@@ -1,0 +1,79 @@
+The Blueprint:* Choosing Our Core Building Materials (Technology Stack
+
+-Lets talk about it.
+
+2. Give me two physical examples so I know what to relate to or in which direction to lean. THe mechanic are very simple. But the amount of dominoss" that have to fall into place at a specific time can cause massive bottlenecks.. 
+
+3.I dont mind web but I worry about the robustness. App-store could be a fun learning experience.
+
+4.Ok make a note, look foward to colabing on that,
+
+Sidenote: We have to somehow make it clear that agents should stick to scrypt and not add their own features unless clarified by the dev first! For example, im a fan of claudes artistic touch.... BUT HE KEEPS ADDING STUFF!! >< lol.
+
+Purpose of the game: COGNATIVE EXERCISE.... NOT for multiple users or saving feature or multiple profile features....  PLUG AND PLAY.... Players have to figure it out and ill tak a screen shot of the firs windows and gameplay windows so you can get a feel for it
+
+5. Spycholgical distraction and censory stimulation (That's good we should add that to the readme! file). THey appear every time a "row" in the math problem is solved. THen they run around causing the player to lose focus..... if the user tries to click on them they multiply (can not exceed 5) every 10 seconds a worm on the window if any will run and steal a symbol from the already placed symbols and push it to the top of the gameplay window where it will appear if it is pushing it "off" the screen. If you click/touch the symbol in the (Now dubbed -) "Matrix-Window" , - that is the same as the symbol the"worm" stole at that moment it had in its mouth, it explodes!
+
+6.NOTHING!!!!!!!! Make this very clear. Figuring the game out is part of its features 
+
+HOWEVER**** There will be a "Green" Help button that is placed in the middle (Solution window) at the top just above where the players math solution will be displayed. Im sure the screenshots will help you a lot.
+
+7. I need that *CHILD* -  Sonnet4 for that mission. I colab with him later.
+
+8.NOTHING GETS STORED. This mountain will have 150 levels to clear and and the only proof they will ever have of this is their memory and smarter brain! Please make this very clear top future agents because I have had this happen 4 times before and im fucking done. Ill burn the next toaster that creates unneccesary ptoblems. One player at a time. Only way of "dieing/losing" is quiting.... So later "frustration" features can be added
+
+10. Excellent work ethic btw. Respect.
+
+
+*****Game Starts***** (Basic/ quick context description
+
+1.Welcome screen 
+2. Level select and setting window.
+3. Landscape display devide into 3 sections named :(starting from the left to right)  
+****Gameplay window:****
+Left: 
+Progression window ( has a visually appealing lock animation that gets unlocked as the players completes their math problems. The current math problem of the level  will displayed in the middle top of that section of the display, a bit above the "lock" animation.
+Middle: Tiny help button" and the problems solutions will be rendered here as the player clicks/touches them in the right (matrix) window.
+Right 
+(matrix window)  - Numeral (1-10) and math symbols (X -  / = + x)
+rain down from the top and the user has to click the letters he thinks he needs to solve the problems.The Blueprint:* Choosing Our Core Building Materials (Technology Stack
+
+-Lets talk about it.
+
+2. Give me two physical examples so I know what to relate to or in which direction to lean. THe mechanic are very simple. But the amount of dominoss" that have to fall into place at a specific time can cause massive bottlenecks.. 
+
+3.I dont mind web but I worry about the robustness. App-store could be a fun learning experience.
+
+4.Ok make a note, look foward to colabing on that,
+
+Sidenote: We have to somehow make it clear that agents should stick to scrypt and not add their own features unless clarified by the dev first! For example, im a fan of claudes artistic touch.... BUT HE KEEPS ADDING STUFF!! >< lol.
+
+Purpose of the game: COGNATIVE EXERCISE.... NOT for multiple users or saving feature or multiple profile features....  PLUG AND PLAY.... Players have to figure it out and ill tak a screen shot of the firs windows and gameplay windows so you can get a feel for it
+
+5. Spycholgical distraction and censory stimulation (That's good we should add that to the readme! file). THey appear every time a "row" in the math problem is solved. THen they run around causing the player to lose focus..... if the user tries to click on them they multiply (can not exceed 5) every 10 seconds a worm on the window if any will run and steal a symbol from the already placed symbols and push it to the top of the gameplay window where it will appear if it is pushing it "off" the screen. If you click/touch the symbol in the (Now dubbed -) "Matrix-Window" , - that is the same as the symbol the"worm" stole at that moment it had in its mouth, it explodes!
+
+6.NOTHING!!!!!!!! Make this very clear. Figuring the game out is part of its features 
+
+HOWEVER**** There will be a "Green" Help button that is placed in the middle (Solution window) at the top just above where the players math solution will be displayed. Im sure the screenshots will help you a lot.
+
+7. I need that *CHILD* -  Sonnet4 for that mission. I colab with him later.
+
+8.NOTHING GETS STORED. This mountain will have 150 levels to clear and and the only proof they will ever have of this is their memory and smarter brain! Please make this very clear top future agents because I have had this happen 4 times before and im fucking done. Ill burn the next toaster that creates unneccesary ptoblems. One player at a time. Only way of "dieing/losing" is quiting.... So later "frustration" features can be added
+
+10. Excellent work ethic btw. Respect.
+
+
+*****Game Starts***** (Basic/ quick expectation)
+
+1.Welcome screen 
+2. Level select and setting window.
+3. Landscape display devide into 3 sections named :(starting from the left to right)  
+****Gameplay window:****
+Left: 
+Progression window ( has a visually appealing lock animation that gets unlocked as the players completes their math problems. The current math problem of the level  will displayed in the middle top of that section of the display, a bit above the "lock" animation.
+Middle: Tiny help button" and the problems solutions will be rendered here as the player clicks/touches them in the right (matrix) window.
+Right 
+(matrix window)  - Numeral (1-10) and math symbols (X -  / = + x)
+rain down from the top and the user has to click the letters he thinks he needs to solve the problems.
+
+Also each agent will have their own jobcards speciffically asigned to them! and have to edit and are not allowed to touch the other agent pvt jobcards!
