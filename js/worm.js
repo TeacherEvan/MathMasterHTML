@@ -5,7 +5,7 @@ class WormManager {
     constructor() {
         this.worms = [];
         this.maxWorms = 8;
-        this.symbols = '0123456789X+-=÷×';
+        this.symbols = '0123456789Xx+-=÷×'; // X = variable, x = multiplication
         this.containers = {
             progression: document.getElementById('progression-worms'),
             problemSolving: document.getElementById('problem-solving-worms'),
@@ -38,9 +38,8 @@ class WormManager {
             return;
         }
 
-        // Randomly choose a section to spawn the worm
-        const sections = ['progression', 'problemSolving', 'matrix'];
-        const section = sections[Math.floor(Math.random() * sections.length)];
+        // Worms should ONLY appear in the middle panel (problem-solving display)
+        const section = 'problemSolving';
         const container = this.containers[section];
 
         if (!container) {
@@ -63,17 +62,27 @@ class WormManager {
         wormContainer.dataset.section = section;
         wormContainer.dataset.id = `worm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         
-        // Create segmented worm with 8 body segments
+        // Create segmented worm with 8 body segments as specified
         const segments = [];
-        const earthyColors = ['#8B4513', '#A0522D', '#CD853F', '#D2691E', '#DEB887'];
-        const wormColor = earthyColors[Math.floor(Math.random() * earthyColors.length)];
+        const earthyColors = [
+            { base: '#8B4513', light: '#A0522D' }, // Saddle Brown
+            { base: '#A0522D', light: '#CD853F' }, // Sienna
+            { base: '#CD853F', light: '#DEB887' }, // Sandy Brown
+            { base: '#D2691E', light: '#F4A460' }, // Chocolate
+            { base: '#DEB887', light: '#F5DEB3' }  // Burlywood
+        ];
+        const colorSet = earthyColors[Math.floor(Math.random() * earthyColors.length)];
+        
+        // Set CSS custom properties for consistent coloring
+        wormContainer.style.setProperty('--worm-color', colorSet.base);
+        wormContainer.style.setProperty('--worm-color-light', colorSet.light);
         
         for (let i = 0; i < 8; i++) {
             const segment = document.createElement('div');
             segment.className = `worm-segment segment-${i}`;
             
             if (i === 0) {
-                // Head segment with eyes
+                // Head segment with eyes and mouth
                 segment.classList.add('worm-head');
                 segment.innerHTML = `
                     <div class="worm-eye left-eye"></div>
@@ -82,9 +91,10 @@ class WormManager {
                 `;
             }
             
-            segment.style.backgroundColor = wormColor;
-            segment.style.width = `${12 + Math.random() * 4}px`;
-            segment.style.height = `${12 + Math.random() * 4}px`;
+            // Proper 12px base segment size with slight randomization as specified
+            const segmentSize = 12 + Math.random() * 4;
+            segment.style.width = `${segmentSize}px`;
+            segment.style.height = `${segmentSize}px`;
             
             wormContainer.appendChild(segment);
             segments.push(segment);
@@ -92,13 +102,13 @@ class WormManager {
         
         // Random starting position within the container
         const containerRect = container.getBoundingClientRect();
-        const x = Math.random() * (containerRect.width - 100);
-        const y = Math.random() * (containerRect.height - 30);
+        const x = Math.random() * (containerRect.width - 120); // Account for worm length
+        const y = Math.random() * (containerRect.height - 40);
         
         wormContainer.style.left = x + 'px';
         wormContainer.style.top = y + 'px';
         
-        // Add click event listener
+        // Add click event listener for symbol theft prevention
         wormContainer.addEventListener('click', (e) => this.onWormClick(e, wormContainer));
         
         container.appendChild(wormContainer);
@@ -110,69 +120,92 @@ class WormManager {
             container: container,
             isCarryingSymbol: false,
             carriedSymbol: null,
+            targetSymbol: null,
             lastStealTime: Date.now(),
             behaviorInterval: null,
             moveInterval: null,
-            blinkInterval: null
+            blinkInterval: null,
+            currentX: x,
+            currentY: y,
+            direction: Math.random() * 360, // Random initial direction
+            speed: 0.5 + Math.random() * 1.5 // Dynamic speed as specified
         };
     }
 
     startWormBehavior(worm) {
-        // Random movement every 200-500ms
+        // Random movement with edge bouncing as specified
         worm.moveInterval = setInterval(() => {
-            this.moveWormRandomly(worm);
-        }, 200 + Math.random() * 300);
+            this.moveWormWithBouncing(worm);
+        }, 100 + Math.random() * 200); // More frequent movement for better animation
 
-        // Symbol stealing behavior every 10 seconds
+        // Symbol stealing behavior - targeting behavior with visual indicators
         worm.behaviorInterval = setInterval(() => {
-            this.wormStealSymbol(worm);
-        }, 10000);
+            this.attemptSymbolTheft(worm);
+        }, 5000 + Math.random() * 5000); // 5-10 seconds as specified
 
-        // Blinking animation for eyes
+        // Blinking animation with random timing as specified
         worm.blinkInterval = setInterval(() => {
             this.blinkWormEyes(worm);
-        }, 2000 + Math.random() * 3000);
+        }, 1500 + Math.random() * 3000);
 
         // Initial movement
-        this.moveWormRandomly(worm);
+        this.moveWormWithBouncing(worm);
     }
 
-    moveWormRandomly(worm) {
+    moveWormWithBouncing(worm) {
         const container = worm.container;
         const element = worm.element;
         
         if (!container || !element.parentNode) return;
 
         const containerRect = container.getBoundingClientRect();
-        const maxX = containerRect.width - 100; // Account for worm length
-        const maxY = containerRect.height - 30;
+        const maxX = containerRect.width - 120; // Account for full worm length
+        const maxY = containerRect.height - 40;
         
-        // Random movement within bounds
-        const currentX = parseInt(element.style.left) || 0;
-        const currentY = parseInt(element.style.top) || 0;
+        // Calculate new position based on direction and speed
+        const moveDistance = worm.speed * 10; // Convert speed to pixels
         
-        const deltaX = (Math.random() - 0.5) * 60; // Move up to 60px
-        const deltaY = (Math.random() - 0.5) * 60;
+        const deltaX = Math.cos(worm.direction * Math.PI / 180) * moveDistance;
+        const deltaY = Math.sin(worm.direction * Math.PI / 180) * moveDistance;
         
-        const newX = Math.max(0, Math.min(maxX, currentX + deltaX));
-        const newY = Math.max(0, Math.min(maxY, currentY + deltaY));
+        let newX = worm.currentX + deltaX;
+        let newY = worm.currentY + deltaY;
         
-        element.style.transition = 'all 0.5s ease-in-out';
+        // Edge bouncing behavior as specified
+        if (newX <= 0 || newX >= maxX) {
+            worm.direction = 180 - worm.direction; // Bounce horizontally
+            newX = Math.max(0, Math.min(maxX, newX));
+        }
+        if (newY <= 0 || newY >= maxY) {
+            worm.direction = -worm.direction; // Bounce vertically
+            newY = Math.max(0, Math.min(maxY, newY));
+        }
+        
+        // Random direction changes as specified
+        if (Math.random() < 0.1) { // 10% chance to change direction
+            worm.direction += (Math.random() - 0.5) * 90; // Turn up to 45° either way
+        }
+        
+        // Update position
+        worm.currentX = newX;
+        worm.currentY = newY;
+        
+        element.style.transition = 'all 0.3s ease-in-out';
         element.style.left = newX + 'px';
         element.style.top = newY + 'px';
         
-        // Animate segments following the head
-        this.animateSegmentMovement(worm, newX, newY);
+        // Animate segments following the head with smooth movement
+        this.animateSegmentFollowing(worm);
     }
 
-    animateSegmentMovement(worm, newX, newY) {
-        // Create a trailing effect for segments
+    animateSegmentFollowing(worm) {
+        // Smooth segment following as specified
         worm.segments.forEach((segment, index) => {
             if (index > 0) {
+                const lag = index * 3; // Each segment follows with increasing delay
                 setTimeout(() => {
-                    const lag = index * 2; // Each segment follows with a small delay
-                    segment.style.transform = `translate(${-lag}px, ${-lag * 0.5}px)`;
-                }, index * 50);
+                    segment.style.transform = `translate(${-lag}px, ${-lag * 0.5}px) rotate(${worm.direction}deg)`;
+                }, index * 30);
             }
         });
     }
@@ -187,18 +220,247 @@ class WormManager {
         });
     }
 
-    wormStealSymbol(worm) {
+    attemptSymbolTheft(worm) {
         if (worm.isCarryingSymbol) return; // Already carrying something
 
-        // Choose a random symbol to steal
-        const symbol = this.symbols[Math.floor(Math.random() * this.symbols.length)];
+        // Find symbols in the problem-solving area (middle panel)
+        const symbols = document.querySelectorAll('#solution-container .symbol, #problem-container .symbol, .math-symbol, .revealed-symbol');
         
+        if (symbols.length === 0) {
+            console.log('🐛 No symbols found to steal');
+            return;
+        }
+
+        // Choose a random symbol with proximity-based targeting
+        const targetSymbol = this.findNearestSymbol(worm, symbols);
+        
+        if (!targetSymbol) return;
+
+        console.log(`🐛 Worm targeting symbol: ${targetSymbol.textContent}`);
+        
+        // Start theft animation - 1-second smooth movement as specified
+        this.startTheftAnimation(worm, targetSymbol);
+    }
+
+    findNearestSymbol(worm, symbols) {
+        let nearest = null;
+        let shortestDistance = Infinity;
+        
+        const wormRect = worm.element.getBoundingClientRect();
+        const wormCenterX = wormRect.left + wormRect.width / 2;
+        const wormCenterY = wormRect.top + wormRect.height / 2;
+        
+        symbols.forEach(symbol => {
+            const symbolRect = symbol.getBoundingClientRect();
+            const symbolCenterX = symbolRect.left + symbolRect.width / 2;
+            const symbolCenterY = symbolRect.top + symbolRect.height / 2;
+            
+            const distance = Math.sqrt(
+                Math.pow(wormCenterX - symbolCenterX, 2) + 
+                Math.pow(wormCenterY - symbolCenterY, 2)
+            );
+            
+            // Detection range as specified - within reasonable proximity
+            if (distance < 200 && distance < shortestDistance) {
+                shortestDistance = distance;
+                nearest = symbol;
+            }
+        });
+        
+        return nearest;
+    }
+
+    startTheftAnimation(worm, targetSymbol) {
+        const symbolText = targetSymbol.textContent || targetSymbol.innerText;
+        const symbolRect = targetSymbol.getBoundingClientRect();
+        const containerRect = worm.container.getBoundingClientRect();
+        
+        // Calculate position relative to worm container
+        const targetX = symbolRect.left - containerRect.left;
+        const targetY = symbolRect.top - containerRect.top;
+        
+        // Store original position
+        const originalX = worm.currentX;
+        const originalY = worm.currentY;
+        
+        // 1-second smooth movement to symbol as specified
+        worm.element.style.transition = 'all 1s ease-in-out';
+        worm.element.style.left = targetX + 'px';
+        worm.element.style.top = targetY + 'px';
+        
+        // Visual indicator - glow effect during targeting
+        worm.element.style.filter = 'drop-shadow(0 0 10px rgba(255, 165, 0, 0.8))';
+        
+        setTimeout(() => {
+            // Symbol follows worm to off-screen as specified
+            this.completeTheft(worm, targetSymbol, symbolText, originalX, originalY);
+        }, 1000);
+    }
+
+    completeTheft(worm, targetSymbol, symbolText, originalX, originalY) {
+        // Mark as carrying symbol
         worm.isCarryingSymbol = true;
-        worm.carriedSymbol = symbol;
-        worm.element.textContent = symbol;
+        worm.carriedSymbol = symbolText;
+        worm.element.dataset.symbol = symbolText;
         worm.element.classList.add('carrying-symbol');
         
-        console.log(`🐛 Worm stole symbol: ${symbol}`);
+        // Hide the original symbol (simulate theft)
+        targetSymbol.style.opacity = '0.3';
+        targetSymbol.style.textDecoration = 'line-through';
+        
+        // Transport effect - symbol follows worm
+        const symbolIndicator = document.createElement('div');
+        symbolIndicator.className = 'stolen-symbol-indicator';
+        symbolIndicator.textContent = symbolText;
+        symbolIndicator.style.cssText = `
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #ff6600, #ffaa00);
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            border: 2px solid #cc4400;
+            animation: symbolBob 0.8s ease-in-out infinite;
+            z-index: 20;
+        `;
+        
+        worm.element.appendChild(symbolIndicator);
+        
+        // Move to off-screen location for transport
+        worm.element.style.transition = 'all 2s ease-in-out';
+        worm.element.style.left = '-100px';
+        worm.element.style.opacity = '0.7';
+        
+        console.log(`🐛 Worm successfully stole symbol: ${symbolText}`);
+        
+        // Return after theft (with stolen symbol)
+        setTimeout(() => {
+            this.returnAfterTheft(worm, originalX, originalY);
+        }, 2000);
+    }
+
+    returnAfterTheft(worm, originalX, originalY) {
+        // Return to approximate original area
+        const returnX = originalX + (Math.random() - 0.5) * 100;
+        const returnY = originalY + (Math.random() - 0.5) * 100;
+        
+        worm.element.style.transition = 'all 1.5s ease-in-out';
+        worm.element.style.left = returnX + 'px';
+        worm.element.style.top = returnY + 'px';
+        worm.element.style.opacity = '1';
+        
+        worm.currentX = returnX;
+        worm.currentY = returnY;
+        
+        // Resume normal behavior after 3 seconds
+        setTimeout(() => {
+            worm.element.style.filter = '';
+        }, 1500);
+    }
+
+    onWormClick(event, wormContainer) {
+        event.stopPropagation();
+        
+        // Find the worm object
+        const worm = this.worms.find(w => w.element === wormContainer);
+        if (!worm) return;
+        
+        console.log('🎯 Worm clicked - Player intervention!');
+        
+        if (worm.isCarryingSymbol) {
+            // Save the symbol! - Player intervention as specified
+            this.saveSymbolFromWorm(worm);
+            
+            // Visual and audio confirmation as specified
+            this.showSaveEffect(worm);
+            
+            // Remove the stolen symbol indicator
+            const indicator = worm.element.querySelector('.stolen-symbol-indicator');
+            if (indicator) indicator.remove();
+            
+            worm.isCarryingSymbol = false;
+            worm.carriedSymbol = null;
+            worm.element.removeAttribute('data-symbol');
+            worm.element.classList.remove('carrying-symbol');
+            
+            console.log('✅ Symbol saved by player intervention!');
+        } else {
+            // Explosion animation when clicked as specified
+            this.createExplosionEffect(worm);
+            this.destroyWorm(worm);
+        }
+    }
+
+    saveSymbolFromWorm(worm) {
+        // Restore the stolen symbol to its original location
+        const symbols = document.querySelectorAll('#solution-container .symbol, #problem-container .symbol, .math-symbol, .revealed-symbol');
+        
+        symbols.forEach(symbol => {
+            if (symbol.style.opacity === '0.3' && symbol.style.textDecoration === 'line-through') {
+                symbol.style.opacity = '1';
+                symbol.style.textDecoration = 'none';
+                
+                // Add save effect
+                symbol.style.animation = 'symbolSaved 1s ease-in-out';
+                setTimeout(() => {
+                    symbol.style.animation = '';
+                }, 1000);
+            }
+        });
+    }
+
+    showSaveEffect(worm) {
+        // Visual confirmation effect
+        const saveEffect = document.createElement('div');
+        saveEffect.textContent = 'SAVED!';
+        saveEffect.style.cssText = `
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ff00;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 25;
+            animation: saveText 1.5s ease-out forwards;
+        `;
+        
+        worm.element.appendChild(saveEffect);
+        
+        setTimeout(() => {
+            if (saveEffect.parentNode) {
+                saveEffect.parentNode.removeChild(saveEffect);
+            }
+        }, 1500);
+    }
+
+    createExplosionEffect(worm) {
+        // Explosion animation when clicked as specified
+        worm.element.style.animation = 'wormDeath 0.8s ease-out forwards';
+        
+        // Create particle effect
+        for (let i = 0; i < 8; i++) {
+            const particle = document.createElement('div');
+            particle.style.cssText = `
+                position: absolute;
+                width: 4px;
+                height: 4px;
+                background: #ff6600;
+                border-radius: 50%;
+                left: 50%;
+                top: 50%;
+                animation: explodeParticle 0.8s ease-out forwards;
+                animation-delay: ${i * 0.1}s;
+                transform: rotate(${i * 45}deg) translateY(-20px);
+            `;
+            worm.element.appendChild(particle);
+        }
+    }
         
         // Create stealing animation
         this.createStealingEffect(worm, symbol);

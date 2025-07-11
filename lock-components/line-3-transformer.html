@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Level 3 Lock Transformer - Rotating Metamorphosis</title>
+    <title>Warrior Lock Transformer - Rotating Metamorphosis</title>
     <style>
         body {
             margin: 0;
@@ -44,7 +44,7 @@
             transform-style: preserve-3d;
         }
 
-        .lock-body.level-3-active {
+        .lock-body.warrior-active {
             width: 180px;
             height: 180px; /* Becomes circular while maintaining overall scale */
             background: linear-gradient(145deg, #4a2a4a, #6a4a6a, #4a2a4a);
@@ -56,7 +56,7 @@
                 inset 0 0 30px rgba(138, 43, 226, 0.4),
                 0 0 0 15px rgba(138, 43, 226, 0.3),
                 0 0 0 30px rgba(138, 43, 226, 0.15);
-            animation: level3-metamorphosis 3s ease-in-out infinite;
+            animation: warrior-metamorphosis 3s ease-in-out infinite;
         }
 
         /* Horizontal Arms from Level 2 - Starting State */
@@ -87,7 +87,7 @@
             transform: translateY(-50%) translateX(0) rotate(0deg); /* Already extended from Level 2 */
         }
 
-        .lock-body.level-3-active .horizontal-arm {
+        .lock-body.warrior-active .horizontal-arm {
             background: linear-gradient(90deg, #8a2be2, #ba55d3, #fff, #ba55d3, #8a2be2); /* Purple for Level 3 */
             border-color: #8a2be2;
             box-shadow: 
@@ -133,7 +133,7 @@
             transform: rotate(0deg) scale(0);
         }
 
-        .lock-body.level-3-active .rotating-chamber {
+        .lock-body.warrior-active .rotating-chamber {
             opacity: 1;
             transform: rotate(360deg) scale(1);
             background: linear-gradient(45deg, #8a2be2, #ba55d3, #8a2be2);
@@ -144,19 +144,19 @@
             animation: chamber-spin 2s linear infinite;
         }
 
-        .lock-body.level-3-active .rotating-chamber.chamber-1 {
+        .lock-body.warrior-active .rotating-chamber.chamber-1 {
             animation-delay: 0s;
         }
 
-        .lock-body.level-3-active .rotating-chamber.chamber-2 {
+        .lock-body.warrior-active .rotating-chamber.chamber-2 {
             animation-delay: 0.5s;
         }
 
-        .lock-body.level-3-active .rotating-chamber.chamber-3 {
+        .lock-body.warrior-active .rotating-chamber.chamber-3 {
             animation-delay: 1s;
         }
 
-        .lock-body.level-3-active .rotating-chamber.chamber-4 {
+        .lock-body.warrior-active .rotating-chamber.chamber-4 {
             animation-delay: 1.5s;
         }
 
@@ -199,7 +199,7 @@
             transform: translateX(-50%);
         }
 
-        .lock-body.level-3-active .inner-ring {
+        .lock-body.warrior-active .inner-ring {
             opacity: 1;
             border-color: #8a2be2;
             animation: ring-rotation 4s linear infinite;
@@ -208,8 +208,8 @@
                 inset 0 0 10px rgba(138, 43, 226, 0.3);
         }
 
-        .lock-body.level-3-active .inner-ring::before,
-        .lock-body.level-3-active .inner-ring::after {
+        .lock-body.warrior-active .inner-ring::before,
+        .lock-body.warrior-active .inner-ring::after {
             background: #8a2be2;
             box-shadow: 0 0 8px rgba(138, 43, 226, 0.8);
         }

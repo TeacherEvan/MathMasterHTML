@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSymbolIndex = 0;
     let revealedIndex = 0;
     let correctAnswersCount = 0;
+    let completedLinesCount = 0; // Track completed solution lines across all problems
+    let currentLockLevel = 1; // Track current lock level (1-6)
 
     // Load problems based on level
     function loadProblems() {
@@ -39,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 problemPath = 'Assets/Warrior_Lvl/warrior_problems.md';
                 break;
             case 'master':
-                problemPath = 'Assets/Master_Lvl/master_problems.md'; // Fixed typo
+                problemPath = 'Assets/Master_Lvl/master_problems.md';
                 break;
             default:
                 problemPath = 'Assets/Beginner_Lvl/beginner_problems.md';
@@ -199,49 +201,16 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 lockDisplay.innerHTML = data;
                 console.log('🔒 Lock component loaded successfully');
+                
+                // Wait a moment for scripts to initialize, then set up lock triggers
+                setTimeout(() => {
+                    setupLockTriggers();
+                }, 500);
             })
             .catch(error => {
                 console.error('❌ Error loading lock component:', error);
                 lockDisplay.innerHTML = '<div class="lock-error">🔒 Lock Error</div>';
             });
-    }
-
-    function revealNextSymbol() {
-        // Find all symbols in the current step that are still hidden
-        const currentStepSymbols = solutionContainer.querySelectorAll(
-            `[data-step-index="${currentStepIndex}"].hidden-symbol`
-        );
-        
-        if (currentStepSymbols.length === 0) {
-            // Current step is complete, check if we need to move to next step
-            if (currentStepIndex < currentProblem.steps.length - 1) {
-                // Move to next step
-                currentStepIndex++;
-                currentSymbolIndex = 0;
-                console.log(`📋 Moving to step ${currentStepIndex + 1}: "${currentProblem.steps[currentStepIndex]}"`);
-                
-                // Trigger worm spawning for completed line
-                console.log('🐛 COMPLETE LINE FINISHED - Triggering worm spawn');
-                document.dispatchEvent(new CustomEvent('problemLineCompleted'));
-                
-                // Recursively reveal next symbol from new step
-                revealNextSymbol();
-            } else {
-                console.log('🎉 All steps complete!');
-                return null;
-            }
-        } else {
-            // Reveal the next symbol in current step
-            const nextSymbol = currentStepSymbols[0];
-            nextSymbol.classList.remove('hidden-symbol');
-            nextSymbol.classList.add('revealed-symbol');
-            
-            const symbolText = nextSymbol.textContent;
-            console.log(`💡 Revealed symbol: "${symbolText}" (Step ${currentStepIndex + 1}, Position ${currentSymbolIndex})`);
-            
-            currentSymbolIndex++;
-            return symbolText;
-        }
     }
 
     // Move to next problem
@@ -268,26 +237,68 @@ document.addEventListener('DOMContentLoaded', () => {
     loadProblems(); // Load problems first
     loadLockComponent();
 
-    /** Get next hidden symbol from solution */
+    /** Get next hidden symbol from solution - now accepts any symbol in current line */
     function getNextSymbol() {
-        // Find the next hidden symbol in the current step
+        // Find all hidden symbols in the current step
         const currentStepSymbols = solutionContainer.querySelectorAll(
             `[data-step-index="${currentStepIndex}"].hidden-symbol`
         );
         
         if (currentStepSymbols.length > 0) {
-            const nextSymbol = currentStepSymbols[0].textContent;
-            console.log(`🎯 Next expected symbol: "${nextSymbol}" (Step ${currentStepIndex + 1})`);
-            return nextSymbol;
+            // Return array of all possible symbols in current line
+            const possibleSymbols = Array.from(currentStepSymbols).map(span => span.textContent);
+            console.log(`🎯 Current line has ${possibleSymbols.length} hidden symbols: [${possibleSymbols.join(', ')}]`);
+            return possibleSymbols;
         }
         
         console.log('🏁 No more hidden symbols in current step');
         return null;
     }
 
+    /** Check if clicked symbol exists in current line */
+    function isSymbolInCurrentLine(clickedSymbol) {
+        const expectedSymbols = getNextSymbol();
+        console.log(`🔍 Checking symbol "${clickedSymbol}" against expected symbols:`, expectedSymbols);
+        
+        if (expectedSymbols && Array.isArray(expectedSymbols)) {
+            const result = expectedSymbols.includes(clickedSymbol);
+            console.log(`🎯 Symbol "${clickedSymbol}" match result: ${result}`);
+            return result;
+        }
+        console.log(`❌ No expected symbols available`);
+        return false;
+    }
+
+    /** Reveal specific symbol in current line */
+    function revealSpecificSymbol(targetSymbol) {
+        console.log(`🔍 Attempting to reveal symbol: "${targetSymbol}" in step ${currentStepIndex}`);
+        
+        // Find the specific symbol in current step
+        const currentStepSymbols = solutionContainer.querySelectorAll(
+            `[data-step-index="${currentStepIndex}"].hidden-symbol`
+        );
+        
+        console.log(`📋 Found ${currentStepSymbols.length} hidden symbols in current step`);
+        
+        for (let span of currentStepSymbols) {
+            const spanSymbol = span.textContent;
+            console.log(`🔎 Comparing "${targetSymbol}" with hidden symbol "${spanSymbol}"`);
+            
+            if (spanSymbol === targetSymbol) {
+                span.classList.remove('hidden-symbol');
+                span.classList.add('revealed-symbol');
+                console.log(`✅ Successfully revealed symbol: "${targetSymbol}" in step ${currentStepIndex + 1}`);
+                return true;
+            }
+        }
+        
+        console.log(`❌ Symbol "${targetSymbol}" not found in current step`);
+        return false;
+    }
+
     /** Handle correct symbol selection */
-    function handleCorrectAnswer() {
-        console.log('✅ Correct symbol clicked!');
+    function handleCorrectAnswer(clickedSymbol) {
+        console.log(`✅ Correct symbol clicked: "${clickedSymbol}"`);
         correctAnswersCount++;
         
         // Add visual feedback
@@ -296,8 +307,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.background = '';
         }, 300);
         
-        revealNextSymbol();
-        checkProblemCompletion();
+        // Reveal the specific symbol clicked
+        revealSpecificSymbol(clickedSymbol);
+        checkLineCompletion();
     }
 
     /** Handle incorrect symbol selection */
@@ -305,6 +317,40 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('❌ Incorrect symbol clicked!');
         document.body.classList.add('incorrect-flash');
         setTimeout(() => document.body.classList.remove('incorrect-flash'), 400);
+    }
+
+    /** Check if current line is complete and move to next */
+    function checkLineCompletion() {
+        // Check if current step has any hidden symbols left
+        const currentStepHiddenSymbols = solutionContainer.querySelectorAll(
+            `[data-step-index="${currentStepIndex}"].hidden-symbol`
+        );
+        
+        if (currentStepHiddenSymbols.length === 0) {
+            console.log(`🎉 Line ${currentStepIndex + 1} completed!`);
+            
+            // Trigger worm spawning for completed line
+            console.log('🐛 COMPLETE LINE FINISHED - Triggering worm spawn');
+            document.dispatchEvent(new CustomEvent('problemLineCompleted'));
+            
+            // Trigger lock animation for completed step
+            triggerLockAnimation(currentStepIndex);
+            
+            // Dispatch step completion event
+            document.dispatchEvent(new CustomEvent('stepCompleted', {
+                detail: { stepIndex: currentStepIndex }
+            }));
+            
+            // Move to next step if available
+            if (currentStepIndex < currentProblem.steps.length - 1) {
+                currentStepIndex++;
+                currentSymbolIndex = 0;
+                console.log(`📋 Moving to step ${currentStepIndex + 1}: "${currentProblem.steps[currentStepIndex]}"`);
+            } else {
+                console.log('🎉 All steps complete!');
+                checkProblemCompletion();
+            }
+        }
     }
 
     /** Check if all solution steps have been revealed */
@@ -337,7 +383,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event Listeners
     helpButton.addEventListener('click', () => {
         console.log('💡 Help button clicked');
-        revealNextSymbol();
+        
+        // Get available symbols in current line
+        const availableSymbols = getNextSymbol();
+        if (availableSymbols && availableSymbols.length > 0) {
+            // Reveal a random symbol from current line
+            const randomSymbol = availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
+            revealSpecificSymbol(randomSymbol);
+            checkLineCompletion();
+        }
         
         // Add help button feedback
         helpButton.style.transform = 'scale(0.95)';
@@ -349,13 +403,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listen for symbol clicks from symbol rain (matrix.js)
     document.addEventListener('symbolClicked', (e) => {
         const clicked = e.detail.symbol;
-        const expected = getNextSymbol();
         
-        console.log(`🎯 Symbol Rain click - Expected: "${expected}", Clicked: "${clicked}"`);
+        console.log(`🎯 Symbol Rain click - Clicked: "${clicked}"`);
         
-        if (expected && clicked === expected) {
-            handleCorrectAnswer();
-        } else if (expected) {
+        if (isSymbolInCurrentLine(clicked)) {
+            handleCorrectAnswer(clicked);
+        } else {
             handleIncorrectAnswer();
         }
     });
@@ -363,14 +416,186 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listen for worm symbol correct events
     document.addEventListener('wormSymbolCorrect', (e) => {
         const symbol = e.detail.symbol;
-        const expected = getNextSymbol();
         
-        console.log(`🐛✅ Worm symbol event - Symbol: ${symbol}, Expected: ${expected}`);
+        console.log(`🐛✅ Worm symbol event - Symbol: ${symbol}`);
         
-        if (symbol === expected) {
-            handleCorrectAnswer();
+        if (isSymbolInCurrentLine(symbol)) {
+            handleCorrectAnswer(symbol);
         }
     });
+
+    // Lock Animation Integration Functions
+    function setupLockTriggers() {
+        console.log('🔒 Setting up lock animation triggers');
+        
+        // Check if lock container exists
+        const lockContainer = lockDisplay.querySelector('.lock-container');
+        if (!lockContainer) {
+            console.warn('⚠️ No lock container found for trigger setup');
+            return;
+        }
+        
+        // Add event listeners for lock animations
+        document.addEventListener('stepCompleted', (e) => {
+            triggerLockAnimation(e.detail.stepIndex);
+        });
+        
+        console.log('✅ Lock triggers initialized');
+    }
+    
+    function triggerLockAnimation(stepIndex) {
+        console.log(`🔒 Triggering lock animation for step ${stepIndex + 1} (Total completed lines: ${completedLinesCount})`);
+        
+        // Find lock elements that can be animated
+        const lockBody = lockDisplay.querySelector('.lock-body');
+        const lockSegments = lockDisplay.querySelectorAll('.lock-segment, .vertical-lock-segment, .horizontal-lock-segment');
+        const progressBars = lockDisplay.querySelectorAll('.progress-bar, .fill-bar');
+        
+        // INCREMENT completed lines count for EVERY step completion!
+        completedLinesCount++;
+        
+        // Determine lock stage based on total completed lines across ALL problems
+        let lockStage = Math.min(6, Math.floor(completedLinesCount / 2) + 1); // Every 2 lines = new stage
+        
+        console.log(`🔒 Lock Stage: ${lockStage} (based on ${completedLinesCount} completed lines)`);
+        
+        if (lockBody) {
+            // Clear any existing classes to reset state
+            lockBody.classList.remove('level-1-active', 'level-3-active', 'level-5-active', 'warrior-active', 'beginner-active', 'master-active');
+            
+            // Apply progressive lock animation based on TOTAL progress, not just current problem
+            if (lockStage >= 1) {
+                triggerBeginnerLockAnimation(lockBody, lockStage);
+            }
+            if (lockStage >= 3) {
+                triggerWarriorLockAnimation(lockBody, lockStage);
+            }
+            if (lockStage >= 5) {
+                triggerMasterLockAnimation(lockBody, lockStage);
+            }
+        }
+        
+        // Animate lock segments if available
+        if (lockSegments.length > 0) {
+            animateLockSegments(lockSegments, lockStage);
+        }
+        
+        // Update progress bars if available
+        if (progressBars.length > 0) {
+            updateProgressBars(progressBars, lockStage);
+        }
+        
+        // Update current lock level for tracking
+        currentLockLevel = lockStage;
+        
+        // Dispatch custom event for lock-specific scripts
+        document.dispatchEvent(new CustomEvent('lockStepCompleted', {
+            detail: { 
+                stepIndex, 
+                lockStage: lockStage,
+                totalCompletedLines: completedLinesCount,
+                totalSteps: currentProblem.steps ? currentProblem.steps.length : 1 
+            }
+        }));
+    }
+    
+    function triggerBeginnerLockAnimation(lockBody, stepIndex) {
+        console.log('🟢 Triggering Beginner level lock animation');
+        
+        // Add beginner-specific class for step completion
+        lockBody.classList.add('level-1-active');
+        
+        // Scale animation for step completion
+        const scaleAmount = 1 + (stepIndex * 0.1);
+        lockBody.style.transform = `scaleY(${scaleAmount})`;
+        
+        // Color progression - green tones
+        const greenIntensity = Math.min(255, 100 + (stepIndex * 40));
+        lockBody.style.background = `linear-gradient(145deg, #1a4a1a, rgb(42, ${greenIntensity}, 42), #1a4a1a)`;
+        lockBody.style.borderColor = `rgb(0, ${greenIntensity}, 0)`;
+        
+        // Glow effect
+        const glowIntensity = 0.3 + (stepIndex * 0.1);
+        lockBody.style.boxShadow = `0 0 ${20 + stepIndex * 10}px rgba(0, 255, 0, ${glowIntensity})`;
+    }
+    
+    function triggerWarriorLockAnimation(lockBody, stepIndex) {
+        console.log('🟡 Triggering Warrior level lock animation');
+        
+        // Add warrior-specific class
+        lockBody.classList.add('level-3-active');
+        
+        // Rotation and scale for warrior level
+        const rotation = stepIndex * 15;
+        const scaleAmount = 1 + (stepIndex * 0.15);
+        lockBody.style.transform = `rotate(${rotation}deg) scale(${scaleAmount})`;
+        
+        // Gold color progression
+        const goldIntensity = Math.min(255, 150 + (stepIndex * 30));
+        lockBody.style.background = `linear-gradient(145deg, #4a4a1a, rgb(${goldIntensity}, ${goldIntensity}, 42), #4a4a1a)`;
+        lockBody.style.borderColor = `rgb(${goldIntensity}, ${goldIntensity}, 0)`;
+        
+        // Golden glow
+        const glowIntensity = 0.4 + (stepIndex * 0.15);
+        lockBody.style.boxShadow = `0 0 ${25 + stepIndex * 15}px rgba(255, 215, 0, ${glowIntensity})`;
+    }
+    
+    function triggerMasterLockAnimation(lockBody, stepIndex) {
+        console.log('🔴 Triggering Master level lock animation');
+        
+        // Add master-specific class
+        lockBody.classList.add('level-5-active');
+        
+        // Complex animation for master level
+        const rotation = stepIndex * 20;
+        const scaleAmount = 1 + (stepIndex * 0.2);
+        const skew = stepIndex * 5;
+        lockBody.style.transform = `rotate(${rotation}deg) scale(${scaleAmount}) skewX(${skew}deg)`;
+        
+        // Red color progression
+        const redIntensity = Math.min(255, 120 + (stepIndex * 35));
+        lockBody.style.background = `linear-gradient(145deg, #4a1a1a, rgb(${redIntensity}, 42, 42), #4a1a1a)`;
+        lockBody.style.borderColor = `rgb(${redIntensity}, 0, 0)`;
+        
+        // Red glow with pulsing effect
+        const glowIntensity = 0.5 + (stepIndex * 0.2);
+        lockBody.style.boxShadow = `0 0 ${30 + stepIndex * 20}px rgba(255, 0, 0, ${glowIntensity})`;
+        lockBody.style.animation = `lockPulse${stepIndex} 1s ease-in-out`;
+    }
+    
+    function triggerGenericLockAnimation(lockBody, stepIndex) {
+        console.log('⚪ Triggering generic lock animation');
+        
+        // Basic animation for any unspecified lock type
+        const scaleAmount = 1 + (stepIndex * 0.1);
+        lockBody.style.transform = `scale(${scaleAmount})`;
+        lockBody.style.filter = `brightness(${1 + stepIndex * 0.2})`;
+    }
+    
+    function animateLockSegments(segments, stepIndex) {
+        console.log(`🔧 Animating ${segments.length} lock segments for step ${stepIndex + 1}`);
+        
+        segments.forEach((segment, index) => {
+            if (index <= stepIndex) {
+                segment.classList.add('segment-active');
+                segment.style.background = 'linear-gradient(45deg, #0f0, #090)';
+                segment.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.6)';
+            }
+        });
+    }
+    
+    function updateProgressBars(progressBars, stepIndex) {
+        const totalSteps = currentProblem.steps.length;
+        const progressPercentage = ((stepIndex + 1) / totalSteps) * 100;
+        
+        console.log(`📊 Updating progress bars: ${progressPercentage.toFixed(1)}% (${stepIndex + 1}/${totalSteps})`);
+        
+        progressBars.forEach(bar => {
+            bar.style.width = `${progressPercentage}%`;
+            bar.style.background = `linear-gradient(90deg, #0f0, #090)`;
+            bar.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.5)';
+        });
+    }
 
     // Add completion glow animation and additional styles
     const gameStyles = document.createElement('style');
@@ -388,6 +613,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 box-shadow: inset 0 0 15px rgba(0,255,0,0.4);
                 transform: scale(1);
             }
+        }
+        
+        /* Lock animation enhancements */
+        .segment-active {
+            transition: all 0.5s ease-in-out;
+        }
+        
+        /* Dynamic keyframes for master level pulsing */
+        @keyframes lockPulse0 {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.5); }
+            100% { filter: brightness(1); }
+        }
+        
+        @keyframes lockPulse1 {
+            0% { filter: brightness(1) hue-rotate(0deg); }
+            50% { filter: brightness(1.6) hue-rotate(10deg); }
+            100% { filter: brightness(1) hue-rotate(0deg); }
+        }
+        
+        @keyframes lockPulse2 {
+            0% { filter: brightness(1) hue-rotate(0deg); }
+            50% { filter: brightness(1.7) hue-rotate(20deg); }
+            100% { filter: brightness(1) hue-rotate(0deg); }
+        }
+        
+        @keyframes lockPulse3 {
+            0% { filter: brightness(1) hue-rotate(0deg); }
+            50% { filter: brightness(1.8) hue-rotate(30deg); }
+            100% { filter: brightness(1) hue-rotate(0deg); }
+        }
+        
+        @keyframes lockPulse4 {
+            0% { filter: brightness(1) hue-rotate(0deg); }
+            50% { filter: brightness(1.9) hue-rotate(40deg); }
+            100% { filter: brightness(1) hue-rotate(0deg); }
+        }
+        
+        @keyframes lockPulse5 {
+            0% { filter: brightness(1) hue-rotate(0deg); }
+            50% { filter: brightness(2.0) hue-rotate(50deg); }
+            100% { filter: brightness(1) hue-rotate(0deg); }
         }
         
         .problem-text {

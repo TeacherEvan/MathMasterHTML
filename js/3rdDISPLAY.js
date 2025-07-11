@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     
-    // Math symbols for the rain
-    const symbols = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X', '+', '-', '=', '÷', '×'];
+    // Math symbols for the rain - X = variable placeholder, x = multiplication
+    const symbols = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X', 'x', '+', '-', '=', '÷', '×'];
     
     // Configuration
     const SYMBOL_FALL_SPEED = 2.7; // Reduced by 10% from 3
