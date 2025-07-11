@@ -1,17 +1,52 @@
+/* Import Orbitron font */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+@keyframes wallPulse {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(0, 230, 255, 0.6);
+        background: linear-gradient(180deg, #00e6ff, #0099cc, #004466);
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(0, 230, 255, 0.9);
+        background: linear-gradient(180deg, #00ffff, #00ccff, #0066aa);
+    }
+}
+
 body, html {
     margin: 0;
     padding: 0;
     height: 100%;
     overflow: hidden;
-    background-color: #000;
-    color: #0f0;
-    font-family: 'Courier New', Courier, monospace;
+    background: linear-gradient(135deg, #0d1421, #1a1a2e, #16213e);
+    color: #e0e6ed;
+    font-family: 'Orbitron', 'Courier New', Courier, monospace;
+    position: relative;
 }
 
+/* Stoic cyberpunk overlay */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(0, 230, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 0, 150, 0.03) 0%, transparent 50%),
+        linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, 0.01) 25%, rgba(255, 255, 255, 0.01) 26%, transparent 27%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Game Container - Three Equal Sections */
 .game-container {
     display: flex;
     height: 100vh;
     width: 100vw;
+    background: transparent;
+    position: relative;
+    z-index: 2;
 }
 
 .display {
@@ -19,124 +54,339 @@ body, html {
     padding: 20px;
     box-sizing: border-box;
     height: 100%;
-    overflow-y: auto;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid rgba(0, 230, 255, 0.4);
+    border-radius: 12px;
+    margin: 10px 5px;
+    background: rgba(13, 20, 33, 0.8);
+    box-shadow: 
+        inset 0 0 30px rgba(0, 230, 255, 0.1),
+        0 0 20px rgba(0, 230, 255, 0.15);
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(2px);
 }
 
 .wall {
-    width: 5px;
-    background-color: #0f0;
+    width: 6px;
+    background: linear-gradient(180deg, #00e6ff, #0099cc, #004466);
     height: 100%;
+    position: relative;
+    overflow: hidden;
+    animation: wallPulse 4s ease-in-out infinite;
+    box-shadow: 0 0 20px rgba(0, 230, 255, 0.6);
+    border-radius: 3px;
 }
 
+@keyframes wallPulse {
+    0%, 100% { 
+        box-shadow: 0 0 15px rgba(0,255,0,0.7);
+        background: linear-gradient(180deg, #0f0, #060);
+    }
+    50% { 
+        box-shadow: 0 0 25px rgba(0,255,0,1);
+        background: linear-gradient(180deg, #0f0, #0a0);
+    }
+}
+
+/* Section Headers */
+.section-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: 2.5em;
+    color: #00e6ff;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin: 0;
+    text-shadow: 0 0 20px rgba(0, 230, 255, 0.8);
+}
+
+/* Section 1: Progression Display */
 #progression-display {
-    background-color: #010;
-    display: flex;
-    flex-direction: column;
+    background: radial-gradient(ellipse at center, rgba(0,50,0,0.3), rgba(0,20,0,0.8));
+    -webkit-backdrop-filter: blur(1px);
+    backdrop-filter: blur(1px);
 }
 
+#problem-container {
+    border: 2px solid #0f0;
+    padding: 20px;
+    margin: 20px 0;
+    min-height: 80px;
+    font-size: 2em;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(0,255,0,0.1), rgba(0,255,0,0.05));
+    border-radius: 12px;
+    box-shadow: inset 0 0 15px rgba(0,255,0,0.4);
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0 0 10px rgba(0,255,0,0.8);
+}
+
+/* Allow lock components to display properly */
+#lock-display {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    overflow: visible;
+    position: relative;
+}
+
+/* Override any global styles that might hide lock content */
+#lock-display iframe,
+#lock-display .lock-container,
+#lock-display .lock-body,
+#lock-display .transformer,
+#lock-display .lock-component,
+#lock-display .animation-part,
+#lock-display .lock-mechanism,
+#lock-display .mechanical-part,
+#lock-display .gear,
+#lock-display .gear-tooth,
+#lock-display .lock-part,
+#lock-display .transformer-part,
+#lock-display .visual-element,
+#lock-display .lock-visual {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+/* Override any global styles that might hide lock content */
+#lock-display iframe,
+#lock-display .lock-container,
+#lock-display .lock-body,
+#lock-display .transformer,
+#lock-display .lock-component,
+#lock-display .animation-part,
+#lock-display .lock-mechanism,
+#lock-display .mechanical-part,
+#lock-display .gear,
+#lock-display .gear-tooth,
+#lock-display .lock-part,
+#lock-display .transformer-part,
+#lock-display .visual-element,
+#lock-display .lock-visual {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+/* FORCE DISPLAY OF ALL LOCK CONTENT - OVERRIDE EVERYTHING */
+#lock-display > * {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+#lock-display div,
+#lock-display style,
+#lock-display script {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Only hide actual text content, not visual elements */
+#lock-display p, 
+#lock-display h1, 
+#lock-display h2, 
+#lock-display h3, 
+#lock-display h4, 
+#lock-display h5, 
+#lock-display h6,
+#lock-display strong, 
+#lock-display em, 
+#lock-display b,
+#lock-display i, 
+#lock-display text, 
+#lock-display label,
+#lock-display button, 
+#lock-display input {
+    font-size: 0 !important;
+    color: transparent !important;
+    text-shadow: none !important;
+}
+
+/* Completely hide all text content in lock components */
+#lock-display * {
+    color: transparent !important;
+    text-shadow: none !important;
+    font-size: 0 !important;
+}
+
+/* Section 2: Problem-Solving Display */
 #problem-solving-display {
-    background-color: #020;
-    display: flex;
-    flex-direction: column;
+    background: radial-gradient(ellipse at center, rgba(0,50,0,0.3), rgba(0,30,0,0.8));
+    -webkit-backdrop-filter: blur(1px);
+    backdrop-filter: blur(1px);
 }
 
+#help-button {
+    background: linear-gradient(145deg, #00e6ff, #0099cc);
+    color: #0d1421;
+    border: 3px solid #00ccff;
+    padding: 15px 30px;
+    cursor: pointer;
+    font-size: 18px;
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    border-radius: 30px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4), 0 0 20px rgba(0, 230, 255, 0.3);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+#help-button:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.5), 0 0 30px rgba(0, 230, 255, 0.6);
+    background: linear-gradient(145deg, #00ffff, #00e6ff);
+}
+
+#help-button:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3), 0 0 15px rgba(0, 230, 255, 0.4);
+}
+
+#solution-container {
+    border: 2px solid #00e6ff;
+    padding: 20px;
+    margin: 20px 0;
+    min-height: 100px;
+    font-size: 1.5em;
+    text-align: left;
+    background: linear-gradient(135deg, rgba(0, 230, 255, 0.1), rgba(0, 230, 255, 0.05));
+    border-radius: 12px;
+    box-shadow: inset 0 0 15px rgba(0, 230, 255, 0.4);
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    color: #00e6ff;
+    text-shadow: 0 0 10px rgba(0, 230, 255, 0.8);
+    visibility: visible;
+    overflow-y: auto;
+    opacity: 1;
+    display: block;
+}
+
+.seneca-quote {
+    margin-top: auto;
+    padding: 15px;
+    font-size: 0.9em;
+    font-style: italic;
+    text-align: center;
+    color: rgba(0,255,0,0.7);
+    border-top: 1px solid rgba(0,255,0,0.3);
+    font-family: 'Orbitron', monospace;
+    font-weight: 400;
+}
+
+/* Section 3: Symbol Rain Display */
 #matrix-display {
-    background-color: #010;
+    background: radial-gradient(ellipse at center, rgba(0,50,0,0.3), rgba(0,20,0,0.8));
+    -webkit-backdrop-filter: blur(1px);
+    backdrop-filter: blur(1px);
     padding: 0;
     position: relative;
     overflow: hidden;
 }
 
-#matrix-canvas {
-    display: block;
+#symbol-rain-container {
     width: 100%;
     height: 100%;
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.falling-symbol {
     position: absolute;
-    top: 0;
-    left: 0;
-    cursor: crosshair;
-}
-
-#help-button {
-    background-color: #0f0;
-    color: #000;
-    border: none;
-    padding: 10px 20px;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    font-size: 48px; /* Increased by 50% from 32px */
+    color: #00e6ff;
     cursor: pointer;
-    font-size: 16px;
-    margin-bottom: 20px;
-    align-self: center;
-    border-radius: 25px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    -webkit-user-select: none;
+    user-select: none;
+    text-shadow: 0 0 8px rgba(0, 230, 255, 0.6);
+    transition: all 0.2s ease;
+    z-index: 20;
+    pointer-events: auto;
+    opacity: 1;
 }
 
-#help-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,255,0,0.4);
+.falling-symbol:hover {
+    transform: scale(1.2);
+    color: #00ffff;
+    text-shadow: 0 0 15px rgba(0, 230, 255, 0.9);
 }
 
-#help-button:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+.falling-symbol.clicked {
+    animation: symbolClick 0.5s ease-out forwards;
 }
 
-#problem-container, #solution-container {
-    border: 1px solid #0f0;
-    padding: 15px;
-    margin-top: 10px;
-    min-height: 100px;
-    font-size: 24px;
-    text-align: center;
-    background: linear-gradient(135deg, rgba(0,255,0,0.1), rgba(0,255,0,0.05));
-    border-radius: 8px;
-    box-shadow: inset 0 0 10px rgba(0,255,0,0.3);
-}
-
-#lock-display {
-    margin-top: auto;
-    margin-bottom: auto;
-    align-self: center;
-    display: flex;
-    justify-content: center;
-    flex-grow: 1;
-    align-items: center;
-}
-
-/* Hide any text in lock components */
-#lock-display p, #lock-display h1, #lock-display h2, #lock-display h3, 
-#lock-display h4, #lock-display h5, #lock-display h6, #lock-display span {
+.matrix-refresh {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    color: transparent;
+    font-size: 0px;
+    z-index: 5;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    background: transparent;
+    padding: 0;
+    border-radius: 20px;
+    border: none;
+    opacity: 0;
+    visibility: hidden;
     display: none;
 }
 
+/* Character reveal mechanics */
 .hidden-char {
+    background-color: #333;
+    border-radius: 4px;
+    display: inline-block;
+    min-width: 16px;
+    margin: 0 2px;
     color: transparent;
+    -webkit-user-select: none;
     user-select: none;
+    border: 1px solid #555;
+    animation: hiddenPulse 2s ease-in-out infinite;
+}
+
+@keyframes hiddenPulse {
+    0%, 100% { background-color: #333; }
+    50% { background-color: #444; }
 }
 
 .revealed-char {
     color: #0f0;
-}
-   
-/* Fade-in for revealed characters */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    animation: fadeIn 0.5s ease-in;
+    text-shadow: 0 0 8px rgba(0,255,0,0.8);
 }
 
-/* Block placeholder style */
-.hidden-char {
-    background-color: #333;
-    border-radius: 3px;
-    display: inline-block;
-    min-width: 12px;
-    margin: 0 1px;
-}
-.revealed-char {
-    animation: fadeIn 0.3s ease-in;
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
 }
 
 /* Incorrect answer flash */
@@ -146,49 +396,108 @@ body, html {
 }
 
 body.incorrect-flash {
-    animation: flash-red 0.3s;
+    animation: flash-red 0.4s;
 }
 
-/* Enhanced matrix rain styles */
-.matrix-symbol {
-    user-select: none;
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: bold;
-}
-
-/* Worm styles */
-.worm {
+/* Worm Container */
+.worm-container {
     position: absolute;
-    width: 20px;
-    height: 20px;
-    background-color: #ff0;
-    border-radius: 50%;
-    z-index: 10;
-    cursor: pointer;
-    transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
+    z-index: 15;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.worm-container:hover {
+    transform: scale(1.1);
+}
+
+/* Worm Segments */
+.worm-segment {
+    border-radius: 50%;
+    margin: 0 1px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(139, 69, 19, 0.3);
+    position: relative;
+}
+
+.worm-head {
+    z-index: 16;
+}
+
+.worm-eye {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background-color: #000;
+    border-radius: 50%;
+    transition: opacity 0.1s ease;
+}
+
+.left-eye {
+    top: 3px;
+    left: 3px;
+}
+
+.right-eye {
+    top: 3px;
+    right: 3px;
+}
+
+.worm-mouth {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 2px;
+    background-color: #333;
+    border-radius: 0 0 50% 50%;
+}
+
+.worm-container.carrying-symbol {
+    animation: wormCarrying 1s ease-in-out infinite;
+}
+
+.worm-container.carrying-symbol .worm-head::after {
+    content: attr(data-symbol);
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 165, 0, 0.9);
     color: #000;
-    border: 2px solid #ffa500;
-    animation: wormPulse 1s infinite ease-in-out;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+@keyframes wormCarrying {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
 }
 
 @keyframes wormPulse {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+    50% { transform: scale(1.05); }
 }
 
-.worm:hover {
-    transform: scale(1.2);
-    box-shadow: 0 0 10px #ff0;
-}
-
-.worm.carrying-symbol {
-    background-color: #ffa500;
-    border-color: #ff0;
+@keyframes wormDeath {
+    0% { 
+        transform: scale(1) rotate(0deg); 
+        opacity: 1; 
+    }
+    50% { 
+        transform: scale(1.5) rotate(180deg); 
+        opacity: 0.7; 
+    }
+    100% { 
+        transform: scale(0) rotate(360deg); 
+        opacity: 0; 
+    }
 }
 
 /* Stolen symbol animation */

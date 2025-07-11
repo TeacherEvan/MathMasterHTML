@@ -157,7 +157,7 @@ Main Scene Hierarchy:
 ### 3.2 Falling Symbols System
 **File: FallingSymbolsManager.cs**
 
-**Symbol Set**: "0123456789X+-=÷×()" **IMPORTANT**
+**Symbol Set**: "0123456789X+-=÷×" **IMPORTANT**
 
 **Animation Specifications:**
 - Continuous generation at top of screen
