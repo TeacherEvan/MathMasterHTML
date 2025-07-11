@@ -1,0 +1,156 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+    color: #0f0;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.game-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+.display {
+    flex: 1;
+    padding: 20px;
+    box-sizing: border-box;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.wall {
+    width: 5px;
+    background-color: #0f0;
+    height: 100%;
+}
+
+#progression-display {
+    background-color: #010;
+}
+
+#problem-solving-display {
+    background-color: #020;
+    display: flex;
+    flex-direction: column;
+}
+
+#matrix-display {
+    background-color: #010;
+    padding: 0;
+}
+
+#matrix-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#help-button {
+    background-color: #0f0;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 20px;
+    align-self: center;
+}
+
+#problem-container, #solution-container, #lock-display {
+    border: 1px solid #0f0;
+    padding: 15px;
+    margin-top: 10px;
+    min-height: 100px;
+    font-size: 24px;
+    text-align: center;
+}
+
+.hidden-char {
+    color: transparent;
+    user-select: none;
+}
+
+.revealed-char {
+    color: #0f0;
+}
+   
+/* Fade-in for revealed characters */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Block placeholder style */
+.hidden-char {
+    background-color: #333;
+    border-radius: 3px;
+    display: inline-block;
+    min-width: 12px;
+    margin: 0 1px;
+}
+.revealed-char {
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* Incorrect answer flash */
+@keyframes flash-red {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(255, 0, 0, 0.3); }
+}
+    50% { background-color: rgba(255, 0, 0, 0.3); }
+}
+
+body.incorrect-flash {
+    animation: flash-red 0.3s;
+}
+
+/* Level-specific styles */
+/* Beginner - Green theme (default) */
+body.level-beginner .wall {
+    background-color: #0f0;
+}
+
+body.level-beginner #help-button {
+    background-color: #0f0;
+}
+
+body.level-beginner .revealed-char {
+    color: #0f0;
+}
+
+/* Warrior - Gold theme */
+body.level-warrior .wall {
+    background-color: #ffd700;
+}
+
+body.level-warrior #help-button {
+    background-color: #ffd700;
+    color: #000;
+}
+
+body.level-warrior .revealed-char {
+    color: #ffd700;
+}
+
+/* Master - Red theme */
+body.level-master .wall {
+    background-color: #ff4444;
+}
+
+body.level-master #help-button {
+    background-color: #ff4444;
+    color: #000;
+}
+
+body.level-master .revealed-char {
+    color: #ff4444;
+}
+    50% { background-color: rgba(255,0,0,0.2); }
+}
+body.incorrect-flash {
+    animation: flash-red 0.3s ease-in;
+}

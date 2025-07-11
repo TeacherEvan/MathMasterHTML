@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathMaster - Game</title>
+    <link rel="stylesheet" href="css/game.css">
+    <style>
+        #back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: linear-gradient(145deg, #333, #111);
+            border: 2px solid #888;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 14px;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        #back-button:hover {
+            border-color: #00ff00;
+            color: #00ff00;
+            box-shadow: 0 0 15px rgba(0,255,0,0.3);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <button id="back-button" onclick="goBack()">← Back to Levels</button>
+    <div class="game-container">
+        <div id="progression-display" class="display">
+            <h2>Problem</h2>
+            <div id="problem-container"></div>
+            <div id="lock-display"></div>
+        </div>
+        <div class="wall"></div>
+        <div id="problem-solving-display" class="display">
+            <button id="help-button">HELP</button>
+            <div id="solution-container"></div>
+        </div>
+        <div class="wall"></div>
+        <div id="matrix-display" class="display">
+            <canvas id="matrix-canvas"></canvas>
+        </div>
+    </div>
+    <script src="js/matrix.js"></script>
+    <script src="js/worm.js"></script>
+    <script src="js/game.js"></script>
+    <script>
+        function goBack() {
+            window.location.href = 'level-select.html';
+        }
+    </script>
+</body>
+</html>

@@ -37,5 +37,52 @@ Date: 2024-10-27
 **Task 1 (Completed):** Generated 50 easy algebra problems with solutions, and after several failures, formatted them correctly in `50-easy-algebra-problems.md`.
 **Task 2 (Completed):** Corrected the `MathMasterHTML.mdc` blueprint to remove incorrect "Matrix-style" symbols and equations, replacing them with the user's specific request.
 
-**Task 3 (Failure Analysis & Recovery):** After multiple failures, corrected `50-easy-algebra-problems.md` to restore the original algebraic problems and format the solution steps without explicit division symbols, per user's clarified instructions. Root cause identified as a logic conflict between core programming and explicit user commands.
---- 
+---
+### Session Start: 2025-07-11
+
+**Task 1 (In Progress):** Build the main game interface.
+
+**Phase 1 (Completed):** Create Core HTML and CSS Structure
+- Created `game.html` for the main game screen.
+- Created `css/game.css` to style the three-column layout.
+- Created `js/` directory and initial script files (`game.js`, `matrix.js`, `worm.js`).
+- Implemented the falling symbols animation in the Matrix Display.
+
+**Phase 2 (In Progress):** Develop the Three Main Displays
+**Phase 2 (In Progress):** Develop the Three Main Displays
+
+- **Progression Display (Left):** Show current problem and lock animation.
+- **Problem Solving Display (Center):** Implement "Help" button and step-by-step solution display.
+- **Matrix Display (Right):** Implemented falling symbols animation.
+- **Matrix Display (Right):** Implemented falling symbols animation.
+
+#### Phase 3 (In Progress): Implement Game Logic
+
+- **Input Handling:** Add a click listener to the Matrix canvas to detect which symbol the player clicks.
+- **Answer Checking:** Compare the clicked symbol with the next correct symbol in the solution.
+- **Progression:** If the symbol is correct, reveal the character in the "Problem Solving Display"; if incorrect, provide visual feedback (e.g., a red flash).
+- **Level Completion:** Detect when the entire solution is revealed and trigger a "level complete" state.
+- **Level Completion:** Detect when the entire solution is revealed and trigger a "level complete" state.
+
+#### Phase 4 (Next): Link Welcome Screen to Level Select
+
+- Ensure the "Click to continue" ripple or Enter/Space key on `index.html` navigates to `level-select.html`.
+- Verify `level-select.html` displays available levels and links to each `level-*-transformer.html` component.
+- Ensure the "Click to continue" ripple or Enter/Space key on `index.html` navigates to `level-select.html`.
+- Verify `level-select.html` displays available levels and links to each `level-*-transformer.html` component.
+- **Spawning:** Implement logic to spawn a worm when a line of the math problem is completed.
+- **Movement:** Animate the worm's movement within the "Problem Solving Display".
+- **Symbol Stealing:** After 10 seconds, have the worm target a visible symbol, move towards it, and "carry" it to the top of the screen.
+#### Phase 5: Create the Worm NPCs
+
+- **Worm Class:** Create a `Worm` class in `js/worm.js` to manage individual worm properties (position, speed, state).
+- **Spawning:** Implement logic to spawn a worm when a line of the math problem is completed.
+- **Movement:** Animate the worm's movement within the "Problem Solving Display".
+- **Symbol Stealing:** After 10 seconds, have the worm target a visible symbol, move towards it, and "carry" it to the top of the screen.
+- **Interaction:**
+  - Clicking the correct symbol on the Matrix display (the one the worm is carrying) destroys the worm.
+  - Clicking the worm itself causes it to multiply (up to a maximum of 8).
+  - **Interaction:**
+    - Clicking the correct symbol on the Matrix display (the one the worm is carrying) destroys the worm.
+    - Clicking the worm itself causes it to multiply (up to a maximum of 8).
+---
