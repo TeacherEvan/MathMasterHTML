@@ -135,71 +135,72 @@ body::before {
 /* Allow lock components to display properly */
 #lock-display {
     flex: 1;
-    display: flex;
+    display: flex !important;
     justify-content: center;
     align-items: center;
     margin: 20px 0;
-    overflow: visible;
+    overflow: visible !important;
+    position: relative;
+    min-height: 300px;
+    border: 2px solid rgba(0, 255, 0, 0.3);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Lock component wrapper to contain extracted content */
+.lock-component-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: relative;
 }
 
-/* Override any global styles that might hide lock content */
-#lock-display iframe,
-#lock-display .lock-container,
-#lock-display .lock-body,
-#lock-display .transformer,
-#lock-display .lock-component,
-#lock-display .animation-part,
-#lock-display .lock-mechanism,
-#lock-display .mechanical-part,
-#lock-display .gear,
-#lock-display .gear-tooth,
-#lock-display .lock-part,
-#lock-display .transformer-part,
-#lock-display .visual-element,
-#lock-display .lock-visual {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: relative !important;
-    z-index: 10 !important;
-}
-
-/* Override any global styles that might hide lock content */
-#lock-display iframe,
-#lock-display .lock-container,
-#lock-display .lock-body,
-#lock-display .transformer,
-#lock-display .lock-component,
-#lock-display .animation-part,
-#lock-display .lock-mechanism,
-#lock-display .mechanical-part,
-#lock-display .gear,
-#lock-display .gear-tooth,
-#lock-display .lock-part,
-#lock-display .transformer-part,
-#lock-display .visual-element,
-#lock-display .lock-visual {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: relative !important;
-    z-index: 10 !important;
+/* Reset body styles for lock components */
+.lock-component-wrapper body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+    height: auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
 }
 
 /* FORCE DISPLAY OF ALL LOCK CONTENT - OVERRIDE EVERYTHING */
-#lock-display > * {
+#lock-display > *,
+#lock-display * {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    max-width: none !important;
+    max-height: none !important;
 }
 
-#lock-display div,
-#lock-display style,
-#lock-display script {
+#lock-display iframe,
+#lock-display .lock-container,
+#lock-display .lock-body,
+#lock-display .transformer,
+#lock-display .lock-component,
+#lock-display .animation-part,
+#lock-display .lock-mechanism,
+#lock-display .mechanical-part,
+#lock-display .gear,
+#lock-display .gear-tooth,
+#lock-display .lock-part,
+#lock-display .transformer-part,
+#lock-display .visual-element,
+#lock-display .lock-visual,
+#lock-display .piston,
+#lock-display .extension-rails {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    position: relative !important;
+    z-index: 10 !important;
 }
 
 /* Only hide actual text content, not visual elements */
@@ -426,14 +427,129 @@ body.incorrect-flash {
 
 /* Worm Container - GROUNDED EARTHWORM DESIGN */
 .worm-container {
-    position: absolute;
-    display: flex;
+    position: absolute !important;
+    display: flex !important;
     align-items: center;
     z-index: 15;
     cursor: pointer;
     transition: all 0.2s ease;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
     /* REMOVED floating wiggle animation - worms stay grounded */
+}
+
+/* Add styles for worms */
+.worm-container {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    pointer-events: auto;
+    z-index: 10;
+    /* Add ground shadow to make worm look grounded */
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3));
+}
+.worm-segment {
+    border-radius: 50%;
+    background: var(--worm-color);
+    margin-right: 2px;
+    /* Add realistic earthworm styling */
+    box-shadow: 
+        0 1px 3px rgba(0, 0, 0, 0.4),
+        inset 0 1px 2px rgba(255, 255, 255, 0.1),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    /* Add subtle ridges like real earthworms */
+    position: relative;
+}
+
+.worm-segment::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 1px;
+}
+
+.worm-segment::after {
+    content: '';
+    position: absolute;
+    bottom: 20%;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 1px;
+}
+.worm-head {
+    position: relative;
+    background: var(--worm-color-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Enhanced head styling */
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.5),
+        inset 0 1px 3px rgba(255, 255, 255, 0.15),
+        inset 0 -1px 3px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    /* Slightly tapered head shape */
+    border-radius: 60% 60% 50% 50%;
+}
+.worm-eye {
+    width: 4px;
+    height: 4px;
+    background: #000;
+    border-radius: 50%;
+    position: absolute;
+    /* Add eye depth */
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.6),
+        inset 0 0 1px rgba(255, 255, 255, 0.3);
+    border: 0.5px solid rgba(0, 0, 0, 0.4);
+}
+.left-eye {
+    left: 25%;
+    top: 20%;
+}
+.right-eye {
+    right: 25%;
+    top: 20%;
+}
+.worm-mouth {
+    width: 6px;
+    height: 2px;
+    background: #000;
+    position: absolute;
+    bottom: 15%;
+    border-radius: 1px;
+    /* Add mouth depth */
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.8),
+        inset 0 0 1px rgba(0, 0, 0, 0.9);
+    border: 0.5px solid rgba(0, 0, 0, 0.6);
+}
+
+/* Container parent elements need to be properly positioned */
+#progression-worms,
+#problem-solving-worms,
+#matrix-worms,
+.worm-spawn-area {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#progression-worms .worm-container,
+#problem-solving-worms .worm-container,
+#matrix-worms .worm-container,
+.worm-spawn-area .worm-container {
+    pointer-events: all;
 }
 
 .worm-container:hover {

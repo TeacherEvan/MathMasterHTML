@@ -7,35 +7,37 @@
     <style>
         body {
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+            padding: 10px; /* Reduced from 20px */
+            background: transparent; /* Make transparent for game integration */
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            min-height: 100%;
             font-family: 'Orbitron', monospace;
             overflow: hidden;
         }
 
         .lock-container {
             position: relative;
-            width: 200px;
-            height: 300px;
+            width: 120px;  /* Reduced from 200px */
+            height: 180px; /* Reduced from 300px */
             display: flex;
             flex-direction: column;
             align-items: center;
+            transform: scale(0.6); /* Scale down entire component */
+            transform-origin: center;
         }
 
         .lock-body {
-            width: 120px;
-            height: 150px;
+            width: 80px;   /* Reduced from 120px */
+            height: 100px; /* Reduced from 150px */
             background: linear-gradient(145deg, #2a2a2a, #404040);
-            border-radius: 15px;
+            border-radius: 10px; /* Reduced from 15px */
             position: relative;
-            border: 3px solid #555;
+            border: 2px solid #555; /* Reduced from 3px */
             box-shadow: 
-                0 0 20px rgba(0, 255, 0, 0.3),
-                inset 0 0 10px rgba(0, 0, 0, 0.5),
+                0 0 15px rgba(0, 255, 0, 0.3), /* Reduced from 20px */
+                inset 0 0 8px rgba(0, 0, 0, 0.5), /* Reduced from 10px */
                 0 0 0 0 rgba(0, 255, 0, 0);
             transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             transform-origin: top center;
@@ -43,96 +45,167 @@
         }
 
         .lock-body.level-1-active {
-            height: 250px;
-            transform: scaleY(1.5);
+            transform: scaleY(1.2);
             background: linear-gradient(145deg, #1a4a1a, #2a6a2a, #1a4a1a);
+            border-color: #0f0;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.6), /* Reduced from 30px */
+                inset 0 0 10px rgba(0, 0, 0, 0.6), /* Reduced from 15px */
+                0 0 0 3px rgba(0, 255, 0, 0.15), /* Reduced from 4px */
+                0 0 0 6px rgba(0, 255, 0, 0.08); /* Reduced from 8px */
+        }
+
+        /* Progressive levels for line completion */
+        .lock-body.level-2-active {
+            transform: scaleY(1.25);
+            background: linear-gradient(145deg, #1a4a1a, #3a7a3a, #1a4a1a);
+            border-color: #0f0;
+            box-shadow: 
+                0 0 35px rgba(0, 255, 0, 0.7),
+                inset 0 0 18px rgba(0, 0, 0, 0.6),
+                0 0 0 5px rgba(0, 255, 0, 0.2),
+                0 0 0 10px rgba(0, 255, 0, 0.1);
+        }
+
+        .lock-body.level-3-active {
+            transform: scaleY(1.3);
+            background: linear-gradient(145deg, #1a4a1a, #4a8a4a, #1a4a1a);
             border-color: #0f0;
             box-shadow: 
                 0 0 40px rgba(0, 255, 0, 0.8),
                 inset 0 0 20px rgba(0, 0, 0, 0.7),
-                0 0 0 8px rgba(0, 255, 0, 0.2),
-                0 0 0 16px rgba(0, 255, 0, 0.1);
-            animation: level1-pulse 2s ease-in-out infinite;
+                0 0 0 6px rgba(0, 255, 0, 0.25),
+                0 0 0 12px rgba(0, 255, 0, 0.12);
         }
 
         /* Mechanical Extensions */
         .extension-rails {
             position: absolute;
-            width: 8px;
+            width: 5px; /* Reduced from 8px */
             height: 100%;
             background: linear-gradient(180deg, #666, #333);
-            border-radius: 4px;
+            border-radius: 3px; /* Reduced from 4px */
             top: 0;
             transition: all 0.8s ease;
         }
 
         .extension-rails.left {
-            left: -15px;
+            left: -10px; /* Reduced from -15px */
             transform: translateY(0);
         }
 
         .extension-rails.right {
-            right: -15px;
+            right: -10px; /* Reduced from -15px */
             transform: translateY(0);
         }
 
         .lock-body.level-1-active .extension-rails {
-            height: 130%;
+            height: 110%;
             background: linear-gradient(180deg, #888, #555);
+            box-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
+        }
+
+        .lock-body.level-2-active .extension-rails {
+            height: 115%;
+            background: linear-gradient(180deg, #999, #666);
             box-shadow: 0 0 10px rgba(0, 255, 0, 0.4);
+        }
+
+        .lock-body.level-3-active .extension-rails {
+            height: 120%;
+            background: linear-gradient(180deg, #aaa, #777);
+            box-shadow: 0 0 12px rgba(0, 255, 0, 0.5);
         }
 
         /* Enhanced Mechanical Pistons */
         .piston {
             position: absolute;
-            width: 8px;
-            height: 25px;
+            width: 5px; /* Reduced from 8px */
+            height: 18px; /* Reduced from 25px */
             background: linear-gradient(180deg, #888, #444, #222);
-            border-radius: 4px;
+            border-radius: 3px; /* Reduced from 4px */
             border: 1px solid #333;
             transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.1);
         }
 
         .piston.top {
-            top: -30px;
+            top: -22px; /* Reduced from -30px */
             left: 50%;
             transform: translateX(-50%) scaleY(1);
         }
 
         .piston.bottom {
-            bottom: -30px;
+            bottom: -22px; /* Reduced from -30px */
             left: 50%;
             transform: translateX(-50%) scaleY(1);
         }
 
         .lock-body.level-1-active .piston.top {
-            top: -60px;
-            height: 60px;
+            top: -25px; /* Reduced from -35px */
+            height: 25px; /* Reduced from 35px */
             background: linear-gradient(180deg, #0f0, #090, #060, #030);
             border-color: #0f0;
             box-shadow: 
-                0 0 15px rgba(0, 255, 0, 0.8),
-                inset 0 2px 6px rgba(255, 255, 255, 0.3);
-            animation: piston-extend-top 2s ease-in-out infinite;
+                0 0 8px rgba(0, 255, 0, 0.6), /* Reduced from 10px */
+                inset 0 2px 4px rgba(255, 255, 255, 0.2);
         }
 
         .lock-body.level-1-active .piston.bottom {
-            bottom: -60px;
-            height: 60px;
+            bottom: -25px; /* Reduced from -35px */
+            height: 25px; /* Reduced from 35px */
             background: linear-gradient(180deg, #0f0, #090, #060, #030);
             border-color: #0f0;
             box-shadow: 
+                0 0 8px rgba(0, 255, 0, 0.6), /* Reduced from 10px */
+                inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        }
+
+        .lock-body.level-2-active .piston.top {
+            top: -40px;
+            height: 40px;
+            background: linear-gradient(180deg, #1f1, #0a0, #070, #040);
+            border-color: #1f1;
+            box-shadow: 
+                0 0 12px rgba(0, 255, 0, 0.7),
+                inset 0 2px 5px rgba(255, 255, 255, 0.25);
+        }
+
+        .lock-body.level-2-active .piston.bottom {
+            bottom: -40px;
+            height: 40px;
+            background: linear-gradient(180deg, #1f1, #0a0, #070, #040);
+            border-color: #1f1;
+            box-shadow: 
+                0 0 12px rgba(0, 255, 0, 0.7),
+                inset 0 2px 5px rgba(255, 255, 255, 0.25);
+        }
+
+        .lock-body.level-3-active .piston.top {
+            top: -45px;
+            height: 45px;
+            background: linear-gradient(180deg, #2f2, #0b0, #080, #050);
+            border-color: #2f2;
+            box-shadow: 
                 0 0 15px rgba(0, 255, 0, 0.8),
                 inset 0 2px 6px rgba(255, 255, 255, 0.3);
-            animation: piston-extend-bottom 2s ease-in-out infinite;
+        }
+
+        .lock-body.level-3-active .piston.bottom {
+            bottom: -45px;
+            height: 45px;
+            background: linear-gradient(180deg, #2f2, #0b0, #080, #050);
+            border-color: #2f2;
+            box-shadow: 
+                0 0 15px rgba(0, 255, 0, 0.8),
+                inset 0 2px 6px rgba(255, 255, 255, 0.3);
         }
 
         /* Energy Conduits */
         .energy-conduit {
             position: absolute;
-            width: 4px;
-            height: 80px;
+            width: 3px; /* Reduced from 4px */
+            height: 60px; /* Reduced from 80px */
             background: linear-gradient(180deg, transparent, #333, transparent);
             left: 50%;
             transform: translateX(-50%);
@@ -141,14 +214,36 @@
         }
 
         .energy-conduit.top {
-            top: -80px;
+            top: -35px; /* Reduced from -50px */
         }
 
         .energy-conduit.bottom {
-            bottom: -80px;
+            bottom: -35px; /* Reduced from -50px */
         }
 
         .lock-body.level-1-active .energy-conduit {
+            opacity: 1;
+            background: linear-gradient(180deg, 
+                rgba(0, 255, 0, 0), 
+                rgba(0, 255, 0, 0.6), 
+                rgba(0, 255, 0, 0.8), 
+                rgba(0, 255, 0, 0.6), 
+                rgba(0, 255, 0, 0));
+            box-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+        }
+
+        .lock-body.level-2-active .energy-conduit {
+            opacity: 1;
+            background: linear-gradient(180deg, 
+                rgba(0, 255, 0, 0), 
+                rgba(0, 255, 0, 0.7), 
+                rgba(0, 255, 0, 0.9), 
+                rgba(0, 255, 0, 0.7), 
+                rgba(0, 255, 0, 0));
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .lock-body.level-3-active .energy-conduit {
             opacity: 1;
             background: linear-gradient(180deg, 
                 rgba(0, 255, 0, 0), 
@@ -156,8 +251,7 @@
                 rgba(0, 255, 0, 1), 
                 rgba(0, 255, 0, 0.8), 
                 rgba(0, 255, 0, 0));
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
-            animation: energy-flow 1.5s ease-in-out infinite;
+            box-shadow: 0 0 12px rgba(0, 255, 0, 0.6);
         }
 
         /* Central Keyhole */
@@ -166,8 +260,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
+            width: 15px; /* Reduced from 20px */
+            height: 15px; /* Reduced from 20px */
             background: #000;
             border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
             border: 2px solid #333;
@@ -177,11 +271,11 @@
         .keyhole::after {
             content: '';
             position: absolute;
-            bottom: -8px;
+            bottom: -6px; /* Reduced from -8px */
             left: 50%;
             transform: translateX(-50%);
-            width: 8px;
-            height: 12px;
+            width: 6px; /* Reduced from 8px */
+            height: 9px; /* Reduced from 12px */
             background: #000;
             border: 2px solid #333;
             border-top: none;
@@ -195,9 +289,9 @@
         /* Mechanical Gears */
         .gear {
             position: absolute;
-            width: 30px;
-            height: 30px;
-            border: 3px solid #666;
+            width: 20px; /* Reduced from 30px */
+            height: 20px; /* Reduced from 30px */
+            border: 2px solid #666; /* Reduced from 3px */
             border-radius: 50%;
             background: radial-gradient(circle, #444, #222);
             transition: all 0.8s ease;
@@ -209,60 +303,48 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 8px;
-            height: 8px;
+            width: 5px; /* Reduced from 8px */
+            height: 5px; /* Reduced from 8px */
             background: #333;
             border-radius: 50%;
         }
 
         .gear.left {
-            top: 20px;
-            left: -20px;
+            top: 15px; /* Reduced from 20px */
+            left: -15px; /* Reduced from -20px */
             animation: rotate-clockwise 3s linear infinite;
         }
 
         .gear.right {
-            top: 20px;
-            right: -20px;
+            top: 15px; /* Reduced from 20px */
+            right: -15px; /* Reduced from -20px */
             animation: rotate-counter-clockwise 3s linear infinite;
         }
 
         .lock-body.level-1-active .gear {
             border-color: #0f0;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
-            animation-duration: 1.5s;
+            box-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
         }
 
-        /* Status Indicator */
-        .status-indicator {
-            position: absolute;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 5px 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #0f0;
-            font-size: 12px;
-            border-radius: 5px;
-            border: 1px solid #333;
-            transition: all 0.5s ease;
+        .lock-body.level-2-active .gear {
+            border-color: #1f1;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
         }
 
-        .lock-body.level-1-active .status-indicator {
-            color: #ff0;
-            border-color: #ff0;
-            box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+        .lock-body.level-3-active .gear {
+            border-color: #2f2;
+            box-shadow: 0 0 12px rgba(0, 255, 0, 0.6);
         }
 
         /* Shackle */
         .shackle {
-            width: 80px;
-            height: 60px;
-            border: 8px solid #555;
+            width: 55px; /* Reduced from 80px */
+            height: 40px; /* Reduced from 60px */
+            border: 5px solid #555; /* Reduced from 8px */
             border-bottom: none;
-            border-radius: 40px 40px 0 0;
+            border-radius: 28px 28px 0 0; /* Reduced proportionally */
             position: absolute;
-            top: -50px;
+            top: -35px; /* Reduced from -50px */
             left: 50%;
             transform: translateX(-50%);
             background: transparent;
@@ -284,84 +366,9 @@
             to { transform: rotate(0deg); }
         }
 
-        @keyframes level1-pulse {
-            0%, 100% { 
-                box-shadow: 
-                    0 0 40px rgba(0, 255, 0, 0.8),
-                    inset 0 0 20px rgba(0, 0, 0, 0.7),
-                    0 0 0 8px rgba(0, 255, 0, 0.2),
-                    0 0 0 16px rgba(0, 255, 0, 0.1);
-            }
-            50% { 
-                box-shadow: 
-                    0 0 60px rgba(0, 255, 0, 1),
-                    inset 0 0 25px rgba(0, 0, 0, 0.8),
-                    0 0 0 12px rgba(0, 255, 0, 0.3),
-                    0 0 0 24px rgba(0, 255, 0, 0.15);
-            }
-        }
-
-        @keyframes piston-extend-top {
-            0%, 100% { 
-                transform: translateX(-50%) scaleY(1);
-                box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
-            }
-            50% { 
-                transform: translateX(-50%) scaleY(1.1);
-                box-shadow: 0 0 25px rgba(0, 255, 0, 1);
-            }
-        }
-
-        @keyframes piston-extend-bottom {
-            0%, 100% { 
-                transform: translateX(-50%) scaleY(1);
-                box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
-            }
-            50% { 
-                transform: translateX(-50%) scaleY(1.1);
-                box-shadow: 0 0 25px rgba(0, 255, 0, 1);
-            }
-        }
-
-        @keyframes energy-flow {
-            0% { 
-                opacity: 0.5;
-                transform: translateX(-50%) scaleY(0.8);
-            }
-            50% { 
-                opacity: 1;
-                transform: translateX(-50%) scaleY(1.2);
-            }
-            100% { 
-                opacity: 0.5;
-                transform: translateX(-50%) scaleY(0.8);
-            }
-        }
-
-        /* Control Panel */
+        /* Control Panel - Hidden in game mode */
         .control-panel {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            background: linear-gradient(145deg, #333, #555);
-            color: #0f0;
-            border: 2px solid #666;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Orbitron', monospace;
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            background: linear-gradient(145deg, #555, #777);
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            display: none; /* Hide control panel in game */
         }
     </style>
 </head>
@@ -370,8 +377,6 @@
         <div class="shackle"></div>
         
         <div class="lock-body" id="lockBody">
-            <div class="status-indicator">LEVEL 1: VERTICAL EXTENSION</div>
-            
             <!-- Energy Conduits -->
             <div class="energy-conduit top"></div>
             <div class="energy-conduit bottom"></div>

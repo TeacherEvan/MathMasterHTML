@@ -6,18 +6,16 @@ class WormManager {
         this.worms = [];
         this.maxWorms = 8;
         this.symbols = '0123456789Xx+-=÷×'; // X = variable, x = multiplication
-        this.containers = {
-            progression: document.getElementById('progression-worms'),
-            problemSolving: document.getElementById('problem-solving-worms'),
-            matrix: document.getElementById('matrix-worms')
-        };
+        this.containers = {};
         this.isInitialized = false;
         
-        // Wait for DOM to be fully loaded
+        // Wait for DOM to be fully loaded and ensure containers exist
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.initialize());
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(() => this.initialize(), 1000); // Extra delay to ensure containers exist
+            });
         } else {
-            this.initialize();
+            setTimeout(() => this.initialize(), 1000); // Extra delay to ensure containers exist
         }
     }
 
@@ -25,6 +23,35 @@ class WormManager {
         if (this.isInitialized) return;
         
         console.log('🐛 Initializing Worm Manager');
+        
+        // Find containers freshly each time
+        this.containers = {
+            progression: document.getElementById('progression-worms'),
+            problemSolving: document.getElementById('problem-solving-worms'),
+            matrix: document.getElementById('matrix-worms')
+        };
+        
+        // Verify containers exist
+        console.log('🐛 Checking containers...');
+        let containersFound = 0;
+        Object.keys(this.containers).forEach(key => {
+            const container = this.containers[key];
+            if (container) {
+                console.log(`✅ Container "${key}" found:`, container);
+                containersFound++;
+            } else {
+                console.error(`❌ Container "${key}" NOT found!`);
+            }
+        });
+        
+        if (containersFound === 0) {
+            console.error('❌ NO worm containers found! Retrying in 2 seconds...');
+            setTimeout(() => {
+                this.isInitialized = false;
+                this.initialize();
+            }, 2000);
+            return;
+        }
         
         // Listen for problem completion events to spawn worms
         document.addEventListener('problemLineCompleted', () => {
@@ -50,23 +77,7 @@ class WormManager {
 
         if (!container) {
             console.error('❌ Container not found for section:', section);
-            console.log('Available containers:', Object.keys(this.containers));
-            // Fallback to try other containers
-            const fallbackContainer = document.getElementById('problem-solving-worms');
-            if (fallbackContainer) {
-                console.log('✅ Using fallback container');
-                const worm = this.createWormElement(section, fallbackContainer);
-                this.worms.push(worm);
-                
-                console.log(`🐛 Spawned worm #${this.worms.length} in ${section} section (fallback)`);
-                
-                // Start worm behavior after a short delay
-                setTimeout(() => this.startWormBehavior(worm), 500);
-                return;
-            } else {
-                console.error('❌ No fallback container found either!');
-                return;
-            }
+            return;
         }
 
         const worm = this.createWormElement(section, container);
@@ -122,10 +133,10 @@ class WormManager {
             segments.push(segment);
         }
         
-        // Random starting position within the container
+        // FIXED: Position worm on the BOTTOM of the container (ground level)
         const containerRect = container.getBoundingClientRect();
         const x = Math.random() * (containerRect.width - 120); // Account for worm length
-        const y = Math.random() * (containerRect.height - 40);
+        const y = containerRect.height - 30; // FORCE worms to stay at BOTTOM
         
         wormContainer.style.left = x + 'px';
         wormContainer.style.top = y + 'px';
@@ -150,25 +161,26 @@ class WormManager {
             currentX: x,
             currentY: y,
             direction: Math.random() * 360, // Random initial direction
-            speed: 0.5 + Math.random() * 1.5 // Dynamic speed as specified
+            speed: 0.5 + Math.random() * 1.5, // Dynamic speed as specified
+            groundLevel: containerRect.height - 30 // Store ground level
         };
     }
 
     startWormBehavior(worm) {
-        // Random movement with edge bouncing as specified
+        // FIXED: Slower, less frequent movement to reduce lag
         worm.moveInterval = setInterval(() => {
             this.moveWormWithBouncing(worm);
-        }, 100 + Math.random() * 200); // More frequent movement for better animation
+        }, 1000); // Much slower - move every 1 second
 
-        // Symbol stealing behavior - targeting behavior with visual indicators
+        // Symbol stealing behavior - less frequent
         worm.behaviorInterval = setInterval(() => {
             this.attemptSymbolTheft(worm);
-        }, 5000 + Math.random() * 5000); // 5-10 seconds as specified
+        }, 8000 + Math.random() * 5000); // 8-13 seconds
 
-        // Blinking animation with random timing as specified
+        // Blinking animation - less frequent
         worm.blinkInterval = setInterval(() => {
             this.blinkWormEyes(worm);
-        }, 1500 + Math.random() * 3000);
+        }, 3000 + Math.random() * 2000); // 3-5 seconds
 
         // Initial movement
         this.moveWormWithBouncing(worm);
@@ -182,64 +194,42 @@ class WormManager {
 
         const containerRect = container.getBoundingClientRect();
         const maxX = containerRect.width - 120; // Account for full worm length
-        const maxY = containerRect.height - 40;
+        const groundLevel = containerRect.height - 30; // KEEP ON GROUND
         
-        // FIXED: More natural worm movement - slower, ground-based
-        const moveDistance = worm.speed * 3; // Much slower movement
+        // FIXED: Horizontal movement ONLY - no vertical floating
+        const moveDistance = worm.speed * 2; // Slower movement
         
-        const deltaX = Math.cos(worm.direction * Math.PI / 180) * moveDistance;
-        const deltaY = Math.sin(worm.direction * Math.PI / 180) * moveDistance;
+        let newX = worm.currentX + (Math.random() > 0.5 ? moveDistance : -moveDistance);
+        let newY = groundLevel; // ALWAYS stay on ground
         
-        let newX = worm.currentX + deltaX;
-        let newY = worm.currentY + deltaY;
-        
-        // FIXED: Keep worms closer to ground (bottom 30% of container)
-        const groundLevel = maxY * 0.7; // Stay in bottom 30%
-        if (newY < groundLevel) {
-            newY = groundLevel + Math.random() * (maxY - groundLevel);
-            worm.direction = Math.abs(worm.direction); // Point downward
+        // Edge bouncing behavior - HORIZONTAL ONLY
+        if (newX <= 0) {
+            newX = 5; // Bounce off left edge
         }
-        
-        // Edge bouncing behavior
-        if (newX <= 0 || newX >= maxX) {
-            worm.direction = 180 - worm.direction; // Bounce horizontally
-            newX = Math.max(0, Math.min(maxX, newX));
-        }
-        if (newY <= groundLevel || newY >= maxY) {
-            worm.direction = -worm.direction; // Bounce vertically
-            newY = Math.max(groundLevel, Math.min(maxY, newY));
-        }
-        
-        // FIXED: Less erratic direction changes
-        if (Math.random() < 0.03) { // Only 3% chance to change direction
-            worm.direction += (Math.random() - 0.5) * 30; // Smaller turns
+        if (newX >= maxX) {
+            newX = maxX - 5; // Bounce off right edge
         }
         
         // Update position
         worm.currentX = newX;
         worm.currentY = newY;
         
-        // FIXED: Remove floating transition, use instant updates
+        // INSTANT position updates - no transitions
         element.style.transition = 'none';
         element.style.left = newX + 'px';
         element.style.top = newY + 'px';
         
-        // Animate segments following the head with realistic trailing
+        // Simple segment following without floating effects
         this.animateSegmentFollowing(worm);
     }
 
     animateSegmentFollowing(worm) {
-        // FIXED: Natural trailing worm segment movement
+        // SIMPLIFIED: No floating effects, just basic trailing
         worm.segments.forEach((segment, index) => {
             if (index > 0) {
-                const lag = index * 1.5; // Tighter following
-                // Remove floating sine wave - just simple trailing
-                setTimeout(() => {
-                    segment.style.transform = `translate(${-lag}px, 0px) rotate(${worm.direction + index * 2}deg)`;
-                    // Subtle size reduction along body
-                    const sizeVariation = 1 - (index * 0.015);
-                    segment.style.transform += ` scale(${sizeVariation})`;
-                }, index * 15); // Faster response
+                const lag = index * 2; // Simple trailing distance
+                segment.style.transform = `translate(${-lag}px, 0px)`;
+                // NO size changes, NO rotation, NO sine waves
             }
         });
     }
@@ -475,7 +465,7 @@ class WormManager {
 
     createExplosionEffect(worm) {
         // Explosion animation when clicked as specified
-        worm.element.style.animation = 'wormDeath 0.8s ease-out forwards';
+        worm.element.style.animation = 'wormDeath 0.5s ease-out forwards';
         
         // Create particle effect
         for (let i = 0; i < 8; i++) {

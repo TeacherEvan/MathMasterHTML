@@ -1,0 +1,17 @@
+/* …existing imports… */
+
+/* root wrapper for any lock component */
+.lock-root {
+	/* …existing code… */
+	transform-origin: top left;
+	transform: scale(0.2857); /* 1 / 3.5 */
+}
+
+/* optional utility if you want it auto-centred inside #lock-display */
+#lock-display {
+	/* …existing code… */
+	display: flex !important;
+	justify-content: center;
+	align-items: center;
+	overflow: visible !important;
+}

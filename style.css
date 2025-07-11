@@ -1,0 +1,32 @@
+/* Update the hidden symbol background to match the green theme */
+.hidden-symbol {
+  color: transparent;
+  background: rgba(0, 50, 0, 0.3);   /* was rgba(255,255,255,0.1) */
+  border-radius: 2px;
+  text-shadow: none;
+}
+
+/* Ensure lock-display matches the green theme */
+#lock-display {
+  flex: 1;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+  overflow: visible !important;
+  position: relative;
+  min-height: 300px;
+  border: 2px solid rgba(0,255,0,0.3);
+  border-radius: 8px;
+  background: radial-gradient(ellipse at center,
+                             rgba(0, 50, 0, 0.3),
+                             rgba(0, 30, 0, 0.8)); /* Match green gradient */
+}
+
+/* Readable waiting message */
+.lock-waiting {
+  color: rgba(0, 255, 0, 0.8);
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+  font-size: 1.2em;
+  padding: 15px;
+}

@@ -61,8 +61,7 @@
             0%, 100% { box-shadow: 0 0 10px rgba(0,255,0,0.5); }
             50% { box-shadow: 0 0 20px rgba(0,255,0,0.8); }
         }
-        
-        /* Ensure the body has the correct styles */
+          /* Ensure the body has the correct styles */
         body {
             margin: 0;
             padding: 0;
@@ -70,9 +69,9 @@
             font-family: 'Orbitron', monospace;
             background: #000;
         }
-        
-        /* Worm container for spawning worms */
-        .worm-container {
+
+        /* Worm spawn areas for individual sections */
+        .worm-spawn-area {
             position: absolute;
             top: 0;
             left: 0;
@@ -80,10 +79,6 @@
             height: 100%;
             pointer-events: none;
             z-index: 10;
-        }
-        
-        .worm-container .worm {
-            pointer-events: all;
         }
     </style>
 </head>
@@ -100,7 +95,7 @@
             <div id="problem-container"></div>
             <div id="lock-display"></div>
             <!-- Worm container for this section -->
-            <div class="worm-container" id="progression-worms"></div>
+            <div class="worm-spawn-area" id="progression-worms"></div>
         </div>
         
         <!-- Wall 1 -->
@@ -113,7 +108,7 @@
             </div>
             <div id="solution-container"></div>
             <!-- Worm container for this section -->
-            <div class="worm-container" id="problem-solving-worms"></div>
+            <div class="worm-spawn-area" id="problem-solving-worms"></div>
         </div>
         
         <!-- Wall 2 -->
@@ -124,7 +119,7 @@
             <div id="symbol-rain-container"></div>
             <div class="matrix-refresh" id="matrix-refresh-indicator">Refresh in: <span id="refresh-countdown">10</span>s</div>
             <!-- Worm container for this section -->
-            <div class="worm-container" id="matrix-worms"></div>
+            <div class="worm-spawn-area" id="matrix-worms"></div>
         </div>
     </div>
     
