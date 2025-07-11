@@ -1,0 +1,264 @@
+<div class="lock-container">
+    <div class="lock-body">
+        <!-- Mechanical Extensions -->
+        <div class="extension-rails left"></div>
+        <div class="extension-rails right"></div>
+        
+        <!-- Enhanced Mechanical Pistons -->
+        <div class="piston top"></div>
+        <div class="piston top-right"></div>
+        <div class="piston top-left"></div>
+        <div class="piston bottom"></div>
+        <div class="piston bottom-right"></div>
+        <div class="piston bottom-left"></div>
+        
+        <!-- Circuit Lines -->
+        <div class="circuit-line top"></div>
+        <div class="circuit-line right"></div>
+        <div class="circuit-line bottom"></div>
+        <div class="circuit-line left"></div>
+        
+        <!-- Core Components -->
+        <div class="core-component"></div>
+        
+        <!-- Energy Dots -->
+        <div class="energy-dot top-left"></div>
+        <div class="energy-dot top-right"></div>
+        <div class="energy-dot bottom-left"></div>
+        <div class="energy-dot bottom-right"></div>
+        <div class="energy-dot center"></div>
+    </div>
+</div>
+
+<style>
+    .lock-container {
+        position: relative;
+        width: 200px;
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .lock-body {
+        width: 120px;
+        height: 150px;
+        background: linear-gradient(145deg, #2a2a2a, #404040);
+        border-radius: 15px;
+        position: relative;
+        border: 3px solid #555;
+        box-shadow: 
+            0 0 20px rgba(0, 255, 0, 0.3),
+            inset 0 0 10px rgba(0, 0, 0, 0.5),
+            0 0 0 0 rgba(0, 255, 0, 0);
+        transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        transform-origin: top center;
+        overflow: visible;
+        animation: level1-activation 5s ease-in-out infinite alternate;
+    }
+
+    /* Mechanical Extensions */
+    .extension-rails {
+        position: absolute;
+        width: 8px;
+        height: 100%;
+        background: linear-gradient(180deg, #666, #333);
+        border-radius: 4px;
+        top: 0;
+        transition: all 0.8s ease;
+    }
+
+    .extension-rails.left {
+        left: -15px;
+        transform: translateY(0);
+    }
+
+    .extension-rails.right {
+        right: -15px;
+        transform: translateY(0);
+    }
+
+    /* Enhanced Mechanical Pistons */
+    .piston {
+        position: absolute;
+        width: 8px;
+        height: 25px;
+        background: linear-gradient(180deg, #888, #444, #222);
+        border-radius: 4px;
+        border: 1px solid #333;
+        transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.1);
+    }
+
+    .piston.top {
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%) scaleY(1);
+    }
+
+    .piston.top-right {
+        top: -25px;
+        right: 20px;
+        transform: rotate(30deg) scaleY(1);
+    }
+
+    .piston.top-left {
+        top: -25px;
+        left: 20px;
+        transform: rotate(-30deg) scaleY(1);
+    }
+
+    .piston.bottom {
+        bottom: -30px;
+        left: 50%;
+        transform: translateX(-50%) scaleY(1);
+    }
+
+    .piston.bottom-right {
+        bottom: -25px;
+        right: 20px;
+        transform: rotate(-30deg) scaleY(1);
+    }
+
+    .piston.bottom-left {
+        bottom: -25px;
+        left: 20px;
+        transform: rotate(30deg) scaleY(1);
+    }
+
+    /* Circuit Lines */
+    .circuit-line {
+        position: absolute;
+        background: linear-gradient(90deg, #007700, #00ff00, #007700);
+        opacity: 0.5;
+        transition: all 1s ease;
+    }
+
+    .circuit-line.top {
+        top: 10px;
+        left: 20px;
+        width: calc(100% - 40px);
+        height: 2px;
+    }
+
+    .circuit-line.right {
+        top: 20px;
+        right: 10px;
+        width: 2px;
+        height: calc(100% - 40px);
+    }
+
+    .circuit-line.bottom {
+        bottom: 10px;
+        left: 20px;
+        width: calc(100% - 40px);
+        height: 2px;
+    }
+
+    .circuit-line.left {
+        top: 20px;
+        left: 10px;
+        width: 2px;
+        height: calc(100% - 40px);
+    }
+
+    /* Core Component */
+    .core-component {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        background: radial-gradient(circle, #008800, #005500);
+        border-radius: 50%;
+        border: 2px solid #00aa00;
+        box-shadow: 
+            0 0 15px rgba(0, 255, 0, 0.5),
+            inset 0 0 10px rgba(255, 255, 255, 0.3);
+        transition: all 1s ease;
+        animation: core-pulse 2s ease-in-out infinite;
+    }
+
+    /* Energy Dots */
+    .energy-dot {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: #00ff00;
+        border-radius: 50%;
+        box-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
+        transition: all 0.8s ease;
+        opacity: 0.7;
+        animation: dot-pulse 3s ease-in-out infinite;
+    }
+
+    .energy-dot.top-left {
+        top: 20px;
+        left: 20px;
+        animation-delay: 0.5s;
+    }
+
+    .energy-dot.top-right {
+        top: 20px;
+        right: 20px;
+        animation-delay: 1s;
+    }
+
+    .energy-dot.bottom-left {
+        bottom: 20px;
+        left: 20px;
+        animation-delay: 1.5s;
+    }
+
+    .energy-dot.bottom-right {
+        bottom: 20px;
+        right: 20px;
+        animation-delay: 2s;
+    }
+
+    .energy-dot.center {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 10px;
+        height: 10px;
+        opacity: 0.9;
+        animation-delay: 0s;
+    }
+
+    /* Animations */
+    @keyframes core-pulse {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+        50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    }
+
+    @keyframes dot-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.7; }
+        50% { transform: scale(1.5); opacity: 1; }
+    }
+
+    @keyframes level1-activation {
+        0%, 20% { 
+            height: 150px;
+            transform: scaleY(1);
+            background: linear-gradient(145deg, #2a2a2a, #404040);
+            border-color: #555;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.3),
+                inset 0 0 10px rgba(0, 0, 0, 0.5),
+                0 0 0 0 rgba(0, 255, 0, 0);
+        }
+        80%, 100% { 
+            height: 250px;
+            transform: scaleY(1.5);
+            background: linear-gradient(145deg, #1a4a1a, #2a6a2a, #1a4a1a);
+            border-color: #0f0;
+            box-shadow: 
+                0 0 40px rgba(0, 255, 0, 0.8),
+                inset 0 0 20px rgba(0, 0, 0, 0.7),
+                0 0 0 8px rgba(0, 255, 0, 0.2),
+                0 0 0 16px rgba(0, 255, 0, 0.1);
+        }
+    }
+</style>

@@ -30,6 +30,8 @@ body, html {
 
 #progression-display {
     background-color: #010;
+    display: flex;
+    flex-direction: column;
 }
 
 #problem-solving-display {
@@ -41,12 +43,18 @@ body, html {
 #matrix-display {
     background-color: #010;
     padding: 0;
+    position: relative;
+    overflow: hidden;
 }
 
 #matrix-canvas {
     display: block;
     width: 100%;
     height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: crosshair;
 }
 
 #help-button {
@@ -58,15 +66,50 @@ body, html {
     font-size: 16px;
     margin-bottom: 20px;
     align-self: center;
+    border-radius: 25px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
-#problem-container, #solution-container, #lock-display {
+#help-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,255,0,0.4);
+}
+
+#help-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+#problem-container, #solution-container {
     border: 1px solid #0f0;
     padding: 15px;
     margin-top: 10px;
     min-height: 100px;
     font-size: 24px;
     text-align: center;
+    background: linear-gradient(135deg, rgba(0,255,0,0.1), rgba(0,255,0,0.05));
+    border-radius: 8px;
+    box-shadow: inset 0 0 10px rgba(0,255,0,0.3);
+}
+
+#lock-display {
+    margin-top: auto;
+    margin-bottom: auto;
+    align-self: center;
+    display: flex;
+    justify-content: center;
+    flex-grow: 1;
+    align-items: center;
+}
+
+/* Hide any text in lock components */
+#lock-display p, #lock-display h1, #lock-display h2, #lock-display h3, 
+#lock-display h4, #lock-display h5, #lock-display h6, #lock-display span {
+    display: none;
 }
 
 .hidden-char {
@@ -101,11 +144,118 @@ body, html {
     0%, 100% { background-color: transparent; }
     50% { background-color: rgba(255, 0, 0, 0.3); }
 }
-    50% { background-color: rgba(255, 0, 0, 0.3); }
-}
 
 body.incorrect-flash {
     animation: flash-red 0.3s;
+}
+
+/* Enhanced matrix rain styles */
+.matrix-symbol {
+    user-select: none;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+}
+
+/* Worm styles */
+.worm {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #ff0;
+    border-radius: 50%;
+    z-index: 10;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #000;
+    border: 2px solid #ffa500;
+    animation: wormPulse 1s infinite ease-in-out;
+}
+
+@keyframes wormPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.worm:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 10px #ff0;
+}
+
+.worm.carrying-symbol {
+    background-color: #ffa500;
+    border-color: #ff0;
+}
+
+/* Stolen symbol animation */
+@keyframes symbolSteal {
+    0% { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+    50% { 
+        transform: translateY(-20px) scale(1.2); 
+        opacity: 0.7; 
+    }
+    100% { 
+        transform: translateY(-100px) scale(0.5); 
+        opacity: 0; 
+    }
+}
+
+.stolen-symbol {
+    animation: symbolSteal 2s ease-in-out forwards;
+    position: absolute;
+    z-index: 20;
+    color: #ff0;
+    font-weight: bold;
+    pointer-events: none;
+}
+
+/* Matrix display enhancements */
+#matrix-display {
+    border: 2px solid rgba(0,255,0,0.3);
+    border-radius: 10px;
+    box-shadow: inset 0 0 20px rgba(0,255,0,0.1);
+}
+
+/* Progression display enhancements */
+#progression-display {
+    border: 2px solid rgba(0,255,0,0.3);
+    border-radius: 10px;
+    box-shadow: inset 0 0 20px rgba(0,255,0,0.1);
+}
+
+/* Problem solving display enhancements */
+#problem-solving-display {
+    border: 2px solid rgba(0,255,0,0.3);
+    border-radius: 10px;
+    box-shadow: inset 0 0 20px rgba(0,255,0,0.1);
+}
+
+/* Symbol click feedback */
+.symbol-clicked {
+    animation: symbolClick 0.3s ease-out;
+}
+
+@keyframes symbolClick {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.7; }
+    100% { transform: scale(0.8); opacity: 0; }
+}
+
+/* Matrix refresh indicator */
+.matrix-refresh {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: rgba(0,255,0,0.7);
+    font-size: 12px;
+    z-index: 5;
 }
 
 /* Level-specific styles */
@@ -136,6 +286,20 @@ body.level-warrior .revealed-char {
     color: #ffd700;
 }
 
+body.level-warrior #problem-container,
+body.level-warrior #solution-container {
+    border-color: #ffd700;
+    background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,215,0,0.05));
+    box-shadow: inset 0 0 10px rgba(255,215,0,0.3);
+}
+
+body.level-warrior #progression-display,
+body.level-warrior #problem-solving-display,
+body.level-warrior #matrix-display {
+    border-color: rgba(255,215,0,0.3);
+    box-shadow: inset 0 0 20px rgba(255,215,0,0.1);
+}
+
 /* Master - Red theme */
 body.level-master .wall {
     background-color: #ff4444;
@@ -149,8 +313,17 @@ body.level-master #help-button {
 body.level-master .revealed-char {
     color: #ff4444;
 }
-    50% { background-color: rgba(255,0,0,0.2); }
+
+body.level-master #problem-container,
+body.level-master #solution-container {
+    border-color: #ff4444;
+    background: linear-gradient(135deg, rgba(255,68,68,0.1), rgba(255,68,68,0.05));
+    box-shadow: inset 0 0 10px rgba(255,68,68,0.3);
 }
-body.incorrect-flash {
-    animation: flash-red 0.3s ease-in;
+
+body.level-master #progression-display,
+body.level-master #problem-solving-display,
+body.level-master #matrix-display {
+    border-color: rgba(255,68,68,0.3);
+    box-shadow: inset 0 0 20px rgba(255,68,68,0.1);
 }

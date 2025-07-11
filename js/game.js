@@ -14,15 +14,103 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log(`Loading level: ${level}, Lock component: ${lockComponent}`);
 
-    // --- Sample Data ---
-    const currentProblem = {
-        problem: "4x = 24",
-        solution: "x = 6"
-    };
+    // Problems array to store loaded problems
+    let problems = [];
+    let currentProblemIndex = 0;
+    let currentProblem = null;
     let revealedIndex = 0;
-    // -------------------
+
+    // Load problems based on level
+    function loadProblems() {
+        let problemPath = '';
+        
+        // Determine which asset file to load based on level
+        switch(level) {
+            case 'beginner':
+                problemPath = 'Assets/Beginner_Lvl/beginner_problems.md';
+                break;
+            case 'warrior':
+                problemPath = 'Assets/Warrior_Lvl/warrior_problems.md';
+                break;
+            case 'master':
+                problemPath = 'Assets/Master _Lvl/master_problems.md';
+                break;
+            default:
+                problemPath = 'Assets/Beginner_Lvl/beginner_problems.md';
+        }
+        
+        // Fetch the problem set
+        fetch(problemPath)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to load problems: ${response.statusText}`);
+                }
+                return response.text();
+            })
+            .then(data => {
+                // Parse problems from markdown
+                problems = parseProblemsFromMarkdown(data);
+                console.log(`Loaded ${problems.length} problems for ${level} level`);
+                
+                // Start with the first problem
+                if (problems.length > 0) {
+                    currentProblem = problems[currentProblemIndex];
+                    setupProblem();
+                } else {
+                    console.error('No problems found in the loaded file');
+                    // Use fallback problem
+                    currentProblem = {
+                        problem: "4x = 24",
+                        solution: "x = 6"
+                    };
+                    setupProblem();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading problems:', error);
+                // Fallback to a default problem
+                currentProblem = {
+                    problem: "4x = 24",
+                    solution: "x = 6"
+                };
+                setupProblem();
+            });
+    }
+
+    // Parse problems from markdown content
+    function parseProblemsFromMarkdown(markdownContent) {
+        const parsedProblems = [];
+        
+        // Split by problem (starting with a number followed by dot)
+        const problemRegex = /\d+\.\s+`([^`]+)`\s+(?:-[^]+?(?=\d+\.\s+`|\n\n|$))/g;
+        let match;
+        
+        while ((match = problemRegex.exec(markdownContent)) !== null) {
+            try {
+                const problemText = match[1];
+                
+                // Extract solution from the steps (last line of the steps)
+                const steps = match[0].split('\n').filter(line => line.trim().startsWith('-'));
+                const lastStep = steps[steps.length - 1].trim().replace('- ', '');
+                
+                parsedProblems.push({
+                    problem: problemText,
+                    solution: lastStep
+                });
+            } catch (e) {
+                console.error('Error parsing problem:', e);
+            }
+        }
+        
+        return parsedProblems;
+    }
 
     function setupProblem() {
+        if (!currentProblem) return;
+        
+        // Reset revealed characters
+        revealedIndex = 0;
+        
         // Display the problem
         problemContainer.textContent = currentProblem.problem;
 
@@ -41,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadLockComponent() {
         // Fetch and display the lock component based on URL parameter
-        fetch(`lock-components/${lockComponent}`)
+        fetch(`lock-components/simplified-lock.html`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`Failed to load lock component: ${response.statusText}`);
@@ -50,16 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(data => {
                 lockDisplay.innerHTML = data;
+                console.log('Simplified lock component loaded successfully');
             })
             .catch(error => {
                 console.error('Error loading lock component:', error);
-                lockDisplay.textContent = 'Error loading lock. Using default instead.';
-                // Fallback to default lock
-                fetch('lock-components/level-1-transformer.html')
-                    .then(response => response.text())
-                    .then(data => {
-                        lockDisplay.innerHTML = data;
-                    });
+                lockDisplay.textContent = 'Error loading lock.';
             });
     }
 
@@ -78,12 +161,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Move to next problem
+    function nextProblem() {
+        currentProblemIndex++;
+        if (currentProblemIndex >= problems.length) {
+            // Loop back to first problem for now
+            currentProblemIndex = 0;
+        }
+        currentProblem = problems[currentProblemIndex];
+        setupProblem();
+    }
+
     // Event Listeners
     helpButton.addEventListener('click', revealNextCharacter);
 
     // Initial setup
-    setupProblem();
+    loadProblems(); // Load problems first
     loadLockComponent();
+    
     // Reference to matrix canvas to listen for symbol clicks
     const matrixCanvas = document.getElementById('matrix-canvas');
 
@@ -117,8 +212,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const spans = solutionContainer.getElementsByTagName('span');
         const complete = Array.from(spans).every(span => !span.classList.contains('hidden-char'));
         if (complete) {
-            console.log('🎉 Level Complete!');
-            // TODO: trigger level completion UI
+            console.log('🎉 Problem Complete!');
+            // Show completion message
+            setTimeout(() => {
+                alert(`Problem ${currentProblemIndex + 1} completed! Moving to next problem.`);
+                nextProblem();
+            }, 1000);
         }
     }
 
