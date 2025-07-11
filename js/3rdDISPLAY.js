@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let columns = 0;
     let activeSymbols = [];
-    let refreshTimer = 10;
+    let refreshTimer = 60; // Changed from 10 to 60 seconds (1 minute)
     let animationRunning = false;
     
     // Calculate number of columns based on container width
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         activeSymbols = [];
-        refreshTimer = 10;
+        refreshTimer = 60; // Changed from 10 to 60 seconds
         calculateColumns();
     }
     

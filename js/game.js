@@ -255,23 +255,30 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 
-    /** Check if clicked symbol exists in current line */
+    /** Check if clicked symbol exists in current line - FIXED X/x DETECTION */
     function isSymbolInCurrentLine(clickedSymbol) {
         const expectedSymbols = getNextSymbol();
         console.log(`🔍 Checking symbol "${clickedSymbol}" against expected symbols:`, expectedSymbols);
         
         if (expectedSymbols && Array.isArray(expectedSymbols)) {
-            const result = expectedSymbols.includes(clickedSymbol);
-            console.log(`🎯 Symbol "${clickedSymbol}" match result: ${result}`);
+            // FIXED: Normalize X/x comparison - treat them as the same
+            const normalizedClicked = clickedSymbol.toLowerCase() === 'x' ? 'X' : clickedSymbol;
+            const normalizedExpected = expectedSymbols.map(s => s.toLowerCase() === 'x' ? 'X' : s);
+            
+            const result = normalizedExpected.includes(normalizedClicked);
+            console.log(`🎯 Symbol "${clickedSymbol}" normalized to "${normalizedClicked}" - match result: ${result}`);
             return result;
         }
         console.log(`❌ No expected symbols available`);
         return false;
     }
 
-    /** Reveal specific symbol in current line */
+    /** Reveal specific symbol in current line - FIXED X/x DETECTION */
     function revealSpecificSymbol(targetSymbol) {
         console.log(`🔍 Attempting to reveal symbol: "${targetSymbol}" in step ${currentStepIndex}`);
+        
+        // FIXED: Normalize X/x for matching
+        const normalizedTarget = targetSymbol.toLowerCase() === 'x' ? 'X' : targetSymbol;
         
         // Find the specific symbol in current step
         const currentStepSymbols = solutionContainer.querySelectorAll(
@@ -282,9 +289,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         for (let span of currentStepSymbols) {
             const spanSymbol = span.textContent;
-            console.log(`🔎 Comparing "${targetSymbol}" with hidden symbol "${spanSymbol}"`);
+            const normalizedSpan = spanSymbol.toLowerCase() === 'x' ? 'X' : spanSymbol;
             
-            if (spanSymbol === targetSymbol) {
+            console.log(`🔎 Comparing "${normalizedTarget}" with hidden symbol "${normalizedSpan}"`);
+            
+            if (normalizedSpan === normalizedTarget) {
                 span.classList.remove('hidden-symbol');
                 span.classList.add('revealed-symbol');
                 console.log(`✅ Successfully revealed symbol: "${targetSymbol}" in step ${currentStepIndex + 1}`);
@@ -330,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`🎉 Line ${currentStepIndex + 1} completed!`);
             
             // Trigger worm spawning for completed line
-            console.log('🐛 COMPLETE LINE FINISHED - Triggering worm spawn');
+            console.log('🐛 DISPATCHING problemLineCompleted EVENT - This should spawn a worm!');
             document.dispatchEvent(new CustomEvent('problemLineCompleted'));
             
             // Trigger lock animation for completed step
@@ -444,59 +453,78 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function triggerLockAnimation(stepIndex) {
-        console.log(`🔒 Triggering lock animation for step ${stepIndex + 1} (Total completed lines: ${completedLinesCount})`);
-        
-        // Find lock elements that can be animated
-        const lockBody = lockDisplay.querySelector('.lock-body');
-        const lockSegments = lockDisplay.querySelectorAll('.lock-segment, .vertical-lock-segment, .horizontal-lock-segment');
-        const progressBars = lockDisplay.querySelectorAll('.progress-bar, .fill-bar');
+        console.log(`🔒 Triggering lock animation for step ${stepIndex + 1}`);
         
         // INCREMENT completed lines count for EVERY step completion!
         completedLinesCount++;
+        console.log(`🔒 Completed lines count: ${completedLinesCount}`);
         
-        // Determine lock stage based on total completed lines across ALL problems
-        let lockStage = Math.min(6, Math.floor(completedLinesCount / 2) + 1); // Every 2 lines = new stage
-        
-        console.log(`🔒 Lock Stage: ${lockStage} (based on ${completedLinesCount} completed lines)`);
-        
-        if (lockBody) {
-            // Clear any existing classes to reset state
-            lockBody.classList.remove('level-1-active', 'level-3-active', 'level-5-active', 'warrior-active', 'beginner-active', 'master-active');
-            
-            // Apply progressive lock animation based on TOTAL progress, not just current problem
-            if (lockStage >= 1) {
-                triggerBeginnerLockAnimation(lockBody, lockStage);
-            }
-            if (lockStage >= 3) {
-                triggerWarriorLockAnimation(lockBody, lockStage);
-            }
-            if (lockStage >= 5) {
-                triggerMasterLockAnimation(lockBody, lockStage);
-            }
+        // FIXED: Trigger lock progression immediately after first line
+        if (completedLinesCount === 2 && currentLockLevel < 2) {
+            console.log('🔒 SWITCHING TO LEVEL 2 LOCK');
+            currentLockLevel = 2;
+            loadNewLockComponent('line-2-transformer.html');
+            return; // Exit to let new lock load
         }
         
-        // Animate lock segments if available
-        if (lockSegments.length > 0) {
-            animateLockSegments(lockSegments, lockStage);
-        }
+        // Find lock elements in CURRENT lock display
+        setTimeout(() => {
+            const lockBody = lockDisplay.querySelector('.lock-body');
+            if (lockBody) {
+                // Apply animation based on completed lines
+                const activeClass = `level-${completedLinesCount}-active`;
+                console.log(`🔒 Applying class: ${activeClass}`);
+                
+                // Clear existing classes
+                lockBody.className = lockBody.className.replace(/level-\d+-active/g, '');
+                
+                // Add new class
+                lockBody.classList.add(activeClass);
+                
+                // Force immediate visual update
+                lockBody.style.transform = `scale(${1 + completedLinesCount * 0.1})`;
+                lockBody.style.boxShadow = `0 0 ${20 + completedLinesCount * 10}px rgba(0, 255, 0, ${0.5 + completedLinesCount * 0.1})`;
+            }
+        }, 100);
         
-        // Update progress bars if available
-        if (progressBars.length > 0) {
-            updateProgressBars(progressBars, lockStage);
-        }
-        
-        // Update current lock level for tracking
-        currentLockLevel = lockStage;
-        
-        // Dispatch custom event for lock-specific scripts
+        // Dispatch event for lock scripts
         document.dispatchEvent(new CustomEvent('lockStepCompleted', {
             detail: { 
                 stepIndex, 
-                lockStage: lockStage,
-                totalCompletedLines: completedLinesCount,
-                totalSteps: currentProblem.steps ? currentProblem.steps.length : 1 
+                lockStage: completedLinesCount,
+                totalCompletedLines: completedLinesCount
             }
         }));
+    }
+    
+    // NEW FUNCTION: Dynamically load new lock component
+    function loadNewLockComponent(newLockFile) {
+        console.log(`🔄 Loading new lock component: ${newLockFile}`);
+        
+        const lockPath = `lock-components/${newLockFile}`;
+        
+        fetch(lockPath)
+            .then(response => {
+                if (!response.ok) {
+                    console.warn(`⚠️ Failed to load ${lockPath}, keeping current lock`);
+                    return null;
+                }
+                return response.text();
+            })
+            .then(data => {
+                if (data) {
+                    lockDisplay.innerHTML = data;
+                    console.log(`✅ Successfully loaded new lock component: ${newLockFile}`);
+                    
+                    // Wait a moment for scripts to initialize, then set up lock triggers
+                    setTimeout(() => {
+                        setupLockTriggers();
+                    }, 500);
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error loading new lock component:', error);
+            });
     }
     
     function triggerBeginnerLockAnimation(lockBody, stepIndex) {
@@ -689,9 +717,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         .revealed-symbol {
-            color: #00ff00;
-            text-shadow: 0 0 8px rgba(0,255,0,0.6);
-            background: rgba(0,255,0,0.1);
+            color: #ff0000; /* Changed from green to red */
+            text-shadow: 0 0 8px rgba(255,0,0,0.6); /* Changed from green to red */
+            background: rgba(255,0,0,0.1); /* Changed from green to red */
             border-radius: 2px;
         }
         
