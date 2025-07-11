@@ -35,17 +35,24 @@
             border: 3px solid #555;
             box-shadow: 
                 0 0 20px rgba(0, 255, 0, 0.3),
-                inset 0 0 10px rgba(0, 0, 0, 0.5);
-            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                inset 0 0 10px rgba(0, 0, 0, 0.5),
+                0 0 0 0 rgba(0, 255, 0, 0);
+            transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             transform-origin: top center;
+            overflow: visible;
         }
 
         .lock-body.level-1-active {
-            height: 220px;
-            transform: scaleY(1.3);
+            height: 250px;
+            transform: scaleY(1.5);
+            background: linear-gradient(145deg, #1a4a1a, #2a6a2a, #1a4a1a);
+            border-color: #0f0;
             box-shadow: 
-                0 0 30px rgba(0, 255, 0, 0.6),
-                inset 0 0 15px rgba(0, 0, 0, 0.5);
+                0 0 40px rgba(0, 255, 0, 0.8),
+                inset 0 0 20px rgba(0, 0, 0, 0.7),
+                0 0 0 8px rgba(0, 255, 0, 0.2),
+                0 0 0 16px rgba(0, 255, 0, 0.1);
+            animation: level1-pulse 2s ease-in-out infinite;
         }
 
         /* Mechanical Extensions */
@@ -75,40 +82,82 @@
             box-shadow: 0 0 10px rgba(0, 255, 0, 0.4);
         }
 
-        /* Mechanical Pistons */
+        /* Enhanced Mechanical Pistons */
         .piston {
             position: absolute;
-            width: 6px;
-            height: 20px;
-            background: linear-gradient(180deg, #888, #444);
-            border-radius: 3px;
-            transition: all 0.8s ease;
+            width: 8px;
+            height: 25px;
+            background: linear-gradient(180deg, #888, #444, #222);
+            border-radius: 4px;
+            border: 1px solid #333;
+            transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.1);
         }
 
         .piston.top {
-            top: -25px;
+            top: -30px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) scaleY(1);
         }
 
         .piston.bottom {
-            bottom: -25px;
+            bottom: -30px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) scaleY(1);
         }
 
         .lock-body.level-1-active .piston.top {
-            top: -45px;
-            height: 40px;
-            background: linear-gradient(180deg, #aaa, #666);
-            box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+            top: -60px;
+            height: 60px;
+            background: linear-gradient(180deg, #0f0, #090, #060, #030);
+            border-color: #0f0;
+            box-shadow: 
+                0 0 15px rgba(0, 255, 0, 0.8),
+                inset 0 2px 6px rgba(255, 255, 255, 0.3);
+            animation: piston-extend-top 2s ease-in-out infinite;
         }
 
         .lock-body.level-1-active .piston.bottom {
-            bottom: -45px;
-            height: 40px;
-            background: linear-gradient(180deg, #aaa, #666);
-            box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+            bottom: -60px;
+            height: 60px;
+            background: linear-gradient(180deg, #0f0, #090, #060, #030);
+            border-color: #0f0;
+            box-shadow: 
+                0 0 15px rgba(0, 255, 0, 0.8),
+                inset 0 2px 6px rgba(255, 255, 255, 0.3);
+            animation: piston-extend-bottom 2s ease-in-out infinite;
+        }
+
+        /* Energy Conduits */
+        .energy-conduit {
+            position: absolute;
+            width: 4px;
+            height: 80px;
+            background: linear-gradient(180deg, transparent, #333, transparent);
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 1.2s ease;
+            opacity: 0;
+        }
+
+        .energy-conduit.top {
+            top: -80px;
+        }
+
+        .energy-conduit.bottom {
+            bottom: -80px;
+        }
+
+        .lock-body.level-1-active .energy-conduit {
+            opacity: 1;
+            background: linear-gradient(180deg, 
+                rgba(0, 255, 0, 0), 
+                rgba(0, 255, 0, 0.8), 
+                rgba(0, 255, 0, 1), 
+                rgba(0, 255, 0, 0.8), 
+                rgba(0, 255, 0, 0));
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+            animation: energy-flow 1.5s ease-in-out infinite;
         }
 
         /* Central Keyhole */
@@ -235,6 +284,60 @@
             to { transform: rotate(0deg); }
         }
 
+        @keyframes level1-pulse {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 40px rgba(0, 255, 0, 0.8),
+                    inset 0 0 20px rgba(0, 0, 0, 0.7),
+                    0 0 0 8px rgba(0, 255, 0, 0.2),
+                    0 0 0 16px rgba(0, 255, 0, 0.1);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 60px rgba(0, 255, 0, 1),
+                    inset 0 0 25px rgba(0, 0, 0, 0.8),
+                    0 0 0 12px rgba(0, 255, 0, 0.3),
+                    0 0 0 24px rgba(0, 255, 0, 0.15);
+            }
+        }
+
+        @keyframes piston-extend-top {
+            0%, 100% { 
+                transform: translateX(-50%) scaleY(1);
+                box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+            }
+            50% { 
+                transform: translateX(-50%) scaleY(1.1);
+                box-shadow: 0 0 25px rgba(0, 255, 0, 1);
+            }
+        }
+
+        @keyframes piston-extend-bottom {
+            0%, 100% { 
+                transform: translateX(-50%) scaleY(1);
+                box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+            }
+            50% { 
+                transform: translateX(-50%) scaleY(1.1);
+                box-shadow: 0 0 25px rgba(0, 255, 0, 1);
+            }
+        }
+
+        @keyframes energy-flow {
+            0% { 
+                opacity: 0.5;
+                transform: translateX(-50%) scaleY(0.8);
+            }
+            50% { 
+                opacity: 1;
+                transform: translateX(-50%) scaleY(1.2);
+            }
+            100% { 
+                opacity: 0.5;
+                transform: translateX(-50%) scaleY(0.8);
+            }
+        }
+
         /* Control Panel */
         .control-panel {
             position: absolute;
@@ -267,13 +370,17 @@
         <div class="shackle"></div>
         
         <div class="lock-body" id="lockBody">
-            <div class="status-indicator">LEVEL 1: BASIC</div>
+            <div class="status-indicator">LEVEL 1: VERTICAL EXTENSION</div>
+            
+            <!-- Energy Conduits -->
+            <div class="energy-conduit top"></div>
+            <div class="energy-conduit bottom"></div>
             
             <!-- Mechanical Extensions -->
             <div class="extension-rails left"></div>
             <div class="extension-rails right"></div>
             
-            <!-- Pistons -->
+            <!-- Enhanced Pistons -->
             <div class="piston top"></div>
             <div class="piston bottom"></div>
             

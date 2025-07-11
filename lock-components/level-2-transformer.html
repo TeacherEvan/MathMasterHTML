@@ -27,67 +27,120 @@
         }
 
         .lock-body {
+            /* Starting from Level 1's final state - Vertical Extension */
             width: 120px;
-            height: 150px;
-            background: linear-gradient(145deg, #2a2a2a, #404040);
+            height: 250px; /* Already extended from Level 1 */
+            background: linear-gradient(145deg, #1a4a1a, #2a6a2a, #1a4a1a); /* Green from Level 1 */
             border-radius: 15px;
             position: relative;
-            border: 3px solid #555;
+            border: 3px solid #0f0; /* Green border from Level 1 */
             box-shadow: 
-                0 0 20px rgba(255, 165, 0, 0.3),
-                inset 0 0 10px rgba(0, 0, 0, 0.5);
+                0 0 30px rgba(0, 255, 0, 0.6), /* Green glow from Level 1 */
+                inset 0 0 15px rgba(0, 255, 0, 0.2),
+                0 0 0 5px rgba(0, 255, 0, 0.3);
             transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform: scaleY(1.5); /* Maintains Level 1 vertical extension */
             transform-origin: center center;
         }
 
         .lock-body.level-2-active {
-            width: 180px;
-            background: linear-gradient(145deg, #3a3a3a, #505050);
+            width: 200px; /* Horizontal expansion while maintaining vertical */
+            height: 250px; /* Keeps Level 1's vertical extension */
+            background: linear-gradient(145deg, #4a2a1a, #6a4a2a, #4a2a1a);
+            border-color: #ffa500;
+            transform: scaleY(1.5) scaleX(1.6); /* Maintains vertical + adds horizontal */
             box-shadow: 
-                0 0 40px rgba(255, 165, 0, 0.6),
-                inset 0 0 15px rgba(0, 0, 0, 0.5);
+                0 0 50px rgba(255, 165, 0, 0.9),
+                inset 0 0 20px rgba(0, 0, 0, 0.6),
+                0 0 0 10px rgba(255, 165, 0, 0.3),
+                0 0 0 20px rgba(255, 165, 0, 0.15);
+            animation: level2-expansion 2.5s ease-in-out infinite;
         }
 
-        /* Horizontal Extensions */
+        /* Enhanced Horizontal Extensions */
         .horizontal-arm {
             position: absolute;
             top: 50%;
-            width: 60px;
-            height: 20px;
-            background: linear-gradient(90deg, #666, #888, #666);
-            border: 2px solid #555;
-            border-radius: 10px;
+            width: 80px;
+            height: 25px;
+            background: linear-gradient(90deg, #666, #888, #aaa, #888, #666);
+            border: 3px solid #555;
+            border-radius: 12px;
             transform: translateY(-50%);
-            transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            overflow: hidden;
+            transition: all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            overflow: visible;
+            box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.1);
         }
 
         .horizontal-arm.left {
-            left: -65px;
-            transform: translateY(-50%) translateX(-100px);
+            left: -85px;
+            transform: translateY(-50%) translateX(-120px) rotate(-10deg);
             opacity: 0;
         }
 
         .horizontal-arm.right {
-            right: -65px;
-            transform: translateY(-50%) translateX(100px);
+            right: -85px;
+            transform: translateY(-50%) translateX(120px) rotate(10deg);
             opacity: 0;
         }
 
         .lock-body.level-2-active .horizontal-arm.left {
-            transform: translateY(-50%) translateX(0);
+            transform: translateY(-50%) translateX(0) rotate(0deg);
             opacity: 1;
-            background: linear-gradient(90deg, #888, #aaa, #888);
+            background: linear-gradient(90deg, #ffa500, #ffcc00, #fff, #ffcc00, #ffa500);
             border-color: #ffa500;
-            box-shadow: 0 0 15px rgba(255, 165, 0, 0.6);
+            box-shadow: 
+                0 0 20px rgba(255, 165, 0, 0.8),
+                inset 0 2px 8px rgba(255, 255, 255, 0.3);
+            animation: arm-energy-pulse 2s ease-in-out infinite;
         }
 
         .lock-body.level-2-active .horizontal-arm.right {
-            transform: translateY(-50%) translateX(0);
+            transform: translateY(-50%) translateX(0) rotate(0deg);
             opacity: 1;
-            background: linear-gradient(90deg, #888, #aaa, #888);
+            background: linear-gradient(90deg, #ffa500, #ffcc00, #fff, #ffcc00, #ffa500);
             border-color: #ffa500;
-            box-shadow: 0 0 15px rgba(255, 165, 0, 0.6);
+            box-shadow: 
+                0 0 20px rgba(255, 165, 0, 0.8),
+                inset 0 2px 8px rgba(255, 255, 255, 0.3);
+            animation: arm-energy-pulse 2s ease-in-out infinite reverse;
+        }
+
+        /* Energy Discharge Effects */
+        .energy-spark {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ffa500;
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .energy-spark.spark-1 {
+            top: 20%;
+            left: 20%;
+        }
+
+        .energy-spark.spark-2 {
+            top: 30%;
+            right: 25%;
+        }
+
+        .energy-spark.spark-3 {
+            bottom: 25%;
+            left: 30%;
+        }
+
+        .energy-spark.spark-4 {
+            bottom: 20%;
+            right: 20%;
+        }
+
+        .lock-body.level-2-active .energy-spark {
+            opacity: 1;
+            animation: spark-dance 1.8s ease-in-out infinite;
+            box-shadow: 0 0 8px rgba(255, 165, 0, 0.8);
         }
 
         /* Mechanical Joints */
@@ -332,6 +385,58 @@
             to { transform: rotate(0deg); }
         }
 
+        @keyframes level2-expansion {
+            0%, 100% { 
+                width: 200px;
+                box-shadow: 
+                    0 0 50px rgba(255, 165, 0, 0.9),
+                    inset 0 0 20px rgba(0, 0, 0, 0.6),
+                    0 0 0 10px rgba(255, 165, 0, 0.3),
+                    0 0 0 20px rgba(255, 165, 0, 0.15);
+            }
+            50% { 
+                width: 220px;
+                box-shadow: 
+                    0 0 70px rgba(255, 165, 0, 1),
+                    inset 0 0 25px rgba(0, 0, 0, 0.7),
+                    0 0 0 15px rgba(255, 165, 0, 0.4),
+                    0 0 0 30px rgba(255, 165, 0, 0.2);
+            }
+        }
+
+        @keyframes arm-energy-pulse {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 20px rgba(255, 165, 0, 0.8),
+                    inset 0 2px 8px rgba(255, 255, 255, 0.3);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 35px rgba(255, 165, 0, 1),
+                    inset 0 2px 12px rgba(255, 255, 255, 0.5);
+                transform: translateY(-50%) translateX(0) rotate(0deg) scale(1.05);
+            }
+        }
+
+        @keyframes spark-dance {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg);
+                opacity: 0.7;
+            }
+            25% { 
+                transform: scale(1.5) rotate(90deg);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(0.8) rotate(180deg);
+                opacity: 0.9;
+            }
+            75% { 
+                transform: scale(1.2) rotate(270deg);
+                opacity: 1;
+            }
+        }
+
         @keyframes piston-pulse {
             0%, 100% { 
                 transform: translateY(-50%) scaleY(1.2) rotate(0deg);
@@ -380,9 +485,15 @@
         <div class="shackle"></div>
         
         <div class="lock-body" id="lockBody">
-            <div class="status-indicator">LEVEL 2: HORIZONTAL</div>
+            <div class="status-indicator">LEVEL 2: HORIZONTAL EXPANSION</div>
             
-            <!-- Horizontal Arms -->
+            <!-- Energy Sparks -->
+            <div class="energy-spark spark-1"></div>
+            <div class="energy-spark spark-2"></div>
+            <div class="energy-spark spark-3"></div>
+            <div class="energy-spark spark-4"></div>
+            
+            <!-- Enhanced Horizontal Arms -->
             <div class="horizontal-arm left">
                 <div class="joint left"></div>
                 <div class="hydraulic-piston left"></div>
