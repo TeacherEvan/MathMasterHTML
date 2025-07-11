@@ -137,7 +137,6 @@ Main Scene Hierarchy:
 - 
 
 **Warrior Level (Multiplication):**
-<<<<<<< HEAD:Docs/Windows/MathMasterHTML.mdc
 - Example: `a + b - c + X = d` (e.g., "2 + 3 - 1 x X = 100")
 
 - 50 problems total with integer solutions
@@ -158,11 +157,7 @@ Main Scene Hierarchy:
 ### 3.2 Falling Symbols System
 **File: FallingSymbolsManager.cs**
 
-<<<<<<< HEAD:Docs/Windows/MathMasterHTML.mdc
 **Symbol Set**: "0123456789X+-=÷×()" **IMPORTANT**
-=======
-**Symbol Set**: "0123456789Xx +-=÷×*/()" **IMPORTANT**
->>>>>>> f63e832059b13fed52f8317d5ad39dae94f58daa:MathMasterHTML.mdc
 
 **Animation Specifications:**
 - Continuous generation at top of screen
