@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futuristic Lock Component - Test</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Orbitron', monospace;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Test Container */
+        .test-container {
+            background: linear-gradient(135deg, #111 0%, #222 50%, #111 100%);
+            border: 2px solid #00ff00;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 
+                0 0 20px rgba(0,255,0,0.3),
+                inset 0 0 20px rgba(0,255,0,0.1);
+        }
+        
+        /* Lock Container */
+        .lock-container {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        /* Lock Main Body */
+        .lock-body {
+            position: relative;
+            width: 200px;
+            height: 250px;
+            background: linear-gradient(135deg, #333 0%, #666 50%, #333 100%);
+            border: 3px solid #888;
+            border-radius: 20px;
+            box-shadow: 
+                0 10px 20px rgba(0,0,0,0.7),
+                inset 0 5px 10px rgba(255,255,255,0.1),
+                inset 0 -5px 10px rgba(0,0,0,0.5);
+            margin-top: 50px;
+        }
+        
+        /* Lock Shackle */
+        .lock-shackle {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 60px;
+            border: 8px solid #888;
+            border-bottom: none;
+            border-radius: 40px 40px 0 0;
+            background: transparent;
+            box-shadow: 
+                0 0 10px rgba(0,0,0,0.5),
+                inset 0 2px 5px rgba(255,255,255,0.2);
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .lock-shackle.unlocked {
+            transform: translateX(-50%) rotate(-15deg) translateY(-10px);
+            border-color: #00ff00;
+            box-shadow: 
+                0 0 20px rgba(0,255,0,0.5),
+                inset 0 2px 5px rgba(0,255,0,0.3);
+        }
+        
+        /* Lock Segments - These unlock progressively */
+        .lock-segments {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 80px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .lock-segment {
+            height: calc((100% - 32px) / 5); /* 5 segments for typical algebra steps */
+            background: linear-gradient(90deg, #444 0%, #666 50%, #444 100%);
+            border: 2px solid #ff4444;
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.6s ease;
+            overflow: hidden;
+        }
+        
+        .lock-segment.unlocked {
+            background: linear-gradient(90deg, #004400 0%, #008800 50%, #004400 100%);
+            border-color: #00ff00;
+            box-shadow: 
+                0 0 15px rgba(0,255,0,0.4),
+                inset 0 0 10px rgba(0,255,0,0.2);
+        }
+        
+        /* Segment Progress Bar */
+        .segment-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, transparent 0%, #00ff00 50%, transparent 100%);
+            transition: width 0.8s ease;
+        }
+        
+        .lock-segment.unlocked .segment-progress {
+            width: 100%;
+        }
+        
+        /* Central Keyhole */
+        .lock-keyhole {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: #000;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            border: 2px solid #666;
+            box-shadow: 
+                inset 0 0 10px rgba(0,0,0,0.8),
+                0 0 10px rgba(0,255,0,0.3);
+            transition: all 0.6s ease;
+        }
+        
+        .lock-keyhole.activated {
+            border-color: #00ff00;
+            box-shadow: 
+                inset 0 0 10px rgba(0,255,0,0.5),
+                0 0 20px rgba(0,255,0,0.6);
+            background: radial-gradient(circle, #004400 0%, #000 100%);
+        }
+        
+        /* Futuristic Circuit Lines */
+        .circuit-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+        
+        .circuit-line {
+            position: absolute;
+            background: #00ff00;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            box-shadow: 0 0 5px #00ff00;
+        }
+        
+        .circuit-line.active {
+            opacity: 0.7;
+        }
+        
+        /* Horizontal circuit lines */
+        .circuit-line.horizontal {
+            height: 2px;
+            width: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* Vertical circuit lines */
+        .circuit-line.vertical {
+            width: 2px;
+            height: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* Test Controls */
+        .test-controls {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #333 0%, #555 100%);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            background: linear-gradient(135deg, #555 0%, #777 100%);
+            box-shadow: 0 0 10px rgba(0,255,0,0.5);
+        }
+        
+        /* Status Display */
+        .status-display {
+            margin-top: 20px;
+            color: #00ff00;
+            text-align: center;
+            font-size: 1.2rem;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        
+        /* Advanced Particle System */
+        .particle-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        /* Level Unlock Particles */
+        .level-particle {
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #00ff00 0%, transparent 70%);
+            box-shadow: 0 0 6px #00ff00;
+        }
+        
+        /* Firework Particles */
+        .firework-particle {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+        }
+        
+        .firework-trail {
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to bottom, transparent, #fff);
+            border-radius: 1px;
+        }
+        
+        /* Gears and Mechanical Elements */
+        .mechanical-gear {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid #666;
+            background: radial-gradient(circle at 30% 30%, #999, #333);
+            box-shadow: 
+                inset 0 0 10px rgba(0,0,0,0.5),
+                0 0 10px rgba(0,0,0,0.3);
+        }
+        
+        .gear-small {
+            width: 40px;
+            height: 40px;
+            animation: rotate-clockwise 3s linear infinite;
+        }
+        
+        .gear-medium {
+            width: 60px;
+            height: 60px;
+            animation: rotate-counter-clockwise 4s linear infinite;
+        }
+        
+        .gear-large {
+            width: 80px;
+            height: 80px;
+            animation: rotate-clockwise 5s linear infinite;
+        }
+        
+        @keyframes rotate-clockwise {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes rotate-counter-clockwise {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+        
+        /* Gear Teeth */
+        .gear-tooth {
+            position: absolute;
+            width: 8px;
+            height: 4px;
+            background: #666;
+            border-radius: 2px;
+        }
+        
+        /* Enhanced Lock Body with Mechanical Details */
+        .lock-body::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #888 0%, #333 100%);
+            border-radius: 50%;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.8);
+        }
+        
+        .lock-body::after {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 15px;
+            height: 15px;
+            background: linear-gradient(135deg, #666 0%, #333 100%);
+            border-radius: 3px;
+            box-shadow: inset 0 0 3px rgba(0,0,0,0.8);
+        }
+        
+        /* Steam/Energy Effects */
+        .energy-burst {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, transparent 30%, rgba(0,255,0,0.3) 70%, transparent 100%);
+            animation: energy-pulse 1s ease-out;
+            pointer-events: none;
+        }
+        
+        @keyframes energy-pulse {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+        
+        /* Enhanced Segment Effects */
+        .lock-segment::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255,255,255,0.1) 50%, 
+                transparent 100%);
+            border-radius: 6px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .lock-segment.unlocked::before {
+            opacity: 1;
+        }
+        
+        /* Electrical Arcs */
+        .electrical-arc {
+            position: absolute;
+            width: 2px;
+            height: 30px;
+            background: linear-gradient(to bottom, 
+                #ffffff 0%, 
+                #00ffff 25%, 
+                #0080ff 50%, 
+                #ffffff 75%, 
+                transparent 100%);
+            border-radius: 1px;
+            box-shadow: 0 0 10px #00ffff;
+            animation: arc-flicker 0.1s infinite alternate;
+            opacity: 0;
+        }
+        
+        @keyframes arc-flicker {
+            0% { opacity: 0.8; transform: scaleY(0.9); }
+            100% { opacity: 1; transform: scaleY(1.1); }
+        }
+        
+        .electrical-arc.active {
+            opacity: 1;
+        }
+        
+        /* Circuit Line Positioning */
+        .circuit-line-1, .circuit-line-2, .circuit-line-3, .circuit-line-4, .circuit-line-5 {
+            top: 50%;
+        }
+        
+        /* Gear Positioning */
+        .gear-small.gear-top-right {
+            top: 15px;
+            right: 15px;
+        }
+        
+        .gear-medium.gear-bottom-left {
+            bottom: 15px;
+            left: 15px;
+        }
+        
+        /* Gear Tooth Positioning */
+        .gear-tooth.top { top: -2px; left: 50%; transform: translateX(-50%); }
+        .gear-tooth.right { right: -2px; top: 50%; transform: translateY(-50%); }
+        .gear-tooth.bottom { bottom: -2px; left: 50%; transform: translateX(-50%); }
+        .gear-tooth.left { left: -2px; top: 50%; transform: translateY(-50%); }
+        
+        .gear-tooth.top-left { top: -2px; left: 25%; }
+        .gear-tooth.top-right { top: -2px; right: 25%; }
+        .gear-tooth.right-top { right: -2px; top: 25%; }
+        .gear-tooth.right-bottom { right: -2px; bottom: 25%; }
+        .gear-tooth.bottom-right { bottom: -2px; right: 25%; }
+        .gear-tooth.bottom-left { bottom: -2px; left: 25%; }
+        .gear-tooth.left-bottom { left: -2px; bottom: 25%; }
+        .gear-tooth.left-top { left: -2px; top: 25%; }
+        
+        /* Electrical Arc Positioning */
+        .electrical-arc.left-10 { left: 10px; top: 50%; transform: translateY(-50%); }
+        .electrical-arc.right-10 { right: 10px; top: 50%; transform: translateY(-50%); }
+        .electrical-arc.left-15 { left: 15px; top: 50%; transform: translateY(-50%); }
+        .electrical-arc.right-15 { right: 15px; top: 50%; transform: translateY(-50%); }
+        .electrical-arc.left-20 { left: 20px; top: 50%; transform: translateY(-50%); }
+        .electrical-arc.right-20 { right: 20px; top: 50%; transform: translateY(-50%); }
+        .electrical-arc.left-25 { left: 25px; top: 50%; transform: translateY(-50%); }
+        .electrical-arc.right-25 { right: 25px; top: 50%; transform: translateY(-50%); }
+        .electrical-arc.left-30 { left: 30px; top: 50%; transform: translateY(-50%); }
+        .electrical-arc.right-30 { right: 30px; top: 50%; transform: translateY(-50%); }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="lock-container">
+            <!-- Lock Structure -->
+            <div class="lock-body">
+                <div class="lock-shackle" id="lockShackle"></div>
+                
+                <!-- Mechanical Gears -->
+                <div class="mechanical-gear gear-small gear-top-right">
+                    <div class="gear-tooth top"></div>
+                    <div class="gear-tooth right"></div>
+                    <div class="gear-tooth bottom"></div>
+                    <div class="gear-tooth left"></div>
+                </div>
+                
+                <div class="mechanical-gear gear-medium gear-bottom-left">
+                    <div class="gear-tooth top-left"></div>
+                    <div class="gear-tooth top-right"></div>
+                    <div class="gear-tooth right-top"></div>
+                    <div class="gear-tooth right-bottom"></div>
+                    <div class="gear-tooth bottom-right"></div>
+                    <div class="gear-tooth bottom-left"></div>
+                    <div class="gear-tooth left-bottom"></div>
+                    <div class="gear-tooth left-top"></div>
+                </div>
+                
+                <!-- Progressive Segments with Enhanced Effects -->
+                <div class="lock-segments">
+                    <div class="lock-segment" data-step="1">
+                        <div class="segment-progress"></div>
+                        <div class="circuit-lines">
+                            <div class="circuit-line horizontal circuit-line-1"></div>
+                            <div class="electrical-arc left-10"></div>
+                            <div class="electrical-arc right-10"></div>
+                        </div>
+                    </div>
+                    <div class="lock-segment" data-step="2">
+                        <div class="segment-progress"></div>
+                        <div class="circuit-lines">
+                            <div class="circuit-line horizontal circuit-line-2"></div>
+                            <div class="electrical-arc left-15"></div>
+                            <div class="electrical-arc right-15"></div>
+                        </div>
+                    </div>
+                    <div class="lock-segment" data-step="3">
+                        <div class="segment-progress"></div>
+                        <div class="circuit-lines">
+                            <div class="circuit-line horizontal circuit-line-3"></div>
+                            <div class="electrical-arc left-20"></div>
+                            <div class="electrical-arc right-20"></div>
+                        </div>
+                    </div>
+                    <div class="lock-segment" data-step="4">
+                        <div class="segment-progress"></div>
+                        <div class="circuit-lines">
+                            <div class="circuit-line horizontal circuit-line-4"></div>
+                            <div class="electrical-arc left-25"></div>
+                            <div class="electrical-arc right-25"></div>
+                        </div>
+                    </div>
+                    <div class="lock-segment" data-step="5">
+                        <div class="segment-progress"></div>
+                        <div class="circuit-lines">
+                            <div class="circuit-line horizontal circuit-line-5"></div>
+                            <div class="electrical-arc left-30"></div>
+                            <div class="electrical-arc right-30"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Central Keyhole -->
+                <div class="lock-keyhole" id="lockKeyhole"></div>
+            </div>
+        </div>
+        
+        <!-- Test Controls -->
+        <div class="test-controls">
+            <button class="test-button" onclick="unlockNextSegment()">Unlock Next Level</button>
+            <button class="test-button" onclick="resetLock()">Reset Lock</button>
+            <button class="test-button" onclick="unlockAll()">Unlock All (Fireworks!)</button>
+        </div>
+        
+        <div class="status-display" id="statusDisplay">
+            Lock Status: LOCKED (0/5 levels unlocked)
+        </div>
+    </div>
+    
+    <!-- Particle Container for Advanced Effects -->
+    <div class="particle-container" id="particleContainer"></div>
+
+    <script>
+        class AdvancedParticleSystem {
+            constructor() {
+                this.container = document.getElementById('particleContainer');
+                this.particles = [];
+                this.isAnimating = false;
+                this.maxParticles = 500;
+            }
+            
+            createLevelUnlockEffect(segmentElement) {
+                const rect = segmentElement.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                // Create energy burst
+                this.createEnergyBurst(centerX, centerY);
+                
+                // Create level particles
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        this.createLevelParticle(centerX, centerY);
+                    }, i * 50);
+                }
+            }
+            
+            createEnergyBurst(x, y) {
+                const burst = document.createElement('div');
+                burst.className = 'energy-burst';
+                burst.style.left = (x - 50) + 'px';
+                burst.style.top = (y - 50) + 'px';
+                this.container.appendChild(burst);
+                
+                setTimeout(() => {
+                    if (burst.parentNode) {
+                        burst.parentNode.removeChild(burst);
+                    }
+                }, 1000);
+            }
+            
+            createLevelParticle(originX, originY) {
+                const particle = document.createElement('div');
+                particle.className = 'particle level-particle';
+                
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = 2 + Math.random() * 4;
+                const lifetime = 1000 + Math.random() * 1000;
+                
+                particle.style.left = originX + 'px';
+                particle.style.top = originY + 'px';
+                
+                this.container.appendChild(particle);
+                this.particles.push({
+                    element: particle,
+                    x: originX,
+                    y: originY,
+                    vx: Math.cos(angle) * velocity,
+                    vy: Math.sin(angle) * velocity,
+                    life: lifetime,
+                    maxLife: lifetime
+                });
+                
+                this.startAnimation();
+            }
+            
+            createFireworksShow() {
+                // Epic fireworks celebration
+                this.clearAllParticles();
+                
+                const colors = [
+                    '#ff0000', '#00ff00', '#0000ff', '#ffff00', 
+                    '#ff00ff', '#00ffff', '#ff8000', '#8000ff',
+                    '#ff0080', '#80ff00', '#0080ff', '#ff8080'
+                ];
+                
+                // Launch multiple fireworks
+                for (let i = 0; i < 8; i++) {
+                    setTimeout(() => {
+                        const x = 200 + Math.random() * (window.innerWidth - 400);
+                        const y = 100 + Math.random() * 200;
+                        const color = colors[Math.floor(Math.random() * colors.length)];
+                        this.launchFirework(x, y, color);
+                    }, i * 200);
+                }
+                
+                // Continue for 3 seconds
+                setTimeout(() => {
+                    for (let i = 0; i < 5; i++) {
+                        setTimeout(() => {
+                            const x = 300 + Math.random() * (window.innerWidth - 600);
+                            const y = 80 + Math.random() * 150;
+                            const color = colors[Math.floor(Math.random() * colors.length)];
+                            this.launchFirework(x, y, color);
+                        }, i * 300);
+                    }
+                }, 1500);
+            }
+            
+            launchFirework(x, y, color) {
+                // Create trail going up
+                const trail = document.createElement('div');
+                trail.className = 'firework-trail';
+                trail.style.left = x + 'px';
+                trail.style.top = (window.innerHeight - 50) + 'px';
+                trail.style.background = `linear-gradient(to bottom, transparent, ${color})`;
+                this.container.appendChild(trail);
+                
+                // Animate trail to destination
+                const trailAnimation = trail.animate([
+                    { transform: 'translateY(0px)', opacity: 1 },
+                    { transform: `translateY(${y - window.innerHeight + 50}px)`, opacity: 0.8 }
+                ], {
+                    duration: 800,
+                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                });
+                
+                trailAnimation.addEventListener('finish', () => {
+                    trail.remove();
+                    this.explodeFirework(x, y, color);
+                });
+            }
+            
+            explodeFirework(x, y, color) {
+                const particleCount = 30 + Math.random() * 20;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle firework-particle';
+                    particle.style.backgroundColor = color;
+                    particle.style.boxShadow = `0 0 10px ${color}`;
+                    
+                    const angle = (i / particleCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+                    const velocity = 3 + Math.random() * 5;
+                    const size = 2 + Math.random() * 4;
+                    
+                    particle.style.width = size + 'px';
+                    particle.style.height = size + 'px';
+                    particle.style.left = x + 'px';
+                    particle.style.top = y + 'px';
+                    
+                    this.container.appendChild(particle);
+                    this.particles.push({
+                        element: particle,
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * velocity,
+                        vy: Math.sin(angle) * velocity,
+                        life: 2000 + Math.random() * 1000,
+                        maxLife: 2000 + Math.random() * 1000,
+                        gravity: 0.1,
+                        type: 'firework'
+                    });
+                }
+                
+                this.startAnimation();
+            }
+            
+            startAnimation() {
+                if (!this.isAnimating) {
+                    this.isAnimating = true;
+                    this.animate();
+                }
+            }
+            
+            animate() {
+                if (this.particles.length === 0) {
+                    this.isAnimating = false;
+                    return;
+                }
+                
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const particle = this.particles[i];
+                    
+                    // Update position
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    
+                    // Apply gravity for fireworks
+                    if (particle.type === 'firework' && particle.gravity) {
+                        particle.vy += particle.gravity;
+                    }
+                    
+                    // Update element position
+                    particle.element.style.left = particle.x + 'px';
+                    particle.element.style.top = particle.y + 'px';
+                    
+                    // Update life
+                    particle.life -= 16; // ~60fps
+                    const opacity = particle.life / particle.maxLife;
+                    particle.element.style.opacity = Math.max(0, opacity);
+                    
+                    // Remove dead particles
+                    if (particle.life <= 0 || particle.y > window.innerHeight + 100) {
+                        particle.element.remove();
+                        this.particles.splice(i, 1);
+                    }
+                }
+                
+                if (this.particles.length > 0) {
+                    requestAnimationFrame(() => this.animate());
+                } else {
+                    this.isAnimating = false;
+                }
+            }
+            
+            clearAllParticles() {
+                this.particles.forEach(particle => particle.element.remove());
+                this.particles = [];
+                this.container.innerHTML = '';
+            }
+        }
+
+        class FuturisticLock {
+            constructor() {
+                this.maxSegments = 5;
+                this.currentUnlocked = 0;
+                this.segments = document.querySelectorAll('.lock-segment');
+                this.shackle = document.getElementById('lockShackle');
+                this.keyhole = document.getElementById('lockKeyhole');
+                this.statusDisplay = document.getElementById('statusDisplay');
+                this.particleSystem = new AdvancedParticleSystem();
+            }
+            
+            unlockSegment(segmentIndex) {
+                if (segmentIndex >= this.maxSegments) return;
+                
+                const segment = this.segments[segmentIndex];
+                if (segment && !segment.classList.contains('unlocked')) {
+                    // Add unlock animation
+                    segment.classList.add('unlocked');
+                    
+                    // Activate circuit lines and electrical arcs
+                    const circuitLines = segment.querySelectorAll('.circuit-line');
+                    const electricalArcs = segment.querySelectorAll('.electrical-arc');
+                    
+                    circuitLines.forEach(line => {
+                        setTimeout(() => line.classList.add('active'), 200);
+                    });
+                    
+                    electricalArcs.forEach(arc => {
+                        setTimeout(() => arc.classList.add('active'), 300);
+                    });
+                    
+                    // Create spectacular particle effect
+                    this.particleSystem.createLevelUnlockEffect(segment);
+                    
+                    this.currentUnlocked++;
+                    this.updateStatus();
+                    
+                    // Check if fully unlocked
+                    if (this.currentUnlocked >= this.maxSegments) {
+                        setTimeout(() => this.fullyUnlock(), 500);
+                    }
+                }
+            }
+            
+            fullyUnlock() {
+                // Unlock shackle
+                this.shackle.classList.add('unlocked');
+                
+                // Activate keyhole
+                this.keyhole.classList.add('activated');
+                
+                // EPIC FIREWORKS SHOW!
+                setTimeout(() => {
+                    this.statusDisplay.textContent = "🎆 LOCK OPENED! PUZZLE SOLVED! 🎆";
+                    this.statusDisplay.style.color = "#ffff00";
+                    this.statusDisplay.style.textShadow = "0 0 15px #ffff00";
+                    
+                    // Launch the fireworks spectacular!
+                    this.particleSystem.createFireworksShow();
+                }, 300);
+            }
+            
+            reset() {
+                this.currentUnlocked = 0;
+                
+                // Clear all particles
+                this.particleSystem.clearAllParticles();
+                
+                // Reset all segments
+                this.segments.forEach(segment => {
+                    segment.classList.remove('unlocked');
+                    const circuitLines = segment.querySelectorAll('.circuit-line');
+                    const electricalArcs = segment.querySelectorAll('.electrical-arc');
+                    circuitLines.forEach(line => line.classList.remove('active'));
+                    electricalArcs.forEach(arc => arc.classList.remove('active'));
+                });
+                
+                // Reset shackle and keyhole
+                this.shackle.classList.remove('unlocked');
+                this.keyhole.classList.remove('activated');
+                
+                // Reset status display
+                this.statusDisplay.style.color = "#00ff00";
+                this.statusDisplay.style.textShadow = "0 0 5px #00ff00";
+                this.updateStatus();
+            }
+            
+            unlockAll() {
+                for (let i = 0; i < this.maxSegments; i++) {
+                    setTimeout(() => this.unlockSegment(i), i * 400);
+                }
+            }
+            
+            updateStatus() {
+                this.statusDisplay.textContent = 
+                    `Lock Status: ${this.currentUnlocked === this.maxSegments ? 'UNLOCKED' : 'LOCKED'} (${this.currentUnlocked}/${this.maxSegments} levels unlocked)`;
+            }
+        }
+        
+        // Initialize lock
+        const lock = new FuturisticLock();
+        
+        // Test functions for simulation
+        function unlockNextSegment() {
+            lock.unlockSegment(lock.currentUnlocked);
+        }
+        
+        function resetLock() {
+            lock.reset();
+        }
+        
+        function unlockAll() {
+            lock.unlockAll();
+        }
+        
+        // API for external integration (this is what your problem solving display will call)
+        window.MathMasterLock = {
+            // Call this when a player solves an algebra line
+            triggerLevelUnlock: function() {
+                lock.unlockSegment(lock.currentUnlocked);
+            },
+            
+            // Call this to reset the lock for a new problem
+            resetLock: function() {
+                lock.reset();
+            },
+            
+            // Get current progress
+            getProgress: function() {
+                return {
+                    currentLevel: lock.currentUnlocked,
+                    maxLevels: lock.maxSegments,
+                    isComplete: lock.currentUnlocked >= lock.maxSegments
+                };
+            }
+        };
+    </script>
+</body>
+</html>
