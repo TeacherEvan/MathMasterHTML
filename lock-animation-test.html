@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lock Animation Test - Unified System</title>
+    <link rel="stylesheet" href="css/game.css">
+    <link rel="stylesheet" href="css/lock-responsive.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+            font-family: 'Orbitron', monospace;
+            color: white;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .test-controls {
+            margin: 20px 0;
+        }
+        
+        .test-button {
+            background: linear-gradient(145deg, #333, #111);
+            border: 2px solid #888;
+            border-radius: 8px;
+            padding: 10px 20px;
+            color: #ccc;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            border-color: #00ff00;
+            color: #00ff00;
+            box-shadow: 0 0 15px rgba(0,255,0,0.3);
+        }
+        
+        /* Mock game layout for testing */
+        .mock-game-container {
+            display: flex;
+            height: 60vh;
+            width: 100%;
+            background: #000;
+            margin: 20px 0;
+            border: 2px solid #333;
+            border-radius: 8px;
+        }
+        
+        .mock-display {
+            flex: 1;
+            padding: 20px;
+            border: 2px solid rgba(0, 230, 255, 0.4);
+            border-radius: 8px;
+            margin: 10px 5px;
+            background: rgba(13, 20, 33, 0.8);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .mock-wall {
+            width: 6px;
+            background: linear-gradient(180deg, #0f0, #060);
+            height: 100%;
+            border-radius: 3px;
+        }
+        
+        #test-lock-display {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            overflow: visible;
+            position: relative;
+            min-height: 300px;
+            max-height: 400px;
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .status-display {
+            font-size: 14px;
+            color: #0f0;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Lock Animation System Test</h1>
+        <p>This test verifies that lock animations trigger correctly and display properly in the side panel.</p>
+        
+        <div class="test-section">
+            <h2>Test Controls</h2>
+            <div class="test-controls">
+                <button class="test-button" onclick="testFirstLineEvent()">Trigger First Line Solved</button>
+                <button class="test-button" onclick="testStepCompleted()">Trigger Step Completed</button>
+                <button class="test-button" onclick="testAdvanceLock()">Advance Lock Level</button>
+                <button class="test-button" onclick="resetTest()">Reset Test</button>
+            </div>
+            <div class="status-display" id="test-status">Status: Ready for testing</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Mock Game Layout</h2>
+            <div class="mock-game-container">
+                <!-- Mock Section 1: Problem Display with Lock -->
+                <div class="mock-display">
+                    <h3>Problem Display</h3>
+                    <div id="test-lock-display"></div>
+                </div>
+                
+                <div class="mock-wall"></div>
+                
+                <!-- Mock Section 2: Solution Display -->
+                <div class="mock-display">
+                    <h3>Solution Display</h3>
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                        <p>Solution steps appear here...</p>
+                    </div>
+                </div>
+                
+                <div class="mock-wall"></div>
+                
+                <!-- Mock Section 3: Symbol Rain -->
+                <div class="mock-display">
+                    <h3>Symbol Rain</h3>
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                        <p>Symbol rain appears here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test Results</h2>
+            <div id="test-results">
+                <p>Run tests to see results here...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Mock lock manager for testing
+        class TestLockManager {
+            constructor() {
+                this.lockDisplay = document.getElementById('test-lock-display');
+                this.lockAnimationActive = false;
+                this.currentLockLevel = 1;
+                this.completedLinesCount = 0;
+                this.lockIsLive = false;
+                this.setupEventListeners();
+                this.updateStatus('TestLockManager initialized');
+            }
+            
+            setupEventListeners() {
+                document.addEventListener('first-line-solved', () => {
+                    this.startLockAnimation();
+                });
+                
+                document.addEventListener('stepCompleted', (e) => {
+                    if (this.lockAnimationActive) {
+                        this.advanceLockLevel(e.detail.stepIndex);
+                    }
+                });
+            }
+            
+            startLockAnimation() {
+                if (this.lockIsLive) return;
+                
+                this.lockIsLive = true;
+                this.lockAnimationActive = true;
+                
+                this.updateStatus('Starting lock animation...');
+                
+                this.loadLockComponent('Line-1-transformer.html')
+                    .then(() => {
+                        setTimeout(() => {
+                            this.activateLockLevel(1);
+                        }, 300);
+                    });
+            }
+            
+            async loadLockComponent(componentName) {
+                const lockPath = `lock-components/${componentName}`;
+                this.updateStatus(`Loading lock component: ${componentName}`);
+                
+                try {
+                    const response = await fetch(lockPath);
+                    if (!response.ok) {
+                        throw new Error(`Failed to load ${lockPath}`);
+                    }
+                    
+                    const data = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data, 'text/html');
+                    
+                    const styleElements = doc.head.querySelectorAll('style');
+                    let styles = '';
+                    styleElements.forEach(style => {
+                        styles += style.outerHTML;
+                    });
+                    
+                    const bodyContent = doc.body.innerHTML;
+                    
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'lock-component-wrapper';
+                    wrapper.innerHTML = styles + bodyContent;
+                    
+                    this.lockDisplay.innerHTML = '';
+                    this.lockDisplay.appendChild(wrapper);
+                    
+                    this.updateStatus(`✅ Lock component ${componentName} loaded successfully`);
+                    this.addTestResult(`Lock component ${componentName} loaded and displayed`);
+                    
+                } catch (error) {
+                    this.updateStatus(`❌ Error loading lock component: ${error.message}`);
+                    this.lockDisplay.innerHTML = '<div class="lock-error">🔒 Lock Component Error</div>';
+                }
+            }
+            
+            activateLockLevel(level) {
+                this.updateStatus(`Activating lock level ${level}`);
+                
+                const lockBody = this.lockDisplay.querySelector('.lock-body');
+                if (lockBody) {
+                    lockBody.classList.remove('level-1-active', 'level-2-active', 'level-3-active', 'level-4-active', 'level-5-active', 'level-6-active');
+                    lockBody.classList.add(`level-${level}-active`);
+                    
+                    this.updateStatus(`✅ Lock level ${level} activated`);
+                    this.addTestResult(`Lock level ${level} activated successfully`);
+                } else {
+                    this.updateStatus('⚠️ Lock body not found for activation');
+                    this.addTestResult('❌ Lock body not found for activation');
+                }
+            }
+            
+            advanceLockLevel(stepIndex) {
+                this.completedLinesCount++;
+                const newLockLevel = Math.min(6, this.completedLinesCount + 1);
+                
+                if (newLockLevel > this.currentLockLevel) {
+                    this.currentLockLevel = newLockLevel;
+                    this.updateStatus(`Advancing to lock level ${newLockLevel}`);
+                    
+                    this.loadLockComponent(`line-${newLockLevel}-transformer.html`)
+                        .then(() => {
+                            setTimeout(() => {
+                                this.activateLockLevel(newLockLevel);
+                            }, 300);
+                        });
+                } else {
+                    this.activateLockLevel(newLockLevel);
+                }
+            }
+            
+            updateStatus(message) {
+                document.getElementById('test-status').textContent = `Status: ${message}`;
+                console.log('🔒 Test:', message);
+            }
+            
+            addTestResult(message) {
+                const resultsDiv = document.getElementById('test-results');
+                const timestamp = new Date().toLocaleTimeString();
+                const resultItem = document.createElement('div');
+                resultItem.style.cssText = 'margin: 5px 0; padding: 5px; background: rgba(0,255,0,0.1); border-left: 3px solid #0f0; font-size: 14px;';
+                resultItem.textContent = `[${timestamp}] ${message}`;
+                resultsDiv.appendChild(resultItem);
+            }
+            
+            reset() {
+                this.lockAnimationActive = false;
+                this.currentLockLevel = 1;
+                this.completedLinesCount = 0;
+                this.lockIsLive = false;
+                this.lockDisplay.innerHTML = '<div style="color: #888; font-style: italic;">Lock will appear here when first line is solved...</div>';
+                this.updateStatus('Test reset - ready for new test');
+                document.getElementById('test-results').innerHTML = '<p>Run tests to see results here...</p>';
+            }
+        }
+        
+        // Initialize test manager
+        let testLockManager;
+        document.addEventListener('DOMContentLoaded', () => {
+            testLockManager = new TestLockManager();
+        });
+        
+        // Test functions
+        function testFirstLineEvent() {
+            document.dispatchEvent(new Event('first-line-solved'));
+        }
+        
+        function testStepCompleted() {
+            document.dispatchEvent(new CustomEvent('stepCompleted', {
+                detail: { stepIndex: testLockManager.completedLinesCount }
+            }));
+        }
+        
+        function testAdvanceLock() {
+            if (testLockManager.lockAnimationActive) {
+                testStepCompleted();
+            } else {
+                testLockManager.addTestResult('❌ Lock not active yet. Trigger "First Line Solved" first.');
+            }
+        }
+        
+        function resetTest() {
+            testLockManager.reset();
+        }
+    </script>
+</body>
+</html>

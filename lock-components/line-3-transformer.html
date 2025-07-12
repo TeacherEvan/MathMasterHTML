@@ -7,37 +7,40 @@
     <style>
         body {
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+            padding: 0;
+            background: transparent; /* Make transparent for game integration */
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            min-height: 100%;
             font-family: 'Orbitron', monospace;
             overflow: hidden;
         }
 
         .lock-container {
             position: relative;
-            width: 500px;
-            height: 400px;
+            width: 200px; /* Optimized for game display */
+            height: 160px; /* Optimized for game display */
             display: flex;
             flex-direction: column;
             align-items: center;
-            perspective: 1000px;
+            perspective: 500px; /* Adjusted for game display */
+            transform: scale(0.8); /* Better scale for game integration */
+            transform-origin: center;
+            margin: 15px auto; /* Center in game display */
         }
 
         .lock-body {
             /* Starting from Level 2's final state - Vertical + Horizontal Extension */
-            width: 200px; /* Already horizontally expanded from Level 2 */
-            height: 250px; /* Already vertically extended from Level 1 */
+            width: 130px; /* Reduced by 35% from 200px */
+            height: 163px; /* Reduced by 35% from 250px */
             background: linear-gradient(145deg, #4a2a1a, #6a4a2a, #4a2a1a); /* Orange from Level 2 */
-            border-radius: 15px;
+            border-radius: 10px; /* Reduced by 35% from 15px */
             position: relative;
-            border: 4px solid #ffa500; /* Orange border from Level 2 */
+            border: 3px solid #ffa500; /* Reduced by 35% from 4px */
             box-shadow: 
-                0 0 40px rgba(255, 165, 0, 0.7), /* Orange glow from Level 2 */
-                inset 0 0 15px rgba(255, 165, 0, 0.3);
+                0 0 26px rgba(255, 165, 0, 0.7), /* Reduced by 35% from 40px */
+                inset 0 0 10px rgba(255, 165, 0, 0.3); /* Reduced by 35% from 15px */
             transition: all 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             transform: scaleY(1.5) scaleX(1.6); /* Maintains Level 1 + Level 2 scaling */
             transform-origin: center center;
@@ -45,8 +48,8 @@
         }
 
         .lock-body.warrior-active {
-            width: 180px;
-            height: 180px; /* Becomes circular while maintaining overall scale */
+            width: 117px; /* Reduced by 35% from 180px */
+            height: 117px; /* Reduced by 35% from 180px */
             background: linear-gradient(145deg, #4a2a4a, #6a4a6a, #4a2a4a);
             border-color: #8a2be2;
             border-radius: 50%; /* Circular transformation */
@@ -419,33 +422,26 @@
         .lock-body.level-3-active .particle.p7 { animation-delay: 1.8s; }
         .lock-body.level-3-active .particle.p8 { animation-delay: 2.1s; }
 
-        /* Status Indicator */
+        /* Status Indicator - Hidden in game mode */
         .status-indicator {
-            position: absolute;
-            top: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 8px 15px;
-            background: rgba(0, 0, 0, 0.9);
-            color: #8a2be2;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 8px;
-            border: 2px solid #333;
-            transition: all 0.5s ease;
-            letter-spacing: 1px;
+            display: none !important;
         }
 
         .lock-body.level-3-active .status-indicator {
-            color: #ba55d3;
-            border-color: #8a2be2;
-            box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
-            animation: status-glow 2s ease-in-out infinite;
+            display: none !important;
+        }
+
+        /* Remove all text elements and status indicators */
+        .status-indicator,
+        .status-display,
+        .level-display,
+        .btn {
+            display: none !important;
         }
 
         /* Shackle */
         .shackle {
-            width: 90px;
+            width: 59px; /* Reduced by 35% from 90px */
             height: 70px;
             border: 10px solid #555;
             border-bottom: none;
@@ -619,8 +615,6 @@
         <div class="shackle"></div>
         
         <div class="lock-body" id="lockBody">
-            <div class="status-indicator">LEVEL 3: ROTATING METAMORPHOSIS</div>
-            
             <!-- Horizontal Arms from Level 2 -->
             <div class="horizontal-arm left"></div>
             <div class="horizontal-arm right"></div>

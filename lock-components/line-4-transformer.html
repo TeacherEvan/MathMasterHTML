@@ -8,23 +8,26 @@
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            background: transparent; /* Make transparent for game integration */
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            min-height: 100%;
             font-family: 'Orbitron', monospace;
-            perspective: 2000px;
+            perspective: 1300px; /* Reduced by 35% from 2000px */
         }
 
         .lock-container {
             position: relative;
-            width: 300px;
-            height: 300px;
+            width: 180px; /* Optimized for game display */
+            height: 180px; /* Optimized for game display */
             display: flex;
             justify-content: center;
             align-items: center;
             transform-style: preserve-3d;
+            transform: scale(0.8); /* Better scale for game integration */
+            transform-origin: center;
+            margin: 15px auto; /* Center in game display */
         }
 
         .lock-body {
@@ -204,6 +207,15 @@
                 0 0 25px rgba(255, 68, 68, 1),
                 inset 0 0 12px rgba(255, 255, 255, 0.3);
             animation: chamber-spin-red 2s linear infinite;
+        }
+
+        /* Remove all text elements and status indicators */
+        .status-indicator,
+        .status-display,
+        .level-display,
+        .btn,
+        .controls {
+            display: none !important;
         }
 
         @keyframes level4-expansion {

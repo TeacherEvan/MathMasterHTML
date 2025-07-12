@@ -142,6 +142,7 @@ body::before {
     overflow: visible !important;
     position: relative;
     min-height: 300px;
+    max-height: 400px;
     border: 2px solid rgba(0, 255, 0, 0.3);
     border-radius: 8px;
     background: rgba(0, 0, 0, 0.3);
@@ -155,6 +156,8 @@ body::before {
     justify-content: center;
     align-items: center;
     position: relative;
+    max-width: 300px;
+    max-height: 350px;
 }
 
 /* Reset body styles for lock components */
@@ -168,6 +171,16 @@ body::before {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
+}
+
+/* RESPONSIVE SCALING FOR LOCK COMPONENTS */
+#lock-display .lock-container {
+    transform: scale(0.8) !important;
+    transform-origin: center !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: 250px !important;
+    max-height: 300px !important;
 }
 
 /* FORCE DISPLAY OF ALL LOCK CONTENT - OVERRIDE EVERYTHING */

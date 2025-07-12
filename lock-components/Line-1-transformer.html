@@ -19,25 +19,24 @@
 
         .lock-container {
             position: relative;
-            width: 120px;  /* Reduced from 200px */
-            height: 180px; /* Reduced from 300px */
+            width: 100px;  /* Optimized for game display */
+            height: 140px; /* Optimized for game display */
             display: flex;
             flex-direction: column;
             align-items: center;
-            transform: scale(0.6); /* Scale down entire component */
+            transform: scale(0.8); /* Better scale for game integration */
             transform-origin: center;
+            margin: 15px auto; /* Center in game display */
         }
 
         .lock-body {
-            width: 80px;   /* Reduced from 120px */
-            height: 100px; /* Reduced from 150px */
+            width: 60px;   /* Optimized for game display */
+            height: 80px;  /* Optimized for game display */
             background: linear-gradient(145deg, #2a2a2a, #404040);
-            border-radius: 10px; /* Reduced from 15px */
+            border-radius: 8px; /* Proportionally adjusted */
             position: relative;
-            border: 2px solid #555; /* Reduced from 3px */
+            border: 2px solid #555;
             box-shadow: 
-                0 0 15px rgba(0, 255, 0, 0.3), /* Reduced from 20px */
-                inset 0 0 8px rgba(0, 0, 0, 0.5), /* Reduced from 10px */
                 0 0 0 0 rgba(0, 255, 0, 0);
             transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             transform-origin: top center;
@@ -49,10 +48,10 @@
             background: linear-gradient(145deg, #1a4a1a, #2a6a2a, #1a4a1a);
             border-color: #0f0;
             box-shadow: 
-                0 0 20px rgba(0, 255, 0, 0.6), /* Reduced from 30px */
-                inset 0 0 10px rgba(0, 0, 0, 0.6), /* Reduced from 15px */
-                0 0 0 3px rgba(0, 255, 0, 0.15), /* Reduced from 4px */
-                0 0 0 6px rgba(0, 255, 0, 0.08); /* Reduced from 8px */
+                0 0 13px rgba(0, 255, 0, 0.6), /* Reduced by 35% from 20px */
+                inset 0 0 6px rgba(0, 0, 0, 0.6), /* Reduced by 35% from 10px */
+                0 0 0 2px rgba(0, 255, 0, 0.15), /* Reduced by 35% from 3px */
+                0 0 0 4px rgba(0, 255, 0, 0.08); /* Reduced by 35% from 6px */
         }
 
         /* Progressive levels for line completion */
@@ -338,13 +337,13 @@
 
         /* Shackle */
         .shackle {
-            width: 55px; /* Reduced from 80px */
-            height: 40px; /* Reduced from 60px */
-            border: 5px solid #555; /* Reduced from 8px */
+            width: 36px; /* Reduced by 35% from 55px */
+            height: 26px; /* Reduced by 35% from 40px */
+            border: 3px solid #555; /* Reduced by 35% from 5px */
             border-bottom: none;
-            border-radius: 28px 28px 0 0; /* Reduced proportionally */
+            border-radius: 18px 18px 0 0; /* Reduced by 35% from 28px */
             position: absolute;
-            top: -35px; /* Reduced from -50px */
+            top: -23px; /* Reduced by 35% from -35px */
             left: 50%;
             transform: translateX(-50%);
             background: transparent;
@@ -369,6 +368,14 @@
         /* Control Panel - Hidden in game mode */
         .control-panel {
             display: none; /* Hide control panel in game */
+        }
+        
+        /* Remove all text elements and status indicators */
+        .status-indicator,
+        .status-display,
+        .level-display,
+        .btn {
+            display: none !important;
         }
     </style>
 </head>
@@ -409,6 +416,7 @@
             constructor() {
                 this.lockBody = document.getElementById('lockBody');
                 this.isActive = false;
+                // DON'T auto-activate - wait for game trigger
             }
 
             activate() {
@@ -419,14 +427,14 @@
                     // Trigger mechanical sound effect (if audio system exists)
                     this.playMechanicalSound();
                     
-                    console.log('Level 1 Lock: Extended and Activated');
+                    console.log('🔒 Level 1 Lock: Extended and Activated');
                 }
             }
 
             reset() {
                 this.lockBody.classList.remove('level-1-active');
                 this.isActive = false;
-                console.log('Level 1 Lock: Reset to Base State');
+                console.log('🔒 Level 1 Lock: Reset to Base State');
             }
 
             playMechanicalSound() {

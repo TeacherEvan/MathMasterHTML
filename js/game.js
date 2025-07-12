@@ -25,9 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSymbolIndex = 0;
     let revealedIndex = 0;
     let correctAnswersCount = 0;
-    let completedLinesCount = 0; // Track completed solution lines across all problems
-    let currentLockLevel = 1; // Track current lock level (1-6)
-    let lockAnimationActive = false; // Track if lock animation should be active
 
     // Load problems based on level
     function loadProblems() {
@@ -138,8 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSymbolIndex = 0;
         revealedIndex = 0;
         
-        // Show waiting message for lock
-        if (!lockAnimationActive && lockDisplay) {
+        // Show waiting message for lock - DON'T load lock component yet
+        if (lockDisplay) {
             lockDisplay.innerHTML = '<div class="lock-waiting">🔒 Lock will activate after first symbol reveal</div>';
         }
         
@@ -190,51 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`📋 Created ${currentProblem.steps.length} solution steps`);
     }
 
-    function loadLockComponent() {
-        // Fetch and display the lock component based on URL parameter
-        const lockPath = `lock-components/${lockComponent}`;
-        console.log(`🔒 Loading lock component: ${lockPath}`);
-        
-        fetch(lockPath)
-            .then(response => {
-                if (!response.ok) {
-                    console.warn(`⚠️ Failed to load ${lockPath}, falling back to simplified lock`);
-                    return fetch('lock-components/simplified-lock.html');
-                }
-                return response;
-            })
-            .then(response => response.text())
-            .then(data => {
-                // Parse the HTML and extract only the body content and styles
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(data, 'text/html');
-                
-                // Get styles from the head
-                const styleElements = doc.head.querySelectorAll('style');
-                let styles = '';
-                styleElements.forEach(style => {
-                    styles += style.outerHTML;
-                });
-                
-                // Get the body content (the actual lock)
-                const bodyContent = doc.body.innerHTML;
-                
-                // Insert only the extracted content
-                lockDisplay.innerHTML = styles + bodyContent;
-                console.log('🔒 Lock component loaded successfully');
-                
-                // Wait a moment for scripts to initialize, then set up lock triggers
-                setTimeout(() => {
-                    // DON'T call setupLockTriggers() - it auto-activates the lock
-                    console.log('🔒 Lock component loaded but NOT triggered - waiting for first symbol reveal');
-                }, 500);
-            })
-            .catch(error => {
-                console.error('❌ Error loading lock component:', error);
-                lockDisplay.innerHTML = '<div class="lock-error">🔒 Lock Error</div>';
-            });
-    }
-
     // Move to next problem
     function nextProblem() {
         currentProblemIndex++;
@@ -257,10 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial setup
     loadProblems(); // Load problems first
-    // Initialize lock display with waiting message immediately
-    if (lockDisplay) {
-        lockDisplay.innerHTML = '<div class="lock-waiting">🔒 Lock will activate after first symbol reveal</div>';
-    }
 
     /** Get next hidden symbol from solution - now accepts any symbol in current line */
     function getNextSymbol() {
@@ -335,15 +283,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`✅ Correct symbol clicked: "${clickedSymbol}"`);
         correctAnswersCount++;
         
-        // Initialize lock animation on first correct answer if not already active
-        if (!lockAnimationActive) {
-            console.log('🔒 First symbol revealed - initializing lock animation');
-            lockAnimationActive = true;
-            loadLockComponent();
-            // Set up triggers after a delay to ensure lock is loaded
-            setTimeout(() => {
-                setupLockTriggers();
-            }, 1000);
+        // Dispatch first-line-solved event for LockManager
+        if (correctAnswersCount === 1) {
+            console.log('🔒 First correct answer - dispatching first-line-solved event');
+            document.dispatchEvent(new Event('first-line-solved'));
         }
         
         // Add visual feedback
@@ -377,16 +320,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Trigger worm spawning for completed line
             console.log('🐛 DISPATCHING problemLineCompleted EVENT - This should spawn a worm!');
             document.dispatchEvent(new CustomEvent('problemLineCompleted'));
-            
-            // Trigger lock animation for completed step (only if lock is active)
-            if (lockAnimationActive) {
-                triggerLockAnimation(currentStepIndex);
-            }
-            
-            // Dispatch step completion event
-            document.dispatchEvent(new CustomEvent('stepCompleted', {
-                detail: { stepIndex: currentStepIndex }
-            }));
             
             // Move to next step if available
             if (currentStepIndex < currentProblem.steps.length - 1) {

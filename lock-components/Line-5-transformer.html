@@ -7,25 +7,28 @@
     <style>
         body {
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+            padding: 0;
+            background: transparent; /* Make transparent for game integration */
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            min-height: 100%;
             font-family: 'Orbitron', monospace;
             overflow: hidden;
         }
 
         .lock-container {
             position: relative;
-            width: 400px;
-            height: 400px;
+            width: 200px; /* Optimized for game display */
+            height: 200px; /* Optimized for game display */
             display: flex;
             justify-content: center;
             align-items: center;
             transform-style: preserve-3d;
-            perspective: 1000px;
+            perspective: 500px; /* Adjusted for game display */
+            transform: scale(0.8); /* Better scale for game integration */
+            transform-origin: center;
+            margin: 15px auto; /* Center in game display */
         }
 
         .lock-body {
@@ -228,38 +231,27 @@
             animation: particle-orbit 3s infinite linear;
         }
 
-        /* Status Display */
+        /* Remove all text elements and status indicators */
+        .status-indicator,
+        .status-display,
+        .level-display,
+        .btn,
+        .controls {
+            display: none !important;
+        }
+
+        /* Status Display - Hidden in game mode */
         .status-display {
-            position: absolute;
-            bottom: -80px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #4488ff;
-            font-size: 1.2em;
-            font-weight: bold;
-            text-align: center;
-            text-shadow: 0 0 20px rgba(68, 136, 255, 0.8);
-            opacity: 0;
-            transition: opacity 2s ease-in-out;
+            display: none !important;
         }
 
         .status-display.active {
-            opacity: 1;
-            animation: status-glow-blue 2s infinite ease-in-out;
+            display: none !important;
         }
 
-        /* Control Instructions */
+        /* Control Instructions - Hidden in game mode */
         .controls {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            color: #4488ff;
-            font-size: 0.9em;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #4488ff;
-            box-shadow: 0 0 20px rgba(68, 136, 255, 0.3);
+            display: none !important;
         }
 
         /* Animations */

@@ -1,0 +1,106 @@
+/* Lock Component Responsive Design */
+/* This CSS ensures lock components work properly in both fullscreen and side displays */
+
+/* Base lock component container */
+.lock-component-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    max-width: 300px;
+    max-height: 350px;
+    margin: 0 auto;
+    overflow: visible;
+}
+
+/* Responsive scaling for lock containers */
+.lock-component-wrapper .lock-container {
+    transform: scale(0.8) !important;
+    transform-origin: center !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: 250px !important;
+    max-height: 300px !important;
+}
+
+/* Ensure lock bodies scale properly */
+.lock-component-wrapper .lock-body {
+    max-width: 150px;
+    max-height: 200px;
+}
+
+/* Override individual component sizing */
+.lock-component-wrapper .lock-container,
+.lock-component-wrapper .lock-body,
+.lock-component-wrapper .transformer,
+.lock-component-wrapper .lock-mechanism {
+    box-sizing: border-box;
+}
+
+/* Make sure extensions and mechanical parts scale with container */
+.lock-component-wrapper .extension-rails,
+.lock-component-wrapper .mechanical-extension,
+.lock-component-wrapper .transformer-extension {
+    position: absolute;
+    transform-origin: center;
+}
+
+/* Responsive animations - smaller scale for side display */
+@media screen and (max-width: 1920px) {
+    .lock-component-wrapper .lock-container {
+        transform: scale(0.6);
+    }
+    
+    .lock-component-wrapper .lock-body {
+        max-width: 120px;
+        max-height: 160px;
+    }
+}
+
+@media screen and (max-width: 1440px) {
+    .lock-component-wrapper .lock-container {
+        transform: scale(0.5);
+    }
+    
+    .lock-component-wrapper .lock-body {
+        max-width: 100px;
+        max-height: 140px;
+    }
+}
+
+/* Make sure all lock component styles are contained */
+.lock-component-wrapper * {
+    box-sizing: border-box;
+}
+
+/* Override any fullscreen-specific styles */
+.lock-component-wrapper body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* Ensure animations work at smaller scales */
+.lock-component-wrapper .lock-body.level-1-active,
+.lock-component-wrapper .lock-body.level-2-active,
+.lock-component-wrapper .lock-body.level-3-active,
+.lock-component-wrapper .lock-body.level-4-active,
+.lock-component-wrapper .lock-body.level-5-active,
+.lock-component-wrapper .lock-body.level-6-active {
+    animation-duration: 1.2s;
+    animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Error states */
+.lock-error {
+    color: #ff4444;
+    text-align: center;
+    font-size: 16px;
+    padding: 20px;
+    font-family: 'Orbitron', monospace;
+}

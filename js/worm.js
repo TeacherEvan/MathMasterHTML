@@ -1,30 +1,26 @@
-// js/worm.js - Advanced Worm NPC Mechanics
-console.log("Worm script loaded.");
+// js/worm.js - Redesigned Elegant Worm System
+console.log("🐛 New Worm System Loading...");
 
-class WormManager {
+class ElegantWormSystem {
     constructor() {
         this.worms = [];
-        this.maxWorms = 8;
-        this.symbols = '0123456789Xx+-=÷×'; // X = variable, x = multiplication
+        this.maxWorms = 6;
+        this.symbols = '0123456789Xx+-=÷×';
         this.containers = {};
-        this.isInitialized = false;
+        this.isActive = false;
         
-        // Wait for DOM to be fully loaded and ensure containers exist
+        // Initialize after DOM is ready
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                setTimeout(() => this.initialize(), 1000); // Extra delay to ensure containers exist
-            });
+            document.addEventListener('DOMContentLoaded', () => this.initialize());
         } else {
-            setTimeout(() => this.initialize(), 1000); // Extra delay to ensure containers exist
+            this.initialize();
         }
     }
 
     initialize() {
-        if (this.isInitialized) return;
+        console.log('🐛 Initializing Elegant Worm System');
         
-        console.log('🐛 Initializing Worm Manager');
-        
-        // Find containers freshly each time
+        // Find containers
         this.containers = {
             progression: document.getElementById('progression-worms'),
             problemSolving: document.getElementById('problem-solving-worms'),
@@ -32,22 +28,38 @@ class WormManager {
         };
         
         // Verify containers exist
-        console.log('🐛 Checking containers...');
-        let containersFound = 0;
-        Object.keys(this.containers).forEach(key => {
-            const container = this.containers[key];
-            if (container) {
-                console.log(`✅ Container "${key}" found:`, container);
-                containersFound++;
-            } else {
-                console.error(`❌ Container "${key}" NOT found!`);
-            }
-        });
+        const validContainers = Object.values(this.containers).filter(c => c);
+        if (validContainers.length === 0) {
+            console.error('❌ No worm containers found! Retrying...');
+            setTimeout(() => this.initialize(), 2000);
+            return;
+        }
         
-        if (containersFound === 0) {
-            console.error('❌ NO worm containers found! Retrying in 2 seconds...');
-            setTimeout(() => {
-                this.isInitialized = false;
+        console.log(`✅ Found ${validContainers.length} worm containers`);
+        this.isActive = true;
+        
+        // Create initial worms
+        this.createInitialWorms();
+        
+        // Start worm behaviors
+        this.startWormBehaviors();
+    }
+
+    createInitialWorms() {
+        const containerNames = Object.keys(this.containers);
+        
+        for (let i = 0; i < this.maxWorms; i++) {
+            const containerName = containerNames[i % containerNames.length];
+            const container = this.containers[containerName];
+            
+            if (container) {
+                const worm = this.createWorm(container, containerName);
+                this.worms.push(worm);
+            }
+        }
+        
+        console.log(`🐛 Created ${this.worms.length} elegant worms`);
+    }
                 this.initialize();
             }, 2000);
             return;

@@ -7,25 +7,28 @@
     <style>
         body {
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+            padding: 0;
+            background: transparent; /* Make transparent for game integration */
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            min-height: 100%;
             font-family: 'Orbitron', monospace;
             overflow: hidden;
         }
 
         .lock-container {
             position: relative;
-            width: 400px;
-            height: 400px;
+            width: 200px; /* Optimized for game display */
+            height: 200px; /* Optimized for game display */
             display: flex;
             justify-content: center;
             align-items: center;
             transform-style: preserve-3d;
-            perspective: 1000px;
+            perspective: 500px; /* Adjusted for game display */
+            transform: scale(0.8); /* Better scale for game integration */
+            transform-origin: center;
+            margin: 15px auto; /* Center in game display */
         }
 
         .lock-body {
@@ -341,6 +344,29 @@
             border-radius: 10px;
             border: 1px solid #ffffff;
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Remove all text elements and status indicators */
+        .status-indicator,
+        .status-display,
+        .level-display,
+        .btn,
+        .controls {
+            display: none !important;
+        }
+
+        /* Status Display - Hidden in game mode */
+        .status-display {
+            display: none !important;
+        }
+
+        .status-display.active {
+            display: none !important;
+        }
+
+        /* Control Instructions - Hidden in game mode */
+        .controls {
+            display: none !important;
         }
 
         /* Cosmic Background Effect */
