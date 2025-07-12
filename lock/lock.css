@@ -1,10 +1,9 @@
-/* …existing imports… */
+/* Lock CSS - Improved responsive scaling for game display */
 
-/* root wrapper for any lock component */
+/* Root wrapper for any lock component */
 .lock-root {
-    /* …existing code… */
     transform-origin: center;
-    transform: scale(0.8); /* Improved scaling for side display */
+    transform: scale(0.8);
     width: 100%;
     height: 100%;
     display: flex;
@@ -12,13 +11,151 @@
     align-items: center;
 }
 
-/* optional utility if you want it auto-centred inside #lock-display */
+/* Lock display container styling */
 #lock-display {
-    /* …existing code… */
     display: flex !important;
-    justify-content: center;
-    align-items: center;
+    justify-content: center !important;
+    align-items: center !important;
     overflow: visible !important;
     max-width: 300px;
     max-height: 350px;
+    margin: 0 auto !important;
+    padding: 10px;
+    box-sizing: border-box;
+    /* Support for responsive scaling */
+    transform: scale(var(--lock-scale, 0.8));
+    transform-origin: center center;
+    transition: transform 0.3s ease;
+}
+
+/* Lock container responsive scaling */
+#lock-display .lock-container {
+    transform: scale(var(--lock-container-scale, 0.8)) !important;
+    transform-origin: center center !important;
+    max-width: 250px !important;
+    max-height: 300px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    transition: transform 0.3s ease;
+}
+
+/* Lock component wrapper for proper containment */
+.lock-component-wrapper {
+    width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin: 0 auto;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* Responsive lock body scaling */
+.lock-body {
+    max-width: 80px !important;
+    max-height: 120px !important;
+    transition: all 0.3s ease;
+    transform-origin: center center !important;
+    margin: 0 auto !important;
+    transform: scale(var(--lock-body-scale, 1));
+}
+
+/* Error and waiting states */
+.lock-error {
+    color: #ff4444;
+    text-align: center;
+    font-size: 1.2em;
+    padding: 20px;
+    background: rgba(255, 68, 68, 0.1);
+    border-radius: 8px;
+    border: 2px solid #ff4444;
+}
+
+.lock-waiting {
+    color: #ffd700;
+    text-align: center;
+    font-size: 1.1em;
+    padding: 20px;
+    opacity: 0.8;
+    font-style: italic;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Animation keyframes */
+@keyframes pulse {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+    #lock-display {
+        max-width: 200px;
+        max-height: 250px;
+    }
+    
+    #lock-display .lock-container {
+        transform: scale(var(--lock-container-scale, 0.6)) !important;
+        max-width: 180px !important;
+        max-height: 200px !important;
+    }
+    
+    .lock-body {
+        max-width: 60px !important;
+        max-height: 80px !important;
+    }
+}
+
+/* Resolution-specific classes for fine-tuning */
+.res-4k #lock-display {
+    max-width: 400px;
+    max-height: 450px;
+}
+
+.res-1440p #lock-display {
+    max-width: 350px;
+    max-height: 400px;
+}
+
+.res-1080p #lock-display {
+    max-width: 300px;
+    max-height: 350px;
+}
+
+.res-720p #lock-display {
+    max-width: 250px;
+    max-height: 300px;
+}
+
+.res-mobile #lock-display {
+    max-width: 200px;
+    max-height: 250px;
+}
+
+/* High DPI display adjustments */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .lock-body {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* Orientation-specific adjustments */
+@media (orientation: portrait) {
+    .res-mobile #lock-display {
+        max-width: 180px;
+        max-height: 220px;
+    }
+}
+
+@media (orientation: landscape) {
+    .res-mobile #lock-display {
+        max-width: 220px;
+        max-height: 180px;
+    }
 }

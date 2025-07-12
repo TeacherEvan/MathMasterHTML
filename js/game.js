@@ -135,9 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSymbolIndex = 0;
         revealedIndex = 0;
         
-        // Show waiting message for lock - DON'T load lock component yet
-        if (lockDisplay) {
-            lockDisplay.innerHTML = '<div class="lock-waiting">🔒 Lock will activate after first symbol reveal</div>';
+        // Show basic lock until activation
+        if (lockDisplay && window.lockManager) {
+            lockManager.showBasicLock();
         }
         
         // Display the problem with enhanced styling
@@ -404,193 +404,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Lock Animation Integration Functions
-    function setupLockTriggers() {
-        console.log('🔒 Setting up lock animation triggers');
-        
-        // Check if lock container exists
-        const lockContainer = lockDisplay.querySelector('.lock-container');
-        if (!lockContainer) {
-            console.warn('⚠️ No lock container found for trigger setup');
-            return;
-        }
-        
-        // Add event listeners for lock animations
-        document.addEventListener('stepCompleted', (e) => {
-            if (lockAnimationActive) {
-                triggerLockAnimation(e.detail.stepIndex);
-            }
-        });
-        
-        console.log('✅ Lock triggers initialized');
-    }
-    
-    function triggerLockAnimation(stepIndex) {
-        console.log(`🔒 Triggering lock animation for step ${stepIndex + 1}`);
-        
-        // Only trigger animation if lock is active
-        if (!lockAnimationActive) {
-            console.log('🔒 Lock animation not active yet - skipping trigger');
-            return;
-        }
-        
-        // INCREMENT completed lines count for EVERY step completion!
-        completedLinesCount++;
-        console.log(`🔒 Completed lines count: ${completedLinesCount}`);
-        
-        // Determine which lock component to load based on completed lines
-        const newLockLevel = Math.min(6, completedLinesCount + 1);
-
-        if (newLockLevel > currentLockLevel) {
-            console.log(`🔒 SWITCHING TO LEVEL ${newLockLevel} LOCK`);
-            currentLockLevel = newLockLevel;
-            loadNewLockComponent(`line-${newLockLevel}-transformer.html`);
-            return; // Exit to let new lock load
-        }
-    }
-
-    function loadNewLockComponent(newComponent) {
-        console.log(`🔄 Loading new lock component: ${newComponent}`);
-        
-        const lockPath = `lock-components/${newComponent}`;
-        
-        fetch(lockPath)
-            .then(response => {
-                if (!response.ok) {
-                    console.warn(`⚠️ Failed to load ${lockPath}, falling back to simplified lock`);
-                    return fetch('lock-components/simplified-lock.html');
-                }
-                return response;
-            })
-            .then(response => response.text())
-            .then(data => {
-                // Parse the HTML and extract only the body content and styles
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(data, 'text/html');
-                
-                // Get styles from the head
-                const styleElements = doc.head.querySelectorAll('style');
-                let styles = '';
-                styleElements.forEach(style => {
-                    styles += style.outerHTML;
-                });
-                
-                // Get the body content (the actual lock)
-                const bodyContent = doc.body.innerHTML;
-                
-                // Insert only the extracted content
-                lockDisplay.innerHTML = styles + bodyContent;
-                console.log('🔒 New lock component loaded successfully');
-                
-                // Wait a moment for scripts to initialize, then set up lock triggers
-                setTimeout(() => {
-                    setupLockTriggers();
-                }, 500);
-            })
-            .catch(error => {
-                console.error('❌ Error loading new lock component:', error);
-                lockDisplay.innerHTML = '<div class="lock-error">🔒 Lock Error</div>';
-            });
-    }
-    
-    function triggerBeginnerLockAnimation(lockBody, stepIndex) {
-        console.log('🟢 Triggering Beginner level lock animation');
-        
-        // Add beginner-specific class for step completion
-        lockBody.classList.add('level-1-active');
-        
-        // Scale animation for step completion
-        const scaleAmount = 1 + (stepIndex * 0.1);
-        lockBody.style.transform = `scaleY(${scaleAmount})`;
-        
-        // Color progression - green tones
-        const greenIntensity = Math.min(255, 100 + (stepIndex * 40));
-        lockBody.style.background = `linear-gradient(145deg, #1a4a1a, rgb(42, ${greenIntensity}, 42), #1a4a1a)`;
-        lockBody.style.borderColor = `rgb(0, ${greenIntensity}, 0)`;
-        
-        // Glow effect
-        const glowIntensity = 0.3 + (stepIndex * 0.1);
-        lockBody.style.boxShadow = `0 0 ${20 + stepIndex * 10}px rgba(0, 255, 0, ${glowIntensity})`;
-    }
-    
-    function triggerWarriorLockAnimation(lockBody, stepIndex) {
-        console.log('🟡 Triggering Warrior level lock animation');
-        
-        // Add warrior-specific class
-        lockBody.classList.add('level-3-active');
-        
-        // Rotation and scale for warrior level
-        const rotation = stepIndex * 15;
-        const scaleAmount = 1 + (stepIndex * 0.15);
-        lockBody.style.transform = `rotate(${rotation}deg) scale(${scaleAmount})`;
-        
-        // Gold color progression
-        const goldIntensity = Math.min(255, 150 + (stepIndex * 30));
-        lockBody.style.background = `linear-gradient(145deg, #4a4a1a, rgb(${goldIntensity}, ${goldIntensity}, 42), #4a4a1a)`;
-        lockBody.style.borderColor = `rgb(${goldIntensity}, ${goldIntensity}, 0)`;
-        
-        // Golden glow
-        const glowIntensity = 0.4 + (stepIndex * 0.15);
-        lockBody.style.boxShadow = `0 0 ${25 + stepIndex * 15}px rgba(255, 215, 0, ${glowIntensity})`;
-    }
-    
-    function triggerMasterLockAnimation(lockBody, stepIndex) {
-        console.log('🔴 Triggering Master level lock animation');
-        
-        // Add master-specific class
-        lockBody.classList.add('level-5-active');
-        
-        // Complex animation for master level
-        const rotation = stepIndex * 20;
-        const scaleAmount = 1 + (stepIndex * 0.2);
-        const skew = stepIndex * 5;
-        lockBody.style.transform = `rotate(${rotation}deg) scale(${scaleAmount}) skewX(${skew}deg)`;
-        
-        // Red color progression
-        const redIntensity = Math.min(255, 120 + (stepIndex * 35));
-        lockBody.style.background = `linear-gradient(145deg, #4a1a1a, rgb(${redIntensity}, 42, 42), #4a1a1a)`;
-        lockBody.style.borderColor = `rgb(${redIntensity}, 0, 0)`;
-        
-        // Red glow with pulsing effect
-        const glowIntensity = 0.5 + (stepIndex * 0.2);
-        lockBody.style.boxShadow = `0 0 ${30 + stepIndex * 20}px rgba(255, 0, 0, ${glowIntensity})`;
-        lockBody.style.animation = `lockPulse${stepIndex} 1s ease-in-out`;
-    }
-    
-    function triggerGenericLockAnimation(lockBody, stepIndex) {
-        console.log('⚪ Triggering generic lock animation');
-        
-        // Basic animation for any unspecified lock type
-        const scaleAmount = 1 + (stepIndex * 0.1);
-        lockBody.style.transform = `scale(${scaleAmount})`;
-        lockBody.style.filter = `brightness(${1 + stepIndex * 0.2})`;
-    }
-    
-    function animateLockSegments(segments, stepIndex) {
-        console.log(`🔧 Animating ${segments.length} lock segments for step ${stepIndex + 1}`);
-        
-        segments.forEach((segment, index) => {
-            if (index <= stepIndex) {
-                segment.classList.add('segment-active');
-                segment.style.background = 'linear-gradient(45deg, #0f0, #090)';
-                segment.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.6)';
-            }
-        });
-    }
-    
-    function updateProgressBars(progressBars, stepIndex) {
-        const totalSteps = currentProblem.steps.length;
-        const progressPercentage = ((stepIndex + 1) / totalSteps) * 100;
-        
-        console.log(`📊 Updating progress bars: ${progressPercentage.toFixed(1)}% (${stepIndex + 1}/${totalSteps})`);
-        
-        progressBars.forEach(bar => {
-            bar.style.width = `${progressPercentage}%`;
-            bar.style.background = `linear-gradient(90deg, #0f0, #090)`;
-            bar.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.5)';
-        });
-    }
-
     // Add completion glow animation and additional styles
     const gameStyles = document.createElement('style');
     gameStyles.textContent = `
@@ -609,48 +422,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        /* Lock animation enhancements */
-        .segment-active {
-            transition: all 0.5s ease-in-out;
-        }
-        
-        /* Dynamic keyframes for master level pulsing */
-        @keyframes lockPulse0 {
-            0% { filter: brightness(1); }
-            50% { filter: brightness(1.5); }
-            100% { filter: brightness(1); }
-        }
-        
-        @keyframes lockPulse1 {
-            0% { filter: brightness(1) hue-rotate(0deg); }
-            50% { filter: brightness(1.6) hue-rotate(10deg); }
-            100% { filter: brightness(1) hue-rotate(0deg); }
-        }
-        
-        @keyframes lockPulse2 {
-            0% { filter: brightness(1) hue-rotate(0deg); }
-            50% { filter: brightness(1.7) hue-rotate(20deg); }
-            100% { filter: brightness(1) hue-rotate(0deg); }
-        }
-        
-        @keyframes lockPulse3 {
-            0% { filter: brightness(1) hue-rotate(0deg); }
-            50% { filter: brightness(1.8) hue-rotate(30deg); }
-            100% { filter: brightness(1) hue-rotate(0deg); }
-        }
-        
-        @keyframes lockPulse4 {
-            0% { filter: brightness(1) hue-rotate(0deg); }
-            50% { filter: brightness(1.9) hue-rotate(40deg); }
-            100% { filter: brightness(1) hue-rotate(0deg); }
-        }
-        
-        @keyframes lockPulse5 {
-            0% { filter: brightness(1) hue-rotate(0deg); }
-            50% { filter: brightness(2.0) hue-rotate(50deg); }
-            100% { filter: brightness(1) hue-rotate(0deg); }
-        }
-        
         .problem-text {
             font-size: 1.1em;
             font-weight: 700;
@@ -659,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         .steps-container {
             font-family: 'Orbitron', monospace;
-            font-size: 1.1em;
+            font-size: 1.65em; /* Increased by 50% */
             line-height: 1.8;
         }
         
@@ -677,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         .hidden-symbol {
             color: transparent;
-            background: rgba(255,255,255,0.1);
+            background: transparent; /* Hide text boxes */
             border-radius: 2px;
             text-shadow: none;
         }
