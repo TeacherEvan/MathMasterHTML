@@ -319,7 +319,17 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Trigger worm spawning for completed line
             console.log('🐛 DISPATCHING problemLineCompleted EVENT - This should spawn a worm!');
-            document.dispatchEvent(new CustomEvent('problemLineCompleted'));
+            
+            // Enhanced event dispatch with line details
+            document.dispatchEvent(new CustomEvent('problemLineCompleted', { 
+                detail: { 
+                    lineNumber: currentStepIndex + 1,
+                    lineText: currentProblem.steps[currentStepIndex]
+                }
+            }));
+            
+            // Log the completion for debugging
+            console.log(`🔒 Line ${currentStepIndex + 1} completed - triggering lock progression`);
             
             // Move to next step if available
             if (currentStepIndex < currentProblem.steps.length - 1) {

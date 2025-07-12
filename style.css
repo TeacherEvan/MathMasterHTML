@@ -6,7 +6,7 @@
   text-shadow: none;
 }
 
-/* Ensure lock-display matches the green theme */
+/* Ensure lock-display matches the clean theme */
 #lock-display {
   flex: 1;
   display: flex !important;
@@ -16,11 +16,9 @@
   overflow: visible !important;
   position: relative;
   min-height: 300px;
-  border: 2px solid rgba(0,255,0,0.3);
+  border: none; /* Removed green border */
   border-radius: 8px;
-  background: radial-gradient(ellipse at center,
-                             rgba(0, 50, 0, 0.3),
-                             rgba(0, 30, 0, 0.8)); /* Match green gradient */
+  background: transparent; /* Removed black/green background */
 }
 
 /* Readable waiting message */

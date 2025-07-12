@@ -17,23 +17,25 @@
     justify-content: center !important;
     align-items: center !important;
     overflow: visible !important;
-    max-width: 300px;
-    max-height: 350px;
+    max-width: 390px; /* Increased by 30% from 300px */
+    max-height: 455px; /* Increased by 30% from 350px */
     margin: 0 auto !important;
     padding: 10px;
     box-sizing: border-box;
     /* Support for responsive scaling */
-    transform: scale(var(--lock-scale, 0.8));
+    transform: scale(var(--lock-scale, 1.04)); /* Increased by 30% from 0.8 */
     transform-origin: center center;
     transition: transform 0.3s ease;
+    border: none; /* Removed any border */
+    background: transparent; /* Removed any background */
 }
 
 /* Lock container responsive scaling */
 #lock-display .lock-container {
-    transform: scale(var(--lock-container-scale, 0.8)) !important;
+    transform: scale(var(--lock-container-scale, 1.04)) !important; /* Increased by 30% from 0.8 */
     transform-origin: center center !important;
-    max-width: 250px !important;
-    max-height: 300px !important;
+    max-width: 325px !important; /* Increased by 30% from 250px */
+    max-height: 390px !important; /* Increased by 30% from 300px */
     margin: 0 auto !important;
     display: flex !important;
     justify-content: center !important;
@@ -56,12 +58,12 @@
 
 /* Responsive lock body scaling */
 .lock-body {
-    max-width: 80px !important;
-    max-height: 120px !important;
+    max-width: 104px !important; /* Increased by 30% from 80px */
+    max-height: 156px !important; /* Increased by 30% from 120px */
     transition: all 0.3s ease;
     transform-origin: center center !important;
     margin: 0 auto !important;
-    transform: scale(var(--lock-body-scale, 1));
+    transform: scale(var(--lock-body-scale, 1.3)); /* Increased by 30% from 1 */
 }
 
 /* Error and waiting states */

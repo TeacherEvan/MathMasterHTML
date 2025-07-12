@@ -48,11 +48,46 @@ class LockManager {
         });
         
         // Listen for problem line completion
-        document.addEventListener('problemLineCompleted', () => {
-            console.log('🔒 LockManager received problemLineCompleted event');
+        document.addEventListener('problemLineCompleted', (e) => {
+            console.log('🔒 LockManager received problemLineCompleted event', e.detail ? e.detail : '(no details)');
             this.completedLinesCount++;
-            this.progressLockLevel();
+            console.log(`🔒 Completed lines count is now: ${this.completedLinesCount}`);
+            
+            // Check if we're in master level
+            const isMasterLevel = document.body.classList.contains('master-level');
+            console.log(`🔒 Current game mode: ${isMasterLevel ? 'Master Level' : 'Normal Level'}`);
+            
+            // Force reload line-3-transformer.html specifically when second line is completed in non-master mode
+            if (this.completedLinesCount === 2 && !isMasterLevel) {
+                console.log('🔒 Second line completed - forcing load of line-3-transformer.html');
+                this.isLoadingComponent = true;
+                this.loadLockComponent('line-3-transformer.html')
+                    .then(() => {
+                        setTimeout(() => {
+                            this.activateLockLevel(3);
+                            this.currentLockLevel = 3;
+                            this.isLoadingComponent = false;
+                        }, 300);
+                    })
+                    .catch(error => {
+                        console.error('❌ Failed to load line-3-transformer.html:', error);
+                        this.isLoadingComponent = false;
+                    });
+            } else {
+                // Normal progression
+                this.progressLockLevel();
+            }
         });
+        
+        // Add additional debug listener for lock-related events
+        console.log('🔒 Setting up additional debug listeners for lock events');
+        
+        // Debug event to trace lock loading issues
+        window.addEventListener('error', (e) => {
+            if (e.target && (e.target.tagName === 'IFRAME' || e.target.tagName === 'IMG')) {
+                console.error(`🔒 Resource load error: ${e.target.src}`);
+            }
+        }, true);
     }
     
     
@@ -175,8 +210,20 @@ class LockManager {
             return;
         }
         
-        // Progress every 2 completed lines as documented
-        const newLevel = Math.min(6, Math.floor(this.completedLinesCount / 2) + 1);
+        // Get the current level
+        const isMasterLevel = document.body.classList.contains('master-level');
+        
+        // Progress calculation differs for Master level vs other levels
+        let newLevel;
+        if (isMasterLevel) {
+            // In Master level, all 6 lock lines can be triggered
+            newLevel = Math.min(6, this.completedLinesCount + 1);
+        } else {
+            // For other levels, restrict to max level 3 (lines 1-3 only)
+            newLevel = Math.min(3, Math.floor(this.completedLinesCount / 2) + 1);
+        }
+        
+        console.log(`🔒 Lock progression check: completedLinesCount=${this.completedLinesCount}, newLevel=${newLevel}, currentLevel=${this.currentLockLevel}, isMasterLevel=${isMasterLevel}`);
         
         if (newLevel > this.currentLockLevel) {
             console.log(`🔒 Progressing to lock level ${newLevel} (${this.completedLinesCount} lines completed)`);
@@ -186,12 +233,16 @@ class LockManager {
             // Normalize component filename (handle inconsistent naming)
             const componentName = this.normalizeComponentName(newLevel);
             
+            console.log(`🔒 Loading component for level ${newLevel}: ${componentName}`);
+            
             // Load the new lock component
             this.loadLockComponent(componentName)
                 .then(() => {
                     setTimeout(() => {
                         this.activateLockLevel(newLevel);
                         this.isLoadingComponent = false;
+                        // Dispatch an event to notify that the lock level has been updated
+                        document.dispatchEvent(new CustomEvent('lockLevelUpdated', { detail: { level: newLevel } }));
                     }, 300);
                 })
                 .catch(error => {
@@ -220,6 +271,15 @@ class LockManager {
     triggerLevelAnimation(lockBody, level) {
         console.log(`🎨 Triggering level ${level} animation`);
         
+        // Check if we're in master level
+        const isMasterLevel = document.body.classList.contains('master-level');
+        
+        // In non-master levels, cap at level 3
+        if (!isMasterLevel && level > 3) {
+            console.log(`⚠️ Capping animation at level 3 (non-master level)`);
+            level = 3;
+        }
+        
         switch (level) {
             case 1:
                 this.triggerBeginnerAnimation(lockBody);
@@ -231,7 +291,12 @@ class LockManager {
             case 4:
             case 5:
             case 6:
-                this.triggerMasterAnimation(lockBody, level);
+                if (isMasterLevel) {
+                    this.triggerMasterAnimation(lockBody, level);
+                } else {
+                    // Fallback to warrior animation if somehow reached here in non-master level
+                    this.triggerWarriorAnimation(lockBody, 3);
+                }
                 break;
             default:
                 this.triggerGenericAnimation(lockBody, level);
@@ -352,45 +417,49 @@ class LockManager {
                 </div>
                 <style>
                     .basic-lock-container {
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%) scale(1.8);
                         display: flex;
                         flex-direction: column;
                         align-items: center;
                         justify-content: center;
-                        transform-origin: center;
-                        margin: 20px auto;
-                        max-width: 100px;
-                        max-height: 140px;
+                        transform-origin: center center;
+                        width: 120px;
+                        height: 160px;
+                        z-index: 10;
                     }
                     
                     .basic-lock-shackle {
-                        width: 40px;
-                        height: 30px;
-                        border: 6px solid #666;
+                        width: 50px;
+                        height: 38px;
+                        border: 7px solid #666;
                         border-bottom: none;
-                        border-radius: 20px 20px 0 0;
-                        margin-bottom: 5px;
+                        border-radius: 25px 25px 0 0;
+                        margin-bottom: 6px;
                         background: transparent;
-                        box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+                        box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
                     }
                     
                     .basic-lock-body {
-                        width: 60px;
-                        height: 80px;
+                        width: 75px;
+                        height: 100px;
                         background: linear-gradient(145deg, #2a2a2a, #404040);
-                        border-radius: 8px;
+                        border-radius: 10px;
                         position: relative;
                         border: 2px solid #555;
                         box-shadow: 
-                            0 4px 8px rgba(0,0,0,0.3),
-                            inset 0 0 5px rgba(0,0,0,0.2);
+                            0 5px 10px rgba(0,0,0,0.3),
+                            inset 0 0 6px rgba(0,0,0,0.2);
                         display: flex;
                         justify-content: center;
                         align-items: center;
                     }
                     
                     .basic-lock-keyhole {
-                        width: 12px;
-                        height: 12px;
+                        width: 15px;
+                        height: 15px;
                         background: #000;
                         border-radius: 50%;
                         position: relative;
@@ -400,11 +469,11 @@ class LockManager {
                     .basic-lock-keyhole::after {
                         content: '';
                         position: absolute;
-                        bottom: -6px;
+                        bottom: -8px;
                         left: 50%;
                         transform: translateX(-50%);
-                        width: 4px;
-                        height: 8px;
+                        width: 5px;
+                        height: 10px;
                         background: #000;
                         border: 1px solid #333;
                         border-top: none;
@@ -419,17 +488,17 @@ class LockManager {
                     
                     .bolt {
                         position: absolute;
-                        width: 8px;
-                        height: 8px;
+                        width: 10px;
+                        height: 10px;
                         background: #333;
                         border-radius: 50%;
                         box-shadow: inset 0 0 2px rgba(0,0,0,0.5);
                     }
                     
-                    .bolt-1 { top: 10px; left: 10px; }
-                    .bolt-2 { top: 10px; right: 10px; }
-                    .bolt-3 { bottom: 10px; left: 10px; }
-                    .bolt-4 { bottom: 10px; right: 10px; }
+                    .bolt-1 { top: 12px; left: 12px; }
+                    .bolt-2 { top: 12px; right: 12px; }
+                    .bolt-3 { bottom: 12px; left: 12px; }
+                    .bolt-4 { bottom: 12px; right: 12px; }
                 </style>
             `;
         }
