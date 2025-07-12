@@ -1,0 +1,117 @@
+/* Lock Component Responsive Design */
+/* This CSS ensures lock components work properly in both fullscreen and side displays */
+
+/* Base lock component container */
+.lock-component-wrapper {
+    position: absolute;
+    top: 50%;
+    left: calc(50% - 1.3in); /* Moved 1.3 inches to the left (increased from 1in) */
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+    box-sizing: border-box;
+    z-index: 10;
+}
+
+/* Responsive scaling for lock containers */
+.lock-component-wrapper .lock-container {
+    transform: scale(4.00) !important; /* Further increased to enlarge all locks */
+    transform-origin: center center !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    position: relative !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* Ensure lock bodies scale properly and stay centered */
+.lock-component-wrapper .lock-body {
+    position: relative !important;
+    transform-origin: center center !important;
+    margin: 0 auto !important;
+    max-width: none !important;
+    max-height: none !important;
+}
+
+/* Override individual component sizing */
+.lock-component-wrapper .lock-container,
+.lock-component-wrapper .lock-body,
+.lock-component-wrapper .transformer,
+.lock-component-wrapper .lock-mechanism {
+    box-sizing: border-box;
+}
+
+/* Make sure extensions and mechanical parts scale with container */
+.lock-component-wrapper .extension-rails,
+.lock-component-wrapper .mechanical-extension,
+.lock-component-wrapper .transformer-extension {
+    position: absolute;
+    transform-origin: center;
+}
+
+/* Responsive animations - maintain larger scale for side display */
+@media screen and (max-width: 1920px) {
+    .lock-component-wrapper .lock-container {
+        transform: scale(4.00) !important;
+    }
+}
+
+@media screen and (max-width: 1440px) {
+    .lock-component-wrapper .lock-container {
+        transform: scale(3.80) !important;
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .lock-component-wrapper .lock-container {
+        transform: scale(3.40) !important;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    .lock-component-wrapper .lock-container {
+        transform: scale(3.20) !important;
+    }
+}
+
+/* Make sure all lock component styles are contained */
+.lock-component-wrapper * {
+    box-sizing: border-box;
+}
+
+/* Override any fullscreen-specific styles */
+.lock-component-wrapper body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* Ensure animations work at smaller scales */
+.lock-component-wrapper .lock-body.level-1-active,
+.lock-component-wrapper .lock-body.level-2-active,
+.lock-component-wrapper .lock-body.level-3-active,
+.lock-component-wrapper .lock-body.level-4-active,
+.lock-component-wrapper .lock-body.level-5-active,
+.lock-component-wrapper .lock-body.level-6-active {
+    animation-duration: 1.2s;
+    animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Error states */
+.lock-error {
+    color: #ff4444;
+    text-align: center;
+    font-size: 16px;
+    padding: 20px;
+    font-family: 'Orbitron', monospace;
+}

@@ -1,0 +1,30 @@
+Worms are NPC's that are generated in the midle window (Worm Animation System
+**File: WormAnimationManager.cs**
+
+**Worm Specifications:**
+- **Appearance**: Segmented creatures with 8 body segments
+- **Colors**: Earthy tones with random variation per worm
+- **Size**: 12px base segment size with slight randomization
+- **Maximum Count**: 4 worms simultaneously
+- **Animation**: Smooth movement with segment following
+
+**Behavioral System:**
+- **Movement**: Random direction changes, edge bouncing
+- **Targeting**: Symbol stealing behavior with visual indicators
+- **Transport Animation**: Smooth symbol theft with teleportation effects
+- **Player Interaction**: Clickable to stop symbol theft
+- **Speed Variation**: Dynamic speed changes during gameplay events
+
+**Visual Features:**
+- **Eyes**: Blinking animation with random timing
+- **Mouth**: Opening/closing states during feeding
+- **Color Cycling**: LSD-style rainbow effects during celebration
+- **Particle Trails**: Following movement for enhanced visual appeal
+- **Collision Effects**: Explosion animations when clicked
+
+**Symbol Interaction:**
+- **Detection Range**: Proximity-based symbol targeting
+- **Theft Animation**: 1-second smooth movement to symbol
+- **Transport Effect**: Symbol follows worm to off-screen
+- **Player Intervention**: Click worm to save symbol
+- **Feedback**: Visual and audio confirmation of intervention

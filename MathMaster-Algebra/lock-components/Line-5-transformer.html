@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level 5 Lock Transformer - Ultimate Metamorphosis</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent; /* Make transparent for game integration */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100%;
+            font-family: 'Orbitron', monospace;
+            overflow: hidden;
+        }
+
+        .lock-container {
+            position: relative;
+            width: 200px; /* Optimized for game display */
+            height: 200px; /* Optimized for game display */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform-style: preserve-3d;
+            perspective: 500px; /* Adjusted for game display */
+            transform: scale(0.8); /* Better scale for game integration */
+            transform-origin: center;
+            margin: 15px auto; /* Center in game display */
+        }
+
+        .lock-body {
+            /* Starting from Level 4's final state - All previous transformations */
+            position: relative;
+            width: 180px; /* Level 3's final circular width */
+            height: 180px; /* Level 3's final circular height */
+            background: linear-gradient(145deg, #4a1a1a, #6a2a2a, #4a1a1a); /* Red from Level 4 */
+            border-radius: 50%; /* Circular from Level 3 */
+            border: 4px solid #ff4444; /* Red border from Level 4 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: scaleY(1.5) scaleX(1.6) rotateY(720deg) rotateZ(360deg) scale(1.2); /* All Level 4 transformations */
+            transform-style: preserve-3d;
+            transition: all 3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 
+                0 0 80px rgba(255, 68, 68, 0.8), /* Red glow from Level 4 */
+                inset 0 0 25px rgba(255, 68, 68, 0.3),
+                0 0 0 10px rgba(255, 68, 68, 0.2);
+        }
+
+        .lock-body.active {
+            animation: level5-metamorphosis 5s ease-in-out forwards;
+            background: linear-gradient(145deg, #1a1a4a, #2a2a6a, #1a1a4a); /* Transition to blue */
+            border-color: #4488ff;
+            box-shadow: 
+                0 0 120px rgba(68, 136, 255, 1.0),
+                inset 0 0 40px rgba(68, 136, 255, 0.5),
+                0 0 0 15px rgba(68, 136, 255, 0.3);
+        }
+
+        /* Core Element - Enhanced for Level 5 */
+        .core {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #4488ff, #6699ff, #4488ff);
+            border-radius: 50%;
+            border: 3px solid #88aaff;
+            transition: all 3s ease-in-out;
+            box-shadow: 
+                0 0 25px rgba(68, 136, 255, 1.0),
+                inset 0 0 15px rgba(136, 170, 255, 0.8);
+            z-index: 10;
+        }
+
+        .core.active {
+            animation: core-ultimate-pulse 2s infinite ease-in-out;
+        }
+
+        /* Detachable Segments */
+        .detachable-segment {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #4488ff, #6699ff);
+            border: 2px solid #88aaff;
+            border-radius: 8px;
+            transition: all 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 0 20px rgba(68, 136, 255, 0.8);
+            opacity: 0;
+        }
+
+        /* Four corner segments that detach */
+        .segment-nw {
+            top: 20px;
+            left: 20px;
+            transform: translate(0, 0) rotate(0deg);
+        }
+
+        .segment-ne {
+            top: 20px;
+            right: 20px;
+            transform: translate(0, 0) rotate(0deg);
+        }
+
+        .segment-sw {
+            bottom: 20px;
+            left: 20px;
+            transform: translate(0, 0) rotate(0deg);
+        }
+
+        .segment-se {
+            bottom: 20px;
+            right: 20px;
+            transform: translate(0, 0) rotate(0deg);
+        }
+
+        .detachable-segment.active {
+            opacity: 1;
+        }
+
+        .segment-nw.detached {
+            transform: translate(-60px, -60px) rotate(45deg) scale(1.2);
+            animation: segment-float-nw 4s infinite ease-in-out;
+        }
+
+        .segment-ne.detached {
+            transform: translate(60px, -60px) rotate(-45deg) scale(1.2);
+            animation: segment-float-ne 4s infinite ease-in-out;
+        }
+
+        .segment-sw.detached {
+            transform: translate(-60px, 60px) rotate(-45deg) scale(1.2);
+            animation: segment-float-sw 4s infinite ease-in-out;
+        }
+
+        .segment-se.detached {
+            transform: translate(60px, 60px) rotate(45deg) scale(1.2);
+            animation: segment-float-se 4s infinite ease-in-out;
+        }
+
+        /* Static Electric Current Lines */
+        .electric-current {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, #4488ff, #88aaff, #4488ff, transparent);
+            height: 2px;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            box-shadow: 0 0 10px rgba(68, 136, 255, 0.8);
+            animation: electric-flow 1.5s infinite ease-in-out;
+        }
+
+        .electric-current.active {
+            opacity: 1;
+        }
+
+        /* Electric currents connecting core to segments */
+        .current-to-nw {
+            width: 100px;
+            top: 50%;
+            left: 50%;
+            transform-origin: left center;
+            transform: translateY(-50%) rotate(-45deg);
+        }
+
+        .current-to-ne {
+            width: 100px;
+            top: 50%;
+            left: 50%;
+            transform-origin: left center;
+            transform: translateY(-50%) rotate(45deg);
+        }
+
+        .current-to-sw {
+            width: 100px;
+            top: 50%;
+            left: 50%;
+            transform-origin: left center;
+            transform: translateY(-50%) rotate(-135deg);
+        }
+
+        .current-to-se {
+            width: 100px;
+            top: 50%;
+            left: 50%;
+            transform-origin: left center;
+            transform: translateY(-50%) rotate(135deg);
+        }
+
+        /* Enhanced Energy Arcs from Level 4 - Now Blue */
+        .energy-arc {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 3px solid transparent;
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 2s ease-in-out;
+        }
+
+        .energy-arc.active {
+            opacity: 1;
+            border-color: #4488ff;
+            animation: arc-discharge-blue 2s infinite ease-in-out;
+            box-shadow: 
+                0 0 30px rgba(68, 136, 255, 0.8),
+                inset 0 0 20px rgba(68, 136, 255, 0.4);
+        }
+
+        .arc-north { top: -40px; left: 50%; transform: translateX(-50%); }
+        .arc-south { bottom: -40px; left: 50%; transform: translateX(-50%); }
+        .arc-east { right: -40px; top: 50%; transform: translateY(-50%); }
+        .arc-west { left: -40px; top: 50%; transform: translateY(-50%); }
+
+        /* Particle System - Enhanced for Level 5 */
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, #4488ff, #88aaff);
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 15px rgba(68, 136, 255, 0.8);
+        }
+
+        .particle.active {
+            opacity: 1;
+            animation: particle-orbit 3s infinite linear;
+        }
+
+        /* Remove all text elements and status indicators */
+        .status-indicator,
+        .status-display,
+        .level-display,
+        .btn,
+        .controls {
+            display: none !important;
+        }
+
+        /* Status Display - Hidden in game mode */
+        .status-display {
+            display: none !important;
+        }
+
+        .status-display.active {
+            display: none !important;
+        }
+
+        /* Control Instructions - Hidden in game mode */
+        .controls {
+            display: none !important;
+        }
+
+        /* Animations */
+        @keyframes level5-metamorphosis {
+            0% {
+                transform: scaleY(1.5) scaleX(1.6) rotateY(720deg) rotateZ(360deg) scale(1.2);
+                background: linear-gradient(145deg, #4a1a1a, #6a2a2a, #4a1a1a);
+            }
+            25% {
+                transform: scaleY(1.5) scaleX(1.6) rotateY(900deg) rotateZ(540deg) scale(1.4);
+                background: linear-gradient(145deg, #3a1a3a, #5a2a5a, #3a1a3a);
+            }
+            50% {
+                transform: scaleY(1.5) scaleX(1.6) rotateY(1080deg) rotateZ(720deg) scale(1.6);
+                background: linear-gradient(145deg, #2a1a4a, #4a2a6a, #2a1a4a);
+            }
+            75% {
+                transform: scaleY(1.5) scaleX(1.6) rotateY(1260deg) rotateZ(900deg) scale(1.5);
+                background: linear-gradient(145deg, #1a2a4a, #2a4a6a, #1a2a4a);
+            }
+            100% {
+                transform: scaleY(1.5) scaleX(1.6) rotateY(1440deg) rotateZ(1080deg) scale(1.4);
+                background: linear-gradient(145deg, #1a1a4a, #2a2a6a, #1a1a4a);
+            }
+        }
+
+        @keyframes core-ultimate-pulse {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+                box-shadow: 
+                    0 0 25px rgba(68, 136, 255, 1.0),
+                    inset 0 0 15px rgba(136, 170, 255, 0.8);
+            }
+            50% {
+                transform: scale(1.3) rotate(180deg);
+                box-shadow: 
+                    0 0 40px rgba(68, 136, 255, 1.2),
+                    inset 0 0 25px rgba(136, 170, 255, 1.0);
+            }
+        }
+
+        @keyframes segment-float-nw {
+            0%, 100% { transform: translate(-60px, -60px) rotate(45deg) scale(1.2); }
+            50% { transform: translate(-70px, -70px) rotate(90deg) scale(1.4); }
+        }
+
+        @keyframes segment-float-ne {
+            0%, 100% { transform: translate(60px, -60px) rotate(-45deg) scale(1.2); }
+            50% { transform: translate(70px, -70px) rotate(-90deg) scale(1.4); }
+        }
+
+        @keyframes segment-float-sw {
+            0%, 100% { transform: translate(-60px, 60px) rotate(-45deg) scale(1.2); }
+            50% { transform: translate(-70px, 70px) rotate(-90deg) scale(1.4); }
+        }
+
+        @keyframes segment-float-se {
+            0%, 100% { transform: translate(60px, 60px) rotate(45deg) scale(1.2); }
+            50% { transform: translate(70px, 70px) rotate(90deg) scale(1.4); }
+        }
+
+        @keyframes electric-flow {
+            0% {
+                background: linear-gradient(90deg, transparent, #4488ff, #88aaff, #4488ff, transparent);
+            }
+            50% {
+                background: linear-gradient(90deg, transparent, #88aaff, #aaccff, #88aaff, transparent);
+            }
+            100% {
+                background: linear-gradient(90deg, transparent, #4488ff, #88aaff, #4488ff, transparent);
+            }
+        }
+
+        @keyframes arc-discharge-blue {
+            0%, 100% {
+                border-color: #4488ff;
+                box-shadow: 
+                    0 0 30px rgba(68, 136, 255, 0.8),
+                    inset 0 0 20px rgba(68, 136, 255, 0.4);
+            }
+            50% {
+                border-color: #88aaff;
+                box-shadow: 
+                    0 0 50px rgba(136, 170, 255, 1.2),
+                    inset 0 0 35px rgba(136, 170, 255, 0.7);
+            }
+        }
+
+        @keyframes particle-orbit {
+            0% {
+                transform: rotate(0deg) translateX(120px) rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg) translateX(120px) rotate(-360deg);
+            }
+        }
+
+        @keyframes status-glow-blue {
+            0%, 100% {
+                text-shadow: 0 0 20px rgba(68, 136, 255, 0.8);
+                color: #4488ff;
+            }
+            50% {
+                text-shadow: 0 0 40px rgba(136, 170, 255, 1.2);
+                color: #88aaff;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+    </div>
+
+    <div class="lock-container">
+        <!-- Main Lock Body (Starting from Level 4's final state) -->
+        <div class="lock-body" id="lockBody">
+            <!-- Core Element -->
+            <div class="core" id="core"></div>
+
+            <!-- Detachable Segments -->
+            <div class="detachable-segment segment-nw" id="segmentNW"></div>
+            <div class="detachable-segment segment-ne" id="segmentNE"></div>
+            <div class="detachable-segment segment-sw" id="segmentSW"></div>
+            <div class="detachable-segment segment-se" id="segmentSE"></div>
+
+            <!-- Static Electric Currents -->
+            <div class="electric-current current-to-nw" id="currentNW"></div>
+            <div class="electric-current current-to-ne" id="currentNE"></div>
+            <div class="electric-current current-to-sw" id="currentSW"></div>
+            <div class="electric-current current-to-se" id="currentSE"></div>
+
+            <!-- Enhanced Energy Arcs (From Level 4, now blue) -->
+            <div class="energy-arc arc-north" id="arcNorth"></div>
+            <div class="energy-arc arc-south" id="arcSouth"></div>
+            <div class="energy-arc arc-east" id="arcEast"></div>
+            <div class="energy-arc arc-west" id="arcWest"></div>
+
+            <!-- Particle System -->
+            <div class="particle" id="particle1"></div>
+            <div class="particle" id="particle2"></div>
+            <div class="particle" id="particle3"></div>
+            <div class="particle" id="particle4"></div>
+            <div class="particle" id="particle5"></div>
+            <div class="particle" id="particle6"></div>
+            <div class="particle" id="particle7"></div>
+            <div class="particle" id="particle8"></div>
+        </div>
+
+    </div>
+
+    <script>
+        class Level5Lock {
+            constructor() {
+                this.isActive = false;
+                this.currentPhase = 0;
+                this.totalPhases = 6;
+                this.detachedSegments = 0;
+                
+                this.elements = {
+                    lockBody: document.getElementById('lockBody'),
+                    core: document.getElementById('core'),
+                    statusDisplay: document.getElementById('statusDisplay'),
+                    segments: {
+                        nw: document.getElementById('segmentNW'),
+                        ne: document.getElementById('segmentNE'),
+                        sw: document.getElementById('segmentSW'),
+                        se: document.getElementById('segmentSE')
+                    },
+                    currents: {
+                        nw: document.getElementById('currentNW'),
+                        ne: document.getElementById('currentNE'),
+                        sw: document.getElementById('currentSW'),
+                        se: document.getElementById('currentSE')
+                    },
+                    arcs: {
+                        north: document.getElementById('arcNorth'),
+                        south: document.getElementById('arcSouth'),
+                        east: document.getElementById('arcEast'),
+                        west: document.getElementById('arcWest')
+                    },
+                    particles: []
+                };
+
+                // Initialize particles
+                for (let i = 1; i <= 8; i++) {
+                    this.elements.particles.push(document.getElementById(`particle${i}`));
+                }
+
+                this.bindEvents();
+            }
+
+            bindEvents() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === '5') {
+                        this.activate();
+                    } else if (e.key.toLowerCase() === 'r') {
+                        this.reset();
+                    }
+                });
+            }
+
+            activate() {
+                if (this.isActive) return;
+                
+                console.log('🔵 Level 5 Ultimate Metamorphosis: Static Electric Detachment Initiated');
+                this.isActive = true;
+                this.currentPhase = 1;
+
+                // Phase 1: Core transformation and status display (0-1s)
+                setTimeout(() => this.phase1_CoreTransformation(), 100);
+                
+                // Phase 2: Segment emergence (1-2s)
+                setTimeout(() => this.phase2_SegmentEmergence(), 1000);
+                
+                // Phase 3: Static electric currents activation (2-3s)
+                setTimeout(() => this.phase3_ElectricCurrents(), 2000);
+                
+                // Phase 4: Segment detachment (3-4s)
+                setTimeout(() => this.phase4_SegmentDetachment(), 3000);
+                
+                // Phase 5: Enhanced energy arcs (4-5s)
+                setTimeout(() => this.phase5_EnergyArcs(), 4000);
+                
+                // Phase 6: Particle system activation (5s+)
+                setTimeout(() => this.phase6_ParticleSystem(), 5000);
+            }
+
+            phase1_CoreTransformation() {
+                console.log('⚡ Phase 1: Core Blue Energy Transformation');
+                this.currentPhase = 1;
+                this.elements.lockBody.classList.add('active');
+                this.elements.core.classList.add('active');
+                this.elements.statusDisplay.classList.add('active');
+            }
+
+            phase2_SegmentEmergence() {
+                console.log('🔧 Phase 2: Detachable Segments Emergence');
+                this.currentPhase = 2;
+                
+                Object.values(this.elements.segments).forEach((segment, index) => {
+                    setTimeout(() => {
+                        segment.classList.add('active');
+                    }, index * 200);
+                });
+            }
+
+            phase3_ElectricCurrents() {
+                console.log('⚡ Phase 3: Static Electric Currents Activation');
+                this.currentPhase = 3;
+                
+                Object.values(this.elements.currents).forEach((current, index) => {
+                    setTimeout(() => {
+                        current.classList.add('active');
+                    }, index * 150);
+                });
+            }
+
+            phase4_SegmentDetachment() {
+                console.log('🚀 Phase 4: Segment Detachment with Electric Tethering');
+                this.currentPhase = 4;
+                
+                const segmentKeys = ['nw', 'ne', 'sw', 'se'];
+                segmentKeys.forEach((key, index) => {
+                    setTimeout(() => {
+                        this.elements.segments[key].classList.add('detached');
+                        this.detachedSegments++;
+                        console.log(`   Segment ${key.toUpperCase()} detached (${this.detachedSegments}/4)`);
+                    }, index * 300);
+                });
+            }
+
+            phase5_EnergyArcs() {
+                console.log('🌀 Phase 5: Enhanced Blue Energy Arc Discharge');
+                this.currentPhase = 5;
+                
+                Object.values(this.elements.arcs).forEach((arc, index) => {
+                    setTimeout(() => {
+                        arc.classList.add('active');
+                    }, index * 200);
+                });
+            }
+
+            phase6_ParticleSystem() {
+                console.log('✨ Phase 6: Ultimate Particle System Activation');
+                this.currentPhase = 6;
+                
+                this.elements.particles.forEach((particle, index) => {
+                    setTimeout(() => {
+                        particle.classList.add('active');
+                        particle.style.animationDelay = `${index * 0.2}s`;
+                    }, index * 100);
+                });
+                
+                console.log('🎉 Level 5 Ultimate Metamorphosis: COMPLETE - Static Electric Mastery Achieved!');
+            }
+
+            reset() {
+                console.log('🔄 Level 5 Reset: Returning to Level 4 final state');
+                this.isActive = false;
+                this.currentPhase = 0;
+                this.detachedSegments = 0;
+
+                // Remove all active classes
+                this.elements.lockBody.classList.remove('active');
+                this.elements.core.classList.remove('active');
+                this.elements.statusDisplay.classList.remove('active');
+
+                Object.values(this.elements.segments).forEach(segment => {
+                    segment.classList.remove('active', 'detached');
+                });
+
+                Object.values(this.elements.currents).forEach(current => {
+                    current.classList.remove('active');
+                });
+
+                Object.values(this.elements.arcs).forEach(arc => {
+                    arc.classList.remove('active');
+                });
+
+                this.elements.particles.forEach(particle => {
+                    particle.classList.remove('active');
+                });
+            }
+
+            getStatus() {
+                return {
+                    isActive: this.isActive,
+                    currentPhase: this.currentPhase,
+                    totalPhases: this.totalPhases,
+                    detachedSegments: this.detachedSegments,
+                    phaseNames: [
+                        'Inactive',
+                        'Core Transformation',
+                        'Segment Emergence',
+                        'Electric Currents',
+                        'Segment Detachment',
+                        'Energy Arc Discharge',
+                        'Particle System'
+                    ]
+                };
+            }
+
+            getCurrentPhase() {
+                return this.currentPhase;
+            }
+
+            getDetachedSegments() {
+                return this.detachedSegments;
+            }
+
+            isFullyDetached() {
+                return this.detachedSegments === 4;
+            }
+        }
+
+        // Initialize Level 5 Lock
+        const level5Lock = new Level5Lock();
+
+        // Make it globally accessible for integration
+        window.Level5Lock = {
+            activate: () => level5Lock.activate(),
+            reset: () => level5Lock.reset(),
+            getStatus: () => level5Lock.getStatus(),
+            isActive: () => level5Lock.isActive,
+            getCurrentPhase: () => level5Lock.getCurrentPhase(),
+            getDetachedSegments: () => level5Lock.getDetachedSegments(),
+            isFullyDetached: () => level5Lock.isFullyDetached()
+        };
+
+        console.log('🔵 Level 5 Lock Transformer Initialized - Ultimate Metamorphosis Ready');
+        console.log('Press "5" to activate, "R" to reset');
+    </script>
+</body>
+</html>

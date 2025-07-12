@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Master Algebra - Welcome</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Orbitron', monospace;
+            background: #000;
+            overflow: hidden;
+            cursor: pointer;
+            height: 100vh;
+            position: relative;
+        }
+        
+        /* Matrix Rain Background */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .matrix-column {
+            position: absolute;
+            top: -100px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            text-shadow: 0 0 5px #00ff00;
+            animation: fall linear infinite;
+            opacity: 0.7;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(calc(100vh + 100px));
+            }
+        }
+        
+        /* Main Container */
+        .welcome-container {
+            position: relative;
+            z-index: 10;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        /* Main Title */
+        .main-title {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            color: #00ff00;
+            text-shadow: 
+                0 0 5px #00ff00,
+                0 0 10px #00ff00,
+                0 0 15px #00ff00,
+                3px 3px 0px #000,
+                6px 6px 0px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 
+                    0 0 5px #00ff00,
+                    0 0 10px #00ff00,
+                    0 0 15px #00ff00,
+                    3px 3px 0px #000,
+                    6px 6px 0px rgba(0,0,0,0.5);
+            }
+            to {
+                text-shadow: 
+                    0 0 8px #00ff00,
+                    0 0 15px #00ff00,
+                    0 0 20px #00ff00,
+                    0 0 25px #00ff00,
+                    3px 3px 0px #000,
+                    6px 6px 0px rgba(0,0,0,0.5);
+            }
+        }
+        
+        /* Subtitle */
+        .subtitle {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            color: #ffd700;
+            text-shadow: 
+                0 0 10px #ffd700,
+                2px 2px 0px #000,
+                4px 4px 0px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            animation: pulse 3s ease-in-out infinite;
+            letter-spacing: 2px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+        
+        /* Logo Container */
+        .logo-container {
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .logo-circle {
+            width: 120px;
+            height: 120px;
+            border: 4px solid #00ff00;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            position: relative;
+            background: 
+                radial-gradient(circle at 30% 30%, #333, #111),
+                linear-gradient(135deg, #222 0%, #000 50%, #111 100%);
+            box-shadow: 
+                0 0 20px #00ff00,
+                inset 0 0 20px rgba(0,255,0,0.2),
+                inset -5px -5px 15px rgba(0,0,0,0.8),
+                inset 5px 5px 15px rgba(255,255,255,0.1),
+                0 8px 16px rgba(0,0,0,0.6);
+            animation: rotate 10s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .logo-content {
+            position: relative;
+            animation: rotate 10s linear infinite reverse;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-symbol {
+            font-size: 2rem;
+            color: #ffd700;
+            text-shadow: 
+                0 0 15px #ffd700,
+                2px 2px 0px #b8860b,
+                4px 4px 0px #8b6914,
+                6px 6px 8px rgba(0,0,0,0.8),
+                0 -2px 0px #ffed4e,
+                0 -4px 0px #fff35c;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
+            background: linear-gradient(145deg, #ffd700 0%, #ffed4e 50%, #b8860b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 3;
+        }
+        
+        .logo-symbol::before {
+            content: '⚖';
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: #8b6914;
+            text-shadow: 
+                1px 1px 0px #5d4a0f,
+                2px 2px 0px #3d310a;
+            z-index: -1;
+            filter: blur(0.5px);
+        }
+        
+        .logo-variables {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .variable-x, .variable-y {
+            position: absolute;
+            font-size: 5rem;
+            font-weight: 900;
+            font-family: 'Orbitron', monospace;
+            text-shadow: 
+                2px 2px 0px #666,
+                4px 4px 0px #444,
+                6px 6px 0px #222,
+                8px 8px 12px rgba(0,0,0,0.8),
+                0 -2px 0px #ddd,
+                0 -4px 0px #eee;
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6));
+        }
+        
+        .variable-x {
+            color: #f5f5f5;
+            z-index: 1;
+            background: linear-gradient(145deg, #f5f5f5 0%, #e0e0e0 50%, #c0c0c0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .variable-y {
+            color: #d5d5d5;
+            z-index: 2;
+            background: linear-gradient(145deg, #d5d5d5 0%, #b8b8b8 50%, #999 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .variable-x::before, .variable-y::before {
+            content: attr(data-letter);
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: #777;
+            text-shadow: 
+                1px 1px 0px #555,
+                2px 2px 0px #333;
+            z-index: -1;
+            filter: blur(0.5px);
+        }
+        
+        /* Quote */
+        .quote {
+            max-width: 800px;
+            margin: 40px auto;
+            color: #ffd700;
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            line-height: 1.6;
+            opacity: 0.9;
+            text-shadow: 
+                1px 1px 0px #000,
+                0 0 10px #ffd700;
+            font-style: italic;
+            letter-spacing: 1px;
+            animation: quote-glow 3s ease-in-out infinite;
+        }
+        
+        @keyframes quote-glow {
+            0%, 100% {
+                text-shadow: 
+                    1px 1px 0px #000,
+                    0 0 10px #ffd700;
+                color: #ffd700;
+            }
+            50% {
+                text-shadow: 
+                    1px 1px 0px #000,
+                    0 0 20px #ffd700,
+                    0 0 30px #ffd700,
+                    0 0 40px #ffd700;
+                color: #ffed4e;
+            }
+        }
+        
+        .quote-author {
+            margin-top: 15px;
+            font-size: clamp(0.8rem, 1.5vw, 1rem);
+            color: #ffcc00;
+            font-style: normal;
+            font-weight: 400;
+        }
+        
+        /* Continue Text */
+        .continue-text {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #aaffaa;
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            text-shadow: 1px 1px 0px #000;
+            animation: blink 2s ease-in-out infinite;
+            letter-spacing: 1px;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        /* Creator Credit */
+        .creator-credit {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #888;
+            font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+            opacity: 0.6;
+            text-shadow: 1px 1px 0px #000;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Hover Effects */
+        body:hover .welcome-container {
+            animation: gentle-shake 0.5s ease-in-out;
+        }
+        
+        @keyframes gentle-shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
+        }
+        
+        /* Click Ripple Effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(0, 255, 0, 0.3);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        /* Floating Mathematical Symbols */
+        .math-symbol {
+            position: absolute;
+            color: rgba(255, 215, 0, 0.3);
+            font-size: 2rem;
+            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .logo-circle {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .logo-symbol {
+                font-size: 1.8rem;
+            }
+            
+            .variable-x, .variable-y {
+                font-size: 4rem;
+            }
+            
+            .quote {
+                padding: 0 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .welcome-container {
+                padding: 15px;
+            }
+            
+            .logo-circle {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .logo-symbol {
+                font-size: 1.5rem;
+            }
+            
+            .variable-x, .variable-y {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body onclick="createRipple(event)">
+    <!-- Matrix Rain Background -->
+    <div class="matrix-bg" id="matrixBg"></div>
+    
+    <!-- Main Welcome Container -->
+    <div class="welcome-container">
+        <h1 class="main-title">MATH MASTER</h1>
+        <h2 class="subtitle">Algebra</h2>
+        
+        <div class="logo-container">
+            <div class="logo-circle">
+                <div class="logo-content">
+                    <div class="logo-symbol">⚖</div>
+                    <div class="logo-variables">
+                        <span class="variable-x" data-letter="X">X</span>
+                        <span class="variable-y" data-letter="Y">Y</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="quote">
+            "If it is not right, do not do it; if it is not true, do not say it."
+            <div class="quote-author">- Marcus Aurelius</div>
+        </div>
+        
+        <div class="continue-text">Click to continue</div>
+        <div class="creator-credit">Created by Teacher Evan</div>
+    </div>
+    
+    <!-- Floating Math Symbols -->
+    <div class="math-symbol" style="top: 15%; left: 10%; animation-delay: 0s;">∑</div>
+    <div class="math-symbol" style="top: 25%; right: 15%; animation-delay: 1s;">π</div>
+    <div class="math-symbol" style="top: 60%; left: 8%; animation-delay: 2s;">∞</div>
+    <div class="math-symbol" style="top: 70%; right: 12%; animation-delay: 3s;">√</div>
+    <div class="math-symbol" style="top: 40%; left: 85%; animation-delay: 4s;">±</div>
+    <div class="math-symbol" style="top: 80%; left: 75%; animation-delay: 5s;">∆</div>
+
+    <script>
+        // Matrix Rain Effect
+        function createMatrixRain() {
+            const matrixBg = document.getElementById('matrixBg');
+            const symbols = '0123456789+-×÷=XxΣπ∞√±∆αβγ';
+            const columns = Math.floor(window.innerWidth / 20);
+            
+            for (let i = 0; i < columns; i++) {
+                const column = document.createElement('div');
+                column.className = 'matrix-column';
+                column.style.left = i * 20 + 'px';
+                column.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                column.style.animationDelay = Math.random() * 2 + 's';
+                
+                // Create falling text
+                let text = '';
+                const length = Math.floor(Math.random() * 20) + 10;
+                for (let j = 0; j < length; j++) {
+                    text += symbols[Math.floor(Math.random() * symbols.length)] + '<br>';
+                }
+                column.innerHTML = text;
+                
+                matrixBg.appendChild(column);
+            }
+        }
+        
+        // Click Ripple Effect
+        function createRipple(event) {
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            
+            const rect = document.body.getBoundingClientRect();
+            const size = 60;
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            
+            document.body.appendChild(ripple);
+            
+            setTimeout(() => {
+                document.body.removeChild(ripple);
+            }, 600);
+            
+            // Navigate to next screen after animation
+            setTimeout(() => {
+                window.location.href = 'level-select.html';
+            }, 300);
+        }
+        
+        // Dynamic Background Music Visualization (CSS animations)
+        function addDynamicEffects() {
+            const title = document.querySelector('.main-title');
+            const subtitle = document.querySelector('.subtitle');
+            
+            // Add random glow intensity variations
+            setInterval(() => {
+                const intensity = Math.random() * 0.5 + 0.5;
+                title.style.filter = `brightness(${intensity})`;
+            }, 2000);
+            
+            // Subtitle color variations
+            const colors = ['#ffd700', '#ffcc00', '#ffaa00', '#ff9900'];
+            let colorIndex = 0;
+            setInterval(() => {
+                subtitle.style.color = colors[colorIndex];
+                colorIndex = (colorIndex + 1) % colors.length;
+            }, 4000);
+        }
+        
+        // Initialize everything when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            createMatrixRain();
+            addDynamicEffects();
+        });
+        
+        // Recreate matrix rain on window resize
+        window.addEventListener('resize', () => {
+            const matrixBg = document.getElementById('matrixBg');
+            matrixBg.innerHTML = '';
+            createMatrixRain();
+        });
+        
+        // Keyboard support
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                // Create ripple effect at center of screen
+                const ripple = document.createElement('div');
+                ripple.className = 'ripple';
+                const size = 60;
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = window.innerWidth / 2 - size / 2 + 'px';
+                ripple.style.top = window.innerHeight / 2 - size / 2 + 'px';
+                document.body.appendChild(ripple);
+                
+                setTimeout(() => {
+                    document.body.removeChild(ripple);
+                }, 600);
+                
+                // Navigate to level select
+                setTimeout(() => {
+                    window.location.href = 'level-select.html';
+                }, 300);
+            }
+        });
+    </script>
+</body>
+</html> 

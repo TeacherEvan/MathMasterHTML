@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathMaster - Game</title>
+    <link rel="stylesheet" href="css/game.css">
+    <link rel="stylesheet" href="css/lock-responsive.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        #back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: linear-gradient(145deg, #333, #111);
+            border: 2px solid #888;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 14px;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        #back-button:hover {
+            border-color: #00ff00;
+            color: #00ff00;
+            box-shadow: 0 0 15px rgba(0,255,0,0.3);
+            transform: scale(1.05);
+        }
+        
+        /* Game container layout */
+        .game-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            background: #000;
+        }
+        
+        .display {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .wall {
+            width: 5px;
+            background: linear-gradient(180deg, #0f0, #060);
+            position: relative;
+            overflow: hidden;
+            animation: wallPulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes wallPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(0,255,0,0.5); }
+            50% { box-shadow: 0 0 20px rgba(0,255,0,0.8); }
+        }
+          /* Ensure the body has the correct styles */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Orbitron', monospace;
+            background: #000;
+        }
+
+        /* Worm spawn areas for individual sections */
+        .worm-spawn-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <button id="back-button" onclick="goBack()">← Back to Levels</button>
+    
+    <!-- Main Game Container -->
+    <div class="game-container">
+        <!-- Section 1: Progression Display -->
+        <div id="progression-display" class="display">
+            <div class="section-header">
+                <h2>Problem</h2>
+            </div>
+            <div id="problem-container"></div>
+            <div id="lock-display"></div>
+            <!-- Worm container for this section -->
+            <div class="worm-spawn-area" id="progression-worms"></div>
+        </div>
+        
+        <!-- Wall 1 -->
+        <div class="wall"></div>
+        
+        <!-- Section 2: Problem-Solving Display -->
+        <div id="problem-solving-display" class="display">
+            <div class="section-header">
+                <button id="help-button">HELP</button>
+            </div>
+            <div id="solution-container"></div>
+            <!-- Worm container for this section -->
+            <div class="worm-spawn-area" id="problem-solving-worms"></div>
+        </div>
+        
+        <!-- Wall 2 -->
+        <div class="wall"></div>
+        
+        <!-- Section 3: Symbol Rain Display -->
+        <div id="matrix-display" class="display">
+            <div id="symbol-rain-container"></div>
+            <div class="matrix-refresh" id="matrix-refresh-indicator">Refresh in: <span id="refresh-countdown">10</span>s</div>
+            <!-- Worm container for this section -->
+            <div class="worm-spawn-area" id="matrix-worms"></div>
+        </div>
+    </div>
+    
+    <script src="js/3rdDISPLAY.js"></script>
+    <script src="js/worm.js"></script>
+    <script src="js/lock-responsive.js"></script>
+    <script src="js/lock-manager.js"></script>
+    <script src="js/game.js"></script>
+    <script>
+        function goBack() {
+            window.location.href = 'level-select.html';
+        }
+    </script>
+</body>
+</html>
