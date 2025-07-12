@@ -7,8 +7,8 @@
     top: 50%;
     left: calc(50% - 1.3in); /* Moved 1.3 inches to the left (increased from 1in) */
     transform: translate(-50%, -50%);
-    width: 90%;
-    height: 90%;
+    width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -19,7 +19,7 @@
 
 /* Responsive scaling for lock containers */
 .lock-component-wrapper .lock-container {
-    transform: scale(2.54) !important; /* Increased by 30% from 1.95 */
+    transform: scale(4.00) !important; /* Further increased to enlarge all locks */
     transform-origin: center center !important;
     width: auto !important;
     height: auto !important;
@@ -59,25 +59,25 @@
 /* Responsive animations - maintain larger scale for side display */
 @media screen and (max-width: 1920px) {
     .lock-component-wrapper .lock-container {
-        transform: scale(2.20) !important; /* Increased by 30% from 1.69 */
+        transform: scale(4.00) !important;
     }
 }
 
 @media screen and (max-width: 1440px) {
     .lock-component-wrapper .lock-container {
-        transform: scale(2.03) !important; /* Increased by 30% from 1.56 */
+        transform: scale(3.80) !important;
     }
 }
 
 @media screen and (max-width: 1200px) {
     .lock-component-wrapper .lock-container {
-        transform: scale(1.69) !important; /* Increased by 30% from 1.3 */
+        transform: scale(3.40) !important;
     }
 }
 
 @media screen and (max-width: 800px) {
     .lock-component-wrapper .lock-container {
-        transform: scale(1.52) !important; /* Increased by 30% from 1.17 */
+        transform: scale(3.20) !important;
     }
 }
 

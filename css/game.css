@@ -134,14 +134,15 @@ body::before {
 }
 
 /* Allow lock components to display properly */
+/* Allow lock components to display properly */
 #lock-display {
     position: absolute;
-    /* Adjusted position: moved 3 inches up and 3 inches left */
-    top: calc(50% - 50px); /* ~2 inches up (approximately 50px) */
-    left: calc(50% - 122px); /* ~3 inches left (approximately 122px) - moved an additional inch left */
+    /* Center and adjust for larger lock */
+    top: calc(50% - 100px); /* Move up for larger dimensions */
+    left: calc(50% - 150px); /* Center for larger dimensions */
     transform: translate(-50%, -50%);
-    width: 133%; /* Increased by 30% from previous 102% */
-    height: 133%; /* Increased by 30% from previous 102% */
+    width: 200%; /* Enlarged lock display width */
+    height: 200%; /* Enlarged lock display height */
     display: flex !important;
     justify-content: center;
     align-items: center;
@@ -185,8 +186,8 @@ body::before {
     height: 100% !important; /* Increased to maximum */
     max-width: none !important;
     max-height: none !important;
-    min-width: 468px !important; /* Increased by 30% from 360px */
-    min-height: 468px !important; /* Increased by 30% from 360px */
+    min-width: 900px !important; /* Increased for larger lock display */
+    min-height: 900px !important; /* Increased for larger lock display */
     display: block !important;
 }
 
