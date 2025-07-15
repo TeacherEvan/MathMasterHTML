@@ -41,6 +41,9 @@ class ElegantWormSystem {
         // Create initial worms
         this.createInitialWorms();
         
+        // Setup event listeners
+        this.setupEventListeners();
+        
         // Start worm behaviors
         this.startWormBehaviors();
     }
@@ -60,11 +63,8 @@ class ElegantWormSystem {
         
         console.log(`🐛 Created ${this.worms.length} elegant worms`);
     }
-                this.initialize();
-            }, 2000);
-            return;
-        }
-        
+
+    setupEventListeners() {
         // Listen for problem completion events to spawn worms
         document.addEventListener('problemLineCompleted', () => {
             console.log('🐛 RECEIVED problemLineCompleted event - Spawning worm!');
