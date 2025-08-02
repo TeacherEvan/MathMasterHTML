@@ -417,6 +417,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add completion glow animation and additional styles
     const gameStyles = document.createElement('style');
     gameStyles.textContent = `
+        @keyframes pulsating-red {
+            0% {
+                color: #ff6666;
+                text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+            }
+            50% {
+                color: #ff9999;
+                text-shadow: 0 0 20px #ff0000, 0 0 30px #ff0000;
+            }
+            100% {
+                color: #ff6666;
+                text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+            }
+        }
+
         @keyframes completionGlow {
             0% { 
                 box-shadow: inset 0 0 15px rgba(0,255,0,0.4);
@@ -433,9 +448,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         .problem-text {
-            font-size: 1.1em;
+            font-size: 2.5em;
             font-weight: 700;
-            text-shadow: 0 0 15px rgba(0,255,0,0.8);
+            text-align: center;
+            animation: pulsating-red 2s ease-in-out infinite;
         }
         
         .steps-container {

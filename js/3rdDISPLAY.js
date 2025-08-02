@@ -3,116 +3,102 @@ console.log("Symbol Rain Display script loaded.");
 
 document.addEventListener('DOMContentLoaded', () => {
     const symbolRainContainer = document.getElementById('symbol-rain-container');
-    const refreshCountdown = document.querySelector('.matrix-refresh');
     
     if (!symbolRainContainer) {
         console.error('Symbol rain container not found!');
         return;
     }
     
-    // Math symbols for the rain - X = variable placeholder, x = multiplication
     const symbols = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X', 'x', '+', '-', '=', '÷', '×'];
     
     // Configuration
-    const SYMBOL_FALL_SPEED = 2.7; // Reduced by 10% from 3
-    const SPAWN_RATE = 0.12; // Increased for more symbols
-    const COLUMN_WIDTH = 50; // Reduced for more columns
+    let symbolFallSpeed = 0.5; // Start slow
+    const maxFallSpeed = 5; // Set a maximum speed
+    const spawnRate = 0.2; // Higher spawn rate for initial population
+    const columnWidth = 50;
     
     let columns = 0;
     let activeSymbols = [];
-    let refreshTimer = 60; // Changed from 10 to 60 seconds (1 minute)
     let animationRunning = false;
-    
-    // Calculate number of columns based on container width
+
     function calculateColumns() {
         const containerWidth = symbolRainContainer.offsetWidth;
-        columns = Math.floor(containerWidth / COLUMN_WIDTH);
-        console.log(`Calculated ${columns} columns for symbol rain`);
+        columns = Math.floor(containerWidth / columnWidth);
     }
-    
-    // Create a new falling symbol
-    function createFallingSymbol(column) {
+
+    function createFallingSymbol(column, isInitialPopulation = false) {
         const symbol = document.createElement('div');
         symbol.className = 'falling-symbol';
         symbol.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-        symbol.style.left = (column * COLUMN_WIDTH + Math.random() * 30) + 'px';
-        symbol.style.top = '-50px';
-        symbol.style.zIndex = '25';
-        symbol.style.pointerEvents = 'auto';
+        symbol.style.left = (column * columnWidth + Math.random() * 30) + 'px';
         
-        console.log(`🌟 Created symbol "${symbol.textContent}" at column ${column}`);
+        if (isInitialPopulation) {
+            symbol.style.top = `${Math.random() * symbolRainContainer.offsetHeight}px`;
+        } else {
+            symbol.style.top = '-50px';
+        }
         
-        symbol.addEventListener('click', function() {
-            handleSymbolClick(this);
-        });
-        
+        symbol.addEventListener('click', (event) => handleSymbolClick(symbol, event));
         symbolRainContainer.appendChild(symbol);
         
         activeSymbols.push({
             element: symbol,
             column: column,
-            y: -50,
+            y: isInitialPopulation ? parseFloat(symbol.style.top) : -50,
             symbol: symbol.textContent
         });
     }
-    
-    // Handle symbol click
-    function handleSymbolClick(symbolElement) {
+
+    function populateInitialSymbols() {
+        const initialSymbolCount = columns * 5; // Populate with more symbols
+        for (let i = 0; i < initialSymbolCount; i++) {
+            createFallingSymbol(Math.floor(Math.random() * columns), true);
+        }
+    }
+
+    function handleSymbolClick(symbolElement, event) {
+        if (!document.getElementById('panel-c').contains(event.target)) {
+            return;
+        }
+
         const clickedSymbol = symbolElement.textContent;
-        console.log(`🎯 Player clicked symbol: "${clickedSymbol}"`);
+        document.dispatchEvent(new CustomEvent('symbolClicked', { detail: { symbol: clickedSymbol } }));
         
         symbolElement.classList.add('clicked');
-        
         setTimeout(() => {
             if (symbolElement.parentNode) {
                 symbolElement.parentNode.removeChild(symbolElement);
             }
             activeSymbols = activeSymbols.filter(s => s.element !== symbolElement);
         }, 500);
-        
-        // Notify game logic
-        document.dispatchEvent(new CustomEvent('symbolClicked', {
-            detail: { symbol: clickedSymbol }
-        }));
     }
-    
-    // Animation loop
+
     function animateSymbols() {
         const containerHeight = symbolRainContainer.offsetHeight;
         
-        // Update existing symbols
         activeSymbols = activeSymbols.filter(symbolObj => {
-            symbolObj.y += SYMBOL_FALL_SPEED;
-            symbolObj.element.style.top = symbolObj.y + 'px';
+            symbolObj.y += symbolFallSpeed;
+            symbolObj.element.style.top = `${symbolObj.y}px`;
             
             if (symbolObj.y > containerHeight + 50) {
-                if (symbolObj.element.parentNode) {
-                    symbolObj.element.parentNode.removeChild(symbolObj.element);
-                }
+                symbolObj.element.remove();
                 return false;
             }
             return true;
         });
         
-        // Spawn new symbols
         for (let col = 0; col < columns; col++) {
-            if (Math.random() < SPAWN_RATE) {
-                const hasRecentSymbol = activeSymbols.some(s => 
-                    s.column === col && s.y < 100
-                );
-                
-                if (!hasRecentSymbol) {
+            if (Math.random() < spawnRate) {
+                if (!activeSymbols.some(s => s.column === col && s.y < 100)) {
                     createFallingSymbol(col);
                 }
             }
         }
     }
-    
-    // Start animation
-    function startRainLoop() {
+
+    function startAnimation() {
         if (animationRunning) return;
         animationRunning = true;
-        
         function loop() {
             if (animationRunning) {
                 animateSymbols();
@@ -120,47 +106,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         loop();
-        console.log('🌧️ Symbol rain started');
     }
-    
-    // Start refresh timer
-    function startRefreshTimer() {
+
+    function startSpeedController() {
         setInterval(() => {
-            refreshTimer--;
-            if (refreshCountdown) {
-                refreshCountdown.textContent = `Refresh: ${Math.max(0, refreshTimer)}s`;
+            if (symbolFallSpeed < maxFallSpeed) {
+                symbolFallSpeed *= 1.05; // Increase by 5%
             }
-            
-            if (refreshTimer <= 0) {
-                fullRefresh();
-            }
-        }, 1000);
+        }, 10000); // Every 10 seconds
     }
-    
-    // Full refresh
-    function fullRefresh() {
-        console.log('🔄 Full refresh');
-        activeSymbols.forEach(s => {
-            if (s.element.parentNode) {
-                s.element.parentNode.removeChild(s.element);
-            }
-        });
-        activeSymbols = [];
-        refreshTimer = 60; // Changed from 10 to 60 seconds
-        calculateColumns();
-    }
-    
+
     // Initialize
     calculateColumns();
-    startRainLoop();
-    startRefreshTimer();
+    populateInitialSymbols();
+    startAnimation();
+    startSpeedController();
     
-    // Handle resize
     window.addEventListener('resize', calculateColumns);
-    
-    // Export
-    window.symbolRain = {
-        refresh: fullRefresh,
-        getActiveSymbols: () => activeSymbols.map(s => s.symbol)
-    };
 });

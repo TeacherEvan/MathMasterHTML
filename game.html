@@ -87,40 +87,27 @@
     <button id="back-button" onclick="goBack()">← Back to Levels</button>
     
     <!-- Main Game Container -->
-    <div class="game-container">
-        <!-- Section 1: Progression Display -->
-        <div id="progression-display" class="display">
-            <div class="section-header">
-                <h2>Problem</h2>
-            </div>
-            <div id="problem-container"></div>
+    <div class="grid-container">
+        <!-- Panel A: Lock and Problem -->
+        <div id="panel-a" class="display-panel">
             <div id="lock-display"></div>
-            <!-- Worm container for this section -->
-            <div class="worm-spawn-area" id="progression-worms"></div>
+            <div id="problem-container"></div>
         </div>
-        
-        <!-- Wall 1 -->
+
         <div class="wall"></div>
-        
-        <!-- Section 2: Problem-Solving Display -->
-        <div id="problem-solving-display" class="display">
-            <div class="section-header">
-                <button id="help-button">HELP</button>
-            </div>
+
+        <!-- Panel B: Solution and Worms -->
+        <div id="panel-b" class="display-panel">
+            <button id="help-button">HELP</button>
             <div id="solution-container"></div>
-            <!-- Worm container for this section -->
-            <div class="worm-spawn-area" id="problem-solving-worms"></div>
+            <div id="worm-container"></div>
         </div>
-        
-        <!-- Wall 2 -->
+
         <div class="wall"></div>
-        
-        <!-- Section 3: Symbol Rain Display -->
-        <div id="matrix-display" class="display">
+
+        <!-- Panel C: Raining Symbols -->
+        <div id="panel-c" class="display-panel">
             <div id="symbol-rain-container"></div>
-            <div class="matrix-refresh" id="matrix-refresh-indicator">Refresh in: <span id="refresh-countdown">10</span>s</div>
-            <!-- Worm container for this section -->
-            <div class="worm-spawn-area" id="matrix-worms"></div>
         </div>
     </div>
     

@@ -29,6 +29,7 @@ Main Scene Hierarchy:
 ├── SolutionCanvasB (Solution display area)  
 ├── ParticleSystemManager (All visual effects)
 ├── AudioManager (Sound effects)
+
 └── TouchManager (Multi-touch input handling)
 ```
 
@@ -105,6 +106,12 @@ Main Scene Hierarchy:
   - Positioned at bottom
 
 **Touch Interaction:**
+Main gameplay display window will be devided into 3 equaly devided sections.... "A","B" and "C". These displays are clearly devided by walls.
+
+A = lock animation (Vissualy progressive mechanics that createas a complicated unlocking display 6x and unlocks after each line being completed. Final lock visual becomes a Quasar and creates a 5 second visualy appealing loading scene.) + Math problem rendered above it....
+B = Problem solving section and worms created. Worms can only move in section "B"
+C = "raining symbol swindow" - THE ONLY WINDOW THAT IS INTERACTABLE BY THE USER! By clicking the falling symbols, correct ones become visible in the B screen.
+
 - Multi-touch support for all buttons
 - Visual feedback on touch (button highlight)
 - Smooth transitions between screens
@@ -112,10 +119,13 @@ Main Scene Hierarchy:
 
 ### 2.3 Matrix Background System
 **File: MatrixBackgroundManager.cs**
+### 2.3 Background System
+**File: BackgroundManager.cs**
 
 **Implementation Requirements:**
 - Symbols to rain down: Numerals (0-9), and math symbols (X, -, /, =, +, x)
 - Green color scheme matching Matrix aesthetic
+- old stoic matching aesthetic
 - Continuous animation at 48 FPS
 - Depth layers for visual complexity
 - Performance optimization for mobile devices
@@ -159,6 +169,7 @@ Main Scene Hierarchy:
 
 **Symbol Set**: "0123456789X+-=÷×" **IMPORTANT**
 
+Main game window section "C"
 **Animation Specifications:**
 - Continuous generation at top of screen
 - Variable falling speeds (randomized)
@@ -378,6 +389,7 @@ Main Scene Hierarchy:
 - **Feedback**: Immediate visual response to touch input
 
 ---
+POLISH
 
 ## PHASE 7: AUDIO & POLISH
 
@@ -398,6 +410,7 @@ Main Scene Hierarchy:
 - **Compression**: Optimized audio files for mobile deployment
 - **Accessibility**: Visual indicators for audio cues
 
+#
 ### 7.2 Performance Optimization
 **File: PerformanceManager.cs**
 

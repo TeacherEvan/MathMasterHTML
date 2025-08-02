@@ -585,7 +585,7 @@
             <!-- Easy Level - Addition/Subtraction -->
             <div class="level-card level-easy" onclick="selectLevel('easy', this)">
                 <div class="level-icon">🌱</div>
-                <h3 class="level-title">BEGINNER</h3>
+                <h3 class="level-title">EASY</h3>
                 <p class="level-description">
                     Master the foundations with addition and subtraction algebra. 
                     Each problem contains BOTH + and - operations for complete practice.
@@ -616,7 +616,7 @@
             <!-- Medium Level - Multiplication -->
             <div class="level-card level-medium" onclick="selectLevel('medium', this)">
                 <div class="level-icon">🔥</div>
-                <h3 class="level-title">WARRIOR</h3>
+                <h3 class="level-title">MEDIUM</h3>
                 <p class="level-description">
                     Rise to the challenge with multi-operation algebra. 
                     Each problem contains addition, subtraction, AND multiplication.
@@ -645,9 +645,9 @@
             </div>
             
             <!-- Hard Level - Division -->
-            <div class="level-card level-hard" onclick="selectLevel('hard', this)">
+            <div class="level-card level-hard" onclick="selectLevel('medium-too', this)">
                 <div class="level-icon">⚡</div>
-                <h3 class="level-title">MASTER</h3>
+                <h3 class="level-title">MEDIUM TOO</h3>
                 <p class="level-description">
                     Conquer the test with division algebra. 
                     Achieve mastery and become closer to unlocking your full potential.
@@ -765,7 +765,7 @@
                     case 'medium':
                         window.location.href = 'game.html?level=warrior&lockComponent=level-1-transformer.html';
                         break;
-                    case 'hard':
+                    case 'medium-too':
                         window.location.href = 'game.html?level=master&lockComponent=level-1-transformer.html';
                         break;
                 }
