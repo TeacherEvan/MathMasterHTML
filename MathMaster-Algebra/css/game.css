@@ -842,3 +842,329 @@ body.level-master #matrix-display {
     border-color: rgba(255,68,68,0.3);
     box-shadow: inset 0 0 20px rgba(255,68,68,0.1);
 }
+
+/* ===============================
+   MOBILE RESPONSIVE DESIGN
+   =============================== */
+
+/* Tablet and smaller desktop screens */
+@media screen and (max-width: 1024px) {
+    .game-container {
+        padding: 5px;
+    }
+    
+    .display {
+        margin: 5px 3px;
+        padding: 15px;
+    }
+    
+    .wall {
+        width: 4px;
+    }
+    
+    #help-button {
+        padding: 12px 25px;
+        font-size: 16px;
+    }
+}
+
+/* Mobile devices - Major layout changes */
+@media screen and (max-width: 768px) {
+    /* Stack the three panels vertically for mobile */
+    .game-container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        padding: 0;
+        overflow-y: auto;
+    }
+    
+    .display {
+        flex: none;
+        height: auto;
+        min-height: 200px;
+        margin: 5px 10px;
+        padding: 15px;
+        border-radius: 8px;
+    }
+    
+    /* Hide walls on mobile as panels are stacked */
+    .wall {
+        display: none;
+    }
+    
+    /* Back button optimization */
+    #back-button {
+        top: 10px;
+        left: 10px;
+        padding: 8px 16px;
+        font-size: 12px;
+        z-index: 200;
+    }
+    
+    /* Section headers */
+    .section-header h2 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+    
+    /* Problem display section */
+    #progression-display {
+        order: 1;
+        min-height: 180px;
+    }
+    
+    #problem-container {
+        font-size: 1.2rem;
+        text-align: center;
+        padding: 10px;
+    }
+    
+    /* Problem solving section */
+    #problem-solving-display {
+        order: 2;
+        min-height: 250px;
+    }
+    
+    #help-button {
+        padding: 10px 20px;
+        font-size: 14px;
+        letter-spacing: 1px;
+        min-height: 44px; /* iOS minimum tap target */
+    }
+    
+    #solution-container {
+        margin-top: 10px;
+    }
+    
+    .solution-step {
+        margin: 8px 0;
+        padding: 8px;
+        font-size: 1rem;
+    }
+    
+    /* Matrix display section */
+    #matrix-display {
+        order: 3;
+        min-height: 150px;
+        max-height: 200px; /* Limit height on mobile */
+    }
+    
+    #symbol-rain-container {
+        height: 120px; /* Reduced height for mobile */
+    }
+    
+    .matrix-refresh {
+        font-size: 0.8rem;
+        bottom: 5px;
+        right: 5px;
+    }
+    
+    /* Lock display optimization for mobile */
+    #lock-display {
+        min-width: 200px !important;
+        min-height: 200px !important;
+        width: 100% !important;
+        height: auto !important;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    
+    .lock-component-wrapper {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        height: auto !important;
+        padding: 20px 0;
+    }
+    
+    .lock-component-wrapper .lock-container {
+        transform: scale(2.5) !important; /* Reduced scale for mobile */
+    }
+    
+    /* Worm spawn areas */
+    .worm-spawn-area {
+        height: 50px; /* Reduced height on mobile */
+    }
+}
+
+/* Small mobile devices */
+@media screen and (max-width: 480px) {
+    .game-container {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .display {
+        margin: 3px 5px;
+        padding: 10px;
+        border-width: 1px;
+    }
+    
+    #back-button {
+        top: 5px;
+        left: 5px;
+        padding: 6px 12px;
+        font-size: 11px;
+        border-radius: 15px;
+    }
+    
+    .section-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    #progression-display {
+        min-height: 150px;
+    }
+    
+    #problem-container {
+        font-size: 1.1rem;
+        padding: 8px;
+    }
+    
+    #problem-solving-display {
+        min-height: 200px;
+    }
+    
+    #help-button {
+        padding: 8px 16px;
+        font-size: 12px;
+        min-height: 40px;
+    }
+    
+    .solution-step {
+        margin: 6px 0;
+        padding: 6px;
+        font-size: 0.9rem;
+    }
+    
+    #matrix-display {
+        min-height: 120px;
+        max-height: 150px;
+    }
+    
+    #symbol-rain-container {
+        height: 100px;
+    }
+    
+    #lock-display {
+        min-width: 150px !important;
+        min-height: 150px !important;
+        max-width: 250px;
+    }
+    
+    .lock-component-wrapper .lock-container {
+        transform: scale(2.0) !important; /* Further reduced for small screens */
+    }
+    
+    .matrix-refresh {
+        font-size: 0.7rem;
+        padding: 2px 5px;
+    }
+}
+
+/* Extra small mobile devices */
+@media screen and (max-width: 320px) {
+    .display {
+        margin: 2px;
+        padding: 8px;
+    }
+    
+    #back-button {
+        top: 3px;
+        left: 3px;
+        padding: 5px 10px;
+        font-size: 10px;
+    }
+    
+    .section-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    #problem-container {
+        font-size: 1rem;
+    }
+    
+    #help-button {
+        padding: 7px 14px;
+        font-size: 11px;
+        min-height: 38px;
+    }
+    
+    .solution-step {
+        font-size: 0.8rem;
+        padding: 5px;
+    }
+    
+    #lock-display {
+        min-width: 120px !important;
+        min-height: 120px !important;
+        max-width: 200px;
+    }
+    
+    .lock-component-wrapper .lock-container {
+        transform: scale(1.5) !important;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Improve touch targets on touch devices */
+    #help-button {
+        min-height: 48px;
+        min-width: 120px;
+    }
+    
+    #back-button {
+        min-height: 44px;
+        min-width: 80px;
+    }
+    
+    /* Reduce intensive animations for better performance */
+    .wall {
+        animation-duration: 6s;
+    }
+    
+    /* Optimize backdrop blur for mobile performance */
+    .display {
+        backdrop-filter: blur(1px);
+        -webkit-backdrop-filter: blur(1px);
+    }
+}
+
+/* Landscape orientation on mobile */
+@media screen and (max-width: 768px) and (orientation: landscape) {
+    .game-container {
+        flex-direction: row; /* Return to horizontal layout in landscape */
+        height: 100vh;
+        overflow: hidden;
+    }
+    
+    .display {
+        flex: 1;
+        height: 100%;
+        margin: 5px 2px;
+        padding: 10px;
+        min-height: auto;
+        max-height: none;
+    }
+    
+    .wall {
+        display: block;
+        width: 3px;
+    }
+    
+    #matrix-display {
+        max-height: none;
+    }
+    
+    #symbol-rain-container {
+        height: 100%;
+    }
+    
+    .lock-component-wrapper .lock-container {
+        transform: scale(1.8) !important;
+    }
+}

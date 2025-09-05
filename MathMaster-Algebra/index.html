@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Math Master Algebra - Welcome</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
@@ -365,8 +365,14 @@
             50% { transform: translateY(-20px) rotate(180deg); }
         }
         
-        /* Responsive Design */
+        /* Enhanced Mobile Responsive Design */
         @media (max-width: 768px) {
+            /* Reduce matrix rain intensity on tablets */
+            .matrix-column {
+                font-size: 16px;
+                opacity: 0.5;
+            }
+            
             .logo-circle {
                 width: 100px;
                 height: 100px;
@@ -382,25 +388,136 @@
             
             .quote {
                 padding: 0 20px;
+                line-height: 1.5;
+            }
+            
+            /* Improve touch targets */
+            .continue-text {
+                font-size: clamp(1.1rem, 3vw, 1.4rem);
+                bottom: 60px;
+                padding: 10px;
             }
         }
         
         @media (max-width: 480px) {
+            /* Mobile-first optimizations */
+            body {
+                font-size: 14px;
+            }
+            
+            /* Reduce matrix rain for better performance */
+            .matrix-column {
+                font-size: 14px;
+                opacity: 0.3;
+                animation-duration: 4s !important;
+            }
+            
             .welcome-container {
-                padding: 15px;
+                padding: 10px 15px;
+                justify-content: space-between;
+                min-height: 100vh;
+            }
+            
+            .main-title {
+                margin-bottom: 5px;
+            }
+            
+            .subtitle {
+                margin-bottom: 20px;
+            }
+            
+            .logo-container {
+                margin: 20px 0;
             }
             
             .logo-circle {
                 width: 80px;
                 height: 80px;
+                border-width: 3px;
             }
             
             .logo-symbol {
-                font-size: 1.5rem;
+                font-size: 1.4rem;
             }
             
             .variable-x, .variable-y {
-                font-size: 3rem;
+                font-size: 2.8rem;
+            }
+            
+            .quote {
+                margin: 20px auto;
+                font-size: clamp(0.85rem, 2.2vw, 1rem);
+                line-height: 1.4;
+            }
+            
+            .quote-author {
+                margin-top: 10px;
+                font-size: clamp(0.75rem, 1.8vw, 0.9rem);
+            }
+            
+            /* Mobile touch improvements */
+            .continue-text {
+                bottom: 70px;
+                padding: 15px;
+                background: rgba(0,0,0,0.3);
+                border-radius: 25px;
+                border: 1px solid rgba(170,255,170,0.3);
+            }
+            
+            .creator-credit {
+                bottom: 15px;
+                font-size: clamp(0.65rem, 1.2vw, 0.8rem);
+            }
+            
+            /* Floating symbols - reduce on mobile */
+            .math-symbol {
+                font-size: 1.2rem;
+                opacity: 0.2;
+            }
+        }
+        
+        @media (max-width: 320px) {
+            /* Extra small mobile devices */
+            .welcome-container {
+                padding: 5px 10px;
+            }
+            
+            .logo-circle {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .logo-symbol {
+                font-size: 1.2rem;
+            }
+            
+            .variable-x, .variable-y {
+                font-size: 2.5rem;
+            }
+            
+            .quote {
+                margin: 15px auto;
+            }
+        }
+        
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            /* For touch devices, improve tap targets */
+            body {
+                cursor: default;
+            }
+            
+            .continue-text {
+                padding: 20px;
+                min-height: 44px; /* iOS minimum tap target */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            /* Reduce animations on touch devices for better performance */
+            .main-title, .subtitle, .logo-circle, .quote {
+                animation-duration: 3s;
             }
         }
     </style>
@@ -444,22 +561,43 @@
     <div class="math-symbol" style="top: 80%; left: 75%; animation-delay: 5s;">∆</div>
 
     <script>
-        // Matrix Rain Effect
+        // Mobile device detection
+        function isMobileDevice() {
+            return window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        // Enhanced Matrix Rain Effect with mobile optimization
         function createMatrixRain() {
             const matrixBg = document.getElementById('matrixBg');
             const symbols = '0123456789+-×÷=XxΣπ∞√±∆αβγ';
-            const columns = Math.floor(window.innerWidth / 20);
+            const isMobile = isMobileDevice();
             
-            for (let i = 0; i < columns; i++) {
+            // Adjust column spacing and count based on device
+            const columnSpacing = isMobile ? 25 : 20;
+            const columns = Math.floor(window.innerWidth / columnSpacing);
+            const maxColumns = isMobile ? Math.min(columns, 15) : columns; // Limit on mobile
+            
+            // Clear existing columns
+            matrixBg.innerHTML = '';
+            
+            for (let i = 0; i < maxColumns; i++) {
                 const column = document.createElement('div');
                 column.className = 'matrix-column';
-                column.style.left = i * 20 + 'px';
-                column.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                column.style.animationDelay = Math.random() * 2 + 's';
+                column.style.left = i * columnSpacing + 'px';
                 
-                // Create falling text
+                // Slower, less intensive animations on mobile
+                const duration = isMobile ? (Math.random() * 4 + 3) : (Math.random() * 3 + 2);
+                const delay = isMobile ? Math.random() * 3 : Math.random() * 2;
+                
+                column.style.animationDuration = duration + 's';
+                column.style.animationDelay = delay + 's';
+                
+                // Create falling text - shorter on mobile
                 let text = '';
-                const length = Math.floor(Math.random() * 20) + 10;
+                const length = isMobile ? 
+                    Math.floor(Math.random() * 12) + 6 : 
+                    Math.floor(Math.random() * 20) + 10;
+                
                 for (let j = 0; j < length; j++) {
                     text += symbols[Math.floor(Math.random() * symbols.length)] + '<br>';
                 }
@@ -495,16 +633,23 @@
             }, 300);
         }
         
-        // Dynamic Background Music Visualization (CSS animations)
+        // Mobile-optimized dynamic effects
         function addDynamicEffects() {
             const title = document.querySelector('.main-title');
             const subtitle = document.querySelector('.subtitle');
+            const isMobile = isMobileDevice();
+            
+            // Reduce effect intensity on mobile for better performance
+            const interval1 = isMobile ? 3000 : 2000;
+            const interval2 = isMobile ? 6000 : 4000;
             
             // Add random glow intensity variations
             setInterval(() => {
-                const intensity = Math.random() * 0.5 + 0.5;
+                const intensity = isMobile ? 
+                    Math.random() * 0.3 + 0.7 : 
+                    Math.random() * 0.5 + 0.5;
                 title.style.filter = `brightness(${intensity})`;
-            }, 2000);
+            }, interval1);
             
             // Subtitle color variations
             const colors = ['#ffd700', '#ffcc00', '#ffaa00', '#ff9900'];
@@ -512,13 +657,43 @@
             setInterval(() => {
                 subtitle.style.color = colors[colorIndex];
                 colorIndex = (colorIndex + 1) % colors.length;
-            }, 4000);
+            }, interval2);
+        }
+        
+        // Enhanced touch support for mobile devices
+        function setupMobileTouchSupport() {
+            const continueText = document.querySelector('.continue-text');
+            
+            // Add visual feedback for touch
+            document.addEventListener('touchstart', (e) => {
+                document.body.style.backgroundColor = 'rgba(0,20,0,0.1)';
+            });
+            
+            document.addEventListener('touchend', (e) => {
+                document.body.style.backgroundColor = '';
+            });
+            
+            // Prevent double-tap zoom on continue text
+            continueText.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                createRipple(e.changedTouches[0]);
+            });
+            
+            // Update continue text for mobile
+            if (isMobileDevice()) {
+                continueText.textContent = 'Tap to continue';
+            }
         }
         
         // Initialize everything when DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
             createMatrixRain();
             addDynamicEffects();
+            
+            // Setup mobile-specific features
+            if (isMobileDevice()) {
+                setupMobileTouchSupport();
+            }
         });
         
         // Recreate matrix rain on window resize
