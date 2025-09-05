@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Math Master Algebra - Level Select</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
@@ -490,52 +490,201 @@
             }
         }
         
-        /* Responsive Design */
+        /* Enhanced Mobile Responsive Design */
         @media (max-width: 768px) {
+            /* Reduce matrix rain intensity on tablets */
+            .matrix-column {
+                opacity: 0.3;
+                font-size: 16px;
+            }
+            
             .levels-grid {
                 grid-template-columns: 1fr;
-                gap: 20px;
+                gap: 25px;
             }
             
             .level-card {
                 padding: 25px;
+                margin: 0 10px;
             }
             
             .level-icon {
-                font-size: 3rem;
+                font-size: 3.5rem;
+                margin-bottom: 15px;
             }
             
             .level-stats {
                 flex-direction: column;
-                gap: 10px;
+                gap: 12px;
+                margin-bottom: 20px;
             }
             
             .stat {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                padding: 8px 12px;
+                background: rgba(0,0,0,0.2);
+                border-radius: 8px;
             }
             
             .stat-value {
                 margin-left: auto;
+                font-size: clamp(1.1rem, 2.2vw, 1.3rem);
+            }
+            
+            .stat-label {
+                font-size: clamp(0.8rem, 1.6vw, 1rem);
+            }
+            
+            /* Improve button touch targets */
+            .level-button {
+                padding: 15px 35px;
+                font-size: clamp(1.1rem, 2.2vw, 1.3rem);
+                min-height: 44px; /* iOS minimum tap target */
+            }
+            
+            .back-button {
+                padding: 18px 45px;
+                font-size: clamp(1.1rem, 2.2vw, 1.3rem);
+                min-height: 44px;
             }
         }
         
         @media (max-width: 480px) {
+            /* Mobile-first optimizations */
+            .matrix-column {
+                opacity: 0.25;
+                font-size: 14px;
+                animation-duration: 4s !important;
+            }
+            
             .header {
-                padding: 30px 15px 15px;
+                padding: 25px 15px 15px;
             }
             
             .level-container {
-                padding: 30px 15px;
+                padding: 25px 15px;
             }
             
             .level-card {
-                padding: 20px;
+                padding: 20px 15px;
+                margin: 0 5px;
+                border-width: 2px;
+            }
+            
+            .level-icon {
+                font-size: 3rem;
+                margin-bottom: 12px;
+            }
+            
+            .level-title {
+                margin-bottom: 12px;
+            }
+            
+            .level-description {
+                font-size: clamp(0.85rem, 1.8vw, 1rem);
+                line-height: 1.5;
+                margin-bottom: 18px;
+            }
+            
+            .level-stats {
+                gap: 8px;
+                margin-bottom: 15px;
+            }
+            
+            .stat {
+                padding: 6px 10px;
+            }
+            
+            .progress-container {
+                margin-bottom: 15px;
+            }
+            
+            .progress-label {
+                font-size: 0.85rem;
+                margin-bottom: 6px;
+            }
+            
+            .progress-bar {
+                height: 6px;
+            }
+            
+            /* Enhanced touch targets for mobile */
+            .level-button {
+                padding: 16px 30px;
+                font-size: clamp(1rem, 2vw, 1.2rem);
+                border-radius: 22px;
+                min-height: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
             
             .navigation {
-                padding: 25px 15px 40px;
+                padding: 20px 15px 35px;
+            }
+            
+            .back-button {
+                padding: 16px 35px;
+                font-size: clamp(1rem, 2vw, 1.2rem);
+                min-height: 48px;
+                margin-bottom: 15px;
+            }
+            
+            /* Floating symbols - reduce on mobile */
+            .math-symbol {
+                font-size: 1.2rem;
+                opacity: 0.15;
+            }
+        }
+        
+        @media (max-width: 320px) {
+            /* Extra small mobile devices */
+            .level-container {
+                padding: 20px 10px;
+            }
+            
+            .level-card {
+                padding: 15px 10px;
+                margin: 0;
+            }
+            
+            .level-icon {
+                font-size: 2.5rem;
+            }
+            
+            .level-button, .back-button {
+                padding: 14px 25px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            /* Optimize for touch devices */
+            .level-card {
+                /* Remove hover effects that don't work on touch */
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+            
+            .level-card:active {
+                transform: scale(0.98);
+            }
+            
+            .level-button:active,
+            .back-button:active {
+                transform: scale(0.95);
+            }
+            
+            /* Ensure adequate touch targets */
+            .level-card {
+                min-height: 280px;
+            }
+            
+            /* Reduce animation intensity for better performance */
+            .level-icon {
+                animation-duration: 3s;
             }
         }
         
@@ -694,25 +843,43 @@
     <div class="math-symbol" style="top: 40%; left: 80%; animation-delay: 7s;">γ</div>
 
     <script>
-        // Matrix Rain Effect - Inherited from welcome screen
+        // Mobile device detection
+        function isMobileDevice() {
+            return window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        // Enhanced Matrix Rain Effect with mobile optimization - Inherited from welcome screen
         function createMatrixRain() {
             const matrixBg = document.getElementById('matrixBg');
             const symbols = '0123456789+-×÷=XxΣπ∞√±∆αβγθλμ';
-            const columns = Math.floor(window.innerWidth / 20);
+            const isMobile = isMobileDevice();
+            
+            // Optimize for mobile performance
+            const columnSpacing = isMobile ? 25 : 20;
+            const columns = Math.floor(window.innerWidth / columnSpacing);
+            const maxColumns = isMobile ? Math.min(columns, 12) : columns;
             
             // Clear existing columns
             matrixBg.innerHTML = '';
             
-            for (let i = 0; i < columns; i++) {
+            for (let i = 0; i < maxColumns; i++) {
                 const column = document.createElement('div');
                 column.className = 'matrix-column';
-                column.style.left = i * 20 + 'px';
-                column.style.animationDuration = (Math.random() * 4 + 3) + 's';
-                column.style.animationDelay = Math.random() * 3 + 's';
+                column.style.left = i * columnSpacing + 'px';
                 
-                // Create falling text
+                // Slower animations on mobile for better performance
+                const duration = isMobile ? (Math.random() * 5 + 4) : (Math.random() * 4 + 3);
+                const delay = isMobile ? Math.random() * 4 : Math.random() * 3;
+                
+                column.style.animationDuration = duration + 's';
+                column.style.animationDelay = delay + 's';
+                
+                // Create falling text - shorter on mobile
                 let text = '';
-                const length = Math.floor(Math.random() * 15) + 8;
+                const length = isMobile ? 
+                    Math.floor(Math.random() * 10) + 5 : 
+                    Math.floor(Math.random() * 15) + 8;
+                
                 for (let j = 0; j < length; j++) {
                     text += symbols[Math.floor(Math.random() * symbols.length)] + '<br>';
                 }
@@ -834,6 +1001,11 @@
             addDynamicEffects();
             animateCards();
             setTimeout(animateProgress, 1000);
+            
+            // Setup mobile-specific features
+            if (isMobileDevice()) {
+                setupMobileTouchSupport();
+            }
         });
         
         // Recreate matrix rain on window resize
@@ -873,7 +1045,81 @@
             }
         });
         
-        // Touch Support for Mobile
+        // Enhanced Touch Support for Mobile
+        function setupMobileTouchSupport() {
+            const cards = document.querySelectorAll('.level-card');
+            const buttons = document.querySelectorAll('.level-button, .back-button');
+            
+            // Enhanced touch feedback for cards
+            cards.forEach(card => {
+                card.addEventListener('touchstart', (e) => {
+                    e.currentTarget.style.transform = 'scale(0.97)';
+                    e.currentTarget.style.transition = 'transform 0.1s ease';
+                });
+                
+                card.addEventListener('touchend', (e) => {
+                    e.currentTarget.style.transform = '';
+                    e.currentTarget.style.transition = 'transform 0.3s ease';
+                });
+                
+                card.addEventListener('touchcancel', (e) => {
+                    e.currentTarget.style.transform = '';
+                });
+            });
+            
+            // Enhanced touch feedback for buttons
+            buttons.forEach(button => {
+                button.addEventListener('touchstart', (e) => {
+                    e.currentTarget.style.transform = 'scale(0.95)';
+                    e.currentTarget.style.transition = 'transform 0.1s ease';
+                });
+                
+                button.addEventListener('touchend', (e) => {
+                    e.currentTarget.style.transform = '';
+                    e.currentTarget.style.transition = 'transform 0.2s ease';
+                });
+                
+                button.addEventListener('touchcancel', (e) => {
+                    e.currentTarget.style.transform = '';
+                });
+            });
+            
+            // Prevent double-tap zoom on interactive elements
+            cards.forEach(card => {
+                card.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                });
+            });
+        }
+        
+        // Mobile-optimized dynamic effects
+        function addDynamicEffects() {
+            const title = document.querySelector('.main-title');
+            const subtitle = document.querySelector('.subtitle');
+            const isMobile = isMobileDevice();
+            
+            // Reduce effect intensity on mobile for better performance
+            const interval1 = isMobile ? 4000 : 3000;
+            const interval2 = isMobile ? 8000 : 5000;
+            
+            // Add random glow intensity variations
+            setInterval(() => {
+                const intensity = isMobile ? 
+                    Math.random() * 0.2 + 0.8 : 
+                    Math.random() * 0.3 + 0.8;
+                title.style.filter = `brightness(${intensity})`;
+            }, interval1);
+            
+            // Subtitle color variations
+            const colors = ['#ffd700', '#ffcc00', '#ffaa00'];
+            let colorIndex = 0;
+            setInterval(() => {
+                subtitle.style.color = colors[colorIndex];
+                colorIndex = (colorIndex + 1) % colors.length;
+            }, interval2);
+        }
+        
+        // Touch Support for Mobile - Basic version
         document.addEventListener('touchstart', (event) => {
             if (event.target.closest('.level-card')) {
                 event.target.closest('.level-card').style.transform = 'scale(0.98)';
