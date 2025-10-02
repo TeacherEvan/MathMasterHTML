@@ -28,7 +28,6 @@ Main Scene Hierarchy:
 ├── SymbolCanvasA (Falling symbols area)
 ├── SolutionCanvasB (Solution display area)  
 ├── ParticleSystemManager (All visual effects)
-├── AudioManager (Sound effects)
 
 └── TouchManager (Multi-touch input handling)
 ```
@@ -117,14 +116,11 @@ C = "raining symbol swindow" - THE ONLY WINDOW THAT IS INTERACTABLE BY THE USER!
 - Smooth transitions between screens
 - Escape key support for desktop platforms
 
-### 2.3 Matrix Background System
-**File: MatrixBackgroundManager.cs**
 ### 2.3 Background System
 **File: BackgroundManager.cs**
 
 **Implementation Requirements:**
 - Symbols to rain down: Numerals (0-9), and math symbols (X, -, /, =, +, x)
-- Green color scheme matching Matrix aesthetic
 - old stoic matching aesthetic
 - Continuous animation at 48 FPS
 - Depth layers for visual complexity
@@ -168,7 +164,6 @@ C = "raining symbol swindow" - THE ONLY WINDOW THAT IS INTERACTABLE BY THE USER!
 **File: FallingSymbolsManager.cs**
 
 **Symbol Set**: "0123456789X+-=÷×" **IMPORTANT**
-
 Main game window section "C"
 **Animation Specifications:**
 - Continuous generation at top of screen
@@ -390,25 +385,6 @@ Main game window section "C"
 
 ---
 POLISH
-
-## PHASE 7: AUDIO & POLISH
-
-### 7.1 Audio System
-**File: AudioManager.cs**
-
-**Sound Effects:**
-- **Symbol Selection**: Positive chime for correct selection
-- **Error Feedback**: Negative tone for incorrect actions
-- **Worm Interactions**: Playful sounds for creature interactions
-- **Lock Unlocking**: Satisfying mechanical sounds
-- **Level Completion**: Triumphant completion fanfare
-- **Background Ambience**: Subtle electronic/mathematical atmosphere
-
-**Audio Implementation:**
-- **Dynamic Mixing**: Adjustable volume for different effect types
-- **Spatial Audio**: Positional audio for on-screen events
-- **Compression**: Optimized audio files for mobile deployment
-- **Accessibility**: Visual indicators for audio cues
 
 #
 ### 7.2 Performance Optimization
