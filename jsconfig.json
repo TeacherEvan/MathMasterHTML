@@ -1,12 +1,12 @@
 {
-  "compilerOptions": {
-    "target": "ES6",
-    "module": "ESNext",
-    "checkJs": false,
-    "allowJs": true
-  },
-  "exclude": [
-    "node_modules",
-    "**/node_modules/*"
-  ]
+    "compilerOptions": {
+        "target": "ES6",
+        "module": "ESNext",
+        "checkJs": false,
+        "allowJs": true
+    },
+    "exclude": [
+        "node_modules",
+        "**/node_modules/*"
+    ]
 }
