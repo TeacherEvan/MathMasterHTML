@@ -23,10 +23,59 @@
 }
 
 @keyframes wallPulse {
-    0%, 100% { box-shadow: 0 0 10px rgba(0,255,0,0.5); }
-    50% { box-shadow: 0 0 20px rgba(0,255,0,0.8); }
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+    }
 }
 
 #panel-c {
+    position: relative;
     cursor: pointer;
+}
+
+#symbol-rain-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.falling-symbol {
+    position: absolute;
+    font-size: 24px;
+    font-family: 'Orbitron', monospace;
+    color: #0f0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+    z-index: 1;
+}
+
+.falling-symbol:hover {
+    color: #0ff;
+    text-shadow: 0 0 10px #0ff;
+    transform: scale(1.2);
+}
+
+.falling-symbol.clicked {
+    animation: symbolClick 0.5s ease-out;
+    pointer-events: none;
+}
+
+@keyframes symbolClick {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
 }

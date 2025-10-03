@@ -5,7 +5,8 @@
 .lock-component-wrapper {
     position: absolute;
     top: 50%;
-    left: calc(50% - 1.3in); /* Moved 1.3 inches to the left (increased from 1in) */
+    left: 50%;
+    /* Centered in panel */
     transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
@@ -19,7 +20,8 @@
 
 /* Responsive scaling for lock containers */
 .lock-component-wrapper .lock-container {
-    transform: scale(4.00) !important; /* Further increased to enlarge all locks */
+    transform: scale(4.00) !important;
+    /* Further increased to enlarge all locks */
     transform-origin: center center !important;
     width: auto !important;
     height: auto !important;

@@ -29,6 +29,7 @@
 ## ✨ Features
 
 ### 🎯 Core Gameplay
+
 - **Three Difficulty Levels**: Beginner (Addition/Subtraction), Warrior (Multiplication), Master (Division)
 - **Step-by-Step Solutions**: Visual revelation of algebraic problem-solving process
 - **Symbol Rain**: Matrix-style falling symbols for interactive gameplay
@@ -36,12 +37,14 @@
 - **Worm Adversaries**: Enemy system that steals symbols - click to save them!
 
 ### 🎨 Visual Design
+
 - **Matrix Theme**: Green cascading symbols with cyberpunk aesthetics
 - **Smooth Animations**: CSS3-powered lock transformations and worm movements
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
 - **Orbitron Font**: Sci-fi themed typography
 
 ### 🧠 Educational Value
+
 - **150 Problems Total**: 50 problems per difficulty level
 - **Multiple Operations**: Addition, subtraction, multiplication, division
 - **Visual Learning**: See each step of equation solving
@@ -52,12 +55,15 @@
 ## 🎬 Demo
 
 ### Welcome Screen
+
 ![Welcome Screen](Images/Welcome%20screen.jpg)
 
 ### Level Selection
+
 ![Level Select](Images/Level%20select.jpg)
 
 ### Gameplay
+
 ![Gameplay](Images/Gameplay2.jpg)
 
 ---
@@ -67,12 +73,14 @@
 ### Quick Start
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/TeacherEvan/MathMasterHTML.git
    cd MathMasterHTML
    ```
 
 2. **Open in browser**
+
    ```bash
    # Simply open index.html in your browser
    # No build process required!
@@ -120,11 +128,13 @@ Visit the live version at: `https://teachereven.github.io/MathMasterHTML/`
 ## 🎲 Game Mechanics
 
 ### Symbol Revelation System
+
 - Solutions are revealed **symbol-by-symbol**, not character-by-character
 - Each solution line must be completed before moving to the next
 - Case-insensitive matching (X and x are treated identically)
 
 ### Lock Animation Progression
+
 - **Cumulative Progress**: Lock levels advance based on total completed lines across ALL problems
 - **Formula**: Every 2 completed lines = 1 lock level advancement
 - **Level Caps**:
@@ -132,13 +142,16 @@ Visit the live version at: `https://teachereven.github.io/MathMasterHTML/`
   - Master: All 6 levels unlocked
 
 ### Worm System
+
 - **Spawning**: 1 worm per completed solution line (max 4 active)
 - **Behavior**: Random ground-based movement
 - **Theft Cycle**: Attempts to steal symbols every 10 seconds
 - **Defeat**: Click worm to destroy and return stolen symbol
 
 ### Event-Driven Architecture
+
 The game uses custom DOM events for communication:
+
 - `symbolClicked` - Player clicked a falling symbol
 - `first-line-solved` - First correct answer triggers lock animation
 - `problemLineCompleted` - Line finished → spawn worm + progress lock
@@ -149,6 +162,7 @@ The game uses custom DOM events for communication:
 ## 🏗️ Technical Architecture
 
 ### Technology Stack
+
 - **HTML5** - Semantic structure
 - **CSS3** - Animations, gradients, responsive design
 - **Vanilla JavaScript** - No frameworks or dependencies
@@ -236,6 +250,7 @@ MathMaster-Algebra/
 ## 🛠️ Development
 
 ### Prerequisites
+
 - Modern web browser (Chrome, Firefox, Edge, Safari)
 - Text editor (VS Code recommended)
 - No build tools or package managers required!
@@ -243,6 +258,7 @@ MathMaster-Algebra/
 ### Local Development
 
 1. **Open the project**
+
    ```bash
    code .
    ```
@@ -264,6 +280,7 @@ MathMaster-Algebra/
 **Testing Path**: `index.html` → `level-select.html` → `game.html?level=beginner`
 
 **Lock Animation Testing**:
+
 ```javascript
 // In browser console:
 lockManager.forceLockLevel(3);  // Jump to level 3
@@ -271,6 +288,7 @@ lockManager.getDebugInfo();      // Inspect state
 ```
 
 **Worm Spawn Testing**:
+
 ```javascript
 // Manually trigger:
 document.dispatchEvent(new CustomEvent('problemLineCompleted'));
@@ -293,6 +311,7 @@ document.dispatchEvent(new CustomEvent('problemLineCompleted'));
 Contributions are welcome! Here's how you can help:
 
 ### Reporting Bugs
+
 1. Check existing issues
 2. Create detailed bug report with:
    - Browser and version
@@ -301,11 +320,13 @@ Contributions are welcome! Here's how you can help:
    - Console errors (if any)
 
 ### Suggesting Features
+
 - Open an issue with `[FEATURE]` prefix
 - Describe the feature and use case
 - Include mockups if applicable
 
 ### Code Contributions
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
@@ -313,6 +334,7 @@ Contributions are welcome! Here's how you can help:
 5. Open a Pull Request
 
 ### Development Guidelines
+
 - Follow existing code style (see `.github/copilot-instructions.md`)
 - Use emoji-prefixed console logging
 - Test on multiple browsers
@@ -333,6 +355,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Purpose**: Educational tool for teaching algebra through interactive gameplay
 
 ### Special Thanks
+
 - Google Fonts for Orbitron typeface
 - The Matrix (1999) for visual inspiration
 - Students who tested and provided feedback
