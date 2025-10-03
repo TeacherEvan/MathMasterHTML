@@ -34,11 +34,14 @@
 }
 
 @keyframes problemPulse {
-    0%, 100% { 
+
+    0%,
+    100% {
         color: #ff6666;
         text-shadow: 0 0 10px rgba(255, 102, 102, 0.5);
     }
-    50% { 
+
+    50% {
         color: #ff9999;
         text-shadow: 0 0 15px rgba(255, 153, 153, 0.8);
     }

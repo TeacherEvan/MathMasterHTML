@@ -3,7 +3,12 @@
         "target": "ES6",
         "module": "ESNext",
         "checkJs": false,
-        "allowJs": true
+        "allowJs": true,
+        "noLib": false,
+        "lib": [
+            "ES6",
+            "DOM"
+        ]
     },
     "exclude": [
         "node_modules",

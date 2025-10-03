@@ -1,7 +1,8 @@
 /* Update the hidden symbol background to match the green theme */
 .hidden-symbol {
   color: transparent;
-  background: rgba(0, 50, 0, 0.3);   /* was rgba(255,255,255,0.1) */
+  background: rgba(0, 50, 0, 0.3);
+  /* was rgba(255,255,255,0.1) */
   border-radius: 2px;
   text-shadow: none;
 }
@@ -16,9 +17,11 @@
   overflow: visible !important;
   position: relative;
   min-height: 300px;
-  border: none; /* Removed green border */
+  border: none;
+  /* Removed green border */
   border-radius: 8px;
-  background: transparent; /* Removed black/green background */
+  background: transparent;
+  /* Removed black/green background */
   width: 100%;
 }
 

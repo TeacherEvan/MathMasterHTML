@@ -1,0 +1,8 @@
+{
+    "javascript.validate.enable": true,
+    "javascript.implicitProjectConfig.checkJs": false,
+    "eslint.enable": false,
+    "files.associations": {
+        "*.js": "javascript"
+    }
+}
