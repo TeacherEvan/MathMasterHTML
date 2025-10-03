@@ -53,15 +53,18 @@ class DisplayManager {
         const detected = this.detectResolution();
         this.currentResolution = detected;
 
-        console.log(`📊 Resolution: ${detected.name} (${detected.width}x${detected.height})`);
-        console.log(`🔍 Scale: ${detected.config.scale}, Font: ${detected.config.fontSize}`);
+        console.log(`📊 ========================================`);
+        console.log(`📊 DISPLAY MANAGER - Resolution Detected`);
+        console.log(`📊 Resolution: ${detected.name.toUpperCase()}`);
+        console.log(`📊 Viewport: ${detected.width}x${detected.height}`);
+        console.log(`� Scale: ${detected.config.scale}`);
+        console.log(`📊 Base Font Size: ${detected.config.fontSize}`);
+        console.log(`📊 ========================================`);
 
         // Apply resolution class to body
         document.body.className = document.body.className
             .replace(/\bres-\S+/g, '');
-        document.body.classList.add(`res-${detected.name}`);
-
-        // Apply CSS variables for dynamic scaling
+        document.body.classList.add(`res-${detected.name}`);        // Apply CSS variables for dynamic scaling
         document.documentElement.style.setProperty('--display-scale', detected.config.scale);
         document.documentElement.style.setProperty('--display-font-size', detected.config.fontSize);
         document.documentElement.style.setProperty('--viewport-width', `${detected.width}px`);
@@ -83,11 +86,11 @@ class DisplayManager {
     }
 
     applyFontSizes(config) {
-        // Problem container
-        const problemContainer = document.getElementById('problem-container');
-        if (problemContainer) {
-            problemContainer.style.fontSize = `calc(${config.fontSize} * 1.2)`;
-        }
+        // Problem container - DON'T override, let CSS handle it
+        // const problemContainer = document.getElementById('problem-container');
+        // if (problemContainer) {
+        //     problemContainer.style.fontSize = `calc(${config.fontSize} * 1.2)`;
+        // }
 
         // Solution container
         const solutionContainer = document.getElementById('solution-container');
@@ -135,47 +138,47 @@ class DisplayManager {
             position: fixed;
             bottom: 10px;
             right: 10px;
-            background: rgba(0, 255, 0, 0.1);
-            border: 1px solid #0f0;
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #0f0;
             color: #0f0;
-            padding: 8px 12px;
+            padding: 10px 15px;
             font-family: 'Orbitron', monospace;
-            font-size: 12px;
-            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
             z-index: 9999;
-            opacity: 0.7;
+            opacity: 1;
             transition: opacity 0.3s;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
         `;
-        indicator.textContent = 'Detecting...';
+        indicator.textContent = 'DETECTING RESOLUTION...';
         document.body.appendChild(indicator);
 
-        // Fade out after 3 seconds
+        // Fade out after 5 seconds (increased from 3)
         setTimeout(() => {
-            indicator.style.opacity = '0.3';
-        }, 3000);
+            indicator.style.opacity = '0.5';
+        }, 5000);
 
         // Show on hover
         indicator.addEventListener('mouseenter', () => {
             indicator.style.opacity = '1';
         });
         indicator.addEventListener('mouseleave', () => {
-            indicator.style.opacity = '0.3';
+            indicator.style.opacity = '0.5';
         });
     }
 
     updateResolutionIndicator(detected) {
         const indicator = document.getElementById('resolution-indicator');
         if (indicator) {
-            indicator.textContent = `${detected.name.toUpperCase()} | ${detected.width}x${detected.height} | ${Math.round(detected.config.scale * 100)}%`;
-            indicator.style.opacity = '0.7';
+            indicator.textContent = `${detected.name.toUpperCase()} | ${detected.width}x${detected.height} | SCALE: ${Math.round(detected.config.scale * 100)}%`;
+            indicator.style.opacity = '1';
 
             setTimeout(() => {
-                indicator.style.opacity = '0.3';
-            }, 3000);
+                indicator.style.opacity = '0.5';
+            }, 5000);
         }
-    }
-
-    debounce(func, wait) {
+    } debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
             const later = () => {
