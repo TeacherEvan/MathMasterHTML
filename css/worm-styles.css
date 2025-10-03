@@ -6,13 +6,17 @@
     align-items: center;
     z-index: 100;
     cursor: pointer;
-    transition: transform 0.3s ease, filter 0.3s ease;
+    /* NO transition property to prevent floating effect */
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .worm-container:hover {
-    transform: scale(1.1);
     filter: drop-shadow(0 4px 8px rgba(196, 164, 132, 0.6));
+}
+
+.worm-body {
+    display: flex;
+    align-items: center;
 }
 
 .worm-segment {
@@ -91,7 +95,7 @@
 
 /* Stolen symbol appearance */
 .stolen {
-    opacity: 0.3;
+    opacity: 0.3 !important;
     text-decoration: line-through;
     color: #666 !important;
     text-shadow: none !important;
@@ -110,33 +114,54 @@
     }
 }
 
-/* Symbol being carried by worm */
-.carried-symbol {
-    position: absolute;
-    top: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(145deg, #ffeb3b, #ffc107);
-    padding: 3px 6px;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #000;
-    border: 2px solid #ff9800;
-    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.5);
-    animation: symbol-float 1s ease-in-out infinite;
-    z-index: 101;
-}
-
-@keyframes symbol-float {
-
-    0%,
-    100% {
-        top: -25px;
+/* Symbol return animation when worm is clicked */
+@keyframes symbol-return {
+    0% {
+        transform: scale(0.5) translateY(-20px);
+        opacity: 0;
     }
 
     50% {
-        top: -30px;
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Symbol being carried by worm */
+.carried-symbol {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(145deg, #ff0000, #ff6666);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    border: 2px solid #ff0000;
+    box-shadow: 0 0 12px rgba(255, 0, 0, 0.8);
+    animation: symbol-glow 1s ease-in-out infinite;
+    z-index: 101;
+    pointer-events: none;
+}
+
+@keyframes symbol-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 12px rgba(255, 0, 0, 0.8);
+        text-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(255, 0, 0, 1);
+        text-shadow: 0 0 12px rgba(255, 0, 0, 0.8);
     }
 }
 
