@@ -98,6 +98,22 @@
     transition: all 0.3s ease;
     user-select: none;
     z-index: 1;
+    /* Increase touch target size */
+    padding: 15px;
+    margin: -15px;
+    /* Compensate for padding to maintain visual position */
+}
+
+/* Larger invisible clickable area for better touch targeting */
+.falling-symbol::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    /* Invisible but clickable area - increases touch radius by 40px total */
+    cursor: pointer;
 }
 
 .falling-symbol:hover {
@@ -120,5 +136,40 @@
     100% {
         transform: scale(2);
         opacity: 0;
+    }
+}
+
+/* Mobile and touch device optimizations */
+@media (max-width: 768px) {
+    .falling-symbol {
+        /* Even larger touch targets on mobile */
+        padding: 20px;
+        margin: -20px;
+        font-size: 28px;
+        /* Slightly larger symbols */
+    }
+
+    .falling-symbol::before {
+        /* Larger invisible touch area on mobile */
+        top: -25px;
+        left: -25px;
+        right: -25px;
+        bottom: -25px;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+    .falling-symbol {
+        padding: 25px;
+        margin: -25px;
+        font-size: 30px;
+    }
+
+    .falling-symbol::before {
+        top: -30px;
+        left: -30px;
+        right: -30px;
+        bottom: -30px;
     }
 }
