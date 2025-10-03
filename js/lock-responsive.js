@@ -131,8 +131,9 @@ class LockResponsiveManager {
         const lockDisplay = document.getElementById('lock-display');
         if (lockDisplay) {
             lockDisplay.style.setProperty('--lock-scale', scale);
-            lockDisplay.style.transform = `scale(${scale})`;
-            lockDisplay.style.transformOrigin = 'center top'; // Changed to top for downward positioning
+            // DON'T apply transform or transformOrigin here - let CSS handle centering
+            // lockDisplay.style.transform = `scale(${scale})`;
+            // lockDisplay.style.transformOrigin = 'center center';
             
             // Adjust container size based on scale
             const scaledWidth = Math.floor(this.baseWidth * scale);
@@ -141,8 +142,8 @@ class LockResponsiveManager {
             lockDisplay.style.maxWidth = `${scaledWidth}px`;
             lockDisplay.style.maxHeight = `${scaledHeight}px`;
             
-            // Add top margin to move lock down-south
-            lockDisplay.style.marginTop = '40px';
+            // Remove any margin overrides
+            lockDisplay.style.marginTop = '';
         }
         
         // Apply scaling to lock containers
@@ -150,8 +151,8 @@ class LockResponsiveManager {
         lockContainers.forEach(container => {
             const containerScale = scale * 0.9; // Slightly smaller for better fit
             container.style.transform = `scale(${containerScale})`;
-            container.style.transformOrigin = 'center top'; // Keep top alignment
-            container.style.marginTop = '20px'; // Additional downward adjustment
+            container.style.transformOrigin = 'center center'; // Center alignment
+            container.style.marginTop = ''; // Remove margin override
         });
         
         // Apply scaling to lock bodies
@@ -159,14 +160,14 @@ class LockResponsiveManager {
         lockBodies.forEach(body => {
             const bodyScale = scale * 0.8; // Even smaller for lock body
             body.style.transform = `scale(${bodyScale})`;
-            body.style.transformOrigin = 'center top'; // Keep top alignment
+            body.style.transformOrigin = 'center center'; // Center alignment
         });
         
         // Apply scaling to lock component wrappers
         const lockWrappers = document.querySelectorAll('.lock-component-wrapper');
         lockWrappers.forEach(wrapper => {
-            wrapper.style.paddingTop = `${60 * scale}px`; // Scale-aware top padding
-            wrapper.style.alignItems = 'flex-start'; // Ensure top alignment
+            wrapper.style.paddingTop = ''; // Remove padding override
+            wrapper.style.alignItems = 'center'; // Center alignment
         });
         
         // Add resolution class for CSS targeting
