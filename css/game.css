@@ -20,17 +20,28 @@
 #panel-a {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: stretch;
 }
 
 #problem-container {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     text-align: center;
-    margin-top: 20px;
     font-family: 'Orbitron', monospace;
     font-size: 24px;
     color: #ff6666;
     animation: problemPulse 2s ease-in-out infinite;
+    z-index: 100;
+}
+
+#lock-display {
+    flex: 1;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
 }
 
 @keyframes problemPulse {
