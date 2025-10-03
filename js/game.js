@@ -502,14 +502,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        @keyframes pulsating-green {
+        @keyframes pulsating-cyan {
             0%, 100% {
-                color: #00ff00;
-                text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+                color: #00ffff;
+                text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
             }
             50% {
-                color: #33ff33;
-                text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #00ff00;
+                color: #66ffff;
+                text-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00d4ff;
             }
         }
 
@@ -592,11 +592,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         .completed-row-symbol {
-            color: #00ff00;
-            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
-            background: rgba(0,255,0,0.15);
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00d4ff;
+            background: rgba(0,255,255,0.15);
             border-radius: 2px;
-            animation: pulsating-green 2s ease-in-out infinite;
+            animation: pulsating-cyan 2s ease-in-out infinite;
             font-weight: bold;
         }
         

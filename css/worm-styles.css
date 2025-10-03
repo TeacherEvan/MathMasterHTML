@@ -7,11 +7,12 @@
     z-index: 100;
     cursor: pointer;
     /* NO transition property to prevent floating effect */
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 8px rgba(196, 164, 132, 0.4));
 }
 
 .worm-container:hover {
-    filter: drop-shadow(0 4px 8px rgba(196, 164, 132, 0.6));
+    filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 15px rgba(255, 200, 100, 0.7));
+    transform: scale(1.05);
 }
 
 .worm-body {
@@ -22,21 +23,25 @@
 .worm-segment {
     width: 12px;
     height: 12px;
-    background: radial-gradient(circle at 30% 30%, #D4B494, #C4A484, #A0785A);
-    border: 1px solid #8B6342;
+    background: radial-gradient(circle at 30% 30%, #E4C4A4, #C4A484, #A0785A);
+    border: 2px solid #6B4423;
     border-radius: 50%;
     margin-left: -2px;
     animation: worm-wiggle 2s ease-in-out infinite;
     animation-delay: calc(var(--segment-index, 0) * 0.1s);
     position: relative;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3),
+        0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .worm-segment:first-child {
     --segment-index: 0;
     width: 14px;
     height: 14px;
-    background: radial-gradient(circle at 30% 30%, #E4C4A4, #C4A484);
-    border: 2px solid #8B6342;
+    background: radial-gradient(circle at 30% 30%, #F4D4B4, #D4A494, #B4846A);
+    border: 2px solid #5B3313;
+    box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.4),
+        0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 /* Worm eyes on first segment (head) */
