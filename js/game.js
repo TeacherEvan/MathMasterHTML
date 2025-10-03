@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const level = urlParams.get('level') || 'beginner';
     const lockComponent = urlParams.get('lockComponent') || 'level-1-transformer.html';
-    
+
     console.log(`🎮 Loading level: ${level}, Lock component: ${lockComponent}`);
 
     // Apply level theme to body
@@ -29,9 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load problems based on level
     function loadProblems() {
         let problemPath = '';
-        
+
         // Determine which asset file to load based on level
-        switch(level) {
+        switch (level) {
             case 'beginner':
                 problemPath = 'Assets/Beginner_Lvl/beginner_problems.md';
                 break;
@@ -44,9 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
             default:
                 problemPath = 'Assets/Beginner_Lvl/beginner_problems.md';
         }
-        
+
         console.log(`📚 Loading problems from: ${problemPath}`);
-        
+
         // Fetch the problem set
         fetch(problemPath)
             .then(response => {
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Parse problems from markdown
                 problems = parseProblemsFromMarkdown(data);
                 console.log(`📖 Loaded ${problems.length} problems for ${level} level`);
-                
+
                 // Start with the first problem
                 if (problems.length > 0) {
                     currentProblem = problems[currentProblemIndex];
@@ -88,22 +88,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Parse problems from markdown content
     function parseProblemsFromMarkdown(markdownContent) {
         const parsedProblems = [];
-        
+
         // Split by problem (starting with a number followed by dot and backtick)
         const problemRegex = /(\d+)\.\s+`([^`]+)`\s*\n((?:\s*-[^\n]+\n?)+)/g;
         let match;
-        
+
         while ((match = problemRegex.exec(markdownContent)) !== null) {
             try {
                 const problemNumber = match[1];
                 const problemText = match[2];
                 const stepsText = match[3];
-                
+
                 // Extract all solution steps (lines starting with -)
                 const steps = stepsText.split('\n')
                     .filter(line => line.trim().startsWith('-'))
                     .map(line => line.trim().replace(/^-\s*/, ''));
-                
+
                 if (steps.length > 0) {
                     parsedProblems.push({
                         problem: problemText,
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error parsing problem:', e);
             }
         }
-        
+
         console.log(`📚 Parsed ${parsedProblems.length} problems with multi-step solutions`);
         return parsedProblems;
     }
@@ -126,42 +126,42 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('❌ Problem setup failed - invalid problem data');
             return;
         }
-        
+
         console.log(`🎯 Setting up problem: ${currentProblem.problem}`);
         console.log(`📚 Solution steps:`, currentProblem.steps);
-        
+
         // Reset indices
         currentStepIndex = 0;
         currentSymbolIndex = 0;
         revealedIndex = 0;
-        
+
         // Show basic lock until activation
         if (lockDisplay && window.lockManager) {
             lockManager.showBasicLock();
         }
-        
+
         // Display the problem with enhanced styling
         problemContainer.innerHTML = `<div class="problem-text">${currentProblem.problem}</div>`;
 
         // Setup the step-by-step solution display
         setupStepDisplay();
-        
+
         console.log(`📝 Problem setup complete with ${currentProblem.steps.length} solution steps`);
     }
 
     function setupStepDisplay() {
         // Clear previous solution
         solutionContainer.innerHTML = '';
-        
+
         // Create container for all solution steps
         const stepsContainer = document.createElement('div');
         stepsContainer.className = 'steps-container';
-        
+
         currentProblem.steps.forEach((step, stepIndex) => {
             const stepDiv = document.createElement('div');
             stepDiv.className = 'solution-step';
             stepDiv.dataset.stepIndex = stepIndex;
-            
+
             // Create spans for each symbol in the step
             step.split('').forEach((symbol, symbolIndex) => {
                 const symbolSpan = document.createElement('span');
@@ -169,20 +169,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 symbolSpan.dataset.stepIndex = stepIndex;
                 symbolSpan.dataset.symbolIndex = symbolIndex;
                 symbolSpan.className = 'solution-symbol';
-                
+
                 // Initially hide all symbols except spaces
                 if (symbol === ' ') {
                     symbolSpan.classList.add('space-symbol');
                 } else {
                     symbolSpan.classList.add('hidden-symbol');
                 }
-                
+
                 stepDiv.appendChild(symbolSpan);
             });
-            
+
             stepsContainer.appendChild(stepDiv);
         });
-        
+
         solutionContainer.appendChild(stepsContainer);
         console.log(`📋 Created ${currentProblem.steps.length} solution steps`);
     }
@@ -196,13 +196,13 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('🔄 Looping back to first problem');
         }
         currentProblem = problems[currentProblemIndex];
-        
+
         // Reset step indices
         currentStepIndex = 0;
         currentSymbolIndex = 0;
-        
+
         setupProblem();
-        
+
         // Trigger event for worm spawning
         document.dispatchEvent(new CustomEvent('problemLineCompleted'));
     }
@@ -216,14 +216,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentStepSymbols = solutionContainer.querySelectorAll(
             `[data-step-index="${currentStepIndex}"].hidden-symbol`
         );
-        
+
         if (currentStepSymbols.length > 0) {
             // Return array of all possible symbols in current line
             const possibleSymbols = Array.from(currentStepSymbols).map(span => span.textContent);
             console.log(`🎯 Current line has ${possibleSymbols.length} hidden symbols: [${possibleSymbols.join(', ')}]`);
             return possibleSymbols;
         }
-        
+
         console.log('🏁 No more hidden symbols in current step');
         return null;
     }
@@ -232,12 +232,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function isSymbolInCurrentLine(clickedSymbol) {
         const expectedSymbols = getNextSymbol();
         console.log(`🔍 Checking symbol "${clickedSymbol}" against expected symbols:`, expectedSymbols);
-        
+
         if (expectedSymbols && Array.isArray(expectedSymbols)) {
             // FIXED: Normalize X/x comparison - treat them as the same
             const normalizedClicked = clickedSymbol.toLowerCase() === 'x' ? 'X' : clickedSymbol;
             const normalizedExpected = expectedSymbols.map(s => s.toLowerCase() === 'x' ? 'X' : s);
-            
+
             const result = normalizedExpected.includes(normalizedClicked);
             console.log(`🎯 Symbol "${clickedSymbol}" normalized to "${normalizedClicked}" - match result: ${result}`);
             return result;
@@ -249,23 +249,23 @@ document.addEventListener('DOMContentLoaded', () => {
     /** Reveal specific symbol in current line - FIXED X/x DETECTION */
     function revealSpecificSymbol(targetSymbol) {
         console.log(`🔍 Attempting to reveal symbol: "${targetSymbol}" in step ${currentStepIndex}`);
-        
+
         // FIXED: Normalize X/x for matching
         const normalizedTarget = targetSymbol.toLowerCase() === 'x' ? 'X' : targetSymbol;
-        
+
         // Find the specific symbol in current step
         const currentStepSymbols = solutionContainer.querySelectorAll(
             `[data-step-index="${currentStepIndex}"].hidden-symbol`
         );
-        
+
         console.log(`📋 Found ${currentStepSymbols.length} hidden symbols in current step`);
-        
+
         for (let span of currentStepSymbols) {
             const spanSymbol = span.textContent;
             const normalizedSpan = spanSymbol.toLowerCase() === 'x' ? 'X' : spanSymbol;
-            
+
             console.log(`🔎 Comparing "${normalizedTarget}" with hidden symbol "${normalizedSpan}"`);
-            
+
             if (normalizedSpan === normalizedTarget) {
                 span.classList.remove('hidden-symbol');
                 span.classList.add('revealed-symbol');
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return true;
             }
         }
-        
+
         console.log(`❌ Symbol "${targetSymbol}" not found in current step`);
         return false;
     }
@@ -282,19 +282,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleCorrectAnswer(clickedSymbol) {
         console.log(`✅ Correct symbol clicked: "${clickedSymbol}"`);
         correctAnswersCount++;
-        
+
         // Dispatch first-line-solved event for LockManager
         if (correctAnswersCount === 1) {
             console.log('🔒 First correct answer - dispatching first-line-solved event');
             document.dispatchEvent(new Event('first-line-solved'));
         }
-        
+
         // Add visual feedback
         document.body.style.background = 'radial-gradient(circle, rgba(0,255,0,0.1), rgba(0,0,0,1))';
         setTimeout(() => {
             document.body.style.background = '';
         }, 300);
-        
+
         // Reveal the specific symbol clicked
         revealSpecificSymbol(clickedSymbol);
         checkLineCompletion();
@@ -313,24 +313,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentStepHiddenSymbols = solutionContainer.querySelectorAll(
             `[data-step-index="${currentStepIndex}"].hidden-symbol`
         );
-        
+
         if (currentStepHiddenSymbols.length === 0) {
             console.log(`🎉 Line ${currentStepIndex + 1} completed!`);
-            
+
             // Trigger worm spawning for completed line
             console.log('🐛 DISPATCHING problemLineCompleted EVENT - This should spawn a worm!');
-            
+
             // Enhanced event dispatch with line details
-            document.dispatchEvent(new CustomEvent('problemLineCompleted', { 
-                detail: { 
+            document.dispatchEvent(new CustomEvent('problemLineCompleted', {
+                detail: {
                     lineNumber: currentStepIndex + 1,
                     lineText: currentProblem.steps[currentStepIndex]
                 }
             }));
-            
+
             // Log the completion for debugging
             console.log(`🔒 Line ${currentStepIndex + 1} completed - triggering lock progression`);
-            
+
             // Move to next step if available
             if (currentStepIndex < currentProblem.steps.length - 1) {
                 currentStepIndex++;
@@ -347,23 +347,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkProblemCompletion() {
         // Check if all symbols in all steps have been revealed
         const hiddenSymbols = solutionContainer.querySelectorAll('.hidden-symbol');
-        
+
         if (hiddenSymbols.length === 0) {
             console.log('🎉 Problem Complete - All steps revealed!');
-            
+
             // Enhanced completion effect
             solutionContainer.style.animation = 'completionGlow 1s ease-in-out';
-            
+
             // Show completion message and move to next problem
             setTimeout(() => {
                 const completionMessage = `Problem ${currentProblemIndex + 1} completed!\n` +
                     `Steps completed: ${currentProblem.steps.length}\n` +
                     `Correct answers: ${correctAnswersCount}\n` +
                     `Moving to next problem...`;
-                
+
                 console.log(completionMessage);
                 nextProblem();
-                
+
                 // Reset completion effect
                 solutionContainer.style.animation = '';
             }, 1500);
@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event Listeners
     helpButton.addEventListener('click', () => {
         console.log('💡 Help button clicked');
-        
+
         // Get available symbols in current line
         const availableSymbols = getNextSymbol();
         if (availableSymbols && availableSymbols.length > 0) {
@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
             revealSpecificSymbol(randomSymbol);
             checkLineCompletion();
         }
-        
+
         // Add help button feedback
         helpButton.style.transform = 'scale(0.95)';
         setTimeout(() => {
@@ -393,9 +393,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listen for symbol clicks from symbol rain (matrix.js)
     document.addEventListener('symbolClicked', (e) => {
         const clicked = e.detail.symbol;
-        
+
         console.log(`🎯 Symbol Rain click - Clicked: "${clicked}"`);
-        
+
         if (isSymbolInCurrentLine(clicked)) {
             handleCorrectAnswer(clicked);
         } else {
@@ -406,12 +406,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listen for worm symbol correct events
     document.addEventListener('wormSymbolCorrect', (e) => {
         const symbol = e.detail.symbol;
-        
+
         console.log(`🐛✅ Worm symbol event - Symbol: ${symbol}`);
-        
+
         if (isSymbolInCurrentLine(symbol)) {
             handleCorrectAnswer(symbol);
         }
+    });
+
+    // Listen for worm symbol saved events (when player clicks worm to save symbol)
+    document.addEventListener('wormSymbolSaved', (e) => {
+        const { symbol, wormId } = e.detail;
+
+        console.log(`🎯✅ Player saved symbol "${symbol}" from worm ${wormId}!`);
+
+        // Add visual feedback for saving a symbol
+        document.body.style.background = 'radial-gradient(circle, rgba(0,255,0,0.2), rgba(0,0,0,1))';
+        setTimeout(() => {
+            document.body.style.background = '';
+        }, 500);
+
+        // Could add scoring or other rewards here
+        console.log(`💯 Good job! Symbol "${symbol}" has been saved!`);
     });
 
     // Add completion glow animation and additional styles
@@ -509,6 +525,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     `;
     document.head.appendChild(gameStyles);
-    
+
     console.log('✅ Game initialization complete!');
 });
