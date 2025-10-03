@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const symbols = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X', 'x', '+', '-', '=', '÷', '×'];
 
     // Configuration
-    let symbolFallSpeed = 0.5; // Start slow
-    const maxFallSpeed = 5; // Set a maximum speed
+    let symbolFallSpeed = 0.6; // Increased by 20% from 0.5
+    const maxFallSpeed = 6; // Increased by 20% from 5
     const spawnRate = 0.2; // Higher spawn rate for initial population
     const columnWidth = 50;
 

@@ -22,7 +22,10 @@ class WormSystem {
         }
 
         // Listen for the custom event dispatched by game.js
-        document.addEventListener('problemLineCompleted', () => this.spawnWorm());
+        document.addEventListener('problemLineCompleted', (event) => {
+            console.log('🐛 Worm System received problemLineCompleted event:', event.detail);
+            this.spawnWorm();
+        });
 
         // Cleanup on page unload
         window.addEventListener('beforeunload', () => this.cleanup());
@@ -45,14 +48,18 @@ class WormSystem {
     }
 
     spawnWorm() {
+        console.log(`🐛 spawnWorm() called. Current worms: ${this.worms.length}/${this.maxWorms}`);
+
         if (this.worms.length >= this.maxWorms) {
-            console.log('Max worms reached. No more spawning.');
+            console.log(`⚠️ Max worms (${this.maxWorms}) reached. No more spawning.`);
             return;
         }
 
         const worm = this.createWorm(this.container);
         this.worms.push(worm);
         this.startWormBehaviors(worm);
+
+        console.log(`✅ Worm spawned! Total worms now: ${this.worms.length}`);
     }
 
     createWorm(container) {
