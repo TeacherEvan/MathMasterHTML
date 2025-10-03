@@ -317,6 +317,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentStepHiddenSymbols.length === 0) {
             console.log(`🎉 Line ${currentStepIndex + 1} completed!`);
 
+            // SPECIAL EFFECT: Lightning flash for first row completion
+            if (currentStepIndex === 0) {
+                console.log('⚡ FIRST ROW COMPLETED - Triggering lightning flash!');
+                createLightningFlash();
+                transformRowToPulsatingGreen(currentStepIndex);
+            }
+
             // Trigger worm spawning for completed line
             console.log('🐛 DISPATCHING problemLineCompleted EVENT - This should spawn a worm!');
 
@@ -341,6 +348,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkProblemCompletion();
             }
         }
+    }
+
+    /** Create lightning flash effect */
+    function createLightningFlash() {
+        console.log('⚡ Creating lightning flash effect...');
+
+        // Create lightning overlay
+        const lightning = document.createElement('div');
+        lightning.className = 'lightning-flash';
+        lightning.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(135,206,250,0.7), transparent);
+            z-index: 9999;
+            pointer-events: none;
+            animation: lightning-strike 1s ease-out forwards;
+        `;
+
+        document.body.appendChild(lightning);
+
+        // Remove after animation
+        setTimeout(() => {
+            if (lightning.parentNode) {
+                lightning.parentNode.removeChild(lightning);
+            }
+        }, 1000);
+    }
+
+    /** Transform completed row to pulsating green */
+    function transformRowToPulsatingGreen(stepIndex) {
+        console.log(`💚 Transforming row ${stepIndex + 1} to pulsating green...`);
+
+        // Get all symbols in the completed row
+        const rowSymbols = solutionContainer.querySelectorAll(
+            `[data-step-index="${stepIndex}"].revealed-symbol`
+        );
+
+        rowSymbols.forEach(symbol => {
+            // Remove red styling and add green pulsating
+            symbol.classList.remove('revealed-symbol');
+            symbol.classList.add('completed-row-symbol');
+        });
+
+        console.log(`✅ Row ${stepIndex + 1} transformed - ${rowSymbols.length} symbols now pulsating green`);
     }
 
     /** Check if all solution steps have been revealed */
@@ -448,16 +502,51 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        @keyframes pulsating-green {
+            0%, 100% {
+                color: #00ff00;
+                text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+            }
+            50% {
+                color: #33ff33;
+                text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #00ff00;
+            }
+        }
+
+        @keyframes lightning-strike {
+            0% {
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            20% {
+                opacity: 0.3;
+            }
+            30% {
+                opacity: 1;
+            }
+            40% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
         @keyframes completionGlow {
-            0% { 
+            0% {
                 box-shadow: inset 0 0 15px rgba(0,255,0,0.4);
                 transform: scale(1);
             }
-            50% { 
+            50% {
                 box-shadow: inset 0 0 30px rgba(0,255,0,0.8), 0 0 50px rgba(0,255,0,0.6);
                 transform: scale(1.02);
             }
-            100% { 
+            100% {
                 box-shadow: inset 0 0 15px rgba(0,255,0,0.4);
                 transform: scale(1);
             }
@@ -500,6 +589,15 @@ document.addEventListener('DOMContentLoaded', () => {
             text-shadow: 0 0 8px rgba(255,0,0,0.6); /* Changed from green to red */
             background: rgba(255,0,0,0.1); /* Changed from green to red */
             border-radius: 2px;
+        }
+
+        .completed-row-symbol {
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+            background: rgba(0,255,0,0.15);
+            border-radius: 2px;
+            animation: pulsating-green 2s ease-in-out infinite;
+            font-weight: bold;
         }
         
         .space-symbol {

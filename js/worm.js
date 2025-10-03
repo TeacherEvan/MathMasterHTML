@@ -42,6 +42,22 @@ class WormSystem {
 
         this.isInitialized = true;
         console.log('✅ Worm System initialized successfully');
+
+        // Spawn initial worms after a short delay to ensure solution is set up
+        setTimeout(() => this.spawnInitialWorms(), 1000);
+    }
+
+    spawnInitialWorms() {
+        console.log('🐛 Spawning initial worms...');
+        // Spawn 2 initial worms to make gameplay more engaging from the start
+        const initialWormCount = 2;
+        for (let i = 0; i < initialWormCount; i++) {
+            setTimeout(() => {
+                if (this.worms.length < this.maxWorms) {
+                    this.spawnWorm();
+                }
+            }, i * 500); // Stagger spawning
+        }
     }
 
 

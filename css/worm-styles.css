@@ -28,6 +28,7 @@
     margin-left: -2px;
     animation: worm-wiggle 2s ease-in-out infinite;
     animation-delay: calc(var(--segment-index, 0) * 0.1s);
+    position: relative;
 }
 
 .worm-segment:first-child {
@@ -36,6 +37,43 @@
     height: 14px;
     background: radial-gradient(circle at 30% 30%, #E4C4A4, #C4A484);
     border: 2px solid #8B6342;
+}
+
+/* Worm eyes on first segment (head) */
+.worm-segment:first-child::before,
+.worm-segment:first-child::after {
+    content: '';
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #000;
+    border-radius: 50%;
+    top: 3px;
+    animation: worm-blink 3s ease-in-out infinite;
+}
+
+.worm-segment:first-child::before {
+    left: 3px;
+}
+
+.worm-segment:first-child::after {
+    right: 3px;
+}
+
+@keyframes worm-blink {
+
+    0%,
+    90%,
+    100% {
+        height: 3px;
+        opacity: 1;
+    }
+
+    92%,
+    98% {
+        height: 0.5px;
+        opacity: 0.3;
+    }
 }
 
 @keyframes worm-wiggle {
