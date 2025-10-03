@@ -317,12 +317,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentStepHiddenSymbols.length === 0) {
             console.log(`🎉 Line ${currentStepIndex + 1} completed!`);
 
-            // SPECIAL EFFECT: Lightning flash for first row completion
-            if (currentStepIndex === 0) {
-                console.log('⚡ FIRST ROW COMPLETED - Triggering lightning flash!');
-                createLightningFlash();
-                transformRowToPulsatingGreen(currentStepIndex);
-            }
+            // SPECIAL EFFECT: Lightning flash for ALL row completions
+            console.log(`⚡ ROW ${currentStepIndex + 1} COMPLETED - Triggering lightning flash!`);
+            createLightningFlash();
+            transformRowToPulsatingCyan(currentStepIndex);
 
             // Trigger worm spawning for completed line
             console.log('🐛 DISPATCHING problemLineCompleted EVENT - This should spawn a worm!');
@@ -379,9 +377,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
 
-    /** Transform completed row to pulsating green */
-    function transformRowToPulsatingGreen(stepIndex) {
-        console.log(`💚 Transforming row ${stepIndex + 1} to pulsating green...`);
+    /** Transform completed row to pulsating cyan */
+    function transformRowToPulsatingCyan(stepIndex) {
+        console.log(`💙 Transforming row ${stepIndex + 1} to pulsating cyan...`);
 
         // Get all symbols in the completed row
         const rowSymbols = solutionContainer.querySelectorAll(
@@ -389,12 +387,12 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         rowSymbols.forEach(symbol => {
-            // Remove red styling and add green pulsating
+            // Remove red styling and add cyan pulsating
             symbol.classList.remove('revealed-symbol');
             symbol.classList.add('completed-row-symbol');
         });
 
-        console.log(`✅ Row ${stepIndex + 1} transformed - ${rowSymbols.length} symbols now pulsating green`);
+        console.log(`✅ Row ${stepIndex + 1} transformed - ${rowSymbols.length} symbols now pulsating cyan`);
     }
 
     /** Check if all solution steps have been revealed */
