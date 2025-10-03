@@ -381,9 +381,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function transformRowToPulsatingCyan(stepIndex) {
         console.log(`💙 Transforming row ${stepIndex + 1} to pulsating cyan...`);
 
-        // Get all symbols in the completed row
+        // Get ALL non-hidden, non-space symbols in the completed row
         const rowSymbols = solutionContainer.querySelectorAll(
-            `[data-step-index="${stepIndex}"].revealed-symbol`
+            `[data-step-index="${stepIndex}"].solution-symbol:not(.hidden-symbol):not(.space-symbol):not(.completed-row-symbol)`
         );
 
         rowSymbols.forEach(symbol => {
