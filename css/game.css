@@ -13,6 +13,35 @@
     position: relative;
     overflow: hidden;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+#panel-a {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#problem-container {
+    text-align: center;
+    margin-top: 20px;
+    font-family: 'Orbitron', monospace;
+    font-size: 24px;
+    color: #ff6666;
+    animation: problemPulse 2s ease-in-out infinite;
+}
+
+@keyframes problemPulse {
+    0%, 100% { 
+        color: #ff6666;
+        text-shadow: 0 0 10px rgba(255, 102, 102, 0.5);
+    }
+    50% { 
+        color: #ff9999;
+        text-shadow: 0 0 15px rgba(255, 153, 153, 0.8);
+    }
 }
 
 .wall {

@@ -2,12 +2,15 @@
 console.log("Symbol Rain Display script loaded.");
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🎯 DOMContentLoaded fired for 3rdDISPLAY.js');
     const symbolRainContainer = document.getElementById('symbol-rain-container');
 
     if (!symbolRainContainer) {
-        console.error('Symbol rain container not found!');
+        console.error('❌ Symbol rain container not found!');
         return;
     }
+
+    console.log('✅ Symbol rain container found:', symbolRainContainer);
 
     const symbols = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X', 'x', '+', '-', '=', '÷', '×'];
 
@@ -23,7 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function calculateColumns() {
         const containerWidth = symbolRainContainer.offsetWidth;
+        const containerHeight = symbolRainContainer.offsetHeight;
         columns = Math.floor(containerWidth / columnWidth);
+        console.log(`📏 Container dimensions: ${containerWidth}x${containerHeight}, Columns: ${columns}`);
     }
 
     function createFallingSymbol(column, isInitialPopulation = false) {
@@ -148,10 +153,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initialize
+    console.log('🚀 Initializing symbol rain system...');
     calculateColumns();
+    console.log(`📊 Creating ${columns * 5} initial symbols...`);
     populateInitialSymbols();
+    console.log(`✨ Created ${activeSymbols.length} symbols`);
     startAnimation();
+    console.log('▶️ Animation started');
     startSpeedController();
+    console.log('⏱️ Speed controller started');
 
-    window.addEventListener('resize', calculateColumns);
+    window.addEventListener('resize', () => {
+        console.log('🔄 Window resized, recalculating columns...');
+        calculateColumns();
+    });
 });
