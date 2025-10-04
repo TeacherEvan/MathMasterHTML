@@ -574,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         .steps-container {
-            font-family: 'Orbitron', monospace;
+            font-family: 'Orbitron', monospace; /* cSpell:ignore Orbitron */
             font-size: 1.65em; /* Increased by 50% */
             line-height: 1.8;
         }

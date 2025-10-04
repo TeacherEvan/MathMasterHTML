@@ -1,5 +1,10 @@
 /* Symbol Console Styles - Matrix Theme */
 
+/* Ensure console is positioned within Panel B */
+#panel-b {
+    position: relative;
+}
+
 #symbol-console {
     position: absolute;
     bottom: 20px;
