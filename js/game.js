@@ -406,18 +406,23 @@ document.addEventListener('DOMContentLoaded', () => {
             // Enhanced completion effect
             solutionContainer.style.animation = 'completionGlow 1s ease-in-out';
 
-            // Show completion message and move to next problem
+            // Show completion message and trigger console modal
             setTimeout(() => {
                 const completionMessage = `Problem ${currentProblemIndex + 1} completed!\n` +
                     `Steps completed: ${currentProblem.steps.length}\n` +
-                    `Correct answers: ${correctAnswersCount}\n` +
-                    `Moving to next problem...`;
+                    `Correct answers: ${correctAnswersCount}`;
 
                 console.log(completionMessage);
-                nextProblem();
 
                 // Reset completion effect
                 solutionContainer.style.animation = '';
+
+                // Dispatch problemCompleted event to trigger console modal
+                console.log('📡 Dispatching problemCompleted event');
+                document.dispatchEvent(new CustomEvent('problemCompleted'));
+
+                // Wait for console symbol to be added before moving to next problem
+                // The consoleSymbolAdded event will trigger nextProblem()
             }, 1500);
         }
     }
@@ -480,6 +485,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Could add scoring or other rewards here
         console.log(`💯 Good job! Symbol "${symbol}" has been saved!`);
+    });
+
+    // Listen for console symbol added events (from console manager)
+    document.addEventListener('consoleSymbolAdded', (e) => {
+        console.log('🎮 Console symbol added, moving to next problem');
+
+        if (e.detail) {
+            console.log(`📊 Console update: ${e.detail.symbol} added to position ${e.detail.position + 1}`);
+        }
+
+        // Continue to next problem after console interaction
+        setTimeout(() => {
+            nextProblem();
+        }, 300);
     });
 
     // Add completion glow animation and additional styles

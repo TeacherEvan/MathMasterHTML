@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MathMaster - Game</title>
     <link rel="stylesheet" href="css/game.css">
+    <link rel="stylesheet" href="css/console.css">
     <link rel="stylesheet" href="css/lock-responsive.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -92,6 +93,18 @@
         <div id="panel-a" class="display-panel">
             <div id="lock-display"></div>
             <div id="problem-container"></div>
+            <!-- Symbol Console -->
+            <div id="symbol-console">
+                <button class="console-slot" data-slot="0"></button>
+                <button class="console-slot" data-slot="1"></button>
+                <button class="console-slot" data-slot="2"></button>
+                <button class="console-slot" data-slot="3"></button>
+                <button class="console-slot" data-slot="4"></button>
+                <button class="console-slot" data-slot="5"></button>
+                <button class="console-slot" data-slot="6"></button>
+                <button class="console-slot" data-slot="7"></button>
+                <button class="console-slot" data-slot="8"></button>
+            </div>
         </div>
 
         <div class="wall"></div>
@@ -111,11 +124,51 @@
         </div>
     </div>
     
+    <!-- Symbol Selection Modal -->
+    <div id="symbol-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2>Choose a Symbol for Your Console</h2>
+            <p class="modal-instruction">First, select a symbol:</p>
+            <div id="symbol-choices" class="symbol-grid">
+                <button class="symbol-choice" data-symbol="0">0</button>
+                <button class="symbol-choice" data-symbol="1">1</button>
+                <button class="symbol-choice" data-symbol="2">2</button>
+                <button class="symbol-choice" data-symbol="3">3</button>
+                <button class="symbol-choice" data-symbol="4">4</button>
+                <button class="symbol-choice" data-symbol="5">5</button>
+                <button class="symbol-choice" data-symbol="6">6</button>
+                <button class="symbol-choice" data-symbol="7">7</button>
+                <button class="symbol-choice" data-symbol="8">8</button>
+                <button class="symbol-choice" data-symbol="9">9</button>
+                <button class="symbol-choice" data-symbol="X">X</button>
+                <button class="symbol-choice" data-symbol="+">+</button>
+                <button class="symbol-choice" data-symbol="-">-</button>
+                <button class="symbol-choice" data-symbol="=">=</button>
+                <button class="symbol-choice" data-symbol="÷">÷</button>
+                <button class="symbol-choice" data-symbol="×">×</button>
+            </div>
+            <p class="modal-instruction" id="position-instruction" style="display: none;">Now, choose a position on your console:</p>
+            <div id="position-choices" class="position-grid" style="display: none;">
+                <button class="position-choice" data-position="0">1</button>
+                <button class="position-choice" data-position="1">2</button>
+                <button class="position-choice" data-position="2">3</button>
+                <button class="position-choice" data-position="3">4</button>
+                <button class="position-choice" data-position="4">5</button>
+                <button class="position-choice" data-position="5">6</button>
+                <button class="position-choice" data-position="6">7</button>
+                <button class="position-choice" data-position="7">8</button>
+                <button class="position-choice" data-position="8">9</button>
+            </div>
+            <button id="skip-button" class="modal-skip">Skip (Random Fill)</button>
+        </div>
+    </div>
+    
     <script src="js/display-manager.js"></script>
     <script src="js/3rdDISPLAY.js"></script>
     <script src="js/worm.js"></script>
     <script src="js/lock-responsive.js"></script>
     <script src="js/lock-manager.js"></script>
+    <script src="js/console-manager.js"></script>
     <script src="js/game.js"></script>
     <script>
         function goBack() {
