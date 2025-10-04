@@ -181,9 +181,12 @@
     left: 0;
     right: 0;
     bottom: 0;
-    pointer-events: none; /* Allow clicks to pass through to elements below */
-    z-index: 900; /* Below console (z-index 50 in console.css is relative to panel-b) but above solution */
-    overflow: visible; /* Allow worms to animate freely */
+    pointer-events: none;
+    /* Allow clicks to pass through to elements below */
+    z-index: 9999 !important;
+    /* HIGHEST z-index - worms must be in front of ALL layers */
+    overflow: visible;
+    /* Allow worms to animate freely */
 }
 
 /* Re-enable pointer events on actual worm elements */

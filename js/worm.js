@@ -158,7 +158,7 @@ class WormSystem {
         wormElement.style.left = `${startX}px`;
         wormElement.style.top = `${startY}px`;
         wormElement.style.position = 'absolute';
-        wormElement.style.zIndex = '1000'; // High z-index for visibility
+        wormElement.style.zIndex = '10000'; // MAXIMUM z-index - in front of ALL layers
         wormElement.style.opacity = '1';
         wormElement.style.visibility = 'visible';
 
@@ -236,7 +236,7 @@ class WormSystem {
         wormElement.style.left = `${startX}px`;
         wormElement.style.top = `${startY}px`;
         wormElement.style.position = 'absolute';
-        wormElement.style.zIndex = '1000'; // High z-index for visibility
+        wormElement.style.zIndex = '10000'; // MAXIMUM z-index - in front of ALL layers
         wormElement.style.opacity = '1';
         wormElement.style.visibility = 'visible';
 
