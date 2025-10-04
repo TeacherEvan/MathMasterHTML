@@ -363,19 +363,22 @@
 
 /* Console worm special styling */
 .worm-container.console-worm {
-    z-index: 100 !important;
+    z-index: 1000 !important;
     /* Front of all displays */
     animation: wormCrawlOut 1s ease-out;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 @keyframes wormCrawlOut {
     0% {
         transform: scale(0.5);
-        opacity: 0;
+        opacity: 0.5;
     }
 
     50% {
         transform: scale(1.2);
+        opacity: 1;
     }
 
     100% {

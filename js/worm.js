@@ -158,7 +158,9 @@ class WormSystem {
         wormElement.style.left = `${startX}px`;
         wormElement.style.top = `${startY}px`;
         wormElement.style.position = 'absolute';
-        wormElement.style.zIndex = '100'; // Front of all displays
+        wormElement.style.zIndex = '1000'; // High z-index for visibility
+        wormElement.style.opacity = '1';
+        wormElement.style.visibility = 'visible';
 
         this.wormContainer.appendChild(wormElement);
 
@@ -234,6 +236,9 @@ class WormSystem {
         wormElement.style.left = `${startX}px`;
         wormElement.style.top = `${startY}px`;
         wormElement.style.position = 'absolute';
+        wormElement.style.zIndex = '1000'; // High z-index for visibility
+        wormElement.style.opacity = '1';
+        wormElement.style.visibility = 'visible';
 
         this.wormContainer.appendChild(wormElement);
 

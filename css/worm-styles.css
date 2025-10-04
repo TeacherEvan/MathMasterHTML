@@ -4,14 +4,19 @@
     position: absolute;
     display: flex;
     align-items: center;
-    z-index: 100;
+    z-index: 1000 !important;
+    /* High z-index to be visible above everything */
     cursor: pointer;
     /* NO transition property to prevent floating effect */
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 6px rgba(0, 255, 0, 0.4));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
 }
 
 .worm-container:hover {
-    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 12px rgba(0, 255, 0, 0.7));
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 1)) drop-shadow(0 0 15px rgba(0, 255, 0, 1));
+    transform: scale(1.1);
 }
 
 .worm-container.flickering {
@@ -71,16 +76,18 @@
     width: 18px;
     /* Quarter-coin size */
     height: 18px;
-    background: radial-gradient(circle at 30% 30%, #00ff00, #00dd00, #00aa00);
-    /* Green */
-    border: 2px solid #006600;
+    background: radial-gradient(circle at 30% 30%, #00ff00, #00ee00, #00cc00);
+    /* Brighter green */
+    border: 2px solid #00ff00;
     border-radius: 50%;
     margin-left: -4px;
     animation: worm-wiggle 1.5s ease-in-out infinite;
     animation-delay: calc(var(--segment-index, 0) * 0.1s);
     position: relative;
-    box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.3),
-        0 2px 4px rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.4),
+        0 2px 4px rgba(0, 0, 0, 0.8),
+        0 0 8px rgba(0, 255, 0, 0.6);
+    opacity: 1 !important;
 }
 
 .worm-segment:first-child {
@@ -88,11 +95,13 @@
     width: 24px;
     /* Head slightly larger - quarter coin size */
     height: 24px;
-    background: radial-gradient(circle at 30% 30%, #00ff44, #00dd33, #00bb22);
+    background: radial-gradient(circle at 30% 30%, #00ff66, #00ee44, #00cc33);
     /* Brighter green head */
-    border: 3px solid #004400;
-    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4),
-        0 2px 5px rgba(0, 0, 0, 0.6);
+    border: 3px solid #00ff00;
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5),
+        0 2px 5px rgba(0, 0, 0, 0.9),
+        0 0 12px rgba(0, 255, 0, 0.8);
+    opacity: 1 !important;
 }
 
 /* Worm eyes on first segment (head) */
