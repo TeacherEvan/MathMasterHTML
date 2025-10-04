@@ -9,13 +9,58 @@ class WormSystem {
         this.solutionContainer = null;
         this.isInitialized = false;
         this.animationFrameId = null;
+        this.spawnTimer = null;
+        this.firstWormSpawned = false;
 
         console.log('🐛 WormSystem initialized');
 
         // Listen for the custom event dispatched by game.js
         document.addEventListener('problemLineCompleted', (event) => {
             console.log('🐛 Worm System received problemLineCompleted event:', event.detail);
-            this.spawnWorm();
+            if (!this.firstWormSpawned) {
+                this.spawnWorm();
+                this.firstWormSpawned = true;
+                // Start spawning new worms every 10 seconds
+                this.startSpawnTimer();
+            }
+        });
+
+        // Listen for symbol clicks in rain display to check if worm's target was clicked
+        document.addEventListener('symbolClicked', (event) => {
+            this.checkWormTargetClick(event.detail.symbol);
+        });
+    }
+
+    startSpawnTimer() {
+        // Clear existing timer if any
+        if (this.spawnTimer) {
+            clearInterval(this.spawnTimer);
+        }
+
+        // Spawn a new worm every 10 seconds
+        this.spawnTimer = setInterval(() => {
+            if (this.worms.length < this.maxWorms) {
+                this.spawnWorm();
+            }
+        }, 10000); // 10 seconds
+
+        console.log('⏱️ Worm spawn timer started (every 10 seconds)');
+    }
+
+    checkWormTargetClick(clickedSymbol) {
+        // Normalize X/x
+        const normalizedClicked = clickedSymbol.toLowerCase() === 'x' ? 'X' : clickedSymbol;
+
+        // Check if any worm is carrying this symbol
+        this.worms.forEach(worm => {
+            if (!worm.active || !worm.hasStolen) return;
+
+            const normalizedWormSymbol = worm.stolenSymbol.toLowerCase() === 'x' ? 'X' : worm.stolenSymbol;
+
+            if (normalizedWormSymbol === normalizedClicked) {
+                console.log(`🎯 User clicked rain target "${clickedSymbol}" matching worm's stolen symbol!`);
+                this.explodeWorm(worm);
+            }
         });
     }
 
@@ -42,22 +87,6 @@ class WormSystem {
 
         this.isInitialized = true;
         console.log('✅ Worm System initialized successfully');
-
-        // Spawn initial worms after a short delay to ensure solution is set up
-        setTimeout(() => this.spawnInitialWorms(), 1000);
-    }
-
-    spawnInitialWorms() {
-        console.log('🐛 Spawning initial worms...');
-        // Spawn 2 initial worms to make gameplay more engaging from the start
-        const initialWormCount = 2;
-        for (let i = 0; i < initialWormCount; i++) {
-            setTimeout(() => {
-                if (this.worms.length < this.maxWorms) {
-                    this.spawnWorm();
-                }
-            }, i * 500); // Stagger spawning
-        }
     }
 
 
@@ -71,37 +100,18 @@ class WormSystem {
             return;
         }
 
-        // Find a hidden symbol to steal
-        const hiddenSymbols = this.solutionContainer.querySelectorAll('.hidden-symbol');
-        const availableSymbols = Array.from(hiddenSymbols).filter(el => !el.dataset.stolen);
-
-        if (availableSymbols.length === 0) {
-            console.log('🐛 No hidden symbols available to steal');
-            return;
-        }
-
-        // Pick random hidden symbol
-        const targetSymbol = availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
-        const symbolValue = targetSymbol.textContent;
-
-        console.log(`🐛 Spawning worm to steal symbol: "${symbolValue}"`);
-
-        // Mark symbol as stolen
-        targetSymbol.dataset.stolen = 'true';
-        targetSymbol.classList.add('stolen');
-
         // Create worm element
         const wormId = `worm-${Date.now()}-${Math.random()}`;
         const wormElement = document.createElement('div');
         wormElement.className = 'worm-container';
         wormElement.id = wormId;
-        wormElement.dataset.stolenSymbol = symbolValue;
 
-        // Worm body with segments
+        // Worm body with segments (quarter-coin size ~24px)
         const wormBody = document.createElement('div');
         wormBody.className = 'worm-body';
 
-        for (let i = 0; i < 8; i++) {
+        // 5 segments for quarter-sized worm
+        for (let i = 0; i < 5; i++) {
             const segment = document.createElement('div');
             segment.className = 'worm-segment';
             segment.style.setProperty('--segment-index', i);
@@ -110,17 +120,11 @@ class WormSystem {
 
         wormElement.appendChild(wormBody);
 
-        // Add stolen symbol indicator
-        const stolenSymbolDiv = document.createElement('div');
-        stolenSymbolDiv.className = 'carried-symbol';
-        stolenSymbolDiv.textContent = symbolValue;
-        wormElement.appendChild(stolenSymbolDiv);
-
         // Random starting position at bottom
         const containerWidth = this.wormContainer.offsetWidth || 800;
         const containerHeight = this.wormContainer.offsetHeight || 600;
-        const startX = Math.random() * Math.max(0, containerWidth - 120);
-        const startY = Math.max(0, containerHeight - 40); // Bottom of container
+        const startX = Math.random() * Math.max(0, containerWidth - 80);
+        const startY = Math.max(0, containerHeight - 30); // Bottom of container
 
         wormElement.style.left = `${startX}px`;
         wormElement.style.top = `${startY}px`;
@@ -132,13 +136,18 @@ class WormSystem {
         const wormData = {
             id: wormId,
             element: wormElement,
-            stolenSymbol: symbolValue,
-            targetElement: targetSymbol,
+            stolenSymbol: null,
+            targetElement: null,
             x: startX,
             y: startY,
-            velocityX: (Math.random() - 0.5) * 0.5, // Slower horizontal movement
-            velocityY: -1.5, // Move upward to throw symbol out of bounds
-            active: true
+            velocityX: (Math.random() - 0.5) * 1.0, // Horizontal roaming
+            velocityY: (Math.random() - 0.5) * 0.5, // Slight vertical roaming
+            active: true,
+            hasStolen: false,
+            roamingEndTime: Date.now() + 10000, // Roam for 10 seconds
+            isFlickering: false,
+            baseSpeed: 1.0,
+            currentSpeed: 1.0
         };
 
         this.worms.push(wormData);
@@ -147,10 +156,102 @@ class WormSystem {
         wormElement.addEventListener('click', () => this.explodeWorm(wormData));
 
         console.log(`✅ Worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
+        console.log(`🐛 Worm will roam for 10 seconds before stealing`);
 
         // Start animation loop if not already running
         if (this.worms.length === 1) {
             this.animate();
+        }
+    }
+
+    stealSymbol(worm) {
+        // Find a hidden symbol to steal
+        const hiddenSymbols = this.solutionContainer.querySelectorAll('.hidden-symbol');
+        const availableSymbols = Array.from(hiddenSymbols).filter(el => !el.dataset.stolen);
+
+        if (availableSymbols.length === 0) {
+            console.log('🐛 No hidden symbols available to steal');
+            // Continue roaming
+            worm.roamingEndTime = Date.now() + 5000;
+            return;
+        }
+
+        // Pick random hidden symbol (only unlocked red symbols)
+        const targetSymbol = availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
+        const symbolValue = targetSymbol.textContent;
+
+        console.log(`🐛 Worm ${worm.id} stealing symbol: "${symbolValue}"`);
+
+        // Mark symbol as stolen
+        targetSymbol.dataset.stolen = 'true';
+        targetSymbol.classList.add('stolen');
+
+        // Update worm data
+        worm.stolenSymbol = symbolValue;
+        worm.targetElement = targetSymbol;
+        worm.hasStolen = true;
+        worm.element.dataset.stolenSymbol = symbolValue;
+
+        // Add stolen symbol indicator
+        const stolenSymbolDiv = document.createElement('div');
+        stolenSymbolDiv.className = 'carried-symbol';
+        stolenSymbolDiv.textContent = symbolValue;
+        worm.element.appendChild(stolenSymbolDiv);
+
+        // Change velocity to move upward and throw symbol out
+        worm.velocityY = -1.5;
+        worm.velocityX = (Math.random() - 0.5) * 0.5;
+
+        console.log(`🐛 Worm now carrying "${symbolValue}" and moving to top`);
+    }
+
+    checkWormNearRainSymbol(worm) {
+        if (!worm.hasStolen) return;
+
+        // Get all falling symbols in rain display
+        const rainSymbols = document.querySelectorAll('#symbol-rain-container .falling-symbol');
+        const normalizedWormSymbol = worm.stolenSymbol.toLowerCase() === 'x' ? 'X' : worm.stolenSymbol;
+
+        let isNearMatchingSymbol = false;
+
+        rainSymbols.forEach(rainSymbol => {
+            const rainSymbolText = rainSymbol.textContent;
+            const normalizedRainSymbol = rainSymbolText.toLowerCase() === 'x' ? 'X' : rainSymbolText;
+
+            if (normalizedRainSymbol === normalizedWormSymbol) {
+                // Check proximity (simple distance check)
+                const rainRect = rainSymbol.getBoundingClientRect();
+                const wormRect = worm.element.getBoundingClientRect();
+
+                // Calculate distance between centers
+                const rainCenterX = rainRect.left + rainRect.width / 2;
+                const rainCenterY = rainRect.top + rainRect.height / 2;
+                const wormCenterX = wormRect.left + wormRect.width / 2;
+                const wormCenterY = wormRect.top + wormRect.height / 2;
+
+                const distance = Math.sqrt(
+                    Math.pow(rainCenterX - wormCenterX, 2) +
+                    Math.pow(rainCenterY - wormCenterY, 2)
+                );
+
+                // If within ~100px, consider it "near"
+                if (distance < 100) {
+                    isNearMatchingSymbol = true;
+                }
+            }
+        });
+
+        // Update flicker state
+        if (isNearMatchingSymbol && !worm.isFlickering) {
+            console.log(`🌈 Worm ${worm.id} near matching rain symbol - FLICKERING!`);
+            worm.isFlickering = true;
+            worm.element.classList.add('flickering');
+            worm.currentSpeed = worm.baseSpeed * 1.3; // 30% speed boost
+        } else if (!isNearMatchingSymbol && worm.isFlickering) {
+            console.log(`🐛 Worm ${worm.id} no longer near matching symbol - normal`);
+            worm.isFlickering = false;
+            worm.element.classList.remove('flickering');
+            worm.currentSpeed = worm.baseSpeed;
         }
     }
 
@@ -160,33 +261,78 @@ class WormSystem {
             return;
         }
 
+        const currentTime = Date.now();
+
         this.worms.forEach(worm => {
             if (!worm.active) return;
 
-            // Update position using JavaScript (NO CSS transitions to avoid floating)
-            worm.y += worm.velocityY;
-            worm.x += worm.velocityX;
-
-            // Keep horizontal position in bounds
-            if (worm.x < 5) {
-                worm.x = 5;
-                worm.velocityX *= -1;
+            // Check if roaming period has ended and worm hasn't stolen yet
+            if (!worm.hasStolen && currentTime >= worm.roamingEndTime) {
+                this.stealSymbol(worm);
             }
-            const containerWidth = this.wormContainer.offsetWidth || 800;
-            if (worm.x > containerWidth - 120) {
-                worm.x = containerWidth - 120;
-                worm.velocityX *= -1;
+
+            // Check proximity to matching rain symbols (for flickering effect)
+            if (worm.hasStolen) {
+                this.checkWormNearRainSymbol(worm);
+            }
+
+            // Update position based on current behavior
+            if (!worm.hasStolen) {
+                // Roaming behavior - random movement in bottom area
+                worm.x += worm.velocityX * worm.currentSpeed;
+                worm.y += worm.velocityY * worm.currentSpeed;
+
+                // Keep in bottom 40% while roaming
+                const containerHeight = this.wormContainer.offsetHeight || 600;
+                const minY = containerHeight * 0.6;
+                const maxY = containerHeight - 30;
+
+                if (worm.y < minY) {
+                    worm.y = minY;
+                    worm.velocityY *= -1;
+                }
+                if (worm.y > maxY) {
+                    worm.y = maxY;
+                    worm.velocityY *= -1;
+                }
+
+                // Bounce horizontally
+                const containerWidth = this.wormContainer.offsetWidth || 800;
+                if (worm.x < 5) {
+                    worm.x = 5;
+                    worm.velocityX *= -1;
+                }
+                if (worm.x > containerWidth - 80) {
+                    worm.x = containerWidth - 80;
+                    worm.velocityX *= -1;
+                }
+            } else {
+                // Carrying symbol - move upward to throw it out
+                worm.y += worm.velocityY * worm.currentSpeed;
+                worm.x += worm.velocityX * worm.currentSpeed;
+
+                // Keep horizontal position in bounds
+                const containerWidth = this.wormContainer.offsetWidth || 800;
+                if (worm.x < 5) {
+                    worm.x = 5;
+                    worm.velocityX *= -1;
+                }
+                if (worm.x > containerWidth - 80) {
+                    worm.x = containerWidth - 80;
+                    worm.velocityX *= -1;
+                }
+
+                // Check if worm has thrown symbol out of bounds (reached top)
+                if (worm.y < -50) {
+                    console.log(`🐛 Worm ${worm.id} threw symbol "${worm.stolenSymbol}" out of bounds`);
+                    this.removeWorm(worm);
+                    return;
+                }
             }
 
             // Apply position directly (no CSS transitions)
             worm.element.style.left = `${worm.x}px`;
             worm.element.style.top = `${worm.y}px`;
-
-            // Check if worm has thrown symbol out of bounds (reached top)
-            if (worm.y < -50) {
-                console.log(`🐛 Worm ${worm.id} threw symbol "${worm.stolenSymbol}" out of bounds`);
-                this.removeWorm(worm);
-            }
         });
 
         // Continue animation if there are active worms
@@ -252,6 +398,15 @@ class WormSystem {
 
     reset() {
         console.log('🐛 Resetting worm system');
+
+        // Clear spawn timer
+        if (this.spawnTimer) {
+            clearInterval(this.spawnTimer);
+            this.spawnTimer = null;
+        }
+
+        // Reset spawn flag
+        this.firstWormSpawned = false;
 
         // Cancel animation frame
         if (this.animationFrameId) {
