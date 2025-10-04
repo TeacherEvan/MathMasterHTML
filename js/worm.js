@@ -48,12 +48,12 @@ class WormSystem {
     initialize() {
         if (this.isInitialized) return;
 
-        this.wormContainer = document.getElementById('panel-b');
+        this.wormContainer = document.getElementById('worm-container');
         this.solutionContainer = document.getElementById('solution-container');
         this.consoleElement = document.getElementById('symbol-console');
 
         if (!this.wormContainer) {
-            console.error('🐛 Worm container #panel-b not found!');
+            console.error('🐛 Worm container #worm-container not found!');
             return;
         }
 
