@@ -173,3 +173,20 @@
         bottom: -30px;
     }
 }
+
+/* Worm container - absolutely positioned to cover entire panel-b */
+#worm-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none; /* Allow clicks to pass through to elements below */
+    z-index: 900; /* Below console (z-index 50 in console.css is relative to panel-b) but above solution */
+    overflow: visible; /* Allow worms to animate freely */
+}
+
+/* Re-enable pointer events on actual worm elements */
+#worm-container .worm-container {
+    pointer-events: auto;
+}
