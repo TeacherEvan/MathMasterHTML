@@ -202,9 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSymbolIndex = 0;
 
         setupProblem();
-
-        // Trigger event for worm spawning
-        document.dispatchEvent(new CustomEvent('problemLineCompleted'));
     }
 
     // Initial setup

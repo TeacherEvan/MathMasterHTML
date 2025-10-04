@@ -1,4 +1,4 @@
-// js/worm.js - Refactored Worm System
+// js/worm.js - Refactored Worm System with Console Integration
 console.log("🐛 Worm System Loading...");
 
 class WormSystem {
@@ -7,44 +7,25 @@ class WormSystem {
         this.maxWorms = 4; // As per spec
         this.wormContainer = null;
         this.solutionContainer = null;
+        this.consoleElement = null;
         this.isInitialized = false;
         this.animationFrameId = null;
         this.spawnTimer = null;
         this.firstWormSpawned = false;
+        this.lockedConsoleSlots = new Set(); // Track which console slots have active worms
 
         console.log('🐛 WormSystem initialized');
 
         // Listen for the custom event dispatched by game.js
         document.addEventListener('problemLineCompleted', (event) => {
             console.log('🐛 Worm System received problemLineCompleted event:', event.detail);
-            if (!this.firstWormSpawned) {
-                this.spawnWorm();
-                this.firstWormSpawned = true;
-                // Start spawning new worms every 10 seconds
-                this.startSpawnTimer();
-            }
+            this.spawnWormFromConsole();
         });
 
         // Listen for symbol clicks in rain display to check if worm's target was clicked
         document.addEventListener('symbolClicked', (event) => {
             this.checkWormTargetClick(event.detail.symbol);
         });
-    }
-
-    startSpawnTimer() {
-        // Clear existing timer if any
-        if (this.spawnTimer) {
-            clearInterval(this.spawnTimer);
-        }
-
-        // Spawn a new worm every 10 seconds
-        this.spawnTimer = setInterval(() => {
-            if (this.worms.length < this.maxWorms) {
-                this.spawnWorm();
-            }
-        }, 10000); // 10 seconds
-
-        console.log('⏱️ Worm spawn timer started (every 10 seconds)');
     }
 
     checkWormTargetClick(clickedSymbol) {
@@ -69,6 +50,7 @@ class WormSystem {
 
         this.wormContainer = document.getElementById('panel-b');
         this.solutionContainer = document.getElementById('solution-container');
+        this.consoleElement = document.getElementById('symbol-console');
 
         if (!this.wormContainer) {
             console.error('🐛 Worm container #panel-b not found!');
@@ -77,6 +59,11 @@ class WormSystem {
 
         if (!this.solutionContainer) {
             console.error('🐛 Solution container not found!');
+            return;
+        }
+
+        if (!this.consoleElement) {
+            console.error('🐛 Console element not found!');
             return;
         }
 
@@ -89,21 +76,68 @@ class WormSystem {
         console.log('✅ Worm System initialized successfully');
     }
 
+    // Find an empty console slot to spawn worm from
+    findEmptyConsoleSlot() {
+        if (!this.consoleElement) return null;
 
-    spawnWorm() {
+        const slots = this.consoleElement.querySelectorAll('.console-slot');
+        const emptySlots = [];
+
+        slots.forEach((slot, index) => {
+            // Check if slot is empty and not locked by an active worm
+            if (!slot.textContent && !this.lockedConsoleSlots.has(index)) {
+                emptySlots.push({ element: slot, index: index });
+            }
+        });
+
+        if (emptySlots.length === 0) {
+            console.log('⚠️ No empty console slots available for worm spawn');
+            return null;
+        }
+
+        // Return random empty slot
+        return emptySlots[Math.floor(Math.random() * emptySlots.length)];
+    }
+
+    // Spawn worm from console slot with slide-open animation
+    spawnWormFromConsole() {
         this.initialize();
 
-        console.log(`🐛 spawnWorm() called. Current worms: ${this.worms.length}/${this.maxWorms}`);
+        console.log(`🐛 spawnWormFromConsole() called. Current worms: ${this.worms.length}/${this.maxWorms}`);
 
         if (this.worms.length >= this.maxWorms) {
             console.log(`⚠️ Max worms (${this.maxWorms}) reached. No more spawning.`);
             return;
         }
 
+        // Find empty console slot
+        const slotData = this.findEmptyConsoleSlot();
+        if (!slotData) {
+            console.log('⚠️ All console slots occupied or locked, spawning worm normally');
+            this.spawnWorm(); // Fallback to normal spawn
+            return;
+        }
+
+        const { element: slotElement, index: slotIndex } = slotData;
+
+        // Lock this console slot
+        this.lockedConsoleSlots.add(slotIndex);
+        slotElement.classList.add('worm-spawning', 'locked');
+
+        console.log(`🕳️ Worm spawning from console slot ${slotIndex + 1}`);
+
+        // Get slot position for worm spawn point
+        const slotRect = slotElement.getBoundingClientRect();
+        const containerRect = this.wormContainer.getBoundingClientRect();
+
+        // Calculate spawn position relative to panel-b
+        const startX = slotRect.left - containerRect.left + (slotRect.width / 2);
+        const startY = slotRect.top - containerRect.top + (slotRect.height / 2);
+
         // Create worm element
         const wormId = `worm-${Date.now()}-${Math.random()}`;
         const wormElement = document.createElement('div');
-        wormElement.className = 'worm-container';
+        wormElement.className = 'worm-container console-worm';
         wormElement.id = wormId;
 
         // Worm body with segments (quarter-coin size ~24px)
@@ -120,19 +154,15 @@ class WormSystem {
 
         wormElement.appendChild(wormBody);
 
-        // Random starting position at bottom
-        const containerWidth = this.wormContainer.offsetWidth || 800;
-        const containerHeight = this.wormContainer.offsetHeight || 600;
-        const startX = Math.random() * Math.max(0, containerWidth - 80);
-        const startY = Math.max(0, containerHeight - 30); // Bottom of container
-
+        // Position worm at console slot
         wormElement.style.left = `${startX}px`;
         wormElement.style.top = `${startY}px`;
         wormElement.style.position = 'absolute';
+        wormElement.style.zIndex = '100'; // Front of all displays
 
         this.wormContainer.appendChild(wormElement);
 
-        // Store worm data
+        // Store worm data with console slot reference
         const wormData = {
             id: wormId,
             element: wormElement,
@@ -140,23 +170,98 @@ class WormSystem {
             targetElement: null,
             x: startX,
             y: startY,
-            velocityX: (Math.random() - 0.5) * 1.0, // Horizontal roaming
-            velocityY: (Math.random() - 0.5) * 0.5, // Slight vertical roaming
+            velocityX: (Math.random() - 0.5) * 1.5, // Horizontal roaming
+            velocityY: (Math.random() - 0.5) * 1.0, // Vertical roaming
             active: true,
             hasStolen: false,
             roamingEndTime: Date.now() + 10000, // Roam for 10 seconds
             isFlickering: false,
-            baseSpeed: 1.0,
-            currentSpeed: 1.0
+            baseSpeed: 1.5,
+            currentSpeed: 1.5,
+            consoleSlotIndex: slotIndex,
+            consoleSlotElement: slotElement,
+            fromConsole: true
         };
 
-        this.worms.push(wormData);
-
-        // Add click handler to explode worm
+        this.worms.push(wormData);// Add click handler to explode worm
         wormElement.addEventListener('click', () => this.explodeWorm(wormData));
 
         console.log(`✅ Worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
         console.log(`🐛 Worm will roam for 10 seconds before stealing`);
+
+        // Start animation loop if not already running
+        if (this.worms.length === 1) {
+            this.animate();
+        }
+    }
+
+    // Fallback spawn method for when console slots are all occupied
+    spawnWorm() {
+        this.initialize();
+
+        console.log(`🐛 spawnWorm() called (fallback). Current worms: ${this.worms.length}/${this.maxWorms}`);
+
+        if (this.worms.length >= this.maxWorms) {
+            console.log(`⚠️ Max worms (${this.maxWorms}) reached. No more spawning.`);
+            return;
+        }
+
+        // Create worm element
+        const wormId = `worm-${Date.now()}-${Math.random()}`;
+        const wormElement = document.createElement('div');
+        wormElement.className = 'worm-container';
+        wormElement.id = wormId;
+
+        // Worm body with segments
+        const wormBody = document.createElement('div');
+        wormBody.className = 'worm-body';
+
+        for (let i = 0; i < 5; i++) {
+            const segment = document.createElement('div');
+            segment.className = 'worm-segment';
+            segment.style.setProperty('--segment-index', i);
+            wormBody.appendChild(segment);
+        }
+
+        wormElement.appendChild(wormBody);
+
+        // Random starting position at bottom
+        const containerWidth = this.wormContainer.offsetWidth || 800;
+        const containerHeight = this.wormContainer.offsetHeight || 600;
+        const startX = Math.random() * Math.max(0, containerWidth - 80);
+        const startY = Math.max(0, containerHeight - 30);
+
+        wormElement.style.left = `${startX}px`;
+        wormElement.style.top = `${startY}px`;
+        wormElement.style.position = 'absolute';
+
+        this.wormContainer.appendChild(wormElement);
+
+        // Store worm data (non-console worm)
+        const wormData = {
+            id: wormId,
+            element: wormElement,
+            stolenSymbol: null,
+            targetElement: null,
+            x: startX,
+            y: startY,
+            velocityX: (Math.random() - 0.5) * 1.0,
+            velocityY: (Math.random() - 0.5) * 0.5,
+            active: true,
+            hasStolen: false,
+            roamingEndTime: Date.now() + 10000,
+            isFlickering: false,
+            baseSpeed: 1.0,
+            currentSpeed: 1.0,
+            fromConsole: false
+        };
+
+        this.worms.push(wormData);
+
+        // Add click handler
+        wormElement.addEventListener('click', () => this.explodeWorm(wormData));
+
+        console.log(`✅ Worm ${wormId} spawned (fallback mode). Total worms: ${this.worms.length}`);
 
         // Start animation loop if not already running
         if (this.worms.length === 1) {
@@ -307,26 +412,55 @@ class WormSystem {
                     worm.velocityX *= -1;
                 }
             } else {
-                // Carrying symbol - move upward to throw it out
-                worm.y += worm.velocityY * worm.currentSpeed;
-                worm.x += worm.velocityX * worm.currentSpeed;
+                // Carrying symbol - behavior depends on if worm is from console
+                if (worm.fromConsole && worm.consoleSlotElement) {
+                    // Move back towards console hole
+                    const slotRect = worm.consoleSlotElement.getBoundingClientRect();
+                    const containerRect = this.wormContainer.getBoundingClientRect();
 
-                // Keep horizontal position in bounds
-                const containerWidth = this.wormContainer.offsetWidth || 800;
-                if (worm.x < 5) {
-                    worm.x = 5;
-                    worm.velocityX *= -1;
-                }
-                if (worm.x > containerWidth - 80) {
-                    worm.x = containerWidth - 80;
-                    worm.velocityX *= -1;
-                }
+                    const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
+                    const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
 
-                // Check if worm has thrown symbol out of bounds (reached top)
-                if (worm.y < -50) {
-                    console.log(`🐛 Worm ${worm.id} threw symbol "${worm.stolenSymbol}" out of bounds`);
-                    this.removeWorm(worm);
-                    return;
+                    // Calculate direction to console
+                    const dx = targetX - worm.x;
+                    const dy = targetY - worm.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 20) {
+                        // Reached console hole - escape with symbol!
+                        console.log(`🐛 Worm ${worm.id} escaped to console with symbol "${worm.stolenSymbol}"!`);
+                        this.removeWorm(worm);
+                        return;
+                    }
+
+                    // Move towards console
+                    worm.velocityX = (dx / distance) * 2;
+                    worm.velocityY = (dy / distance) * 2;
+
+                    worm.x += worm.velocityX * worm.currentSpeed;
+                    worm.y += worm.velocityY * worm.currentSpeed;
+                } else {
+                    // Non-console worm - move upward to throw it out
+                    worm.y += worm.velocityY * worm.currentSpeed;
+                    worm.x += worm.velocityX * worm.currentSpeed;
+
+                    // Keep horizontal position in bounds
+                    const containerWidth = this.wormContainer.offsetWidth || 800;
+                    if (worm.x < 5) {
+                        worm.x = 5;
+                        worm.velocityX *= -1;
+                    }
+                    if (worm.x > containerWidth - 80) {
+                        worm.x = containerWidth - 80;
+                        worm.velocityX *= -1;
+                    }
+
+                    // Check if worm has thrown symbol out of bounds (reached top)
+                    if (worm.y < -50) {
+                        console.log(`🐛 Worm ${worm.id} threw symbol "${worm.stolenSymbol}" out of bounds`);
+                        this.removeWorm(worm);
+                        return;
+                    }
                 }
             }
 
@@ -387,6 +521,15 @@ class WormSystem {
         const index = this.worms.indexOf(wormData);
         if (index > -1) {
             this.worms.splice(index, 1);
+        }
+
+        // Unlock console slot if worm was spawned from console
+        if (wormData.fromConsole && wormData.consoleSlotIndex !== undefined) {
+            this.lockedConsoleSlots.delete(wormData.consoleSlotIndex);
+            if (wormData.consoleSlotElement) {
+                wormData.consoleSlotElement.classList.remove('worm-spawning', 'locked');
+            }
+            console.log(`🔓 Console slot ${wormData.consoleSlotIndex + 1} unlocked`);
         }
 
         if (wormData.element && wormData.element.parentNode) {

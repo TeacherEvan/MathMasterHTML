@@ -10,31 +10,31 @@ class LockManager {
         this.completedLinesCount = 0;
         this.isLoadingComponent = false; // Prevent concurrent loading
         this.responsiveManager = null; // Will be set when responsive manager loads
-        
+
         // Validation
         if (!this.container) {
             console.error(`❌ Lock container not found: ${containerSelector}`);
         }
-        
+
         // Initialize with basic lock display
         this.showBasicLock();
-        
+
         // Bind event listeners
         this.initEventListeners();
-        
+
         // Wait for responsive manager to load
         this.initResponsiveIntegration();
-        
+
         console.log('🔒 LockManager initialized with basic lock display');
     }
-    
+
     initEventListeners() {
         // Listen for first-line-solved event
         document.addEventListener('first-line-solved', () => {
             console.log('🔒 LockManager received first-line-solved event');
             this.startLockAnimation();
         });
-        
+
         // Listen for step completion events
         document.addEventListener('stepCompleted', (e) => {
             console.log('🔒 LockManager received stepCompleted event:', e.detail);
@@ -46,17 +46,17 @@ class LockManager {
                 }
             }
         });
-        
+
         // Listen for problem line completion
         document.addEventListener('problemLineCompleted', (e) => {
             console.log('🔒 LockManager received problemLineCompleted event', e.detail ? e.detail : '(no details)');
             this.completedLinesCount++;
             console.log(`🔒 Completed lines count is now: ${this.completedLinesCount}`);
-            
+
             // Check if we're in master level
             const isMasterLevel = document.body.classList.contains('master-level');
             console.log(`🔒 Current game mode: ${isMasterLevel ? 'Master Level' : 'Normal Level'}`);
-            
+
             // Force reload line-3-transformer.html specifically when second line is completed in non-master mode
             if (this.completedLinesCount === 2 && !isMasterLevel) {
                 console.log('🔒 Second line completed - forcing load of line-3-transformer.html');
@@ -78,10 +78,10 @@ class LockManager {
                 this.progressLockLevel();
             }
         });
-        
+
         // Add additional debug listener for lock-related events
         console.log('🔒 Setting up additional debug listeners for lock events');
-        
+
         // Debug event to trace lock loading issues
         window.addEventListener('error', (e) => {
             if (e.target && (e.target.tagName === 'IFRAME' || e.target.tagName === 'IMG')) {
@@ -89,18 +89,18 @@ class LockManager {
             }
         }, true);
     }
-    
-    
+
+
     startLockAnimation() {
         if (this.lockIsLive) {
             console.log('🔒 Lock animation already active, ignoring duplicate start');
             return;
         }
-        
+
         console.log('🔒 Starting lock animation sequence');
         this.lockIsLive = true;
         this.lockAnimationActive = true;
-        
+
         // Load the basic lock component first (using normalized naming)
         const componentName = this.normalizeComponentName(1);
         this.loadLockComponent(componentName)
@@ -118,22 +118,22 @@ class LockManager {
                 this.lockAnimationActive = false;
             });
     }
-    
+
     loadLockComponent(componentName) {
         return new Promise((resolve, reject) => {
             if (!this.container) {
                 reject(new Error('Lock container not found'));
                 return;
             }
-            
+
             const lockPath = `lock-components/${componentName}`;
             console.log(`🔒 Loading lock component: ${lockPath}`);
-            
+
             // Add timeout to prevent hanging
             const timeout = setTimeout(() => {
                 reject(new Error(`Component loading timeout: ${componentName}`));
             }, 10000);
-            
+
             fetch(lockPath)
                 .then(response => {
                     clearTimeout(timeout);
@@ -146,17 +146,17 @@ class LockManager {
                     // Parse the HTML and extract content
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
-                    
+
                     // Extract styles from head
                     const styleElements = doc.head.querySelectorAll('style');
                     let styles = '';
                     styleElements.forEach(style => {
                         styles += style.outerHTML;
                     });
-                    
+
                     // Extract body content
                     const bodyContent = doc.body.innerHTML;
-                    
+
                     // Wrap content in lock-component-wrapper
                     const wrappedContent = `
                         ${styles}
@@ -164,10 +164,10 @@ class LockManager {
                             ${bodyContent}
                         </div>
                     `;
-                    
+
                     // Insert into container
                     this.container.innerHTML = wrappedContent;
-                    
+
                     console.log(`✅ Lock component ${componentName} loaded successfully`);
                     resolve();
                 })
@@ -178,17 +178,17 @@ class LockManager {
                 });
         });
     }
-    
-    
+
+
     activateLockLevel(level) {
         console.log(`🔒 Activating lock level ${level}`);
-        
+
         const lockBody = this.container.querySelector('.lock-body');
         if (!lockBody) {
             console.warn('⚠️ Lock body not found for activation');
             return;
         }
-        
+
         // Remove any previous level-* classes
         for (let lvl = 1; lvl <= 6; lvl++) {
             lockBody.classList.remove(`level-${lvl}-active`);
@@ -196,45 +196,45 @@ class LockManager {
         // Apply level-specific activation and update state
         lockBody.classList.add(`level-${level}-active`);
         this.currentLockLevel = level;
-        
+
         // Trigger level-specific animations
         this.triggerLevelAnimation(lockBody, level);
-        
+
         // Update progress indicators
         this.updateProgressIndicators(level);
     }
-    
+
     progressLockLevel() {
         if (this.isLoadingComponent) {
             console.log('🔒 Lock component already loading, skipping progression');
             return;
         }
-        
+
         // Get the current level
         const isMasterLevel = document.body.classList.contains('master-level');
-        
+
         // Progress calculation differs for Master level vs other levels
         let newLevel;
         if (isMasterLevel) {
             // In Master level, all 6 lock lines can be triggered
-            newLevel = Math.min(6, this.completedLinesCount + 1);
+            newLevel = Math.min(6, this.completedLinesCount);
         } else {
-            // For other levels, restrict to max level 3 (lines 1-3 only)
-            newLevel = Math.min(3, Math.floor(this.completedLinesCount / 2) + 1);
+            // For other levels, advance one level per completed line, capped at 3
+            newLevel = Math.min(3, this.completedLinesCount);
         }
-        
+
         console.log(`🔒 Lock progression check: completedLinesCount=${this.completedLinesCount}, newLevel=${newLevel}, currentLevel=${this.currentLockLevel}, isMasterLevel=${isMasterLevel}`);
-        
+
         if (newLevel > this.currentLockLevel) {
             console.log(`🔒 Progressing to lock level ${newLevel} (${this.completedLinesCount} lines completed)`);
             this.currentLockLevel = newLevel;
             this.isLoadingComponent = true;
-            
+
             // Normalize component filename (handle inconsistent naming)
             const componentName = this.normalizeComponentName(newLevel);
-            
+
             console.log(`🔒 Loading component for level ${newLevel}: ${componentName}`);
-            
+
             // Load the new lock component
             this.loadLockComponent(componentName)
                 .then(() => {
@@ -253,33 +253,33 @@ class LockManager {
                 });
         }
     }
-    
+
     normalizeComponentName(level) {
         // Handle inconsistent naming in component files
         const componentMap = {
             1: 'Line-1-transformer.html',
-            2: 'line-2-transformer.html', 
+            2: 'line-2-transformer.html',
             3: 'line-3-transformer.html',
             4: 'line-4-transformer.html',
             5: 'Line-5-transformer.html',
             6: 'line-6-transformer.html'
         };
-        
+
         return componentMap[level] || `line-${level}-transformer.html`;
     }
-    
+
     triggerLevelAnimation(lockBody, level) {
         console.log(`🎨 Triggering level ${level} animation`);
-        
+
         // Check if we're in master level
         const isMasterLevel = document.body.classList.contains('master-level');
-        
+
         // In non-master levels, cap at level 3
         if (!isMasterLevel && level > 3) {
             console.log(`⚠️ Capping animation at level 3 (non-master level)`);
             level = 3;
         }
-        
+
         switch (level) {
             case 1:
                 this.triggerBeginnerAnimation(lockBody);
@@ -302,10 +302,10 @@ class LockManager {
                 this.triggerGenericAnimation(lockBody, level);
         }
     }
-    
+
     triggerBeginnerAnimation(lockBody) {
         console.log('� Triggering beginner level animation');
-        
+
         // Scale and color progression
         const scaleAmount = 1.2;
         lockBody.style.transform = `scaleY(${scaleAmount})`;
@@ -313,56 +313,56 @@ class LockManager {
         lockBody.style.borderColor = '#0f0';
         lockBody.style.boxShadow = '0 0 20px rgba(0, 255, 0, 0.4)';
     }
-    
+
     triggerWarriorAnimation(lockBody, level) {
         console.log(`🟡 Triggering warrior level ${level} animation`);
-        
+
         // Remove rotation: scale only for warrior levels
         const scaleAmount = 1 + (level * 0.15);
         lockBody.style.transform = `scale(${scaleAmount})`;
-        
+
         const goldIntensity = Math.min(255, 150 + (level * 30));
         lockBody.style.background = `linear-gradient(145deg, #4a4a1a, rgb(${goldIntensity}, ${goldIntensity}, 42), #4a4a1a)`;
         lockBody.style.borderColor = `rgb(${goldIntensity}, ${goldIntensity}, 0)`;
         lockBody.style.boxShadow = `0 0 ${25 + level * 15}px rgba(255, 215, 0, 0.5)`;
     }
-    
+
     triggerMasterAnimation(lockBody, level) {
         console.log(`� Triggering master level ${level} animation`);
-        
+
         // Remove rotation and skew: scale only for master levels
         const scaleAmount = 1 + (level * 0.2);
         lockBody.style.transform = `scale(${scaleAmount})`;
-        
+
         const redIntensity = Math.min(255, 120 + (level * 35));
         lockBody.style.background = `linear-gradient(145deg, #4a1a1a, rgb(${redIntensity}, 42, 42), #4a1a1a)`;
         lockBody.style.borderColor = `rgb(${redIntensity}, 0, 0)`;
         lockBody.style.boxShadow = `0 0 ${30 + level * 20}px rgba(255, 0, 0, 0.6)`;
-        
+
         // Add pulsing effect
         lockBody.style.animation = `lockPulse${level} 1s ease-in-out`;
     }
-    
+
     triggerGenericAnimation(lockBody, level) {
         console.log(`⚪ Triggering generic level ${level} animation`);
-        
+
         const scaleAmount = 1 + (level * 0.1);
         lockBody.style.transform = `scale(${scaleAmount})`;
         lockBody.style.filter = `brightness(${1 + level * 0.2})`;
     }
-    
+
     updateProgressIndicators(level) {
         // Update any progress bars or indicators
         const progressBars = this.container.querySelectorAll('.progress-bar, .lock-progress');
         const totalLevels = 6;
         const progressPercentage = (level / totalLevels) * 100;
-        
+
         progressBars.forEach(bar => {
             bar.style.width = `${progressPercentage}%`;
             bar.style.background = 'linear-gradient(90deg, #0f0, #090)';
             bar.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.5)';
         });
-        
+
         // Update lock segments
         const segments = this.container.querySelectorAll('.lock-segment');
         segments.forEach((segment, index) => {
@@ -373,7 +373,7 @@ class LockManager {
             }
         });
     }
-    
+
     showErrorLock() {
         if (this.container) {
             this.container.innerHTML = `
@@ -385,7 +385,7 @@ class LockManager {
             `;
         }
     }
-    
+
     reset() {
         console.log('🔄 Resetting lock manager');
         this.lockIsLive = false;
@@ -393,11 +393,11 @@ class LockManager {
         this.currentLockLevel = 1;
         this.completedLinesCount = 0;
         this.isLoadingComponent = false;
-        
+
         // Show basic lock instead of waiting message
         this.showBasicLock();
     }
-    
+
     showBasicLock() {
         if (this.container) {
             this.container.innerHTML = `
@@ -503,7 +503,7 @@ class LockManager {
             `;
         }
     }
-    
+
     initResponsiveIntegration() {
         // Check if responsive manager is available
         if (window.lockResponsiveManager) {
@@ -518,30 +518,30 @@ class LockManager {
                     clearInterval(checkForResponsiveManager);
                 }
             }, 100);
-            
+
             // Stop checking after 5 seconds
             setTimeout(() => {
                 clearInterval(checkForResponsiveManager);
             }, 5000);
         }
-        
+
         // Listen for responsive scale changes
         document.addEventListener('lockScaleChanged', (e) => {
             console.log('🔒 LockManager received scale change:', e.detail);
             this.onScaleChanged(e.detail);
         });
     }
-    
+
     onScaleChanged(scaleInfo) {
         // Adjust lock animations based on scale
         const { scale, resolution } = scaleInfo;
-        
+
         if (this.container) {
             // Apply scale-specific adjustments
             this.container.style.setProperty('--lock-scale', scale);
             this.container.style.setProperty('--lock-container-scale', scale * 0.9);
             this.container.style.setProperty('--lock-body-scale', scale * 0.8);
-            
+
             // Adjust animation timing for different scales
             if (scale < 0.6) {
                 // Faster animations for smaller scales
@@ -553,26 +553,26 @@ class LockManager {
                 // Normal animation duration
                 this.container.style.setProperty('--animation-duration', '1.2s');
             }
-            
+
             // Add resolution class for component-specific adjustments
             this.container.classList.remove('res-4k', 'res-1440p', 'res-1080p', 'res-720p', 'res-mobile');
             this.container.classList.add(`res-${resolution}`);
         }
     }
-    
+
     // Public API methods
     isActive() {
         return this.lockIsLive;
     }
-    
+
     getCurrentLevel() {
         return this.currentLockLevel;
     }
-    
+
     getCompletedLines() {
         return this.completedLinesCount;
     }
-    
+
     // Method to manually trigger lock animation for testing
     triggerLockAnimation() {
         if (!this.lockAnimationActive) {
@@ -581,7 +581,7 @@ class LockManager {
             this.progressLockLevel();
         }
     }
-    
+
     // Debug method to get current state
     getDebugInfo() {
         return {
@@ -593,18 +593,18 @@ class LockManager {
             containerExists: !!this.container
         };
     }
-    
+
     // Method to force advance to specific level (for testing)
     forceLockLevel(level) {
         if (level < 1 || level > 6) {
             console.error('❌ Invalid lock level:', level);
             return;
         }
-        
+
         console.log(`🔧 Force advancing to lock level ${level}`);
         this.currentLockLevel = level;
         this.completedLinesCount = (level - 1) * 2; // Update completed lines accordingly
-        
+
         const componentName = this.normalizeComponentName(level);
         this.loadLockComponent(componentName)
             .then(() => {
