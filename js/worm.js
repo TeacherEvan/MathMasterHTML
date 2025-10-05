@@ -4,7 +4,7 @@ console.log("🐛 Worm System Loading...");
 class WormSystem {
     constructor() {
         this.worms = [];
-        this.maxWorms = 4; // As per spec
+        this.maxWorms = 9; // Maximum 9 worms on playfield
         this.wormContainer = null;
         this.solutionContainer = null;
         this.consoleElement = null;
@@ -32,7 +32,7 @@ class WormSystem {
         // Normalize X/x
         const normalizedClicked = clickedSymbol.toLowerCase() === 'x' ? 'X' : clickedSymbol;
 
-        // Check if any worm is carrying this symbol
+        // Check if any worm is carrying this symbol - just log it, don't explode
         this.worms.forEach(worm => {
             if (!worm.active || !worm.hasStolen) return;
 
@@ -40,7 +40,7 @@ class WormSystem {
 
             if (normalizedWormSymbol === normalizedClicked) {
                 console.log(`🎯 User clicked rain target "${clickedSymbol}" matching worm's stolen symbol!`);
-                this.explodeWorm(worm);
+                // Worms no longer explode on target match - they just keep the symbol
             }
         });
     }
@@ -185,8 +185,11 @@ class WormSystem {
             fromConsole: true
         };
 
-        this.worms.push(wormData);// Add click handler to explode worm
-        wormElement.addEventListener('click', () => this.explodeWorm(wormData));
+        this.worms.push(wormData);// Add click handler to multiply worm
+        wormElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.multiplyWorm(wormData);
+        });
 
         console.log(`✅ Worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
         console.log(`🐛 Worm will roam for 10 seconds before stealing`);
@@ -264,7 +267,10 @@ class WormSystem {
         this.worms.push(wormData);
 
         // Add click handler
-        wormElement.addEventListener('click', () => this.explodeWorm(wormData));
+        wormElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.multiplyWorm(wormData);
+        });
 
         console.log(`✅ Worm ${wormId} spawned (fallback mode). Total worms: ${this.worms.length}`);
 
@@ -302,6 +308,12 @@ class WormSystem {
         worm.hasStolen = true;
         worm.element.dataset.stolenSymbol = symbolValue;
 
+        // ACTIVATE LSD FLICKER when stealing red symbol!
+        console.log(`🌈 Worm ${worm.id} stole red symbol - ACTIVATING LSD FLICKER!`);
+        worm.isFlickering = true;
+        worm.element.classList.add('flickering');
+        worm.currentSpeed = worm.baseSpeed * 1.5; // 50% speed boost when trippy!
+
         // Add stolen symbol indicator
         const stolenSymbolDiv = document.createElement('div');
         stolenSymbolDiv.className = 'carried-symbol';
@@ -312,7 +324,7 @@ class WormSystem {
         worm.velocityY = -1.5;
         worm.velocityX = (Math.random() - 0.5) * 0.5;
 
-        console.log(`🐛 Worm now carrying "${symbolValue}" and moving to top`);
+        console.log(`🐛 Worm now carrying "${symbolValue}" and moving to top with LSD colors!`);
     }
 
     checkWormNearRainSymbol(worm) {
@@ -482,44 +494,98 @@ class WormSystem {
         }
     }
 
-    explodeWorm(wormData) {
+    multiplyWorm(wormData) {
         if (!wormData.active) return;
 
-        console.log(`🐛 Worm ${wormData.id} exploded! Returning symbol: "${wormData.stolenSymbol}"`);
+        console.log(`🐛 Worm ${wormData.id} clicked! Attempting to multiply...`);
 
-        // Mark as inactive
-        wormData.active = false;
-
-        // Explosion animation
-        wormData.element.classList.add('worm-clicked');
-        wormData.element.style.transition = 'transform 0.3s, opacity 0.3s';
-        wormData.element.style.transform = 'scale(2) rotate(360deg)';
-        wormData.element.style.opacity = '0';
-
-        // Return stolen symbol to solution
-        if (wormData.targetElement) {
-            wormData.targetElement.classList.remove('stolen');
-            wormData.targetElement.style.visibility = 'visible';
-            delete wormData.targetElement.dataset.stolen;
-
-            // Add return animation
-            wormData.targetElement.style.animation = 'symbol-return 0.5s ease-out';
+        // Check if we can spawn more worms
+        if (this.worms.length >= this.maxWorms) {
+            console.log(`⚠️ Max worms (${this.maxWorms}) reached. Cannot multiply.`);
+            // Flash effect to indicate max reached
+            wormData.element.style.animation = 'worm-flash 0.3s ease-out';
             setTimeout(() => {
-                if (wormData.targetElement) {
-                    wormData.targetElement.style.animation = '';
-                }
-            }, 500);
+                wormData.element.style.animation = '';
+            }, 300);
+            return;
         }
 
-        // Dispatch event for successful worm click
-        document.dispatchEvent(new CustomEvent('wormSymbolCorrect', {
-            detail: { symbol: wormData.stolenSymbol }
-        }));
+        // Create a new worm near the clicked one
+        const newWormId = `worm-${Date.now()}-${Math.random()}`;
+        const newWormElement = document.createElement('div');
+        newWormElement.className = 'worm-container';
+        newWormElement.id = newWormId;
 
-        // Remove worm after animation
+        // Worm body with segments
+        const wormBody = document.createElement('div');
+        wormBody.className = 'worm-body';
+
+        for (let i = 0; i < 5; i++) {
+            const segment = document.createElement('div');
+            segment.className = 'worm-segment';
+            segment.style.setProperty('--segment-index', i);
+            wormBody.appendChild(segment);
+        }
+
+        newWormElement.appendChild(wormBody);
+
+        // Position near parent worm with slight offset
+        const offsetX = (Math.random() - 0.5) * 50;
+        const offsetY = (Math.random() - 0.5) * 50;
+        const newX = wormData.x + offsetX;
+        const newY = wormData.y + offsetY;
+
+        newWormElement.style.left = `${newX}px`;
+        newWormElement.style.top = `${newY}px`;
+        newWormElement.style.position = 'absolute';
+        newWormElement.style.zIndex = '10000';
+        newWormElement.style.opacity = '1';
+        newWormElement.style.visibility = 'visible';
+
+        this.wormContainer.appendChild(newWormElement);
+
+        // Create new worm data
+        const newWormData = {
+            id: newWormId,
+            element: newWormElement,
+            stolenSymbol: null,
+            targetElement: null,
+            x: newX,
+            y: newY,
+            velocityX: (Math.random() - 0.5) * 1.5,
+            velocityY: (Math.random() - 0.5) * 1.0,
+            active: true,
+            hasStolen: false,
+            roamingEndTime: Date.now() + 10000,
+            isFlickering: false,
+            baseSpeed: 1.5,
+            currentSpeed: 1.5,
+            fromConsole: false
+        };
+
+        this.worms.push(newWormData);
+
+        // Add click handler to new worm
+        newWormElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.multiplyWorm(newWormData);
+        });
+
+        // Multiplication effect on both worms
+        wormData.element.classList.add('worm-multiply');
+        newWormElement.classList.add('worm-multiply');
+
         setTimeout(() => {
-            this.removeWorm(wormData);
-        }, 300);
+            wormData.element.classList.remove('worm-multiply');
+            newWormElement.classList.remove('worm-multiply');
+        }, 500);
+
+        console.log(`✅ Worm multiplied! New worm ${newWormId} created. Total worms: ${this.worms.length}`);
+
+        // Start animation loop if not already running
+        if (!this.animationFrameId) {
+            this.animate();
+        }
     }
 
     removeWorm(wormData) {
