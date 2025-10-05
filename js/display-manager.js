@@ -91,29 +91,27 @@ class DisplayManager {
         
         console.log(`📱 Mobile mode: ${isMobile ? 'YES' : 'NO'}`);
         
-        // Problem container - DON'T override, let CSS handle it
-        // const problemContainer = document.getElementById('problem-container');
-        // if (problemContainer) {
-        //     problemContainer.style.fontSize = `calc(${config.fontSize} * 1.2)`;
-        // }
-
-        // Solution container - reduce by 25% on mobile (75% of normal size)
+        // Solution container - INCREASE on mobile for better readability (no wrapping)
         const solutionContainer = document.getElementById('solution-container');
         if (solutionContainer) {
             if (isMobile) {
-                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.75)`;
-                console.log(`📱 Solution container font reduced to 75%`);
+                solutionContainer.style.fontSize = `calc(${config.fontSize} * 1.2)`;
+                solutionContainer.style.whiteSpace = 'nowrap'; // Prevent wrapping
+                solutionContainer.style.overflowX = 'auto'; // Allow horizontal scroll if needed
+                console.log(`📱 Solution container font increased to 120% with nowrap`);
             } else {
                 solutionContainer.style.fontSize = config.fontSize;
+                solutionContainer.style.whiteSpace = '';
+                solutionContainer.style.overflowX = '';
             }
         }
 
-        // Problem container - reduce by 25% on mobile (75% of normal size)
+        // Problem container - keep normal size on mobile
         const problemContainer = document.getElementById('problem-container');
         if (problemContainer) {
             if (isMobile) {
-                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.75)`;
-                console.log(`📱 Problem container font reduced to 75%`);
+                problemContainer.style.fontSize = config.fontSize;
+                console.log(`📱 Problem container font kept at base size`);
             } else {
                 problemContainer.style.fontSize = config.fontSize;
             }
