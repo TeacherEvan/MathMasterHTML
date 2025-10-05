@@ -156,30 +156,6 @@
         right: -25px;
         bottom: -25px;
     }
-
-    /* Solution container - horizontal layout on mobile */
-    #solution-container {
-        width: 100%;
-        overflow-x: auto;
-        overflow-y: visible;
-        white-space: nowrap;
-    }
-
-    #solution-container .steps-container {
-        display: inline-block;
-        white-space: nowrap;
-    }
-
-    #solution-container .solution-step {
-        display: inline-block;
-        white-space: nowrap;
-        margin-right: 10px;
-    }
-
-    #solution-container .solution-symbol {
-        display: inline-block;
-        white-space: nowrap;
-    }
 }
 
 /* Extra small devices */
