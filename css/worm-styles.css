@@ -227,17 +227,15 @@
     20% {
         transform: scale(1.4) rotate(15deg);
         opacity: 1;
-        filter: 
-            drop-shadow(0 0 20px rgba(255, 255, 0, 1))
-            drop-shadow(0 0 30px rgba(255, 165, 0, 1));
+        filter:
+            drop-shadow(0 0 20px rgba(255, 255, 0, 1)) drop-shadow(0 0 30px rgba(255, 165, 0, 1));
     }
 
     40% {
         transform: scale(1.8) rotate(-10deg);
         opacity: 0.8;
-        filter: 
-            drop-shadow(0 0 30px rgba(255, 0, 0, 1))
-            drop-shadow(0 0 40px rgba(255, 100, 0, 1));
+        filter:
+            drop-shadow(0 0 30px rgba(255, 0, 0, 1)) drop-shadow(0 0 40px rgba(255, 100, 0, 1));
     }
 
     60% {
@@ -271,12 +269,12 @@
     left: 50%;
     width: 100%;
     height: 2px;
-    background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(100, 100, 100, 0.8) 10%, 
-        rgba(80, 80, 80, 0.9) 50%, 
-        rgba(100, 100, 100, 0.8) 90%, 
-        transparent 100%);
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(100, 100, 100, 0.8) 10%,
+            rgba(80, 80, 80, 0.9) 50%,
+            rgba(100, 100, 100, 0.8) 90%,
+            transparent 100%);
     transform: translate(-50%, -50%) rotate(45deg);
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
 }
@@ -288,12 +286,12 @@
     left: 50%;
     width: 100%;
     height: 2px;
-    background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(100, 100, 100, 0.8) 10%, 
-        rgba(80, 80, 80, 0.9) 50%, 
-        rgba(100, 100, 100, 0.8) 90%, 
-        transparent 100%);
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(100, 100, 100, 0.8) 10%,
+            rgba(80, 80, 80, 0.9) 50%,
+            rgba(100, 100, 100, 0.8) 90%,
+            transparent 100%);
     transform: translate(-50%, -50%) rotate(-45deg);
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
 }
@@ -303,12 +301,12 @@
         opacity: 0;
         transform: scale(0.5) rotate(0deg);
     }
-    
+
     50% {
         opacity: 1;
         transform: scale(1.2) rotate(10deg);
     }
-    
+
     100% {
         opacity: 0.7;
         transform: scale(1) rotate(0deg);

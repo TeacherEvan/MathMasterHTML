@@ -650,7 +650,7 @@ class WormSystem {
         crack.className = 'worm-crack';
         crack.style.left = `${x}px`;
         crack.style.top = `${y}px`;
-        
+
         // Append to panel C (third display)
         const panelC = document.getElementById('third-display');
         if (panelC) {
@@ -733,7 +733,7 @@ class WormSystem {
 document.addEventListener('DOMContentLoaded', () => {
     window.wormSystem = new WormSystem();
     console.log('✅ Global wormSystem created');
-    
+
     // Clean up cracks when problem is completed
     document.addEventListener('problemCompleted', () => {
         if (window.wormSystem) {
