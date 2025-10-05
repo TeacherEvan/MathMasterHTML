@@ -53,6 +53,13 @@ class LockManager {
             this.completedLinesCount++;
             console.log(`🔒 Completed lines count is now: ${this.completedLinesCount}`);
 
+            // If lock animation hasn't started yet, start it now
+            if (!this.lockIsLive && this.completedLinesCount === 1) {
+                console.log('🔒 First line completed - starting lock animation');
+                this.startLockAnimation();
+                return; // startLockAnimation will load level 1 and activate it
+            }
+
             // Check if we're in master level
             const isMasterLevel = document.body.classList.contains('master-level');
             console.log(`🔒 Current game mode: ${isMasterLevel ? 'Master Level' : 'Normal Level'}`);
