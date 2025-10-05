@@ -35,6 +35,7 @@
 - **Symbol Rain**: Matrix-style falling symbols for interactive gameplay
 - **Progressive Lock System**: Visual feedback that evolves as you progress (6 levels)
 - **Worm Adversaries**: Enemy system that steals symbols - click to save them!
+- **Quick Access Console**: 3x3 grid for storing frequently used symbols with keyboard shortcuts (1-9)
 
 ### 🎨 Visual Design
 
@@ -64,7 +65,7 @@
 
 ### Gameplay
 
-![Gameplay](Images/Gameplay2.jpg)
+![Gameplay](Images/Gameplay3.jpg)
 
 ---
 
@@ -120,8 +121,13 @@ Visit the live version at: `https://teachereven.github.io/MathMasterHTML/`
    - **Click worms** to destroy them and save the symbols!
 
 6. **Use the Help Button**
-   - Stuck? Click the **?** button in Panel B
+   - Stuck? Click the **HELP** button in Panel B
    - It reveals one random symbol from the current line
+
+7. **Quick Access Console (NEW!)**
+   - After solving each problem, you can add symbols to your console
+   - Use keyboard shortcuts 1-9 to quickly click console symbols
+   - Console appears at the bottom of Panel B for easy access
 
 ---
 
@@ -148,6 +154,15 @@ Visit the live version at: `https://teachereven.github.io/MathMasterHTML/`
 - **Theft Cycle**: Attempts to steal symbols every 10 seconds
 - **Defeat**: Click worm to destroy and return stolen symbol
 
+### Quick Access Console
+
+- **Symbol Selection**: After each problem, choose symbols to add to your 3x3 console grid
+- **Keyboard Shortcuts**: Press 1-9 to activate console slots (matches numpad layout)
+- **Two-Step Process**: Select symbol first, then choose position on grid
+- **Skip Option**: Use "Skip" button for random placement
+- **Visual Feedback**: Purple pulsate animation when console buttons are clicked
+- **Session Storage**: Console resets on page reload
+
 ### Event-Driven Architecture
 
 The game uses custom DOM events for communication:
@@ -156,6 +171,8 @@ The game uses custom DOM events for communication:
 - `first-line-solved` - First correct answer triggers lock animation
 - `problemLineCompleted` - Line finished → spawn worm + progress lock
 - `wormSymbolSaved` - Player saved symbol by clicking worm
+- `problemCompleted` - Problem finished → show console modal
+- `consoleSymbolAdded` - Symbol added to console → continue to next problem
 
 ---
 
@@ -190,6 +207,7 @@ The game uses custom DOM events for communication:
 | `js/lock-manager.js` | Progressive lock animation system (LockManager class) | 634 |
 | `js/worm.js` | Enemy mechanics system (WormSystem class) | 230 |
 | `js/3rdDISPLAY.js` | Symbol rain rendering and click detection | ~200 |
+| `js/console-manager.js` | Quick access console system (ConsoleManager class) | ~340 |
 
 ### Problem Format
 
@@ -227,10 +245,12 @@ MathMaster-Algebra/
 │   ├── game.js                # Core game logic
 │   ├── lock-manager.js        # Lock animation system
 │   ├── worm.js                # Worm mechanics
+│   ├── console-manager.js     # Quick access console
 │   └── 3rdDISPLAY.js          # Symbol rain
 ├── css/
 │   ├── game.css               # Three-panel layout
 │   ├── lock-responsive.css    # Lock scaling
+│   ├── console.css            # Console styling
 │   └── worm-styles.css        # Worm animations
 ├── lock-components/
 │   ├── Line-1-transformer.html
@@ -242,7 +262,10 @@ MathMaster-Algebra/
 └── Docs/
     ├── BugFix_Jobcard_Critical.md
     ├── Worm_System_Improvements.md
-    └── Lock animation audit.md
+    ├── Lock animation audit.md
+    ├── Console_Quick_Reference.md
+    ├── Console_Feature_Implementation.md
+    └── Final_Code_Review.md
 ```
 
 ---
@@ -303,6 +326,8 @@ document.dispatchEvent(new CustomEvent('problemLineCompleted'));
 | Symbols not revealing | Check X/x normalization |
 | Worms not spawning | Check event listener in WormSystem |
 | Multiple clicks needed | Symbol detection missing normalization |
+| Console not appearing | Ensure `problemCompleted` event fires after all symbols revealed |
+| Keyboard shortcuts not working | Console slot must be filled, game window must have focus |
 
 ---
 
