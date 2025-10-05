@@ -467,21 +467,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (normalizedStolen === normalizedClicked) {
                 console.log(`🔄 Restoring stolen symbol "${clicked}" in Panel B!`);
-                
+
                 // Restore the symbol
                 stolenSymbol.classList.remove('stolen', 'hidden-symbol');
                 stolenSymbol.classList.add('revealed-symbol');
                 stolenSymbol.style.visibility = 'visible';
                 delete stolenSymbol.dataset.stolen;
-                
+
                 symbolRestored = true;
-                
+
                 // Add visual feedback for restoration
                 document.body.style.background = 'radial-gradient(circle, rgba(0,255,255,0.2), rgba(0,0,0,1))';
                 setTimeout(() => {
                     document.body.style.background = '';
                 }, 300);
-                
+
                 console.log(`✅ Symbol "${clicked}" successfully restored!`);
                 break;
             }

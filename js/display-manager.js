@@ -20,14 +20,14 @@ class DisplayManager {
 
         // Listen for window resize
         window.addEventListener('resize', this.debounce(() => {
-            console.log("🔄 Window resized, redetecting resolution");
+            console.log("🔄 Window resized, re-detecting resolution");
             this.detectAndApply();
         }, 300));
 
         // Listen for orientation change
         window.addEventListener('orientationchange', () => {
             setTimeout(() => {
-                console.log("📱 Orientation changed, redetecting resolution");
+                console.log("📱 Orientation changed, re-detecting resolution");
                 this.detectAndApply();
             }, 100);
         });

@@ -4,7 +4,7 @@ console.log("🐛 Worm System Loading...");
 class WormSystem {
     constructor() {
         this.worms = [];
-        this.maxWorms = 7; // Maximum 7 worms on playfield
+        this.maxWorms = 7; // Maximum 7 worms on play field
         this.wormContainer = null;
         this.solutionContainer = null;
         this.consoleElement = null;
