@@ -637,9 +637,35 @@ class WormSystem {
         // Explosion visual effect
         worm.element.classList.add('worm-clicked');
 
+        // Create persistent crack at worm's location
+        this.createCrack(worm.x, worm.y);
+
         setTimeout(() => {
             this.removeWorm(worm);
         }, 300);
+    }
+
+    createCrack(x, y) {
+        const crack = document.createElement('div');
+        crack.className = 'worm-crack';
+        crack.style.left = `${x}px`;
+        crack.style.top = `${y}px`;
+        
+        // Append to panel C (third display)
+        const panelC = document.getElementById('third-display');
+        if (panelC) {
+            panelC.appendChild(crack);
+            console.log(`💥 Crack created at (${x}, ${y})`);
+        }
+    }
+
+    cleanupCracks() {
+        const panelC = document.getElementById('third-display');
+        if (panelC) {
+            const cracks = panelC.querySelectorAll('.worm-crack');
+            cracks.forEach(crack => crack.remove());
+            console.log(`🧹 Cleaned up ${cracks.length} crack(s)`);
+        }
     }
 
     removeWorm(wormData) {
@@ -707,4 +733,12 @@ class WormSystem {
 document.addEventListener('DOMContentLoaded', () => {
     window.wormSystem = new WormSystem();
     console.log('✅ Global wormSystem created');
+    
+    // Clean up cracks when problem is completed
+    document.addEventListener('problemCompleted', () => {
+        if (window.wormSystem) {
+            window.wormSystem.cleanupCracks();
+        }
+    });
+    console.log('✅ Crack cleanup listener registered for problemCompleted event');
 });
