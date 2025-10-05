@@ -73,34 +73,37 @@
 }
 
 .worm-segment {
-    width: 18px;
-    /* Quarter-coin size */
-    height: 18px;
+    width: 9px;
+    /* 50% of original 18px quarter-coin size */
+    height: 9px;
     background: radial-gradient(circle at 30% 30%, #00ff00, #00ee00, #00cc00);
     /* Brighter green */
-    border: 2px solid #00ff00;
+    border: 1px solid #00ff00;
+    /* Reduced from 2px */
     border-radius: 50%;
-    margin-left: -4px;
+    margin-left: -2px;
+    /* Reduced from -4px */
     animation: worm-crawl 0.8s ease-in-out infinite;
     animation-delay: calc(var(--segment-index, 0) * 0.15s);
     position: relative;
-    box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.4),
-        0 2px 4px rgba(0, 0, 0, 0.8),
-        0 0 8px rgba(0, 255, 0, 0.6);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4),
+        0 1px 2px rgba(0, 0, 0, 0.8),
+        0 0 4px rgba(0, 255, 0, 0.6);
     opacity: 1 !important;
 }
 
 .worm-segment:first-child {
     --segment-index: 0;
-    width: 24px;
-    /* Head slightly larger - quarter coin size */
-    height: 24px;
+    width: 12px;
+    /* 50% of original 24px - head slightly larger */
+    height: 12px;
     background: radial-gradient(circle at 30% 30%, #00ff66, #00ee44, #00cc33);
     /* Brighter green head */
-    border: 3px solid #00ff00;
-    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5),
-        0 2px 5px rgba(0, 0, 0, 0.9),
-        0 0 12px rgba(0, 255, 0, 0.8);
+    border: 1.5px solid #00ff00;
+    /* Reduced from 3px */
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5),
+        0 1px 3px rgba(0, 0, 0, 0.9),
+        0 0 6px rgba(0, 255, 0, 0.8);
     opacity: 1 !important;
 }
 
@@ -109,20 +112,24 @@
 .worm-segment:first-child::after {
     content: '';
     position: absolute;
-    width: 4px;
-    height: 4px;
+    width: 2px;
+    /* Reduced from 4px */
+    height: 2px;
     background: #000;
     border-radius: 50%;
-    top: 6px;
+    top: 3px;
+    /* Adjusted from 6px */
     animation: worm-blink 3s ease-in-out infinite;
 }
 
 .worm-segment:first-child::before {
-    left: 5px;
+    left: 2.5px;
+    /* Adjusted from 5px */
 }
 
 .worm-segment:first-child::after {
-    right: 5px;
+    right: 2.5px;
+    /* Adjusted from 5px */
 }
 
 @keyframes worm-blink {
@@ -130,13 +137,15 @@
     0%,
     90%,
     100% {
-        height: 4px;
+        height: 2px;
+        /* Reduced from 4px */
         opacity: 1;
     }
 
     92%,
     98% {
-        height: 1px;
+        height: 0.5px;
+        /* Reduced from 1px */
         opacity: 0.3;
     }
 }
@@ -343,34 +352,40 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .worm-segment {
-        width: 16px;
-        height: 16px;
+        width: 8px;
+        /* 50% of original 16px */
+        height: 8px;
     }
 
     .worm-segment:first-child {
-        width: 20px;
-        height: 20px;
+        width: 10px;
+        /* 50% of original 20px */
+        height: 10px;
     }
 
     .carried-symbol {
-        font-size: 14px;
-        padding: 3px 6px;
+        font-size: 12px;
+        /* Slightly smaller */
+        padding: 2px 4px;
     }
 }
 
 @media (max-width: 480px) {
     .worm-segment {
-        width: 14px;
-        height: 14px;
+        width: 7px;
+        /* 50% of original 14px */
+        height: 7px;
     }
 
     .worm-segment:first-child {
-        width: 18px;
-        height: 18px;
+        width: 9px;
+        /* 50% of original 18px */
+        height: 9px;
     }
 
     .carried-symbol {
-        font-size: 12px;
-        padding: 2px 4px;
+        font-size: 10px;
+        /* Smaller for mobile */
+        padding: 1px 3px;
     }
 }

@@ -92,19 +92,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function checkCollision(symbolObj) {
         const symbolHeight = 30; // Approximate height of a symbol
-        const collisionBuffer = 10; // Additional spacing between symbols
+        const symbolWidth = 30; // Approximate width of a symbol
+        const collisionBuffer = 25; // Increased spacing to prevent click conflicts
+        const horizontalBuffer = 20; // Extra horizontal spacing
         const symbolLeft = parseFloat(symbolObj.element.style.left);
-        const symbolRight = symbolLeft + 30; // Approximate width of a symbol
+        const symbolRight = symbolLeft + symbolWidth;
 
         // Check collision with other symbols
         for (let other of activeSymbols) {
             if (other === symbolObj) continue;
 
             const otherLeft = parseFloat(other.element.style.left);
-            const otherRight = otherLeft + 30;
+            const otherRight = otherLeft + symbolWidth;
 
             // Check if symbols are horizontally overlapping or close
-            const horizontalOverlap = !(symbolRight < otherLeft || symbolLeft > otherRight);
+            const horizontalOverlap = !(symbolRight + horizontalBuffer < otherLeft || symbolLeft > otherRight + horizontalBuffer);
 
             if (horizontalOverlap) {
                 // Check if this symbol would collide with the other
