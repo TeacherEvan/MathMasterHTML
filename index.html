@@ -63,6 +63,47 @@
             padding: 20px;
         }
         
+        /* Teacher Evan's Title */
+        .teacher-title {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            color: #8a2be2;
+            text-shadow: 
+                0 0 10px #8a2be2,
+                0 0 20px #8a2be2,
+                0 0 30px #8a2be2,
+                2px 2px 0px #000,
+                4px 4px 0px rgba(0,0,0,0.5);
+            margin-bottom: 15px;
+            letter-spacing: 4px;
+            animation: purple-pulse 2s ease-in-out infinite;
+            text-transform: uppercase;
+        }
+        
+        @keyframes purple-pulse {
+            0%, 100% {
+                color: #8a2be2;
+                text-shadow: 
+                    0 0 10px #8a2be2,
+                    0 0 20px #8a2be2,
+                    0 0 30px #8a2be2,
+                    2px 2px 0px #000,
+                    4px 4px 0px rgba(0,0,0,0.5);
+                transform: scale(1);
+            }
+            50% {
+                color: #ba55d3;
+                text-shadow: 
+                    0 0 15px #8a2be2,
+                    0 0 30px #8a2be2,
+                    0 0 40px #ba55d3,
+                    0 0 50px #ba55d3,
+                    2px 2px 0px #000,
+                    4px 4px 0px rgba(0,0,0,0.5);
+                transform: scale(1.05);
+            }
+        }
+        
         /* Main Title */
         .main-title {
             font-size: clamp(3rem, 8vw, 6rem);
@@ -411,6 +452,7 @@
     
     <!-- Main Welcome Container -->
     <div class="welcome-container">
+        <h1 class="teacher-title">Teacher Evan's</h1>
         <h1 class="main-title">MATH MASTER</h1>
         <h2 class="subtitle">Algebra</h2>
         
