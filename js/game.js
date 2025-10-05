@@ -456,6 +456,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
         console.log(`🎯 Symbol Rain click - Clicked: "${clicked}"`);
 
+        // First, check if this symbol was stolen by a worm and needs to be restored
+        const normalizedClicked = clicked.toLowerCase() === 'x' ? 'X' : clicked;
+        const stolenSymbols = solutionContainer.querySelectorAll('[data-stolen="true"]');
+        let symbolRestored = false;
+
+        for (let stolenSymbol of stolenSymbols) {
+            const stolenText = stolenSymbol.textContent;
+            const normalizedStolen = stolenText.toLowerCase() === 'x' ? 'X' : stolenText;
+
+            if (normalizedStolen === normalizedClicked) {
+                console.log(`🔄 Restoring stolen symbol "${clicked}" in Panel B!`);
+
+                // Restore the symbol
+                stolenSymbol.classList.remove('stolen', 'hidden-symbol');
+                stolenSymbol.classList.add('revealed-symbol');
+                stolenSymbol.style.visibility = 'visible';
+                delete stolenSymbol.dataset.stolen;
+
+                symbolRestored = true;
+
+                // Add visual feedback for restoration
+                document.body.style.background = 'radial-gradient(circle, rgba(0,255,255,0.2), rgba(0,0,0,1))';
+                setTimeout(() => {
+                    document.body.style.background = '';
+                }, 300);
+
+                console.log(`✅ Symbol "${clicked}" successfully restored!`);
+                break;
+            }
+        }
+
+        // If symbol was restored, we're done
+        if (symbolRestored) {
+            return;
+        }
+
+        // Otherwise, check if it's in the current line (normal gameplay)
         if (isSymbolInCurrentLine(clicked)) {
             handleCorrectAnswer(clicked);
         } else {
