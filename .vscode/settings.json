@@ -4,5 +4,8 @@
     "eslint.enable": false,
     "files.associations": {
         "*.js": "javascript"
-    }
+    },
+    "cSpell.words": [
+        "Orbitron"
+    ]
 }
