@@ -86,16 +86,37 @@ class DisplayManager {
     }
 
     applyFontSizes(config) {
+        // Determine if we're on mobile
+        const isMobile = this.currentResolution.name === 'mobile' || window.innerWidth <= 768;
+        
+        console.log(`📱 Mobile mode: ${isMobile ? 'YES' : 'NO'}`);
+        
         // Problem container - DON'T override, let CSS handle it
         // const problemContainer = document.getElementById('problem-container');
         // if (problemContainer) {
         //     problemContainer.style.fontSize = `calc(${config.fontSize} * 1.2)`;
         // }
 
-        // Solution container
+        // Solution container - reduce by 25% on mobile (75% of normal size)
         const solutionContainer = document.getElementById('solution-container');
         if (solutionContainer) {
-            solutionContainer.style.fontSize = config.fontSize;
+            if (isMobile) {
+                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.75)`;
+                console.log(`📱 Solution container font reduced to 75%`);
+            } else {
+                solutionContainer.style.fontSize = config.fontSize;
+            }
+        }
+
+        // Problem container - reduce by 25% on mobile (75% of normal size)
+        const problemContainer = document.getElementById('problem-container');
+        if (problemContainer) {
+            if (isMobile) {
+                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.75)`;
+                console.log(`📱 Problem container font reduced to 75%`);
+            } else {
+                problemContainer.style.fontSize = config.fontSize;
+            }
         }
 
         // Back button
@@ -112,6 +133,9 @@ class DisplayManager {
     }
 
     applySymbolRainAdjustments(config) {
+        // Determine if we're on mobile
+        const isMobile = this.currentResolution.name === 'mobile' || window.innerWidth <= 768;
+        
         // Adjust falling symbol sizes
         const style = document.createElement('style');
         style.id = 'dynamic-symbol-style';
@@ -122,11 +146,19 @@ class DisplayManager {
             oldStyle.remove();
         }
 
+        // On mobile: increase falling symbols by 50% (1.5x larger)
+        // On desktop: normal size
+        const symbolMultiplier = isMobile ? 1.8 : 1.2;
+        
         style.textContent = `
             .falling-symbol {
-                font-size: calc(${config.fontSize} * 1.2) !important;
+                font-size: calc(${config.fontSize} * ${symbolMultiplier}) !important;
             }
         `;
+        
+        if (isMobile) {
+            console.log(`📱 Falling symbols increased by 50% (multiplier: ${symbolMultiplier})`);
+        }
 
         document.head.appendChild(style);
     }
