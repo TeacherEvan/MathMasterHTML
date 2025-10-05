@@ -88,9 +88,9 @@ class DisplayManager {
     applyFontSizes(config) {
         // Determine if we're on mobile
         const isMobile = this.currentResolution.name === 'mobile' || window.innerWidth <= 768;
-        
+
         console.log(`📱 Mobile mode: ${isMobile ? 'YES' : 'NO'}`);
-        
+
         // Solution container - INCREASE on mobile for better readability (no wrapping)
         const solutionContainer = document.getElementById('solution-container');
         if (solutionContainer) {
@@ -133,7 +133,7 @@ class DisplayManager {
     applySymbolRainAdjustments(config) {
         // Determine if we're on mobile
         const isMobile = this.currentResolution.name === 'mobile' || window.innerWidth <= 768;
-        
+
         // Adjust falling symbol sizes
         const style = document.createElement('style');
         style.id = 'dynamic-symbol-style';
@@ -147,13 +147,13 @@ class DisplayManager {
         // On mobile: increase falling symbols by 50% (1.5x larger)
         // On desktop: normal size
         const symbolMultiplier = isMobile ? 1.8 : 1.2;
-        
+
         style.textContent = `
             .falling-symbol {
                 font-size: calc(${config.fontSize} * ${symbolMultiplier}) !important;
             }
         `;
-        
+
         if (isMobile) {
             console.log(`📱 Falling symbols increased by 50% (multiplier: ${symbolMultiplier})`);
         }

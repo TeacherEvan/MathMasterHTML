@@ -276,15 +276,38 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
     #symbol-console {
+        /* Mobile: Span full viewport width, not confined to Panel B */
+        position: fixed;
         bottom: 10px;
-        gap: 6px;
+        left: 10px;
+        right: 10px;
+        transform: none;
+        
+        /* Change from 3×3 grid to horizontal 2×1 pairs */
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        align-items: center;
+        gap: 8px;
         padding: 10px;
+        
+        /* Ensure it spans across all panels */
+        z-index: 10000;
     }
 
     .console-slot {
-        width: 40px;
-        height: 40px;
-        font-size: 20px;
+        /* Make slots slightly larger for touch on mobile */
+        width: 45px;
+        height: 45px;
+        font-size: 22px;
+        flex: 0 0 auto;
+    }
+    
+    /* Group slots in pairs visually with spacing */
+    .console-slot:nth-child(2),
+    .console-slot:nth-child(4),
+    .console-slot:nth-child(6) {
+        margin-right: 15px; /* Space after every 2nd, 4th, 6th slot to create pairs */
     }
 
     .modal-content {
@@ -307,9 +330,17 @@
 
 @media (max-width: 480px) {
     .console-slot {
-        width: 35px;
-        height: 35px;
-        font-size: 18px;
+        /* Slightly smaller on very small screens */
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+    
+    /* Reduce pair spacing on very small screens */
+    .console-slot:nth-child(2),
+    .console-slot:nth-child(4),
+    .console-slot:nth-child(6) {
+        margin-right: 10px;
     }
 
     .symbol-grid {
