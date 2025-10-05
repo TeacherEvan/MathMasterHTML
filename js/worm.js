@@ -1,10 +1,10 @@
-// js/worm.js - Refactored Worm System with Console Integration
+// js/worm.js - Enhanced Worm System with Crawling Behavior
 console.log("🐛 Worm System Loading...");
 
 class WormSystem {
     constructor() {
         this.worms = [];
-        this.maxWorms = 9; // Maximum 9 worms on playfield
+        this.maxWorms = 7; // Maximum 7 worms on playfield
         this.wormContainer = null;
         this.solutionContainer = null;
         this.consoleElement = null;
@@ -24,24 +24,46 @@ class WormSystem {
 
         // Listen for symbol clicks in rain display to check if worm's target was clicked
         document.addEventListener('symbolClicked', (event) => {
-            this.checkWormTargetClick(event.detail.symbol);
+            this.checkWormTargetClickForExplosion(event.detail.symbol);
+        });
+
+        // Listen for symbol reveals to trigger worm targeting
+        document.addEventListener('symbolRevealed', (event) => {
+            console.log('🎯 Symbol revealed event:', event.detail);
+            this.notifyWormsOfRedSymbol(event.detail.symbol);
         });
     }
 
-    checkWormTargetClick(clickedSymbol) {
+    // Check if rain symbol clicked matches worm's stolen symbol - EXPLODE WORM!
+    checkWormTargetClickForExplosion(clickedSymbol) {
         // Normalize X/x
         const normalizedClicked = clickedSymbol.toLowerCase() === 'x' ? 'X' : clickedSymbol;
 
-        // Check if any worm is carrying this symbol - just log it, don't explode
+        // Check if any worm is carrying this symbol
         this.worms.forEach(worm => {
             if (!worm.active || !worm.hasStolen) return;
 
             const normalizedWormSymbol = worm.stolenSymbol.toLowerCase() === 'x' ? 'X' : worm.stolenSymbol;
 
             if (normalizedWormSymbol === normalizedClicked) {
-                console.log(`🎯 User clicked rain target "${clickedSymbol}" matching worm's stolen symbol!`);
-                // Worms no longer explode on target match - they just keep the symbol
+                console.log(`💥 BOOM! User clicked rain symbol "${clickedSymbol}" - EXPLODING worm with stolen symbol!`);
+                this.explodeWorm(worm);
             }
+        });
+    }
+
+    // Notify roaming worms that a red symbol has appeared
+    notifyWormsOfRedSymbol(symbolValue) {
+        console.log(`🎯 Notifying worms of revealed red symbol: "${symbolValue}"`);
+
+        this.worms.forEach(worm => {
+            if (!worm.active || worm.hasStolen || worm.isRushingToTarget) return;
+
+            // Worm stops roaming and rushes to this symbol
+            console.log(`🐛 Worm ${worm.id} detected red symbol "${symbolValue}" - RUSHING TO TARGET!`);
+            worm.isRushingToTarget = true;
+            worm.targetSymbol = symbolValue;
+            worm.roamingEndTime = Date.now(); // Stop roaming timer
         });
     }
 
@@ -170,25 +192,31 @@ class WormSystem {
             element: wormElement,
             stolenSymbol: null,
             targetElement: null,
+            targetSymbol: null,
             x: startX,
             y: startY,
-            velocityX: (Math.random() - 0.5) * 1.5, // Horizontal roaming
-            velocityY: (Math.random() - 0.5) * 1.0, // Vertical roaming
+            velocityX: (Math.random() - 0.5) * 2.0, // Crawling movement
+            velocityY: (Math.random() - 0.5) * 1.0,
             active: true,
             hasStolen: false,
+            isRushingToTarget: false,
             roamingEndTime: Date.now() + 10000, // Roam for 10 seconds
             isFlickering: false,
-            baseSpeed: 1.5,
-            currentSpeed: 1.5,
+            baseSpeed: 2.0, // Updated base speed
+            currentSpeed: 2.0,
             consoleSlotIndex: slotIndex,
             consoleSlotElement: slotElement,
-            fromConsole: true
+            fromConsole: true,
+            crawlPhase: 0, // For crawling animation
+            direction: Math.random() * Math.PI * 2 // Random initial direction
         };
 
-        this.worms.push(wormData);// Add click handler to multiply worm
+        this.worms.push(wormData);
+
+        // Add click handler to CLONE worm (not just multiply)
         wormElement.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.multiplyWorm(wormData);
+            this.cloneWorm(wormData);
         });
 
         console.log(`✅ Worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
@@ -281,100 +309,68 @@ class WormSystem {
     }
 
     stealSymbol(worm) {
-        // Find a hidden symbol to steal
-        const hiddenSymbols = this.solutionContainer.querySelectorAll('.hidden-symbol');
-        const availableSymbols = Array.from(hiddenSymbols).filter(el => !el.dataset.stolen);
+        // Find revealed RED symbols (not hidden symbols)
+        const revealedSymbols = this.solutionContainer.querySelectorAll('.revealed-symbol');
+        const availableSymbols = Array.from(revealedSymbols).filter(el =>
+            !el.dataset.stolen &&
+            !el.classList.contains('space-symbol') &&
+            !el.classList.contains('completed-row-symbol')
+        );
 
         if (availableSymbols.length === 0) {
-            console.log('🐛 No hidden symbols available to steal');
+            console.log('🐛 No revealed red symbols available to steal');
             // Continue roaming
             worm.roamingEndTime = Date.now() + 5000;
+            worm.isRushingToTarget = false;
             return;
         }
 
-        // Pick random hidden symbol (only unlocked red symbols)
-        const targetSymbol = availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
+        // If worm has a target symbol, try to find it
+        let targetSymbol = null;
+        if (worm.targetSymbol) {
+            const normalizedTarget = worm.targetSymbol.toLowerCase() === 'x' ? 'X' : worm.targetSymbol;
+            targetSymbol = availableSymbols.find(el => {
+                const elSymbol = el.textContent.toLowerCase() === 'x' ? 'X' : el.textContent;
+                return elSymbol === normalizedTarget;
+            });
+        }
+
+        // If no specific target or target not found, pick random
+        if (!targetSymbol) {
+            targetSymbol = availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
+        }
+
         const symbolValue = targetSymbol.textContent;
 
-        console.log(`🐛 Worm ${worm.id} stealing symbol: "${symbolValue}"`);
+        console.log(`🐛 Worm ${worm.id} stealing RED symbol: "${symbolValue}"`);
 
-        // Mark symbol as stolen
+        // Mark symbol as stolen and hide it
         targetSymbol.dataset.stolen = 'true';
         targetSymbol.classList.add('stolen');
+        targetSymbol.classList.remove('revealed-symbol');
+        targetSymbol.classList.add('hidden-symbol'); // Hide it again until user re-clicks in rain
+        targetSymbol.style.visibility = 'hidden';
 
         // Update worm data
         worm.stolenSymbol = symbolValue;
         worm.targetElement = targetSymbol;
         worm.hasStolen = true;
+        worm.isRushingToTarget = false;
         worm.element.dataset.stolenSymbol = symbolValue;
 
         // ACTIVATE LSD FLICKER when stealing red symbol!
-        console.log(`🌈 Worm ${worm.id} stole red symbol - ACTIVATING LSD FLICKER!`);
+        console.log(`🌈 Worm ${worm.id} stole red symbol - ACTIVATING LSD FLICKER with 20% SPEED BOOST!`);
         worm.isFlickering = true;
         worm.element.classList.add('flickering');
-        worm.currentSpeed = worm.baseSpeed * 1.5; // 50% speed boost when trippy!
+        worm.currentSpeed = worm.baseSpeed * 1.2; // 20% speed boost!
 
-        // Add stolen symbol indicator
+        // Add stolen symbol indicator (symbol follows worm)
         const stolenSymbolDiv = document.createElement('div');
         stolenSymbolDiv.className = 'carried-symbol';
         stolenSymbolDiv.textContent = symbolValue;
         worm.element.appendChild(stolenSymbolDiv);
 
-        // Change velocity to move upward and throw symbol out
-        worm.velocityY = -1.5;
-        worm.velocityX = (Math.random() - 0.5) * 0.5;
-
-        console.log(`🐛 Worm now carrying "${symbolValue}" and moving to top with LSD colors!`);
-    }
-
-    checkWormNearRainSymbol(worm) {
-        if (!worm.hasStolen) return;
-
-        // Get all falling symbols in rain display
-        const rainSymbols = document.querySelectorAll('#symbol-rain-container .falling-symbol');
-        const normalizedWormSymbol = worm.stolenSymbol.toLowerCase() === 'x' ? 'X' : worm.stolenSymbol;
-
-        let isNearMatchingSymbol = false;
-
-        rainSymbols.forEach(rainSymbol => {
-            const rainSymbolText = rainSymbol.textContent;
-            const normalizedRainSymbol = rainSymbolText.toLowerCase() === 'x' ? 'X' : rainSymbolText;
-
-            if (normalizedRainSymbol === normalizedWormSymbol) {
-                // Check proximity (simple distance check)
-                const rainRect = rainSymbol.getBoundingClientRect();
-                const wormRect = worm.element.getBoundingClientRect();
-
-                // Calculate distance between centers
-                const rainCenterX = rainRect.left + rainRect.width / 2;
-                const rainCenterY = rainRect.top + rainRect.height / 2;
-                const wormCenterX = wormRect.left + wormRect.width / 2;
-                const wormCenterY = wormRect.top + wormRect.height / 2;
-
-                const distance = Math.sqrt(
-                    Math.pow(rainCenterX - wormCenterX, 2) +
-                    Math.pow(rainCenterY - wormCenterY, 2)
-                );
-
-                // If within ~100px, consider it "near"
-                if (distance < 100) {
-                    isNearMatchingSymbol = true;
-                }
-            }
-        });
-
-        // Update flicker state
-        if (isNearMatchingSymbol && !worm.isFlickering) {
-            console.log(`🌈 Worm ${worm.id} near matching rain symbol - FLICKERING!`);
-            worm.isFlickering = true;
-            worm.element.classList.add('flickering');
-            worm.currentSpeed = worm.baseSpeed * 1.3; // 30% speed boost
-        } else if (!isNearMatchingSymbol && worm.isFlickering) {
-            console.log(`🐛 Worm ${worm.id} no longer near matching symbol - normal`);
-            worm.isFlickering = false;
-            worm.element.classList.remove('flickering');
-            worm.currentSpeed = worm.baseSpeed;
-        }
+        console.log(`🐛 Worm now carrying "${symbolValue}" and heading back to console hole!`);
     }
 
     animate() {
@@ -384,104 +380,135 @@ class WormSystem {
         }
 
         const currentTime = Date.now();
+        const panelB = this.wormContainer;
+        const panelBRect = panelB.getBoundingClientRect();
+        const panelBWidth = panelB.offsetWidth || 800;
+        const panelBHeight = panelB.offsetHeight || 600;
 
         this.worms.forEach(worm => {
             if (!worm.active) return;
 
-            // Check if roaming period has ended and worm hasn't stolen yet
-            if (!worm.hasStolen && currentTime >= worm.roamingEndTime) {
+            // Update crawl phase for animation
+            worm.crawlPhase = (worm.crawlPhase + 0.05) % (Math.PI * 2);
+
+            // Check if roaming period has ended and worm should steal
+            if (!worm.hasStolen && !worm.isRushingToTarget && currentTime >= worm.roamingEndTime) {
                 this.stealSymbol(worm);
             }
 
-            // Check proximity to matching rain symbols (for flickering effect)
-            if (worm.hasStolen) {
-                this.checkWormNearRainSymbol(worm);
-            }
+            // Rushing to red symbol that just appeared
+            if (worm.isRushingToTarget && !worm.hasStolen) {
+                // Find the target red symbol
+                const revealedSymbols = this.solutionContainer.querySelectorAll('.revealed-symbol');
+                let targetElement = null;
 
-            // Update position based on current behavior
-            if (!worm.hasStolen) {
-                // Roaming behavior - random movement in bottom area
-                worm.x += worm.velocityX * worm.currentSpeed;
-                worm.y += worm.velocityY * worm.currentSpeed;
-
-                // Keep in bottom 40% while roaming
-                const containerHeight = this.wormContainer.offsetHeight || 600;
-                const minY = containerHeight * 0.6;
-                const maxY = containerHeight - 30;
-
-                if (worm.y < minY) {
-                    worm.y = minY;
-                    worm.velocityY *= -1;
-                }
-                if (worm.y > maxY) {
-                    worm.y = maxY;
-                    worm.velocityY *= -1;
+                if (worm.targetSymbol) {
+                    const normalizedTarget = worm.targetSymbol.toLowerCase() === 'x' ? 'X' : worm.targetSymbol;
+                    targetElement = Array.from(revealedSymbols).find(el => {
+                        const elSymbol = el.textContent.toLowerCase() === 'x' ? 'X' : el.textContent;
+                        return elSymbol === normalizedTarget && !el.dataset.stolen;
+                    });
                 }
 
-                // Bounce horizontally
-                const containerWidth = this.wormContainer.offsetWidth || 800;
-                if (worm.x < 5) {
-                    worm.x = 5;
-                    worm.velocityX *= -1;
-                }
-                if (worm.x > containerWidth - 80) {
-                    worm.x = containerWidth - 80;
-                    worm.velocityX *= -1;
-                }
-            } else {
-                // Carrying symbol - behavior depends on if worm is from console
-                if (worm.fromConsole && worm.consoleSlotElement) {
-                    // Move back towards console hole
-                    const slotRect = worm.consoleSlotElement.getBoundingClientRect();
+                if (targetElement) {
+                    // Rush towards target symbol
+                    const targetRect = targetElement.getBoundingClientRect();
                     const containerRect = this.wormContainer.getBoundingClientRect();
 
-                    const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
-                    const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
+                    const targetX = targetRect.left - containerRect.left + (targetRect.width / 2);
+                    const targetY = targetRect.top - containerRect.top + (targetRect.height / 2);
 
-                    // Calculate direction to console
                     const dx = targetX - worm.x;
                     const dy = targetY - worm.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
 
-                    if (distance < 20) {
-                        // Reached console hole - escape with symbol!
-                        console.log(`🐛 Worm ${worm.id} escaped to console with symbol "${worm.stolenSymbol}"!`);
-                        this.removeWorm(worm);
-                        return;
+                    if (distance < 30) {
+                        // Reached target - steal it!
+                        this.stealSymbol(worm);
+                    } else {
+                        // Move towards target at double speed
+                        const rushSpeed = worm.baseSpeed * 2;
+                        worm.velocityX = (dx / distance) * rushSpeed;
+                        worm.velocityY = (dy / distance) * rushSpeed;
+
+                        worm.x += worm.velocityX;
+                        worm.y += worm.velocityY;
                     }
-
-                    // Move towards console
-                    worm.velocityX = (dx / distance) * 2;
-                    worm.velocityY = (dy / distance) * 2;
-
-                    worm.x += worm.velocityX * worm.currentSpeed;
-                    worm.y += worm.velocityY * worm.currentSpeed;
                 } else {
-                    // Non-console worm - move upward to throw it out
-                    worm.y += worm.velocityY * worm.currentSpeed;
-                    worm.x += worm.velocityX * worm.currentSpeed;
-
-                    // Keep horizontal position in bounds
-                    const containerWidth = this.wormContainer.offsetWidth || 800;
-                    if (worm.x < 5) {
-                        worm.x = 5;
-                        worm.velocityX *= -1;
-                    }
-                    if (worm.x > containerWidth - 80) {
-                        worm.x = containerWidth - 80;
-                        worm.velocityX *= -1;
-                    }
-
-                    // Check if worm has thrown symbol out of bounds (reached top)
-                    if (worm.y < -50) {
-                        console.log(`🐛 Worm ${worm.id} threw symbol "${worm.stolenSymbol}" out of bounds`);
-                        this.removeWorm(worm);
-                        return;
-                    }
+                    // Target disappeared, go back to roaming
+                    console.log(`🐛 Worm ${worm.id} lost target, resuming roaming`);
+                    worm.isRushingToTarget = false;
+                    worm.roamingEndTime = Date.now() + 5000;
                 }
             }
+            // Roaming behavior - crawling movement ONLY in Panel B
+            else if (!worm.hasStolen && !worm.isRushingToTarget) {
+                // Update direction slightly for natural movement
+                worm.direction += (Math.random() - 0.5) * 0.1;
 
-            // Apply position directly (no CSS transitions)
+                // Crawling movement with inchworm effect
+                const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
+                worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
+                worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
+
+                worm.x += worm.velocityX;
+                worm.y += worm.velocityY;
+
+                // STRICT PANEL B BOUNDARIES
+                const margin = 20;
+                if (worm.x < margin) {
+                    worm.x = margin;
+                    worm.direction = Math.PI - worm.direction; // Reflect horizontally
+                }
+                if (worm.x > panelBWidth - margin) {
+                    worm.x = panelBWidth - margin;
+                    worm.direction = Math.PI - worm.direction;
+                }
+                if (worm.y < margin) {
+                    worm.y = margin;
+                    worm.direction = -worm.direction; // Reflect vertically
+                }
+                if (worm.y > panelBHeight - margin) {
+                    worm.y = panelBHeight - margin;
+                    worm.direction = -worm.direction;
+                }
+
+                // Rotate worm body to face movement direction
+                worm.element.style.transform = `rotate(${worm.direction}rad)`;
+            }
+            // Carrying symbol - return to console hole
+            else if (worm.hasStolen && worm.fromConsole && worm.consoleSlotElement) {
+                const slotRect = worm.consoleSlotElement.getBoundingClientRect();
+                const containerRect = this.wormContainer.getBoundingClientRect();
+
+                const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
+                const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
+
+                const dx = targetX - worm.x;
+                const dy = targetY - worm.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 20) {
+                    // Reached console hole - escape with symbol!
+                    console.log(`🐛 Worm ${worm.id} escaped to console with symbol "${worm.stolenSymbol}"!`);
+                    console.log(`💀 Symbol "${worm.stolenSymbol}" stays HIDDEN until user clicks it again in Panel C`);
+                    this.removeWorm(worm);
+                    return;
+                }
+
+                // Move towards console with LSD colors!
+                worm.direction = Math.atan2(dy, dx);
+                worm.velocityX = (dx / distance) * worm.currentSpeed;
+                worm.velocityY = (dy / distance) * worm.currentSpeed;
+
+                worm.x += worm.velocityX;
+                worm.y += worm.velocityY;
+
+                // Rotate towards console
+                worm.element.style.transform = `rotate(${worm.direction}rad)`;
+            }
+
+            // Apply position directly (no CSS transitions for smooth crawling)
             worm.element.style.left = `${worm.x}px`;
             worm.element.style.top = `${worm.y}px`;
         });
@@ -494,24 +521,24 @@ class WormSystem {
         }
     }
 
-    multiplyWorm(wormData) {
-        if (!wormData.active) return;
+    cloneWorm(parentWorm) {
+        if (!parentWorm.active) return;
 
-        console.log(`🐛 Worm ${wormData.id} clicked! Attempting to multiply...`);
+        console.log(`🐛 Worm ${parentWorm.id} clicked! Creating CLONE with same mission...`);
 
         // Check if we can spawn more worms
         if (this.worms.length >= this.maxWorms) {
-            console.log(`⚠️ Max worms (${this.maxWorms}) reached. Cannot multiply.`);
+            console.log(`⚠️ Max worms (${this.maxWorms}) reached. Cannot clone.`);
             // Flash effect to indicate max reached
-            wormData.element.style.animation = 'worm-flash 0.3s ease-out';
+            parentWorm.element.style.animation = 'worm-flash 0.3s ease-out';
             setTimeout(() => {
-                wormData.element.style.animation = '';
+                parentWorm.element.style.animation = '';
             }, 300);
             return;
         }
 
-        // Create a new worm near the clicked one
-        const newWormId = `worm-${Date.now()}-${Math.random()}`;
+        // Create a new worm near the parent
+        const newWormId = `worm-clone-${Date.now()}-${Math.random()}`;
         const newWormElement = document.createElement('div');
         newWormElement.className = 'worm-container';
         newWormElement.id = newWormId;
@@ -530,10 +557,10 @@ class WormSystem {
         newWormElement.appendChild(wormBody);
 
         // Position near parent worm with slight offset
-        const offsetX = (Math.random() - 0.5) * 50;
-        const offsetY = (Math.random() - 0.5) * 50;
-        const newX = wormData.x + offsetX;
-        const newY = wormData.y + offsetY;
+        const offsetX = (Math.random() - 0.5) * 60;
+        const offsetY = (Math.random() - 0.5) * 60;
+        const newX = parentWorm.x + offsetX;
+        const newY = parentWorm.y + offsetY;
 
         newWormElement.style.left = `${newX}px`;
         newWormElement.style.top = `${newY}px`;
@@ -544,48 +571,73 @@ class WormSystem {
 
         this.wormContainer.appendChild(newWormElement);
 
-        // Create new worm data
-        const newWormData = {
+        // Create clone with SAME MISSION as parent
+        const cloneData = {
             id: newWormId,
             element: newWormElement,
             stolenSymbol: null,
             targetElement: null,
+            targetSymbol: parentWorm.targetSymbol, // SAME TARGET as parent!
             x: newX,
             y: newY,
-            velocityX: (Math.random() - 0.5) * 1.5,
+            velocityX: (Math.random() - 0.5) * 2.0,
             velocityY: (Math.random() - 0.5) * 1.0,
             active: true,
             hasStolen: false,
+            isRushingToTarget: parentWorm.isRushingToTarget, // Inherit rushing state
             roamingEndTime: Date.now() + 10000,
             isFlickering: false,
-            baseSpeed: 1.5,
-            currentSpeed: 1.5,
-            fromConsole: false
+            baseSpeed: 2.0,
+            currentSpeed: 2.0,
+            fromConsole: false, // Clones don't return to console
+            crawlPhase: Math.random() * Math.PI * 2,
+            direction: Math.random() * Math.PI * 2
         };
 
-        this.worms.push(newWormData);
+        this.worms.push(cloneData);
 
-        // Add click handler to new worm
+        // Add click handler to new clone
         newWormElement.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.multiplyWorm(newWormData);
+            this.cloneWorm(cloneData);
         });
 
-        // Multiplication effect on both worms
-        wormData.element.classList.add('worm-multiply');
+        // Clone birth effect on both worms
+        parentWorm.element.classList.add('worm-multiply');
         newWormElement.classList.add('worm-multiply');
 
         setTimeout(() => {
-            wormData.element.classList.remove('worm-multiply');
+            parentWorm.element.classList.remove('worm-multiply');
             newWormElement.classList.remove('worm-multiply');
         }, 500);
 
-        console.log(`✅ Worm multiplied! New worm ${newWormId} created. Total worms: ${this.worms.length}`);
+        console.log(`✅ Worm cloned! New clone ${newWormId} targeting same symbol: "${cloneData.targetSymbol || 'any'}". Total worms: ${this.worms.length}`);
 
         // Start animation loop if not already running
         if (!this.animationFrameId) {
             this.animate();
         }
+    }
+
+    explodeWorm(worm) {
+        console.log(`💥 EXPLODING worm ${worm.id} and returning symbol "${worm.stolenSymbol}"!`);
+
+        // Return stolen symbol to its original position
+        if (worm.targetElement) {
+            worm.targetElement.classList.remove('stolen', 'hidden-symbol');
+            worm.targetElement.classList.add('revealed-symbol');
+            worm.targetElement.style.visibility = 'visible';
+            delete worm.targetElement.dataset.stolen;
+
+            console.log(`✅ Symbol "${worm.stolenSymbol}" returned to Panel B`);
+        }
+
+        // Explosion visual effect
+        worm.element.classList.add('worm-clicked');
+
+        setTimeout(() => {
+            this.removeWorm(worm);
+        }, 300);
     }
 
     removeWorm(wormData) {

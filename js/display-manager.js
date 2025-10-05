@@ -147,36 +147,25 @@ class DisplayManager {
             font-weight: bold;
             border-radius: 6px;
             z-index: 9999;
-            opacity: 1;
+            opacity: 0;
+            visibility: hidden;
             transition: opacity 0.3s;
             box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+            pointer-events: none;
         `;
         indicator.textContent = 'DETECTING RESOLUTION...';
         document.body.appendChild(indicator);
 
-        // Fade out after 5 seconds (increased from 3)
-        setTimeout(() => {
-            indicator.style.opacity = '0.5';
-        }, 5000);
-
-        // Show on hover
-        indicator.addEventListener('mouseenter', () => {
-            indicator.style.opacity = '1';
-        });
-        indicator.addEventListener('mouseleave', () => {
-            indicator.style.opacity = '0.5';
-        });
+        // Keep it hidden but functional
+        // Indicator still exists for debugging if needed via console
     }
 
     updateResolutionIndicator(detected) {
         const indicator = document.getElementById('resolution-indicator');
         if (indicator) {
             indicator.textContent = `${detected.name.toUpperCase()} | ${detected.width}x${detected.height} | SCALE: ${Math.round(detected.config.scale * 100)}%`;
-            indicator.style.opacity = '1';
-
-            setTimeout(() => {
-                indicator.style.opacity = '0.5';
-            }, 5000);
+            // Keep hidden - functionality preserved for debugging
+            console.log(`📺 Resolution Indicator: ${indicator.textContent}`);
         }
     } debounce(func, wait) {
         let timeout;

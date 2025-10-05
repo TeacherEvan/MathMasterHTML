@@ -20,6 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const spawnRate = 0.2; // Higher spawn rate for initial population
     const columnWidth = 50;
 
+    // Guaranteed spawn system - ensure all symbols appear every 5 seconds
+    let lastSpawnTime = {};
+    symbols.forEach(sym => {
+        lastSpawnTime[sym] = Date.now() - Math.random() * 2000; // Stagger initial spawns
+    });
+    const GUARANTEED_SPAWN_INTERVAL = 5000; // 5 seconds
+
     let columns = 0;
     let activeSymbols = [];
     let animationRunning = false;
@@ -31,10 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`📏 Container dimensions: ${containerWidth}x${containerHeight}, Columns: ${columns}`);
     }
 
-    function createFallingSymbol(column, isInitialPopulation = false) {
+    function createFallingSymbol(column, isInitialPopulation = false, forcedSymbol = null) {
         const symbol = document.createElement('div');
         symbol.className = 'falling-symbol';
-        symbol.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        symbol.textContent = forcedSymbol || symbols[Math.floor(Math.random() * symbols.length)];
         symbol.style.left = (column * columnWidth + Math.random() * 30) + 'px';
 
         if (isInitialPopulation) {
@@ -52,6 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
             y: isInitialPopulation ? parseFloat(symbol.style.top) : -50,
             symbol: symbol.textContent
         });
+
+        // Update last spawn time for this symbol
+        if (forcedSymbol) {
+            lastSpawnTime[forcedSymbol] = Date.now();
+        }
     }
 
     function populateInitialSymbols() {
@@ -107,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function animateSymbols() {
         const containerHeight = symbolRainContainer.offsetHeight;
+        const currentTime = Date.now();
 
         activeSymbols = activeSymbols.filter(symbolObj => {
             // Check for collision before moving
@@ -123,10 +136,22 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         });
 
+        // Check for symbols that haven't spawned in 5 seconds - GUARANTEE SPAWN
+        symbols.forEach(sym => {
+            if (currentTime - lastSpawnTime[sym] > GUARANTEED_SPAWN_INTERVAL) {
+                // Force spawn this symbol
+                const randomColumn = Math.floor(Math.random() * columns);
+                console.log(`⏰ Forcing spawn of "${sym}" (not seen in 5s)`);
+                createFallingSymbol(randomColumn, false, sym);
+            }
+        });
+
+        // Normal random spawning
         for (let col = 0; col < columns; col++) {
             if (Math.random() < spawnRate) {
                 if (!activeSymbols.some(s => s.column === col && s.y < 100)) {
-                    createFallingSymbol(col);
+                    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                    createFallingSymbol(col, false, randomSymbol);
                 }
             }
         }

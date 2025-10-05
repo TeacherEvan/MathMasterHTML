@@ -267,6 +267,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 span.classList.remove('hidden-symbol');
                 span.classList.add('revealed-symbol');
                 console.log(`✅ Successfully revealed symbol: "${targetSymbol}" in step ${currentStepIndex + 1}`);
+
+                // Dispatch event to notify worms that a RED symbol appeared!
+                document.dispatchEvent(new CustomEvent('symbolRevealed', {
+                    detail: { symbol: targetSymbol, element: span }
+                }));
+
                 return true;
             }
         }
