@@ -215,8 +215,14 @@
 .res-mobile #panel-a {
     order: 1;
     height: auto;
+    min-height: 150px;
+    /* Ensure Panel A is always visible */
     max-height: 25vh;
     /* Limit to 25% of viewport height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 /* First wall */
@@ -229,6 +235,13 @@
     order: 3;
     flex: 1;
     /* Takes remaining space */
+    min-height: 200px;
+    /* Ensure Panel B is always visible */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow-y: auto;
+    /* Allow scrolling if content is too tall */
 }
 
 /* Second wall */
@@ -256,4 +269,49 @@
     /* Positioning will be handled by JavaScript for horizontal movement */
     font-size: 32px;
     /* Larger for mobile visibility */
+}
+
+/* Mobile: Adjust problem container positioning and size */
+.res-mobile #problem-container {
+    position: relative;
+    /* Change from absolute to relative for mobile */
+    top: auto;
+    left: auto;
+    transform: none;
+    font-size: 18px;
+    /* Much larger for mobile readability */
+    margin: 10px auto;
+    padding: 10px;
+    max-width: 90%;
+    word-wrap: break-word;
+}
+
+/* Mobile: Ensure lock display is visible */
+.res-mobile #lock-display {
+    min-height: 100px;
+    /* Ensure lock is visible */
+    flex: 1;
+}
+
+/* Mobile: Solution container visibility */
+.res-mobile #solution-container {
+    font-size: 16px;
+    /* Readable size for mobile */
+    padding: 15px;
+    color: #00ff00;
+    /* Matrix green */
+    line-height: 1.6;
+    min-height: 100px;
+    /* Ensure it takes up space */
+}
+
+/* Mobile: Add subtle backgrounds to distinguish panels */
+.res-mobile #panel-a {
+    background: rgba(0, 20, 0, 0.3);
+    /* Very dark green tint */
+}
+
+.res-mobile #panel-b {
+    background: rgba(0, 10, 0, 0.2);
+    /* Slightly different tint */
 }
