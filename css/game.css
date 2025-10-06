@@ -252,14 +252,15 @@
 /* Panel C - Bottom (Symbol Train) */
 .res-mobile #panel-c {
     order: 5;
-    height: 80px;
-    /* Just enough for one row of symbols */
+    height: 40px;
+    /* Reduced from 80px - half the space */
     overflow: hidden;
 }
 
 /* Symbol rain container becomes horizontal train */
 .res-mobile #symbol-rain-container {
-    height: 80px;
+    height: 40px;
+    /* Match Panel C height */
     display: flex;
     align-items: center;
 }
@@ -267,8 +268,8 @@
 /* Falling symbols become horizontally moving symbols */
 .res-mobile .falling-symbol {
     /* Positioning will be handled by JavaScript for horizontal movement */
-    font-size: 32px;
-    /* Larger for mobile visibility */
+    font-size: 24px;
+    /* Reduced from 32px to fit 40px container */
 }
 
 /* Mobile: Adjust problem container positioning and size */
@@ -314,4 +315,74 @@
 .res-mobile #panel-b {
     background: rgba(0, 10, 0, 0.2);
     /* Slightly different tint */
+}
+
+/* ============================================
+   FORCE LANDSCAPE ORIENTATION ON MOBILE
+   ============================================ */
+
+/* Rotation overlay - shown only in portrait mode */
+#rotation-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    z-index: 999999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #00ff00;
+    font-family: 'Orbitron', monospace;
+    text-align: center;
+    padding: 20px;
+}
+
+#rotation-overlay .rotate-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: rotatePhone 2s ease-in-out infinite;
+}
+
+#rotation-overlay .rotate-text {
+    font-size: 24px;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+@keyframes rotatePhone {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(90deg); }
+}
+
+/* Show overlay ONLY on mobile in portrait mode */
+@media (max-width: 768px) and (orientation: portrait) {
+    #rotation-overlay {
+        display: flex !important;
+    }
+    
+    /* Hide game content in portrait mode */
+    .grid-container {
+        display: none !important;
+    }
+    
+    #back-button {
+        display: none !important;
+    }
+}
+
+/* Landscape mode on mobile - ensure full visibility */
+@media (max-width: 768px) and (orientation: landscape) {
+    .res-mobile #panel-a {
+        min-height: 80px;
+        /* Shorter in landscape */
+        max-height: 20vh;
+    }
+    
+    .res-mobile #panel-b {
+        min-height: 120px;
+        /* More space for solution */
+    }
 }

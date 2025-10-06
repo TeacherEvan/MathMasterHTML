@@ -29,10 +29,11 @@ Implemented comprehensive mobile-responsive layout that transforms the desktop 3
 - **Layout**: Vertical 3-panel (Top → Bottom)
 - **Panel A**: Top (25% viewport height) - Problem & Lock
 - **Panel B**: Middle (flexible height) - Solution & Worms only
-- **Panel C**: Bottom (80px height) - Horizontal symbol train (right → left)
+- **Panel C**: Bottom (40px height) - Horizontal symbol train (right → left)
 - **Console**: Completely hidden (display: none)
 - **Worms**: Max 3, spawn from left edge of Panel B
 - **Symbol Spawn**: All symbols guaranteed every 10 seconds
+- **Orientation**: **LANDSCAPE ONLY** - Portrait mode shows "rotate device" overlay
 
 ---
 
@@ -184,6 +185,39 @@ Implemented comprehensive mobile-responsive layout that transforms the desktop 3
 
 ---
 
+## 🔄 Forced Landscape Orientation
+
+### Why Landscape Only?
+
+Mobile gameplay **requires landscape orientation** for optimal experience:
+- **Panel B visibility**: Portrait mode collapses solution area
+- **Symbol train**: Horizontal movement needs width
+- **Lock display**: Better visibility in landscape
+- **Touch targets**: Easier to click symbols in landscape
+
+### Implementation
+
+**Portrait Mode Detection**:
+```css
+@media (max-width: 768px) and (orientation: portrait) {
+    #rotation-overlay { display: flex !important; }
+    .grid-container { display: none !important; }
+}
+```
+
+**Rotation Overlay**:
+- Full-screen black background with Matrix green text
+- Rotating phone icon (📱➡️) animation
+- Message: "Please rotate your device to landscape mode"
+- Z-index 999999 to cover all game content
+
+**Landscape Adjustments**:
+- Panel A: `min-height: 80px`, `max-height: 20vh`
+- Panel B: `min-height: 120px` for solution visibility
+- Panel C: `height: 40px` for compact symbol train
+
+---
+
 ## 🎮 Gameplay Differences
 
 | Feature | Desktop | Mobile |
@@ -195,8 +229,9 @@ Implemented comprehensive mobile-responsive layout that transforms the desktop 3
 | **Console** | Active (9 slots) | Hidden |
 | **Max Worms** | 7 | 3 |
 | **Worm Spawn** | From empty console slots | From left edge |
-| **Panel C Height** | Full height | 80px (one row) |
-| **Panel A Height** | Full height | Max 25vh |
+| **Panel C Height** | Full height | 40px (compact row) |
+| **Panel A Height** | Full height | Max 25vh (20vh landscape) |
+| **Orientation** | Any | **Landscape ONLY** |
 
 ---
 
