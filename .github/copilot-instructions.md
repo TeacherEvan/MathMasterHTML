@@ -180,6 +180,200 @@ Resolutions: '4k' (≥2560px) → '1440p' (≥1920px) → '1080p' (≥1280px) �
 - Body Class: `res-{resolution}` applied for resolution-specific styling
 - **Event Dispatch**: `displayResolutionChanged` event with resolution details
 
+## CRITICAL: JavaScript Inline Style Override System
+
+### ⚠️ THE OVERRIDE HIERARCHY PROBLEM ⚠️
+
+**Why CSS Changes to Panel A & B Don't Work**: The game uses **THREE separate JavaScript systems** that apply inline styles, which override CSS rules due to CSS specificity:
+
+1. **display-manager.js** (Primary Font Controller)
+2. **lock-responsive.js** (Lock Scaling Controller)  
+3. **Dynamic Style Injection** (Symbol rain sizing)
+
+### Inline Style Override Behavior
+
+**CSS Specificity Rule**: Inline styles (`element.style.property = value`) ALWAYS win over CSS rules, even `!important` rules in some cases.
+
+**Result**: Any changes you make to CSS files for mobile Panel A/B will be **immediately overridden** when:
+- Page loads (initial `detectAndApply()`)
+- Window resizes (debounced resize listeners)
+- Orientation changes (mobile rotation)
+- Display resolution changes (custom events)
+
+### Display Manager Overrides (js/display-manager.js)
+
+**Panel B - Solution Container**:
+```javascript
+// Lines 95-102: OVERRIDES CSS font-size
+if (isMobile) {
+    solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.6)`; // 60% multiplier
+} else {
+    solutionContainer.style.fontSize = config.fontSize;
+}
+```
+
+**Panel A - Problem Container**:
+```javascript
+// Lines 106-113: OVERRIDES CSS font-size
+if (isMobile) {
+    problemContainer.style.fontSize = `calc(${config.fontSize} * 0.55)`; // 55% multiplier
+} else {
+    problemContainer.style.fontSize = config.fontSize;
+}
+```
+
+**Symbol Rain (Panel C)**:
+```javascript
+// Lines 135-153: INJECTS dynamic <style> tag with !important
+const symbolMultiplier = isMobile ? 1.8 : 1.2;
+style.textContent = `
+    .falling-symbol {
+        font-size: calc(${config.fontSize} * ${symbolMultiplier}) !important;
+    }
+`;
+```
+
+### Lock Responsive Manager Overrides (js/lock-responsive.js)
+
+**Panel A - Lock Display Container**:
+```javascript
+// Lines 133-143: OVERRIDES CSS transform, max-width, max-height
+lockDisplay.style.setProperty('--lock-scale', scale);
+lockDisplay.style.maxWidth = `${scaledWidth}px`;
+lockDisplay.style.maxHeight = `${scaledHeight}px`;
+lockDisplay.style.marginTop = ''; // Removes CSS margin
+```
+
+**Lock Containers**:
+```javascript
+// Lines 146-151: OVERRIDES CSS transform for ALL .lock-container elements
+container.style.transform = `scale(${containerScale})`;
+container.style.transformOrigin = 'center center';
+container.style.marginTop = ''; // Removes CSS margin
+```
+
+**Lock Bodies**:
+```javascript
+// Lines 154-158: OVERRIDES CSS transform for ALL .lock-body elements
+body.style.transform = `scale(${bodyScale})`;
+body.style.transformOrigin = 'center center';
+```
+
+### How to Make Changes That Actually Work
+
+#### ❌ WRONG APPROACH (Will be overridden):
+```css
+/* game.css - THIS WILL NOT WORK */
+.res-mobile #panel-a {
+    font-size: 12px; /* Overridden by display-manager.js */
+}
+
+.res-mobile #problem-container {
+    font-size: 10px; /* Overridden by display-manager.js line 108 */
+    top: 80px; /* THIS WORKS - not overridden */
+}
+
+.res-mobile #solution-container {
+    font-size: 14px; /* Overridden by display-manager.js line 97 */
+    margin-bottom: 70px; /* THIS WORKS - not overridden */
+}
+
+#lock-display {
+    transform: scale(1.5); /* Overridden by lock-responsive.js line 134 */
+    max-width: 400px; /* Overridden by lock-responsive.js line 141 */
+}
+```
+
+#### ✅ CORRECT APPROACH:
+
+**For Font Sizes (Panel A & B)**:
+1. Edit `js/display-manager.js`
+2. Modify the multiplier values in `applyFontSizes()` method:
+
+```javascript
+// Lines 95-113 in display-manager.js
+if (isMobile) {
+    solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.6)`; // Change multiplier here
+    problemContainer.style.fontSize = `calc(${config.fontSize} * 0.55)`; // Change multiplier here
+}
+```
+
+**For Lock Scaling (Panel A)**:
+1. Edit `js/lock-responsive.js`
+2. Modify scale calculations in `calculateOptimalScale()` or `resolutionBreakpoints`:
+
+```javascript
+// Lines 13-18 in lock-responsive.js
+this.resolutionBreakpoints = {
+    'mobile': { width: 768, height: 1024, scale: 0.5 } // Change scale here
+};
+```
+
+**For CSS Properties NOT Overridden**:
+These CSS properties are safe to change because JavaScript doesn't touch them:
+- `position`, `top`, `left`, `right`, `bottom`
+- `margin` (except where explicitly cleared by JS)
+- `padding`
+- `color`, `background`, `border`
+- `animation`, `transition`
+- `display`, `flex-direction`, `justify-content`, `align-items`
+- `z-index`, `opacity`, `visibility`
+- `letter-spacing`, `line-height`, `white-space`
+
+### Testing Your Changes
+
+**After modifying JavaScript files**:
+1. Hard refresh browser: `Ctrl+Shift+R` (Windows) or `Cmd+Shift+R` (Mac)
+2. Open DevTools Console (`F12`)
+3. Check for emoji-prefixed logs:
+   - `🖥️` = Display Manager activity
+   - `🔧` = Lock Responsive Manager activity
+4. Inspect element and verify inline styles are what you expect
+
+**After modifying CSS files**:
+1. Check if the property you changed appears in the element's `element.style` (inline)
+2. If YES → Your CSS change will be overridden → Modify JavaScript instead
+3. If NO → Your CSS change will work → Continue editing CSS
+
+### Known Override Conflicts
+
+| Panel | Element | CSS Property | Overridden By | Solution |
+|-------|---------|--------------|---------------|----------|
+| A | `#problem-container` | `font-size` | display-manager.js L108 | Edit multiplier in JS |
+| A | `#lock-display` | `transform`, `max-width/height` | lock-responsive.js L134-141 | Edit scale in JS |
+| A | `.lock-container` | `transform`, `transform-origin` | lock-responsive.js L148-149 | Edit scale in JS |
+| A | `.lock-body` | `transform` | lock-responsive.js L156 | Edit bodyScale in JS |
+| B | `#solution-container` | `font-size` | display-manager.js L97 | Edit multiplier in JS |
+| B | `.worm-container` | None (safe) | - | Edit CSS freely |
+| B | `#symbol-console` | None (safe) | - | Edit CSS freely |
+| C | `.falling-symbol` | `font-size` | display-manager.js L145 (!important) | Edit symbolMultiplier in JS |
+
+### Resolution Detection Flow
+
+```
+Page Load / Resize / Orientation Change
+    ↓
+DisplayManager.detectAndApply()
+    ↓
+Applies inline styles to #problem-container, #solution-container
+Injects <style> tag with .falling-symbol rules
+    ↓
+LockResponsiveManager.detectAndScale()
+    ↓
+Applies inline styles to #lock-display, .lock-container, .lock-body
+    ↓
+CSS rules are evaluated LAST (but overridden by inline styles)
+```
+
+### Debug Checklist: "My Changes Don't Work"
+
+1. ✅ **Check if property is in inline styles**: Inspect element → Look for `element.style.propertyName`
+2. ✅ **Search JavaScript for `.style.propertyName =`**: grep for the property in `js/*.js`
+3. ✅ **Check for dynamic `<style>` injection**: Look for `createElement('style')` in JS
+4. ✅ **Verify `res-mobile` class exists**: Console: `document.body.classList.contains('res-mobile')`
+5. ✅ **Check console logs**: Look for `🖥️` and `🔧` emoji logs showing what values are applied
+6. ✅ **Hard refresh**: `Ctrl+Shift+R` to ensure no cached JS/CSS
+
 **CRITICAL: Font Size Override Behavior**:
 - `display-manager.js` applies **inline styles** that override CSS rules
 - Mobile font sizes are calculated as: `calc(baseFontSize * multiplier)`
