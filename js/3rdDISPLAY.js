@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const symbolWidth = 30;
             const collisionBuffer = 40; // Increased from 25 to spread symbols more
             const horizontalBuffer = 35; // Increased from 20 for better horizontal spacing
-            
+
             // Cache element position to avoid repeated style access
             const symbolLeft = symbolObj.x;
             const symbolRight = symbolLeft + symbolWidth;
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         break; // Early exit optimization
                     }
                 }
-                
+
                 if (!columnCrowded) {
                     const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
                     createFallingSymbol(col, false, randomSymbol);
