@@ -91,28 +91,28 @@ class DisplayManager {
 
         console.log(`📱 Mobile mode: ${isMobile ? 'YES' : 'NO'}`);
 
-        // Solution container - DECREASE to 45% on mobile for better vertical fit
+        // Solution container - DECREASE to 36% on mobile for better vertical fit (20% smaller)
         const solutionContainer = document.getElementById('solution-container');
         if (solutionContainer) {
             if (isMobile) {
-                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.45)`;
+                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.36)`;
                 solutionContainer.style.lineHeight = '1.2';
-                console.log(`📱 Solution container font reduced to 45% for horizontal layout`);
+                console.log(`📱 Solution container font reduced to 36% for horizontal layout`);
             } else {
-                solutionContainer.style.fontSize = config.fontSize;
+                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.8)`;
                 solutionContainer.style.lineHeight = '1.4';
             }
         }
 
-        // Problem container - DECREASE to 40% on mobile to prevent edge cutoff
+        // Problem container - DECREASE to 32% on mobile to prevent edge cutoff (20% smaller)
         const problemContainer = document.getElementById('problem-container');
         if (problemContainer) {
             if (isMobile) {
-                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.40)`;
+                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.32)`;
                 problemContainer.style.letterSpacing = '1px';
-                console.log(`📱 Problem container font reduced to 40% for horizontal layout`);
+                console.log(`📱 Problem container font reduced to 32% for horizontal layout`);
             } else {
-                problemContainer.style.fontSize = config.fontSize;
+                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.8)`;
                 problemContainer.style.letterSpacing = '2px';
             }
         }

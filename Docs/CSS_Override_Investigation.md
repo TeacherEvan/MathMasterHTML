@@ -23,6 +23,7 @@ These changes are **completely ignored** because JavaScript applies inline style
 ## The CSS Specificity Problem
 
 ### CSS Specificity Hierarchy (Lowest to Highest)
+
 1. ~~External stylesheet~~ (overridden by inline)
 2. ~~Internal `<style>` tags~~ (overridden by inline)
 3. ~~CSS rules with selectors~~ (overridden by inline)
@@ -32,16 +33,19 @@ These changes are **completely ignored** because JavaScript applies inline style
 ### Why Inline Styles Win
 
 When JavaScript executes:
+
 ```javascript
 element.style.fontSize = '12px';
 ```
 
 This creates an inline style attribute:
+
 ```html
 <div id="problem-container" style="font-size: 12px;">...</div>
 ```
 
 This inline style has **higher specificity** than ANY CSS rule, including:
+
 - `.res-mobile #problem-container { font-size: 20px; }`
 - `#problem-container { font-size: 20px !important; }` (usually)
 - Any combination of selectors
@@ -51,11 +55,13 @@ This inline style has **higher specificity** than ANY CSS rule, including:
 ### 1. Display Manager (js/display-manager.js)
 
 **Applies Inline Styles To**:
+
 - `#problem-container` - Line 110
 - `#solution-container` - Line 98
 - `.falling-symbol` - Line 152 (via injected `<style>` with `!important`)
 
 **Current Mobile Multipliers**:
+
 ```javascript
 // Line 98: Solution container = 45% of base font
 solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.45)`;
@@ -74,6 +80,7 @@ style.textContent = `
 ```
 
 **Trigger Events**:
+
 - Page load
 - Window resize (300ms debounce)
 - Orientation change (mobile rotation)
@@ -82,11 +89,13 @@ style.textContent = `
 ### 2. Lock Responsive Manager (js/lock-responsive.js)
 
 **Applies Inline Styles To**:
+
 - `#lock-display` - Lines 134-141
 - `.lock-container` - Lines 146-151
 - `.lock-body` - Lines 154-158
 
 **What It Overrides**:
+
 ```javascript
 // Line 134-141: Lock display container
 lockDisplay.style.setProperty('--lock-scale', scale);
@@ -105,6 +114,7 @@ body.style.transformOrigin = 'center center';
 ```
 
 **Trigger Events**:
+
 - Page load
 - Window resize (300ms debounce)
 - Orientation change
@@ -113,6 +123,7 @@ body.style.transformOrigin = 'center center';
 ### 3. Dynamic Style Injection (display-manager.js)
 
 **Creates Dynamic `<style>` Tag**:
+
 ```javascript
 // Lines 138-157
 const style = document.createElement('style');
@@ -193,6 +204,7 @@ const symbolMultiplier = isMobile ? 1.8 : 1.2; // Change 1.8 for mobile, 1.2 for
 These CSS properties are safe to change because JavaScript doesn't touch them:
 
 **Safe for Panel A & B**:
+
 - `position`, `top`, `left`, `right`, `bottom`
 - `margin` (except where explicitly cleared by `element.style.marginTop = ''`)
 - `padding`
@@ -203,6 +215,7 @@ These CSS properties are safe to change because JavaScript doesn't touch them:
 - `white-space`, `overflow`
 
 **Example - These CSS Changes WILL Work**:
+
 ```css
 .res-mobile #problem-container {
     top: 80px; /* ✅ WORKS */
@@ -243,6 +256,7 @@ These CSS properties are safe to change because JavaScript doesn't touch them:
 ### Step 2: Find the Override Source
 
 **Search Pattern**:
+
 ```javascript
 // In VS Code, search for:
 element.style.fontSize
@@ -252,6 +266,7 @@ element.style.maxWidth
 
 **Console Logging**:
 Look for emoji-prefixed logs:
+
 - `🖥️` = Display Manager activity
 - `🔧` = Lock Responsive Manager activity
 - `📱` = Mobile-specific logging
@@ -294,11 +309,13 @@ CSS rules evaluated LAST (but overridden by inline styles)
 **Base Font Size**: `14px` (from resolutions.mobile.fontSize)
 
 **Calculated Mobile Font Sizes**:
+
 - Problem container: `calc(14px * 0.40)` = **5.6px**
 - Solution container: `calc(14px * 0.45)` = **6.3px**
 - Falling symbols: `calc(14px * 1.8)` = **25.2px**
 
 **Lock Scaling**:
+
 - Mobile base scale: `0.5`
 - Container scale: `0.5 * 0.9` = **0.45**
 - Body scale: `0.5 * 0.8` = **0.40**
