@@ -178,8 +178,22 @@ Resolutions: '4k' (≥2560px) → '1440p' (≥1920px) → '1080p' (≥1280px) �
 **Dynamic Scaling**:
 - CSS Variables: `--display-scale`, `--display-font-size`, `--viewport-width/height`
 - Body Class: `res-{resolution}` applied for resolution-specific styling
-- **Mobile Adjustment**: Solution container font reduced to 75% for horizontal layout
 - **Event Dispatch**: `displayResolutionChanged` event with resolution details
+
+**CRITICAL: Font Size Override Behavior**:
+- `display-manager.js` applies **inline styles** that override CSS rules
+- Mobile font sizes are calculated as: `calc(baseFontSize * multiplier)`
+- Problem container: 55% of base font (0.55 multiplier) on mobile
+- Solution container: 60% of base font (0.6 multiplier) on mobile
+- **Always modify `display-manager.js` for mobile font changes, NOT just CSS**
+- CSS changes alone will be overridden by JavaScript inline styles
+
+**Lock Sizing System**:
+- Lock components are scaled via `css/lock-responsive.css`
+- Base scale: 1.8x for desktop, 0.8x for mobile landscape
+- **NEVER set scale above 2.0** - causes overflow in Panel A
+- Responsive breakpoints: 1920px → 1440px → 1200px → 800px → mobile
+- Mobile class `.res-mobile` applies additional scale reduction
 
 ## Styling Conventions
 
@@ -196,6 +210,9 @@ Resolutions: '4k' (≥2560px) → '1440p' (≥1920px) → '1080p' (≥1280px) �
 3. **Worms Floating**: Ensure no CSS `transition` or `animation` on `.worm-container`
 4. **Component Not Loading**: Check `lock-components/` path and filename case-sensitivity
 5. **Multiple Clicks Required**: Symbol detection likely missing case normalization
+6. **Mobile Font Changes Not Working**: Check `display-manager.js` - it applies inline styles that override CSS
+7. **Lock Overflow in Panel A**: Check `lock-responsive.css` - scale should be ≤2.0 for desktop, ≤0.8 for mobile
+8. **CSS Changes Ignored**: Inline styles from JavaScript take precedence - check display-manager.js and lock-responsive.js
 
 ## Development Workflow
 

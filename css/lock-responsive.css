@@ -20,8 +20,8 @@
 
 /* Responsive scaling for lock containers */
 .lock-component-wrapper .lock-container {
-    transform: scale(4.00) !important;
-    /* Further increased to enlarge all locks */
+    transform: scale(1.8) !important;
+    /* Reduced from 4.00 to fit properly in panel */
     transform-origin: center center !important;
     width: auto !important;
     height: auto !important;
@@ -58,29 +58,35 @@
     transform-origin: center;
 }
 
-/* Responsive animations - maintain larger scale for side display */
+/* Responsive animations - maintain appropriate scale for different screen sizes */
 @media screen and (max-width: 1920px) {
     .lock-component-wrapper .lock-container {
-        transform: scale(4.00) !important;
+        transform: scale(1.6) !important;
     }
 }
 
 @media screen and (max-width: 1440px) {
     .lock-component-wrapper .lock-container {
-        transform: scale(3.80) !important;
+        transform: scale(1.4) !important;
     }
 }
 
 @media screen and (max-width: 1200px) {
     .lock-component-wrapper .lock-container {
-        transform: scale(3.40) !important;
+        transform: scale(1.2) !important;
     }
 }
 
 @media screen and (max-width: 800px) {
     .lock-component-wrapper .lock-container {
-        transform: scale(3.20) !important;
+        transform: scale(0.9) !important;
     }
+}
+
+/* Mobile landscape mode - specific optimization */
+.res-mobile .lock-component-wrapper .lock-container {
+    transform: scale(0.8) !important;
+    /* Even smaller for mobile landscape */
 }
 
 /* Make sure all lock component styles are contained */

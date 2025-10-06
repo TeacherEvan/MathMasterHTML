@@ -91,23 +91,23 @@ class DisplayManager {
 
         console.log(`📱 Mobile mode: ${isMobile ? 'YES' : 'NO'}`);
 
-        // Solution container - DECREASE to 75% on mobile so text fits horizontally
+        // Solution container - DECREASE to 60% on mobile (reduced from 75% for better fit)
         const solutionContainer = document.getElementById('solution-container');
         if (solutionContainer) {
             if (isMobile) {
-                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.75)`;
-                console.log(`📱 Solution container font reduced to 75% for horizontal layout`);
+                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.6)`;
+                console.log(`📱 Solution container font reduced to 60% for horizontal layout`);
             } else {
                 solutionContainer.style.fontSize = config.fontSize;
             }
         }
 
-        // Problem container - DECREASE to 75% on mobile so text fits horizontally
+        // Problem container - DECREASE to 55% on mobile (reduced from 75% for better fit)
         const problemContainer = document.getElementById('problem-container');
         if (problemContainer) {
             if (isMobile) {
-                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.75)`;
-                console.log(`📱 Problem container font reduced to 75% for horizontal layout`);
+                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.55)`;
+                console.log(`📱 Problem container font reduced to 55% for horizontal layout`);
             } else {
                 problemContainer.style.fontSize = config.fontSize;
             }
