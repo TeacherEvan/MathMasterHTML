@@ -10,7 +10,7 @@ Educational math game with Matrix-themed UI where players solve algebra problems
 JavaScript applies inline styles that override CSS rules. To change mobile font sizes:
 1. Edit `js/display-manager.js` - NOT `css/game.css`
 2. Modify multiplier values in `applyFontSizes()` method (lines 95-118)
-3. Current values: Problem=0.40 (40%), Solution=0.45 (45%)
+3. Current values: Problem=0.32 (32%), Solution=0.36 (36%) on mobile, and 0.8 (80%) on desktop.
 
 See `Docs/CSS_Override_Investigation.md` for complete details.
 
@@ -404,10 +404,10 @@ CSS rules are evaluated LAST (but overridden by inline styles)
 - CSS changes alone will be overridden by JavaScript inline styles
 
 **Lock Sizing System**:
-- Lock components are scaled via `css/lock-responsive.css`
-- Base scale: 1.8x for desktop, 0.8x for mobile landscape
+- Lock components are scaled via `js/lock-responsive.js`
+- Base scale: 1.5x for 4k, 1.3x for 1440p, 1.1x for 1080p, 0.9x for 720p, and 0.8x for mobile.
 - **NEVER set scale above 2.0** - causes overflow in Panel A
-- Responsive breakpoints: 1920px → 1440px → 1200px → 800px → mobile
+- Responsive breakpoints: 3840px → 2560px → 1920px → 1280px → 768px
 - Mobile class `.res-mobile` applies additional scale reduction
 
 ## Styling Conventions

@@ -7,16 +7,16 @@ class LockResponsiveManager {
         this.baseWidth = 300;  // Base lock container width
         this.baseHeight = 350; // Base lock container height
         this.minScale = 0.3;   // Minimum scale factor
-        this.maxScale = 1.2;   // Maximum scale factor
+        this.maxScale = 1.8;   // Maximum scale factor
         this.isInitialized = false;
 
         // Resolution breakpoints for different scaling
         this.resolutionBreakpoints = {
-            '4k': { width: 3840, height: 2160, scale: 1.2 },
-            '1440p': { width: 2560, height: 1440, scale: 1.0 },
-            '1080p': { width: 1920, height: 1080, scale: 0.8 },
-            '720p': { width: 1280, height: 720, scale: 0.6 },
-            'mobile': { width: 768, height: 1024, scale: 0.5 }
+            '4k': { width: 3840, height: 2160, scale: 1.5 },
+            '1440p': { width: 2560, height: 1440, scale: 1.3 },
+            '1080p': { width: 1920, height: 1080, scale: 1.1 },
+            '720p': { width: 1280, height: 720, scale: 0.9 },
+            'mobile': { width: 768, height: 1024, scale: 0.8 }
         };
 
         this.init();
