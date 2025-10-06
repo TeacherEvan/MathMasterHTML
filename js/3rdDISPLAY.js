@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const symbols = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X', 'x', '+', '-', '=', '÷', '×'];
 
+    // Mobile mode detection
+    let isMobileMode = window.innerWidth <= 768 || document.body.classList.contains('res-mobile');
+
     // Configuration
     let symbolFallSpeed = 0.6;
     const maxFallSpeed = 6;
@@ -203,6 +206,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('resize', () => {
         console.log('🔄 Window resized, recalculating columns...');
+        isMobileMode = window.innerWidth <= 768 || document.body.classList.contains('res-mobile');
+        console.log(`📱 Mobile mode: ${isMobileMode}`);
         calculateColumns();
+    });
+
+    // Listen for display resolution changes
+    document.addEventListener('displayResolutionChanged', (event) => {
+        const isMobile = event.detail.name === 'mobile';
+        isMobileMode = isMobile;
+        console.log(`🖥️ Display resolution changed to: ${event.detail.name}, isMobileMode: ${isMobileMode}`);
     });
 });

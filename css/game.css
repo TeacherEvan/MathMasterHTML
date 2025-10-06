@@ -228,10 +228,16 @@
 }
 
 .res-mobile #problem-container {
-    font-size: 14px;
-    /* Readable on mobile landscape */
+    font-size: 10px;
+    /* Smaller font for better horizontal alignment of red symbols */
     top: 60px;
     /* Adjust position */
+    white-space: nowrap;
+    /* Keep symbols on same line */
+    overflow: visible;
+    /* Allow overflow if needed */
+    letter-spacing: 1px;
+    /* Add spacing between symbols for neat alignment */
 }
 
 .res-mobile #lock-display {
@@ -247,30 +253,48 @@
 }
 
 .res-mobile #solution-container {
-    font-size: 14px;
-    /* Smaller solution text */
-    line-height: 1.4;
+    font-size: 11px;
+    /* Smaller solution text to fit better */
+    line-height: 1.3;
+    /* Tighter line spacing */
+    margin-bottom: 60px;
+    /* Space for horizontal console */
 }
 
 .res-mobile #symbol-console {
-    bottom: 10px;
+    bottom: 5px;
     /* Closer to bottom */
-    padding: 8px;
-    /* Less padding */
-    gap: 5px;
-    /* Tighter spacing */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 10px;
+    /* Horizontal padding */
+    gap: 4px;
+    /* Tight horizontal spacing */
+    display: flex;
+    /* Change to horizontal flexbox */
+    flex-direction: row;
+    /* Single row layout */
+    flex-wrap: nowrap;
+    /* Keep all in one row */
+    overflow-x: auto;
+    /* Allow horizontal scroll if needed */
+    max-width: 95%;
+    /* Don't overflow panel width */
 }
 
 .res-mobile .console-slot {
-    width: 35px;
-    /* Smaller console buttons */
-    height: 35px;
-    font-size: 18px;
+    width: 32px;
+    /* Smaller console buttons for horizontal layout */
+    height: 32px;
+    font-size: 16px;
+    flex-shrink: 0;
+    /* Prevent shrinking */
 }
 
 /* Panel C - Symbol Rain (scaled) */
 .res-mobile #panel-c {
     /* Keep full height for vertical falling symbols */
+    height: 100vh;
 }
 
 .res-mobile .falling-symbol {

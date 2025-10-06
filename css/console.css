@@ -418,3 +418,11 @@
         opacity: 1;
     }
 }
+/* Mobile-specific console adjustments for horizontal layout */
+.res-mobile #symbol-console {
+    /* Override grid to flexbox on mobile */
+    display: flex !important;
+    flex-direction: row !important;
+    grid-template-columns: none;
+    grid-template-rows: none;
+}
