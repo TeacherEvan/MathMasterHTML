@@ -314,8 +314,15 @@
 }
 
 @keyframes rotatePhone {
-    0%, 100% { transform: rotate(0deg); }
-    50% { transform: rotate(90deg); }
+
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(90deg);
+    }
 }
 
 /* Show overlay ONLY on mobile in portrait mode */
@@ -323,12 +330,12 @@
     #rotation-overlay {
         display: flex !important;
     }
-    
+
     /* Hide game content in portrait mode */
     .grid-container {
         display: none !important;
     }
-    
+
     #back-button {
         display: none !important;
     }
@@ -341,7 +348,7 @@
         /* Shorter in landscape */
         max-height: 20vh;
     }
-    
+
     .res-mobile #panel-b {
         min-height: 120px;
         /* More space for solution */

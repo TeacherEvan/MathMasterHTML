@@ -190,6 +190,7 @@ Implemented comprehensive mobile-responsive layout that transforms the desktop 3
 ### Why Landscape Only?
 
 Mobile gameplay **requires landscape orientation** for optimal experience:
+
 - **Panel B visibility**: Portrait mode collapses solution area
 - **Symbol train**: Horizontal movement needs width
 - **Lock display**: Better visibility in landscape
@@ -198,6 +199,7 @@ Mobile gameplay **requires landscape orientation** for optimal experience:
 ### Implementation
 
 **Portrait Mode Detection**:
+
 ```css
 @media (max-width: 768px) and (orientation: portrait) {
     #rotation-overlay { display: flex !important; }
@@ -206,12 +208,14 @@ Mobile gameplay **requires landscape orientation** for optimal experience:
 ```
 
 **Rotation Overlay**:
+
 - Full-screen black background with Matrix green text
 - Rotating phone icon (📱➡️) animation
 - Message: "Please rotate your device to landscape mode"
 - Z-index 999999 to cover all game content
 
 **Landscape Adjustments**:
+
 - Panel A: `min-height: 80px`, `max-height: 20vh`
 - Panel B: `min-height: 120px` for solution visibility
 - Panel C: `height: 40px` for compact symbol train
