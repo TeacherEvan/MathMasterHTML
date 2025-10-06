@@ -109,18 +109,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return false;
         } else {
-            // Desktop: Check vertical collision
+            // Desktop: Check vertical collision with increased spacing
             const symbolHeight = 30;
             const symbolWidth = 30;
-            const collisionBuffer = 25;
-            const horizontalBuffer = 20;
-            const symbolLeft = parseFloat(symbolObj.element.style.left);
+            const collisionBuffer = 40; // Increased from 25 to spread symbols more
+            const horizontalBuffer = 35; // Increased from 20 for better horizontal spacing
+            
+            // Cache element position to avoid repeated style access
+            const symbolLeft = symbolObj.x;
             const symbolRight = symbolLeft + symbolWidth;
 
             for (let other of activeSymbols) {
                 if (other === symbolObj) continue;
 
-                const otherLeft = parseFloat(other.element.style.left);
+                // Use cached positions instead of parsing style
+                const otherLeft = other.x;
                 const otherRight = otherLeft + symbolWidth;
 
                 const horizontalOverlap = !(symbolRight + horizontalBuffer < otherLeft || symbolLeft > otherRight + horizontalBuffer);
@@ -140,16 +143,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const containerHeight = symbolRainContainer.offsetHeight;
         const currentTime = Date.now();
 
+        // Use filter for cleanup and update positions in single pass
         activeSymbols = activeSymbols.filter(symbolObj => {
+            // Check if symbol should be removed (out of bounds)
+            if (symbolObj.y > containerHeight + 50) {
+                symbolObj.element.remove();
+                return false;
+            }
+
+            // Update position only if not colliding
             if (!checkCollision(symbolObj)) {
                 symbolObj.y += symbolFallSpeed;
                 symbolObj.element.style.top = `${symbolObj.y}px`;
             }
 
-            if (symbolObj.y > containerHeight + 50) {
-                symbolObj.element.remove();
-                return false;
-            }
             return true;
         });
 
@@ -157,15 +164,23 @@ document.addEventListener('DOMContentLoaded', () => {
         symbols.forEach(sym => {
             if (currentTime - lastSpawnTime[sym] > GUARANTEED_SPAWN_INTERVAL) {
                 const randomColumn = Math.floor(Math.random() * columns);
-                console.log(`⏰ Forcing spawn of "${sym}" (not seen in 5s)`);
                 createFallingSymbol(randomColumn, false, sym);
             }
         });
 
-        // Normal random spawning
+        // Normal random spawning - optimized to reduce array iterations
         for (let col = 0; col < columns; col++) {
             if (Math.random() < spawnRate) {
-                if (!activeSymbols.some(s => s.column === col && s.y < 100)) {
+                // Quick check: only spawn if column isn't crowded at top
+                let columnCrowded = false;
+                for (let i = 0; i < activeSymbols.length; i++) {
+                    if (activeSymbols[i].column === col && activeSymbols[i].y < 100) {
+                        columnCrowded = true;
+                        break; // Early exit optimization
+                    }
+                }
+                
+                if (!columnCrowded) {
                     const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
                     createFallingSymbol(col, false, randomSymbol);
                 }

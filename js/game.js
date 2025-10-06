@@ -483,11 +483,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 300);
 
                 console.log(`✅ Symbol "${clicked}" successfully restored!`);
-                
+
                 // CRITICAL FIX: Check if line is complete after restoration
                 console.log(`🔍 Checking line completion after restoration...`);
                 checkLineCompletion();
-                
+
                 break;
             }
         }

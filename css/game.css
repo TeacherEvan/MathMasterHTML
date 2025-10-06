@@ -228,8 +228,8 @@
 }
 
 .res-mobile #problem-container {
-    font-size: 10px;
-    /* Smaller font for better horizontal alignment of red symbols */
+    font-size: 8px;
+    /* Reduced by 20% from 10px for better fit */
     top: 60px;
     /* Adjust position */
     white-space: nowrap;
@@ -253,8 +253,8 @@
 }
 
 .res-mobile #solution-container {
-    font-size: 11px;
-    /* Smaller solution text to fit better */
+    font-size: 9px;
+    /* Reduced by 20% from 11px for better fit */
     line-height: 1.3;
     /* Tighter line spacing */
     margin-bottom: 60px;
