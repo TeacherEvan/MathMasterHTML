@@ -3,6 +3,17 @@
 ## Project Overview
 Educational math game with Matrix-themed UI where players solve algebra problems by clicking falling symbols. Features progressive lock animations, adversarial worm mechanics, and a quick-access symbol console.
 
+## ⚠️ CRITICAL: CSS Override Warning
+
+**Panel A & B font sizes CANNOT be changed via CSS alone!**
+
+JavaScript applies inline styles that override CSS rules. To change mobile font sizes:
+1. Edit `js/display-manager.js` - NOT `css/game.css`
+2. Modify multiplier values in `applyFontSizes()` method (lines 95-118)
+3. Current values: Problem=0.40 (40%), Solution=0.45 (45%)
+
+See `Docs/CSS_Override_Investigation.md` for complete details.
+
 ## Architecture: Three-Panel System
 
 ### Panel A (Left): Problem Display & Lock Animation
@@ -204,21 +215,25 @@ Resolutions: '4k' (≥2560px) → '1440p' (≥1920px) → '1080p' (≥1280px) �
 
 **Panel B - Solution Container**:
 ```javascript
-// Lines 95-102: OVERRIDES CSS font-size
+// Lines 95-105: OVERRIDES CSS font-size
 if (isMobile) {
-    solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.6)`; // 60% multiplier
+    solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.45)`; // 45% multiplier
+    solutionContainer.style.lineHeight = '1.2';
 } else {
     solutionContainer.style.fontSize = config.fontSize;
+    solutionContainer.style.lineHeight = '1.4';
 }
 ```
 
 **Panel A - Problem Container**:
 ```javascript
-// Lines 106-113: OVERRIDES CSS font-size
+// Lines 108-118: OVERRIDES CSS font-size
 if (isMobile) {
-    problemContainer.style.fontSize = `calc(${config.fontSize} * 0.55)`; // 55% multiplier
+    problemContainer.style.fontSize = `calc(${config.fontSize} * 0.40)`; // 40% multiplier
+    problemContainer.style.letterSpacing = '1px';
 } else {
     problemContainer.style.fontSize = config.fontSize;
+    problemContainer.style.letterSpacing = '2px';
 }
 ```
 
@@ -288,13 +303,19 @@ body.style.transformOrigin = 'center center';
 
 **For Font Sizes (Panel A & B)**:
 1. Edit `js/display-manager.js`
-2. Modify the multiplier values in `applyFontSizes()` method:
+2. Modify the multiplier values in `applyFontSizes()` method (currently 0.45 for solution, 0.40 for problem):
 
 ```javascript
-// Lines 95-113 in display-manager.js
+// Lines 95-118 in display-manager.js - CURRENT VALUES
 if (isMobile) {
-    solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.6)`; // Change multiplier here
-    problemContainer.style.fontSize = `calc(${config.fontSize} * 0.55)`; // Change multiplier here
+    solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.45)`; // Currently 45%
+    problemContainer.style.fontSize = `calc(${config.fontSize} * 0.40)`; // Currently 40%
+}
+
+// Example: To increase mobile font sizes, change multipliers:
+if (isMobile) {
+    solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.6)`; // Increase to 60%
+    problemContainer.style.fontSize = `calc(${config.fontSize} * 0.55)`; // Increase to 55%
 }
 ```
 
@@ -377,8 +398,8 @@ CSS rules are evaluated LAST (but overridden by inline styles)
 **CRITICAL: Font Size Override Behavior**:
 - `display-manager.js` applies **inline styles** that override CSS rules
 - Mobile font sizes are calculated as: `calc(baseFontSize * multiplier)`
-- Problem container: 55% of base font (0.55 multiplier) on mobile
-- Solution container: 60% of base font (0.6 multiplier) on mobile
+- Problem container: 40% of base font (0.40 multiplier) on mobile
+- Solution container: 45% of base font (0.45 multiplier) on mobile
 - **Always modify `display-manager.js` for mobile font changes, NOT just CSS**
 - CSS changes alone will be overridden by JavaScript inline styles
 
