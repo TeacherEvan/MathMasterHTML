@@ -10,39 +10,8 @@ class ConsoleManager {
         this.consoleElement = null;
         this.modal = null;
         this.isPendingSelection = false;
-        this.isMobileMode = false;
-        this.isDisabled = false;
 
         this.init();
-    }
-
-    detectMobileMode() {
-        this.isMobileMode = document.body.classList.contains('res-mobile');
-        console.log(`🎮 Console Manager: ${this.isMobileMode ? 'MOBILE MODE - DISABLED' : 'DESKTOP MODE - ACTIVE'}`);
-
-        // Disable console on mobile
-        if (this.isMobileMode) {
-            this.disable();
-        } else {
-            this.enable();
-        }
-    }
-
-    disable() {
-        if (this.isDisabled) return;
-        this.isDisabled = true;
-        console.log("🚫 Console Manager: DISABLED (mobile mode)");
-
-        // Hide modal if open
-        if (this.modal && this.modal.style.display !== 'none') {
-            this.hideSymbolSelectionModal();
-        }
-    }
-
-    enable() {
-        if (!this.isDisabled) return;
-        this.isDisabled = false;
-        console.log("✅ Console Manager: ENABLED (desktop mode)");
     }
 
     init() {
@@ -67,9 +36,6 @@ class ConsoleManager {
 
         console.log("✅ Console elements found, setting up event listeners");
 
-        // Detect initial mobile state
-        this.detectMobileMode();
-
         // Set up console button click handlers
         this.setupConsoleButtons();
 
@@ -81,17 +47,8 @@ class ConsoleManager {
 
         // Listen for problem completion
         document.addEventListener('problemCompleted', () => {
-            if (!this.isDisabled) {
-                console.log("🎉 Problem completed! Showing symbol selection modal");
-                this.showSymbolSelectionModal();
-            } else {
-                console.log("🎉 Problem completed! (Console disabled on mobile - skipping modal)");
-            }
-        });
-
-        // Listen for resolution changes
-        document.addEventListener('displayResolutionChanged', () => {
-            this.detectMobileMode();
+            console.log("🎉 Problem completed! Showing symbol selection modal");
+            this.showSymbolSelectionModal();
         });
 
         console.log("🎮 Console Manager ready!");
@@ -102,12 +59,6 @@ class ConsoleManager {
 
         slots.forEach((slot, index) => {
             slot.addEventListener('click', () => {
-                // Ignore clicks if disabled (mobile mode)
-                if (this.isDisabled) {
-                    console.log("🚫 Console click ignored (mobile mode)");
-                    return;
-                }
-
                 const symbol = this.slots[index];
 
                 if (symbol) {
@@ -160,9 +111,6 @@ class ConsoleManager {
 
     setupKeyboardShortcuts() {
         document.addEventListener('keydown', (e) => {
-            // Ignore keyboard shortcuts if disabled (mobile mode)
-            if (this.isDisabled) return;
-
             // Handle numpad and number row (1-9)
             const key = e.key;
             let slotIndex = -1;

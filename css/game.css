@@ -195,126 +195,87 @@
 }
 
 /* ============================================
-   MOBILE LAYOUT - Vertical Panel Stacking
+   MOBILE LAYOUT - Horizontal 3-Panel (Scaled)
    ============================================ */
+
+/* Keep the same 3-column grid as desktop, just scaled down */
 .res-mobile .grid-container {
-    grid-template-columns: 1fr;
-    /* Single column */
-    grid-template-rows: auto 5px 1fr 5px auto;
-    /* Panel A (auto) | wall | Panel B (flex) | wall | Panel C (auto) */
+    grid-template-columns: 1fr 3px 1fr 3px 1fr;
+    /* Thinner walls for mobile */
+    grid-template-rows: 100vh;
+    /* Full viewport height */
 }
 
 .res-mobile .wall {
-    background: linear-gradient(90deg, #0f0, #060);
-    /* Horizontal gradient for horizontal wall */
-    height: 5px;
-    width: 100%;
+    width: 3px;
+    /* Thinner walls on mobile */
+    background: linear-gradient(180deg, #0f0, #060);
 }
 
-/* Panel A - Top (Problem & Lock) */
+/* Scale down all panels proportionally for small landscape screen */
+.res-mobile .display-panel {
+    font-size: 12px;
+    /* Smaller base font */
+    padding: 10px;
+    /* Less padding */
+}
+
+/* Panel A - Lock and Problem (scaled) */
 .res-mobile #panel-a {
-    order: 1;
-    height: auto;
-    min-height: 150px;
-    /* Ensure Panel A is always visible */
-    max-height: 25vh;
-    /* Limit to 25% of viewport height */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-/* First wall */
-.res-mobile .wall:nth-of-type(1) {
-    order: 2;
-}
-
-/* Panel B - Middle (Solution & Worms) */
-.res-mobile #panel-b {
-    order: 3;
-    flex: 1;
-    /* Takes remaining space */
-    min-height: 200px;
-    /* Ensure Panel B is always visible */
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    overflow-y: auto;
-    /* Allow scrolling if content is too tall */
 }
 
-/* Second wall */
-.res-mobile .wall:nth-of-type(2) {
-    order: 4;
-}
-
-/* Panel C - Bottom (Symbol Train) */
-.res-mobile #panel-c {
-    order: 5;
-    height: 40px;
-    /* Reduced from 80px - half the space */
-    overflow: hidden;
-}
-
-/* Symbol rain container becomes horizontal train */
-.res-mobile #symbol-rain-container {
-    height: 40px;
-    /* Match Panel C height */
-    display: flex;
-    align-items: center;
-}
-
-/* Falling symbols become horizontally moving symbols */
-.res-mobile .falling-symbol {
-    /* Positioning will be handled by JavaScript for horizontal movement */
-    font-size: 24px;
-    /* Reduced from 32px to fit 40px container */
-}
-
-/* Mobile: Adjust problem container positioning and size */
 .res-mobile #problem-container {
-    position: relative;
-    /* Change from absolute to relative for mobile */
-    top: auto;
-    left: auto;
-    transform: none;
-    font-size: 18px;
-    /* Much larger for mobile readability */
-    margin: 10px auto;
-    padding: 10px;
-    max-width: 90%;
-    word-wrap: break-word;
+    font-size: 14px;
+    /* Readable on mobile landscape */
+    top: 60px;
+    /* Adjust position */
 }
 
-/* Mobile: Ensure lock display is visible */
 .res-mobile #lock-display {
-    min-height: 100px;
-    /* Ensure lock is visible */
-    flex: 1;
+    transform: scale(0.7);
+    /* Scale down lock for mobile */
+    transform-origin: center center;
 }
 
-/* Mobile: Solution container visibility */
-.res-mobile #solution-container {
-    font-size: 16px;
-    /* Readable size for mobile */
-    padding: 15px;
-    color: #00ff00;
-    /* Matrix green */
-    line-height: 1.6;
-    min-height: 100px;
-    /* Ensure it takes up space */
-}
-
-/* Mobile: Add subtle backgrounds to distinguish panels */
-.res-mobile #panel-a {
-    background: rgba(0, 20, 0, 0.3);
-    /* Very dark green tint */
-}
-
+/* Panel B - Solution and Console (scaled) */
 .res-mobile #panel-b {
-    background: rgba(0, 10, 0, 0.2);
-    /* Slightly different tint */
+    display: flex;
+    flex-direction: column;
+}
+
+.res-mobile #solution-container {
+    font-size: 14px;
+    /* Smaller solution text */
+    line-height: 1.4;
+}
+
+.res-mobile #symbol-console {
+    bottom: 10px;
+    /* Closer to bottom */
+    padding: 8px;
+    /* Less padding */
+    gap: 5px;
+    /* Tighter spacing */
+}
+
+.res-mobile .console-slot {
+    width: 35px;
+    /* Smaller console buttons */
+    height: 35px;
+    font-size: 18px;
+}
+
+/* Panel C - Symbol Rain (scaled) */
+.res-mobile #panel-c {
+    /* Keep full height for vertical falling symbols */
+}
+
+.res-mobile .falling-symbol {
+    font-size: 18px;
+    /* Smaller symbols for mobile */
 }
 
 /* ============================================
@@ -384,5 +345,144 @@
     .res-mobile #panel-b {
         min-height: 120px;
         /* More space for solution */
+    }
+}
+
+/* ============================================
+   HOW TO PLAY MODAL
+   ============================================ */
+.how-to-play-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 1000000;
+    /* Above rotation overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+}
+
+.how-to-play-content {
+    background: linear-gradient(145deg, #0a0a0a, #1a1a2a);
+    border: 3px solid #ffd700;
+    /* Gold border */
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 700px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.5),
+        inset 0 0 30px rgba(255, 215, 0, 0.1);
+    animation: modalFadeIn 0.5s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes modalFadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(0.8) translateY(-50px);
+    }
+}
+
+.how-to-play-content h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: 32px;
+    font-weight: 900;
+    color: #ffd700;
+    /* Gold */
+    text-align: center;
+    margin-bottom: 25px;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8),
+        0 0 40px rgba(255, 215, 0, 0.4);
+    letter-spacing: 2px;
+}
+
+.how-to-play-message {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-style: normal;
+    /* Normal (non-italic) as requested */
+    color: #00ffff;
+    /* Cyan */
+    line-height: 1.8;
+    text-align: justify;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.how-to-play-message strong {
+    color: #ff6b6b;
+    /* Red for emphasis */
+    font-weight: 900;
+    text-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+    font-style: normal;
+    /* Strong text not italic */
+}
+
+.start-game-button {
+    display: block;
+    width: 100%;
+    padding: 15px 30px;
+    background: linear-gradient(145deg, #ffd700, #ffed4e);
+    border: 3px solid #ffed4e;
+    border-radius: 10px;
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    font-weight: 900;
+    color: #000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+}
+
+.start-game-button:hover {
+    background: linear-gradient(145deg, #ffed4e, #ffd700);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+    transform: scale(1.05);
+}
+
+.start-game-button:active {
+    transform: scale(0.98);
+}
+
+/* Mobile adjustments for How to Play */
+@media (max-width: 768px) {
+    .how-to-play-content {
+        padding: 25px;
+        max-width: 90%;
+    }
+
+    .how-to-play-content h2 {
+        font-size: 24px;
+    }
+
+    .how-to-play-message {
+        font-size: 15px;
+    }
+
+    .start-game-button {
+        font-size: 18px;
     }
 }

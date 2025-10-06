@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MathMaster - Game</title>
+    <title>Math Master - Unlock Your Mind - Game</title>
     <link rel="stylesheet" href="css/game.css">
     <link rel="stylesheet" href="css/console.css">
     <link rel="stylesheet" href="css/worm-styles.css">
@@ -86,6 +86,17 @@
     </style>
 </head>
 <body>
+    <!-- How to Play Modal -->
+    <div id="how-to-play-modal" class="how-to-play-overlay">
+        <div class="how-to-play-content">
+            <h2>Math Master - Unlock Your Mind</h2>
+            <p class="how-to-play-message">
+                Your brain 🧠 is remarkably unique, and you might have abilities locked away in the part of the brain 🧠 which has become "lazy" due to some external "comforts" placed on everyone, by whatever means. Math stimulates your brain's 🧠 problem-solving capabilities allowing you to see vastly different solutions to everyday problems. <strong>THERE IS AN UNLIMITED HELP BUTTON. NO ONE WILL KNOW YOU USED IT!</strong> In the land of the blind, the one-eyed man is King 👑.
+            </p>
+            <button id="start-game-btn" class="start-game-button">NEXT ➔</button>
+        </div>
+    </div>
+    
     <!-- Rotation Overlay - Force Landscape -->
     <div id="rotation-overlay">
         <div class="rotate-icon">📱➡️</div>
@@ -181,6 +192,27 @@
         function goBack() {
             window.location.href = 'level-select.html';
         }
+        
+        // How to Play Modal Control
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('how-to-play-modal');
+            const startButton = document.getElementById('start-game-btn');
+            
+            if (modal && startButton) {
+                // Show modal on page load
+                modal.style.display = 'flex';
+                
+                // Hide modal when NEXT button clicked
+                startButton.addEventListener('click', function() {
+                    modal.style.animation = 'modalFadeOut 0.3s ease-out';
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                        console.log('🎮 How to Play modal dismissed - game ready to start');
+                    }, 300);
+                });
+            }
+        });
     </script>
+
 </body>
 </html>

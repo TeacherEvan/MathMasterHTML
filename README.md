@@ -1,13 +1,13 @@
-# 🎮 Math Master Algebra
+# 🎮 Math Master - Unlock Your Mind
 
-> An educational algebra game with a Matrix-themed interface where players solve equations by clicking falling symbols. Features progressive lock animations and adversarial worm mechanics.
+> An educational math game with a Matrix-themed interface where players solve algebra equations by clicking falling symbols. Features progressive lock animations and adversarial worm mechanics.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
 [![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 
-![Math Master Algebra Gameplay](Images/Gameplay1.jpg)
+![Math Master - Unlock Your Mind Gameplay](Images/Gameplay1.jpg)
 
 ---
 
@@ -414,6 +414,6 @@ For questions, suggestions, or collaboration:
 
 **Made with ❤️ for math education**
 
-[⬆ Back to Top](#-math-master-algebra)
+[⬆ Back to Top](#-math-master---unlock-your-mind)
 
 </div>

@@ -4,8 +4,7 @@ console.log("🐛 Worm System Loading...");
 class WormSystem {
     constructor() {
         this.worms = [];
-        this.maxWorms = 7; // Maximum 7 worms on play field (desktop)
-        this.maxWormsMobile = 3; // Maximum 3 worms on mobile
+        this.maxWorms = 7; // Maximum 7 worms on play field
         this.wormContainer = null;
         this.solutionContainer = null;
         this.consoleElement = null;
@@ -14,7 +13,6 @@ class WormSystem {
         this.spawnTimer = null;
         this.firstWormSpawned = false;
         this.lockedConsoleSlots = new Set(); // Track which console slots have active worms
-        this.isMobileMode = false;
 
         console.log('🐛 WormSystem initialized');
 
@@ -34,20 +32,6 @@ class WormSystem {
             console.log('🎯 Symbol revealed event:', event.detail);
             this.notifyWormsOfRedSymbol(event.detail.symbol);
         });
-
-        // Listen for resolution changes
-        document.addEventListener('displayResolutionChanged', () => {
-            this.detectMobileMode();
-        });
-    }
-
-    detectMobileMode() {
-        this.isMobileMode = document.body.classList.contains('res-mobile');
-        console.log(`🐛 Worm System: ${this.isMobileMode ? 'MOBILE MODE (Max 3 worms, left-edge spawn)' : 'DESKTOP MODE (Max 7 worms, console spawn)'}`);
-    }
-
-    getMaxWorms() {
-        return this.isMobileMode ? this.maxWormsMobile : this.maxWorms;
     }
 
     // Check if rain symbol clicked matches worm's stolen symbol - EXPLODE WORM!
@@ -110,9 +94,6 @@ class WormSystem {
             this.wormContainer.style.position = 'relative';
         }
 
-        // Detect mobile mode
-        this.detectMobileMode();
-
         this.isInitialized = true;
         console.log('✅ Worm System initialized successfully');
     }
@@ -140,108 +121,17 @@ class WormSystem {
         return emptySlots[Math.floor(Math.random() * emptySlots.length)];
     }
 
-    // MOBILE: Spawn worm from left edge of Panel B
-    spawnWormFromLeftEdge() {
-        const containerHeight = this.wormContainer.offsetHeight || 600;
-
-        // Random Y position on left edge (with margin from top/bottom)
-        const margin = 50;
-        const startX = -30; // Just off the left edge
-        const startY = margin + Math.random() * Math.max(0, containerHeight - (margin * 2));
-
-        console.log(`📱 Spawning mobile worm from left edge at (${startX}, ${startY.toFixed(0)})`);
-
-        // Create worm element
-        const wormId = `worm-mobile-${Date.now()}-${Math.random()}`;
-        const wormElement = document.createElement('div');
-        wormElement.className = 'worm-container mobile-worm';
-        wormElement.id = wormId;
-
-        // Worm body with segments
-        const wormBody = document.createElement('div');
-        wormBody.className = 'worm-body';
-
-        for (let i = 0; i < 5; i++) {
-            const segment = document.createElement('div');
-            segment.className = 'worm-segment';
-            segment.style.setProperty('--segment-index', i);
-            wormBody.appendChild(segment);
-        }
-
-        wormElement.appendChild(wormBody);
-
-        // Position worm at left edge
-        wormElement.style.left = `${startX}px`;
-        wormElement.style.top = `${startY}px`;
-        wormElement.style.position = 'absolute';
-        wormElement.style.zIndex = '10000';
-        wormElement.style.opacity = '1';
-        wormElement.style.visibility = 'visible';
-
-        this.wormContainer.appendChild(wormElement);
-
-        // Store worm data
-        const wormData = {
-            id: wormId,
-            element: wormElement,
-            stolenSymbol: null,
-            targetElement: null,
-            targetSymbol: null,
-            x: startX,
-            y: startY,
-            velocityX: 2.0, // Move right into the panel
-            velocityY: (Math.random() - 0.5) * 1.0,
-            active: true,
-            hasStolen: false,
-            isRushingToTarget: false,
-            roamingEndTime: Date.now() + 10000, // Roam for 10 seconds
-            isFlickering: false,
-            baseSpeed: 2.0,
-            currentSpeed: 2.0,
-            consoleSlotIndex: null, // No console slot on mobile
-            consoleSlotElement: null,
-            fromConsole: false,
-            fromMobileEdge: true,
-            crawlPhase: 0,
-            direction: 0 // Start moving right (0 radians)
-        };
-
-        this.worms.push(wormData);
-
-        // Add click handler to CLONE worm
-        wormElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.cloneWorm(wormData);
-        });
-
-        console.log(`✅ Mobile worm ${wormId} spawned from left edge. Total worms: ${this.worms.length}`);
-
-        // Start animation loop if not already running
-        if (this.worms.length === 1) {
-            this.animate();
-        }
-    }
-
     // Spawn worm from console slot with slide-open animation
     spawnWormFromConsole() {
         this.initialize();
 
-        const maxWorms = this.getMaxWorms();
-        console.log(`🐛 spawnWormFromConsole() called. Current worms: ${this.worms.length}/${maxWorms} (${this.isMobileMode ? 'MOBILE' : 'DESKTOP'})`);
+        console.log(`🐛 spawnWormFromConsole() called. Current worms: ${this.worms.length}/${this.maxWorms}`);
 
-        if (this.worms.length >= maxWorms) {
-            console.log(`⚠️ Max worms (${maxWorms}) reached. No more spawning.`);
+        if (this.worms.length >= this.maxWorms) {
+            console.log(`⚠️ Max worms (${this.maxWorms}) reached. No more spawning.`);
             return;
         }
 
-        // MOBILE MODE: Spawn from left edge of Panel B
-        if (this.isMobileMode) {
-            console.log('📱 Mobile mode: Spawning worm from left edge of Panel B');
-            this.spawnWormFromLeftEdge();
-            return;
-        }
-
-        // DESKTOP MODE: Spawn from console slot
         // Find empty console slot
         const slotData = this.findEmptyConsoleSlot();
         if (!slotData) {

@@ -1,4 +1,4 @@
-# MathMaster Algebra - Deployment Guide
+# Math Master - Unlock Your Mind - Deployment Guide
 
 ## ✅ Local Development (Fixed!)
 
