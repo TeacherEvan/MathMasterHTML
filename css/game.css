@@ -193,3 +193,67 @@
 #worm-container .worm-container {
     pointer-events: auto;
 }
+
+/* ============================================
+   MOBILE LAYOUT - Vertical Panel Stacking
+   ============================================ */
+.res-mobile .grid-container {
+    grid-template-columns: 1fr;
+    /* Single column */
+    grid-template-rows: auto 5px 1fr 5px auto;
+    /* Panel A (auto) | wall | Panel B (flex) | wall | Panel C (auto) */
+}
+
+.res-mobile .wall {
+    background: linear-gradient(90deg, #0f0, #060);
+    /* Horizontal gradient for horizontal wall */
+    height: 5px;
+    width: 100%;
+}
+
+/* Panel A - Top (Problem & Lock) */
+.res-mobile #panel-a {
+    order: 1;
+    height: auto;
+    max-height: 25vh;
+    /* Limit to 25% of viewport height */
+}
+
+/* First wall */
+.res-mobile .wall:nth-of-type(1) {
+    order: 2;
+}
+
+/* Panel B - Middle (Solution & Worms) */
+.res-mobile #panel-b {
+    order: 3;
+    flex: 1;
+    /* Takes remaining space */
+}
+
+/* Second wall */
+.res-mobile .wall:nth-of-type(2) {
+    order: 4;
+}
+
+/* Panel C - Bottom (Symbol Train) */
+.res-mobile #panel-c {
+    order: 5;
+    height: 80px;
+    /* Just enough for one row of symbols */
+    overflow: hidden;
+}
+
+/* Symbol rain container becomes horizontal train */
+.res-mobile #symbol-rain-container {
+    height: 80px;
+    display: flex;
+    align-items: center;
+}
+
+/* Falling symbols become horizontally moving symbols */
+.res-mobile .falling-symbol {
+    /* Positioning will be handled by JavaScript for horizontal movement */
+    font-size: 32px;
+    /* Larger for mobile visibility */
+}

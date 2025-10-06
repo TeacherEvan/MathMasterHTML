@@ -1,7 +1,7 @@
 # Math Master Algebra - AI Coding Agent Instructions
 
 ## Project Overview
-Educational math game with Matrix-themed UI where players solve algebra problems by clicking falling symbols. Features progressive lock animations that respond to problem-solving progress.
+Educational math game with Matrix-themed UI where players solve algebra problems by clicking falling symbols. Features progressive lock animations, adversarial worm mechanics, and a quick-access symbol console.
 
 ## Architecture: Three-Panel System
 
@@ -11,15 +11,18 @@ Educational math game with Matrix-themed UI where players solve algebra problems
 - Lock transforms through 6 levels as player progresses through solution steps
 - Components load from `lock-components/line-{1-6}-transformer.html`
 
-### Panel B (Middle): Step-by-Step Solution
+### Panel B (Middle): Step-by-Step Solution + Worm Battleground + Console
 - Displays multi-step solution with initially hidden symbols
-- Players reveal symbols by clicking matching symbols in Panel C
+- Players reveal symbols by clicking matching symbols in Panel C or console
+- **Worm Container**: Worms spawn from console, crawl across panel, steal revealed symbols
+- **Symbol Console** (bottom): 3×3 grid of quick-access symbols with keyboard shortcuts (1-9)
 - Each revealed symbol triggers events for lock progression and worm spawning
 
 ### Panel C (Right): Symbol Rain (Matrix Display)
 - Falling symbols (`0-9`, `X`, `x`, `+`, `-`, `=`, `÷`, `×`) managed by `js/3rdDISPLAY.js`
 - Click correct symbols to reveal solution steps
 - Speed increases progressively during gameplay
+- **Guaranteed Spawn System**: Every symbol appears at least once every 5 seconds
 
 ## Critical Event-Driven Communication Pattern
 
@@ -40,11 +43,13 @@ LockManager.progressLockLevel() + WormSystem.spawnWorm()
 ```
 
 ### Key Events (listen with `document.addEventListener`)
-- `symbolClicked` - Symbol clicked in rain display (detail: `{symbol: string}`)
+- `symbolClicked` - Symbol clicked in rain display OR console (detail: `{symbol: string}`)
+- `symbolRevealed` - Symbol revealed in solution (detail: `{symbol: string}`) - triggers worm rush behavior
 - `first-line-solved` - First correct answer, triggers lock animation start
 - `problemLineCompleted` - Solution step completed, spawns worm + advances lock
 - `stepCompleted` - Individual step finished (detail: `{stepIndex: number}`)
-- `wormSymbolCorrect` - Worm carrying symbol was clicked (detail: `{symbol: string}`)
+- `problemCompleted` - Entire problem solved, shows console symbol selection modal
+- `displayResolutionChanged` - Screen resolution changed (detail: resolution object)
 
 ## Data Flow: Problem Loading & Parsing
 
@@ -114,11 +119,33 @@ This pattern is used in:
 
 ## Worm System (js/worm.js)
 
-Spawns after each completed solution line (max 4 worms):
-- **Behavior**: Ground-based crawling (kept in bottom 30% of panel)
-- **Theft**: Randomly steals hidden symbols from solution display
-- **Recovery**: Click worm to return stolen symbol and destroy worm
-- **Movement**: JavaScript-only positioning (NO CSS animations to avoid floating effect)
+**Complete Overhaul (Oct 2025)**: Worms now spawn from console, crawl realistically, and create strategic gameplay.
+
+### Core Mechanics (max 7 worms)
+- **Spawn**: Emerge from empty console slots when `problemLineCompleted` fires
+- **Console Locking**: Spawning slot becomes unusable until worm destroyed/escapes
+- **Roaming Phase**: 10 seconds OR until red symbol appears
+- **Rush Mode**: Detect `symbolRevealed` event → rush to target at 2x speed
+- **Symbol Theft**: Steal revealed RED symbols (not hidden), mark with `data-stolen` attribute
+- **Visual Carry**: Stolen symbol appears as badge above worm (`.carried-symbol` div)
+
+### Player Interactions
+1. **Click Worm**: Creates exact clone with same mission (not destruction!)
+2. **Click Matching Rain Symbol**: If user clicks symbol in Panel C that worm carries → worm EXPLODES
+   - Stolen symbol returns to original position as revealed
+   - `data-stolen` attribute removed
+   - Explosion animation (`.worm-clicked` class) + 300ms removal delay
+
+### Visual Effects
+- **Crawling Animation**: Inchworm `scaleX/scaleY` squash-stretch (0.8s duration)
+- **LSD Rainbow Flash**: When carrying symbol, `hue-rotate` animation (0.3s) + 20% speed boost
+- **Direction Rotation**: JavaScript applies rotation based on movement vector
+- **Staggered Segments**: 0.15s delay per segment for wave effect
+
+### Movement Constraints
+- **Panel B Boundary Only**: 20px margin from edges, reflection physics on collision
+- **Speed Configs**: Base 2.0 → Rush 4.0 → Carrying 2.4
+- **JavaScript-Only Positioning**: NO CSS `transition`/`animation` on position (prevents floating)
 
 ## Level System & URL Parameters
 
@@ -130,6 +157,29 @@ Game launched via: `game.html?level={beginner|warrior|master}&lockComponent=leve
 - Beginner: Addition/Subtraction
 - Warrior: +Multiplication
 - Master: +Division (uses `master-level` class for special lock behavior)
+
+## Symbol Console System (js/console-manager.js)
+
+**3×3 Grid** at bottom of Panel B for quick symbol access:
+- **Keyboard Shortcuts**: Keys 1-9 map to console slots
+- **Symbol Selection**: After `problemCompleted` event, modal shows 16 available symbols
+- **Two-Step Process**: Select symbol → select slot (1-9) → symbol placed in console
+- **Console Click**: Dispatches same `symbolClicked` event as rain display
+- **Visual Feedback**: Purple pulsate animation (`.clicked` class, 600ms)
+- **Worm Integration**: Console slots lock when worm spawns from them (`lockedConsoleSlots` Set)
+
+## Responsive Display System (js/display-manager.js)
+
+**Auto-Detection**: Adjusts layout/fonts based on viewport width:
+```javascript
+Resolutions: '4k' (≥2560px) → '1440p' (≥1920px) → '1080p' (≥1280px) → '720p' (≥768px) → 'mobile' (<768px)
+```
+
+**Dynamic Scaling**:
+- CSS Variables: `--display-scale`, `--display-font-size`, `--viewport-width/height`
+- Body Class: `res-{resolution}` applied for resolution-specific styling
+- **Mobile Adjustment**: Solution container font reduced to 75% for horizontal layout
+- **Event Dispatch**: `displayResolutionChanged` event with resolution details
 
 ## Styling Conventions
 
@@ -151,6 +201,13 @@ Game launched via: `game.html?level={beginner|warrior|master}&lockComponent=leve
 
 **No build process** - pure HTML/CSS/JS. Open `index.html` in browser to start.
 
+**Local Testing (Recommended)**:
+```powershell
+cd "c:\Users\User\OneDrive\Documents\VS 1 games\HTML\MathMaster-Algebra - Copy"
+python -m http.server 8000
+# Open: http://localhost:8000/game.html?level=beginner
+```
+
 **File Opening Order for Testing**:
 1. `index.html` (welcome screen)
 2. `level-select.html` (choose difficulty)
@@ -162,6 +219,7 @@ Game launched via: `game.html?level={beginner|warrior|master}&lockComponent=leve
 - 🐛 Worm system
 - 📚 Problem loading
 - 🎯 Symbol matching
+- 🖥️ Display manager
 - ✅/❌ Success/failure
 
 ## Key Files Reference
@@ -170,6 +228,8 @@ Game launched via: `game.html?level={beginner|warrior|master}&lockComponent=leve
 - `js/lock-manager.js` (634 lines) - Lock animation orchestration
 - `js/3rdDISPLAY.js` - Symbol rain display
 - `js/worm.js` - Worm spawning and theft mechanics
+- `js/console-manager.js` - Symbol console system with keyboard shortcuts
+- `js/display-manager.js` - Responsive design auto-detection
 - `middle-screen/solver.js` - First-line-solved event dispatcher (minimal)
 
 ## When Adding New Features

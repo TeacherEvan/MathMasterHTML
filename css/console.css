@@ -418,3 +418,16 @@
         opacity: 1;
     }
 }
+
+/* ============================================
+   MOBILE - Hide Console Completely
+   ============================================ */
+.res-mobile #symbol-console {
+    display: none !important;
+    /* Completely hidden on mobile */
+}
+
+.res-mobile .modal-overlay {
+    display: none !important;
+    /* No symbol selection modal on mobile */
+}
