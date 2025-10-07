@@ -192,18 +192,30 @@
         </div>
     </div>
     
-    <script src="js/utils.js"></script>
-    <script src="js/problem-manager.js"></script>
     <script src="js/display-manager.js"></script>
     <script src="js/3rdDISPLAY.js"></script>
     <script src="js/worm.js"></script>
     <script src="js/lock-responsive.js"></script>
     <script src="js/lock-manager.js"></script>
     <script src="js/console-manager.js"></script>
-    <script src="js/game.js" type="module"></script>
+    <script src="js/game.js"></script>
     <script>
         function goBack() {
             window.location.href = 'level-select.html';
+        }
+        
+        // Auto-trigger fullscreen on page load
+        function enterFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => {
+                    console.log('⚠️ Fullscreen request failed (user may need to interact first):', err);
+                });
+            } else if (elem.webkitRequestFullscreen) { // Safari
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { // IE11
+                elem.msRequestFullscreen();
+            }
         }
         
         // How to Play Modal Control
@@ -215,15 +227,20 @@
                 // Show modal on page load
                 modal.style.display = 'flex';
                 
-                // Hide modal when NEXT button clicked
+                // Hide modal when NEXT button clicked and trigger fullscreen
                 startButton.addEventListener('click', function() {
                     modal.style.animation = 'modalFadeOut 0.3s ease-out';
                     setTimeout(() => {
                         modal.style.display = 'none';
                         console.log('🎮 How to Play modal dismissed - game ready to start');
+                        // Trigger fullscreen after user interaction (required by browsers)
+                        enterFullscreen();
                     }, 300);
                 });
             }
+            
+            // Also try to enter fullscreen immediately (may not work on all browsers without user interaction)
+            enterFullscreen();
         });
     </script>
 
