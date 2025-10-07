@@ -39,6 +39,36 @@ class LockManager {
             this.startLockAnimation();
         });
 
+        // SNAKE WEAPON: Click handler on lock display
+        // Trigger snake when 4+ worms active
+        if (this.container) {
+            this.container.addEventListener('click', (e) => {
+                console.log('🐍 Lock clicked!');
+
+                // Check if enough worms are active (4+)
+                const activeWorms = window.wormSystem ? window.wormSystem.worms.filter(w => w.active) : [];
+
+                if (activeWorms.length >= 4) {
+                    console.log(`🐍 ${activeWorms.length} worms active - triggering snake weapon!`);
+
+                    // Dispatch event for snake weapon system
+                    document.dispatchEvent(new CustomEvent('snakeWeaponTriggered', {
+                        detail: { wormCount: activeWorms.length }
+                    }));
+                } else {
+                    console.log(`⚠️ Not enough worms (${activeWorms.length}/4) - lock flash feedback`);
+
+                    // Visual feedback - lock flashes to show it's not ready
+                    this.container.style.animation = 'lock-flash-not-ready 0.5s ease-out';
+                    setTimeout(() => {
+                        this.container.style.animation = '';
+                    }, 500);
+                }
+            });
+
+            console.log('🐍 Lock click handler attached');
+        }
+
         // Listen for step completion events
         document.addEventListener('stepCompleted', (e) => {
             console.log('🔒 LockManager received stepCompleted event:', e.detail);

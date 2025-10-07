@@ -468,17 +468,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         console.log(`🎯 Symbol Rain click - Clicked: "${clicked}"`);
 
-        // First, check if this symbol was stolen by a worm and needs to be restored
+        // PRIORITY 1: Check if this symbol was stolen by a worm (includes blue symbols!)
         const normalizedClicked = clicked.toLowerCase() === 'x' ? 'X' : clicked;
         const stolenSymbols = solutionContainer.querySelectorAll('[data-stolen="true"]');
         let symbolRestored = false;
+        let wasBlueSymbol = false;
 
         for (let stolenSymbol of stolenSymbols) {
             const stolenText = stolenSymbol.textContent;
             const normalizedStolen = stolenText.toLowerCase() === 'x' ? 'X' : stolenText;
 
             if (normalizedStolen === normalizedClicked) {
-                console.log(`🔄 Restoring stolen symbol "${clicked}" in Panel B!`);
+                // Check if this was a blue (revealed) symbol before being stolen
+                wasBlueSymbol = stolenSymbol.dataset.wasRevealed === 'true';
+
+                console.log(`🔄 Restoring stolen ${wasBlueSymbol ? 'BLUE' : 'RED'} symbol "${clicked}" in Panel B!`);
 
                 // Restore the symbol
                 stolenSymbol.classList.remove('stolen', 'hidden-symbol');
@@ -486,17 +490,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 stolenSymbol.style.visibility = 'visible';
                 delete stolenSymbol.dataset.stolen;
 
+                // Clear the wasRevealed flag
+                if (wasBlueSymbol) {
+                    delete stolenSymbol.dataset.wasRevealed;
+                }
+
                 symbolRestored = true;
 
-                // Add visual feedback for restoration
-                document.body.style.background = 'radial-gradient(circle, rgba(0,255,255,0.2), rgba(0,0,0,1))';
+                // Visual feedback - different color for blue symbol restoration
+                if (wasBlueSymbol) {
+                    document.body.style.background = 'radial-gradient(circle, rgba(0,255,255,0.3), rgba(0,0,0,1))';
+                    console.log(`💎 BLUE symbol restored - game can continue progressing!`);
+                } else {
+                    document.body.style.background = 'radial-gradient(circle, rgba(0,255,255,0.2), rgba(0,0,0,1))';
+                }
+
                 setTimeout(() => {
                     document.body.style.background = '';
                 }, 300);
 
                 console.log(`✅ Symbol "${clicked}" successfully restored!`);
 
-                // CRITICAL FIX: Check if line is complete after restoration
+                // CRITICAL: Check line completion after restoration
+                // This ensures game progression isn't blocked by stolen symbols
                 console.log(`🔍 Checking line completion after restoration...`);
                 checkLineCompletion();
 
@@ -504,12 +520,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // If symbol was restored, we're done
+        // If symbol was restored, we're done (priority replacement complete!)
         if (symbolRestored) {
             return;
         }
 
-        // Otherwise, check if it's in the current line (normal gameplay)
+        // PRIORITY 2: Otherwise, check if it's in the current line (normal gameplay)
         if (isSymbolInCurrentLine(clicked)) {
             handleCorrectAnswer(clicked);
         } else {

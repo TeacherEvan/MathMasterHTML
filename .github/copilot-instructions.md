@@ -156,16 +156,28 @@ new CustomEvent('lockScaleChanged', { detail: { scale: 0.8 } })
 4.  **Stealing**: Worm reaches symbol, turns it gray/strikethrough, carries it away
 5.  **Destruction**: User clicks matching symbol in Panel C rain OR clicks worm directly → explosion animation
 
+**Cloning Curse Mechanic (NEW!):**
+- **Activation**: First direct click on ANY worm activates the cloning curse
+- **Effect**: While curse is active, ALL worm clicks create clones instead of killing them
+- **Clone Abilities**: Clones can steal BLUE (revealed) symbols, not just red (hidden) ones
+- **Curse Reset**: Only way to break curse is to kill ALL visible worms via rain symbols (not direct clicks)
+- **Visual Feedback**: 
+  - Purple flash when curse activates or worm clones
+  - Cyan flash when curse resets (all worms eliminated via rain)
+  - Stolen blue symbols shown in cyan on worm
+- **Priority Replacement**: Stolen blue symbols get restored FIRST when user clicks matching rain symbol
+- **Game Progression**: Stolen blue symbols don't block line completion - they're marked with `data-was-revealed="true"`
+
 **Key Mechanics:**
 - Maximum 7 worms active at once (`maxWorms`)
 - Worms spawn from empty console slots (locks slot until worm dies)
 - Console slot spawning: Slide-open animation with green glow
 - Worms have 5 body segments (head + 4 segments) defined in CSS
 - Position updated via `requestAnimationFrame` loop, NOT CSS transitions
-- Worm states tracked: `active`, `hasStolen`, `isRushingToTarget`
+- Worm states tracked: `active`, `hasStolen`, `isRushingToTarget`, `wasBlueSymbol`
 - **Dual Kill Mechanic**: Worms can be destroyed two ways:
-  1. Click the worm directly
-  2. Click the matching symbol in Panel C rain (if worm has stolen that symbol)
+  1. Click the worm directly (activates curse on first click, clones on subsequent)
+  2. Click the matching symbol in Panel C rain (if worm has stolen that symbol) - counts as rain kill
 
 **CSS Classes:**
 - `.worm-container`: Main worm wrapper (z-index: 10000)
@@ -180,6 +192,97 @@ new CustomEvent('lockScaleChanged', { detail: { scale: 0.8 } })
 - Worm click creates particles, flash effect, and slime splat
 - `lockedConsoleSlots` Set tracks which console slots are occupied
 - Movement uses `transform: translateX/Y` for performance
+- `cloningCurseActive` tracks curse state globally
+- `stolenBlueSymbols[]` array tracks stolen blue symbols for priority replacement
+- `wormsKilledByRain` counter tracks rain kills vs direct clicks
+
+## Snake Weapon System (`js/snake-weapon.js`)
+
+**Strategic Defensive Mechanic:**
+- **Trigger**: Click on lock (`#lock-display`) when 4+ worms are active
+- **Restriction**: One use per problem (resets on `problemCompleted` event)
+- **Purpose**: Powerful weapon to clear multiple worms when overwhelmed
+
+**Snake Properties:**
+- **Size**: 10 segments @ 18px each (2x worm size: worms are 5 segments @ 9px)
+- **Speed**: 1.8 units/frame (10% slower than worm base speed of 2.0)
+- **Color**: Red gradient (#ff3333 → #ff0000 → #cc0000) with scale texture
+- **Movement**: Cross-panel traversal (Panel A → B → C) via absolute coordinate system
+- **Detection Radius**: Worms flee when snake within 200px
+- **Eating Radius**: 25px collision distance to consume worms
+
+**Visual Design:**
+- **Head**: 24px with yellow eyes, animated forked tongue (flicks every 0.8s)
+- **Body**: Red gradient with scale texture (CSS box-shadow inset)
+- **Animations**: 
+  - Slithering with staggered segment delays (0.1s per segment)
+  - Chomping when eating (head scales to 1.4x)
+  - Serpentine trail-based movement
+- **GPU Acceleration**: `transform: translate3d()`, `will-change: transform`
+
+**Lifecycle:**
+1. **Spawn**: Emerges from lock center in Panel A
+2. **Hunt**: Targets nearest worm using cross-panel distance calculation
+3. **Eat**: Consumes worm on collision, visual chomp animation
+4. **Repeat**: Continues hunting until all worms eliminated
+5. **Return**: Returns to lock at 1.5x speed when no worms remain
+6. **Deactivate**: Cleans up and resets for next problem
+
+**Worm Evasion AI:**
+```javascript
+// Worms detect snake and flee
+if (distanceToSnake < 200) {
+    fleeSpeed = baseSpeed * 1.2  // 20% speed boost
+    velocityX = (dx / distance) * fleeSpeed  // Opposite direction
+    element.classList.add('fleeing')  // Yellow glow + shake
+}
+```
+
+**Cross-Panel Movement:**
+- Snake stores position relative to Panel A
+- Converts to absolute coordinates for worm distance calculation
+- Worm positions converted from Panel B to absolute
+- Direction calculated in absolute space, applied to Panel A relative position
+- Panel boundaries cached for 500ms to prevent layout thrashing
+
+**Event Integration:**
+```javascript
+// Dispatched by lock-manager.js when lock clicked with 4+ worms
+new CustomEvent('snakeWeaponTriggered', { detail: { wormCount: 7 } })
+
+// Snake listens for problem completion to reset availability
+'problemCompleted' - Resets usedThisProblem flag
+```
+
+**Key Methods:**
+- `spawnSnake()` - Creates 10-segment snake at lock center
+- `huntWorms()` - Finds nearest worm, moves toward it
+- `getDistanceToWorm(worm)` - Cross-panel distance calculation
+- `eatWorm(worm)` - Removes worm, chomping animation, red flash
+- `returnToLock()` - Returns to Panel A at 1.5x speed
+- `updateTrail()` - Maintains position history for body segments
+- `getSnakePosition()` - Returns position in Panel B coordinates for worm evasion
+
+**Performance Impact:**
+- FPS: 58-60 → 56-58 (minimal ~3% drop with snake active)
+- DOM queries cached (panel bounds every 500ms)
+- GPU-accelerated transforms
+- Single `requestAnimationFrame` animation loop
+
+**Visual Feedback:**
+- Lock flashes orange when < 4 worms (not ready)
+- Lock flashes red when already used this problem
+- Chomping animation (1.4x scale, brightness boost) when eating
+- Worms show yellow glow + shake animation when fleeing (`.fleeing` class)
+
+**Critical Patterns:**
+- Cross-panel coordinate conversion REQUIRED for accurate worm targeting
+- Snake immune to cloning curse (removes worms directly via `removeWorm()`)
+- One animation loop shared with worm system (performance)
+- Panel boundary caching prevents layout thrashing
+- Event-driven activation (no direct function calls)
+
+**Console Logging:** 🐍 emoji prefix for all snake-related logs
 
 ## Symbol Console System (`js/console-manager.js`)
 
@@ -349,10 +452,22 @@ The `Docs/` directory contains critical project knowledge:
 *   **`CSS_Override_Investigation.md`**: Deep dive into why CSS font size changes are ignored - explains inline style priority and specificity hierarchy. Read this FIRST before attempting any Panel A/B styling changes.
 *   **`Panel_C_Performance_Audit.md`**: Full performance analysis with 12+ optimization opportunities and code examples
 *   **`Panel_C_Performance_Summary.md`**: Executive summary of Panel C optimizations - quick reference for performance improvements
+*   **`Panel_C_Spawn_Fix_Report.md`**: Fixes for symbol spawn timing and guaranteed spawn system
 *   **`Touch_Click_Optimization_Report.md`**: Detailed analysis of pointer events vs click events for mobile responsiveness
 *   **`Performance_Audit_Report.md`**: Historical performance issues and fixes (covers worm system and CSS corruption)
 *   **`Worm_System_Complete_Overhaul.md`**: Architecture documentation for the adversarial worm mechanics
 *   **`Mobile_Layout_Implementation.md`**: Responsive design patterns and mobile-specific handling
+*   **`Bug_Fixes_White_Border_Worm_Movement.md`**: Solutions for visual glitches in worm movement
 *   **`Phase_1_Implementation_Summary.md`** & **`Phase_2_Implementation_Summary.md`**: Historical implementation notes
+*   **`Phase_1_Testing_Guide.md`**: Testing procedures and checklist for major features
 
 **When debugging:** Always check relevant docs before making changes - they contain context about WHY certain patterns exist.
+
+## Git Workflow & Version Control
+
+*   **Repository**: `https://github.com/TeacherEvan/MathMasterHTML`
+*   **Main Branch**: `main` (default branch)
+*   **Deployment**: Auto-deploys to GitHub Pages on push to `main`
+*   **Commit Convention**: Use emoji prefixes matching console logs (🎮, 🔒, 🐛, 📊, 🎯) for easy tracking
+*   **Testing Before Push**: Always test locally with `python -m http.server 8000` before pushing to main
+*   **Critical Files**: Never commit changes to `css/worm-styles.css` without backup - file has history of corruption

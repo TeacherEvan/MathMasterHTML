@@ -14,6 +14,11 @@ class WormSystem {
         this.firstWormSpawned = false;
         this.lockedConsoleSlots = new Set(); // Track which console slots have active worms
 
+        // CLONING CURSE MECHANIC
+        this.cloningCurseActive = false; // Tracks if cloning curse is active
+        this.wormsKilledByRain = 0; // Count of worms killed via rain symbols (not direct clicks)
+        this.stolenBlueSymbols = []; // Track stolen blue symbols for replacement priority
+
         // PERFORMANCE: DOM query caching
         this.cachedRevealedSymbols = null;
         this.revealedSymbolsCacheTime = 0;
@@ -22,7 +27,7 @@ class WormSystem {
         this.CACHE_DURATION_TARGETS = 100; // Refresh revealed symbols every 100ms
         this.CACHE_DURATION_RECT = 200; // Refresh container rect every 200ms
 
-        console.log('🐛 WormSystem initialized with DOM query caching');
+        console.log('🐛 WormSystem initialized with DOM query caching and Cloning Curse mechanic');
 
         // Listen for the custom event dispatched by game.js
         document.addEventListener('problemLineCompleted', (event) => {
@@ -80,7 +85,15 @@ class WormSystem {
 
             if (normalizedWormSymbol === normalizedClicked) {
                 console.log(`💥 BOOM! User clicked rain symbol "${clickedSymbol}" - EXPLODING worm with stolen symbol!`);
-                this.explodeWorm(worm);
+
+                // Track this as a rain kill (not direct click)
+                this.wormsKilledByRain++;
+                console.log(`📊 Worms killed by rain: ${this.wormsKilledByRain}`);
+
+                this.explodeWorm(worm, true); // Pass true to indicate this is a rain kill
+
+                // Check if curse should be reset (all visible worms killed by rain)
+                this.checkCurseReset();
             }
         });
     }
@@ -98,6 +111,47 @@ class WormSystem {
             worm.targetSymbol = symbolValue;
             worm.roamingEndTime = Date.now(); // Stop roaming timer
         });
+    }
+
+    // Check if cloning curse should be reset (all worms eliminated via rain)
+    checkCurseReset() {
+        if (!this.cloningCurseActive) return;
+
+        const activeWorms = this.worms.filter(w => w.active);
+
+        if (activeWorms.length === 0) {
+            console.log('🔓 CURSE RESET! All worms eliminated via rain symbols!');
+            this.cloningCurseActive = false;
+            this.wormsKilledByRain = 0;
+            this.stolenBlueSymbols = []; // Clear stolen blue symbols tracking
+
+            // Visual feedback for curse reset
+            this.createCurseResetEffect();
+        } else {
+            console.log(`🔒 Curse still active. ${activeWorms.length} worm(s) remaining.`);
+        }
+    }
+
+    // Visual effect when curse is reset
+    createCurseResetEffect() {
+        const flash = document.createElement('div');
+        flash.style.position = 'fixed';
+        flash.style.top = '0';
+        flash.style.left = '0';
+        flash.style.width = '100vw';
+        flash.style.height = '100vh';
+        flash.style.background = 'radial-gradient(circle, rgba(0,255,255,0.3), transparent)';
+        flash.style.pointerEvents = 'none';
+        flash.style.zIndex = '999999';
+        flash.style.animation = 'curse-reset-flash 1s ease-out';
+
+        document.body.appendChild(flash);
+
+        setTimeout(() => {
+            if (flash.parentNode) {
+                flash.parentNode.removeChild(flash);
+            }
+        }, 1000);
     }
 
     initialize() {
@@ -344,14 +398,28 @@ class WormSystem {
     stealSymbol(worm) {
         // PERFORMANCE: Use cached revealed symbols instead of querying every time
         const revealedSymbols = this.getCachedRevealedSymbols();
-        const availableSymbols = Array.from(revealedSymbols).filter(el =>
-            !el.dataset.stolen &&
-            !el.classList.contains('space-symbol') &&
-            !el.classList.contains('completed-row-symbol')
-        );
+
+        // CLONING CURSE: Allow stealing BLUE symbols (revealed-symbol class) when curse is active
+        let availableSymbols;
+        if (this.cloningCurseActive) {
+            // Curse active - can steal ANY revealed symbol (red or blue)
+            availableSymbols = Array.from(revealedSymbols).filter(el =>
+                !el.dataset.stolen &&
+                !el.classList.contains('space-symbol') &&
+                !el.classList.contains('completed-row-symbol')
+            );
+            console.log(`🔮 CURSE ACTIVE - Worm can steal blue symbols! ${availableSymbols.length} symbols available`);
+        } else {
+            // Normal mode - only steal red (hidden) symbols
+            availableSymbols = Array.from(revealedSymbols).filter(el =>
+                !el.dataset.stolen &&
+                !el.classList.contains('space-symbol') &&
+                !el.classList.contains('completed-row-symbol')
+            );
+        }
 
         if (availableSymbols.length === 0) {
-            console.log('🐛 No revealed red symbols available to steal');
+            console.log('🐛 No symbols available to steal');
             // Continue roaming
             worm.roamingEndTime = Date.now() + 5000;
             worm.isRushingToTarget = false;
@@ -374,8 +442,22 @@ class WormSystem {
         }
 
         const symbolValue = targetSymbol.textContent;
+        const wasBlueSymbol = targetSymbol.classList.contains('revealed-symbol');
 
-        console.log(`🐛 Worm ${worm.id} stealing RED symbol: "${symbolValue}"`);
+        console.log(`🐛 Worm ${worm.id} stealing ${wasBlueSymbol ? 'BLUE' : 'RED'} symbol: "${symbolValue}"`);
+
+        // Track if this was a blue symbol for replacement priority
+        if (wasBlueSymbol && this.cloningCurseActive) {
+            this.stolenBlueSymbols.push({
+                symbol: symbolValue,
+                element: targetSymbol,
+                wormId: worm.id
+            });
+            console.log(`📋 Tracking stolen BLUE symbol "${symbolValue}" for priority replacement`);
+
+            // Mark the element so game.js knows it was blue before being stolen
+            targetSymbol.dataset.wasRevealed = 'true';
+        }
 
         // Mark symbol as stolen and hide it
         targetSymbol.dataset.stolen = 'true';
@@ -390,9 +472,10 @@ class WormSystem {
         worm.hasStolen = true;
         worm.isRushingToTarget = false;
         worm.element.dataset.stolenSymbol = symbolValue;
+        worm.wasBlueSymbol = wasBlueSymbol; // Track if it was blue
 
-        // ACTIVATE LSD FLICKER when stealing red symbol!
-        console.log(`🌈 Worm ${worm.id} stole red symbol - ACTIVATING LSD FLICKER with 20% SPEED BOOST!`);
+        // ACTIVATE LSD FLICKER when stealing symbol!
+        console.log(`🌈 Worm ${worm.id} stole ${wasBlueSymbol ? 'blue' : 'red'} symbol - ACTIVATING LSD FLICKER with 20% SPEED BOOST!`);
         worm.isFlickering = true;
         worm.element.classList.add('flickering');
         worm.currentSpeed = worm.baseSpeed * 1.2; // 20% speed boost!
@@ -401,6 +484,9 @@ class WormSystem {
         const stolenSymbolDiv = document.createElement('div');
         stolenSymbolDiv.className = 'carried-symbol';
         stolenSymbolDiv.textContent = symbolValue;
+        if (wasBlueSymbol) {
+            stolenSymbolDiv.style.color = '#00ffff'; // Cyan for stolen blue symbols
+        }
         worm.element.appendChild(stolenSymbolDiv);
 
         console.log(`🐛 Worm now carrying "${symbolValue}" and heading back to console hole!`);
@@ -418,8 +504,44 @@ class WormSystem {
         const panelBWidth = panelB.offsetWidth || 800;
         const panelBHeight = panelB.offsetHeight || 600;
 
+        // SNAKE EVASION: Check if snake is active and close to worms
+        let snakePosition = null;
+        let snakeDetectionRadius = 0;
+        let snakeIsActive = false;
+
+        if (window.snakeWeapon && window.snakeWeapon.isSnakeActive()) {
+            snakeIsActive = true;
+            snakePosition = window.snakeWeapon.getSnakePosition();
+            snakeDetectionRadius = window.snakeWeapon.getDetectionRadius();
+        }
+
         this.worms.forEach(worm => {
             if (!worm.active) return;
+
+            // SNAKE EVASION: Check if worm needs to flee from snake
+            if (snakeIsActive && snakePosition) {
+                const dx = worm.x - snakePosition.x;
+                const dy = worm.y - snakePosition.y;
+                const distanceToSnake = Math.sqrt(dx * dx + dy * dy);
+
+                if (distanceToSnake < snakeDetectionRadius) {
+                    // FLEE FROM SNAKE!
+                    console.log(`🏃 Worm ${worm.id} fleeing from snake! Distance: ${distanceToSnake.toFixed(0)}px`);
+
+                    // Set flee velocity (opposite direction from snake, 1.2x speed boost)
+                    const fleeSpeed = worm.baseSpeed * 1.2;
+                    worm.velocityX = (dx / distanceToSnake) * fleeSpeed;
+                    worm.velocityY = (dy / distanceToSnake) * fleeSpeed;
+
+                    // Mark worm as fleeing (visual indicator)
+                    if (!worm.element.classList.contains('fleeing')) {
+                        worm.element.classList.add('fleeing');
+                    }
+                } else if (worm.element.classList.contains('fleeing')) {
+                    // Snake far away now - remove flee state
+                    worm.element.classList.remove('fleeing');
+                }
+            }
 
             // Update crawl phase for animation
             worm.crawlPhase = (worm.crawlPhase + 0.05) % (Math.PI * 2);
@@ -595,30 +717,37 @@ class WormSystem {
     handleWormClick(worm) {
         if (!worm.active) return;
 
-        // RISK/REWARD MECHANIC: 80% chance to kill, 20% chance to clone (spawn 2!)
-        const randomChance = Math.random();
-        
-        if (randomChance < 0.20) {
-            // 20% CHANCE: Worm backfires and creates TWO clones!
-            console.log(`🎲 BAD LUCK! Worm ${worm.id} clicked - SPAWNING 2 CLONES! (20% chance triggered)`);
-            
-            // Visual feedback for bad luck - red flash
-            worm.element.style.animation = 'worm-flash-red 0.3s ease-out';
+        // CLONING CURSE MECHANIC
+        if (this.cloningCurseActive) {
+            // Curse is active - ANY worm click will clone instead of kill!
+            console.log(`🔮 CLONING CURSE ACTIVE! Worm ${worm.id} clicked - CREATING CLONE!`);
+
+            // Visual feedback for curse activation
+            worm.element.style.animation = 'worm-flash-purple 0.3s ease-out';
             setTimeout(() => {
                 worm.element.style.animation = '';
             }, 300);
-            
-            // Spawn TWO clones instead of one!
+
+            // Clone the worm
             this.cloneWorm(worm);
-            setTimeout(() => {
-                this.cloneWorm(worm);
-            }, 150); // Slight delay for visual effect
-            
-        } else {
-            // 80% CHANCE: Successfully explode the worm!
-            console.log(`💥 SUCCESS! Worm ${worm.id} clicked - EXPLODING! (80% chance triggered)`);
-            this.explodeWorm(worm);
+            return;
         }
+
+        // First direct click on a worm - activate cloning curse!
+        console.log(`🔮 CURSE ACTIVATED! First worm ${worm.id} clicked directly - cloning and activating curse!`);
+        this.cloningCurseActive = true;
+        this.wormsKilledByRain = 0; // Reset rain kill counter
+
+        // Visual feedback for curse activation
+        worm.element.style.animation = 'worm-flash-purple 0.5s ease-out';
+        setTimeout(() => {
+            worm.element.style.animation = '';
+        }, 500);
+
+        // Create a clone
+        this.cloneWorm(worm);
+
+        console.log('⚠️ CLONING CURSE NOW ACTIVE! Only killing worms via rain symbols will reset it!');
     }
 
     cloneWorm(parentWorm) {
@@ -719,8 +848,8 @@ class WormSystem {
         }
     }
 
-    explodeWorm(worm) {
-        console.log(`💥 EXPLODING worm ${worm.id} and returning symbol "${worm.stolenSymbol}"!`);
+    explodeWorm(worm, isRainKill = false) {
+        console.log(`💥 EXPLODING worm ${worm.id} (${isRainKill ? 'RAIN KILL' : 'direct click'}) and returning symbol "${worm.stolenSymbol}"!`);
 
         // Return stolen symbol to its original position
         if (worm.targetElement) {
@@ -728,6 +857,12 @@ class WormSystem {
             worm.targetElement.classList.add('revealed-symbol');
             worm.targetElement.style.visibility = 'visible';
             delete worm.targetElement.dataset.stolen;
+
+            // Remove from stolen blue symbols tracking if it was a blue symbol
+            if (worm.wasBlueSymbol) {
+                this.stolenBlueSymbols = this.stolenBlueSymbols.filter(s => s.wormId !== worm.id);
+                console.log(`📋 Removed from stolen blue symbols tracking. Remaining: ${this.stolenBlueSymbols.length}`);
+            }
 
             console.log(`✅ Symbol "${worm.stolenSymbol}" returned to Panel B`);
         }
@@ -738,8 +873,12 @@ class WormSystem {
         // Create explosion particles
         this.createExplosionParticles(worm.x, worm.y);
 
-        // Flash the screen
-        this.createExplosionFlash();
+        // Flash the screen (different color for rain kills during curse)
+        if (isRainKill && this.cloningCurseActive) {
+            this.createExplosionFlash('#00ffff'); // Cyan flash for curse rain kills
+        } else {
+            this.createExplosionFlash();
+        }
 
         // Create persistent crack at worm's location
         this.createCrack(worm.x, worm.y);
@@ -779,9 +918,12 @@ class WormSystem {
         }
     }
 
-    createExplosionFlash() {
+    createExplosionFlash(color = null) {
         const flash = document.createElement('div');
         flash.className = 'explosion-flash';
+        if (color) {
+            flash.style.background = `radial-gradient(circle, ${color}66, transparent)`;
+        }
         document.body.appendChild(flash);
 
         setTimeout(() => {

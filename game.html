@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Master - Unlock Your Mind - Game</title>
-    
+
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" as="style">
-    
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap"
+        as="style">
+
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/game.css">
     <link rel="stylesheet" href="css/console.css">
     <link rel="stylesheet" href="css/worm-styles.css">
+    <link rel="stylesheet" href="css/snake-weapon.css">
     <link rel="stylesheet" href="css/lock-responsive.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -35,14 +38,14 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         #back-button:hover {
             border-color: #00ff00;
             color: #00ff00;
-            box-shadow: 0 0 15px rgba(0,255,0,0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
             transform: scale(1.05);
         }
-        
+
         /* Game container layout */
         .game-container {
             display: flex;
@@ -50,13 +53,13 @@
             width: 100vw;
             background: #000;
         }
-        
+
         .display {
             flex: 1;
             position: relative;
             overflow: hidden;
         }
-        
+
         .wall {
             width: 5px;
             background: linear-gradient(180deg, #0f0, #060);
@@ -64,12 +67,20 @@
             overflow: hidden;
             animation: wallPulse 3s ease-in-out infinite;
         }
-        
+
         @keyframes wallPulse {
-            0%, 100% { box-shadow: 0 0 10px rgba(0,255,0,0.5); }
-            50% { box-shadow: 0 0 20px rgba(0,255,0,0.8); }
+
+            0%,
+            100% {
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+            }
         }
-          /* Ensure the body has the correct styles */
+
+        /* Ensure the body has the correct styles */
         body {
             margin: 0;
             padding: 0;
@@ -90,32 +101,36 @@
         }
     </style>
 </head>
+
 <body>
     <!-- How to Play Modal -->
     <div id="how-to-play-modal" class="how-to-play-overlay">
         <div class="how-to-play-content">
             <h2>Math Master - Unlock Your Mind</h2>
             <p class="how-to-play-message">
-                Math stimulates your brain's problem-solving capabilities, allowing you to see vastly different solutions to everyday problems. Once you finish the game, remember to always use your powers for good 😉
+                Math stimulates your brain's problem-solving capabilities, allowing you to see vastly different
+                solutions to everyday problems. Once you finish the game, remember to always use your powers for good 😉
                 <br><br>
                 <strong>Important Notes:</strong>
                 <br>
-                1. When your muscles train, they burn. Frustration is the brain's way of expressing the "burn". Take a break if necessary, but allow your brain time to let it do its thing without you interrupting it by overthinking everything.
+                1. When your muscles train, they burn. Frustration is the brain's way of expressing the "burn". Take a
+                break if necessary, but allow your brain time to let it do its thing without you interrupting it by
+                overthinking everything.
                 <br><br>
                 2. The help button has no limit. No one will know you used it.
             </p>
             <button id="start-game-btn" class="start-game-button">NEXT ➔</button>
         </div>
     </div>
-    
+
     <!-- Rotation Overlay - Force Landscape -->
     <div id="rotation-overlay">
         <div class="rotate-icon">📱➡️</div>
         <div class="rotate-text">Please rotate your device to landscape mode</div>
     </div>
-    
+
     <button id="back-button" onclick="goBack()">← Back</button>
-    
+
     <!-- Main Game Container -->
     <div class="grid-container">
         <!-- Panel A: Lock and Problem -->
@@ -152,7 +167,7 @@
             <div id="symbol-rain-container"></div>
         </div>
     </div>
-    
+
     <!-- Symbol Selection Modal -->
     <div id="symbol-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
@@ -176,7 +191,8 @@
                 <button class="symbol-choice" data-symbol="÷">÷</button>
                 <button class="symbol-choice" data-symbol="×">×</button>
             </div>
-            <p class="modal-instruction" id="position-instruction" style="display: none;">Now, choose a position on your console:</p>
+            <p class="modal-instruction" id="position-instruction" style="display: none;">Now, choose a position on your
+                console:</p>
             <div id="position-choices" class="position-grid" style="display: none;">
                 <button class="position-choice" data-position="0">1</button>
                 <button class="position-choice" data-position="1">2</button>
@@ -191,11 +207,12 @@
             <button id="skip-button" class="modal-skip">Skip (Random Fill)</button>
         </div>
     </div>
-    
+
     <script src="js/display-manager.js"></script>
     <script src="js/performance-monitor.js"></script>
     <script src="js/3rdDISPLAY.js"></script>
     <script src="js/worm.js"></script>
+    <script src="js/snake-weapon.js"></script>
     <script src="js/lock-responsive.js"></script>
     <script src="js/lock-manager.js"></script>
     <script src="js/console-manager.js"></script>
@@ -204,7 +221,7 @@
         function goBack() {
             window.location.href = 'level-select.html';
         }
-        
+
         // Auto-trigger fullscreen on page load
         function enterFullscreen() {
             const elem = document.documentElement;
@@ -218,18 +235,18 @@
                 elem.msRequestFullscreen();
             }
         }
-        
+
         // How to Play Modal Control
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const modal = document.getElementById('how-to-play-modal');
             const startButton = document.getElementById('start-game-btn');
-            
+
             if (modal && startButton) {
                 // Show modal on page load
                 modal.style.display = 'flex';
-                
+
                 // Hide modal when NEXT button clicked and trigger fullscreen
-                startButton.addEventListener('click', function() {
+                startButton.addEventListener('click', function () {
                     modal.style.animation = 'modalFadeOut 0.3s ease-out';
                     setTimeout(() => {
                         modal.style.display = 'none';
@@ -239,11 +256,12 @@
                     }, 300);
                 });
             }
-            
+
             // Also try to enter fullscreen immediately (may not work on all browsers without user interaction)
             enterFullscreen();
         });
     </script>
 
 </body>
+
 </html>

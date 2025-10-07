@@ -172,6 +172,24 @@
     animation: worm-multiply 0.5s ease-out;
 }
 
+/* Fleeing from snake - visual panic effect */
+.worm-container.fleeing {
+    animation: worm-panic 0.3s ease-in-out infinite;
+    filter: drop-shadow(0 0 15px rgba(255, 255, 0, 0.8)) !important;
+}
+
+@keyframes worm-panic {
+
+    0%,
+    100% {
+        transform: scale(1) rotate(-2deg);
+    }
+
+    50% {
+        transform: scale(1.15) rotate(2deg);
+    }
+}
+
 @keyframes worm-multiply {
 
     0%,
@@ -199,6 +217,42 @@
     100% {
         filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
         transform: scale(1);
+    }
+}
+
+/* Purple flash for cloning curse activation/continuation */
+@keyframes worm-flash-purple {
+    0% {
+        filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 40px rgba(255, 0, 255, 1)) drop-shadow(0 0 60px rgba(138, 43, 226, 0.9));
+        transform: scale(1.4);
+    }
+
+    100% {
+        filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+        transform: scale(1);
+    }
+}
+
+/* Curse reset flash animation */
+@keyframes curse-reset-flash {
+    0% {
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+
+    100% {
+        opacity: 0;
     }
 }
 
