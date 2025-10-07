@@ -743,7 +743,7 @@ class WormSystem {
         // 80% chance: Worm explodes (normal kill)
         // 20% chance: Worm clones AND activates cloning curse
         const roll = Math.random() * 100; // 0-100
-        
+
         if (roll < 80) {
             // 80% - BOOM! Normal worm kill
             console.log(`💥 BOOM! Worm ${worm.id} exploded (${roll.toFixed(1)}% roll - under 80% threshold)`);
@@ -752,7 +752,7 @@ class WormSystem {
             // 20% - Clone AND activate curse!
             console.log(`🔮 CLONE EVENT! Worm ${worm.id} cloned (${roll.toFixed(1)}% roll - over 80% threshold)`);
             console.log(`⚠️ CLONING CURSE ACTIVATED! All future worm clicks will clone until curse reset!`);
-            
+
             this.cloningCurseActive = true;
             this.wormsKilledByRain = 0; // Reset rain kill counter
 
@@ -1080,18 +1080,18 @@ class WormSystem {
     // AUTO-TRIGGER: Check if snake should automatically spawn (emergency backup)
     checkAutoTriggerSnake() {
         const activeWorms = this.worms.filter(w => w.active);
-        
+
         // Auto-trigger threshold: 6 worms (player can manually trigger at 4+)
         const AUTO_TRIGGER_THRESHOLD = 6;
-        
+
         if (activeWorms.length >= AUTO_TRIGGER_THRESHOLD) {
             // Check if snake already used this problem
             if (window.snakeWeapon && !window.snakeWeapon.usedThisProblem) {
                 console.log(`🚨 AUTO-TRIGGER! ${activeWorms.length} worms reached - spawning snake automatically!`);
-                
+
                 // Dispatch same event as manual lock click
                 document.dispatchEvent(new CustomEvent('snakeWeaponTriggered', {
-                    detail: { 
+                    detail: {
                         wormCount: activeWorms.length,
                         autoTriggered: true // Flag to indicate this was automatic
                     }
