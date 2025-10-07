@@ -45,7 +45,7 @@ class LockManager {
         setTimeout(() => {
             const lockContainer = document.querySelector('#lock-display');
             console.log('🐍 Attaching click handler to lock container:', lockContainer);
-            
+
             if (lockContainer) {
                 lockContainer.addEventListener('click', (e) => {
                     console.log('🐍 Lock clicked!', e.target);
