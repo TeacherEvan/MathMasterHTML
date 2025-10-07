@@ -16,8 +16,12 @@ class LockManager {
             console.error(`❌ Lock container not found: ${containerSelector}`);
         }
 
-        // Initialize with basic lock display
-        this.showBasicLock();
+        // PERFORMANCE FIX: Defer basic lock display to prevent blocking
+        // Use requestIdleCallback if available, otherwise setTimeout
+        const deferExecution = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
+        deferExecution(() => {
+            this.showBasicLock();
+        });
 
         // Bind event listeners
         this.initEventListeners();
@@ -25,7 +29,7 @@ class LockManager {
         // Wait for responsive manager to load
         this.initResponsiveIntegration();
 
-        console.log('🔒 LockManager initialized with basic lock display');
+        console.log('🔒 LockManager initialized (lock display deferred for performance)');
     }
 
     initEventListeners() {

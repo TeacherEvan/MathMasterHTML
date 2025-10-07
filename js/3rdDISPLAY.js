@@ -1,8 +1,9 @@
 // js/3rdDISPLAY.js - Symbol Rain Display for Math Game
 console.log("Symbol Rain Display script loaded.");
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎯 DOMContentLoaded fired for 3rdDISPLAY.js');
+// PERFORMANCE FIX: Start animation immediately, don't wait for DOMContentLoaded
+function initSymbolRain() {
+    console.log('🎯 Initializing symbol rain (early start for performance)');
     const symbolRainContainer = document.getElementById('symbol-rain-container');
 
     if (!symbolRainContainer) {
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let symbolFallSpeed = 0.6;
     const maxFallSpeed = 6;
     const spawnRate = 0.2;
-    let columnWidth = 50; // Default for mobile
+    const columnWidth = 50;
 
     // Guaranteed spawn system - ensure all symbols appear every 5 seconds
     let lastSpawnTime = {};
@@ -37,18 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateColumns() {
         const containerWidth = symbolRainContainer.offsetWidth;
         const containerHeight = symbolRainContainer.offsetHeight;
-
-        // Dynamic column width for wider screens
-        if (containerWidth > 1280) {
-            columnWidth = 70; // Wider columns for high-res displays
-        } else if (containerWidth > 768) {
-            columnWidth = 60;
-        } else {
-            columnWidth = 50; // Default for mobile
-        }
-
         columns = Math.floor(containerWidth / columnWidth);
-        console.log(`📏 Container dimensions: ${containerWidth}x${containerHeight}, Columns: ${columns}, Column Width: ${columnWidth}`);
+        console.log(`📏 Container dimensions: ${containerWidth}x${containerHeight}, Columns: ${columns}`);
     }
 
     // DESKTOP: Create falling symbol (vertical)
@@ -56,10 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const symbol = document.createElement('div');
         symbol.className = 'falling-symbol';
         symbol.textContent = forcedSymbol || symbols[Math.floor(Math.random() * symbols.length)];
-
-        // Improved horizontal placement within the column
-        const horizontalOffset = Math.random() * (columnWidth - 30); // Use more of the column width
-        symbol.style.left = (column * columnWidth + horizontalOffset) + 'px';
+        symbol.style.left = (column * columnWidth + Math.random() * 30) + 'px';
 
         if (isInitialPopulation) {
             symbol.style.top = `${Math.random() * symbolRainContainer.offsetHeight}px`;
@@ -125,8 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Desktop: Check vertical collision with increased spacing
             const symbolHeight = 30;
             const symbolWidth = 30;
-            const collisionBuffer = 50; // Increased from 40 to spread symbols more vertically
-            const horizontalBuffer = 45; // Increased from 35 for better horizontal spacing
+            const collisionBuffer = 40; // Increased from 25 to spread symbols more
+            const horizontalBuffer = 35; // Increased from 20 for better horizontal spacing
 
             // Cache element position to avoid repeated style access
             const symbolLeft = symbolObj.x;
@@ -245,4 +233,14 @@ document.addEventListener('DOMContentLoaded', () => {
         isMobileMode = isMobile;
         console.log(`🖥️ Display resolution changed to: ${event.detail.name}, isMobileMode: ${isMobileMode}`);
     });
-});
+}
+
+// PERFORMANCE FIX: Call initSymbolRain as soon as DOM is interactive (earlier than DOMContentLoaded)
+if (document.readyState === 'loading') {
+    // DOM still loading - wait for interactive state
+    document.addEventListener('DOMContentLoaded', initSymbolRain);
+} else {
+    // DOM already loaded - start immediately
+    initSymbolRain();
+}
+

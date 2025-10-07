@@ -64,6 +64,13 @@ The game is **100% event-driven**. Components do not call each other directly. T
 *   **Access the game**: Open `http://localhost:8000/game.html?level=beginner` in your browser.
 *   **Debugging**: The console is filled with emoji-prefixed logs (e.g., 🎮, 🔒, 🐛) that are extremely helpful for tracing game state.
 
+## Performance Optimizations
+
+**Critical Startup Performance Pattern:**
+*   Symbol rain (`3rdDISPLAY.js`) starts immediately without waiting for `DOMContentLoaded` to ensure smooth animation from page load.
+*   Heavy operations (problem loading, lock initialization) are deferred using `requestIdleCallback` or `setTimeout(cb, 1)` to prevent blocking the animation loop.
+*   **Never add synchronous blocking operations during initialization** - use deferred execution for non-critical UI setup.
+
 ## Common Pitfalls & Key Conventions
 
 1.  **CSS Overrides**: (Reiterated for emphasis) Do not try to style mobile font sizes or lock scaling with CSS. Edit the JavaScript files directly.
