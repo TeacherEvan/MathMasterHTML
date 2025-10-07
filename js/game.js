@@ -459,8 +459,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateGameStyles() {
         const isMobile = window.innerWidth <= 768;
-        const solutionSymbolMinWidth = isMobile ? '6px' : '12px';
-        const spaceSymbolMargin = isMobile ? '0 2px' : '0 4px';
+        const solutionSymbolMinWidth = isMobile ? '3px' : '12px';
+        const spaceSymbolMargin = isMobile ? '0 1px' : '0 4px';
 
         gameStyles.textContent = `
         @keyframes pulsating-red {
