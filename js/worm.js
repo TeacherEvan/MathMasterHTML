@@ -690,18 +690,18 @@ class WormSystem {
         for (let i = 0; i < particleCount; i++) {
             const particle = document.createElement('div');
             particle.className = 'explosion-particle';
-            
+
             const angle = (i / particleCount) * Math.PI * 2;
             const speed = 100 + Math.random() * 100;
             const distance = 80 + Math.random() * 40;
-            
+
             particle.style.left = `${x}px`;
             particle.style.top = `${y}px`;
             particle.style.setProperty('--angle-x', Math.cos(angle) * distance);
             particle.style.setProperty('--angle-y', Math.sin(angle) * distance);
-            
+
             this.wormContainer.appendChild(particle);
-            
+
             // Remove particle after animation
             setTimeout(() => {
                 if (particle.parentNode) {
@@ -715,7 +715,7 @@ class WormSystem {
         const flash = document.createElement('div');
         flash.className = 'explosion-flash';
         document.body.appendChild(flash);
-        
+
         setTimeout(() => {
             if (flash.parentNode) {
                 flash.parentNode.removeChild(flash);

@@ -73,9 +73,24 @@ function initSymbolRain() {
 
     function populateInitialSymbols() {
         const initialSymbolCount = columns * 5;
-        for (let i = 0; i < initialSymbolCount; i++) {
-            createFallingSymbol(Math.floor(Math.random() * columns), true);
+        let spawned = 0;
+        
+        // Gradually spawn symbols over time to prevent performance spike
+        function spawnBatch() {
+            const batchSize = 3; // Spawn 3 symbols at a time
+            const batchDelay = 50; // 50ms between batches
+            
+            for (let i = 0; i < batchSize && spawned < initialSymbolCount; i++) {
+                createFallingSymbol(Math.floor(Math.random() * columns), true);
+                spawned++;
+            }
+            
+            if (spawned < initialSymbolCount) {
+                setTimeout(spawnBatch, batchDelay);
+            }
         }
+        
+        spawnBatch();
     }
 
     function handleSymbolClick(symbolElement, event) {

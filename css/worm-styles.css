@@ -479,11 +479,13 @@
         transform: scale(1) rotate(0deg);
         opacity: 1;
     }
+
     50% {
         transform: scale(2.5) rotate(180deg);
         opacity: 0.8;
         filter: drop-shadow(0 0 40px rgba(255, 255, 0, 1)) drop-shadow(0 0 60px rgba(255, 0, 0, 1)) !important;
     }
+
     100% {
         transform: scale(0.1) rotate(360deg);
         opacity: 0;
@@ -507,10 +509,12 @@
         transform: translate(0, 0) scale(1);
         opacity: 1;
     }
+
     50% {
         transform: translate(calc(var(--angle-x) * 0.5), calc(var(--angle-y) * 0.5)) scale(1.5);
         opacity: 0.8;
     }
+
     100% {
         transform: translate(calc(var(--angle-x) * 1px), calc(var(--angle-y) * 1px)) scale(0.3);
         opacity: 0;
@@ -533,15 +537,14 @@
     0% {
         opacity: 0;
     }
+
     50% {
         opacity: 1;
     }
+
     100% {
         opacity: 0;
     }
 }
 
- 
- / *   D R A M A T I C   E X P L O S I O N   E F F E C T S   * / 
- 
- 
+   / *   D R A M A T I C   E X P L O S I O N   E F F E C T S   * /     
