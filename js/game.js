@@ -1,7 +1,9 @@
 // js/game.js - Enhanced Game Logic with Worm Integration
+import { ProblemManager } from './problem-manager.js';
+
 console.log("Game script loaded.");
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const problemContainer = document.getElementById('problem-container');
     const solutionContainer = document.getElementById('solution-container');
     const lockDisplay = document.getElementById('lock-display');
@@ -17,109 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Apply level theme to body
     document.body.className = `level-${level}`;
 
-    // Problems array to store loaded problems
-    let problems = [];
-    let currentProblemIndex = 0;
-    let currentProblem = null;
+    // Initialize Problem Manager
+    const problemManager = new ProblemManager(level);
+    await problemManager.loadProblems();
+
+    // Game state variables
+    let currentProblem = problemManager.getCurrentProblem();
     let currentStepIndex = 0;
     let currentSymbolIndex = 0;
     let revealedIndex = 0;
     let correctAnswersCount = 0;
-
-    // Load problems based on level
-    function loadProblems() {
-        let problemPath = '';
-
-        // Determine which asset file to load based on level
-        switch (level) {
-            case 'beginner':
-                problemPath = 'Assets/Beginner_Lvl/beginner_problems.md';
-                break;
-            case 'warrior':
-                problemPath = 'Assets/Warrior_Lvl/warrior_problems.md';
-                break;
-            case 'master':
-                problemPath = 'Assets/Master_Lvl/master_problems.md';
-                break;
-            default:
-                problemPath = 'Assets/Beginner_Lvl/beginner_problems.md';
-        }
-
-        console.log(`📚 Loading problems from: ${problemPath}`);
-
-        // Fetch the problem set
-        fetch(problemPath)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Failed to load problems: ${response.statusText}`);
-                }
-                return response.text();
-            })
-            .then(data => {
-                // Parse problems from markdown
-                problems = parseProblemsFromMarkdown(data);
-                console.log(`📖 Loaded ${problems.length} problems for ${level} level`);
-
-                // Start with the first problem
-                if (problems.length > 0) {
-                    currentProblem = problems[currentProblemIndex];
-                    setupProblem();
-                } else {
-                    console.error('❌ No problems found in the loaded file');
-                    // Use fallback problem
-                    currentProblem = {
-                        problem: "4x = 24",
-                        solution: "x = 6"
-                    };
-                    setupProblem();
-                }
-            })
-            .catch(error => {
-                console.error('❌ Error loading problems:', error);
-                // Fallback to a default problem
-                currentProblem = {
-                    problem: "4x = 24",
-                    solution: "x = 6"
-                };
-                setupProblem();
-            });
-    }
-
-    // Parse problems from markdown content
-    function parseProblemsFromMarkdown(markdownContent) {
-        const parsedProblems = [];
-
-        // Split by problem (starting with a number followed by dot and backtick)
-        const problemRegex = /(\d+)\.\s+`([^`]+)`\s*\n((?:\s*-[^\n]+\n?)+)/g;
-        let match;
-
-        while ((match = problemRegex.exec(markdownContent)) !== null) {
-            try {
-                const problemNumber = match[1];
-                const problemText = match[2];
-                const stepsText = match[3];
-
-                // Extract all solution steps (lines starting with -)
-                const steps = stepsText.split('\n')
-                    .filter(line => line.trim().startsWith('-'))
-                    .map(line => line.trim().replace(/^-\s*/, ''));
-
-                if (steps.length > 0) {
-                    parsedProblems.push({
-                        problem: problemText,
-                        steps: steps,
-                        currentStep: 0,
-                        currentSymbol: 0
-                    });
-                }
-            } catch (e) {
-                console.error('Error parsing problem:', e);
-            }
-        }
-
-        console.log(`📚 Parsed ${parsedProblems.length} problems with multi-step solutions`);
-        return parsedProblems;
-    }
 
     function setupProblem() {
         if (!currentProblem || !currentProblem.steps || currentProblem.steps.length === 0) {
@@ -134,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentStepIndex = 0;
         currentSymbolIndex = 0;
         revealedIndex = 0;
+        correctAnswersCount = 0; // Reset for new problem
 
         // Show basic lock until activation
         if (lockDisplay && window.lockManager) {
@@ -189,13 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Move to next problem
     function nextProblem() {
-        currentProblemIndex++;
-        if (currentProblemIndex >= problems.length) {
-            // Loop back to first problem for now
-            currentProblemIndex = 0;
-            console.log('🔄 Looping back to first problem');
-        }
-        currentProblem = problems[currentProblemIndex];
+        currentProblem = problemManager.nextProblem();
 
         // Reset step indices
         currentStepIndex = 0;
@@ -205,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initial setup
-    loadProblems(); // Load problems first
+    setupProblem();
 
     /** Get next hidden symbol from solution - now accepts any symbol in current line */
     function getNextSymbol() {
@@ -546,9 +450,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
     });
 
-    // Add completion glow animation and additional styles
     const gameStyles = document.createElement('style');
-    gameStyles.textContent = `
+    gameStyles.id = 'game-styles'; // Add an ID for easy replacement
+
+    function updateGameStyles() {
+        const isMobile = window.innerWidth <= 768;
+        const solutionSymbolMinWidth = isMobile ? '6px' : '12px';
+        const spaceSymbolMargin = isMobile ? '0 2px' : '0 4px';
+
+        gameStyles.textContent = `
         @keyframes pulsating-red {
             0% {
                 color: #ff6666;
@@ -634,7 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         .solution-symbol {
             display: inline-block;
-            min-width: 12px;
+            min-width: ${solutionSymbolMinWidth};
             text-align: center;
             transition: all 0.3s ease;
         }
@@ -663,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         .space-symbol {
-            margin: 0 4px;
+            margin: ${spaceSymbolMargin};
             background: transparent;
         }
         
@@ -684,7 +594,14 @@ document.addEventListener('DOMContentLoaded', () => {
             animation: pulse 2s ease-in-out infinite;
         }
     `;
+    }
+
+    // Initial style setup
+    updateGameStyles();
     document.head.appendChild(gameStyles);
+
+    // Update styles on resolution change
+    document.addEventListener('displayResolutionChanged', updateGameStyles);
 
     console.log('✅ Game initialization complete!');
 });

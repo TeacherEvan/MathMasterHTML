@@ -1,4 +1,6 @@
 // js/display-manager.js - Auto Display Resolution Manager
+import { debounce, isMobile } from './utils.js';
+
 console.log("🖥️ Loading Display Manager...");
 
 class DisplayManager {
@@ -19,7 +21,7 @@ class DisplayManager {
         this.detectAndApply();
 
         // Listen for window resize
-        window.addEventListener('resize', this.debounce(() => {
+        window.addEventListener('resize', debounce(() => {
             console.log("🔄 Window resized, re-detecting resolution");
             this.detectAndApply();
         }, 300));
@@ -87,17 +89,17 @@ class DisplayManager {
 
     applyFontSizes(config) {
         // Determine if we're on mobile
-        const isMobile = this.currentResolution.name === 'mobile' || window.innerWidth <= 768;
+        const mobile = isMobile();
 
-        console.log(`📱 Mobile mode: ${isMobile ? 'YES' : 'NO'}`);
+        console.log(`📱 Mobile mode: ${mobile ? 'YES' : 'NO'}`);
 
         // Solution container - DECREASE to 36% on mobile for better vertical fit (20% smaller)
         const solutionContainer = document.getElementById('solution-container');
         if (solutionContainer) {
-            if (isMobile) {
-                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.36)`;
+            if (mobile) {
+                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.252)`;
                 solutionContainer.style.lineHeight = '1.2';
-                console.log(`📱 Solution container font reduced to 36% for horizontal layout`);
+                console.log(`📱 Solution container font reduced to 25.2% for horizontal layout`);
             } else {
                 solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.8)`;
                 solutionContainer.style.lineHeight = '1.4';
@@ -107,10 +109,10 @@ class DisplayManager {
         // Problem container - DECREASE to 32% on mobile to prevent edge cutoff (20% smaller)
         const problemContainer = document.getElementById('problem-container');
         if (problemContainer) {
-            if (isMobile) {
-                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.32)`;
-                problemContainer.style.letterSpacing = '1px';
-                console.log(`📱 Problem container font reduced to 32% for horizontal layout`);
+            if (mobile) {
+                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.224)`;
+                problemContainer.style.letterSpacing = '0.5px';
+                console.log(`📱 Problem container font reduced to 22.4% for horizontal layout`);
             } else {
                 problemContainer.style.fontSize = `calc(${config.fontSize} * 0.8)`;
                 problemContainer.style.letterSpacing = '2px';
@@ -132,7 +134,7 @@ class DisplayManager {
 
     applySymbolRainAdjustments(config) {
         // Determine if we're on mobile
-        const isMobile = this.currentResolution.name === 'mobile' || window.innerWidth <= 768;
+        const mobile = isMobile();
 
         // Adjust falling symbol sizes
         const style = document.createElement('style');
@@ -146,7 +148,7 @@ class DisplayManager {
 
         // On mobile: increase falling symbols by 50% (1.5x larger)
         // On desktop: normal size
-        const symbolMultiplier = isMobile ? 1.8 : 1.2;
+        const symbolMultiplier = mobile ? 1.8 : 1.2;
 
         style.textContent = `
             .falling-symbol {
@@ -154,7 +156,7 @@ class DisplayManager {
             }
         `;
 
-        if (isMobile) {
+        if (mobile) {
             console.log(`📱 Falling symbols increased by 50% (multiplier: ${symbolMultiplier})`);
         }
 
@@ -197,16 +199,6 @@ class DisplayManager {
             // Keep hidden - functionality preserved for debugging
             console.log(`📺 Resolution Indicator: ${indicator.textContent}`);
         }
-    } debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
     }
 
     getCurrentResolution() {

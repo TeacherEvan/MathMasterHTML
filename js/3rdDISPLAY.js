@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateColumns() {
         const containerWidth = symbolRainContainer.offsetWidth;
         const containerHeight = symbolRainContainer.offsetHeight;
-        
+
         // Dynamic column width for wider screens
         if (containerWidth > 1280) {
             columnWidth = 70; // Wider columns for high-res displays
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const symbol = document.createElement('div');
         symbol.className = 'falling-symbol';
         symbol.textContent = forcedSymbol || symbols[Math.floor(Math.random() * symbols.length)];
-        
+
         // Improved horizontal placement within the column
         const horizontalOffset = Math.random() * (columnWidth - 30); // Use more of the column width
         symbol.style.left = (column * columnWidth + horizontalOffset) + 'px';
