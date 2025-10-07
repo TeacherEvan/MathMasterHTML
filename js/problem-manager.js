@@ -1,7 +1,6 @@
 // js/problem-manager.js
-import { isMobile } from './utils.js';
 
-export class ProblemManager {
+class ProblemManager {
     constructor(level) {
         this.level = level;
         this.problems = [];

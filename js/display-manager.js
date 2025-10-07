@@ -1,5 +1,4 @@
 // js/display-manager.js - Auto Display Resolution Manager
-import { debounce, isMobile } from './utils.js';
 
 console.log("🖥️ Loading Display Manager...");
 
@@ -78,6 +77,9 @@ class DisplayManager {
         // Apply symbol rain adjustments
         this.applySymbolRainAdjustments(detected.config);
 
+        // Apply console adjustments
+        this.applyConsoleAdjustments();
+
         // Dispatch event for other components
         document.dispatchEvent(new CustomEvent('displayResolutionChanged', {
             detail: detected
@@ -129,6 +131,19 @@ class DisplayManager {
         const helpButton = document.getElementById('help-button');
         if (helpButton) {
             helpButton.style.fontSize = `calc(${config.fontSize} * 0.9)`;
+        }
+    }
+
+    applyConsoleAdjustments() {
+        const consoleElement = document.getElementById('symbol-console');
+        if (!consoleElement) return;
+
+        if (isMobile()) {
+            console.log('📱 Applying mobile console layout.');
+            consoleElement.classList.add('mobile-layout');
+        } else {
+            console.log('🖥️ Applying desktop console layout.');
+            consoleElement.classList.remove('mobile-layout');
         }
     }
 

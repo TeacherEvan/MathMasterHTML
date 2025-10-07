@@ -1,9 +1,8 @@
 // js/game.js - Enhanced Game Logic with Worm Integration
-import { ProblemManager } from './problem-manager.js';
 
 console.log("Game script loaded.");
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     const problemContainer = document.getElementById('problem-container');
     const solutionContainer = document.getElementById('solution-container');
     const lockDisplay = document.getElementById('lock-display');
@@ -21,14 +20,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize Problem Manager
     const problemManager = new ProblemManager(level);
-    await problemManager.loadProblems();
 
     // Game state variables
-    let currentProblem = problemManager.getCurrentProblem();
+    let currentProblem;
     let currentStepIndex = 0;
     let currentSymbolIndex = 0;
     let revealedIndex = 0;
     let correctAnswersCount = 0;
+
+    async function initializeGame() {
+        await problemManager.loadProblems();
+        currentProblem = problemManager.getCurrentProblem();
+        setupProblem();
+    }
 
     function setupProblem() {
         if (!currentProblem || !currentProblem.steps || currentProblem.steps.length === 0) {
@@ -109,7 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Initial setup
-    setupProblem();
+    initializeGame();
 
     /** Get next hidden symbol from solution - now accepts any symbol in current line */
     function getNextSymbol() {

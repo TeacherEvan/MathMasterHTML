@@ -6,7 +6,7 @@
  * @param {number} wait The number of milliseconds to delay.
  * @returns {Function} The debounced function.
  */
-export function debounce(func, wait) {
+function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
         const later = () => {
@@ -22,6 +22,6 @@ export function debounce(func, wait) {
  * Checks if the current device is a mobile device based on screen width.
  * @returns {boolean} True if the device is considered mobile.
  */
-export function isMobile() {
+function isMobile() {
     return window.innerWidth <= 768;
 }

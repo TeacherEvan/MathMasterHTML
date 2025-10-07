@@ -474,9 +474,7 @@ class WormSystem {
                 }
 
                 // Rotate worm body to face movement direction (head points forward)
-                // Since worm segments are laid out left-to-right with head first,
-                // we need to reverse the rotation so head points in direction of movement
-                worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+                worm.element.style.transform = `rotate(${worm.direction}rad)`;
             }
             // Carrying symbol - return to console hole
             else if (worm.hasStolen && worm.fromConsole && worm.consoleSlotElement) {
@@ -507,7 +505,7 @@ class WormSystem {
                 worm.y += worm.velocityY;
 
                 // Rotate towards console (head points forward)
-                worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+                worm.element.style.transform = `rotate(${worm.direction}rad)`;
             }
 
             // Apply position directly (no CSS transitions for smooth crawling)
