@@ -474,6 +474,7 @@ class WormSystem {
                 }
 
                 // Rotate worm body to face movement direction (head points forward)
+                // Worm segments are laid out left-to-right, so head should point in direction
                 worm.element.style.transform = `rotate(${worm.direction}rad)`;
             }
             // Carrying symbol - return to console hole
@@ -505,6 +506,40 @@ class WormSystem {
                 worm.y += worm.velocityY;
 
                 // Rotate towards console (head points forward)
+                worm.element.style.transform = `rotate(${worm.direction}rad)`;
+            }
+            // Carrying symbol but not from console - just roam with it
+            else if (worm.hasStolen && !worm.fromConsole) {
+                // Continue crawling movement even after stealing
+                worm.direction += (Math.random() - 0.5) * 0.1;
+
+                const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
+                worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
+                worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
+
+                worm.x += worm.velocityX;
+                worm.y += worm.velocityY;
+
+                // STRICT PANEL B BOUNDARIES
+                const margin = 20;
+                if (worm.x < margin) {
+                    worm.x = margin;
+                    worm.direction = Math.PI - worm.direction;
+                }
+                if (worm.x > panelBWidth - margin) {
+                    worm.x = panelBWidth - margin;
+                    worm.direction = Math.PI - worm.direction;
+                }
+                if (worm.y < margin) {
+                    worm.y = margin;
+                    worm.direction = -worm.direction;
+                }
+                if (worm.y > panelBHeight - margin) {
+                    worm.y = panelBHeight - margin;
+                    worm.direction = -worm.direction;
+                }
+
+                // Rotate worm to face movement direction (head points forward)
                 worm.element.style.transform = `rotate(${worm.direction}rad)`;
             }
 
@@ -632,15 +667,60 @@ class WormSystem {
             console.log(`✅ Symbol "${worm.stolenSymbol}" returned to Panel B`);
         }
 
-        // Explosion visual effect
-        worm.element.classList.add('worm-clicked');
+        // DRAMATIC EXPLOSION EFFECT
+        worm.element.classList.add('worm-exploding');
+
+        // Create explosion particles
+        this.createExplosionParticles(worm.x, worm.y);
+
+        // Flash the screen
+        this.createExplosionFlash();
 
         // Create persistent crack at worm's location
         this.createCrack(worm.x, worm.y);
 
         setTimeout(() => {
             this.removeWorm(worm);
-        }, 300);
+        }, 500);
+    }
+
+    createExplosionParticles(x, y) {
+        // Create 12 particle fragments flying outward
+        const particleCount = 12;
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'explosion-particle';
+            
+            const angle = (i / particleCount) * Math.PI * 2;
+            const speed = 100 + Math.random() * 100;
+            const distance = 80 + Math.random() * 40;
+            
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+            particle.style.setProperty('--angle-x', Math.cos(angle) * distance);
+            particle.style.setProperty('--angle-y', Math.sin(angle) * distance);
+            
+            this.wormContainer.appendChild(particle);
+            
+            // Remove particle after animation
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 600);
+        }
+    }
+
+    createExplosionFlash() {
+        const flash = document.createElement('div');
+        flash.className = 'explosion-flash';
+        document.body.appendChild(flash);
+        
+        setTimeout(() => {
+            if (flash.parentNode) {
+                flash.parentNode.removeChild(flash);
+            }
+        }, 200);
     }
 
     createCrack(x, y) {

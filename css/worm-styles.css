@@ -468,3 +468,80 @@
         padding: 1px 3px;
     }
 }
+
+/* DRAMATIC EXPLOSION EFFECTS */
+.worm-exploding {
+    animation: worm-explosion-scale 0.5s ease-out forwards !important;
+}
+
+@keyframes worm-explosion-scale {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(2.5) rotate(180deg);
+        opacity: 0.8;
+        filter: drop-shadow(0 0 40px rgba(255, 255, 0, 1)) drop-shadow(0 0 60px rgba(255, 0, 0, 1)) !important;
+    }
+    100% {
+        transform: scale(0.1) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.explosion-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, #ffff00, #ff6600, #ff0000);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particle-burst 0.6s ease-out forwards;
+    box-shadow: 0 0 10px rgba(255, 255, 0, 1), 0 0 20px rgba(255, 100, 0, 0.8);
+    z-index: 10001;
+}
+
+@keyframes particle-burst {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(calc(var(--angle-x) * 0.5), calc(var(--angle-y) * 0.5)) scale(1.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(calc(var(--angle-x) * 1px), calc(var(--angle-y) * 1px)) scale(0.3);
+        opacity: 0;
+    }
+}
+
+.explosion-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8), rgba(255, 200, 0, 0.4), transparent);
+    pointer-events: none;
+    z-index: 9998;
+    animation: flash-fade 0.2s ease-out forwards;
+}
+
+@keyframes flash-fade {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+ 
+ / *   D R A M A T I C   E X P L O S I O N   E F F E C T S   * / 
+ 
+ 
