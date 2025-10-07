@@ -20,6 +20,7 @@ function initSymbolRain() {
 
     // Configuration
     let symbolFallSpeed = 0.6;
+    const INITIAL_FALL_SPEED = 0.6; // Store initial speed for reset
     const maxFallSpeed = 6;
     const spawnRate = 0.4; // INCREASED from 0.2 to 0.4 for more frequent spawning
     const burstSpawnRate = 0.15; // 15% chance to spawn burst of 2-3 symbols
@@ -362,9 +363,22 @@ function initSymbolRain() {
         setInterval(() => {
             if (!isMobileMode && symbolFallSpeed < maxFallSpeed) {
                 symbolFallSpeed *= 1.05; // Increase by 5%
+                console.log(`⏱️ Speed increased to: ${symbolFallSpeed.toFixed(2)} (max: ${maxFallSpeed})`);
             }
         }, 10000); // Every 10 seconds
     }
+
+    // Reset speed when problem completes
+    function resetSpeed() {
+        symbolFallSpeed = INITIAL_FALL_SPEED;
+        console.log(`🔄 Symbol fall speed reset to: ${INITIAL_FALL_SPEED}`);
+    }
+
+    // Listen for problem completion to reset speed
+    document.addEventListener('problemCompleted', () => {
+        console.log('🎯 Problem completed - resetting symbol rain speed');
+        resetSpeed();
+    });
 
     // PERFORMANCE: Check guaranteed spawns every 1 second instead of 60x per second
     function startGuaranteedSpawnController() {

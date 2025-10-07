@@ -70,7 +70,7 @@ new CustomEvent('symbolClicked', { detail: { symbol: 'X' } })
 new CustomEvent('symbolRevealed', { detail: { symbol: 'X' } })
 
 // Dispatched by game.js when first correct answer
-new CustomEvent('first-line-solved')
+new Event('first-line-solved')
 
 // Dispatched by game.js when solution line complete
 new CustomEvent('problemLineCompleted', { detail: { lineNumber: 1 } })
@@ -80,6 +80,9 @@ new CustomEvent('problemCompleted')
 
 // Dispatched by lock-manager.js when lock level changes
 new CustomEvent('lockLevelActivated', { detail: { level: 2 } })
+
+// Dispatched by lock-manager.js when lock clicked with 4+ worms
+new CustomEvent('snakeWeaponTriggered', { detail: { wormCount: 7 } })
 
 // Dispatched by game.js - worm-related events
 new CustomEvent('wormSymbolCorrect', { detail: { symbol: 'X' } })
@@ -430,7 +433,8 @@ new CustomEvent('snakeWeaponTriggered', { detail: { wormCount: 7 } })
     - 🎮 = `game.js` (core game logic)
     - 🔒 = `lock-manager.js` (lock animation)
     - 🐛 = `worm.js` (worm system)
-    - 📊 = `performance-monitor.js`
+    - � = `snake-weapon.js` (snake weapon)
+    - �📊 = `performance-monitor.js`
     - 🎯 = `3rdDISPLAY.js` (symbol rain)
     - 🎮 = `console-manager.js`
 *   Example: `console.log('🐛 Worm System received problemLineCompleted event:', event.detail);`
@@ -450,6 +454,8 @@ new CustomEvent('snakeWeaponTriggered', { detail: { wormCount: 7 } })
 The `Docs/` directory contains critical project knowledge:
 
 *   **`CSS_Override_Investigation.md`**: Deep dive into why CSS font size changes are ignored - explains inline style priority and specificity hierarchy. Read this FIRST before attempting any Panel A/B styling changes.
+*   **`Cloning_Curse_Implementation.md`**: Complete documentation of the cloning curse mechanic - activation, clone abilities, blue symbol stealing, and curse reset logic
+*   **`Snake_Weapon_Implementation.md`**: Full spec for the snake weapon system - cross-panel movement, worm evasion AI, performance optimizations
 *   **`Panel_C_Performance_Audit.md`**: Full performance analysis with 12+ optimization opportunities and code examples
 *   **`Panel_C_Performance_Summary.md`**: Executive summary of Panel C optimizations - quick reference for performance improvements
 *   **`Panel_C_Spawn_Fix_Report.md`**: Fixes for symbol spawn timing and guaranteed spawn system

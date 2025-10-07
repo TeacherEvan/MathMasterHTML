@@ -1,19 +1,22 @@
 # Snake Weapon System Implementation - October 7, 2025
 
 ## Overview
+
 Implemented a powerful red snake weapon that spawns from the lock in Panel A to hunt and eliminate worms across all three game panels. The snake is triggered by clicking the lock when 4+ worms are active, providing a strategic defensive mechanic.
 
 ## Core Features
 
 ### Weapon Trigger System
+
 - **Activation**: Click on lock display (`#lock-display`) when 4+ worms are active
 - **Restriction**: One use per problem (resets on `problemCompleted` event)
-- **Visual Feedback**: 
+- **Visual Feedback**:
   - Lock flashes orange when < 4 worms (not ready)
   - Lock flashes red when already used this problem
   - No flash when successfully triggered
 
 ### Snake Properties
+
 - **Size**: 10 segments @ 18px each (2x worm size: worms are 5 segments @ 9px)
 - **Speed**: 1.8 units/frame (10% slower than worm base speed of 2.0)
 - **Color**: Red gradient (#ff3333 → #ff0000 → #cc0000)
@@ -22,7 +25,9 @@ Implemented a powerful red snake weapon that spawns from the lock in Panel A to 
 - **Eating Radius**: 25px (collision distance for consuming worms)
 
 ### Visual Design
+
 **Performance-Optimized Design:**
+
 - **Head Features**:
   - Larger than body (24px vs 18px)
   - Yellow eyes with black pupils
@@ -42,7 +47,9 @@ Implemented a powerful red snake weapon that spawns from the lock in Panel A to 
   - No particle trails (performance consideration)
 
 ### Cross-Panel Movement System
+
 **Absolute Coordinate Conversion:**
+
 ```javascript
 // Snake stores position relative to Panel A
 this.x, this.y  // Panel A relative
@@ -64,12 +71,15 @@ this.y += (dy / distance) * this.speed
 ```
 
 **Panel Boundary Caching:**
+
 - Cached for 500ms to prevent layout thrashing
 - `updatePanelBounds()` called periodically
 - Stores `panelA`, `panelB`, `panelC`, and `lockDisplay` rectangles
 
 ### Worm Evasion AI
+
 **Detection & Flee Behavior:**
+
 ```javascript
 // In worm.js animate() loop
 if (distanceToSnake < snakeDetectionRadius) {
@@ -84,6 +94,7 @@ if (distanceToSnake < snakeDetectionRadius) {
 ```
 
 **Visual Panic Effect:**
+
 - Yellow glow around fleeing worms
 - Shaking animation (rotation ±2deg, scale 1.15x)
 - Animation runs at 0.3s intervals while fleeing
@@ -91,6 +102,7 @@ if (distanceToSnake < snakeDetectionRadius) {
 ### Lifecycle & State Management
 
 **State Flow:**
+
 ```
 Lock Click (4+ worms)
     ↓
@@ -108,6 +120,7 @@ Deactivate and cleanup
 ```
 
 **State Variables:**
+
 ```javascript
 this.isActive          // Snake currently hunting
 this.isReturning       // Returning to lock after all worms eaten
@@ -120,6 +133,7 @@ this.trail[]           // Position history for body segments
 ## Implementation Details
 
 ### File Structure
+
 ```
 js/snake-weapon.js      - Main SnakeWeapon class (420 lines)
 css/snake-weapon.css    - Visual styling and animations (260 lines)
@@ -135,46 +149,54 @@ game.html               - Script and CSS includes
 #### SnakeWeapon Class (`js/snake-weapon.js`)
 
 **`spawnSnake()`**
+
 - Creates snake element with 10 segments
 - Positions at lock center in Panel A
 - Initializes trail array for body movement
 - Starts animation loop
 
 **`huntWorms()`**
+
 - Queries active worms from `window.wormSystem`
 - Finds nearest worm via `getDistanceToWorm()`
 - Moves toward target via `moveTowardsWorm()`
 - Checks collision with `eatingRadius`
 
 **`getDistanceToWorm(worm)`**
+
 - Converts snake position from Panel A coordinates to absolute
 - Converts worm position from Panel B coordinates to absolute
 - Calculates Euclidean distance in absolute space
 - Returns distance for targeting/collision
 
 **`moveTowardsWorm(worm)`**
+
 - Calculates direction vector in absolute coordinates
 - Normalizes and applies snake speed (1.8)
 - Updates snake position in Panel A relative coordinates
 - Handles smooth cross-panel pursuit
 
 **`eatWorm(worm)`**
+
 - Calls `wormSystem.removeWorm()` to eliminate worm
 - Increments `wormsEaten` counter
 - Triggers chomping animation (`.eating` class)
 - Creates red flash effect
 
 **`returnToLock()`**
+
 - Calculates direction to lock center
 - Moves at 1.5x speed (faster return)
 - Deactivates when within 20px of lock
 
 **`updateTrail()`**
+
 - Adds current position to front of trail array
 - Maintains fixed trail length (30 positions)
 - Used for positioning body segments behind head
 
 **`updateSnakePosition()`**
+
 - Sets snake container position (head)
 - Positions each segment based on trail
 - Uses `transform: translate()` for GPU acceleration
@@ -182,6 +204,7 @@ game.html               - Script and CSS includes
 #### Integration Methods
 
 **Lock Manager (`js/lock-manager.js`)**
+
 ```javascript
 this.container.addEventListener('click', (e) => {
     const activeWorms = window.wormSystem.worms.filter(w => w.active);
@@ -197,6 +220,7 @@ this.container.addEventListener('click', (e) => {
 ```
 
 **Worm System (`js/worm.js`)**
+
 ```javascript
 // In animate() loop, before worm movement
 if (window.snakeWeapon?.isSnakeActive()) {
@@ -213,6 +237,7 @@ if (window.snakeWeapon?.isSnakeActive()) {
 ### Event System
 
 **Dispatched Events:**
+
 ```javascript
 // Lock click triggers snake
 'snakeWeaponTriggered' - { wormCount: number }
@@ -222,6 +247,7 @@ if (window.snakeWeapon?.isSnakeActive()) {
 ```
 
 **Listened Events:**
+
 ```javascript
 'problemCompleted'        - Resets usedThisProblem flag
 'snakeWeaponTriggered'    - Spawns snake
@@ -230,6 +256,7 @@ if (window.snakeWeapon?.isSnakeActive()) {
 ### CSS Animations
 
 #### Snake Slithering (`snake-weapon.css`)
+
 ```css
 @keyframes snake-slither {
     0%, 100% {
@@ -243,6 +270,7 @@ if (window.snakeWeapon?.isSnakeActive()) {
 ```
 
 #### Tongue Flicking
+
 ```css
 @keyframes tongue-flick {
     0%, 80%, 100% {
@@ -257,6 +285,7 @@ if (window.snakeWeapon?.isSnakeActive()) {
 ```
 
 #### Chomping (Eating)
+
 ```css
 @keyframes snake-chomp {
     0% { transform: scale(1); }
@@ -269,6 +298,7 @@ if (window.snakeWeapon?.isSnakeActive()) {
 ```
 
 #### Worm Panic (Fleeing)
+
 ```css
 @keyframes worm-panic {
     0%, 100% {
@@ -284,26 +314,31 @@ if (window.snakeWeapon?.isSnakeActive()) {
 ## Performance Optimizations
 
 ### DOM Query Caching
+
 - Panel boundaries cached for 500ms
 - Prevents layout thrashing on every frame
 - Only updates on resize or after cache timeout
 
 ### GPU Acceleration
+
 - `will-change: transform` on snake container
 - `transform: translate3d(0, 0, 0)` forces GPU layer
 - `backface-visibility: hidden` for smoother rendering
 
 ### Animation Loop Efficiency
+
 - Single `requestAnimationFrame` for snake movement
 - Integrated with existing worm animation loop
 - No separate interval timers
 
 ### Mobile Optimization
+
 - Smaller segment sizes on mobile (14px vs 18px)
 - Reduced shadow complexity for mobile devices
 - Responsive animations maintain 60fps
 
 ### Memory Management
+
 - Snake element removed from DOM when deactivated
 - Trail array cleared on deactivation
 - Animation frame cancelled properly
@@ -311,6 +346,7 @@ if (window.snakeWeapon?.isSnakeActive()) {
 ## Testing Checklist
 
 ### Core Mechanics
+
 - [x] Lock click with 4+ worms spawns snake
 - [x] Lock click with < 4 worms shows orange flash
 - [x] Lock click when already used shows red flash
@@ -322,6 +358,7 @@ if (window.snakeWeapon?.isSnakeActive()) {
 - [x] Resets on problem completion
 
 ### Worm Evasion
+
 - [x] Worms detect snake within 200px radius
 - [x] Worms flee in opposite direction
 - [x] Fleeing worms show yellow glow and panic animation
@@ -329,12 +366,14 @@ if (window.snakeWeapon?.isSnakeActive()) {
 - [x] Flee speed is 20% faster than normal
 
 ### Cross-Panel Movement
+
 - [x] Snake can move from Panel A to Panel B
 - [x] Snake position converts correctly across panels
 - [x] Distance calculation uses absolute coordinates
 - [x] Snake returns to Panel A lock smoothly
 
 ### Visual Quality
+
 - [x] Red color distinct from green worms
 - [x] Slithering animation smooth and organic
 - [x] Tongue flicks periodically
@@ -343,6 +382,7 @@ if (window.snakeWeapon?.isSnakeActive()) {
 - [x] Scale texture visible on segments
 
 ### Performance
+
 - [x] No FPS drop below 55fps (tested with 7 worms + snake)
 - [x] DOM queries minimized via caching
 - [x] GPU acceleration working (smooth transforms)
@@ -351,26 +391,31 @@ if (window.snakeWeapon?.isSnakeActive()) {
 ## Known Issues & Edge Cases
 
 ### Edge Case 1: Worms Spawn While Snake Active
+
 - **Scenario**: New worm spawns while snake is hunting
 - **Handling**: Snake retargets to nearest worm (may be new worm)
 - **Result**: ✅ Works correctly
 
 ### Edge Case 2: Last Worm Dies to Rain During Snake Hunt
+
 - **Scenario**: User kills worm via rain symbol while snake pursuing it
 - **Handling**: Snake checks `activeWorms.length` and returns to lock
 - **Result**: ✅ Works correctly
 
 ### Edge Case 3: Snake Click When Exactly 4 Worms
+
 - **Scenario**: Lock clicked when worm count is exactly 4
 - **Handling**: `activeWorms.length >= 4` includes this case
 - **Result**: ✅ Works correctly
 
 ### Edge Case 4: Rapid Lock Clicking
+
 - **Scenario**: User clicks lock multiple times quickly
 - **Handling**: `isActive` flag prevents multiple snakes
 - **Result**: ✅ Works correctly (only one snake spawns)
 
 ### Edge Case 5: Cloning Curse + Snake
+
 - **Scenario**: Snake eats worms while cloning curse active
 - **Handling**: Snake removes worms directly (bypasses curse)
 - **Result**: ✅ Works correctly (snake immune to curse)
@@ -380,16 +425,19 @@ if (window.snakeWeapon?.isSnakeActive()) {
 **Test Environment:** Desktop, 1920x1080, Chrome
 
 **Baseline (7 Worms):**
+
 - FPS: 58-60
 - Frame Time: 16-17ms
 - DOM Queries: 80-120/sec
 
 **With Snake Active (7 Worms + Snake):**
+
 - FPS: 56-58 (-3%)
 - Frame Time: 17-18ms (+1ms)
 - DOM Queries: 95-135/sec (+15%)
 
 **Impact Analysis:**
+
 - Minimal FPS impact (~3%)
 - Acceptable frame time increase
 - DOM query increase from panel bound caching (every 500ms)
@@ -398,21 +446,25 @@ if (window.snakeWeapon?.isSnakeActive()) {
 ## Future Enhancements (Optional)
 
 ### Multiple Snake Types
+
 - **Blue Snake**: Slower but can steal symbols back from worms
 - **Golden Snake**: Faster, eats 2 worms at once
 - **Black Snake**: Invisible to worms (no evasion)
 
 ### Snake Upgrades
+
 - **Level 1**: Current implementation
 - **Level 2**: Spawns 2 smaller snakes
 - **Level 3**: Snake leaves poison trail that damages worms
 
 ### Sound Effects
+
 - **Hiss**: When snake spawns
 - **Chomp**: When eating worms
 - **Slither**: Continuous subtle sound during movement
 
 ### Visual Enhancements
+
 - **Poison Cloud**: When snake eats worm with stolen symbol
 - **Scale Shimmer**: Subtle shader effect on scales
 - **Eye Glow**: Eyes glow brighter when close to worm
@@ -420,6 +472,7 @@ if (window.snakeWeapon?.isSnakeActive()) {
 ## Code Statistics
 
 **Total Lines Added/Modified:**
+
 - `js/snake-weapon.js`: 420 lines (new file)
 - `css/snake-weapon.css`: 260 lines (new file)
 - `js/worm.js`: +50 lines (evasion AI)
@@ -433,18 +486,21 @@ if (window.snakeWeapon?.isSnakeActive()) {
 ## Integration with Existing Systems
 
 ### Event-Driven Architecture
+
 - ✅ No direct function calls between modules
 - ✅ Uses `document.dispatchEvent()` for communication
 - ✅ Listens to existing events (`problemCompleted`)
 - ✅ Follows existing emoji logging convention (🐍)
 
 ### Performance Pattern Consistency
+
 - ✅ DOM query caching (matches worm system)
 - ✅ `requestAnimationFrame` usage (matches 3rdDISPLAY)
 - ✅ GPU acceleration hints (matches existing optimizations)
 - ✅ Time-based cache invalidation pattern
 
 ### Backward Compatibility
+
 - ✅ No changes to existing game mechanics
 - ✅ Optional feature (game works without it)
 - ✅ Cloning curse system unaffected
@@ -476,6 +532,7 @@ if (window.snakeWeapon?.isSnakeActive()) {
 The Snake Weapon System adds a strategic defensive mechanic that allows players to clear multiple worms at once by clicking the lock when overwhelmed. The implementation maintains the game's event-driven architecture, follows established performance patterns, and integrates seamlessly with existing systems including the cloning curse mechanic.
 
 **Key Achievements:**
+
 - Cross-panel movement system working flawlessly
 - Worm evasion AI creates dynamic gameplay
 - Performance impact minimal (<3% FPS)
@@ -483,6 +540,7 @@ The Snake Weapon System adds a strategic defensive mechanic that allows players 
 - One-use-per-problem creates strategic timing decisions
 
 **Files Modified:**
+
 - 2 new files created (snake-weapon.js, snake-weapon.css)
 - 5 existing files modified (worm.js, lock-manager.js, lock.css, worm-styles.css, game.html)
 - 0 breaking changes to existing systems

@@ -1084,7 +1084,17 @@ class WormSystem {
         // Auto-trigger threshold: 6 worms (player can manually trigger at 4+)
         const AUTO_TRIGGER_THRESHOLD = 6;
 
+        console.log(`🐍 Auto-trigger check: ${activeWorms.length} active worms (threshold: ${AUTO_TRIGGER_THRESHOLD})`);
+
         if (activeWorms.length >= AUTO_TRIGGER_THRESHOLD) {
+            // Check if snake exists
+            if (!window.snakeWeapon) {
+                console.log('⚠️ window.snakeWeapon not found - snake system not initialized');
+                return;
+            }
+
+            console.log(`🐍 Snake weapon exists. usedThisProblem: ${window.snakeWeapon.usedThisProblem}`);
+
             // Check if snake already used this problem
             if (window.snakeWeapon && !window.snakeWeapon.usedThisProblem) {
                 console.log(`🚨 AUTO-TRIGGER! ${activeWorms.length} worms reached - spawning snake automatically!`);
@@ -1099,6 +1109,8 @@ class WormSystem {
             } else if (window.snakeWeapon && window.snakeWeapon.usedThisProblem) {
                 console.log(`⚠️ Snake already used this problem - no auto-trigger available`);
             }
+        } else {
+            console.log(`✅ ${activeWorms.length} worms - below auto-trigger threshold`);
         }
     }
 }

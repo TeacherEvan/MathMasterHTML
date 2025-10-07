@@ -73,6 +73,13 @@ class SnakeWeapon {
         // Listen for snake trigger event (dispatched by lock click)
         document.addEventListener('snakeWeaponTriggered', (e) => {
             console.log('🐍 Snake weapon triggered!', e.detail);
+            
+            // Check if already used
+            if (this.usedThisProblem) {
+                console.log('⚠️ Snake already used this problem - ignoring trigger');
+                return;
+            }
+            
             this.spawnSnake();
         });
 
