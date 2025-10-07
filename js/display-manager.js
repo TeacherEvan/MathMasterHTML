@@ -95,26 +95,26 @@ class DisplayManager {
 
         console.log(`📱 Mobile mode: ${mobile ? 'YES' : 'NO'}`);
 
-        // Solution container - DECREASE to 36% on mobile for better vertical fit (20% smaller)
+        // Solution container - DECREASE to make text fit horizontally on mobile
         const solutionContainer = document.getElementById('solution-container');
         if (solutionContainer) {
             if (mobile) {
-                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.252)`;
+                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.176)`; // Reduced from 0.252
                 solutionContainer.style.lineHeight = '1.2';
-                console.log(`📱 Solution container font reduced to 25.2% for horizontal layout`);
+                console.log(`📱 Solution container font reduced for horizontal layout`);
             } else {
                 solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.8)`;
                 solutionContainer.style.lineHeight = '1.4';
             }
         }
 
-        // Problem container - DECREASE to 32% on mobile to prevent edge cutoff (20% smaller)
+        // Problem container - DECREASE to prevent edge cutoff on mobile
         const problemContainer = document.getElementById('problem-container');
         if (problemContainer) {
             if (mobile) {
-                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.224)`;
+                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.156)`; // Reduced from 0.224
                 problemContainer.style.letterSpacing = '0.5px';
-                console.log(`📱 Problem container font reduced to 22.4% for horizontal layout`);
+                console.log(`📱 Problem container font reduced for horizontal layout`);
             } else {
                 problemContainer.style.fontSize = `calc(${config.fontSize} * 0.8)`;
                 problemContainer.style.letterSpacing = '2px';
