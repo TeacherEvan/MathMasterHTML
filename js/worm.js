@@ -733,21 +733,32 @@ class WormSystem {
             return;
         }
 
-        // First direct click on a worm - activate cloning curse!
-        console.log(`🔮 CURSE ACTIVATED! First worm ${worm.id} clicked directly - cloning and activating curse!`);
-        this.cloningCurseActive = true;
-        this.wormsKilledByRain = 0; // Reset rain kill counter
+        // 80/20 RISK/REWARD MECHANIC
+        // 80% chance: Worm explodes (normal kill)
+        // 20% chance: Worm clones AND activates cloning curse
+        const roll = Math.random() * 100; // 0-100
+        
+        if (roll < 80) {
+            // 80% - BOOM! Normal worm kill
+            console.log(`💥 BOOM! Worm ${worm.id} exploded (${roll.toFixed(1)}% roll - under 80% threshold)`);
+            this.explodeWorm(worm, false); // false = not a rain kill
+        } else {
+            // 20% - Clone AND activate curse!
+            console.log(`🔮 CLONE EVENT! Worm ${worm.id} cloned (${roll.toFixed(1)}% roll - over 80% threshold)`);
+            console.log(`⚠️ CLONING CURSE ACTIVATED! All future worm clicks will clone until curse reset!`);
+            
+            this.cloningCurseActive = true;
+            this.wormsKilledByRain = 0; // Reset rain kill counter
 
-        // Visual feedback for curse activation
-        worm.element.style.animation = 'worm-flash-purple 0.5s ease-out';
-        setTimeout(() => {
-            worm.element.style.animation = '';
-        }, 500);
+            // Visual feedback for curse activation
+            worm.element.style.animation = 'worm-flash-purple 0.5s ease-out';
+            setTimeout(() => {
+                worm.element.style.animation = '';
+            }, 500);
 
-        // Create a clone
-        this.cloneWorm(worm);
-
-        console.log('⚠️ CLONING CURSE NOW ACTIVE! Only killing worms via rain symbols will reset it!');
+            // Create a clone
+            this.cloneWorm(worm);
+        }
     }
 
     cloneWorm(parentWorm) {
