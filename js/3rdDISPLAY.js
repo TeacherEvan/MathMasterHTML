@@ -110,8 +110,12 @@ function initSymbolRain() {
     }
 
     function populateInitialSymbols() {
-        const initialSymbolCount = columns * 5;
+        // MOBILE FIX: Reduce initial symbols on mobile to prevent overload
+        const symbolMultiplier = isMobileMode ? 2 : 5; // Mobile: 2 per column, Desktop: 5 per column
+        const initialSymbolCount = columns * symbolMultiplier;
         let spawned = 0;
+
+        console.log(`📱 Populating ${initialSymbolCount} initial symbols (Mobile: ${isMobileMode})`);
 
         // Gradually spawn symbols over time to prevent performance spike
         function spawnBatch() {
@@ -298,7 +302,7 @@ function initSymbolRain() {
         console.log(`🖥️ Display resolution changed to: ${event.detail.name}, isMobileMode: ${isMobileMode}`);
     });
     // Expose symbol count for performance monitoring
-    window.getActiveSymbolCount = function() {
+    window.getActiveSymbolCount = function () {
         return activeSymbols.length;
     };
 }

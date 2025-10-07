@@ -45,6 +45,7 @@ class PerformanceMonitor {
             box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
             user-select: none;
             pointer-events: none;
+            display: none;
         `;
 
         overlay.innerHTML = `
