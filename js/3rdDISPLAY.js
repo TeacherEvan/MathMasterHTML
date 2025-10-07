@@ -21,15 +21,15 @@ function initSymbolRain() {
     // Configuration
     let symbolFallSpeed = 0.6;
     const maxFallSpeed = 6;
-    const spawnRate = 0.2;
+    const spawnRate = 0.8; // Increased from 0.2 to 0.8 for more frequent spawning
     const columnWidth = 50;
 
-    // Guaranteed spawn system - ensure all symbols appear every 5 seconds
+    // Guaranteed spawn system - ensure all symbols appear every 3 seconds (faster)
     let lastSpawnTime = {};
     symbols.forEach(sym => {
         lastSpawnTime[sym] = Date.now() - Math.random() * 2000;
     });
-    const GUARANTEED_SPAWN_INTERVAL = 5000; // 5 seconds
+    const GUARANTEED_SPAWN_INTERVAL = 3000; // Reduced from 5000 to 3000 (3 seconds)
 
     let columns = 0;
     let activeSymbols = [];
