@@ -39,16 +39,19 @@ class LockManager {
             this.startLockAnimation();
         });
 
-        // SNAKE WEAPON: Click handler on lock display
-        // Trigger snake weapon (no worm count requirement - debugging mode)
+        // SNAKE WEAPON: Pointerdown handler on lock display for instant mobile response
+        // Use pointerdown instead of click to reduce ~200ms mobile latency
         // Use setTimeout to ensure DOM is ready
         setTimeout(() => {
             const lockContainer = document.querySelector('#lock-display');
-            console.log('🐍 Attaching click handler to lock container:', lockContainer);
+            console.log('🐍 Attaching pointerdown handler to lock container:', lockContainer);
 
             if (lockContainer) {
-                lockContainer.addEventListener('click', (e) => {
+                lockContainer.addEventListener('pointerdown', (e) => {
                     console.log('🐍 Lock clicked!', e.target);
+
+                    // Prevent default to avoid triggering click after pointerdown
+                    e.preventDefault();
 
                     // Debug: Check if wormSystem exists
                     if (!window.wormSystem) {
@@ -69,7 +72,7 @@ class LockManager {
                     }));
                 });
 
-                console.log('🐍 Lock click handler attached successfully!');
+                console.log('🐍 Lock pointerdown handler attached successfully!');
             } else {
                 console.error('❌ Lock container not found - snake weapon won\'t work!');
             }

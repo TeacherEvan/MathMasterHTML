@@ -91,14 +91,14 @@ class DisplayManager {
 
         console.log(`📱 Mobile mode: ${isMobile ? 'YES' : 'NO'}`);
 
-        // Solution container - DECREASE to 36% on mobile for better vertical fit (20% smaller)
+        // Solution container - DECREASE to 30% on mobile for better vertical fit (25% smaller)
         const solutionContainer = document.getElementById('solution-container');
         if (solutionContainer) {
             if (isMobile) {
-                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.36)`;
+                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.30)`;
                 solutionContainer.style.lineHeight = '1.2';
-                solutionContainer.style.letterSpacing = '0.5px'; // ADDED: 50% reduction (1px → 0.5px)
-                console.log(`📱 Solution container font reduced to 36% with 0.5px letter-spacing`);
+                solutionContainer.style.letterSpacing = '0.2px'; // REDUCED: 60% reduction (0.5px → 0.2px) for tighter spacing
+                console.log(`📱 Solution container font reduced to 30% with 0.2px letter-spacing`);
             } else {
                 solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.8)`;
                 solutionContainer.style.lineHeight = '1.4';
@@ -106,13 +106,13 @@ class DisplayManager {
             }
         }
 
-        // Problem container - DECREASE to 32% on mobile to prevent edge cutoff (20% smaller)
+        // Problem container - DECREASE to 25% on mobile to prevent edge cutoff (37.5% smaller than desktop)
         const problemContainer = document.getElementById('problem-container');
         if (problemContainer) {
             if (isMobile) {
-                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.32)`;
+                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.25)`;
                 problemContainer.style.letterSpacing = '0.5px'; // REDUCED from 1px to 0.5px (50% reduction)
-                console.log(`📱 Problem container font reduced to 32% with 0.5px letter-spacing`);
+                console.log(`📱 Problem container font reduced to 25% with 0.5px letter-spacing`);
             } else {
                 problemContainer.style.fontSize = `calc(${config.fontSize} * 0.8)`;
                 problemContainer.style.letterSpacing = '2px';

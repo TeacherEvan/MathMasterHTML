@@ -275,8 +275,11 @@ input:focus:not(:focus-visible),
 }
 
 .res-mobile #lock-display {
-    transform: scale(0.7);
-    /* Scale down lock for mobile */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    /* Center AND scale down lock for mobile */
     transform-origin: center center;
 }
 
