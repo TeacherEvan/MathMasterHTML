@@ -80,6 +80,19 @@ new CustomEvent('problemCompleted')
 
 // Dispatched by lock-manager.js when lock level changes
 new CustomEvent('lockLevelActivated', { detail: { level: 2 } })
+
+// Dispatched by game.js - worm-related events
+new CustomEvent('wormSymbolCorrect', { detail: { symbol: 'X' } })
+new CustomEvent('wormSymbolSaved', { detail: { symbol: 'X' } })
+
+// Dispatched when symbol added to console
+new CustomEvent('consoleSymbolAdded', { detail: { symbol: 'X', position: 0 } })
+
+// Dispatched by display-manager.js on viewport changes
+new CustomEvent('displayResolutionChanged', { detail: { isMobile: true } })
+
+// Dispatched by lock-responsive.js
+new CustomEvent('lockScaleChanged', { detail: { scale: 0.8 } })
 ```
 
 **Adding New Features:** Use `document.dispatchEvent()` and `document.addEventListener()` for inter-module communication. Never add direct function calls between `game.js`, `lock-manager.js`, `worm.js`, etc.
@@ -176,12 +189,14 @@ new CustomEvent('lockLevelActivated', { detail: { level: 2 } })
 - Visual feedback: Glow effect on hover, click animations
 - Integration: Dispatches `symbolClicked` events just like Panel C rain
 - Worm spawn points: Empty slots glow green when worm emerges
+- **Touch Optimization**: Uses `pointerdown` for instant response (reduces ~200ms mobile latency)
 
 **Console Slot States:**
 - Empty: Available for worm spawn
 - Filled: Contains a symbol, user can click
 - Locked: Worm is spawning/active from this slot (`.locked` class)
 - Worm Spawning: Special slide-open animation (`.worm-spawning` class)
+- Clicked: Purple pulsate animation on click (`.clicked` class, 600ms duration)
 
 ## Symbol Rain System (`js/3rdDISPLAY.js`)
 
@@ -260,6 +275,7 @@ new CustomEvent('lockLevelActivated', { detail: { level: 2 } })
 *   ✅ **DOM Element Pooling**: Reuses 30 pooled elements to reduce GC pressure
 *   ✅ **Pseudo-element Removal**: Removed `::before` elements to halve render layers (200+ → 100)
 *   ✅ **Resize Debouncing**: 250ms delay prevents excessive recalculation on window resize
+*   ✅ **Touch/Pointer Optimization**: Uses `pointerdown` for instant mobile response (reduces input latency)
 
 **Performance Results (Desktop):**
 *   FPS improvement: 48-52 → 58-60 (+20%)
@@ -276,6 +292,7 @@ new CustomEvent('lockLevelActivated', { detail: { level: 2 } })
 5.  **File Integrity**: The `css/worm-styles.css` file may contain syntax errors (duplicate keyframes, malformed rules). If worm styling breaks, check this file first for corruption.
 6.  **Local Server Required**: Opening `game.html` directly as `file://` will fail due to CORS. Always use a local HTTP server.
 7.  **URL Parameters**: Game state depends on URL params - always test with `?level=beginner|warrior|master` parameter.
+8.  **Touch Events**: Always use `pointerdown` instead of `click` for interactive elements to reduce mobile input latency (~200ms improvement). This pattern is used in `console-manager.js` and `3rdDISPLAY.js`.
 
 ## Performance Anti-Patterns (Avoid These!)
 
@@ -332,6 +349,7 @@ The `Docs/` directory contains critical project knowledge:
 *   **`CSS_Override_Investigation.md`**: Deep dive into why CSS font size changes are ignored - explains inline style priority and specificity hierarchy. Read this FIRST before attempting any Panel A/B styling changes.
 *   **`Panel_C_Performance_Audit.md`**: Full performance analysis with 12+ optimization opportunities and code examples
 *   **`Panel_C_Performance_Summary.md`**: Executive summary of Panel C optimizations - quick reference for performance improvements
+*   **`Touch_Click_Optimization_Report.md`**: Detailed analysis of pointer events vs click events for mobile responsiveness
 *   **`Performance_Audit_Report.md`**: Historical performance issues and fixes (covers worm system and CSS corruption)
 *   **`Worm_System_Complete_Overhaul.md`**: Architecture documentation for the adversarial worm mechanics
 *   **`Mobile_Layout_Implementation.md`**: Responsive design patterns and mobile-specific handling

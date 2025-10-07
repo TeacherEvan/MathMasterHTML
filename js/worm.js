@@ -246,10 +246,10 @@ class WormSystem {
 
         this.worms.push(wormData);
 
-        // Add click handler to CLONE worm (worms multiply when clicked!)
+        // Add click handler with RISK/REWARD: 80% kill, 20% clone (makes 2 worms!)
         wormElement.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.cloneWorm(wormData);
+            this.handleWormClick(wormData);
         });
 
         console.log(`✅ Worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
@@ -327,10 +327,10 @@ class WormSystem {
 
         this.worms.push(wormData);
 
-        // Add click handler to MULTIPLY worm (fallback spawn worms multiply!)
+        // Add click handler with RISK/REWARD: 80% kill, 20% multiply!
         wormElement.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.multiplyWorm(wormData);
+            this.handleWormClick(wormData);
         });
 
         console.log(`✅ Worm ${wormId} spawned (fallback mode). Total worms: ${this.worms.length}`);
@@ -592,6 +592,35 @@ class WormSystem {
         }
     }
 
+    handleWormClick(worm) {
+        if (!worm.active) return;
+
+        // RISK/REWARD MECHANIC: 80% chance to kill, 20% chance to clone (spawn 2!)
+        const randomChance = Math.random();
+        
+        if (randomChance < 0.20) {
+            // 20% CHANCE: Worm backfires and creates TWO clones!
+            console.log(`🎲 BAD LUCK! Worm ${worm.id} clicked - SPAWNING 2 CLONES! (20% chance triggered)`);
+            
+            // Visual feedback for bad luck - red flash
+            worm.element.style.animation = 'worm-flash-red 0.3s ease-out';
+            setTimeout(() => {
+                worm.element.style.animation = '';
+            }, 300);
+            
+            // Spawn TWO clones instead of one!
+            this.cloneWorm(worm);
+            setTimeout(() => {
+                this.cloneWorm(worm);
+            }, 150); // Slight delay for visual effect
+            
+        } else {
+            // 80% CHANCE: Successfully explode the worm!
+            console.log(`💥 SUCCESS! Worm ${worm.id} clicked - EXPLODING! (80% chance triggered)`);
+            this.explodeWorm(worm);
+        }
+    }
+
     cloneWorm(parentWorm) {
         if (!parentWorm.active) return;
 
@@ -667,10 +696,10 @@ class WormSystem {
 
         this.worms.push(cloneData);
 
-        // Add click handler to clone - clones can also be clicked to multiply!
+        // Add click handler with RISK/REWARD: 80% kill, 20% multiply!
         newWormElement.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.cloneWorm(cloneData);
+            this.handleWormClick(cloneData);
         });
 
         // Clone birth effect on both worms
