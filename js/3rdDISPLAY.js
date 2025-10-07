@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let symbolFallSpeed = 0.6;
     const maxFallSpeed = 6;
     const spawnRate = 0.2;
-    const columnWidth = 50;
+    let columnWidth = 50; // Default for mobile
 
     // Guaranteed spawn system - ensure all symbols appear every 5 seconds
     let lastSpawnTime = {};
@@ -37,8 +37,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateColumns() {
         const containerWidth = symbolRainContainer.offsetWidth;
         const containerHeight = symbolRainContainer.offsetHeight;
+        
+        // Dynamic column width for wider screens
+        if (containerWidth > 1280) {
+            columnWidth = 70; // Wider columns for high-res displays
+        } else if (containerWidth > 768) {
+            columnWidth = 60;
+        } else {
+            columnWidth = 50; // Default for mobile
+        }
+
         columns = Math.floor(containerWidth / columnWidth);
-        console.log(`📏 Container dimensions: ${containerWidth}x${containerHeight}, Columns: ${columns}`);
+        console.log(`📏 Container dimensions: ${containerWidth}x${containerHeight}, Columns: ${columns}, Column Width: ${columnWidth}`);
     }
 
     // DESKTOP: Create falling symbol (vertical)
@@ -46,7 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const symbol = document.createElement('div');
         symbol.className = 'falling-symbol';
         symbol.textContent = forcedSymbol || symbols[Math.floor(Math.random() * symbols.length)];
-        symbol.style.left = (column * columnWidth + Math.random() * 30) + 'px';
+        
+        // Improved horizontal placement within the column
+        const horizontalOffset = Math.random() * (columnWidth - 30); // Use more of the column width
+        symbol.style.left = (column * columnWidth + horizontalOffset) + 'px';
 
         if (isInitialPopulation) {
             symbol.style.top = `${Math.random() * symbolRainContainer.offsetHeight}px`;
@@ -112,8 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Desktop: Check vertical collision with increased spacing
             const symbolHeight = 30;
             const symbolWidth = 30;
-            const collisionBuffer = 40; // Increased from 25 to spread symbols more
-            const horizontalBuffer = 35; // Increased from 20 for better horizontal spacing
+            const collisionBuffer = 50; // Increased from 40 to spread symbols more vertically
+            const horizontalBuffer = 45; // Increased from 35 for better horizontal spacing
 
             // Cache element position to avoid repeated style access
             const symbolLeft = symbolObj.x;
