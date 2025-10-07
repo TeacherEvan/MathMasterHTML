@@ -76,13 +76,17 @@ input:focus:not(:focus-visible),
 }
 
 #lock-display {
-    flex: 1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     cursor: pointer;
     /* Make it obvious the lock is clickable for snake weapon */
-    position: relative;
     z-index: 100;
     /* Ensure lock is clickable above other elements */
 }

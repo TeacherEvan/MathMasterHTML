@@ -119,7 +119,7 @@ class SnakeWeapon {
     spawnSnake() {
         console.log('🐍 spawnSnake() called');
         console.log('🐍 Current state: isActive:', this.isActive, 'usedThisProblem:', this.usedThisProblem);
-        
+
         if (this.isActive) {
             console.log('⚠️ Snake already active - returning');
             return;
@@ -188,7 +188,7 @@ class SnakeWeapon {
     createSnakeElement() {
         console.log('🐍 createSnakeElement() called');
         console.log('🐍 panelA reference:', this.panelA);
-        
+
         // Create main snake container
         this.snakeElement = document.createElement('div');
         this.snakeElement.className = 'snake-weapon';
