@@ -309,6 +309,9 @@ class WormSystem {
         console.log(`✅ Worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
         console.log(`🐛 Worm will roam for 10 seconds before stealing`);
 
+        // AUTO-TRIGGER: Check if snake should auto-spawn (emergency backup)
+        this.checkAutoTriggerSnake();
+
         // Start animation loop if not already running
         if (this.worms.length === 1) {
             this.animate();
@@ -388,6 +391,9 @@ class WormSystem {
         });
 
         console.log(`✅ Worm ${wormId} spawned (fallback mode). Total worms: ${this.worms.length}`);
+
+        // AUTO-TRIGGER: Check if snake should auto-spawn (emergency backup)
+        this.checkAutoTriggerSnake();
 
         // Start animation loop if not already running
         if (this.worms.length === 1) {
@@ -1068,6 +1074,31 @@ class WormSystem {
                 el.classList.remove('stolen');
                 delete el.dataset.stolen;
             });
+        }
+    }
+
+    // AUTO-TRIGGER: Check if snake should automatically spawn (emergency backup)
+    checkAutoTriggerSnake() {
+        const activeWorms = this.worms.filter(w => w.active);
+        
+        // Auto-trigger threshold: 6 worms (player can manually trigger at 4+)
+        const AUTO_TRIGGER_THRESHOLD = 6;
+        
+        if (activeWorms.length >= AUTO_TRIGGER_THRESHOLD) {
+            // Check if snake already used this problem
+            if (window.snakeWeapon && !window.snakeWeapon.usedThisProblem) {
+                console.log(`🚨 AUTO-TRIGGER! ${activeWorms.length} worms reached - spawning snake automatically!`);
+                
+                // Dispatch same event as manual lock click
+                document.dispatchEvent(new CustomEvent('snakeWeaponTriggered', {
+                    detail: { 
+                        wormCount: activeWorms.length,
+                        autoTriggered: true // Flag to indicate this was automatic
+                    }
+                }));
+            } else if (window.snakeWeapon && window.snakeWeapon.usedThisProblem) {
+                console.log(`⚠️ Snake already used this problem - no auto-trigger available`);
+            }
         }
     }
 }
