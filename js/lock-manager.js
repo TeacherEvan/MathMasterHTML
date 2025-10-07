@@ -41,33 +41,39 @@ class LockManager {
 
         // SNAKE WEAPON: Click handler on lock display
         // Trigger snake weapon (no worm count requirement - debugging mode)
-        if (this.container) {
-            this.container.addEventListener('click', (e) => {
-                console.log('🐍 Lock clicked!');
+        // Use setTimeout to ensure DOM is ready
+        setTimeout(() => {
+            const lockContainer = document.querySelector('#lock-display');
+            console.log('🐍 Attaching click handler to lock container:', lockContainer);
+            
+            if (lockContainer) {
+                lockContainer.addEventListener('click', (e) => {
+                    console.log('🐍 Lock clicked!', e.target);
 
-                // Debug: Check if wormSystem exists
-                if (!window.wormSystem) {
-                    console.error('❌ window.wormSystem not found!');
-                    return;
-                }
+                    // Debug: Check if wormSystem exists
+                    if (!window.wormSystem) {
+                        console.error('❌ window.wormSystem not found!');
+                        return;
+                    }
 
-                // Get active worms count for logging
-                const activeWorms = window.wormSystem.worms.filter(w => w.active);
-                console.log(`🐍 Active worms count: ${activeWorms.length}`, activeWorms);
+                    // Get active worms count for logging
+                    const activeWorms = window.wormSystem.worms.filter(w => w.active);
+                    console.log(`🐍 Active worms count: ${activeWorms.length}`, activeWorms);
 
-                // Always trigger snake weapon (removed 4+ worm requirement)
-                console.log(`🐍 Triggering snake weapon! (${activeWorms.length} worms present)`);
+                    // Always trigger snake weapon (removed 4+ worm requirement)
+                    console.log(`🐍 Triggering snake weapon! (${activeWorms.length} worms present)`);
 
-                // Dispatch event for snake weapon system
-                document.dispatchEvent(new CustomEvent('snakeWeaponTriggered', {
-                    detail: { wormCount: activeWorms.length }
-                }));
-            });
+                    // Dispatch event for snake weapon system
+                    document.dispatchEvent(new CustomEvent('snakeWeaponTriggered', {
+                        detail: { wormCount: activeWorms.length }
+                    }));
+                });
 
-            console.log('🐍 Lock click handler attached to:', this.container);
-        } else {
-            console.error('❌ Lock container not found - snake weapon won\'t work!');
-        }
+                console.log('🐍 Lock click handler attached successfully!');
+            } else {
+                console.error('❌ Lock container not found - snake weapon won\'t work!');
+            }
+        }, 500); // Delay to ensure DOM is ready
 
         // Listen for step completion events
         document.addEventListener('stepCompleted', (e) => {
