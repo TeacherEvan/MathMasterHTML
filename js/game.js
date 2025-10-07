@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // PURPLE WORM: Track consecutive wrong answers
     let consecutiveWrongAnswers = 0;
-    const PURPLE_WORM_THRESHOLD = 2; // Trigger purple worm after 2 wrong clicks
+    const PURPLE_WORM_THRESHOLD = 4; // Trigger purple worm after 4 wrong clicks
 
     // PERFORMANCE FIX: Defer heavy problem loading to prevent blocking animation
     // Use requestIdleCallback if available, otherwise setTimeout
@@ -320,11 +320,11 @@ document.addEventListener('DOMContentLoaded', () => {
     /** Handle incorrect symbol selection */
     function handleIncorrectAnswer() {
         console.log('❌ Incorrect symbol clicked!');
-        
+
         // PURPLE WORM: Increment wrong answer counter
         consecutiveWrongAnswers++;
         console.log(`🟣 Consecutive wrong answers: ${consecutiveWrongAnswers}/${PURPLE_WORM_THRESHOLD}`);
-        
+
         // Trigger purple worm on threshold
         if (consecutiveWrongAnswers >= PURPLE_WORM_THRESHOLD) {
             console.log('🟣 PURPLE WORM TRIGGERED! 2+ wrong answers!');
@@ -334,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Reset counter after triggering (can trigger again with 2 more wrong answers)
             consecutiveWrongAnswers = 0;
         }
-        
+
         document.body.classList.add('incorrect-flash');
         setTimeout(() => document.body.classList.remove('incorrect-flash'), 400);
     }

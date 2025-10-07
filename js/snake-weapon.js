@@ -72,14 +72,25 @@ class SnakeWeapon {
 
         // Listen for snake trigger event (dispatched by lock click)
         document.addEventListener('snakeWeaponTriggered', (e) => {
-            console.log('🐍 Snake weapon triggered!', e.detail);
-            
+            console.log('🐍 Snake weapon triggered! Event detail:', e.detail);
+            console.log('🐍 usedThisProblem:', this.usedThisProblem);
+            console.log('🐍 isActive:', this.isActive);
+
             // Check if already used
             if (this.usedThisProblem) {
                 console.log('⚠️ Snake already used this problem - ignoring trigger');
+
+                // Visual feedback - lock flashes red
+                if (this.lockDisplay) {
+                    this.lockDisplay.style.animation = 'lock-flash-red 0.5s ease-out';
+                    setTimeout(() => {
+                        this.lockDisplay.style.animation = '';
+                    }, 500);
+                }
                 return;
             }
-            
+
+            console.log('🐍 Spawning snake now!');
             this.spawnSnake();
         });
 

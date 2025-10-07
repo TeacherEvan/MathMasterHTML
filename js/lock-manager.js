@@ -45,8 +45,15 @@ class LockManager {
             this.container.addEventListener('click', (e) => {
                 console.log('🐍 Lock clicked!');
 
+                // Debug: Check if wormSystem exists
+                if (!window.wormSystem) {
+                    console.error('❌ window.wormSystem not found!');
+                    return;
+                }
+
                 // Check if enough worms are active (4+)
-                const activeWorms = window.wormSystem ? window.wormSystem.worms.filter(w => w.active) : [];
+                const activeWorms = window.wormSystem.worms.filter(w => w.active);
+                console.log(`🐍 Active worms count: ${activeWorms.length}`, activeWorms);
 
                 if (activeWorms.length >= 4) {
                     console.log(`🐍 ${activeWorms.length} worms active - triggering snake weapon!`);
@@ -66,7 +73,9 @@ class LockManager {
                 }
             });
 
-            console.log('🐍 Lock click handler attached');
+            console.log('🐍 Lock click handler attached to:', this.container);
+        } else {
+            console.error('❌ Lock container not found - snake weapon won\'t work!');
         }
 
         // Listen for step completion events
