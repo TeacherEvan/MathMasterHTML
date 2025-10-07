@@ -21,7 +21,8 @@ function initSymbolRain() {
     // Configuration
     let symbolFallSpeed = 0.6;
     const maxFallSpeed = 6;
-    const spawnRate = 0.2;
+    const spawnRate = 0.4; // INCREASED from 0.2 to 0.4 for more frequent spawning
+    const burstSpawnRate = 0.15; // 15% chance to spawn burst of 2-3 symbols
     const columnWidth = 50;
 
     // Guaranteed spawn system - ensure all symbols appear every 5 seconds
@@ -289,9 +290,10 @@ function initSymbolRain() {
         for (let col = 0; col < columns; col++) {
             if (Math.random() < spawnRate) {
                 // Quick check: only spawn if column isn't crowded at top
+                // REDUCED from 100px to 40px to allow more symbols near top
                 let columnCrowded = false;
                 for (let i = 0; i < activeSymbols.length; i++) {
-                    if (activeSymbols[i].column === col && activeSymbols[i].y < 100) {
+                    if (activeSymbols[i].column === col && activeSymbols[i].y < 40) {
                         columnCrowded = true;
                         break; // Early exit optimization
                     }
@@ -301,6 +303,34 @@ function initSymbolRain() {
                     const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
                     createFallingSymbol(col, false, randomSymbol);
                 }
+            }
+        }
+
+        // BURST SPAWNING: Occasionally spawn 2-3 symbols simultaneously in different columns
+        if (Math.random() < burstSpawnRate) {
+            const burstCount = 2 + Math.floor(Math.random() * 2); // 2-3 symbols
+            const availableColumns = [];
+
+            // Find columns that aren't crowded
+            for (let col = 0; col < columns; col++) {
+                let isCrowded = false;
+                for (let i = 0; i < activeSymbols.length; i++) {
+                    if (activeSymbols[i].column === col && activeSymbols[i].y < 40) {
+                        isCrowded = true;
+                        break;
+                    }
+                }
+                if (!isCrowded) {
+                    availableColumns.push(col);
+                }
+            }
+
+            // Spawn burst symbols in random available columns
+            for (let i = 0; i < burstCount && availableColumns.length > 0; i++) {
+                const randomIndex = Math.floor(Math.random() * availableColumns.length);
+                const col = availableColumns.splice(randomIndex, 1)[0]; // Remove selected column
+                const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                createFallingSymbol(col, false, randomSymbol);
             }
         }
     }

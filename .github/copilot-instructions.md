@@ -205,14 +205,26 @@ new CustomEvent('lockLevelActivated', { detail: { level: 2 } })
 
 ## Development Workflow
 
-*   **No Build Process**: This is a pure HTML, CSS, and JavaScript project.
-*   **Local Testing**: Use a simple local server to avoid CORS issues with `fetch()`.
+*   **No Build Process**: This is a pure HTML, CSS, and JavaScript project. No npm, webpack, or bundlers.
+*   **Local Testing**: **REQUIRED** - Use a local server to avoid CORS issues with `fetch()` for problem loading.
     ```powershell
     # From the project root
     python -m http.server 8000
     ```
 *   **Access the game**: Open `http://localhost:8000/game.html?level=beginner` in your browser.
+*   **Level Testing**: Test all three difficulty levels using URL parameters:
+    - Beginner: `game.html?level=beginner` (Addition/Subtraction)
+    - Warrior: `game.html?level=warrior` (Multiplication)
+    - Master: `game.html?level=master` (Division)
 *   **Debugging**: The console is filled with emoji-prefixed logs (e.g., 🎮, 🔒, 🐛) that are extremely helpful for tracing game state.
+*   **Performance Testing**: Press 'P' key during gameplay to toggle performance overlay.
+
+## Deployment
+
+*   **Production Platforms**: GitHub Pages, Netlify, Vercel, Cloudflare Pages (all FREE)
+*   **Deployment Guide**: See `DEPLOYMENT_GUIDE.md` for platform-specific instructions
+*   **Current Live Site**: `https://teachereven.github.io/MathMasterHTML/`
+*   **Auto-Deploy**: GitHub Actions can auto-deploy on push to `main` branch (if configured)
 
 ## Performance Optimizations
 
@@ -262,6 +274,8 @@ new CustomEvent('lockLevelActivated', { detail: { level: 2 } })
 3.  **Worm Movement**: Worm positioning is handled entirely by JavaScript in `js/worm.js`. Do not use CSS transitions or animations for worm movement, as it will cause issues.
 4.  **Event-Driven Logic**: When adding features, use `document.dispatchEvent` and `document.addEventListener` to communicate between modules. Do not add direct function calls between `game.js`, `lock-manager.js`, `worm.js`, etc.
 5.  **File Integrity**: The `css/worm-styles.css` file may contain syntax errors (duplicate keyframes, malformed rules). If worm styling breaks, check this file first for corruption.
+6.  **Local Server Required**: Opening `game.html` directly as `file://` will fail due to CORS. Always use a local HTTP server.
+7.  **URL Parameters**: Game state depends on URL params - always test with `?level=beginner|warrior|master` parameter.
 
 ## Performance Anti-Patterns (Avoid These!)
 
@@ -310,3 +324,17 @@ new CustomEvent('lockLevelActivated', { detail: { level: 2 } })
 *   If symbols don't fall smoothly, check if heavy operations are blocking `requestAnimationFrame` loop
 *   If worms don't move, verify `WormSystem.animationFrameId` is not null
 *   If lock doesn't animate, check browser console for HTML component load failures from `lock-components/`
+
+## Documentation Structure
+
+The `Docs/` directory contains critical project knowledge:
+
+*   **`CSS_Override_Investigation.md`**: Deep dive into why CSS font size changes are ignored - explains inline style priority and specificity hierarchy. Read this FIRST before attempting any Panel A/B styling changes.
+*   **`Panel_C_Performance_Audit.md`**: Full performance analysis with 12+ optimization opportunities and code examples
+*   **`Panel_C_Performance_Summary.md`**: Executive summary of Panel C optimizations - quick reference for performance improvements
+*   **`Performance_Audit_Report.md`**: Historical performance issues and fixes (covers worm system and CSS corruption)
+*   **`Worm_System_Complete_Overhaul.md`**: Architecture documentation for the adversarial worm mechanics
+*   **`Mobile_Layout_Implementation.md`**: Responsive design patterns and mobile-specific handling
+*   **`Phase_1_Implementation_Summary.md`** & **`Phase_2_Implementation_Summary.md`**: Historical implementation notes
+
+**When debugging:** Always check relevant docs before making changes - they contain context about WHY certain patterns exist.

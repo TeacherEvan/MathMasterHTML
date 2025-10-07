@@ -1,5 +1,4 @@
 // js/display-manager.js - Auto Display Resolution Manager
-
 console.log("🖥️ Loading Display Manager...");
 
 class DisplayManager {
@@ -20,7 +19,7 @@ class DisplayManager {
         this.detectAndApply();
 
         // Listen for window resize
-        window.addEventListener('resize', debounce(() => {
+        window.addEventListener('resize', this.debounce(() => {
             console.log("🔄 Window resized, re-detecting resolution");
             this.detectAndApply();
         }, 300));
@@ -77,9 +76,6 @@ class DisplayManager {
         // Apply symbol rain adjustments
         this.applySymbolRainAdjustments(detected.config);
 
-        // Apply console adjustments
-        this.applyConsoleAdjustments();
-
         // Dispatch event for other components
         document.dispatchEvent(new CustomEvent('displayResolutionChanged', {
             detail: detected
@@ -91,30 +87,32 @@ class DisplayManager {
 
     applyFontSizes(config) {
         // Determine if we're on mobile
-        const mobile = isMobile();
+        const isMobile = this.currentResolution.name === 'mobile' || window.innerWidth <= 768;
 
-        console.log(`📱 Mobile mode: ${mobile ? 'YES' : 'NO'}`);
+        console.log(`📱 Mobile mode: ${isMobile ? 'YES' : 'NO'}`);
 
-        // Solution container - DECREASE to make text fit horizontally on mobile
+        // Solution container - DECREASE to 36% on mobile for better vertical fit (20% smaller)
         const solutionContainer = document.getElementById('solution-container');
         if (solutionContainer) {
-            if (mobile) {
-                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.176)`; // Reduced from 0.252
+            if (isMobile) {
+                solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.36)`;
                 solutionContainer.style.lineHeight = '1.2';
-                console.log(`📱 Solution container font reduced for horizontal layout`);
+                solutionContainer.style.letterSpacing = '0.5px'; // ADDED: 50% reduction (1px → 0.5px)
+                console.log(`📱 Solution container font reduced to 36% with 0.5px letter-spacing`);
             } else {
                 solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.8)`;
                 solutionContainer.style.lineHeight = '1.4';
+                solutionContainer.style.letterSpacing = '1px'; // Normal spacing for desktop
             }
         }
 
-        // Problem container - DECREASE to prevent edge cutoff on mobile
+        // Problem container - DECREASE to 32% on mobile to prevent edge cutoff (20% smaller)
         const problemContainer = document.getElementById('problem-container');
         if (problemContainer) {
-            if (mobile) {
-                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.156)`; // Reduced from 0.224
-                problemContainer.style.letterSpacing = '0.5px';
-                console.log(`📱 Problem container font reduced for horizontal layout`);
+            if (isMobile) {
+                problemContainer.style.fontSize = `calc(${config.fontSize} * 0.32)`;
+                problemContainer.style.letterSpacing = '0.5px'; // REDUCED from 1px to 0.5px (50% reduction)
+                console.log(`📱 Problem container font reduced to 32% with 0.5px letter-spacing`);
             } else {
                 problemContainer.style.fontSize = `calc(${config.fontSize} * 0.8)`;
                 problemContainer.style.letterSpacing = '2px';
@@ -134,22 +132,9 @@ class DisplayManager {
         }
     }
 
-    applyConsoleAdjustments() {
-        const consoleElement = document.getElementById('symbol-console');
-        if (!consoleElement) return;
-
-        if (isMobile()) {
-            console.log('📱 Applying mobile console layout.');
-            consoleElement.classList.add('mobile-layout');
-        } else {
-            console.log('🖥️ Applying desktop console layout.');
-            consoleElement.classList.remove('mobile-layout');
-        }
-    }
-
     applySymbolRainAdjustments(config) {
         // Determine if we're on mobile
-        const mobile = isMobile();
+        const isMobile = this.currentResolution.name === 'mobile' || window.innerWidth <= 768;
 
         // Adjust falling symbol sizes
         const style = document.createElement('style');
@@ -163,7 +148,7 @@ class DisplayManager {
 
         // On mobile: increase falling symbols by 50% (1.5x larger)
         // On desktop: normal size
-        const symbolMultiplier = mobile ? 1.8 : 1.2;
+        const symbolMultiplier = isMobile ? 1.8 : 1.2;
 
         style.textContent = `
             .falling-symbol {
@@ -171,7 +156,7 @@ class DisplayManager {
             }
         `;
 
-        if (mobile) {
+        if (isMobile) {
             console.log(`📱 Falling symbols increased by 50% (multiplier: ${symbolMultiplier})`);
         }
 
@@ -214,6 +199,16 @@ class DisplayManager {
             // Keep hidden - functionality preserved for debugging
             console.log(`📺 Resolution Indicator: ${indicator.textContent}`);
         }
+    } debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
 
     getCurrentResolution() {

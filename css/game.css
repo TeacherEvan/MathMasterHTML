@@ -230,8 +230,8 @@
     /* Keep symbols on same line */
     overflow: visible;
     /* Allow overflow if needed */
-    letter-spacing: 1px;
-    /* Add spacing between symbols for neat alignment */
+    letter-spacing: 0.5px;
+    /* REDUCED from 1px to 0.5px (50% reduction) - tighter spacing for mobile */
 }
 
 .res-mobile #lock-display {
@@ -251,6 +251,8 @@
     /* Reduced by 20% from 11px for better fit */
     line-height: 1.2;
     /* Tighter line spacing for mobile */
+    letter-spacing: 0.5px;
+    /* ADDED: 50% reduction for tighter symbol spacing on mobile */
     margin-bottom: 50px;
     /* Space for horizontal console */
     padding: 5px;
