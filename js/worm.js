@@ -35,6 +35,12 @@ class WormSystem {
             this.spawnWormFromConsole();
         });
 
+        // PURPLE WORM: Listen for purple worm trigger (2+ wrong answers)
+        document.addEventListener('purpleWormTriggered', (event) => {
+            console.log('🟣 Purple Worm System received purpleWormTriggered event:', event.detail);
+            this.spawnPurpleWorm();
+        });
+
         // Listen for symbol clicks in rain display to check if worm's target was clicked
         document.addEventListener('symbolClicked', (event) => {
             this.checkWormTargetClickForExplosion(event.detail.symbol);
@@ -401,20 +407,114 @@ class WormSystem {
         }
     }
 
+    // PURPLE WORM: Spawn purple worm triggered by 2+ wrong answers
+    spawnPurpleWorm() {
+        this.initialize();
+
+        console.log(`🟣 spawnPurpleWorm() called. Current worms: ${this.worms.length}/${this.maxWorms}`);
+
+        if (this.worms.length >= this.maxWorms) {
+            console.log(`⚠️ Max worms (${this.maxWorms}) reached. Cannot spawn purple worm.`);
+            return;
+        }
+
+        // Create purple worm element
+        const wormId = `purple-worm-${Date.now()}-${Math.random()}`;
+        const wormElement = document.createElement('div');
+        wormElement.className = 'worm-container purple-worm';
+        wormElement.id = wormId;
+
+        // Worm body with segments
+        const wormBody = document.createElement('div');
+        wormBody.className = 'worm-body';
+
+        for (let i = 0; i < 5; i++) {
+            const segment = document.createElement('div');
+            segment.className = 'worm-segment';
+            segment.style.setProperty('--segment-index', i);
+            wormBody.appendChild(segment);
+        }
+
+        wormElement.appendChild(wormBody);
+
+        // Random starting position (dramatic entrance from top)
+        const containerWidth = this.wormContainer.offsetWidth || 800;
+        const startX = Math.random() * Math.max(0, containerWidth - 80);
+        const startY = -50; // Start above container
+
+        wormElement.style.left = `${startX}px`;
+        wormElement.style.top = `${startY}px`;
+        wormElement.style.position = 'absolute';
+        wormElement.style.zIndex = '10000';
+        wormElement.style.opacity = '1';
+        wormElement.style.visibility = 'visible';
+
+        this.wormContainer.appendChild(wormElement);
+
+        // Store purple worm data
+        const wormData = {
+            id: wormId,
+            element: wormElement,
+            stolenSymbol: null,
+            targetElement: null,
+            targetSymbol: null,
+            x: startX,
+            y: startY,
+            velocityX: (Math.random() - 0.5) * 2.0,
+            velocityY: Math.random() * 1.5 + 1.0, // Downward movement
+            active: true,
+            hasStolen: false,
+            isRushingToTarget: false,
+            roamingEndTime: Date.now() + 8000, // Roam for 8 seconds
+            isFlickering: false,
+            baseSpeed: 2.0,
+            currentSpeed: 2.0,
+            isPurple: true, // FLAG: This is a purple worm!
+            fromConsole: false,
+            crawlPhase: 0,
+            direction: Math.random() * Math.PI * 2,
+            canStealBlue: true // Purple worms can steal blue symbols
+        };
+
+        this.worms.push(wormData);
+
+        // PURPLE WORM CLICK: 50% clone chance (vs 20% for normal worms)
+        wormElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.handlePurpleWormClick(wormData);
+        });
+
+        console.log(`🟣 Purple worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
+        console.log(`🟣 Purple worm has 50% clone chance and can steal BLUE symbols!`);
+
+        // AUTO-TRIGGER: Check if snake should auto-spawn
+        this.checkAutoTriggerSnake();
+
+        // Start animation loop if not already running
+        if (this.worms.length === 1) {
+            this.animate();
+        }
+    }
+
     stealSymbol(worm) {
         // PERFORMANCE: Use cached revealed symbols instead of querying every time
         const revealedSymbols = this.getCachedRevealedSymbols();
 
         // CLONING CURSE: Allow stealing BLUE symbols (revealed-symbol class) when curse is active
+        // PURPLE WORM: Also allow stealing blue symbols (they have canStealBlue flag)
         let availableSymbols;
-        if (this.cloningCurseActive) {
-            // Curse active - can steal ANY revealed symbol (red or blue)
+        if (this.cloningCurseActive || worm.canStealBlue) {
+            // Curse active OR purple worm - can steal ANY revealed symbol (red or blue)
             availableSymbols = Array.from(revealedSymbols).filter(el =>
                 !el.dataset.stolen &&
                 !el.classList.contains('space-symbol') &&
                 !el.classList.contains('completed-row-symbol')
             );
-            console.log(`🔮 CURSE ACTIVE - Worm can steal blue symbols! ${availableSymbols.length} symbols available`);
+            if (worm.isPurple) {
+                console.log(`🟣 PURPLE WORM - Can steal blue symbols! ${availableSymbols.length} symbols available`);
+            } else {
+                console.log(`🔮 CURSE ACTIVE - Worm can steal blue symbols! ${availableSymbols.length} symbols available`);
+            }
         } else {
             // Normal mode - only steal red (hidden) symbols
             availableSymbols = Array.from(revealedSymbols).filter(el =>
@@ -767,6 +867,47 @@ class WormSystem {
         }
     }
 
+    // PURPLE WORM: Special click handler with 50% clone chance
+    handlePurpleWormClick(worm) {
+        if (!worm.active) return;
+
+        console.log(`🟣 Purple worm ${worm.id} clicked!`);
+
+        // CLONING CURSE MECHANIC - applies to purple worms too
+        if (this.cloningCurseActive) {
+            console.log(`🔮 CURSE ACTIVE! Purple worm will clone!`);
+            worm.element.style.animation = 'worm-flash-purple 0.3s ease-out';
+            setTimeout(() => {
+                worm.element.style.animation = '';
+            }, 300);
+            this.clonePurpleWorm(worm);
+            return;
+        }
+
+        // PURPLE WORM: 50/50 SPLIT
+        // 50% chance: Worm explodes (kill)
+        // 50% chance: Worm clones
+        const roll = Math.random() * 100; // 0-100
+
+        if (roll < 50) {
+            // 50% - BOOM! Purple worm kill
+            console.log(`💥 BOOM! Purple worm ${worm.id} exploded (${roll.toFixed(1)}% roll - under 50% threshold)`);
+            this.explodeWorm(worm, false);
+        } else {
+            // 50% - Clone (but don't activate curse - only normal worms do that)
+            console.log(`🟣 CLONE! Purple worm ${worm.id} cloned (${roll.toFixed(1)}% roll - over 50% threshold)`);
+
+            // Visual feedback
+            worm.element.style.animation = 'worm-flash-purple 0.5s ease-out';
+            setTimeout(() => {
+                worm.element.style.animation = '';
+            }, 500);
+
+            // Create a purple clone
+            this.clonePurpleWorm(worm);
+        }
+    }
+
     cloneWorm(parentWorm) {
         if (!parentWorm.active) return;
 
@@ -858,6 +999,108 @@ class WormSystem {
         }, 500);
 
         console.log(`✅ Worm cloned! New clone ${newWormId} targeting same symbol: "${cloneData.targetSymbol || 'any'}". Total worms: ${this.worms.length}`);
+
+        // Start animation loop if not already running
+        if (!this.animationFrameId) {
+            this.animate();
+        }
+    }
+
+    // PURPLE WORM: Clone purple worm (maintains purple properties)
+    clonePurpleWorm(parentWorm) {
+        if (!parentWorm.active) return;
+
+        console.log(`🟣 Purple worm ${parentWorm.id} cloning! Creating purple clone...`);
+
+        // Check if we can spawn more worms
+        if (this.worms.length >= this.maxWorms) {
+            console.log(`⚠️ Max worms (${this.maxWorms}) reached. Cannot clone.`);
+            parentWorm.element.style.animation = 'worm-flash 0.3s ease-out';
+            setTimeout(() => {
+                parentWorm.element.style.animation = '';
+            }, 300);
+            return;
+        }
+
+        // Create purple clone near parent
+        const newWormId = `purple-clone-${Date.now()}-${Math.random()}`;
+        const newWormElement = document.createElement('div');
+        newWormElement.className = 'worm-container purple-worm';
+        newWormElement.id = newWormId;
+
+        // Worm body with segments
+        const wormBody = document.createElement('div');
+        wormBody.className = 'worm-body';
+
+        for (let i = 0; i < 5; i++) {
+            const segment = document.createElement('div');
+            segment.className = 'worm-segment';
+            segment.style.setProperty('--segment-index', i);
+            wormBody.appendChild(segment);
+        }
+
+        newWormElement.appendChild(wormBody);
+
+        // Position clone near parent with random offset
+        const offset = 30;
+        const newX = parentWorm.x + (Math.random() - 0.5) * offset * 2;
+        const newY = parentWorm.y + (Math.random() - 0.5) * offset * 2;
+
+        newWormElement.style.left = `${newX}px`;
+        newWormElement.style.top = `${newY}px`;
+        newWormElement.style.position = 'absolute';
+        newWormElement.style.zIndex = '10000';
+        newWormElement.style.opacity = '1';
+        newWormElement.style.visibility = 'visible';
+
+        this.wormContainer.appendChild(newWormElement);
+
+        // Create purple clone data
+        const cloneData = {
+            id: newWormId,
+            element: newWormElement,
+            stolenSymbol: null,
+            targetElement: null,
+            targetSymbol: parentWorm.targetSymbol,
+            x: newX,
+            y: newY,
+            velocityX: (Math.random() - 0.5) * 2.0,
+            velocityY: (Math.random() - 0.5) * 1.0,
+            active: true,
+            hasStolen: false,
+            isRushingToTarget: parentWorm.isRushingToTarget,
+            roamingEndTime: Date.now() + 8000,
+            isFlickering: false,
+            baseSpeed: 2.0,
+            currentSpeed: 2.0,
+            isPurple: true, // Maintain purple status
+            canStealBlue: true, // Can steal blue symbols
+            fromConsole: false,
+            crawlPhase: Math.random() * Math.PI * 2,
+            direction: Math.random() * Math.PI * 2
+        };
+
+        this.worms.push(cloneData);
+
+        // Purple worm click handler (50% clone chance)
+        newWormElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.handlePurpleWormClick(cloneData);
+        });
+
+        // Clone birth effect
+        parentWorm.element.classList.add('worm-multiply');
+        newWormElement.classList.add('worm-multiply');
+
+        setTimeout(() => {
+            parentWorm.element.classList.remove('worm-multiply');
+            newWormElement.classList.remove('worm-multiply');
+        }, 500);
+
+        console.log(`🟣 Purple worm cloned! New clone ${newWormId}. Total worms: ${this.worms.length}`);
+
+        // Auto-trigger snake check
+        this.checkAutoTriggerSnake();
 
         // Start animation loop if not already running
         if (!this.animationFrameId) {

@@ -26,6 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let revealedIndex = 0;
     let correctAnswersCount = 0;
 
+    // PURPLE WORM: Track consecutive wrong answers
+    let consecutiveWrongAnswers = 0;
+    const PURPLE_WORM_THRESHOLD = 2; // Trigger purple worm after 2 wrong clicks
+
     // PERFORMANCE FIX: Defer heavy problem loading to prevent blocking animation
     // Use requestIdleCallback if available, otherwise setTimeout
     const deferExecution = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
@@ -293,6 +297,9 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`✅ Correct symbol clicked: "${clickedSymbol}"`);
         correctAnswersCount++;
 
+        // PURPLE WORM: Reset wrong answer counter on correct answer
+        consecutiveWrongAnswers = 0;
+
         // Dispatch first-line-solved event for LockManager
         if (correctAnswersCount === 1) {
             console.log('🔒 First correct answer - dispatching first-line-solved event');
@@ -313,6 +320,21 @@ document.addEventListener('DOMContentLoaded', () => {
     /** Handle incorrect symbol selection */
     function handleIncorrectAnswer() {
         console.log('❌ Incorrect symbol clicked!');
+        
+        // PURPLE WORM: Increment wrong answer counter
+        consecutiveWrongAnswers++;
+        console.log(`🟣 Consecutive wrong answers: ${consecutiveWrongAnswers}/${PURPLE_WORM_THRESHOLD}`);
+        
+        // Trigger purple worm on threshold
+        if (consecutiveWrongAnswers >= PURPLE_WORM_THRESHOLD) {
+            console.log('🟣 PURPLE WORM TRIGGERED! 2+ wrong answers!');
+            document.dispatchEvent(new CustomEvent('purpleWormTriggered', {
+                detail: { wrongAnswerCount: consecutiveWrongAnswers }
+            }));
+            // Reset counter after triggering (can trigger again with 2 more wrong answers)
+            consecutiveWrongAnswers = 0;
+        }
+        
         document.body.classList.add('incorrect-flash');
         setTimeout(() => document.body.classList.remove('incorrect-flash'), 400);
     }
