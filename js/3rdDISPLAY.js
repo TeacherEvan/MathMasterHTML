@@ -21,19 +21,57 @@ function initSymbolRain() {
     // Configuration
     let symbolFallSpeed = 0.6;
     const maxFallSpeed = 6;
-    const spawnRate = 0.8; // Increased from 0.2 to 0.8 for more frequent spawning
+    const spawnRate = 0.2;
     const columnWidth = 50;
 
-    // Guaranteed spawn system - ensure all symbols appear every 3 seconds (faster)
+    // Guaranteed spawn system - ensure all symbols appear every 5 seconds
     let lastSpawnTime = {};
     symbols.forEach(sym => {
         lastSpawnTime[sym] = Date.now() - Math.random() * 2000;
     });
-    const GUARANTEED_SPAWN_INTERVAL = 3000; // Reduced from 5000 to 3000 (3 seconds)
+    const GUARANTEED_SPAWN_INTERVAL = 5000; // 5 seconds
 
     let columns = 0;
     let activeSymbols = [];
     let animationRunning = false;
+
+    // PERFORMANCE: Spatial hash grid for O(n) collision detection instead of O(n²)
+    const GRID_CELL_SIZE = 100; // 100px cells
+    let spatialGrid = new Map();
+
+    function getCellKey(x, y) {
+        const cellX = Math.floor(x / GRID_CELL_SIZE);
+        const cellY = Math.floor(y / GRID_CELL_SIZE);
+        return `${cellX},${cellY}`;
+    }
+
+    function updateSpatialGrid() {
+        spatialGrid.clear();
+        activeSymbols.forEach(symbolObj => {
+            const key = getCellKey(symbolObj.x, symbolObj.y);
+            if (!spatialGrid.has(key)) {
+                spatialGrid.set(key, []);
+            }
+            spatialGrid.get(key).push(symbolObj);
+        });
+    }
+
+    function getNeighborCells(x, y) {
+        const cellX = Math.floor(x / GRID_CELL_SIZE);
+        const cellY = Math.floor(y / GRID_CELL_SIZE);
+        const neighbors = [];
+
+        // Check current cell and 8 surrounding cells
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const key = `${cellX + dx},${cellY + dy}`;
+                if (spatialGrid.has(key)) {
+                    neighbors.push(...spatialGrid.get(key));
+                }
+            }
+        }
+        return neighbors;
+    }
 
     function calculateColumns() {
         const containerWidth = symbolRainContainer.offsetWidth;
@@ -116,7 +154,9 @@ function initSymbolRain() {
             const symbolWidth = 60;
             const horizontalBuffer = 80; // Space between symbols in train
 
-            for (let other of activeSymbols) {
+            // PERFORMANCE: Only check nearby symbols from spatial grid
+            const neighbors = getNeighborCells(symbolObj.x, symbolObj.y);
+            for (let other of neighbors) {
                 if (other === symbolObj) continue;
                 const distance = symbolObj.x - other.x;
                 if (distance > 0 && distance < symbolWidth + horizontalBuffer) {
@@ -128,17 +168,17 @@ function initSymbolRain() {
             // Desktop: Check vertical collision with increased spacing
             const symbolHeight = 30;
             const symbolWidth = 30;
-            const collisionBuffer = 40; // Increased from 25 to spread symbols more
-            const horizontalBuffer = 35; // Increased from 20 for better horizontal spacing
+            const collisionBuffer = 40;
+            const horizontalBuffer = 35;
 
-            // Cache element position to avoid repeated style access
             const symbolLeft = symbolObj.x;
             const symbolRight = symbolLeft + symbolWidth;
 
-            for (let other of activeSymbols) {
+            // PERFORMANCE: Only check nearby symbols from spatial grid (not ALL symbols!)
+            const neighbors = getNeighborCells(symbolObj.x, symbolObj.y);
+            for (let other of neighbors) {
                 if (other === symbolObj) continue;
 
-                // Use cached positions instead of parsing style
                 const otherLeft = other.x;
                 const otherRight = otherLeft + symbolWidth;
 
@@ -159,12 +199,18 @@ function initSymbolRain() {
         const containerHeight = symbolRainContainer.offsetHeight;
         const currentTime = Date.now();
 
-        // Use filter for cleanup and update positions in single pass
-        activeSymbols = activeSymbols.filter(symbolObj => {
+        // PERFORMANCE: Update spatial grid ONCE per frame instead of in every collision check
+        updateSpatialGrid();
+
+        // PERFORMANCE: Swap-and-pop instead of filter() to reuse array and reduce GC pressure
+        let writeIndex = 0;
+        for (let readIndex = 0; readIndex < activeSymbols.length; readIndex++) {
+            const symbolObj = activeSymbols[readIndex];
+
             // Check if symbol should be removed (out of bounds)
             if (symbolObj.y > containerHeight + 50) {
                 symbolObj.element.remove();
-                return false;
+                continue; // Skip this symbol, don't copy to writeIndex
             }
 
             // Update position only if not colliding
@@ -173,8 +219,11 @@ function initSymbolRain() {
                 symbolObj.element.style.top = `${symbolObj.y}px`;
             }
 
-            return true;
-        });
+            // Keep this symbol - copy to writeIndex
+            activeSymbols[writeIndex++] = symbolObj;
+        }
+        // Trim array to new length (no reallocation!)
+        activeSymbols.length = writeIndex;
 
         // Guaranteed spawn system - all symbols in 5 seconds
         symbols.forEach(sym => {
@@ -248,6 +297,10 @@ function initSymbolRain() {
         isMobileMode = isMobile;
         console.log(`🖥️ Display resolution changed to: ${event.detail.name}, isMobileMode: ${isMobileMode}`);
     });
+    // Expose symbol count for performance monitoring
+    window.getActiveSymbolCount = function() {
+        return activeSymbols.length;
+    };
 }
 
 // PERFORMANCE FIX: Call initSymbolRain as soon as DOM is interactive (earlier than DOMContentLoaded)

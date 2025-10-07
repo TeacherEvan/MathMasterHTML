@@ -14,7 +14,15 @@ class WormSystem {
         this.firstWormSpawned = false;
         this.lockedConsoleSlots = new Set(); // Track which console slots have active worms
 
-        console.log('🐛 WormSystem initialized');
+        // PERFORMANCE: DOM query caching
+        this.cachedRevealedSymbols = null;
+        this.revealedSymbolsCacheTime = 0;
+        this.cachedContainerRect = null;
+        this.containerRectCacheTime = 0;
+        this.CACHE_DURATION_TARGETS = 100; // Refresh revealed symbols every 100ms
+        this.CACHE_DURATION_RECT = 200; // Refresh container rect every 200ms
+
+        console.log('🐛 WormSystem initialized with DOM query caching');
 
         // Listen for the custom event dispatched by game.js
         document.addEventListener('problemLineCompleted', (event) => {
@@ -32,6 +40,31 @@ class WormSystem {
             console.log('🎯 Symbol revealed event:', event.detail);
             this.notifyWormsOfRedSymbol(event.detail.symbol);
         });
+    }
+
+    // PERFORMANCE: Get cached revealed symbols (refreshes every 100ms instead of every frame)
+    getCachedRevealedSymbols() {
+        const now = Date.now();
+        if (!this.cachedRevealedSymbols || (now - this.revealedSymbolsCacheTime) > this.CACHE_DURATION_TARGETS) {
+            this.cachedRevealedSymbols = this.solutionContainer.querySelectorAll('.revealed-symbol');
+            this.revealedSymbolsCacheTime = now;
+        }
+        return this.cachedRevealedSymbols;
+    }
+
+    // PERFORMANCE: Get cached container bounding rect (refreshes every 200ms instead of every frame)
+    getCachedContainerRect() {
+        const now = Date.now();
+        if (!this.cachedContainerRect || (now - this.containerRectCacheTime) > this.CACHE_DURATION_RECT) {
+            this.cachedContainerRect = this.wormContainer.getBoundingClientRect();
+            this.containerRectCacheTime = now;
+        }
+        return this.cachedContainerRect;
+    }
+
+    // PERFORMANCE: Invalidate caches when symbols change
+    invalidateSymbolCache() {
+        this.cachedRevealedSymbols = null;
     }
 
     // Check if rain symbol clicked matches worm's stolen symbol - EXPLODE WORM!
@@ -150,7 +183,7 @@ class WormSystem {
 
         // Get slot position for worm spawn point
         const slotRect = slotElement.getBoundingClientRect();
-        const containerRect = this.wormContainer.getBoundingClientRect();
+        const containerRect = this.getCachedContainerRect(); // PERFORMANCE: Use cached rect
 
         // Calculate spawn position relative to panel-b
         const startX = slotRect.left - containerRect.left + (slotRect.width / 2);
@@ -309,8 +342,8 @@ class WormSystem {
     }
 
     stealSymbol(worm) {
-        // Find revealed RED symbols (not hidden symbols)
-        const revealedSymbols = this.solutionContainer.querySelectorAll('.revealed-symbol');
+        // PERFORMANCE: Use cached revealed symbols instead of querying every time
+        const revealedSymbols = this.getCachedRevealedSymbols();
         const availableSymbols = Array.from(revealedSymbols).filter(el =>
             !el.dataset.stolen &&
             !el.classList.contains('space-symbol') &&
@@ -398,8 +431,8 @@ class WormSystem {
 
             // Rushing to red symbol that just appeared
             if (worm.isRushingToTarget && !worm.hasStolen) {
-                // Find the target red symbol
-                const revealedSymbols = this.solutionContainer.querySelectorAll('.revealed-symbol');
+                // PERFORMANCE: Use cached revealed symbols
+                const revealedSymbols = this.getCachedRevealedSymbols();
                 let targetElement = null;
 
                 if (worm.targetSymbol) {
@@ -413,7 +446,7 @@ class WormSystem {
                 if (targetElement) {
                     // Rush towards target symbol
                     const targetRect = targetElement.getBoundingClientRect();
-                    const containerRect = this.wormContainer.getBoundingClientRect();
+                    const containerRect = this.getCachedContainerRect(); // PERFORMANCE: Use cached rect
 
                     const targetX = targetRect.left - containerRect.left + (targetRect.width / 2);
                     const targetY = targetRect.top - containerRect.top + (targetRect.height / 2);
@@ -480,7 +513,7 @@ class WormSystem {
             // Carrying symbol - return to console hole
             else if (worm.hasStolen && worm.fromConsole && worm.consoleSlotElement) {
                 const slotRect = worm.consoleSlotElement.getBoundingClientRect();
-                const containerRect = this.wormContainer.getBoundingClientRect();
+                const containerRect = this.getCachedContainerRect(); // PERFORMANCE: Use cached rect
 
                 const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
                 const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);

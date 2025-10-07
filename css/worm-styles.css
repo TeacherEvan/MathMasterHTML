@@ -1,173 +1,16 @@
-/* Worm System Styles - Quarter-coin sized green worms with LSD flicker */
+/* Worm System Styles - Clean Version - Quarter-coin sized green worms */
 
+/* === BASE WORM CONTAINER === */
 .worm-container {
     position: absolute;
     display: flex;
     align-items: center;
     z-index: 10000 !important;
-    /* MAXIMUM z-index - worms MUST be in front of everything */
     cursor: pointer;
-    /* NO transition property to prevent floating effect */
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
-}
-
-/* SLIME SPLAT EFFECT - Green worm death mark */
-.slime-splat {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    pointer-events: none;
-    z-index: 9997;
-    opacity: 0;
-    animation: splat-appear 0.3s ease-out forwards;
-}
-
-/* Main splat body */
-.slime-splat::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at 40% 40%,
-            rgba(0, 255, 0, 0.8) 0%,
-            rgba(0, 220, 0, 0.7) 20%,
-            rgba(0, 180, 0, 0.6) 40%,
-            rgba(0, 140, 0, 0.4) 70%,
-            transparent 100%);
-    border-radius: 50% 40% 45% 55% / 55% 50% 45% 50%;
-    filter: blur(1px);
-}
-
-/* Splat drips */
-.slime-splat::after {
-    content: '';
-    position: absolute;
-    top: 60%;
-    left: 30%;
-    width: 12px;
-    height: 20px;
-    background: linear-gradient(180deg,
-            rgba(0, 200, 0, 0.7) 0%,
-            rgba(0, 180, 0, 0.5) 50%,
-            transparent 100%);
-    border-radius: 0 0 50% 50%;
-    filter: blur(0.5px);
-}
-
-@keyframes splat-appear {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.3);
-    }
-
-    20% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.3);
-    }
-
-    100% {
-        opacity: 0.8;
-        transform: translate(-50%, -50%) scale(1);
-    }
-}
-
-/* Fade out animation */
-.slime-fading {
-    animation: splat-fade 1s ease-out forwards;
-}
-
-@keyframes splat-fade {
-    from {
-        opacity: 0.8;
-    }
-
-    to {
-        opacity: 0;
-    }
-}
-
-/* SLIME SPLAT EFFECT - Green worm death mark */
-.slime-splat {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    pointer-events: none;
-    z-index: 9997;
-    opacity: 0;
-    animation: splat-appear 0.3s ease-out forwards;
-}
-
-/* Main splat body */
-.slime-splat::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at 40% 40%,
-            rgba(0, 255, 0, 0.8) 0%,
-            rgba(0, 220, 0, 0.7) 20%,
-            rgba(0, 180, 0, 0.6) 40%,
-            rgba(0, 140, 0, 0.4) 70%,
-            transparent 100%);
-    border-radius: 50% 40% 45% 55% / 55% 50% 45% 50%;
-    filter: blur(1px);
-}
-
-/* Splat drips */
-.slime-splat::after {
-    content: '';
-    position: absolute;
-    top: 60%;
-    left: 30%;
-    width: 12px;
-    height: 20px;
-    background: linear-gradient(180deg,
-            rgba(0, 200, 0, 0.7) 0%,
-            rgba(0, 180, 0, 0.5) 50%,
-            transparent 100%);
-    border-radius: 0 0 50% 50%;
-    filter: blur(0.5px);
-}
-
-@keyframes splat-appear {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.3);
-    }
-
-    20% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.3);
-    }
-
-    100% {
-        opacity: 0.8;
-        transform: translate(-50%, -50%) scale(1);
-    }
-}
-
-/* Fade out animation */
-.slime-fading {
-    animation: splat-fade 1s ease-out forwards;
-}
-
-@keyframes splat-fade {
-    from {
-        opacity: 0.8;
-    }
-
-    to {
-        opacity: 0;
-    }
 }
 
 .worm-container:hover {
@@ -175,54 +18,7 @@
     transform: scale(1.1);
 }
 
-.worm-container.flickering {
-    animation: lsd-flicker 0.3s linear infinite;
-    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 0, 255, 1));
-}
-
-/* LSD Color Flicker Animation */
-@keyframes lsd-flicker {
-    0% {
-        filter:
-            drop-shadow(0 3px 8px rgba(255, 0, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 0, 0, 1)) hue-rotate(0deg);
-    }
-
-    14% {
-        filter:
-            drop-shadow(0 3px 8px rgba(255, 165, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 165, 0, 1)) hue-rotate(60deg);
-    }
-
-    28% {
-        filter:
-            drop-shadow(0 3px 8px rgba(255, 255, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 255, 0, 1)) hue-rotate(120deg);
-    }
-
-    42% {
-        filter:
-            drop-shadow(0 3px 8px rgba(0, 255, 0, 0.9)) drop-shadow(0 0 20px rgba(0, 255, 0, 1)) hue-rotate(180deg);
-    }
-
-    57% {
-        filter:
-            drop-shadow(0 3px 8px rgba(0, 0, 255, 0.9)) drop-shadow(0 0 20px rgba(0, 0, 255, 1)) hue-rotate(240deg);
-    }
-
-    71% {
-        filter:
-            drop-shadow(0 3px 8px rgba(75, 0, 130, 0.9)) drop-shadow(0 0 20px rgba(75, 0, 130, 1)) hue-rotate(300deg);
-    }
-
-    85% {
-        filter:
-            drop-shadow(0 3px 8px rgba(238, 130, 238, 0.9)) drop-shadow(0 0 20px rgba(238, 130, 238, 1)) hue-rotate(330deg);
-    }
-
-    100% {
-        filter:
-            drop-shadow(0 3px 8px rgba(255, 0, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 0, 0, 1)) hue-rotate(360deg);
-    }
-}
-
+/* === WORM BODY AND SEGMENTS === */
 .worm-body {
     display: flex;
     align-items: center;
@@ -230,15 +26,11 @@
 
 .worm-segment {
     width: 9px;
-    /* 50% of original 18px quarter-coin size */
     height: 9px;
     background: radial-gradient(circle at 30% 30%, #00ff00, #00ee00, #00cc00);
-    /* Brighter green */
     border: 1px solid #00ff00;
-    /* Reduced from 2px */
     border-radius: 50%;
     margin-left: -2px;
-    /* Reduced from -4px */
     animation: worm-crawl 0.8s ease-in-out infinite;
     animation-delay: calc(var(--segment-index, 0) * 0.15s);
     position: relative;
@@ -251,84 +43,53 @@
 .worm-segment:first-child {
     --segment-index: 0;
     width: 12px;
-    /* 50% of original 24px - head slightly larger */
     height: 12px;
     background: radial-gradient(circle at 30% 30%, #00ff66, #00ee44, #00cc33);
-    /* Brighter green head */
     border: 1.5px solid #00ff00;
-    /* Reduced from 3px */
     box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5),
         0 1px 3px rgba(0, 0, 0, 0.9),
         0 0 6px rgba(0, 255, 0, 0.8);
     opacity: 1 !important;
 }
 
-/* Worm eyes on first segment (head) */
+/* Worm eyes on head */
 .worm-segment:first-child::before,
 .worm-segment:first-child::after {
     content: '';
     position: absolute;
     width: 2px;
-    /* Reduced from 4px */
     height: 2px;
     background: #000;
     border-radius: 50%;
     top: 3px;
-    /* Adjusted from 6px */
     animation: worm-blink 3s ease-in-out infinite;
 }
 
 .worm-segment:first-child::before {
     left: 2.5px;
-    /* Adjusted from 5px */
 }
 
 .worm-segment:first-child::after {
     right: 2.5px;
-    /* Adjusted from 5px */
 }
 
+/* === ANIMATIONS === */
 @keyframes worm-blink {
 
     0%,
     90%,
     100% {
         height: 2px;
-        /* Reduced from 4px */
         opacity: 1;
     }
 
     92%,
     98% {
         height: 0.5px;
-        /* Reduced from 1px */
         opacity: 0.3;
     }
 }
 
-@keyframes worm-wiggle {
-    0% {
-        transform: translateY(0) scaleY(1);
-    }
-
-    25% {
-        transform: translateY(-1px) scaleY(1.1);
-    }
-
-    50% {
-        transform: translateY(0) scaleY(0.95);
-    }
-
-    75% {
-        transform: translateY(1px) scaleY(1.05);
-    }
-
-    100% {
-        transform: translateY(0) scaleY(1);
-    }
-}
-
-/* Crawling animation - creates inchworm-like movement */
 @keyframes worm-crawl {
     0% {
         transform: translateY(0) scaleX(1);
@@ -351,7 +112,7 @@
     }
 }
 
-/* Carrying state - worm has a symbol */
+/* === WORM STATES === */
 .worm-container.carrying {
     animation: worm-bounce 0.6s ease-in-out infinite;
 }
@@ -368,264 +129,63 @@
     }
 }
 
-/* Clicked state - visual feedback with improved explosion */
-.worm-container.worm-clicked {
-    animation: worm-explode 0.5s cubic-bezier(0.36, 0, 0.66, -0.56) forwards;
+.worm-container.flickering {
+    animation: lsd-flicker 0.3s linear infinite;
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 0, 255, 1));
 }
 
-@keyframes worm-explode {
+@keyframes lsd-flicker {
     0% {
-        transform: scale(1) rotate(0deg);
-        opacity: 1;
-        filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+        filter: drop-shadow(0 3px 8px rgba(255, 0, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 0, 0, 1)) hue-rotate(0deg);
     }
 
-    20% {
-        transform: scale(1.4) rotate(15deg);
-        opacity: 1;
-        filter:
-            drop-shadow(0 0 20px rgba(255, 255, 0, 1)) drop-shadow(0 0 30px rgba(255, 165, 0, 1));
+    14% {
+        filter: drop-shadow(0 3px 8px rgba(255, 165, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 165, 0, 1)) hue-rotate(60deg);
     }
 
-    40% {
-        transform: scale(1.8) rotate(-10deg);
-        opacity: 0.8;
-        filter:
-            drop-shadow(0 0 30px rgba(255, 0, 0, 1)) drop-shadow(0 0 40px rgba(255, 100, 0, 1));
+    28% {
+        filter: drop-shadow(0 3px 8px rgba(255, 255, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 255, 0, 1)) hue-rotate(120deg);
     }
 
-    60% {
-        transform: scale(0.6) rotate(20deg);
-        opacity: 0.5;
-        filter: drop-shadow(0 0 15px rgba(100, 100, 100, 0.5));
+    42% {
+        filter: drop-shadow(0 3px 8px rgba(0, 255, 0, 0.9)) drop-shadow(0 0 20px rgba(0, 255, 0, 1)) hue-rotate(180deg);
     }
 
-    100% {
-        transform: scale(0.1) rotate(45deg);
-        opacity: 0;
-        filter: none;
-    }
-}
-
-/* Worm explosion crack mark */
-.worm-crack {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0;
-    animation: crack-appear 0.3s ease-out forwards;
-}
-
-.worm-crack::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg,
-            transparent 0%,
-            rgba(100, 100, 100, 0.8) 10%,
-            rgba(80, 80, 80, 0.9) 50%,
-            rgba(100, 100, 100, 0.8) 90%,
-            transparent 100%);
-    transform: translate(-50%, -50%) rotate(45deg);
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
-}
-
-.worm-crack::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg,
-            transparent 0%,
-            rgba(100, 100, 100, 0.8) 10%,
-            rgba(80, 80, 80, 0.9) 50%,
-            rgba(100, 100, 100, 0.8) 90%,
-            transparent 100%);
-    transform: translate(-50%, -50%) rotate(-45deg);
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
-}
-
-@keyframes crack-appear {
-    0% {
-        opacity: 0;
-        transform: scale(0.5) rotate(0deg);
+    57% {
+        filter: drop-shadow(0 3px 8px rgba(0, 0, 255, 0.9)) drop-shadow(0 0 20px rgba(0, 0, 255, 1)) hue-rotate(240deg);
     }
 
-    50% {
-        opacity: 1;
-        transform: scale(1.2) rotate(10deg);
+    71% {
+        filter: drop-shadow(0 3px 8px rgba(75, 0, 130, 0.9)) drop-shadow(0 0 20px rgba(75, 0, 130, 1)) hue-rotate(300deg);
+    }
+
+    85% {
+        filter: drop-shadow(0 3px 8px rgba(238, 130, 238, 0.9)) drop-shadow(0 0 20px rgba(238, 130, 238, 1)) hue-rotate(330deg);
     }
 
     100% {
-        opacity: 0.7;
-        transform: scale(1) rotate(0deg);
+        filter: drop-shadow(0 3px 8px rgba(255, 0, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 0, 0, 1)) hue-rotate(360deg);
     }
 }
 
-/* Stolen symbol appearance */
-.stolen {
-    opacity: 0.3 !important;
-    text-decoration: line-through;
-    color: #666 !important;
-    text-shadow: none !important;
-    animation: stolen-fade 0.5s ease-out;
-}
-
-@keyframes stolen-fade {
-    from {
-        opacity: 1;
-        transform: scale(1);
-    }
-
-    to {
-        opacity: 0.3;
-        transform: scale(0.9);
-    }
-}
-
-/* Symbol return animation when worm is clicked */
-@keyframes symbol-return {
-    0% {
-        transform: scale(0.5) translateY(-20px);
-        opacity: 0;
-    }
-
-    50% {
-        transform: scale(1.2);
-    }
-
-    100% {
-        transform: scale(1) translateY(0);
-        opacity: 1;
-    }
-}
-
-/* Symbol being carried by worm */
-.carried-symbol {
-    position: absolute;
-    top: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(145deg, #ff0000, #ff6666);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #fff;
-    font-family: 'Orbitron', monospace;
-    border: 2px solid #ff0000;
-    box-shadow: 0 0 12px rgba(255, 0, 0, 0.8);
-    animation: symbol-glow 1s ease-in-out infinite;
-    z-index: 101;
-    pointer-events: none;
-}
-
-@keyframes symbol-glow {
-
-    0%,
-    100% {
-        box-shadow: 0 0 12px rgba(255, 0, 0, 0.8);
-        text-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
-    }
-
-    50% {
-        box-shadow: 0 0 20px rgba(255, 0, 0, 1);
-        text-shadow: 0 0 12px rgba(255, 0, 0, 0.8);
-    }
-}
-
-/* Worm multiplication effect */
-.worm-multiply {
-    animation: worm-multiply 0.5s ease-out !important;
+.worm-container.worm-multiply {
+    animation: worm-multiply 0.5s ease-out;
 }
 
 @keyframes worm-multiply {
-    0% {
+
+    0%,
+    100% {
         transform: scale(1);
-        filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
     }
 
     50% {
         transform: scale(1.5);
-        filter: drop-shadow(0 0 30px rgba(0, 255, 0, 1)) drop-shadow(0 0 40px rgba(255, 255, 0, 1));
-    }
-
-    100% {
-        transform: scale(1);
-        filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+        filter: drop-shadow(0 0 30px rgba(255, 255, 0, 1));
     }
 }
 
-/* Worm flash effect when max worms reached */
-@keyframes worm-flash {
-
-    0%,
-    100% {
-        filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
-    }
-
-    25% {
-        filter: drop-shadow(0 0 20px rgba(255, 0, 0, 1));
-    }
-
-    50% {
-        filter: drop-shadow(0 0 20px rgba(255, 255, 0, 1));
-    }
-
-    75% {
-        filter: drop-shadow(0 0 20px rgba(255, 0, 0, 1));
-    }
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .worm-segment {
-        width: 8px;
-        /* 50% of original 16px */
-        height: 8px;
-    }
-
-    .worm-segment:first-child {
-        width: 10px;
-        /* 50% of original 20px */
-        height: 10px;
-    }
-
-    .carried-symbol {
-        font-size: 12px;
-        /* Slightly smaller */
-        padding: 2px 4px;
-    }
-}
-
-@media (max-width: 480px) {
-    .worm-segment {
-        width: 7px;
-        /* 50% of original 14px */
-        height: 7px;
-    }
-
-    .worm-segment:first-child {
-        width: 9px;
-        /* 50% of original 18px */
-        height: 9px;
-    }
-
-    .carried-symbol {
-        font-size: 10px;
-        /* Smaller for mobile */
-        padding: 1px 3px;
-    }
-}
-
-/* DRAMATIC EXPLOSION EFFECTS */
+/* === EXPLOSION EFFECTS === */
 .worm-exploding {
     animation: worm-explosion-scale 0.5s ease-out forwards !important;
 }
@@ -703,3 +263,209 @@
     }
 }
 
+/* === SLIME SPLAT EFFECT === */
+.slime-splat {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    pointer-events: none;
+    z-index: 9997;
+    opacity: 0;
+    animation: splat-appear 0.3s ease-out forwards;
+}
+
+.slime-splat::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 40% 40%,
+            rgba(0, 255, 0, 0.8) 0%,
+            rgba(0, 220, 0, 0.7) 20%,
+            rgba(0, 180, 0, 0.6) 40%,
+            rgba(0, 140, 0, 0.4) 70%,
+            transparent 100%);
+    border-radius: 50% 40% 45% 55% / 55% 50% 45% 50%;
+    filter: blur(1px);
+}
+
+.slime-splat::after {
+    content: '';
+    position: absolute;
+    top: 60%;
+    left: 30%;
+    width: 12px;
+    height: 20px;
+    background: linear-gradient(180deg,
+            rgba(0, 200, 0, 0.7) 0%,
+            rgba(0, 180, 0, 0.5) 50%,
+            transparent 100%);
+    border-radius: 0 0 50% 50%;
+    filter: blur(0.5px);
+}
+
+@keyframes splat-appear {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.3);
+    }
+
+    100% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.slime-fading {
+    animation: splat-fade 1s ease-out forwards;
+}
+
+@keyframes splat-fade {
+    from {
+        opacity: 0.8;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+/* === WORM CRACK MARKS === */
+.worm-crack {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    animation: crack-appear 0.3s ease-out forwards;
+}
+
+.worm-crack::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, rgba(0, 255, 0, 0.4), transparent);
+    transform: translateX(-50%) rotate(15deg);
+}
+
+.worm-crack::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, rgba(0, 255, 0, 0.3), transparent);
+    transform: translateX(-50%) rotate(-20deg);
+}
+
+@keyframes crack-appear {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+}
+
+/* === STOLEN SYMBOL EFFECTS === */
+@keyframes stolen-fade {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0.3;
+        color: #666;
+        text-decoration: line-through;
+    }
+}
+
+@keyframes symbol-return {
+    from {
+        opacity: 0.3;
+        color: #666;
+    }
+
+    to {
+        opacity: 1;
+        color: inherit;
+    }
+}
+
+@keyframes symbol-glow {
+
+    0%,
+    100% {
+        text-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+    }
+
+    50% {
+        text-shadow: 0 0 20px rgba(255, 0, 0, 1), 0 0 30px rgba(255, 100, 0, 0.8);
+    }
+}
+
+/* === CONSOLE SLOT WORM SPAWN EFFECTS === */
+.console-slot.worm-spawning {
+    animation: slot-open 0.5s ease-out;
+    background: radial-gradient(circle, rgba(0, 255, 0, 0.3), rgba(0, 200, 0, 0.1));
+    box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.5), 0 0 30px rgba(0, 255, 0, 0.6);
+}
+
+@keyframes slot-open {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+        box-shadow: inset 0 0 30px rgba(0, 255, 0, 0.8), 0 0 50px rgba(0, 255, 0, 1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.console-slot.locked {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* === RESPONSIVE MOBILE STYLES === */
+@media (max-width: 768px) {
+    .worm-segment {
+        width: 7px;
+        height: 7px;
+    }
+
+    .worm-segment:first-child {
+        width: 10px;
+        height: 10px;
+    }
+
+    .slime-splat {
+        width: 40px;
+        height: 40px;
+    }
+
+    .explosion-particle {
+        width: 6px;
+        height: 6px;
+    }
+}
