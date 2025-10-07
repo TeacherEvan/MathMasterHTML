@@ -11,42 +11,7 @@
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
     opacity: 1 !important;
     visibility: visible !important;
-    pointer-events: auto !important@keyframes flash-fade {
-    0% {
-        opacity: 0;
-    }
-
-    50% {
-        opacit    z-index: 9998;
-    animation: flash-fade 0.2s ease-out forwards;
-}
-
-@keyframes flash-f    z-index: 9998;
-    animation: flash-fade 0.2s ease-out forwards;
-}
-
-@keyframes flash-fade {
-    0% {
-        opacity: 0;
-    }
-
-    50% {
-        opacity: 1;
-    }
-
-    100% {
-        opacity: 0;
-    }
-}    opacity: 0;
-    }
-
-    50% {
-        opacity: 1;
-    }
-
-    100% {
-        opacity: 0;
-    }
+    pointer-events: auto !important;
 }
 
 /* SLIME SPLAT EFFECT - Green worm death mark */
@@ -69,13 +34,12 @@
     transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 40% 40%, 
-        rgba(0, 255, 0, 0.8) 0%,
-        rgba(0, 220, 0, 0.7) 20%,
-        rgba(0, 180, 0, 0.6) 40%,
-        rgba(0, 140, 0, 0.4) 70%,
-        transparent 100%
-    );
+    background: radial-gradient(circle at 40% 40%,
+            rgba(0, 255, 0, 0.8) 0%,
+            rgba(0, 220, 0, 0.7) 20%,
+            rgba(0, 180, 0, 0.6) 40%,
+            rgba(0, 140, 0, 0.4) 70%,
+            transparent 100%);
     border-radius: 50% 40% 45% 55% / 55% 50% 45% 50%;
     filter: blur(1px);
 }
@@ -88,11 +52,10 @@
     left: 30%;
     width: 12px;
     height: 20px;
-    background: linear-gradient(180deg, 
-        rgba(0, 200, 0, 0.7) 0%,
-        rgba(0, 180, 0, 0.5) 50%,
-        transparent 100%
-    );
+    background: linear-gradient(180deg,
+            rgba(0, 200, 0, 0.7) 0%,
+            rgba(0, 180, 0, 0.5) 50%,
+            transparent 100%);
     border-radius: 0 0 50% 50%;
     filter: blur(0.5px);
 }
@@ -102,10 +65,12 @@
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.3);
     }
+
     20% {
         opacity: 1;
         transform: translate(-50%, -50%) scale(1.3);
     }
+
     100% {
         opacity: 0.8;
         transform: translate(-50%, -50%) scale(1);
@@ -121,12 +86,10 @@
     from {
         opacity: 0.8;
     }
+
     to {
         opacity: 0;
     }
-}0% {
-        opacity: 0;
-    }
 }
 
 /* SLIME SPLAT EFFECT - Green worm death mark */
@@ -149,13 +112,12 @@
     transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 40% 40%, 
-        rgba(0, 255, 0, 0.8) 0%,
-        rgba(0, 220, 0, 0.7) 20%,
-        rgba(0, 180, 0, 0.6) 40%,
-        rgba(0, 140, 0, 0.4) 70%,
-        transparent 100%
-    );
+    background: radial-gradient(circle at 40% 40%,
+            rgba(0, 255, 0, 0.8) 0%,
+            rgba(0, 220, 0, 0.7) 20%,
+            rgba(0, 180, 0, 0.6) 40%,
+            rgba(0, 140, 0, 0.4) 70%,
+            transparent 100%);
     border-radius: 50% 40% 45% 55% / 55% 50% 45% 50%;
     filter: blur(1px);
 }
@@ -168,11 +130,10 @@
     left: 30%;
     width: 12px;
     height: 20px;
-    background: linear-gradient(180deg, 
-        rgba(0, 200, 0, 0.7) 0%,
-        rgba(0, 180, 0, 0.5) 50%,
-        transparent 100%
-    );
+    background: linear-gradient(180deg,
+            rgba(0, 200, 0, 0.7) 0%,
+            rgba(0, 180, 0, 0.5) 50%,
+            transparent 100%);
     border-radius: 0 0 50% 50%;
     filter: blur(0.5px);
 }
@@ -182,10 +143,12 @@
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.3);
     }
+
     20% {
         opacity: 1;
         transform: translate(-50%, -50%) scale(1.3);
     }
+
     100% {
         opacity: 0.8;
         transform: translate(-50%, -50%) scale(1);
@@ -201,6 +164,7 @@
     from {
         opacity: 0.8;
     }
+
     to {
         opacity: 0;
     }

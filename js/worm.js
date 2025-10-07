@@ -798,10 +798,10 @@ class WormSystem {
 
     killAllWorms() {
         console.log(`💀 KILLING ALL WORMS! Total worms to kill: ${this.worms.length}`);
-        
+
         // Create a copy of the worms array to iterate over
         const wormsToKill = [...this.worms];
-        
+
         // Explode each worm with a slight delay for dramatic effect
         wormsToKill.forEach((worm, index) => {
             setTimeout(() => {
