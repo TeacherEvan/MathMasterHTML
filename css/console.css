@@ -38,6 +38,10 @@
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    /* TOUCH FIX: Prevent tap delay and double-tap zoom */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 255, 0, 0.3);
+    user-select: none;
 }
 
 /* Empty slot subtle animation */
@@ -273,47 +277,64 @@
     box-shadow: 0 0 15px rgba(255, 153, 0, 0.5);
 }
 
-/* Responsive adjustments for mobile layout */
-#symbol-console.mobile-layout {
-    /* Mobile: Span full viewport width, not confined to Panel B */
-    position: fixed;
-    bottom: 10px;
-    left: 10px;
-    right: 10px;
-    transform: none;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #symbol-console {
+        /* Mobile: Span full viewport width, not confined to Panel B */
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        transform: none;
 
-    /* Change from 3x3 grid to horizontal flex layout */
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    align-items: center;
-    gap: 8px;
-    padding: 10px;
+        /* Change from 3×3 grid to horizontal 2×1 pairs */
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        align-items: center;
+        gap: 8px;
+        padding: 10px;
 
-    /* Ensure it spans across all panels */
-    z-index: 10000;
-}
+        /* Ensure it spans across all panels */
+        z-index: 10000;
+    }
 
-#symbol-console.mobile-layout .console-slot {
-    /* Make slots slightly larger for touch on mobile */
-    width: 45px;
-    height: 45px;
-    font-size: 22px;
-    flex: 0 0 auto;
-}
+    .console-slot {
+        /* Make slots slightly larger for touch on mobile */
+        width: 45px;
+        height: 45px;
+        font-size: 22px;
+        flex: 0 0 auto;
+    }
 
-/* Group slots in pairs visually with spacing */
-#symbol-console.mobile-layout .console-slot:nth-child(2n) {
-    margin-right: 15px;
-    /* Space after every 2nd slot */
-}
+    /* Group slots in pairs visually with spacing */
+    .console-slot:nth-child(2),
+    .console-slot:nth-child(4),
+    .console-slot:nth-child(6) {
+        margin-right: 15px;
+        /* Space after every 2nd, 4th, 6th slot to create pairs */
+    }
 
-#symbol-console.mobile-layout .console-slot:last-child {
-    margin-right: 0;
+    .modal-content {
+        padding: 20px;
+        max-width: 90%;
+    }
+
+    .symbol-choice {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
+
+    .position-choice {
+        width: 60px;
+        height: 60px;
+        font-size: 20px;
+    }
 }
 
 @media (max-width: 480px) {
-    #symbol-console.mobile-layout .console-slot {
+    .console-slot {
         /* Slightly smaller on very small screens */
         width: 40px;
         height: 40px;
@@ -321,8 +342,14 @@
     }
 
     /* Reduce pair spacing on very small screens */
-    #symbol-console.mobile-layout .console-slot:nth-child(2n) {
+    .console-slot:nth-child(2),
+    .console-slot:nth-child(4),
+    .console-slot:nth-child(6) {
         margin-right: 10px;
+    }
+
+    .symbol-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 

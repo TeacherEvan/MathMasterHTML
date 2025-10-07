@@ -407,11 +407,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /** Check if all solution steps have been revealed */
     function checkProblemCompletion() {
-        // Check if all symbols in all steps have been revealed
+        // Check if all symbols in all steps have been revealed (excluding stolen ones)
         const hiddenSymbols = solutionContainer.querySelectorAll('.hidden-symbol');
 
-        if (hiddenSymbols.length === 0) {
-            console.log('🎉 Problem Complete - All steps revealed!');
+        // Filter out stolen symbols - they don't block completion
+        const nonStolenHiddenSymbols = Array.from(hiddenSymbols).filter(el => !el.dataset.stolen);
+
+        console.log(`🔍 Total hidden symbols: ${hiddenSymbols.length}, Non-stolen: ${nonStolenHiddenSymbols.length}`);
+
+        if (nonStolenHiddenSymbols.length === 0) {
+            console.log('🎉 Problem Complete - All steps revealed (stolen symbols don\'t block progression)!');
 
             // Enhanced completion effect
             solutionContainer.style.animation = 'completionGlow 1s ease-in-out';

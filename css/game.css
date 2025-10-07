@@ -133,8 +133,8 @@ input:focus:not(:focus-visible),
     font-family: 'Orbitron', monospace;
     color: #0f0;
     cursor: pointer;
-    /* PERFORMANCE: Only transition hover effects, NOT position (prevents GPU thrashing) */
-    transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
+    /* PERFORMANCE: Only transition hover effects, NOT transform (prevents click delay) */
+    transition: color 0.15s ease, text-shadow 0.15s ease;
     user-select: none;
     z-index: 1;
     /* PERFORMANCE: Expanded padding for touch targets (no ::before needed!) */
@@ -142,6 +142,9 @@ input:focus:not(:focus-visible),
     padding: 20px;
     margin: -20px;
     box-sizing: content-box;
+    /* TOUCH FIX: Prevent 300ms click delay on mobile */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 255, 255, 0.3);
 }
 
 /* PERFORMANCE: ::before pseudo-element removed - was creating double render layers */
@@ -150,7 +153,13 @@ input:focus:not(:focus-visible),
 .falling-symbol:hover {
     color: #0ff;
     text-shadow: 0 0 10px #0ff;
+}
+
+/* Active state for instant touch feedback */
+.falling-symbol:active {
     transform: scale(1.2);
+    color: #0ff;
+    text-shadow: 0 0 15px #0ff;
 }
 
 .falling-symbol.clicked {

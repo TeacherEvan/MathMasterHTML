@@ -185,14 +185,25 @@ function initSymbolRain() {
     }
 
     function handleSymbolClick(symbolElement, event) {
+        // Quick validation check
         if (!document.getElementById('panel-c').contains(event.target)) {
             return;
         }
 
+        // Prevent multiple clicks on same symbol
+        if (symbolElement.classList.contains('clicked')) {
+            return;
+        }
+
         const clickedSymbol = symbolElement.textContent;
+
+        // INSTANT FEEDBACK: Apply clicked class immediately
+        symbolElement.classList.add('clicked');
+
+        // Dispatch event immediately (no delay)
         document.dispatchEvent(new CustomEvent('symbolClicked', { detail: { symbol: clickedSymbol } }));
 
-        symbolElement.classList.add('clicked');
+        // Remove from DOM and clean up after animation
         setTimeout(() => {
             if (symbolElement.parentNode) {
                 symbolElement.parentNode.removeChild(symbolElement);
@@ -371,14 +382,48 @@ function initSymbolRain() {
     // Initialize
     console.log('🚀 Initializing symbol rain system...');
 
-    // PERFORMANCE: Event delegation - single listener for all symbols (prevents memory leaks)
-    symbolRainContainer.addEventListener('click', (event) => {
+    // PERFORMANCE + TOUCH FIX: Use pointerdown for instant response (no 300ms delay)
+    // Pointer Events API unifies mouse, touch, and pen input
+    let isPointerDown = false;
+    let lastClickedSymbol = null;
+
+    symbolRainContainer.addEventListener('pointerdown', (event) => {
+        // Prevent accidental double-handling
+        if (isPointerDown) return;
+        isPointerDown = true;
+
         const symbol = event.target.closest('.falling-symbol');
         if (symbol && symbolRainContainer.contains(symbol)) {
+            // Prevent default to avoid click delay and text selection
+            event.preventDefault();
+            lastClickedSymbol = symbol;
             handleSymbolClick(symbol, event);
         }
+    }, { passive: false }); // Non-passive to allow preventDefault
+
+    symbolRainContainer.addEventListener('pointerup', () => {
+        isPointerDown = false;
+        lastClickedSymbol = null;
     });
-    console.log('✅ Event delegation enabled for symbol clicks');
+
+    // Prevent pointer cancel from breaking the interaction
+    symbolRainContainer.addEventListener('pointercancel', () => {
+        isPointerDown = false;
+        lastClickedSymbol = null;
+    });
+
+    // Fallback for older browsers that don't support Pointer Events
+    if (!window.PointerEvent) {
+        console.warn('⚠️ Pointer Events not supported, falling back to click events');
+        symbolRainContainer.addEventListener('click', (event) => {
+            const symbol = event.target.closest('.falling-symbol');
+            if (symbol && symbolRainContainer.contains(symbol)) {
+                handleSymbolClick(symbol, event);
+            }
+        });
+    }
+
+    console.log('✅ Pointer events enabled for instant touch/click response');
 
     calculateColumns();
     console.log(`📊 Creating ${columns * 5} initial symbols...`);

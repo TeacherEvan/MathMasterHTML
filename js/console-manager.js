@@ -58,11 +58,15 @@ class ConsoleManager {
         const slots = this.consoleElement.querySelectorAll('.console-slot');
 
         slots.forEach((slot, index) => {
-            slot.addEventListener('click', () => {
+            // TOUCH FIX: Use pointerdown for instant response
+            const handleConsoleClick = (e) => {
                 const symbol = this.slots[index];
 
                 if (symbol) {
                     console.log(`🎯 Console button ${index + 1} clicked: ${symbol}`);
+
+                    // Prevent double-clicks
+                    if (slot.classList.contains('clicked')) return;
 
                     // Add purple pulsate animation
                     slot.classList.add('clicked');
@@ -75,10 +79,20 @@ class ConsoleManager {
                 } else {
                     console.log(`⚠️ Console button ${index + 1} is empty`);
                 }
-            });
+            };
+
+            // Use pointerdown for instant response, with click fallback
+            if (window.PointerEvent) {
+                slot.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    handleConsoleClick(e);
+                }, { passive: false });
+            } else {
+                slot.addEventListener('click', handleConsoleClick);
+            }
         });
 
-        console.log("✅ Console button handlers set up");
+        console.log("✅ Console button handlers set up with instant touch response");
     }
 
     setupModalInteractions() {
