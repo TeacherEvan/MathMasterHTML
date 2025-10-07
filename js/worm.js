@@ -679,6 +679,9 @@ class WormSystem {
         // Create persistent crack at worm's location
         this.createCrack(worm.x, worm.y);
 
+        // Create slime splat that lasts 15 seconds
+        this.createSlimeSplat(worm.x, worm.y);
+
         setTimeout(() => {
             this.removeWorm(worm);
         }, 500);
@@ -721,6 +724,31 @@ class WormSystem {
                 flash.parentNode.removeChild(flash);
             }
         }, 200);
+    }
+
+    createSlimeSplat(x, y) {
+        const splat = document.createElement('div');
+        splat.className = 'slime-splat';
+        splat.style.left = `${x}px`;
+        splat.style.top = `${y}px`;
+
+        // Random rotation for variation
+        splat.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 360}deg)`;
+
+        this.wormContainer.appendChild(splat);
+
+        console.log(`🟢 Slime splat created at (${x}, ${y})`);
+
+        // Fade out and remove after 15 seconds
+        setTimeout(() => {
+            splat.classList.add('slime-fading');
+        }, 14000); // Start fade at 14s
+
+        setTimeout(() => {
+            if (splat.parentNode) {
+                splat.parentNode.removeChild(splat);
+            }
+        }, 15000); // Remove at 15s
     }
 
     createCrack(x, y) {
@@ -766,6 +794,25 @@ class WormSystem {
         }
 
         console.log(`🐛 Worm ${wormData.id} removed. Active worms: ${this.worms.length}`);
+    }
+
+    killAllWorms() {
+        console.log(`💀 KILLING ALL WORMS! Total worms to kill: ${this.worms.length}`);
+        
+        // Create a copy of the worms array to iterate over
+        const wormsToKill = [...this.worms];
+        
+        // Explode each worm with a slight delay for dramatic effect
+        wormsToKill.forEach((worm, index) => {
+            setTimeout(() => {
+                if (worm.active) {
+                    console.log(`💥 Exploding worm ${worm.id}`);
+                    this.explodeWorm(worm);
+                }
+            }, index * 100); // 100ms delay between each explosion
+        });
+
+        console.log(`✅ All worms scheduled for extermination!`);
     }
 
     reset() {
@@ -815,8 +862,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Clean up cracks when problem is completed
     document.addEventListener('problemCompleted', () => {
         if (window.wormSystem) {
-            window.wormSystem.cleanupCracks();
+            console.log('🎯 Problem completed - killing all worms!');
+            window.wormSystem.killAllWorms();
+            // Clean up cracks after worms are killed
+            setTimeout(() => {
+                window.wormSystem.cleanupCracks();
+            }, 2000); // Wait 2 seconds for explosions to finish
         }
     });
-    console.log('✅ Crack cleanup listener registered for problemCompleted event');
+    console.log('✅ Worm extermination listener registered for problemCompleted event');
 });
