@@ -1,5 +1,25 @@
 /* Existing CSS content from css/game.css will be here */
 
+/* CRITICAL FIX: Remove default browser focus outlines that cause white border glitch */
+/* This prevents the white border from appearing when clicking buttons/symbols */
+* {
+    outline: none !important; /* Remove all default focus outlines */
+}
+
+/* Modern focus-visible alternative for accessibility (keyboard navigation only) */
+*:focus-visible {
+    outline: 2px solid #00ff00 !important; /* Green outline for keyboard users */
+    outline-offset: 2px;
+}
+
+/* Prevent focus ring on mouse clicks for buttons, inputs, and interactive elements */
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+.falling-symbol:focus:not(:focus-visible),
+.console-slot:focus:not(:focus-visible) {
+    outline: none !important;
+}
+
 /* New styles for the three-panel layout */
 .grid-container {
     display: grid;
