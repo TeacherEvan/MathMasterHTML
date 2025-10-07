@@ -3,12 +3,14 @@
 /* CRITICAL FIX: Remove default browser focus outlines that cause white border glitch */
 /* This prevents the white border from appearing when clicking buttons/symbols */
 * {
-    outline: none !important; /* Remove all default focus outlines */
+    outline: none !important;
+    /* Remove all default focus outlines */
 }
 
 /* Modern focus-visible alternative for accessibility (keyboard navigation only) */
 *:focus-visible {
-    outline: 2px solid #00ff00 !important; /* Green outline for keyboard users */
+    outline: 2px solid #00ff00 !important;
+    /* Green outline for keyboard users */
     outline-offset: 2px;
 }
 

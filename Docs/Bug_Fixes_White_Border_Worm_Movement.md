@@ -9,11 +9,13 @@
 ## 🐛 Issue #1: White Border/Outline Glitch on First Click
 
 ### **Problem Description**
+
 - White border/outline appeared when clicking first target symbol
 - Caused display to glitch on both mobile and desktop browsers
 - Affected gameplay experience negatively
 
 ### **Root Cause**
+
 - Browser default focus styles on buttons, inputs, and clickable elements
 - Default `outline` property applied on `:focus` pseudo-class
 - Not removed in project CSS, causing visual artifacts
@@ -45,6 +47,7 @@ input:focus:not(:focus-visible),
 ```
 
 ### **Benefits**
+
 - ✅ Removes white border glitch entirely
 - ✅ Maintains accessibility for keyboard users (`:focus-visible`)
 - ✅ Works on all browsers (Chrome, Firefox, Safari, Edge)
@@ -55,6 +58,7 @@ input:focus:not(:focus-visible),
 ## 🐛 Issue #2: Worms Moving Backward (Reverse Direction)
 
 ### **Problem Description**
+
 - Worms appeared to crawl backward instead of forward
 - Head was pointing away from movement direction
 - Affected all worm behaviors: roaming, targeting, carrying symbols
@@ -62,6 +66,7 @@ input:focus:not(:focus-visible),
 ### **Root Cause Analysis**
 
 The worm HTML structure creates segments left-to-right:
+
 ```html
 <div class="worm-body">
   <div class="worm-segment">Head</div>  <!-- Index 0 - Leftmost -->
@@ -72,12 +77,14 @@ The worm HTML structure creates segments left-to-right:
 </div>
 ```
 
-**The Problem**: 
+**The Problem**:
+
 - Default orientation: Head faces **LEFT** (180°)
 - Movement direction: Calculated correctly with `Math.atan2(dy, dx)` (0° = right)
 - **Mismatch**: When direction = 0° (moving right), rotation = 0°, but head faces left!
 
 **Visual Representation**:
+
 ```
 BEFORE FIX:
 Direction 0° (right) → Rotation 0° → Head LEFT, Tail RIGHT → BACKWARD! ❌
@@ -95,6 +102,7 @@ Direction 0° (right) → Rotation 0° + 180° → Head RIGHT, Tail LEFT → FOR
 **File**: `js/worm.js` (3 locations)
 
 **Location 1**: Line ~510 (Roaming behavior)
+
 ```javascript
 // Rotate worm body to face movement direction (head points forward)
 // Worm segments are laid out left-to-right, so head should point in direction
@@ -103,6 +111,7 @@ worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
 ```
 
 **Location 2**: Line ~543 (Returning to console with stolen symbol)
+
 ```javascript
 // Rotate towards console (head points forward)
 // FIX: Add π (180°) to flip worm so head faces forward
@@ -110,6 +119,7 @@ worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
 ```
 
 **Location 3**: Line ~577 (Carrying symbol, no console)
+
 ```javascript
 // Rotate worm to face movement direction (head points forward)
 // FIX: Add π (180°) to flip worm so head faces forward
@@ -129,12 +139,14 @@ transform = `rotate(${worm.direction + Math.PI}rad)`;
 ```
 
 **Why this works**:
+
 - `worm.direction` is calculated with `Math.atan2(dy, dx)` which returns angle in radians
 - 0 radians = facing right (positive X-axis)
 - Adding π radians rotates 180° to flip the worm orientation
 - Now when `worm.direction = 0`, the rotation is `0 + π = π`, which faces the head right!
 
 ### **Impact**
+
 - ✅ Worms now crawl **forward** in all movement modes
 - ✅ Head points in direction of travel
 - ✅ Natural-looking worm behavior restored
@@ -145,6 +157,7 @@ transform = `rotate(${worm.direction + Math.PI}rad)`;
 ## 📊 Testing Performed
 
 ### **White Border Glitch**
+
 - [x] Tested on Chrome desktop
 - [x] Tested on Firefox desktop  
 - [x] Tested on mobile viewport (DevTools)
@@ -153,6 +166,7 @@ transform = `rotate(${worm.direction + Math.PI}rad)`;
 - [x] Verified keyboard focus still works (Tab navigation shows green outline)
 
 ### **Worm Movement Direction**
+
 - [x] Worms now crawl forward during roaming
 - [x] Worms rush forward when targeting revealed symbols
 - [x] Worms carry symbols forward while escaping
@@ -177,11 +191,13 @@ transform = `rotate(${worm.direction + Math.PI}rad)`;
 ### White Border Glitch
 
 **Before**:
+
 ```
 Click HELP button → White border appears → Display glitches ❌
 ```
 
 **After**:
+
 ```
 Click HELP button → No border → Clean visual ✅
 ```
@@ -189,12 +205,14 @@ Click HELP button → No border → Clean visual ✅
 ### Worm Movement
 
 **Before**:
+
 ```
 Worm moves right → Head faces left → Backward crawling ❌
      ←[HEAD]←←←←[TAIL]  
 ```
 
 **After**:
+
 ```
 Worm moves right → Head faces right → Forward crawling ✅
      [TAIL]→→→→[HEAD]→
@@ -205,11 +223,13 @@ Worm moves right → Head faces right → Forward crawling ✅
 ## 🚀 Future Considerations
 
 ### Focus Accessibility
+
 - Current fix removes outlines on mouse click but preserves for keyboard
 - Uses modern `:focus-visible` pseudo-class (supported in all modern browsers)
 - Green outline (#00ff00) matches Matrix theme
 
 ### Worm Rotation Performance
+
 - Rotation uses CSS `transform` which is GPU-accelerated
 - No performance impact from adding `+ Math.PI` (compile-time constant)
 - Rotation updates only when direction changes (not every frame)
