@@ -246,10 +246,10 @@ class WormSystem {
 
         this.worms.push(wormData);
 
-        // Add click handler to EXPLODE worm (Dual Kill Mechanic - direct click)
+        // Add click handler to CLONE worm (worms multiply when clicked!)
         wormElement.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.explodeWorm(wormData);
+            this.cloneWorm(wormData);
         });
 
         console.log(`✅ Worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
@@ -327,10 +327,10 @@ class WormSystem {
 
         this.worms.push(wormData);
 
-        // Add click handler to EXPLODE worm (Dual Kill Mechanic - direct click)
+        // Add click handler to MULTIPLY worm (fallback spawn worms multiply!)
         wormElement.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.explodeWorm(wormData);
+            this.multiplyWorm(wormData);
         });
 
         console.log(`✅ Worm ${wormId} spawned (fallback mode). Total worms: ${this.worms.length}`);
@@ -667,10 +667,10 @@ class WormSystem {
 
         this.worms.push(cloneData);
 
-        // Add click handler to explode clone (Dual Kill Mechanic - direct click)
+        // Add click handler to clone - clones can also be clicked to multiply!
         newWormElement.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.explodeWorm(cloneData);
+            this.cloneWorm(cloneData);
         });
 
         // Clone birth effect on both worms
