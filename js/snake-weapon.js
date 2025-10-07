@@ -117,13 +117,16 @@ class SnakeWeapon {
     }
 
     spawnSnake() {
+        console.log('🐍 spawnSnake() called');
+        console.log('🐍 Current state: isActive:', this.isActive, 'usedThisProblem:', this.usedThisProblem);
+        
         if (this.isActive) {
-            console.log('⚠️ Snake already active');
+            console.log('⚠️ Snake already active - returning');
             return;
         }
 
         if (this.usedThisProblem) {
-            console.log('⚠️ Snake already used this problem');
+            console.log('⚠️ Snake already used this problem - returning');
             // Visual feedback - lock flashes red
             this.lockDisplay.style.animation = 'lock-flash-red 0.5s ease-out';
             setTimeout(() => {
@@ -139,16 +142,30 @@ class SnakeWeapon {
         this.wormsEaten = 0;
 
         // Create snake element
+        console.log('🐍 Calling createSnakeElement()...');
         this.createSnakeElement();
+        console.log('🐍 Snake element created:', this.snakeElement);
 
         // Position at lock center
         const bounds = this.updatePanelBounds();
         const lockRect = bounds.lockDisplay;
         const panelARect = bounds.panelA;
 
+        console.log('🐍 Lock rect:', lockRect);
+        console.log('🐍 Panel A rect:', panelARect);
+
         // Snake spawns from center of lock in Panel A
         this.x = lockRect.left + lockRect.width / 2 - panelARect.left;
         this.y = lockRect.top + lockRect.height / 2 - panelARect.top;
+
+        console.log('🐍 Snake position calculated:', { x: this.x, y: this.y });
+
+        // Set initial position on element
+        if (this.snakeElement) {
+            this.snakeElement.style.left = `${this.x}px`;
+            this.snakeElement.style.top = `${this.y}px`;
+            console.log('🐍 Snake element positioned at:', this.snakeElement.style.left, this.snakeElement.style.top);
+        }
 
         // Initialize trail
         this.trail = [];
@@ -161,16 +178,23 @@ class SnakeWeapon {
         this.isReturning = false;
 
         // Start animation loop
+        console.log('🐍 Starting animation loop...');
         this.animate();
 
         console.log(`🐍 Snake spawned at (${this.x.toFixed(0)}, ${this.y.toFixed(0)})`);
+        console.log('🐍 Snake active:', this.isActive);
     }
 
     createSnakeElement() {
+        console.log('🐍 createSnakeElement() called');
+        console.log('🐍 panelA reference:', this.panelA);
+        
         // Create main snake container
         this.snakeElement = document.createElement('div');
         this.snakeElement.className = 'snake-weapon';
         this.snakeElement.id = 'red-snake';
+
+        console.log('🐍 Snake container created:', this.snakeElement);
 
         // Create snake body with segments
         const snakeBody = document.createElement('div');
@@ -192,10 +216,18 @@ class SnakeWeapon {
 
         this.snakeElement.appendChild(snakeBody);
 
+        console.log('🐍 Snake body created with', this.segments, 'segments');
+
         // Append to Panel A (starts here, but can move anywhere)
+        if (!this.panelA) {
+            console.error('❌ Panel A not found! Cannot append snake element');
+            return;
+        }
+
         this.panelA.appendChild(this.snakeElement);
 
-        console.log('✅ Snake element created with', this.segments, 'segments');
+        console.log('✅ Snake element appended to Panel A');
+        console.log('🐍 Snake element in DOM:', document.getElementById('red-snake'));
     }
 
     animate() {

@@ -471,6 +471,9 @@ class WormSystem {
             currentSpeed: 2.0,
             isPurple: true, // FLAG: This is a purple worm!
             fromConsole: false,
+            shouldExitToConsole: true, // Purple worms exit through console
+            exitingToConsole: false,
+            targetConsoleSlot: null,
             crawlPhase: 0,
             direction: Math.random() * Math.PI * 2,
             canStealBlue: true // Purple worms can steal blue symbols
@@ -773,15 +776,70 @@ class WormSystem {
             }
             // Carrying symbol but not from console - just roam with it
             else if (worm.hasStolen && !worm.fromConsole) {
-                // Continue crawling movement even after stealing
-                worm.direction += (Math.random() - 0.5) * 0.1;
+                // PURPLE WORM CONSOLE EXIT: If this is a purple worm, exit through console
+                if (worm.isPurple && worm.shouldExitToConsole) {
+                    // Find empty console slot if not already targeting one
+                    if (!worm.exitingToConsole) {
+                        const emptySlotData = this.findEmptyConsoleSlot();
+                        if (emptySlotData) {
+                            worm.exitingToConsole = true;
+                            worm.targetConsoleSlot = emptySlotData.element;
+                            worm.targetConsoleSlotIndex = emptySlotData.index;
+                            console.log(`🟣 Purple worm ${worm.id} heading to exit at console slot ${emptySlotData.index}`);
+                        }
+                    }
 
-                const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
-                worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
-                worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
+                    // If targeting a console slot, move toward it
+                    if (worm.exitingToConsole && worm.targetConsoleSlot) {
+                        const slotRect = worm.targetConsoleSlot.getBoundingClientRect();
+                        const containerRect = this.getCachedContainerRect();
 
-                worm.x += worm.velocityX;
-                worm.y += worm.velocityY;
+                        const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
+                        const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
+
+                        const dx = targetX - worm.x;
+                        const dy = targetY - worm.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < 20) {
+                            // Reached console exit - purple worm escapes!
+                            console.log(`🟣 Purple worm ${worm.id} exited through console!`);
+                            this.removeWorm(worm);
+                            return;
+                        }
+
+                        // Move towards console exit
+                        worm.direction = Math.atan2(dy, dx);
+                        worm.velocityX = (dx / distance) * worm.currentSpeed;
+                        worm.velocityY = (dy / distance) * worm.currentSpeed;
+
+                        worm.x += worm.velocityX;
+                        worm.y += worm.velocityY;
+
+                        // Rotate towards console (head points forward)
+                        worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+                    } else {
+                        // No console slot found yet, continue roaming
+                        worm.direction += (Math.random() - 0.5) * 0.1;
+
+                        const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
+                        worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
+                        worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
+
+                        worm.x += worm.velocityX;
+                        worm.y += worm.velocityY;
+                    }
+                } else {
+                    // Normal worm carrying symbol - continue roaming
+                    worm.direction += (Math.random() - 0.5) * 0.1;
+
+                    const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
+                    worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
+                    worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
+
+                    worm.x += worm.velocityX;
+                    worm.y += worm.velocityY;
+                }
 
                 // STRICT PANEL B BOUNDARIES
                 const margin = 20;
