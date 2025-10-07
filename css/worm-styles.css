@@ -289,7 +289,7 @@
             rgba(60, 0, 0, 0.5) 70%,
             transparent 100%);
     border-radius: 50% 40% 45% 55% / 55% 50% 45% 50%;
-    box-shadow: 
+    box-shadow:
         inset -2px -2px 4px rgba(0, 0, 0, 0.4),
         0 2px 4px rgba(0, 0, 0, 0.5);
 }
@@ -306,7 +306,7 @@
             rgba(100, 0, 0, 0.7) 50%,
             transparent 100%);
     border-radius: 0 0 60% 40%;
-    box-shadow: 
+    box-shadow:
         2px 0 0 rgba(120, 0, 0, 0.8),
         -8px 5px 0 6px rgba(100, 0, 0, 0.6),
         12px 8px 0 4px rgba(90, 0, 0, 0.5);

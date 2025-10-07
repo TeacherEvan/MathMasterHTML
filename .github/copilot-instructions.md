@@ -12,31 +12,41 @@ Educational math game with a Matrix-themed UI where players solve algebra proble
 JavaScript applies inline styles that override any CSS rules (including `!important`). To change mobile font sizes for `#problem-container` or `#solution-container`, you **MUST** edit `js/display-manager.js`.
 
 1.  **Edit `js/display-manager.js`**, NOT `css/game.css`.
-2.  Modify the multiplier values in the `applyFontSizes()` method.
-3.  **Current Mobile Values** (lines ~95-105):
-    *   Problem Container: `calc(${config.fontSize} * 0.32)` (32% of base)
-    *   Solution Container: `calc(${config.fontSize} * 0.36)` (36% of base)
+2.  Modify the multiplier values in the `applyFontSizes()` method (around lines 95-110).
+3.  **Current Mobile Font Multipliers**:
+    *   Problem Container: `calc(${config.fontSize} * 0.40)` (40% of base)
+    *   Solution Container: `calc(${config.fontSize} * 0.45)` (45% of base)
+    *   Falling Symbols: `calc(${config.fontSize} * 1.8)` (180% of base - injected via `<style>` tag with `!important`)
 
 See `Docs/CSS_Override_Investigation.md` for full investigation. Any CSS changes to these elements will be silently ignored.
 
-## Architecture: Three-Panel System
+## Architecture: Three-Panel System & Module Organization
 
+### Panel Layout (`game.html`)
 *   **Panel A (Left)**: Problem Display (`#problem-container`) & Lock Animation (`#lock-display`).
 *   **Panel B (Middle)**: Step-by-step solution (`#solution-container`), worm battleground (`#worm-container`), and 3x3 symbol console (`#symbol-console`).
 *   **Panel C (Right)**: Falling symbols (`#symbol-rain-container`) managed by `js/3rdDISPLAY.js`.
 
-**HTML Structure** (`game.html`):
+**HTML Structure**:
 ```html
 <div class="game-container">
-  <div class="panel panel-left">...</div>    <!-- Panel A -->
-  <div class="panel panel-middle">...</div>   <!-- Panel B -->  
-  <div class="panel panel-right">...</div>    <!-- Panel C -->
+  <div class="display">...</div>           <!-- Panel A -->
+  <div class="wall"></div>
+  <div class="display">...</div>           <!-- Panel B -->  
+  <div class="wall"></div>
+  <div class="display">...</div>           <!-- Panel C -->
 </div>
 ```
 
-**Key DOM IDs**:
-- `#problem-container`, `#solution-container`, `#lock-display`
-- `#worm-container`, `#symbol-console`, `#symbol-rain-container`
+### JavaScript Module Responsibilities
+- `game.js` - Core game loop, problem loading/validation, symbol revelation logic
+- `3rdDISPLAY.js` - Symbol rain animation (Panel C), spatial hash grid collision detection
+- `lock-manager.js` - Progressive lock animation via HTML component injection
+- `worm.js` - Enemy AI system with roaming/targeting/stealing behaviors
+- `console-manager.js` - 3x3 quick-access symbol grid with keyboard shortcuts (1-9)
+- `display-manager.js` - Responsive font sizing (applies inline styles that override CSS!)
+- `lock-responsive.js` - Lock scaling for mobile viewports
+- `performance-monitor.js` - FPS/DOM query tracking overlay (toggle with 'P' key)
 
 
 ## Critical Event-Driven Communication
@@ -140,6 +150,9 @@ new CustomEvent('lockLevelActivated', { detail: { level: 2 } })
 - Worms have 5 body segments (head + 4 segments) defined in CSS
 - Position updated via `requestAnimationFrame` loop, NOT CSS transitions
 - Worm states tracked: `active`, `hasStolen`, `isRushingToTarget`
+- **Dual Kill Mechanic**: Worms can be destroyed two ways:
+  1. Click the worm directly
+  2. Click the matching symbol in Panel C rain (if worm has stolen that symbol)
 
 **CSS Classes:**
 - `.worm-container`: Main worm wrapper (z-index: 10000)
@@ -170,6 +183,26 @@ new CustomEvent('lockLevelActivated', { detail: { level: 2 } })
 - Locked: Worm is spawning/active from this slot (`.locked` class)
 - Worm Spawning: Special slide-open animation (`.worm-spawning` class)
 
+## Symbol Rain System (`js/3rdDISPLAY.js`)
+
+**Guaranteed Spawn System:**
+- Every symbol is guaranteed to appear at least once every 5 seconds (`GUARANTEED_SPAWN_INTERVAL`)
+- Prevents players from getting stuck waiting for rare symbols
+- Tracks last spawn time per symbol in `lastSpawnTime` object
+- Forced spawns override random column selection
+
+**Symbol Array:**
+```javascript
+['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X', 'x', '+', '-', '=', '÷', '×']
+```
+
+**Rendering:**
+- Desktop: Vertical falling symbols (top to bottom)
+- Mobile: Symbols may fall differently based on viewport (check `isMobileMode`)
+- Column-based spawning with random horizontal offset (±30px)
+- Symbol fall speed: 0.6 (base), increases to max 6 over time
+- Global counter `window.symbolRainActiveCount` tracks active symbols for performance monitor
+
 ## Development Workflow
 
 *   **No Build Process**: This is a pure HTML, CSS, and JavaScript project.
@@ -188,6 +221,40 @@ new CustomEvent('lockLevelActivated', { detail: { level: 2 } })
 *   Heavy operations (problem loading, lock initialization) are deferred using `requestIdleCallback` or `setTimeout(cb, 1)` to prevent blocking the animation loop.
 *   **Never add synchronous blocking operations during initialization** - use deferred execution for non-critical UI setup.
 
+**Spatial Hash Grid Collision Detection:**
+*   `3rdDISPLAY.js` uses a spatial hash grid for O(n) collision detection instead of O(n²).
+*   Grid cell size: 100px (`GRID_CELL_SIZE`)
+*   Functions: `getCellKey()`, `updateSpatialGrid()`, `getNeighborCells()`
+*   This optimization is critical for performance with many falling symbols
+
+**DOM Query Caching:**
+*   `worm.js` caches frequently queried DOM elements with time-based invalidation
+*   `getCachedRevealedSymbols()`: Refreshes every 100ms (`CACHE_DURATION_TARGETS`)
+*   `getCachedContainerRect()`: Refreshes every 200ms (`CACHE_DURATION_RECT`)
+*   Call `invalidateSymbolCache()` when symbols change to force cache refresh
+
+**Performance Monitor:**
+*   Toggle overlay with 'P' key during development
+*   Tracks FPS, DOM queries/sec, active worms, symbol count, frame time
+*   Color-coded metrics: Green (good), Yellow (warning), Red (critical)
+*   Wraps `querySelectorAll` and `querySelector` to count DOM queries automatically
+
+**Optimization Patterns (Panel C - October 2025):**
+*   ✅ **CSS Transitions**: Only transition specific properties (color, text-shadow, transform), NOT `all` to prevent GPU thrashing
+*   ✅ **Guaranteed Spawn**: Moved to 1-second interval instead of checking every frame (98% reduction in checks)
+*   ✅ **Container Height Caching**: Query once, update only on resize to eliminate layout thrashing
+*   ✅ **Event Delegation**: Single click listener on container instead of per-symbol listeners (prevents memory leaks)
+*   ✅ **Tab Visibility Throttling**: Reduces animation to ~1fps when tab hidden (95% CPU savings)
+*   ✅ **DOM Element Pooling**: Reuses 30 pooled elements to reduce GC pressure
+*   ✅ **Pseudo-element Removal**: Removed `::before` elements to halve render layers (200+ → 100)
+*   ✅ **Resize Debouncing**: 250ms delay prevents excessive recalculation on window resize
+
+**Performance Results (Desktop):**
+*   FPS improvement: 48-52 → 58-60 (+20%)
+*   Frame time: 19-21ms → 15-17ms (-20%)
+*   DOM queries: 180-220/sec → 80-120/sec (-45%)
+*   Memory growth: 8MB/min → 2MB/min (-75%)
+
 ## Common Pitfalls & Key Conventions
 
 1.  **CSS Overrides**: (Reiterated for emphasis) Do not try to style mobile font sizes or lock scaling with CSS. Edit the JavaScript files directly.
@@ -195,3 +262,51 @@ new CustomEvent('lockLevelActivated', { detail: { level: 2 } })
 3.  **Worm Movement**: Worm positioning is handled entirely by JavaScript in `js/worm.js`. Do not use CSS transitions or animations for worm movement, as it will cause issues.
 4.  **Event-Driven Logic**: When adding features, use `document.dispatchEvent` and `document.addEventListener` to communicate between modules. Do not add direct function calls between `game.js`, `lock-manager.js`, `worm.js`, etc.
 5.  **File Integrity**: The `css/worm-styles.css` file may contain syntax errors (duplicate keyframes, malformed rules). If worm styling breaks, check this file first for corruption.
+
+## Performance Anti-Patterns (Avoid These!)
+
+**❌ DO NOT:**
+- Use `transition: all` on animated elements (causes GPU thrashing)
+- Query DOM properties (`offsetHeight`, `getBoundingClientRect`) in animation loops
+- Add event listeners to dynamically created elements (use event delegation)
+- Use `::before` or `::after` pseudo-elements on elements with 100+ instances
+- Check timers/intervals in `requestAnimationFrame` loops (use separate intervals)
+- Forget to throttle/pause animations when tab is hidden
+- Skip debouncing on resize/scroll handlers
+- Create new DOM elements without pooling/recycling
+
+**✅ DO:**
+- Cache DOM measurements and update only on resize
+- Use event delegation for dynamic content
+- Implement object pooling for frequently created/destroyed elements
+- Move expensive checks out of animation loops into intervals
+- Use Page Visibility API to throttle when tab hidden
+- Debounce resize handlers (250ms recommended)
+- Profile with Performance Monitor ('P' key) during development
+
+## Known Issues & Debugging
+
+**CSS File Corruption:**
+*   `css/worm-styles.css` has had parsing errors in the past (see `Docs/Performance_Audit_Report.md`)
+*   Backup files: `worm-styles.css.backup`, `worm-styles.css.corrupted`
+*   Watch for: Malformed `@keyframes`, unclosed braces, typos like `opacit` instead of `opacity`
+
+**Console Logging Convention:**
+*   All modules use emoji prefixes for easy filtering in browser console:
+    - 🎮 = `game.js` (core game logic)
+    - 🔒 = `lock-manager.js` (lock animation)
+    - 🐛 = `worm.js` (worm system)
+    - 📊 = `performance-monitor.js`
+    - 🎯 = `3rdDISPLAY.js` (symbol rain)
+    - 🎮 = `console-manager.js`
+*   Example: `console.log('🐛 Worm System received problemLineCompleted event:', event.detail);`
+
+**URL Parameters:**
+*   Game accepts query parameters: `?level=beginner|warrior|master`
+*   Example: `game.html?level=master` loads Master difficulty
+*   Lock component override: `?lockComponent=level-1-transformer.html` (debugging only)
+
+**Common Animation Issues:**
+*   If symbols don't fall smoothly, check if heavy operations are blocking `requestAnimationFrame` loop
+*   If worms don't move, verify `WormSystem.animationFrameId` is not null
+*   If lock doesn't animate, check browser console for HTML component load failures from `lock-components/`

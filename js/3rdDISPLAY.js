@@ -35,9 +35,32 @@ function initSymbolRain() {
     let activeSymbols = [];
     let animationRunning = false;
 
+    // PERFORMANCE: Cache container dimensions to prevent layout thrashing
+    let cachedContainerHeight = 0;
+
+    // PERFORMANCE: Tab visibility throttling (saves 95% CPU when tab hidden)
+    let isTabVisible = !document.hidden;
+
+    // PERFORMANCE: DOM element pooling to reduce GC pressure
+    const symbolPool = [];
+    const POOL_SIZE = 30;
+
     // PERFORMANCE: Spatial hash grid for O(n) collision detection instead of O(n²)
     const GRID_CELL_SIZE = 100; // 100px cells
     let spatialGrid = new Map();
+
+    // PERFORMANCE: Debounce utility to prevent excessive function calls
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 
     function getCellKey(x, y) {
         const cellX = Math.floor(x / GRID_CELL_SIZE);
@@ -75,14 +98,38 @@ function initSymbolRain() {
 
     function calculateColumns() {
         const containerWidth = symbolRainContainer.offsetWidth;
-        const containerHeight = symbolRainContainer.offsetHeight;
+        cachedContainerHeight = symbolRainContainer.offsetHeight; // Cache height here
         columns = Math.floor(containerWidth / columnWidth);
-        console.log(`📏 Container dimensions: ${containerWidth}x${containerHeight}, Columns: ${columns}`);
+        console.log(`📏 Container dimensions: ${containerWidth}x${cachedContainerHeight}, Columns: ${columns}`);
+    }
+
+    // PERFORMANCE: Get symbol from pool or create new one
+    function getSymbolFromPool() {
+        if (symbolPool.length > 0) {
+            const symbol = symbolPool.pop();
+            symbol.style.display = 'block';
+            return symbol;
+        }
+        // Create new element if pool is empty
+        const symbol = document.createElement('div');
+        symbol.className = 'falling-symbol';
+        return symbol;
+    }
+
+    // PERFORMANCE: Return symbol to pool for reuse
+    function returnSymbolToPool(symbolElement) {
+        if (symbolPool.length < POOL_SIZE) {
+            symbolElement.style.display = 'none';
+            symbolElement.className = 'falling-symbol'; // Reset classes
+            symbolPool.push(symbolElement);
+        } else {
+            symbolElement.remove(); // Pool full, discard
+        }
     }
 
     // DESKTOP: Create falling symbol (vertical)
     function createFallingSymbol(column, isInitialPopulation = false, forcedSymbol = null) {
-        const symbol = document.createElement('div');
+        const symbol = getSymbolFromPool(); // Use pooled element
         symbol.className = 'falling-symbol';
         symbol.textContent = forcedSymbol || symbols[Math.floor(Math.random() * symbols.length)];
         symbol.style.left = (column * columnWidth + Math.random() * 30) + 'px';
@@ -93,7 +140,8 @@ function initSymbolRain() {
             symbol.style.top = '-50px';
         }
 
-        symbol.addEventListener('click', (event) => handleSymbolClick(symbol, event));
+        // PERFORMANCE: Event delegation - no listener needed per symbol!
+        // Container handles all clicks via event delegation (see init section)
         symbolRainContainer.appendChild(symbol);
 
         activeSymbols.push({
@@ -149,6 +197,8 @@ function initSymbolRain() {
                 symbolElement.parentNode.removeChild(symbolElement);
             }
             activeSymbols = activeSymbols.filter(s => s.element !== symbolElement);
+            // PERFORMANCE: Return element to pool for reuse
+            returnSymbolToPool(symbolElement);
         }, 500);
     }
 
@@ -200,8 +250,13 @@ function initSymbolRain() {
     }
 
     function animateSymbols() {
-        const containerHeight = symbolRainContainer.offsetHeight;
-        const currentTime = Date.now();
+        // PERFORMANCE: Tab visibility throttling - run at ~1fps when tab hidden
+        if (!isTabVisible && Math.random() > 0.016) {
+            return; // Skip ~98% of frames when tab is hidden (60fps -> 1fps)
+        }
+
+        // PERFORMANCE: Use cached height instead of querying DOM every frame
+        const containerHeight = cachedContainerHeight;
 
         // PERFORMANCE: Update spatial grid ONCE per frame instead of in every collision check
         updateSpatialGrid();
@@ -214,6 +269,7 @@ function initSymbolRain() {
             // Check if symbol should be removed (out of bounds)
             if (symbolObj.y > containerHeight + 50) {
                 symbolObj.element.remove();
+                returnSymbolToPool(symbolObj.element); // Return to pool
                 continue; // Skip this symbol, don't copy to writeIndex
             }
 
@@ -228,14 +284,6 @@ function initSymbolRain() {
         }
         // Trim array to new length (no reallocation!)
         activeSymbols.length = writeIndex;
-
-        // Guaranteed spawn system - all symbols in 5 seconds
-        symbols.forEach(sym => {
-            if (currentTime - lastSpawnTime[sym] > GUARANTEED_SPAWN_INTERVAL) {
-                const randomColumn = Math.floor(Math.random() * columns);
-                createFallingSymbol(randomColumn, false, sym);
-            }
-        });
 
         // Normal random spawning - optimized to reduce array iterations
         for (let col = 0; col < columns; col++) {
@@ -277,8 +325,31 @@ function initSymbolRain() {
         }, 10000); // Every 10 seconds
     }
 
+    // PERFORMANCE: Check guaranteed spawns every 1 second instead of 60x per second
+    function startGuaranteedSpawnController() {
+        setInterval(() => {
+            const currentTime = Date.now();
+            symbols.forEach(sym => {
+                if (currentTime - lastSpawnTime[sym] > GUARANTEED_SPAWN_INTERVAL) {
+                    const randomColumn = Math.floor(Math.random() * columns);
+                    createFallingSymbol(randomColumn, false, sym);
+                }
+            });
+        }, 1000); // Check once per second
+    }
+
     // Initialize
     console.log('🚀 Initializing symbol rain system...');
+
+    // PERFORMANCE: Event delegation - single listener for all symbols (prevents memory leaks)
+    symbolRainContainer.addEventListener('click', (event) => {
+        const symbol = event.target.closest('.falling-symbol');
+        if (symbol && symbolRainContainer.contains(symbol)) {
+            handleSymbolClick(symbol, event);
+        }
+    });
+    console.log('✅ Event delegation enabled for symbol clicks');
+
     calculateColumns();
     console.log(`📊 Creating ${columns * 5} initial symbols...`);
     populateInitialSymbols();
@@ -287,13 +358,29 @@ function initSymbolRain() {
     console.log('▶️ Animation started');
     startSpeedController();
     console.log('⏱️ Speed controller started');
+    startGuaranteedSpawnController();
+    console.log('🎯 Guaranteed spawn controller started');
 
-    window.addEventListener('resize', () => {
+    // PERFORMANCE: Tab visibility API - throttle animation when tab hidden
+    document.addEventListener('visibilitychange', () => {
+        isTabVisible = !document.hidden;
+        console.log(`👁️ Tab visibility changed: ${isTabVisible ? 'visible' : 'hidden'}`);
+        if (!isTabVisible) {
+            console.log('⏸️ Tab hidden - throttling animation to ~1fps (95% CPU savings)');
+        } else {
+            console.log('▶️ Tab visible - resuming normal 60fps animation');
+        }
+    });
+
+    // PERFORMANCE: Debounced resize handler (250ms delay prevents excessive recalculation)
+    const debouncedResize = debounce(() => {
         console.log('🔄 Window resized, recalculating columns...');
         isMobileMode = window.innerWidth <= 768 || document.body.classList.contains('res-mobile');
         console.log(`📱 Mobile mode: ${isMobileMode}`);
         calculateColumns();
-    });
+    }, 250);
+
+    window.addEventListener('resize', debouncedResize);
 
     // Listen for display resolution changes
     document.addEventListener('displayResolutionChanged', (event) => {
