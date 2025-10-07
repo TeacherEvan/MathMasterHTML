@@ -40,7 +40,7 @@ class LockManager {
         });
 
         // SNAKE WEAPON: Click handler on lock display
-        // Trigger snake when 4+ worms active
+        // Trigger snake weapon (no worm count requirement - debugging mode)
         if (this.container) {
             this.container.addEventListener('click', (e) => {
                 console.log('🐍 Lock clicked!');
@@ -51,26 +51,17 @@ class LockManager {
                     return;
                 }
 
-                // Check if enough worms are active (4+)
+                // Get active worms count for logging
                 const activeWorms = window.wormSystem.worms.filter(w => w.active);
                 console.log(`🐍 Active worms count: ${activeWorms.length}`, activeWorms);
 
-                if (activeWorms.length >= 4) {
-                    console.log(`🐍 ${activeWorms.length} worms active - triggering snake weapon!`);
+                // Always trigger snake weapon (removed 4+ worm requirement)
+                console.log(`🐍 Triggering snake weapon! (${activeWorms.length} worms present)`);
 
-                    // Dispatch event for snake weapon system
-                    document.dispatchEvent(new CustomEvent('snakeWeaponTriggered', {
-                        detail: { wormCount: activeWorms.length }
-                    }));
-                } else {
-                    console.log(`⚠️ Not enough worms (${activeWorms.length}/4) - lock flash feedback`);
-
-                    // Visual feedback - lock flashes to show it's not ready
-                    this.container.style.animation = 'lock-flash-not-ready 0.5s ease-out';
-                    setTimeout(() => {
-                        this.container.style.animation = '';
-                    }, 500);
-                }
+                // Dispatch event for snake weapon system
+                document.dispatchEvent(new CustomEvent('snakeWeaponTriggered', {
+                    detail: { wormCount: activeWorms.length }
+                }));
             });
 
             console.log('🐍 Lock click handler attached to:', this.container);
