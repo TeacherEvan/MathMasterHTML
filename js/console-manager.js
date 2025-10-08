@@ -24,7 +24,7 @@ class ConsoleManager {
     loadProgress() {
         const saveKey = `mathmaster_console_${this.currentLevel}`;
         const saved = localStorage.getItem(saveKey);
-        
+
         if (saved) {
             try {
                 const data = JSON.parse(saved);

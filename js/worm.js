@@ -367,20 +367,21 @@ class WormSystem {
 
         wormElement.appendChild(wormBody);
 
-        // Random starting position at bottom
-        const containerWidth = this.wormContainer.offsetWidth || 800;
-        const containerHeight = this.wormContainer.offsetHeight || 600;
-        const startX = Math.random() * Math.max(0, containerWidth - 80);
-        const startY = Math.max(0, containerHeight - 30);
+        // Random starting position at bottom - USE VIEWPORT COORDINATES
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const startX = Math.random() * Math.max(0, viewportWidth - 80);
+        const startY = Math.max(0, viewportHeight - 30);
 
         wormElement.style.left = `${startX}px`;
         wormElement.style.top = `${startY}px`;
-        wormElement.style.position = 'absolute';
+        wormElement.style.position = 'fixed'; // Use fixed for viewport positioning
         wormElement.style.zIndex = '10000'; // MAXIMUM z-index - in front of ALL layers
         wormElement.style.opacity = '1';
         wormElement.style.visibility = 'visible';
+        wormElement.style.pointerEvents = 'auto'; // Allow clicks
 
-        this.wormContainer.appendChild(wormElement);
+        this.crossPanelContainer.appendChild(wormElement); // Use cross-panel container
 
         // Store worm data (non-console worm)
         const wormData = {
@@ -447,19 +448,20 @@ class WormSystem {
 
         wormElement.appendChild(wormBody);
 
-        // Random starting position (dramatic entrance from top)
-        const containerWidth = this.wormContainer.offsetWidth || 800;
-        const startX = Math.random() * Math.max(0, containerWidth - 80);
-        const startY = -50; // Start above container
+        // Random starting position (dramatic entrance from top) - USE VIEWPORT COORDINATES
+        const viewportWidth = window.innerWidth;
+        const startX = Math.random() * Math.max(0, viewportWidth - 80);
+        const startY = -50; // Start above viewport
 
         wormElement.style.left = `${startX}px`;
         wormElement.style.top = `${startY}px`;
-        wormElement.style.position = 'absolute';
+        wormElement.style.position = 'fixed'; // Use fixed for viewport positioning
         wormElement.style.zIndex = '10000';
         wormElement.style.opacity = '1';
         wormElement.style.visibility = 'visible';
+        wormElement.style.pointerEvents = 'auto'; // Allow clicks
 
-        this.wormContainer.appendChild(wormElement);
+        this.crossPanelContainer.appendChild(wormElement); // Use cross-panel container
 
         // Store purple worm data
         const wormData = {
@@ -539,10 +541,10 @@ class WormSystem {
         let availableSymbols;
         if (worm.canStealBlue && worm.isPurple) {
             // First, try to get red (hidden) symbols only
-            const redSymbols = allAvailableSymbols.filter(el => 
+            const redSymbols = allAvailableSymbols.filter(el =>
                 el.classList.contains('hidden-symbol')
             );
-            
+
             if (redSymbols.length > 0) {
                 // Red symbols available - purple worm steals red symbols like normal
                 availableSymbols = redSymbols;
@@ -639,7 +641,7 @@ class WormSystem {
         worm.element.appendChild(stolenSymbolDiv);
 
         console.log(`🐛 Worm now carrying "${symbolValue}" and heading back to console hole!`);
-        
+
         // GAME OVER CHECK: Did worm steal the last available symbol?
         this.checkGameOverCondition();
     }
@@ -736,11 +738,11 @@ class WormSystem {
         }
 
         const currentTime = Date.now();
-        
+
         // CROSS-PANEL MOVEMENT: Use viewport dimensions instead of Panel B only
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        
+
         // Get Panel B boundaries for symbol stealing (worms can only steal in Panel B)
         const panelBRect = this.wormContainer.getBoundingClientRect();
 
@@ -1032,11 +1034,11 @@ class WormSystem {
         // FIRST HIT: Turn green, drop stolen symbol
         if (worm.hitCount === 1) {
             console.log(`� FIRST HIT! Purple worm ${worm.id} is DAMAGED - turns green and drops symbol!`);
-            
+
             // Turn worm green (damaged state)
             worm.element.style.filter = 'hue-rotate(120deg) brightness(1.2)'; // Purple → Green
             worm.element.classList.add('worm-damaged');
-            
+
             // Drop stolen symbol if carrying one
             if (worm.hasStolen && worm.targetElement) {
                 console.log(`📦 Dropping stolen symbol "${worm.stolenSymbol}"`);
@@ -1044,19 +1046,19 @@ class WormSystem {
                 worm.targetElement.classList.add('revealed-symbol');
                 worm.targetElement.style.visibility = 'visible';
                 delete worm.targetElement.dataset.stolen;
-                
+
                 // Clear worm's stolen data
                 worm.hasStolen = false;
                 worm.targetElement = null;
                 worm.stolenSymbol = null;
             }
-            
+
             // Flash effect
             worm.element.style.animation = 'worm-flash-green 0.5s ease-out';
             setTimeout(() => {
                 worm.element.style.animation = '';
             }, 500);
-            
+
             return; // Don't explode yet!
         }
 
@@ -1102,20 +1104,21 @@ class WormSystem {
 
         newWormElement.appendChild(wormBody);
 
-        // Position near parent worm with slight offset
+        // Position near parent worm with slight offset - USE VIEWPORT COORDINATES
         const offsetX = (Math.random() - 0.5) * 60;
         const offsetY = (Math.random() - 0.5) * 60;
-        const newX = parentWorm.x + offsetX;
-        const newY = parentWorm.y + offsetY;
+        const newX = Math.max(0, Math.min(window.innerWidth - 50, parentWorm.x + offsetX));
+        const newY = Math.max(0, Math.min(window.innerHeight - 50, parentWorm.y + offsetY));
 
         newWormElement.style.left = `${newX}px`;
         newWormElement.style.top = `${newY}px`;
-        newWormElement.style.position = 'absolute';
+        newWormElement.style.position = 'fixed'; // Use fixed for viewport positioning
         newWormElement.style.zIndex = '10000';
         newWormElement.style.opacity = '1';
         newWormElement.style.visibility = 'visible';
+        newWormElement.style.pointerEvents = 'auto'; // Allow clicks
 
-        this.wormContainer.appendChild(newWormElement);
+        this.crossPanelContainer.appendChild(newWormElement); // Use cross-panel container
 
         // Create clone with SAME MISSION as parent
         const cloneData = {
@@ -1200,19 +1203,20 @@ class WormSystem {
 
         newWormElement.appendChild(wormBody);
 
-        // Position clone near parent with random offset
+        // Position clone near parent with random offset - USE VIEWPORT COORDINATES
         const offset = 30;
-        const newX = parentWorm.x + (Math.random() - 0.5) * offset * 2;
-        const newY = parentWorm.y + (Math.random() - 0.5) * offset * 2;
+        const newX = Math.max(0, Math.min(window.innerWidth - 50, parentWorm.x + (Math.random() - 0.5) * offset * 2));
+        const newY = Math.max(0, Math.min(window.innerHeight - 50, parentWorm.y + (Math.random() - 0.5) * offset * 2));
 
         newWormElement.style.left = `${newX}px`;
         newWormElement.style.top = `${newY}px`;
-        newWormElement.style.position = 'absolute';
+        newWormElement.style.position = 'fixed'; // Use fixed for viewport positioning
         newWormElement.style.zIndex = '10000';
         newWormElement.style.opacity = '1';
         newWormElement.style.visibility = 'visible';
+        newWormElement.style.pointerEvents = 'auto'; // Allow clicks
 
-        this.wormContainer.appendChild(newWormElement);
+        this.crossPanelContainer.appendChild(newWormElement); // Use cross-panel container
 
         // Create purple clone data
         const cloneData = {

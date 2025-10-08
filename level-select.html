@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Master - Unlock Your Mind - Level Select</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Orbitron', monospace;
             background: #000;
@@ -20,7 +21,7 @@
             min-height: 100vh;
             position: relative;
         }
-        
+
         /* Matrix Rain Background - Inherited from welcome screen */
         .matrix-bg {
             position: fixed;
@@ -31,7 +32,7 @@
             z-index: 1;
             pointer-events: none;
         }
-        
+
         .matrix-column {
             position: absolute;
             top: -100px;
@@ -42,27 +43,27 @@
             animation: fall linear infinite;
             opacity: 0.4;
         }
-        
+
         @keyframes fall {
             to {
                 transform: translateY(calc(100vh + 100px));
             }
         }
-        
+
         /* Header Section */
         .header {
             position: relative;
             z-index: 10;
             text-align: center;
             padding: 40px 20px 20px;
-            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 100%);
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 100%);
         }
-        
+
         .main-title {
             font-size: clamp(2.5rem, 6vw, 4rem);
             font-weight: 900;
             color: #00ff00;
-            text-shadow: 
+            text-shadow:
                 0 0 5px #00ff00,
                 0 0 10px #00ff00,
                 0 0 15px #00ff00,
@@ -71,18 +72,18 @@
             letter-spacing: 2px;
             animation: glow 2s ease-in-out infinite alternate;
         }
-        
+
         .subtitle {
             font-size: clamp(1.2rem, 3vw, 1.8rem);
             font-weight: 700;
             color: #ffd700;
-            text-shadow: 
+            text-shadow:
                 0 0 10px #ffd700,
                 2px 2px 0px #000;
             margin-bottom: 15px;
             animation: pulse 3s ease-in-out infinite;
         }
-        
+
         .level-select-subtitle {
             font-size: clamp(1rem, 2.5vw, 1.4rem);
             color: #aaffaa;
@@ -90,17 +91,18 @@
             font-weight: 400;
             letter-spacing: 1px;
         }
-        
+
         @keyframes glow {
             from {
-                text-shadow: 
+                text-shadow:
                     0 0 5px #00ff00,
                     0 0 10px #00ff00,
                     0 0 15px #00ff00,
                     3px 3px 0px #000;
             }
+
             to {
-                text-shadow: 
+                text-shadow:
                     0 0 8px #00ff00,
                     0 0 15px #00ff00,
                     0 0 20px #00ff00,
@@ -108,12 +110,21 @@
                     3px 3px 0px #000;
             }
         }
-        
+
         @keyframes pulse {
-            0%, 100% { opacity: 0.8; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.05); }
+
+            0%,
+            100% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
         }
-        
+
         /* Main Container */
         .level-container {
             position: relative;
@@ -122,7 +133,7 @@
             max-width: 1200px;
             margin: 0 auto;
         }
-        
+
         /* Level Grid */
         .levels-grid {
             display: grid;
@@ -130,7 +141,7 @@
             gap: 30px;
             margin-bottom: 50px;
         }
-        
+
         /* Level Card Base Styles */
         .level-card {
             background: linear-gradient(145deg, #222 0%, #111 50%, #000 100%);
@@ -142,11 +153,11 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            box-shadow: 
-                0 8px 16px rgba(0,0,0,0.6),
-                inset 0 0 20px rgba(255,255,255,0.05);
+            box-shadow:
+                0 8px 16px rgba(0, 0, 0, 0.6),
+                inset 0 0 20px rgba(255, 255, 255, 0.05);
         }
-        
+
         .level-card::before {
             content: '';
             position: absolute;
@@ -154,105 +165,126 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
             transition: left 0.5s ease;
         }
-        
+
         .level-card:hover::before {
             left: 100%;
         }
-        
+
         /* Easy Level - Green Theme */
         .level-easy {
             border-color: #00ff00;
-            box-shadow: 
-                0 8px 16px rgba(0,0,0,0.6),
-                0 0 20px rgba(0,255,0,0.3),
-                inset 0 0 20px rgba(0,255,0,0.1);
+            box-shadow:
+                0 8px 16px rgba(0, 0, 0, 0.6),
+                0 0 20px rgba(0, 255, 0, 0.3),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
         }
-        
+
         .level-easy:hover {
             transform: translateY(-5px) scale(1.02);
-            box-shadow: 
-                0 12px 24px rgba(0,0,0,0.8),
-                0 0 30px rgba(0,255,0,0.5),
-                inset 0 0 30px rgba(0,255,0,0.2);
+            box-shadow:
+                0 12px 24px rgba(0, 0, 0, 0.8),
+                0 0 30px rgba(0, 255, 0, 0.5),
+                inset 0 0 30px rgba(0, 255, 0, 0.2);
         }
-        
+
         /* Medium Level - Gold Theme */
         .level-medium {
             border-color: #ffd700;
-            box-shadow: 
-                0 8px 16px rgba(0,0,0,0.6),
-                0 0 20px rgba(255,215,0,0.3),
-                inset 0 0 20px rgba(255,215,0,0.1);
+            box-shadow:
+                0 8px 16px rgba(0, 0, 0, 0.6),
+                0 0 20px rgba(255, 215, 0, 0.3),
+                inset 0 0 20px rgba(255, 215, 0, 0.1);
         }
-        
+
         .level-medium:hover {
             transform: translateY(-5px) scale(1.02);
-            box-shadow: 
-                0 12px 24px rgba(0,0,0,0.8),
-                0 0 30px rgba(255,215,0,0.5),
-                inset 0 0 30px rgba(255,215,0,0.2);
+            box-shadow:
+                0 12px 24px rgba(0, 0, 0, 0.8),
+                0 0 30px rgba(255, 215, 0, 0.5),
+                inset 0 0 30px rgba(255, 215, 0, 0.2);
         }
-        
+
         /* Hard Level - Red Theme */
         .level-hard {
             border-color: #ff4444;
-            box-shadow: 
-                0 8px 16px rgba(0,0,0,0.6),
-                0 0 20px rgba(255,68,68,0.3),
-                inset 0 0 20px rgba(255,68,68,0.1);
+            box-shadow:
+                0 8px 16px rgba(0, 0, 0, 0.6),
+                0 0 20px rgba(255, 68, 68, 0.3),
+                inset 0 0 20px rgba(255, 68, 68, 0.1);
         }
-        
+
         .level-hard:hover {
             transform: translateY(-5px) scale(1.02);
-            box-shadow: 
-                0 12px 24px rgba(0,0,0,0.8),
-                0 0 30px rgba(255,68,68,0.5),
-                inset 0 0 30px rgba(255,68,68,0.2);
+            box-shadow:
+                0 12px 24px rgba(0, 0, 0, 0.8),
+                0 0 30px rgba(255, 68, 68, 0.5),
+                inset 0 0 30px rgba(255, 68, 68, 0.2);
         }
-        
+
         /* Level Icon */
         .level-icon {
             font-size: 4rem;
             margin-bottom: 20px;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
         }
-        
+
         .level-easy .level-icon {
             color: #00ff00;
             text-shadow: 0 0 20px #00ff00;
             animation: bounce-easy 2s ease-in-out infinite;
         }
-        
+
         .level-medium .level-icon {
             color: #ffd700;
             text-shadow: 0 0 20px #ffd700;
             animation: bounce-medium 2s ease-in-out infinite;
         }
-        
+
         .level-hard .level-icon {
             color: #ff4444;
             text-shadow: 0 0 20px #ff4444;
             animation: bounce-hard 2s ease-in-out infinite;
         }
-        
+
         @keyframes bounce-easy {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(5deg); }
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-10px) rotate(5deg);
+            }
         }
-        
+
         @keyframes bounce-medium {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-12px) rotate(-5deg); }
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-12px) rotate(-5deg);
+            }
         }
-        
+
         @keyframes bounce-hard {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-15px) rotate(10deg); }
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-15px) rotate(10deg);
+            }
         }
-        
+
         /* Level Title */
         .level-title {
             font-size: clamp(1.5rem, 3vw, 2rem);
@@ -260,22 +292,22 @@
             margin-bottom: 15px;
             letter-spacing: 1px;
         }
-        
+
         .level-easy .level-title {
             color: #00ff00;
             text-shadow: 0 0 10px #00ff00;
         }
-        
+
         .level-medium .level-title {
             color: #ffd700;
             text-shadow: 0 0 10px #ffd700;
         }
-        
+
         .level-hard .level-title {
             color: #ff4444;
             text-shadow: 0 0 10px #ff4444;
         }
-        
+
         /* Level Description */
         .level-description {
             color: #ccc;
@@ -284,56 +316,56 @@
             margin-bottom: 20px;
             font-weight: 400;
         }
-        
+
         /* Level Stats */
         .level-stats {
             display: flex;
             justify-content: space-around;
             margin-bottom: 25px;
             padding: 15px;
-            background: rgba(0,0,0,0.3);
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .stat {
             text-align: center;
         }
-        
+
         .stat-value {
             font-size: clamp(1.2rem, 2.5vw, 1.5rem);
             font-weight: 700;
             color: #fff;
             display: block;
         }
-        
+
         .stat-label {
             font-size: clamp(0.7rem, 1.5vw, 0.9rem);
             color: #aaa;
             margin-top: 5px;
         }
-        
+
         /* Progress Bar */
         .progress-container {
             margin-bottom: 20px;
         }
-        
+
         .progress-label {
             color: #aaa;
             font-size: 0.9rem;
             margin-bottom: 8px;
             text-align: left;
         }
-        
+
         .progress-bar {
             width: 100%;
             height: 8px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 4px;
             overflow: hidden;
             position: relative;
         }
-        
+
         .progress-fill {
             height: 100%;
             border-radius: 4px;
@@ -341,22 +373,22 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .level-easy .progress-fill {
             background: linear-gradient(90deg, #00ff00, #00cc00);
             width: 85%;
         }
-        
+
         .level-medium .progress-fill {
             background: linear-gradient(90deg, #ffd700, #ffaa00);
             width: 60%;
         }
-        
+
         .level-hard .progress-fill {
             background: linear-gradient(90deg, #ff4444, #cc0000);
             width: 25%;
         }
-        
+
         .progress-fill::after {
             content: '';
             position: absolute;
@@ -364,15 +396,20 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             animation: progress-shine 2s ease-in-out infinite;
         }
-        
+
         @keyframes progress-shine {
-            0% { left: -100%; }
-            100% { left: 100%; }
+            0% {
+                left: -100%;
+            }
+
+            100% {
+                left: 100%;
+            }
         }
-        
+
         /* Level Button */
         .level-button {
             background: linear-gradient(145deg, #333, #111);
@@ -389,43 +426,43 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .level-easy .level-button {
             color: #00ff00;
             border-color: #00ff00;
-            box-shadow: 0 0 10px rgba(0,255,0,0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
         }
-        
+
         .level-medium .level-button {
             color: #ffd700;
             border-color: #ffd700;
-            box-shadow: 0 0 10px rgba(255,215,0,0.3);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
         }
-        
+
         .level-hard .level-button {
             color: #ff4444;
             border-color: #ff4444;
-            box-shadow: 0 0 10px rgba(255,68,68,0.3);
+            box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
         }
-        
+
         .level-button:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
         }
-        
+
         .level-button:active {
             transform: scale(0.98);
         }
-        
+
         /* Navigation Footer */
         .navigation {
             position: relative;
             z-index: 10;
             text-align: center;
             padding: 30px 20px 50px;
-            background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 100%);
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 100%);
         }
-        
+
         .back-button {
             background: linear-gradient(145deg, #333, #111);
             border: 2px solid #888;
@@ -441,14 +478,14 @@
             letter-spacing: 1px;
             margin-bottom: 20px;
         }
-        
+
         .back-button:hover {
             border-color: #00ff00;
             color: #00ff00;
-            box-shadow: 0 0 15px rgba(0,255,0,0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
             transform: scale(1.05);
         }
-        
+
         /* Creator Credit */
         .creator-credit {
             color: #666;
@@ -457,7 +494,7 @@
             text-shadow: 1px 1px 0px #000;
             letter-spacing: 0.5px;
         }
-        
+
         /* Floating Mathematical Symbols */
         .math-symbol {
             position: absolute;
@@ -467,12 +504,19 @@
             pointer-events: none;
             z-index: 5;
         }
-        
+
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-30px) rotate(180deg); }
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-30px) rotate(180deg);
+            }
         }
-        
+
         /* Click Ripple Effect */
         .ripple {
             position: absolute;
@@ -482,76 +526,76 @@
             animation: ripple-animation 0.6s linear;
             pointer-events: none;
         }
-        
+
         @keyframes ripple-animation {
             to {
                 transform: scale(4);
                 opacity: 0;
             }
         }
-        
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .levels-grid {
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
-            
+
             .level-card {
                 padding: 25px;
             }
-            
+
             .level-icon {
                 font-size: 3rem;
             }
-            
+
             .level-stats {
                 flex-direction: column;
                 gap: 10px;
             }
-            
+
             .stat {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
             }
-            
+
             .stat-value {
                 margin-left: auto;
             }
         }
-        
+
         @media (max-width: 480px) {
             .header {
                 padding: 30px 15px 15px;
             }
-            
+
             .level-container {
                 padding: 30px 15px;
             }
-            
+
             .level-card {
                 padding: 20px;
             }
-            
+
             .navigation {
                 padding: 25px 15px 40px;
             }
         }
-        
+
         /* Lock Animation for Higher Levels */
         .level-locked {
             opacity: 0.6;
             cursor: not-allowed;
         }
-        
+
         .level-locked:hover {
             transform: none !important;
-            box-shadow: 
-                0 8px 16px rgba(0,0,0,0.6),
-                0 0 20px rgba(255,255,255,0.1) !important;
+            box-shadow:
+                0 8px 16px rgba(0, 0, 0, 0.6),
+                0 0 20px rgba(255, 255, 255, 0.1) !important;
         }
-        
+
         .lock-icon {
             position: absolute;
             top: 15px;
@@ -560,13 +604,23 @@
             font-size: 1.5rem;
             animation: shake 1s ease-in-out infinite;
         }
-        
+
         @keyframes shake {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-5deg); }
-            75% { transform: rotate(5deg); }
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(-5deg);
+            }
+
+            75% {
+                transform: rotate(5deg);
+            }
         }
-        
+
         /* Reset Progress Button */
         .reset-progress-btn {
             position: fixed;
@@ -587,33 +641,34 @@
             letter-spacing: 1px;
             box-shadow: 0 4px 15px rgba(255, 51, 51, 0.3);
         }
-        
+
         .reset-progress-btn:hover {
             background: linear-gradient(145deg, #ff5555, #ff0000);
             border-color: #ff8888;
             box-shadow: 0 0 25px rgba(255, 51, 51, 0.6);
             transform: scale(1.05);
         }
-        
+
         .reset-progress-btn:active {
             transform: scale(0.95);
         }
     </style>
 </head>
+
 <body>
     <!-- Matrix Rain Background -->
     <div class="matrix-bg" id="matrixBg"></div>
-    
+
     <!-- Header Section -->
     <div class="header">
         <h1 class="main-title">MATH MASTER</h1>
         <h2 class="subtitle">Unlock Your Mind</h2>
         <p class="level-select-subtitle">Choose Your Mathematical Challenge</p>
     </div>
-    
+
     <!-- Reset Progress Button -->
     <button class="reset-progress-btn" onclick="resetProgress()">🔄 Reset Progress</button>
-    
+
     <!-- Main Level Selection Container -->
     <div class="level-container">
         <div class="levels-grid">
@@ -622,7 +677,7 @@
                 <div class="level-icon">🌱</div>
                 <h3 class="level-title">EASY</h3>
                 <p class="level-description">
-                    Master the foundations with addition and subtraction algebra. 
+                    Master the foundations with addition and subtraction algebra.
                     Each problem contains BOTH + and - operations for complete practice.
                 </p>
                 <div class="level-stats">
@@ -647,13 +702,13 @@
                 </div>
                 <button class="level-button">Start Journey</button>
             </div>
-            
+
             <!-- Medium Level - Multiplication -->
             <div class="level-card level-medium" onclick="selectLevel('medium', this)">
                 <div class="level-icon">🔥</div>
                 <h3 class="level-title">MEDIUM</h3>
                 <p class="level-description">
-                    Rise to the challenge with multi-operation algebra. 
+                    Rise to the challenge with multi-operation algebra.
                     Each problem contains addition, subtraction, AND multiplication.
                 </p>
                 <div class="level-stats">
@@ -678,13 +733,13 @@
                 </div>
                 <button class="level-button">Accept Challenge</button>
             </div>
-            
+
             <!-- Hard Level - Division -->
             <div class="level-card level-hard" onclick="selectLevel('medium-too', this)">
                 <div class="level-icon">⚡</div>
                 <h3 class="level-title">MEDIUM TOO</h3>
                 <p class="level-description">
-                    Conquer the test with division algebra. 
+                    Conquer the test with division algebra.
                     Achieve mastery and become closer to unlocking your full potential.
                 </p>
                 <div class="level-stats">
@@ -711,13 +766,13 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Navigation Footer -->
     <div class="navigation">
         <button class="back-button" onclick="goBack()">← Return to Welcome</button>
         <div class="creator-credit">Created by Teacher Evan</div>
     </div>
-    
+
     <!-- Floating Math Symbols -->
     <div class="math-symbol" style="top: 20%; left: 5%; animation-delay: 0s;">∑</div>
     <div class="math-symbol" style="top: 30%; right: 8%; animation-delay: 1s;">∫</div>
@@ -734,17 +789,17 @@
             const matrixBg = document.getElementById('matrixBg');
             const symbols = '0123456789+-×÷=XxΣπ∞√±∆αβγθλμ';
             const columns = Math.floor(window.innerWidth / 20);
-            
+
             // Clear existing columns
             matrixBg.innerHTML = '';
-            
+
             for (let i = 0; i < columns; i++) {
                 const column = document.createElement('div');
                 column.className = 'matrix-column';
                 column.style.left = i * 20 + 'px';
                 column.style.animationDuration = (Math.random() * 4 + 3) + 's';
                 column.style.animationDelay = Math.random() * 3 + 's';
-                
+
                 // Create falling text
                 let text = '';
                 const length = Math.floor(Math.random() * 15) + 8;
@@ -752,48 +807,48 @@
                     text += symbols[Math.floor(Math.random() * symbols.length)] + '<br>';
                 }
                 column.innerHTML = text;
-                
+
                 matrixBg.appendChild(column);
             }
         }
-        
+
         // Click Ripple Effect
         function createRipple(event, target) {
             const ripple = document.createElement('div');
             ripple.className = 'ripple';
-            
+
             const rect = target.getBoundingClientRect();
             const size = 60;
             const x = event.clientX - rect.left - size / 2;
             const y = event.clientY - rect.top - size / 2;
-            
+
             ripple.style.width = ripple.style.height = size + 'px';
             ripple.style.left = x + 'px';
             ripple.style.top = y + 'px';
-            
+
             target.appendChild(ripple);
-            
+
             setTimeout(() => {
                 if (target.contains(ripple)) {
                     target.removeChild(ripple);
                 }
             }, 600);
         }
-        
+
         // Level Selection Handler
         function selectLevel(difficulty, cardElement) {
             // Create ripple effect
             createRipple(event, cardElement);
-            
+
             // Add selection animation
             cardElement.style.transform = 'scale(0.95)';
             setTimeout(() => {
                 cardElement.style.transform = '';
             }, 150);
-            
+
             // Navigate based on difficulty
             setTimeout(() => {
-                switch(difficulty) {
+                switch (difficulty) {
                     case 'easy':
                         window.location.href = 'game.html?level=beginner&lockComponent=level-1-transformer.html';
                         break;
@@ -806,7 +861,7 @@
                 }
             }, 300);
         }
-        
+
         // Navigation Functions
         function goBack() {
             createRipple(event, event.target);
@@ -814,22 +869,22 @@
                 window.location.href = 'index.html';
             }, 300);
         }
-        
+
         // Dynamic Progress Animation - LOAD FROM LOCAL STORAGE
         function animateProgress() {
             const levels = ['beginner', 'warrior', 'master'];
             const progressBars = document.querySelectorAll('.progress-fill');
             const cards = document.querySelectorAll('.level-card');
-            
+
             progressBars.forEach((bar, index) => {
                 const levelName = levels[index];
                 const countKey = `mathmaster_problems_${levelName}`;
                 const problemsCompleted = parseInt(localStorage.getItem(countKey) || '0');
-                
+
                 // Calculate percentage (assuming 50 problems per level max for display)
                 const maxProblems = 50;
                 const percentage = Math.min((problemsCompleted / maxProblems) * 100, 100);
-                
+
                 // Update stats display
                 const card = cards[index];
                 const statsSection = card.querySelector('.level-stats');
@@ -848,7 +903,7 @@
                         completionStat.querySelector('.stat-value').textContent = problemsCompleted;
                     }
                 }
-                
+
                 // Animate progress bar
                 bar.style.width = '0%';
                 setTimeout(() => {
@@ -857,7 +912,7 @@
                 }, index * 200);
             });
         }
-        
+
         // RESET PROGRESS FUNCTION
         function resetProgress() {
             if (confirm('⚠️ Are you sure you want to reset ALL progress? This will clear your console slots and problem completion counts for all levels!')) {
@@ -871,7 +926,7 @@
                 location.reload(); // Reload page to show updated progress
             }
         }
-        
+
         // Card Entrance Animation
         function animateCards() {
             const cards = document.querySelectorAll('.level-card');
@@ -885,18 +940,18 @@
                 }, index * 200 + 500);
             });
         }
-        
+
         // Dynamic Background Effects
         function addDynamicEffects() {
             const title = document.querySelector('.main-title');
             const subtitle = document.querySelector('.subtitle');
-            
+
             // Add random glow intensity variations
             setInterval(() => {
                 const intensity = Math.random() * 0.3 + 0.8;
                 title.style.filter = `brightness(${intensity})`;
             }, 3000);
-            
+
             // Subtitle color variations
             const colors = ['#ffd700', '#ffcc00', '#ffaa00'];
             let colorIndex = 0;
@@ -905,7 +960,7 @@
                 colorIndex = (colorIndex + 1) % colors.length;
             }, 5000);
         }
-        
+
         // Initialize everything when page loads
         window.addEventListener('load', () => {
             createMatrixRain();
@@ -913,18 +968,18 @@
             animateCards();
             setTimeout(animateProgress, 1000);
         });
-        
+
         // Recreate matrix rain on window resize
         window.addEventListener('resize', () => {
             createMatrixRain();
         });
-        
+
         // Keyboard Support
         document.addEventListener('keydown', (event) => {
             const cards = document.querySelectorAll('.level-card');
             let selectedCard = null;
-            
-            switch(event.key) {
+
+            switch (event.key) {
                 case '1':
                     selectedCard = cards[0];
                     selectLevel('easy', selectedCard);
@@ -942,7 +997,7 @@
                     goBack();
                     break;
             }
-            
+
             if (selectedCard) {
                 selectedCard.style.animation = 'bounce-easy 0.3s ease-in-out';
                 setTimeout(() => {
@@ -950,14 +1005,14 @@
                 }, 300);
             }
         });
-        
+
         // Touch Support for Mobile
         document.addEventListener('touchstart', (event) => {
             if (event.target.closest('.level-card')) {
                 event.target.closest('.level-card').style.transform = 'scale(0.98)';
             }
         });
-        
+
         document.addEventListener('touchend', (event) => {
             if (event.target.closest('.level-card')) {
                 event.target.closest('.level-card').style.transform = '';
@@ -965,4 +1020,5 @@
         });
     </script>
 </body>
-</html> 
+
+</html>
