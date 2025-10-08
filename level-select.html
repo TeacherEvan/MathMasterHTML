@@ -566,6 +566,38 @@
             25% { transform: rotate(-5deg); }
             75% { transform: rotate(5deg); }
         }
+        
+        /* Reset Progress Button */
+        .reset-progress-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            background: linear-gradient(145deg, #ff3333, #cc0000);
+            border: 2px solid #ff6666;
+            border-radius: 15px;
+            padding: 12px 24px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 14px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(255, 51, 51, 0.3);
+        }
+        
+        .reset-progress-btn:hover {
+            background: linear-gradient(145deg, #ff5555, #ff0000);
+            border-color: #ff8888;
+            box-shadow: 0 0 25px rgba(255, 51, 51, 0.6);
+            transform: scale(1.05);
+        }
+        
+        .reset-progress-btn:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
@@ -578,6 +610,9 @@
         <h2 class="subtitle">Unlock Your Mind</h2>
         <p class="level-select-subtitle">Choose Your Mathematical Challenge</p>
     </div>
+    
+    <!-- Reset Progress Button -->
+    <button class="reset-progress-btn" onclick="resetProgress()">🔄 Reset Progress</button>
     
     <!-- Main Level Selection Container -->
     <div class="level-container">
@@ -780,18 +815,61 @@
             }, 300);
         }
         
-        // Dynamic Progress Animation
+        // Dynamic Progress Animation - LOAD FROM LOCAL STORAGE
         function animateProgress() {
+            const levels = ['beginner', 'warrior', 'master'];
             const progressBars = document.querySelectorAll('.progress-fill');
+            const cards = document.querySelectorAll('.level-card');
+            
             progressBars.forEach((bar, index) => {
+                const levelName = levels[index];
+                const countKey = `mathmaster_problems_${levelName}`;
+                const problemsCompleted = parseInt(localStorage.getItem(countKey) || '0');
+                
+                // Calculate percentage (assuming 50 problems per level max for display)
+                const maxProblems = 50;
+                const percentage = Math.min((problemsCompleted / maxProblems) * 100, 100);
+                
+                // Update stats display
+                const card = cards[index];
+                const statsSection = card.querySelector('.level-stats');
+                if (statsSection && problemsCompleted > 0) {
+                    // Add completion stat
+                    let completionStat = statsSection.querySelector('.completion-stat');
+                    if (!completionStat) {
+                        completionStat = document.createElement('div');
+                        completionStat.className = 'stat completion-stat';
+                        completionStat.innerHTML = `
+                            <span class="stat-value">${problemsCompleted}</span>
+                            <span class="stat-label">Completed</span>
+                        `;
+                        statsSection.appendChild(completionStat);
+                    } else {
+                        completionStat.querySelector('.stat-value').textContent = problemsCompleted;
+                    }
+                }
+                
+                // Animate progress bar
                 bar.style.width = '0%';
                 setTimeout(() => {
                     bar.style.transition = 'width 2s ease-in-out';
-                    if (index === 0) bar.style.width = '85%'; // Easy
-                    if (index === 1) bar.style.width = '60%'; // Medium  
-                    if (index === 2) bar.style.width = '25%'; // Hard
+                    bar.style.width = `${percentage}%`;
                 }, index * 200);
             });
+        }
+        
+        // RESET PROGRESS FUNCTION
+        function resetProgress() {
+            if (confirm('⚠️ Are you sure you want to reset ALL progress? This will clear your console slots and problem completion counts for all levels!')) {
+                const levels = ['beginner', 'warrior', 'master'];
+                levels.forEach(level => {
+                    localStorage.removeItem(`mathmaster_console_${level}`);
+                    localStorage.removeItem(`mathmaster_problems_${level}`);
+                });
+                console.log('🔄 All progress reset!');
+                alert('✅ Progress reset successfully!');
+                location.reload(); // Reload page to show updated progress
+            }
         }
         
         // Card Entrance Animation

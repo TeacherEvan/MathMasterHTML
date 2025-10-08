@@ -4,7 +4,7 @@ console.log("🐛 Worm System Loading...");
 class WormSystem {
     constructor() {
         this.worms = [];
-        this.maxWorms = 7; // Maximum 7 worms on play field
+        this.maxWorms = 999; // No practical limit - let chaos reign!
         this.wormContainer = null;
         this.solutionContainer = null;
         this.consoleElement = null;
@@ -470,19 +470,20 @@ class WormSystem {
             targetConsoleSlot: null,
             crawlPhase: 0,
             direction: Math.random() * Math.PI * 2,
-            canStealBlue: true // Purple worms can steal blue symbols
+            canStealBlue: true, // Purple worms can steal blue symbols
+            hitCount: 0 // Purple worms require 2 hits to die
         };
 
         this.worms.push(wormData);
 
-        // PURPLE WORM CLICK: 50% clone chance (vs 20% for normal worms)
+        // PURPLE WORM CLICK: Requires 2 hits to kill
         wormElement.addEventListener('click', (e) => {
             e.stopPropagation();
             this.handlePurpleWormClick(wormData);
         });
 
         console.log(`🟣 Purple worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
-        console.log(`🟣 Purple worm has 50% clone chance and can steal BLUE symbols!`);
+        console.log(`🟣 Purple worm requires 2 HITS to kill and can steal BLUE symbols!`);
 
         // Start animation loop if not already running
         if (this.worms.length === 1) {
@@ -494,28 +495,43 @@ class WormSystem {
         // PERFORMANCE: Use cached revealed symbols instead of querying every time
         const revealedSymbols = this.getCachedRevealedSymbols();
 
-        // CLONING CURSE: Allow stealing BLUE symbols (revealed-symbol class) when curse is active
-        // PURPLE WORM: Also allow stealing blue symbols (they have canStealBlue flag)
+        // Get all available symbols (not stolen, not spaces, not completed)
+        const allAvailableSymbols = Array.from(revealedSymbols).filter(el =>
+            !el.dataset.stolen &&
+            !el.classList.contains('space-symbol') &&
+            !el.classList.contains('completed-row-symbol')
+        );
+
+        // PURPLE WORM LOGIC: Only steal blue symbols when NO red symbols available
         let availableSymbols;
-        if (this.cloningCurseActive || worm.canStealBlue) {
-            // Curse active OR purple worm - can steal ANY revealed symbol (red or blue)
-            availableSymbols = Array.from(revealedSymbols).filter(el =>
-                !el.dataset.stolen &&
-                !el.classList.contains('space-symbol') &&
-                !el.classList.contains('completed-row-symbol')
+        if (worm.canStealBlue && worm.isPurple) {
+            // First, try to get red (hidden) symbols only
+            const redSymbols = allAvailableSymbols.filter(el => 
+                el.classList.contains('hidden-symbol')
             );
-            if (worm.isPurple) {
-                console.log(`🟣 PURPLE WORM - Can steal blue symbols! ${availableSymbols.length} symbols available`);
+            
+            if (redSymbols.length > 0) {
+                // Red symbols available - purple worm steals red symbols like normal
+                availableSymbols = redSymbols;
+                console.log(`🟣 PURPLE WORM - ${redSymbols.length} red symbols available (preferring red)`);
             } else {
-                console.log(`🔮 CURSE ACTIVE - Worm can steal blue symbols! ${availableSymbols.length} symbols available`);
+                // NO red symbols - now purple worm can steal blue symbols!
+                const blueSymbols = allAvailableSymbols.filter(el =>
+                    el.classList.contains('revealed-symbol')
+                );
+                availableSymbols = blueSymbols;
+                console.log(`🟣 PURPLE WORM - NO red symbols! Stealing blue symbols (${blueSymbols.length} available)`);
             }
+        } else if (this.cloningCurseActive) {
+            // Curse active - can steal ANY symbol (red or blue)
+            availableSymbols = allAvailableSymbols;
+            console.log(`🔮 CURSE ACTIVE - Worm can steal ANY symbol! ${availableSymbols.length} symbols available`);
         } else {
-            // Normal mode - only steal red (hidden) symbols
-            availableSymbols = Array.from(revealedSymbols).filter(el =>
-                !el.dataset.stolen &&
-                !el.classList.contains('space-symbol') &&
-                !el.classList.contains('completed-row-symbol')
+            // Normal worm - only steal red (hidden) symbols
+            availableSymbols = allAvailableSymbols.filter(el =>
+                el.classList.contains('hidden-symbol')
             );
+            console.log(`🐛 Normal worm - ${availableSymbols.length} red symbols available`);
         }
 
         if (availableSymbols.length === 0) {
@@ -884,40 +900,46 @@ class WormSystem {
     handlePurpleWormClick(worm) {
         if (!worm.active) return;
 
-        console.log(`🟣 Purple worm ${worm.id} clicked!`);
+        console.log(`🟣 Purple worm ${worm.id} clicked! Hit count: ${worm.hitCount}/2`);
 
-        // CLONING CURSE MECHANIC - applies to purple worms too
-        if (this.cloningCurseActive) {
-            console.log(`🔮 CURSE ACTIVE! Purple worm will clone!`);
-            worm.element.style.animation = 'worm-flash-purple 0.3s ease-out';
-            setTimeout(() => {
-                worm.element.style.animation = '';
-            }, 300);
-            this.clonePurpleWorm(worm);
-            return;
-        }
+        // Increment hit count
+        worm.hitCount = (worm.hitCount || 0) + 1;
 
-        // PURPLE WORM: 50/50 SPLIT
-        // 50% chance: Worm explodes (kill)
-        // 50% chance: Worm clones
-        const roll = Math.random() * 100; // 0-100
-
-        if (roll < 50) {
-            // 50% - BOOM! Purple worm kill
-            console.log(`💥 BOOM! Purple worm ${worm.id} exploded (${roll.toFixed(1)}% roll - under 50% threshold)`);
-            this.explodeWorm(worm, false);
-        } else {
-            // 50% - Clone (but don't activate curse - only normal worms do that)
-            console.log(`🟣 CLONE! Purple worm ${worm.id} cloned (${roll.toFixed(1)}% roll - over 50% threshold)`);
-
-            // Visual feedback
-            worm.element.style.animation = 'worm-flash-purple 0.5s ease-out';
+        // FIRST HIT: Turn green, drop stolen symbol
+        if (worm.hitCount === 1) {
+            console.log(`� FIRST HIT! Purple worm ${worm.id} is DAMAGED - turns green and drops symbol!`);
+            
+            // Turn worm green (damaged state)
+            worm.element.style.filter = 'hue-rotate(120deg) brightness(1.2)'; // Purple → Green
+            worm.element.classList.add('worm-damaged');
+            
+            // Drop stolen symbol if carrying one
+            if (worm.hasStolen && worm.targetElement) {
+                console.log(`📦 Dropping stolen symbol "${worm.stolenSymbol}"`);
+                worm.targetElement.classList.remove('stolen', 'hidden-symbol');
+                worm.targetElement.classList.add('revealed-symbol');
+                worm.targetElement.style.visibility = 'visible';
+                delete worm.targetElement.dataset.stolen;
+                
+                // Clear worm's stolen data
+                worm.hasStolen = false;
+                worm.targetElement = null;
+                worm.stolenSymbol = null;
+            }
+            
+            // Flash effect
+            worm.element.style.animation = 'worm-flash-green 0.5s ease-out';
             setTimeout(() => {
                 worm.element.style.animation = '';
             }, 500);
+            
+            return; // Don't explode yet!
+        }
 
-            // Create a purple clone
-            this.clonePurpleWorm(worm);
+        // SECOND HIT: Explode!
+        if (worm.hitCount >= 2) {
+            console.log(`💥 SECOND HIT! Purple worm ${worm.id} EXPLODES!`);
+            this.explodeWorm(worm, false);
         }
     }
 
@@ -1118,8 +1140,28 @@ class WormSystem {
         }
     }
 
-    explodeWorm(worm, isRainKill = false) {
-        console.log(`💥 EXPLODING worm ${worm.id} (${isRainKill ? 'RAIN KILL' : 'direct click'}) and returning symbol "${worm.stolenSymbol}"!`);
+    explodeWorm(worm, isRainKill = false, isChainReaction = false) {
+        console.log(`💥 EXPLODING worm ${worm.id} (${isRainKill ? 'RAIN KILL' : 'direct click'}${isChainReaction ? ' - CHAIN REACTION' : ''}) and returning symbol "${worm.stolenSymbol}"!`);
+
+        // AOE DAMAGE: Check for nearby worms and trigger chain explosions
+        const AOE_RADIUS = 18; // One vertical worm height
+        const nearbyWorms = this.worms.filter(w => {
+            if (w.id === worm.id || !w.active) return false;
+            const dx = w.x - worm.x;
+            const dy = w.y - worm.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance <= AOE_RADIUS;
+        });
+
+        if (nearbyWorms.length > 0) {
+            console.log(`💥 CHAIN REACTION! ${nearbyWorms.length} worms caught in blast radius!`);
+            // Delay chain explosions slightly for visual effect
+            setTimeout(() => {
+                nearbyWorms.forEach(nearbyWorm => {
+                    this.explodeWorm(nearbyWorm, false, true); // Chain explosion!
+                });
+            }, 150);
+        }
 
         // Return stolen symbol to its original position
         if (worm.targetElement) {

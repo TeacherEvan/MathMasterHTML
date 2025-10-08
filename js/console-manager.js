@@ -10,8 +10,55 @@ class ConsoleManager {
         this.consoleElement = null;
         this.modal = null;
         this.isPendingSelection = false;
+        this.currentLevel = this.getLevelFromURL(); // Get level from URL
 
         this.init();
+    }
+
+    getLevelFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('level') || 'beginner';
+    }
+
+    // PROGRESSION TRACKING: Load saved console state
+    loadProgress() {
+        const saveKey = `mathmaster_console_${this.currentLevel}`;
+        const saved = localStorage.getItem(saveKey);
+        
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                this.slots = data.slots || this.slots;
+                console.log(`📥 Loaded console progress for ${this.currentLevel}:`, this.slots);
+                this.updateConsoleDisplay();
+                return true;
+            } catch (e) {
+                console.error('❌ Error loading progress:', e);
+                return false;
+            }
+        }
+        return false;
+    }
+
+    // PROGRESSION TRACKING: Save console state
+    saveProgress() {
+        const saveKey = `mathmaster_console_${this.currentLevel}`;
+        const data = {
+            slots: this.slots,
+            timestamp: Date.now()
+        };
+        localStorage.setItem(saveKey, JSON.stringify(data));
+        console.log(`💾 Saved console progress for ${this.currentLevel}`);
+    }
+
+    // PROGRESSION TRACKING: Increment problems completed count
+    incrementProblemsCompleted() {
+        const countKey = `mathmaster_problems_${this.currentLevel}`;
+        let count = parseInt(localStorage.getItem(countKey) || '0');
+        count++;
+        localStorage.setItem(countKey, count.toString());
+        console.log(`✅ Problems completed for ${this.currentLevel}: ${count}`);
+        return count;
     }
 
     init() {
@@ -36,6 +83,9 @@ class ConsoleManager {
 
         console.log("✅ Console elements found, setting up event listeners");
 
+        // Load saved progress
+        this.loadProgress();
+
         // Set up console button click handlers
         this.setupConsoleButtons();
 
@@ -48,6 +98,7 @@ class ConsoleManager {
         // Listen for problem completion
         document.addEventListener('problemCompleted', () => {
             console.log("🎉 Problem completed! Showing symbol selection modal");
+            this.incrementProblemsCompleted(); // Track progress
             this.showSymbolSelectionModal();
         });
 
@@ -267,22 +318,28 @@ class ConsoleManager {
         this.slots[position] = symbol;
 
         // Update DOM
-        const slotElement = this.consoleElement.querySelector(`[data-slot="${position}"]`);
-        if (slotElement) {
-            slotElement.textContent = symbol;
-            slotElement.classList.add('filled');
+        this.updateConsoleDisplay();
 
-            // Add entrance animation
-            slotElement.style.animation = 'none';
-            setTimeout(() => {
-                slotElement.style.animation = 'purplePulsate 0.6s ease-out';
-            }, 10);
-        }
+        // Save progress to localStorage
+        this.saveProgress();
 
-        console.log(`✅ Filled slot ${position + 1} with symbol: ${symbol}`);
+        console.log(`📦 Slot ${position + 1} filled with ${symbol}`);
         console.log(`📊 Console state:`, this.slots);
     }
 
+    updateConsoleDisplay() {
+        const slots = this.consoleElement.querySelectorAll('.console-slot');
+        slots.forEach((slotElement, index) => {
+            const symbol = this.slots[index];
+            if (symbol) {
+                slotElement.textContent = symbol;
+                slotElement.classList.add('filled');
+            } else {
+                slotElement.textContent = '';
+                slotElement.classList.remove('filled');
+            }
+        });
+    }
     updatePositionButtons() {
         const positionButtons = document.querySelectorAll('.position-choice');
 

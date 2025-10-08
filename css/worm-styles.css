@@ -304,6 +304,25 @@
 }
 
 /* === EXPLOSION EFFECTS === */
+.worm-damaged {
+    filter: hue-rotate(120deg) brightness(1.2) !important;
+}
+
+@keyframes worm-flash-green {
+    0% {
+        filter: hue-rotate(120deg) brightness(1.2);
+        transform: scale(1);
+    }
+    50% {
+        filter: hue-rotate(120deg) brightness(2) drop-shadow(0 0 20px rgba(0, 255, 0, 1));
+        transform: scale(1.3);
+    }
+    100% {
+        filter: hue-rotate(120deg) brightness(1.2);
+        transform: scale(1);
+    }
+}
+
 .worm-exploding {
     animation: worm-explosion-scale 0.5s ease-out forwards !important;
 }
