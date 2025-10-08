@@ -39,45 +39,6 @@ class LockManager {
             this.startLockAnimation();
         });
 
-        // SNAKE WEAPON: Pointerdown handler on lock display for instant mobile response
-        // Use pointerdown instead of click to reduce ~200ms mobile latency
-        // Use setTimeout to ensure DOM is ready
-        setTimeout(() => {
-            const lockContainer = document.querySelector('#lock-display');
-            console.log('🐍 Attaching pointerdown handler to lock container:', lockContainer);
-
-            if (lockContainer) {
-                lockContainer.addEventListener('pointerdown', (e) => {
-                    console.log('🐍 Lock clicked!', e.target);
-
-                    // Prevent default to avoid triggering click after pointerdown
-                    e.preventDefault();
-
-                    // Debug: Check if wormSystem exists
-                    if (!window.wormSystem) {
-                        console.error('❌ window.wormSystem not found!');
-                        return;
-                    }
-
-                    // Get active worms count for logging
-                    const activeWorms = window.wormSystem.worms.filter(w => w.active);
-                    console.log(`🐍 Active worms count: ${activeWorms.length}`, activeWorms);
-
-                    // Always trigger snake weapon (removed 4+ worm requirement)
-                    console.log(`🐍 Triggering snake weapon! (${activeWorms.length} worms present)`);
-
-                    // Dispatch event for snake weapon system
-                    document.dispatchEvent(new CustomEvent('snakeWeaponTriggered', {
-                        detail: { wormCount: activeWorms.length }
-                    }));
-                });
-
-                console.log('🐍 Lock pointerdown handler attached successfully!');
-            } else {
-                console.error('❌ Lock container not found - snake weapon won\'t work!');
-            }
-        }, 500); // Delay to ensure DOM is ready
-
         // Listen for step completion events
         document.addEventListener('stepCompleted', (e) => {
             console.log('🔒 LockManager received stepCompleted event:', e.detail);

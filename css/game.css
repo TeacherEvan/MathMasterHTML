@@ -85,10 +85,7 @@ input:focus:not(:focus-visible),
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    cursor: pointer;
-    /* Make it obvious the lock is clickable for snake weapon */
     z-index: 100;
-    /* Ensure lock is clickable above other elements */
 }
 
 @keyframes problemPulse {

@@ -315,9 +315,6 @@ class WormSystem {
         console.log(`✅ Worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
         console.log(`🐛 Worm will roam for 10 seconds before stealing`);
 
-        // AUTO-TRIGGER: Check if snake should auto-spawn (emergency backup)
-        this.checkAutoTriggerSnake();
-
         // Start animation loop if not already running
         if (this.worms.length === 1) {
             this.animate();
@@ -397,9 +394,6 @@ class WormSystem {
         });
 
         console.log(`✅ Worm ${wormId} spawned (fallback mode). Total worms: ${this.worms.length}`);
-
-        // AUTO-TRIGGER: Check if snake should auto-spawn (emergency backup)
-        this.checkAutoTriggerSnake();
 
         // Start animation loop if not already running
         if (this.worms.length === 1) {
@@ -489,9 +483,6 @@ class WormSystem {
 
         console.log(`🟣 Purple worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
         console.log(`🟣 Purple worm has 50% clone chance and can steal BLUE symbols!`);
-
-        // AUTO-TRIGGER: Check if snake should auto-spawn
-        this.checkAutoTriggerSnake();
 
         // Start animation loop if not already running
         if (this.worms.length === 1) {
@@ -613,44 +604,8 @@ class WormSystem {
         const panelBWidth = panelB.offsetWidth || 800;
         const panelBHeight = panelB.offsetHeight || 600;
 
-        // SNAKE EVASION: Check if snake is active and close to worms
-        let snakePosition = null;
-        let snakeDetectionRadius = 0;
-        let snakeIsActive = false;
-
-        if (window.snakeWeapon && window.snakeWeapon.isSnakeActive()) {
-            snakeIsActive = true;
-            snakePosition = window.snakeWeapon.getSnakePosition();
-            snakeDetectionRadius = window.snakeWeapon.getDetectionRadius();
-        }
-
         this.worms.forEach(worm => {
             if (!worm.active) return;
-
-            // SNAKE EVASION: Check if worm needs to flee from snake
-            if (snakeIsActive && snakePosition) {
-                const dx = worm.x - snakePosition.x;
-                const dy = worm.y - snakePosition.y;
-                const distanceToSnake = Math.sqrt(dx * dx + dy * dy);
-
-                if (distanceToSnake < snakeDetectionRadius) {
-                    // FLEE FROM SNAKE!
-                    console.log(`🏃 Worm ${worm.id} fleeing from snake! Distance: ${distanceToSnake.toFixed(0)}px`);
-
-                    // Set flee velocity (opposite direction from snake, 1.2x speed boost)
-                    const fleeSpeed = worm.baseSpeed * 1.2;
-                    worm.velocityX = (dx / distanceToSnake) * fleeSpeed;
-                    worm.velocityY = (dy / distanceToSnake) * fleeSpeed;
-
-                    // Mark worm as fleeing (visual indicator)
-                    if (!worm.element.classList.contains('fleeing')) {
-                        worm.element.classList.add('fleeing');
-                    }
-                } else if (worm.element.classList.contains('fleeing')) {
-                    // Snake far away now - remove flee state
-                    worm.element.classList.remove('fleeing');
-                }
-            }
 
             // Update crawl phase for animation
             worm.crawlPhase = (worm.crawlPhase + 0.05) % (Math.PI * 2);
@@ -1157,9 +1112,6 @@ class WormSystem {
 
         console.log(`🟣 Purple worm cloned! New clone ${newWormId}. Total worms: ${this.worms.length}`);
 
-        // Auto-trigger snake check
-        this.checkAutoTriggerSnake();
-
         // Start animation loop if not already running
         if (!this.animationFrameId) {
             this.animate();
@@ -1375,43 +1327,6 @@ class WormSystem {
                 el.classList.remove('stolen');
                 delete el.dataset.stolen;
             });
-        }
-    }
-
-    // AUTO-TRIGGER: Check if snake should automatically spawn (emergency backup)
-    checkAutoTriggerSnake() {
-        const activeWorms = this.worms.filter(w => w.active);
-
-        // Auto-trigger threshold: 6 worms (player can manually trigger at 4+)
-        const AUTO_TRIGGER_THRESHOLD = 6;
-
-        console.log(`🐍 Auto-trigger check: ${activeWorms.length} active worms (threshold: ${AUTO_TRIGGER_THRESHOLD})`);
-
-        if (activeWorms.length >= AUTO_TRIGGER_THRESHOLD) {
-            // Check if snake exists
-            if (!window.snakeWeapon) {
-                console.log('⚠️ window.snakeWeapon not found - snake system not initialized');
-                return;
-            }
-
-            console.log(`🐍 Snake weapon exists. usedThisProblem: ${window.snakeWeapon.usedThisProblem}`);
-
-            // Check if snake already used this problem
-            if (window.snakeWeapon && !window.snakeWeapon.usedThisProblem) {
-                console.log(`🚨 AUTO-TRIGGER! ${activeWorms.length} worms reached - spawning snake automatically!`);
-
-                // Dispatch same event as manual lock click
-                document.dispatchEvent(new CustomEvent('snakeWeaponTriggered', {
-                    detail: {
-                        wormCount: activeWorms.length,
-                        autoTriggered: true // Flag to indicate this was automatic
-                    }
-                }));
-            } else if (window.snakeWeapon && window.snakeWeapon.usedThisProblem) {
-                console.log(`⚠️ Snake already used this problem - no auto-trigger available`);
-            }
-        } else {
-            console.log(`✅ ${activeWorms.length} worms - below auto-trigger threshold`);
         }
     }
 }

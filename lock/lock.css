@@ -113,19 +113,6 @@
     }
 }
 
-/* Lock flash when snake weapon not ready */
-@keyframes lock-flash-not-ready {
-
-    0%,
-    100% {
-        filter: brightness(1);
-    }
-
-    50% {
-        filter: brightness(1.5) drop-shadow(0 0 15px rgba(255, 165, 0, 0.8));
-    }
-}
-
 /* Media queries for responsive design */
 @media (max-width: 420px) {
     #lock-display {
