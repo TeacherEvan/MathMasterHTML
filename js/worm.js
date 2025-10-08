@@ -13,6 +13,7 @@ class WormSystem {
         this.spawnTimer = null;
         this.firstWormSpawned = false;
         this.lockedConsoleSlots = new Set(); // Track which console slots have active worms
+        this.crossPanelContainer = null; // Container for cross-panel worm movement
 
         // CLONING CURSE MECHANIC
         this.cloningCurseActive = false; // Tracks if cloning curse is active
@@ -167,6 +168,21 @@ class WormSystem {
         this.solutionContainer = document.getElementById('solution-container');
         this.consoleElement = document.getElementById('symbol-console');
 
+        // Create cross-panel container for worms to roam all panels
+        if (!this.crossPanelContainer) {
+            this.crossPanelContainer = document.createElement('div');
+            this.crossPanelContainer.id = 'cross-panel-worm-container';
+            this.crossPanelContainer.style.position = 'fixed';
+            this.crossPanelContainer.style.top = '0';
+            this.crossPanelContainer.style.left = '0';
+            this.crossPanelContainer.style.width = '100vw';
+            this.crossPanelContainer.style.height = '100vh';
+            this.crossPanelContainer.style.pointerEvents = 'none'; // Let clicks pass through
+            this.crossPanelContainer.style.zIndex = '10000';
+            document.body.appendChild(this.crossPanelContainer);
+            console.log('🌍 Cross-panel worm container created');
+        }
+
         if (!this.wormContainer) {
             console.error('🐛 Worm container #worm-container not found!');
             return;
@@ -241,13 +257,12 @@ class WormSystem {
 
         console.log(`🕳️ Worm spawning from console slot ${slotIndex + 1}`);
 
-        // Get slot position for worm spawn point
+        // Get slot position for worm spawn point (viewport coordinates)
         const slotRect = slotElement.getBoundingClientRect();
-        const containerRect = this.getCachedContainerRect(); // PERFORMANCE: Use cached rect
 
-        // Calculate spawn position relative to panel-b
-        const startX = slotRect.left - containerRect.left + (slotRect.width / 2);
-        const startY = slotRect.top - containerRect.top + (slotRect.height / 2);
+        // Use viewport coordinates for cross-panel movement
+        const startX = slotRect.left + (slotRect.width / 2);
+        const startY = slotRect.top + (slotRect.height / 2);
 
         // Create worm element
         const wormId = `worm-${Date.now()}-${Math.random()}`;
@@ -269,15 +284,16 @@ class WormSystem {
 
         wormElement.appendChild(wormBody);
 
-        // Position worm at console slot
+        // Position worm at console slot using VIEWPORT coordinates
         wormElement.style.left = `${startX}px`;
         wormElement.style.top = `${startY}px`;
-        wormElement.style.position = 'absolute';
+        wormElement.style.position = 'fixed'; // Use fixed positioning for viewport
         wormElement.style.zIndex = '10000'; // MAXIMUM z-index - in front of ALL layers
         wormElement.style.opacity = '1';
         wormElement.style.visibility = 'visible';
+        wormElement.style.pointerEvents = 'auto'; // Allow clicks on worms
 
-        this.wormContainer.appendChild(wormElement);
+        this.crossPanelContainer.appendChild(wormElement); // Add to cross-panel container
 
         // Store worm data with console slot reference
         const wormData = {
@@ -492,6 +508,23 @@ class WormSystem {
     }
 
     stealSymbol(worm) {
+        // CROSS-PANEL CHECK: Worm can only steal symbols when inside Panel B
+        const panelBRect = this.wormContainer.getBoundingClientRect();
+        const wormInPanelB = (
+            worm.x >= panelBRect.left &&
+            worm.x <= panelBRect.right &&
+            worm.y >= panelBRect.top &&
+            worm.y <= panelBRect.bottom
+        );
+
+        if (!wormInPanelB) {
+            console.log(`🐛 Worm ${worm.id} outside Panel B - cannot steal symbols`);
+            // Continue roaming
+            worm.roamingEndTime = Date.now() + 5000;
+            worm.isRushingToTarget = false;
+            return;
+        }
+
         // PERFORMANCE: Use cached revealed symbols instead of querying every time
         const revealedSymbols = this.getCachedRevealedSymbols();
 
@@ -606,6 +639,94 @@ class WormSystem {
         worm.element.appendChild(stolenSymbolDiv);
 
         console.log(`🐛 Worm now carrying "${symbolValue}" and heading back to console hole!`);
+        
+        // GAME OVER CHECK: Did worm steal the last available symbol?
+        this.checkGameOverCondition();
+    }
+
+    // GAME OVER: Check if all symbols have been stolen
+    checkGameOverCondition() {
+        const revealedSymbols = this.getCachedRevealedSymbols();
+        const availableSymbols = Array.from(revealedSymbols).filter(el =>
+            !el.dataset.stolen &&
+            !el.classList.contains('space-symbol') &&
+            !el.classList.contains('completed-row-symbol')
+        );
+
+        if (availableSymbols.length === 0) {
+            console.log('💀 GAME OVER! All symbols stolen!');
+            this.triggerGameOver();
+        }
+    }
+
+    // GAME OVER: Trigger game over sequence
+    triggerGameOver() {
+        // Pause worm animations
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+
+        // Remove a random console symbol as penalty (if any exist)
+        this.removeRandomConsoleSymbol();
+
+        // Show Game Over modal
+        this.showGameOverModal();
+    }
+
+    // Remove random symbol from console as penalty
+    removeRandomConsoleSymbol() {
+        if (!window.consoleManager) return;
+
+        const filledSlots = [];
+        window.consoleManager.slots.forEach((symbol, index) => {
+            if (symbol !== null) {
+                filledSlots.push(index);
+            }
+        });
+
+        if (filledSlots.length === 0) {
+            console.log('⚠️ No console symbols to remove');
+            return;
+        }
+
+        // Pick random filled slot
+        const randomIndex = filledSlots[Math.floor(Math.random() * filledSlots.length)];
+        const removedSymbol = window.consoleManager.slots[randomIndex];
+
+        // Remove it
+        window.consoleManager.slots[randomIndex] = null;
+        window.consoleManager.updateConsoleDisplay();
+        window.consoleManager.saveProgress();
+
+        console.log(`💔 PENALTY: Removed "${removedSymbol}" from console slot ${randomIndex + 1}`);
+    }
+
+    // Show Game Over modal
+    showGameOverModal() {
+        // Create modal if it doesn't exist
+        let modal = document.getElementById('game-over-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'game-over-modal';
+            modal.className = 'game-over-modal';
+            modal.innerHTML = `
+                <div class="game-over-content">
+                    <h1 class="game-over-title">💀 GAME OVER! 💀</h1>
+                    <p class="game-over-message">All symbols have been stolen by worms!</p>
+                    <p class="game-over-penalty">Penalty: Lost 1 console symbol</p>
+                    <button class="game-over-button" onclick="location.reload()">Try Again</button>
+                    <button class="game-over-button secondary" onclick="window.location.href='level-select.html'">Back to Levels</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Show modal with animation
+        setTimeout(() => {
+            modal.style.display = 'flex';
+            modal.style.opacity = '1';
+        }, 100);
     }
 
     animate() {
@@ -615,10 +736,13 @@ class WormSystem {
         }
 
         const currentTime = Date.now();
-        const panelB = this.wormContainer;
-        const panelBRect = panelB.getBoundingClientRect();
-        const panelBWidth = panelB.offsetWidth || 800;
-        const panelBHeight = panelB.offsetHeight || 600;
+        
+        // CROSS-PANEL MOVEMENT: Use viewport dimensions instead of Panel B only
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // Get Panel B boundaries for symbol stealing (worms can only steal in Panel B)
+        const panelBRect = this.wormContainer.getBoundingClientRect();
 
         this.worms.forEach(worm => {
             if (!worm.active) return;
@@ -676,7 +800,7 @@ class WormSystem {
                     worm.roamingEndTime = Date.now() + 5000;
                 }
             }
-            // Roaming behavior - crawling movement ONLY in Panel B
+            // Roaming behavior - crawling movement ACROSS ALL PANELS
             else if (!worm.hasStolen && !worm.isRushingToTarget) {
                 // Update direction slightly for natural movement
                 worm.direction += (Math.random() - 0.5) * 0.1;
@@ -689,22 +813,22 @@ class WormSystem {
                 worm.x += worm.velocityX;
                 worm.y += worm.velocityY;
 
-                // STRICT PANEL B BOUNDARIES
+                // CROSS-PANEL BOUNDARIES: Worms can roam entire viewport
                 const margin = 20;
                 if (worm.x < margin) {
                     worm.x = margin;
                     worm.direction = Math.PI - worm.direction; // Reflect horizontally
                 }
-                if (worm.x > panelBWidth - margin) {
-                    worm.x = panelBWidth - margin;
+                if (worm.x > viewportWidth - margin) {
+                    worm.x = viewportWidth - margin;
                     worm.direction = Math.PI - worm.direction;
                 }
                 if (worm.y < margin) {
                     worm.y = margin;
                     worm.direction = -worm.direction; // Reflect vertically
                 }
-                if (worm.y > panelBHeight - margin) {
-                    worm.y = panelBHeight - margin;
+                if (worm.y > viewportHeight - margin) {
+                    worm.y = viewportHeight - margin;
                     worm.direction = -worm.direction;
                 }
 
