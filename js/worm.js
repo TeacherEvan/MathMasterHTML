@@ -28,18 +28,22 @@ class WormSystem {
         this.CACHE_DURATION_TARGETS = 100; // Refresh revealed symbols every 100ms
         this.CACHE_DURATION_RECT = 200; // Refresh container rect every 200ms
 
-        console.log('🐛 WormSystem initialized with DOM query caching and Cloning Curse mechanic');
+        // PERFORMANCE: Spawn batching queue to prevent frame drops
+        this.spawnQueue = [];
+        this.isProcessingSpawnQueue = false;
+
+        console.log('🐛 WormSystem initialized with DOM query caching, spawn batching, and Cloning Curse mechanic');
 
         // Listen for the custom event dispatched by game.js
         document.addEventListener('problemLineCompleted', (event) => {
             console.log('🐛 Worm System received problemLineCompleted event:', event.detail);
-            this.spawnWormFromConsole();
+            this.queueWormSpawn('console');
         });
 
         // PURPLE WORM: Listen for purple worm trigger (2+ wrong answers)
         document.addEventListener('purpleWormTriggered', (event) => {
             console.log('🟣 Purple Worm System received purpleWormTriggered event:', event.detail);
-            this.spawnPurpleWorm();
+            this.queueWormSpawn('purple');
         });
 
         // Listen for symbol clicks in rain display to check if worm's target was clicked
@@ -77,6 +81,38 @@ class WormSystem {
     // PERFORMANCE: Invalidate caches when symbols change
     invalidateSymbolCache() {
         this.cachedRevealedSymbols = null;
+    }
+
+    // PERFORMANCE: Queue worm spawn to prevent frame drops on multi-spawn
+    queueWormSpawn(type, data = {}) {
+        this.spawnQueue.push({ type, data, timestamp: Date.now() });
+        console.log(`📋 Queued ${type} worm spawn. Queue length: ${this.spawnQueue.length}`);
+        this.processSpawnQueue();
+    }
+
+    // PERFORMANCE: Process spawn queue one at a time with RAF spacing
+    processSpawnQueue() {
+        if (this.isProcessingSpawnQueue || this.spawnQueue.length === 0) return;
+        
+        this.isProcessingSpawnQueue = true;
+
+        requestAnimationFrame(() => {
+            const spawn = this.spawnQueue.shift();
+            
+            if (spawn.type === 'console') {
+                this.spawnWormFromConsole();
+            } else if (spawn.type === 'purple') {
+                this.spawnPurpleWorm();
+            }
+            
+            this.isProcessingSpawnQueue = false;
+            
+            // If more spawns queued, process next one after 50ms delay
+            if (this.spawnQueue.length > 0) {
+                setTimeout(() => this.processSpawnQueue(), 50);
+                console.log(`⏱️ Processing next spawn in queue (${this.spawnQueue.length} remaining)...`);
+            }
+        });
     }
 
     // Check if rain symbol clicked matches worm's stolen symbol - EXPLODE WORM!
@@ -511,7 +547,8 @@ class WormSystem {
 
     stealSymbol(worm) {
         // CROSS-PANEL CHECK: Worm can only steal symbols when inside Panel B
-        const panelBRect = this.wormContainer.getBoundingClientRect();
+        // PERFORMANCE: Use cached container rect instead of live query
+        const panelBRect = this.getCachedContainerRect();
         const wormInPanelB = (
             worm.x >= panelBRect.left &&
             worm.x <= panelBRect.right &&
@@ -743,8 +780,8 @@ class WormSystem {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        // Get Panel B boundaries for symbol stealing (worms can only steal in Panel B)
-        const panelBRect = this.wormContainer.getBoundingClientRect();
+        // PERFORMANCE: Get Panel B boundaries once per frame, use cached rect
+        const panelBRect = this.getCachedContainerRect();
 
         this.worms.forEach(worm => {
             if (!worm.active) return;

@@ -11,11 +11,19 @@ class DisplayManager {
             '720p': { width: 1280, minWidth: 768, scale: 0.7, fontSize: '16px' },
             'mobile': { width: 768, minWidth: 0, scale: 0.6, fontSize: '14px' }
         };
+        
+        // PERFORMANCE: Cache DOM elements to avoid repeated getElementById calls
+        this.domCache = {};
+        
         this.init();
     }
 
     init() {
         console.log("🚀 Initializing Display Manager");
+        
+        // PERFORMANCE: Cache DOM elements once at initialization
+        this.cacheDOMElements();
+        
         this.detectAndApply();
 
         // Listen for window resize
@@ -34,6 +42,18 @@ class DisplayManager {
 
         // Show resolution indicator
         this.showResolutionIndicator();
+    }
+
+    // PERFORMANCE: Cache DOM elements to avoid repeated getElementById calls
+    cacheDOMElements() {
+        this.domCache = {
+            solutionContainer: document.getElementById('solution-container'),
+            problemContainer: document.getElementById('problem-container'),
+            backButton: document.getElementById('back-button'),
+            helpButton: document.getElementById('help-button'),
+            resolutionIndicator: document.getElementById('resolution-indicator')
+        };
+        console.log('📦 DOM elements cached for performance');
     }
 
     detectResolution() {
@@ -91,8 +111,9 @@ class DisplayManager {
 
         console.log(`📱 Mobile mode: ${isMobile ? 'YES' : 'NO'}`);
 
+        // PERFORMANCE: Use cached DOM elements
         // Solution container - DECREASE to 30% on mobile for better vertical fit (25% smaller)
-        const solutionContainer = document.getElementById('solution-container');
+        const solutionContainer = this.domCache.solutionContainer;
         if (solutionContainer) {
             if (isMobile) {
                 solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.30)`;
@@ -107,7 +128,7 @@ class DisplayManager {
         }
 
         // Problem container - DECREASE to 25% on mobile to prevent edge cutoff (37.5% smaller than desktop)
-        const problemContainer = document.getElementById('problem-container');
+        const problemContainer = this.domCache.problemContainer;
         if (problemContainer) {
             if (isMobile) {
                 problemContainer.style.fontSize = `calc(${config.fontSize} * 0.25)`;
@@ -120,13 +141,13 @@ class DisplayManager {
         }
 
         // Back button
-        const backButton = document.getElementById('back-button');
+        const backButton = this.domCache.backButton;
         if (backButton) {
             backButton.style.fontSize = `calc(${config.fontSize} * 0.9)`;
         }
 
         // Help button
-        const helpButton = document.getElementById('help-button');
+        const helpButton = this.domCache.helpButton;
         if (helpButton) {
             helpButton.style.fontSize = `calc(${config.fontSize} * 0.9)`;
         }
@@ -193,7 +214,8 @@ class DisplayManager {
     }
 
     updateResolutionIndicator(detected) {
-        const indicator = document.getElementById('resolution-indicator');
+        // PERFORMANCE: Use cached element
+        const indicator = this.domCache.resolutionIndicator;
         if (indicator) {
             indicator.textContent = `${detected.name.toUpperCase()} | ${detected.width}x${detected.height} | SCALE: ${Math.round(detected.config.scale * 100)}%`;
             // Keep hidden - functionality preserved for debugging
