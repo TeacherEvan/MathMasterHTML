@@ -1609,6 +1609,15 @@ class WormSystem {
         this.powerUps[type]++;
         console.log(`🎁 Collected ${type} power-up! Total: ${this.powerUps[type]}`);
         
+        // Chain Lightning: Increase kill count with each pickup
+        if (type === 'chainLightning') {
+            // Only increase after first pickup
+            if (this.powerUps[type] > 1) {
+                this.chainLightningKillCount += 2;
+                console.log(`⚡ Chain Lightning kill count increased to ${this.chainLightningKillCount}`);
+            }
+        }
+        
         // Visual feedback
         element.style.animation = 'power-up-collect 0.3s ease-out';
         
@@ -1622,20 +1631,19 @@ class WormSystem {
         }, 300);
     }
 
-    // Update power-up display on console (placeholder)
+    // Update power-up display on console
     updatePowerUpDisplay() {
-        // TODO: Display power-up counts above console
         console.log(`📊 Power-ups: ⚡${this.powerUps.chainLightning} 🕷️${this.powerUps.spider} 👹${this.powerUps.devil}`);
         
-        // Create or update power-up display
+        // Create or update power-up display above console
         let powerUpDisplay = document.getElementById('power-up-display');
+        const consoleElement = document.getElementById('symbol-console');
+        
         if (!powerUpDisplay) {
             powerUpDisplay = document.createElement('div');
             powerUpDisplay.id = 'power-up-display';
             powerUpDisplay.style.cssText = `
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
+                position: absolute;
                 background: rgba(0, 0, 0, 0.8);
                 color: white;
                 padding: 10px;
@@ -1647,12 +1655,27 @@ class WormSystem {
                 gap: 15px;
                 border: 2px solid #0f0;
             `;
+            
+            // Position above console if available
+            if (consoleElement) {
+                const consoleRect = consoleElement.getBoundingClientRect();
+                powerUpDisplay.style.position = 'fixed';
+                powerUpDisplay.style.bottom = `${window.innerHeight - consoleRect.top + 10}px`;
+                powerUpDisplay.style.left = `${consoleRect.left}px`;
+            } else {
+                // Fallback to bottom right
+                powerUpDisplay.style.position = 'fixed';
+                powerUpDisplay.style.bottom = '20px';
+                powerUpDisplay.style.right = '20px';
+            }
+            
             document.body.appendChild(powerUpDisplay);
         }
         
         powerUpDisplay.innerHTML = `
-            <div class="power-up-item" data-type="chainLightning" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s;">
+            <div class="power-up-item" data-type="chainLightning" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s; position: relative;">
                 ⚡ ${this.powerUps.chainLightning}
+                ${this.powerUps.chainLightning > 0 ? `<div style="position: absolute; top: -10px; right: -10px; font-size: 12px; color: #0ff;">${this.chainLightningKillCount}</div>` : ''}
             </div>
             <div class="power-up-item" data-type="spider" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s;">
                 🕷️ ${this.powerUps.spider}
@@ -1752,8 +1775,8 @@ class WormSystem {
                 }, index * 100);
             });
             
-            // Increase kill count for next use
-            this.chainLightningKillCount += 2;
+            // RESET: Count resets when used (back to 5 for next collection)
+            this.chainLightningKillCount = 5;
             
             // Remove temporary listeners
             this.worms.forEach(w => {
