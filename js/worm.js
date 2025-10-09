@@ -15,10 +15,23 @@ class WormSystem {
         this.lockedConsoleSlots = new Set(); // Track which console slots have active worms
         this.crossPanelContainer = null; // Container for cross-panel worm movement
 
-        // CLONING CURSE MECHANIC
-        this.cloningCurseActive = false; // Tracks if cloning curse is active
+        // ROW COMPLETION TRACKING
+        this.rowsCompleted = 0; // Track number of rows completed in current problem
+        this.wormsPerRow = 10; // Base worms spawned on first row
+        this.additionalWormsPerRow = 5; // Additional worms per subsequent row
+
+        // CLONING CURSE MECHANIC (REMOVED - Green worms now explode on click)
+        this.cloningCurseActive = false; // No longer used
         this.wormsKilledByRain = 0; // Count of worms killed via rain symbols (not direct clicks)
         this.stolenBlueSymbols = []; // Track stolen blue symbols for replacement priority
+
+        // POWER-UP SYSTEM
+        this.powerUps = {
+            chainLightning: 0, // Number of chain lightning power-ups collected
+            spider: 0,
+            devil: 0
+        };
+        this.chainLightningKillCount = 5; // First use kills 5, then +2 per use
 
         // PERFORMANCE: DOM query caching
         this.cachedRevealedSymbols = null;
@@ -32,12 +45,25 @@ class WormSystem {
         this.spawnQueue = [];
         this.isProcessingSpawnQueue = false;
 
-        console.log('🐛 WormSystem initialized with DOM query caching, spawn batching, and Cloning Curse mechanic');
+        console.log('🐛 WormSystem initialized with new row-based spawning and power-up system');
 
         // Listen for the custom event dispatched by game.js
         document.addEventListener('problemLineCompleted', (event) => {
             console.log('🐛 Worm System received problemLineCompleted event:', event.detail);
-            this.queueWormSpawn('console');
+            this.rowsCompleted++;
+            const wormsToSpawn = this.wormsPerRow + (this.rowsCompleted - 1) * this.additionalWormsPerRow;
+            console.log(`📊 Row ${this.rowsCompleted} completed. Spawning ${wormsToSpawn} worms!`);
+            
+            // Spawn multiple worms spread around borders
+            for (let i = 0; i < wormsToSpawn; i++) {
+                this.queueWormSpawn('border', { index: i, total: wormsToSpawn });
+            }
+        });
+        
+        // Listen for problem completion to reset row counter
+        document.addEventListener('problemCompleted', (event) => {
+            console.log('🎉 Problem completed! Resetting row counter.');
+            this.rowsCompleted = 0;
         });
 
         // PURPLE WORM: Listen for purple worm trigger (2+ wrong answers)
@@ -103,6 +129,8 @@ class WormSystem {
                 this.spawnWormFromConsole();
             } else if (spawn.type === 'purple') {
                 this.spawnPurpleWorm();
+            } else if (spawn.type === 'border') {
+                this.spawnWormFromBorder(spawn.data);
             }
             
             this.isProcessingSpawnQueue = false;
@@ -115,7 +143,7 @@ class WormSystem {
         });
     }
 
-    // Check if rain symbol clicked matches worm's stolen symbol - EXPLODE WORM!
+    // Check if rain symbol clicked matches worm's stolen symbol - EXPLODE WORM or TURN GREEN
     checkWormTargetClickForExplosion(clickedSymbol) {
         // Normalize X/x
         const normalizedClicked = clickedSymbol.toLowerCase() === 'x' ? 'X' : clickedSymbol;
@@ -127,6 +155,40 @@ class WormSystem {
             const normalizedWormSymbol = worm.stolenSymbol.toLowerCase() === 'x' ? 'X' : worm.stolenSymbol;
 
             if (normalizedWormSymbol === normalizedClicked) {
+                // PURPLE WORM: Turn green when matching symbol clicked (must click worm to destroy)
+                if (worm.isPurple) {
+                    console.log(`🟣→🟢 User clicked rain symbol "${clickedSymbol}" - Purple worm ${worm.id} turns GREEN!`);
+                    
+                    // Turn worm green (damaged state)
+                    worm.element.style.filter = 'hue-rotate(120deg) brightness(1.2)'; // Purple → Green
+                    worm.element.classList.remove('purple-worm');
+                    worm.element.classList.add('worm-damaged', 'purple-turned-green');
+                    worm.isPurple = false; // No longer purple
+                    worm.canBeClicked = true; // Now clickable for destruction
+                    
+                    // Flash effect
+                    worm.element.style.animation = 'worm-flash-green 0.5s ease-out';
+                    setTimeout(() => {
+                        worm.element.style.animation = '';
+                    }, 500);
+                    
+                    // Update click handler to explode instead of clone
+                    worm.element.removeEventListener('click', worm.clickHandler);
+                    worm.clickHandler = (e) => {
+                        e.stopPropagation();
+                        console.log(`💥 Green (was purple) worm ${worm.id} clicked - EXPLODING!`);
+                        
+                        // Drop power-up when purple worm (now green) is destroyed
+                        this.dropPowerUp(worm.x, worm.y);
+                        
+                        this.explodeWorm(worm, false);
+                    };
+                    worm.element.addEventListener('click', worm.clickHandler);
+                    
+                    return;
+                }
+                
+                // GREEN WORM: Explode immediately
                 console.log(`💥 BOOM! User clicked rain symbol "${clickedSymbol}" - EXPLODING worm with stolen symbol!`);
 
                 // Track this as a rain kill (not direct click)
@@ -134,9 +196,6 @@ class WormSystem {
                 console.log(`📊 Worms killed by rain: ${this.wormsKilledByRain}`);
 
                 this.explodeWorm(worm, true); // Pass true to indicate this is a rain kill
-
-                // Check if curse should be reset (all visible worms killed by rain)
-                this.checkCurseReset();
             }
         });
     }
@@ -454,6 +513,116 @@ class WormSystem {
         }
     }
 
+    // Spawn worm from border (bottom or sides) - used for row completion
+    spawnWormFromBorder(data = {}) {
+        this.initialize();
+
+        const { index = 0, total = 1 } = data;
+        console.log(`🐛 spawnWormFromBorder() called. Worm ${index + 1}/${total}. Current worms: ${this.worms.length}/${this.maxWorms}`);
+
+        if (this.worms.length >= this.maxWorms) {
+            console.log(`⚠️ Max worms (${this.maxWorms}) reached. No more spawning.`);
+            return;
+        }
+
+        // Create worm element
+        const wormId = `border-worm-${Date.now()}-${Math.random()}`;
+        const wormElement = document.createElement('div');
+        wormElement.className = 'worm-container';
+        wormElement.id = wormId;
+
+        // Worm body with segments
+        const wormBody = document.createElement('div');
+        wormBody.className = 'worm-body';
+
+        for (let i = 0; i < 5; i++) {
+            const segment = document.createElement('div');
+            segment.className = 'worm-segment';
+            segment.style.setProperty('--segment-index', i);
+            wormBody.appendChild(segment);
+        }
+
+        wormElement.appendChild(wormBody);
+
+        // Determine spawn position (spread around bottom and side borders)
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        let startX, startY;
+        const margin = 20;
+        
+        // Distribute worms around borders
+        const position = index / total; // 0 to 1
+        
+        if (position < 0.5) {
+            // Bottom border (0-50%)
+            const xPosition = position * 2; // 0 to 1
+            startX = margin + xPosition * (viewportWidth - 2 * margin);
+            startY = viewportHeight - margin;
+        } else if (position < 0.75) {
+            // Left border (50-75%)
+            const yPosition = (position - 0.5) * 4; // 0 to 1
+            startX = margin;
+            startY = margin + yPosition * (viewportHeight - 2 * margin);
+        } else {
+            // Right border (75-100%)
+            const yPosition = (position - 0.75) * 4; // 0 to 1
+            startX = viewportWidth - margin;
+            startY = margin + yPosition * (viewportHeight - 2 * margin);
+        }
+
+        wormElement.style.left = `${startX}px`;
+        wormElement.style.top = `${startY}px`;
+        wormElement.style.position = 'fixed'; // Use fixed for viewport positioning
+        wormElement.style.zIndex = '10000';
+        wormElement.style.opacity = '1';
+        wormElement.style.visibility = 'visible';
+        wormElement.style.pointerEvents = 'auto'; // Allow clicks
+
+        this.crossPanelContainer.appendChild(wormElement);
+
+        // Store worm data
+        const wormData = {
+            id: wormId,
+            element: wormElement,
+            stolenSymbol: null,
+            targetElement: null,
+            targetSymbol: null,
+            x: startX,
+            y: startY,
+            velocityX: (Math.random() - 0.5) * 2.0,
+            velocityY: (Math.random() - 0.5) * 1.0,
+            active: true,
+            hasStolen: false,
+            isRushingToTarget: false,
+            roamingEndTime: Date.now() + 5000, // Shorter roam time - rush to steal
+            isFlickering: false,
+            baseSpeed: 2.5, // Faster than normal worms
+            currentSpeed: 2.5,
+            fromConsole: false,
+            shouldExitToConsole: true, // Can escape through console
+            exitingToConsole: false,
+            targetConsoleSlot: null,
+            crawlPhase: Math.random() * Math.PI * 2,
+            direction: Math.random() * Math.PI * 2
+        };
+
+        this.worms.push(wormData);
+
+        // Add click handler
+        wormElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.handleWormClick(wormData);
+        });
+
+        console.log(`✅ Border worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
+
+        // Start animation loop if not already running
+        if (this.worms.length === 1) {
+            this.animate();
+        }
+    }
+
     // PURPLE WORM: Spawn purple worm triggered by 2+ wrong answers
     spawnPurpleWorm() {
         this.initialize();
@@ -484,10 +653,22 @@ class WormSystem {
 
         wormElement.appendChild(wormBody);
 
-        // Random starting position (dramatic entrance from top) - USE VIEWPORT COORDINATES
-        const viewportWidth = window.innerWidth;
-        const startX = Math.random() * Math.max(0, viewportWidth - 80);
-        const startY = -50; // Start above viewport
+        // Spawn from help button position - USE VIEWPORT COORDINATES
+        const helpButton = document.getElementById('help-button');
+        let startX, startY;
+        
+        if (helpButton) {
+            const helpRect = helpButton.getBoundingClientRect();
+            startX = helpRect.left + (helpRect.width / 2);
+            startY = helpRect.top + (helpRect.height / 2);
+            console.log(`🟣 Purple worm spawning from help button at (${startX.toFixed(0)}, ${startY.toFixed(0)})`);
+        } else {
+            // Fallback if help button not found
+            const viewportWidth = window.innerWidth;
+            startX = Math.random() * Math.max(0, viewportWidth - 80);
+            startY = -50; // Start above viewport
+            console.log(`⚠️ Help button not found, using fallback position`);
+        }
 
         wormElement.style.left = `${startX}px`;
         wormElement.style.top = `${startY}px`;
@@ -508,15 +689,15 @@ class WormSystem {
             targetSymbol: null,
             x: startX,
             y: startY,
-            velocityX: (Math.random() - 0.5) * 2.0,
-            velocityY: Math.random() * 1.5 + 1.0, // Downward movement
+            velocityX: (Math.random() - 0.5) * 1.0, // HALF SPEED (was 2.0)
+            velocityY: Math.random() * 0.75 + 0.5, // HALF SPEED downward movement
             active: true,
             hasStolen: false,
-            isRushingToTarget: false,
-            roamingEndTime: Date.now() + 8000, // Roam for 8 seconds
+            isRushingToTarget: true, // IMMEDIATELY goes for visible symbols (no roaming)
+            roamingEndTime: Date.now(), // No roaming period
             isFlickering: false,
-            baseSpeed: 2.0,
-            currentSpeed: 2.0,
+            baseSpeed: 1.0, // HALF SPEED of green worms (green is 2.0)
+            currentSpeed: 1.0,
             isPurple: true, // FLAG: This is a purple worm!
             fromConsole: false,
             shouldExitToConsole: true, // Purple worms exit through console
@@ -525,19 +706,20 @@ class WormSystem {
             crawlPhase: 0,
             direction: Math.random() * Math.PI * 2,
             canStealBlue: true, // Purple worms can steal blue symbols
-            hitCount: 0 // Purple worms require 2 hits to die
+            prioritizeRed: true // Prioritize red symbols over blue
         };
 
         this.worms.push(wormData);
 
-        // PURPLE WORM CLICK: Requires 2 hits to kill
-        wormElement.addEventListener('click', (e) => {
+        // PURPLE WORM CLICK: Always clones
+        wormData.clickHandler = (e) => {
             e.stopPropagation();
             this.handlePurpleWormClick(wormData);
-        });
+        };
+        wormElement.addEventListener('click', wormData.clickHandler);
 
-        console.log(`🟣 Purple worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
-        console.log(`🟣 Purple worm requires 2 HITS to kill and can steal BLUE symbols!`);
+        console.log(`🟣 Purple worm ${wormId} spawned from help button at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
+        console.log(`🟣 Purple worm moves at HALF SPEED, prioritizes RED symbols, and CLONES on click!`);
 
         // Start animation loop if not already running
         if (this.worms.length === 1) {
@@ -1015,95 +1197,31 @@ class WormSystem {
     handleWormClick(worm) {
         if (!worm.active) return;
 
-        // CLONING CURSE MECHANIC
-        if (this.cloningCurseActive) {
-            // Curse is active - ANY worm click will clone instead of kill!
-            console.log(`🔮 CLONING CURSE ACTIVE! Worm ${worm.id} clicked - CREATING CLONE!`);
-
-            // Visual feedback for curse activation
-            worm.element.style.animation = 'worm-flash-purple 0.3s ease-out';
-            setTimeout(() => {
-                worm.element.style.animation = '';
-            }, 300);
-
-            // Clone the worm
-            this.cloneWorm(worm);
-            return;
+        // GREEN WORMS: Always explode on click (no cloning)
+        console.log(`💥 Green worm ${worm.id} clicked - EXPLODING!`);
+        
+        // Check if this worm has a power-up (will be implemented later)
+        if (worm.hasPowerUp) {
+            this.dropPowerUp(worm.x, worm.y, worm.powerUpType);
         }
-
-        // 80/20 RISK/REWARD MECHANIC
-        // 80% chance: Worm explodes (normal kill)
-        // 20% chance: Worm clones AND activates cloning curse
-        const roll = Math.random() * 100; // 0-100
-
-        if (roll < 80) {
-            // 80% - BOOM! Normal worm kill
-            console.log(`💥 BOOM! Worm ${worm.id} exploded (${roll.toFixed(1)}% roll - under 80% threshold)`);
-            this.explodeWorm(worm, false); // false = not a rain kill
-        } else {
-            // 20% - Clone AND activate curse!
-            console.log(`🔮 CLONE EVENT! Worm ${worm.id} cloned (${roll.toFixed(1)}% roll - over 80% threshold)`);
-            console.log(`⚠️ CLONING CURSE ACTIVATED! All future worm clicks will clone until curse reset!`);
-
-            this.cloningCurseActive = true;
-            this.wormsKilledByRain = 0; // Reset rain kill counter
-
-            // Visual feedback for curse activation
-            worm.element.style.animation = 'worm-flash-purple 0.5s ease-out';
-            setTimeout(() => {
-                worm.element.style.animation = '';
-            }, 500);
-
-            // Create a clone
-            this.cloneWorm(worm);
-        }
+        
+        this.explodeWorm(worm, false); // false = not a rain kill
     }
 
-    // PURPLE WORM: Special click handler with 50% clone chance
+    // PURPLE WORM: Special click handler - always clones
     handlePurpleWormClick(worm) {
         if (!worm.active) return;
 
-        console.log(`🟣 Purple worm ${worm.id} clicked! Hit count: ${worm.hitCount}/2`);
+        console.log(`🟣 Purple worm ${worm.id} clicked - CREATING CLONE!`);
 
-        // Increment hit count
-        worm.hitCount = (worm.hitCount || 0) + 1;
+        // Visual feedback
+        worm.element.style.animation = 'worm-flash-purple 0.5s ease-out';
+        setTimeout(() => {
+            worm.element.style.animation = '';
+        }, 500);
 
-        // FIRST HIT: Turn green, drop stolen symbol
-        if (worm.hitCount === 1) {
-            console.log(`� FIRST HIT! Purple worm ${worm.id} is DAMAGED - turns green and drops symbol!`);
-
-            // Turn worm green (damaged state)
-            worm.element.style.filter = 'hue-rotate(120deg) brightness(1.2)'; // Purple → Green
-            worm.element.classList.add('worm-damaged');
-
-            // Drop stolen symbol if carrying one
-            if (worm.hasStolen && worm.targetElement) {
-                console.log(`📦 Dropping stolen symbol "${worm.stolenSymbol}"`);
-                worm.targetElement.classList.remove('stolen', 'hidden-symbol');
-                worm.targetElement.classList.add('revealed-symbol');
-                worm.targetElement.style.visibility = 'visible';
-                delete worm.targetElement.dataset.stolen;
-
-                // Clear worm's stolen data
-                worm.hasStolen = false;
-                worm.targetElement = null;
-                worm.stolenSymbol = null;
-            }
-
-            // Flash effect
-            worm.element.style.animation = 'worm-flash-green 0.5s ease-out';
-            setTimeout(() => {
-                worm.element.style.animation = '';
-            }, 500);
-
-            return; // Don't explode yet!
-        }
-
-        // SECOND HIT: Explode!
-        if (worm.hitCount >= 2) {
-            console.log(`💥 SECOND HIT! Purple worm ${worm.id} EXPLODES!`);
-            this.explodeWorm(worm, false);
-        }
+        // Clone the purple worm
+        this.clonePurpleWorm(worm);
     }
 
     cloneWorm(parentWorm) {
@@ -1408,6 +1526,81 @@ class WormSystem {
                 flash.parentNode.removeChild(flash);
             }
         }, 200);
+    }
+
+    // Drop power-up at worm location
+    dropPowerUp(x, y, type = null) {
+        // Random power-up type if not specified
+        if (!type) {
+            const types = ['chainLightning', 'spider', 'devil'];
+            type = types[Math.floor(Math.random() * types.length)];
+        }
+
+        const powerUp = document.createElement('div');
+        powerUp.className = 'power-up';
+        powerUp.dataset.type = type;
+        
+        // Set emoji based on type
+        const emojis = {
+            chainLightning: '⚡',
+            spider: '🕷️',
+            devil: '👹'
+        };
+        powerUp.textContent = emojis[type] || '⭐';
+        
+        powerUp.style.left = `${x}px`;
+        powerUp.style.top = `${y}px`;
+        powerUp.style.position = 'fixed';
+        powerUp.style.fontSize = '30px';
+        powerUp.style.zIndex = '10001';
+        powerUp.style.cursor = 'pointer';
+        powerUp.style.animation = 'power-up-appear 0.5s ease-out';
+        powerUp.style.pointerEvents = 'auto';
+
+        // Click to collect
+        powerUp.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.collectPowerUp(type, powerUp);
+        });
+
+        this.crossPanelContainer.appendChild(powerUp);
+        console.log(`✨ Power-up "${type}" dropped at (${x.toFixed(0)}, ${y.toFixed(0)})`);
+
+        // Auto-remove after 10 seconds if not collected
+        setTimeout(() => {
+            if (powerUp.parentNode) {
+                powerUp.style.animation = 'power-up-fade 0.5s ease-out';
+                setTimeout(() => {
+                    if (powerUp.parentNode) {
+                        powerUp.parentNode.removeChild(powerUp);
+                    }
+                }, 500);
+            }
+        }, 10000);
+    }
+
+    // Collect power-up
+    collectPowerUp(type, element) {
+        this.powerUps[type]++;
+        console.log(`🎁 Collected ${type} power-up! Total: ${this.powerUps[type]}`);
+        
+        // Visual feedback
+        element.style.animation = 'power-up-collect 0.3s ease-out';
+        
+        // Update console display (will be implemented)
+        this.updatePowerUpDisplay();
+        
+        setTimeout(() => {
+            if (element.parentNode) {
+                element.parentNode.removeChild(element);
+            }
+        }, 300);
+    }
+
+    // Update power-up display on console (placeholder)
+    updatePowerUpDisplay() {
+        // TODO: Display power-up counts above console
+        console.log(`📊 Power-ups: ⚡${this.powerUps.chainLightning} 🕷️${this.powerUps.spider} 👹${this.powerUps.devil}`);
     }
 
     createSlimeSplat(x, y) {
