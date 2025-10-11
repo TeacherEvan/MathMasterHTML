@@ -17,8 +17,8 @@ class WormSystem {
 
         // ROW COMPLETION TRACKING
         this.rowsCompleted = 0; // Track number of rows completed in current problem
-        this.wormsPerRow = 10; // Base worms spawned on first row
-        this.additionalWormsPerRow = 5; // Additional worms per subsequent row
+        this.wormsPerRow = 5; // Base worms spawned on first row
+        this.additionalWormsPerRow = 0; // Additional worms per subsequent row (5 worms per row total)
 
         // CLONING CURSE MECHANIC (REMOVED - Green worms now explode on click)
         this.cloningCurseActive = false; // No longer used
@@ -45,7 +45,26 @@ class WormSystem {
         this.spawnQueue = [];
         this.isProcessingSpawnQueue = false;
 
+        // PERFORMANCE: Guard to prevent duplicate event listener registration
+        this.eventListenersInitialized = false;
+
+        // Cached DOM elements to avoid repeated getElementById calls
+        this.cachedHelpButton = null;
+        this.cachedPowerUpDisplay = null;
+        this.cachedPanelC = null;
+        this.cachedGameOverModal = null;
+
         console.log('🐛 WormSystem initialized with new row-based spawning and power-up system');
+    }
+
+    // PERFORMANCE: Setup event listeners once (called from initialize)
+    setupEventListeners() {
+        if (this.eventListenersInitialized) {
+            console.log('⚠️ Event listeners already initialized, skipping...');
+            return;
+        }
+
+        console.log('🎧 Setting up WormSystem event listeners...');
 
         // Listen for the custom event dispatched by game.js
         document.addEventListener('problemLineCompleted', (event) => {
@@ -53,20 +72,31 @@ class WormSystem {
             this.rowsCompleted++;
             const wormsToSpawn = this.wormsPerRow + (this.rowsCompleted - 1) * this.additionalWormsPerRow;
             console.log(`📊 Row ${this.rowsCompleted} completed. Spawning ${wormsToSpawn} worms!`);
-            
+
             // Spawn multiple worms spread around borders
             for (let i = 0; i < wormsToSpawn; i++) {
                 this.queueWormSpawn('border', { index: i, total: wormsToSpawn });
             }
         });
-        
-        // Listen for problem completion to reset row counter
-        document.addEventListener('problemCompleted', (event) => {
-            console.log('🎉 Problem completed! Resetting row counter.');
-            this.rowsCompleted = 0;
-        });
 
-        // PURPLE WORM: Listen for purple worm trigger (2+ wrong answers)
+        // CONSOLIDATED: Listen for problem completion (reset row counter + cleanup)
+        document.addEventListener('problemCompleted', (event) => {
+            console.log('🎉 Problem completed! Resetting row counter and cleaning up.');
+            this.rowsCompleted = 0;
+
+            // Clear stolenBlueSymbols array to prevent memory leak
+            this.stolenBlueSymbols = [];
+            console.log('🧹 Cleared stolenBlueSymbols array');
+
+            // Kill all worms and clean up cracks
+            console.log('🎯 Problem completed - killing all worms!');
+            this.killAllWorms();
+
+            // Clean up cracks after worms are killed
+            setTimeout(() => {
+                this.cleanupCracks();
+            }, 2000); // Wait 2 seconds for explosions to finish
+        });        // PURPLE WORM: Listen for purple worm trigger (3 wrong answers)
         document.addEventListener('purpleWormTriggered', (event) => {
             console.log('🟣 Purple Worm System received purpleWormTriggered event:', event.detail);
             this.queueWormSpawn('purple');
@@ -82,6 +112,9 @@ class WormSystem {
             console.log('🎯 Symbol revealed event:', event.detail);
             this.notifyWormsOfRedSymbol(event.detail.symbol);
         });
+
+        this.eventListenersInitialized = true;
+        console.log('✅ WormSystem event listeners initialized');
     }
 
     // PERFORMANCE: Get cached revealed symbols (refreshes every 100ms instead of every frame)
@@ -119,12 +152,12 @@ class WormSystem {
     // PERFORMANCE: Process spawn queue one at a time with RAF spacing
     processSpawnQueue() {
         if (this.isProcessingSpawnQueue || this.spawnQueue.length === 0) return;
-        
+
         this.isProcessingSpawnQueue = true;
 
         requestAnimationFrame(() => {
             const spawn = this.spawnQueue.shift();
-            
+
             if (spawn.type === 'console') {
                 this.spawnWormFromConsole();
             } else if (spawn.type === 'purple') {
@@ -132,9 +165,9 @@ class WormSystem {
             } else if (spawn.type === 'border') {
                 this.spawnWormFromBorder(spawn.data);
             }
-            
+
             this.isProcessingSpawnQueue = false;
-            
+
             // If more spawns queued, process next one after 50ms delay
             if (this.spawnQueue.length > 0) {
                 setTimeout(() => this.processSpawnQueue(), 50);
@@ -158,36 +191,36 @@ class WormSystem {
                 // PURPLE WORM: Turn green when matching symbol clicked (must click worm to destroy)
                 if (worm.isPurple) {
                     console.log(`🟣→🟢 User clicked rain symbol "${clickedSymbol}" - Purple worm ${worm.id} turns GREEN!`);
-                    
+
                     // Turn worm green (damaged state)
                     worm.element.style.filter = 'hue-rotate(120deg) brightness(1.2)'; // Purple → Green
                     worm.element.classList.remove('purple-worm');
                     worm.element.classList.add('worm-damaged', 'purple-turned-green');
                     worm.isPurple = false; // No longer purple
                     worm.canBeClicked = true; // Now clickable for destruction
-                    
+
                     // Flash effect
                     worm.element.style.animation = 'worm-flash-green 0.5s ease-out';
                     setTimeout(() => {
                         worm.element.style.animation = '';
                     }, 500);
-                    
+
                     // Update click handler to explode instead of clone
                     worm.element.removeEventListener('click', worm.clickHandler);
                     worm.clickHandler = (e) => {
                         e.stopPropagation();
                         console.log(`💥 Green (was purple) worm ${worm.id} clicked - EXPLODING!`);
-                        
+
                         // Drop power-up when purple worm (now green) is destroyed
                         this.dropPowerUp(worm.x, worm.y);
-                        
+
                         this.explodeWorm(worm, false);
                     };
                     worm.element.addEventListener('click', worm.clickHandler);
-                    
+
                     return;
                 }
-                
+
                 // GREEN WORM: Explode immediately
                 console.log(`💥 BOOM! User clicked rain symbol "${clickedSymbol}" - EXPLODING worm with stolen symbol!`);
 
@@ -297,6 +330,16 @@ class WormSystem {
         if (getComputedStyle(this.wormContainer).position === 'static') {
             this.wormContainer.style.position = 'relative';
         }
+
+        // PERFORMANCE: Cache frequently-accessed DOM elements
+        this.cachedHelpButton = document.getElementById('help-button');
+        this.cachedPowerUpDisplay = document.getElementById('power-up-display');
+        this.cachedPanelC = document.getElementById('third-display');
+        this.cachedGameOverModal = document.getElementById('game-over-modal');
+        console.log('💾 Cached DOM elements: helpButton, powerUpDisplay, panelC, gameOverModal');
+
+        // PERFORMANCE: Setup event listeners once
+        this.setupEventListeners();
 
         this.isInitialized = true;
         console.log('✅ Worm System initialized successfully');
@@ -547,13 +590,13 @@ class WormSystem {
         // Determine spawn position (spread around bottom and side borders)
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        
+
         let startX, startY;
         const margin = 20;
-        
+
         // Distribute worms around borders
         const position = index / total; // 0 to 1
-        
+
         if (position < 0.5) {
             // Bottom border (0-50%)
             const xPosition = position * 2; // 0 to 1
@@ -654,9 +697,10 @@ class WormSystem {
         wormElement.appendChild(wormBody);
 
         // Spawn from help button position - USE VIEWPORT COORDINATES
-        const helpButton = document.getElementById('help-button');
+        // PERFORMANCE: Use cached element instead of getElementById
+        const helpButton = this.cachedHelpButton || document.getElementById('help-button');
         let startX, startY;
-        
+
         if (helpButton) {
             const helpRect = helpButton.getBoundingClientRect();
             startX = helpRect.left + (helpRect.width / 2);
@@ -925,8 +969,8 @@ class WormSystem {
 
     // Show Game Over modal
     showGameOverModal() {
-        // Create modal if it doesn't exist
-        let modal = document.getElementById('game-over-modal');
+        // PERFORMANCE: Use cached element or create if doesn't exist
+        let modal = this.cachedGameOverModal || document.getElementById('game-over-modal');
         if (!modal) {
             modal = document.createElement('div');
             modal.id = 'game-over-modal';
@@ -941,6 +985,7 @@ class WormSystem {
                 </div>
             `;
             document.body.appendChild(modal);
+            this.cachedGameOverModal = modal; // Cache the newly created modal
         }
 
         // Show modal with animation
@@ -1224,12 +1269,12 @@ class WormSystem {
 
         // GREEN WORMS: Always explode on click (no cloning)
         console.log(`💥 Green worm ${worm.id} clicked - EXPLODING!`);
-        
+
         // Check if this worm has a power-up (will be implemented later)
         if (worm.hasPowerUp) {
             this.dropPowerUp(worm.x, worm.y, worm.powerUpType);
         }
-        
+
         this.explodeWorm(worm, false); // false = not a rain kill
     }
 
@@ -1564,7 +1609,7 @@ class WormSystem {
         const powerUp = document.createElement('div');
         powerUp.className = 'power-up';
         powerUp.dataset.type = type;
-        
+
         // Set emoji based on type
         const emojis = {
             chainLightning: '⚡',
@@ -1572,7 +1617,7 @@ class WormSystem {
             devil: '👹'
         };
         powerUp.textContent = emojis[type] || '⭐';
-        
+
         powerUp.style.left = `${x}px`;
         powerUp.style.top = `${y}px`;
         powerUp.style.position = 'fixed';
@@ -1608,7 +1653,7 @@ class WormSystem {
     collectPowerUp(type, element) {
         this.powerUps[type]++;
         console.log(`🎁 Collected ${type} power-up! Total: ${this.powerUps[type]}`);
-        
+
         // Chain Lightning: Increase kill count with each pickup
         if (type === 'chainLightning') {
             // Only increase after first pickup
@@ -1617,13 +1662,13 @@ class WormSystem {
                 console.log(`⚡ Chain Lightning kill count increased to ${this.chainLightningKillCount}`);
             }
         }
-        
+
         // Visual feedback
         element.style.animation = 'power-up-collect 0.3s ease-out';
-        
+
         // Update console display (will be implemented)
         this.updatePowerUpDisplay();
-        
+
         setTimeout(() => {
             if (element.parentNode) {
                 element.parentNode.removeChild(element);
@@ -1634,11 +1679,11 @@ class WormSystem {
     // Update power-up display on console
     updatePowerUpDisplay() {
         console.log(`📊 Power-ups: ⚡${this.powerUps.chainLightning} 🕷️${this.powerUps.spider} 👹${this.powerUps.devil}`);
-        
-        // Create or update power-up display above console
-        let powerUpDisplay = document.getElementById('power-up-display');
-        const consoleElement = document.getElementById('symbol-console');
-        
+
+        // PERFORMANCE: Use cached elements
+        let powerUpDisplay = this.cachedPowerUpDisplay || document.getElementById('power-up-display');
+        const consoleElement = this.consoleElement || document.getElementById('symbol-console');
+
         if (!powerUpDisplay) {
             powerUpDisplay = document.createElement('div');
             powerUpDisplay.id = 'power-up-display';
@@ -1655,7 +1700,7 @@ class WormSystem {
                 gap: 15px;
                 border: 2px solid #0f0;
             `;
-            
+
             // Position above console if available
             if (consoleElement) {
                 const consoleRect = consoleElement.getBoundingClientRect();
@@ -1668,10 +1713,11 @@ class WormSystem {
                 powerUpDisplay.style.bottom = '20px';
                 powerUpDisplay.style.right = '20px';
             }
-            
+
             document.body.appendChild(powerUpDisplay);
+            this.cachedPowerUpDisplay = powerUpDisplay; // Cache the newly created display
         }
-        
+
         powerUpDisplay.innerHTML = `
             <div class="power-up-item" data-type="chainLightning" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s; position: relative;">
                 ⚡ ${this.powerUps.chainLightning}
@@ -1684,7 +1730,7 @@ class WormSystem {
                 👹 ${this.powerUps.devil}
             </div>
         `;
-        
+
         // Add click handlers
         powerUpDisplay.querySelectorAll('.power-up-item').forEach(item => {
             item.addEventListener('mouseenter', () => {
@@ -1699,17 +1745,17 @@ class WormSystem {
             });
         });
     }
-    
+
     // Use a power-up
     usePowerUp(type) {
         if (this.powerUps[type] <= 0) {
             console.log(`⚠️ No ${type} power-ups available!`);
             return;
         }
-        
+
         console.log(`🎮 Using ${type} power-up!`);
         this.powerUps[type]--;
-        
+
         if (type === 'chainLightning') {
             this.activateChainLightning();
         } else if (type === 'spider') {
@@ -1717,23 +1763,23 @@ class WormSystem {
         } else if (type === 'devil') {
             this.activateDevil();
         }
-        
+
         this.updatePowerUpDisplay();
     }
-    
+
     // Chain Lightning: Click worm to kill 5 + nearby worms
     activateChainLightning() {
         console.log(`⚡ CHAIN LIGHTNING ACTIVATED! Click a worm to unleash the power!`);
-        
+
         // Calculate kill count (5 for first use, then +2 for each subsequent use)
         const killCount = this.chainLightningKillCount;
         console.log(`⚡ Will kill ${killCount} worms in proximity`);
-        
+
         // Set up one-time click listener on worms
         const handleWormClickForLightning = (e, worm) => {
             e.stopPropagation();
             console.log(`⚡ Chain Lightning targeting worm ${worm.id}!`);
-            
+
             // Find closest worms
             const sortedWorms = this.worms
                 .filter(w => w.active)
@@ -1743,9 +1789,9 @@ class WormSystem {
                     return distA - distB;
                 })
                 .slice(0, killCount);
-            
+
             console.log(`⚡ Killing ${sortedWorms.length} worms with chain lightning!`);
-            
+
             // Visual effect
             sortedWorms.forEach((targetWorm, index) => {
                 setTimeout(() => {
@@ -1759,25 +1805,25 @@ class WormSystem {
                         height: ${Math.sqrt(Math.pow(targetWorm.x - worm.x, 2) + Math.pow(targetWorm.y - worm.y, 2))}px;
                         background: linear-gradient(180deg, #fff, #0ff, #fff);
                         transform-origin: top left;
-                        transform: rotate(${Math.atan2(targetWorm.y - worm.y, targetWorm.x - worm.x) + Math.PI/2}rad);
+                        transform: rotate(${Math.atan2(targetWorm.y - worm.y, targetWorm.x - worm.x) + Math.PI / 2}rad);
                         z-index: 10003;
                         box-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
                         pointer-events: none;
                     `;
                     document.body.appendChild(bolt);
-                    
+
                     setTimeout(() => {
                         if (bolt.parentNode) bolt.parentNode.removeChild(bolt);
                     }, 200);
-                    
+
                     // Explode worm
                     this.explodeWorm(targetWorm, false);
                 }, index * 100);
             });
-            
+
             // RESET: Count resets when used (back to 5 for next collection)
             this.chainLightningKillCount = 5;
-            
+
             // Remove temporary listeners
             this.worms.forEach(w => {
                 if (w.element && w.tempLightningHandler) {
@@ -1785,11 +1831,11 @@ class WormSystem {
                     delete w.tempLightningHandler;
                 }
             });
-            
+
             // Reset cursor
             document.body.style.cursor = '';
         };
-        
+
         // Add temporary click listeners to all worms
         this.worms.forEach(w => {
             if (w.active && w.element) {
@@ -1797,29 +1843,29 @@ class WormSystem {
                 w.element.addEventListener('click', w.tempLightningHandler);
             }
         });
-        
+
         // Change cursor to indicate power-up is active
         document.body.style.cursor = 'crosshair';
     }
-    
+
     // Spider: Spawns spider that converts worms to spiders, which convert more worms
     activateSpider() {
         console.log(`🕷️ SPIDER ACTIVATED! Spawning conversion spider...`);
-        
+
         // Find closest worm
         const activeWorms = this.worms.filter(w => w.active);
         if (activeWorms.length === 0) {
             console.log(`⚠️ No worms to convert!`);
             return;
         }
-        
+
         // Spawn spider at random location
         const startX = Math.random() * window.innerWidth;
         const startY = Math.random() * window.innerHeight;
-        
+
         this.spawnSpider(startX, startY);
     }
-    
+
     spawnSpider(x, y) {
         const spider = document.createElement('div');
         spider.className = 'spider-entity';
@@ -1833,7 +1879,7 @@ class WormSystem {
             cursor: pointer;
             transition: all 0.3s ease;
         `;
-        
+
         const spiderData = {
             id: `spider-${Date.now()}`,
             element: spider,
@@ -1844,7 +1890,7 @@ class WormSystem {
             createdAt: Date.now(),
             isHeart: false
         };
-        
+
         // Click to turn into heart
         spider.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -1852,7 +1898,7 @@ class WormSystem {
                 spider.textContent = '❤️';
                 spiderData.isHeart = true;
                 console.log(`🕷️ Spider clicked - turned into ❤️!`);
-                
+
                 // After 1 minute, turn to skull
                 setTimeout(() => {
                     if (spider.parentNode) {
@@ -1866,37 +1912,37 @@ class WormSystem {
                 }, 60000);
             }
         });
-        
+
         this.crossPanelContainer.appendChild(spider);
-        
+
         // Move spider toward closest worm
         const moveSpider = () => {
             if (!spiderData.active || spiderData.isHeart) return;
-            
+
             const activeWorms = this.worms.filter(w => w.active);
             if (activeWorms.length === 0) {
                 console.log(`🕷️ No more worms to convert`);
                 return;
             }
-            
+
             // Find closest worm
             const closest = activeWorms.reduce((prev, curr) => {
                 const prevDist = Math.sqrt(Math.pow(prev.x - spiderData.x, 2) + Math.pow(prev.y - spiderData.y, 2));
                 const currDist = Math.sqrt(Math.pow(curr.x - spiderData.x, 2) + Math.pow(curr.y - spiderData.y, 2));
                 return currDist < prevDist ? curr : prev;
             });
-            
+
             // Move toward closest worm
             const dx = closest.x - spiderData.x;
             const dy = closest.y - spiderData.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            
+
             if (dist < 30) {
                 // Convert worm to spider!
                 console.log(`🕷️ Spider converted worm ${closest.id} to another spider!`);
                 this.removeWorm(closest);
                 this.spawnSpider(closest.x, closest.y);
-                
+
                 // Remove this spider
                 if (spider.parentNode) {
                     spider.parentNode.removeChild(spider);
@@ -1909,36 +1955,36 @@ class WormSystem {
                 spiderData.y += (dy / dist) * speed;
                 spider.style.left = `${spiderData.x}px`;
                 spider.style.top = `${spiderData.y}px`;
-                
+
                 requestAnimationFrame(moveSpider);
             }
         };
-        
+
         moveSpider();
     }
-    
+
     // Devil: Click location to spawn devil, worms rush to it and die after 5s proximity
     activateDevil() {
         console.log(`👹 DEVIL ACTIVATED! Click location to spawn devil...`);
-        
+
         // One-time click listener
         const handleDevilClick = (e) => {
             const x = e.clientX;
             const y = e.clientY;
-            
+
             console.log(`👹 Devil spawning at (${x}, ${y})`);
-            
+
             this.spawnDevil(x, y);
-            
+
             // Remove listener and reset cursor
             document.removeEventListener('click', handleDevilClick);
             document.body.style.cursor = '';
         };
-        
+
         document.addEventListener('click', handleDevilClick);
         document.body.style.cursor = 'crosshair';
     }
-    
+
     spawnDevil(x, y) {
         const devil = document.createElement('div');
         devil.textContent = '👹';
@@ -1951,22 +1997,22 @@ class WormSystem {
             pointer-events: none;
             text-shadow: 0 0 20px red;
         `;
-        
+
         this.crossPanelContainer.appendChild(devil);
-        
+
         // Track worms near devil
         const devilData = {
             x: x,
             y: y,
             wormProximity: new Map() // Track how long each worm has been near
         };
-        
+
         const checkProximity = () => {
             const activeWorms = this.worms.filter(w => w.active);
-            
+
             activeWorms.forEach(worm => {
                 const dist = Math.sqrt(Math.pow(worm.x - devilData.x, 2) + Math.pow(worm.y - devilData.y, 2));
-                
+
                 if (dist < 50) {
                     // Worm is near devil
                     if (!devilData.wormProximity.has(worm.id)) {
@@ -1976,7 +2022,7 @@ class WormSystem {
                         if (timeNear >= 5000) {
                             // Worm has been near for 5 seconds - kill it!
                             console.log(`👹 Worm ${worm.id} killed by devil (5s proximity)`);
-                            
+
                             // Create skull emoji
                             const skull = document.createElement('div');
                             skull.textContent = '💀';
@@ -1989,18 +2035,18 @@ class WormSystem {
                                 pointer-events: none;
                             `;
                             this.crossPanelContainer.appendChild(skull);
-                            
+
                             setTimeout(() => {
                                 if (skull.parentNode) {
                                     skull.parentNode.removeChild(skull);
                                 }
                             }, 10000);
-                            
+
                             this.explodeWorm(worm, false);
                             devilData.wormProximity.delete(worm.id);
                         }
                     }
-                    
+
                     // Make worm rush toward devil (override normal behavior)
                     worm.isRushingToDevil = true;
                     worm.devilX = devilData.x;
@@ -2013,7 +2059,7 @@ class WormSystem {
                     worm.isRushingToDevil = false;
                 }
             });
-            
+
             if (activeWorms.length > 0) {
                 requestAnimationFrame(checkProximity);
             } else {
@@ -2023,7 +2069,7 @@ class WormSystem {
                 }
             }
         };
-        
+
         checkProximity();
     }
 
@@ -2059,7 +2105,8 @@ class WormSystem {
         crack.style.top = `${y}px`;
 
         // Append to panel C (third display)
-        const panelC = document.getElementById('third-display');
+        // PERFORMANCE: Use cached element
+        const panelC = this.cachedPanelC || document.getElementById('third-display');
         if (panelC) {
             panelC.appendChild(crack);
             console.log(`💥 Crack created at (${x}, ${y})`);
@@ -2067,7 +2114,8 @@ class WormSystem {
     }
 
     cleanupCracks() {
-        const panelC = document.getElementById('third-display');
+        // PERFORMANCE: Use cached element
+        const panelC = this.cachedPanelC || document.getElementById('third-display');
         if (panelC) {
             const cracks = panelC.querySelectorAll('.worm-crack');
             cracks.forEach(crack => crack.remove());
@@ -2160,16 +2208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.wormSystem = new WormSystem();
     console.log('✅ Global wormSystem created');
 
-    // Clean up cracks when problem is completed
-    document.addEventListener('problemCompleted', () => {
-        if (window.wormSystem) {
-            console.log('🎯 Problem completed - killing all worms!');
-            window.wormSystem.killAllWorms();
-            // Clean up cracks after worms are killed
-            setTimeout(() => {
-                window.wormSystem.cleanupCracks();
-            }, 2000); // Wait 2 seconds for explosions to finish
-        }
-    });
-    console.log('✅ Worm extermination listener registered for problemCompleted event');
+    // CRITICAL: Initialize immediately to setup event listeners
+    window.wormSystem.initialize();
+    console.log('✅ WormSystem initialized - event listeners active');
 });
