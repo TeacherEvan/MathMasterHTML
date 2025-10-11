@@ -54,6 +54,18 @@ class WormSystem {
         this.cachedPanelC = null;
         this.cachedGameOverModal = null;
 
+        // CONSTANTS: Extract magic numbers for better maintainability
+        this.WORM_SEGMENT_COUNT = 5;
+        this.WORM_Z_INDEX = 10000;
+        this.ROAMING_DURATION_CONSOLE = 10000; // 10 seconds for console worms
+        this.ROAMING_DURATION_BORDER = 5000; // 5 seconds for border worms
+        this.SPEED_CONSOLE_WORM = 2.0;
+        this.SPEED_FALLBACK_WORM = 1.0;
+        this.SPEED_BORDER_WORM = 2.5;
+        this.SPEED_PURPLE_WORM = 1.0; // Half speed of normal worms
+        this.SPAWN_QUEUE_DELAY = 50; // ms between spawn queue processing
+        this.BORDER_MARGIN = 20; // px from viewport edge
+
         console.log('🐛 WormSystem initialized with new row-based spawning and power-up system');
     }
 
@@ -168,9 +180,9 @@ class WormSystem {
 
             this.isProcessingSpawnQueue = false;
 
-            // If more spawns queued, process next one after 50ms delay
+            // If more spawns queued, process next one after delay
             if (this.spawnQueue.length > 0) {
-                setTimeout(() => this.processSpawnQueue(), 50);
+                setTimeout(() => this.processSpawnQueue(), this.SPAWN_QUEUE_DELAY);
                 console.log(`⏱️ Processing next spawn in queue (${this.spawnQueue.length} remaining)...`);
             }
         });
@@ -178,14 +190,14 @@ class WormSystem {
 
     // Check if rain symbol clicked matches worm's stolen symbol - EXPLODE WORM or TURN GREEN
     checkWormTargetClickForExplosion(clickedSymbol) {
-        // Normalize X/x
-        const normalizedClicked = clickedSymbol.toLowerCase() === 'x' ? 'X' : clickedSymbol;
+        // REFACTORED: Use utility function for normalization
+        const normalizedClicked = normalizeSymbol(clickedSymbol);
 
         // Check if any worm is carrying this symbol
         this.worms.forEach(worm => {
             if (!worm.active || !worm.hasStolen) return;
 
-            const normalizedWormSymbol = worm.stolenSymbol.toLowerCase() === 'x' ? 'X' : worm.stolenSymbol;
+            const normalizedWormSymbol = normalizeSymbol(worm.stolenSymbol);
 
             if (normalizedWormSymbol === normalizedClicked) {
                 // PURPLE WORM: Turn green when matching symbol clicked (must click worm to destroy)
@@ -368,6 +380,56 @@ class WormSystem {
         return emptySlots[Math.floor(Math.random() * emptySlots.length)];
     }
 
+    /**
+     * FACTORY METHOD: Create worm element with consistent structure
+     * Eliminates ~200 lines of duplicate code across spawn methods
+     * @param {Object} config - Worm configuration
+     * @param {string} config.id - Unique worm ID
+     * @param {string[]} config.classNames - Additional CSS classes
+     * @param {number} config.segmentCount - Number of worm segments (default: 5)
+     * @param {number} config.x - Starting X position
+     * @param {number} config.y - Starting Y position
+     * @returns {HTMLElement} Configured worm element
+     */
+    createWormElement(config) {
+        const {
+            id,
+            classNames = [],
+            segmentCount = this.WORM_SEGMENT_COUNT,
+            x,
+            y
+        } = config;
+
+        // Create main worm container
+        const wormElement = document.createElement('div');
+        wormElement.className = ['worm-container', ...classNames].join(' ');
+        wormElement.id = id;
+
+        // Create worm body with segments
+        const wormBody = document.createElement('div');
+        wormBody.className = 'worm-body';
+
+        for (let i = 0; i < segmentCount; i++) {
+            const segment = document.createElement('div');
+            segment.className = 'worm-segment';
+            segment.style.setProperty('--segment-index', i);
+            wormBody.appendChild(segment);
+        }
+
+        wormElement.appendChild(wormBody);
+
+        // Apply consistent positioning and styling
+        wormElement.style.left = `${x}px`;
+        wormElement.style.top = `${y}px`;
+        wormElement.style.position = 'fixed';
+        wormElement.style.zIndex = String(this.WORM_Z_INDEX);
+        wormElement.style.opacity = '1';
+        wormElement.style.visibility = 'visible';
+        wormElement.style.pointerEvents = 'auto';
+
+        return wormElement;
+    }
+
     // Spawn worm from console slot with slide-open animation
     spawnWormFromConsole() {
         this.initialize();
@@ -397,41 +459,20 @@ class WormSystem {
 
         // Get slot position for worm spawn point (viewport coordinates)
         const slotRect = slotElement.getBoundingClientRect();
-
-        // Use viewport coordinates for cross-panel movement
         const startX = slotRect.left + (slotRect.width / 2);
         const startY = slotRect.top + (slotRect.height / 2);
 
-        // Create worm element
-        const wormId = `worm-${Date.now()}-${Math.random()}`;
-        const wormElement = document.createElement('div');
-        wormElement.className = 'worm-container console-worm';
-        wormElement.id = wormId;
+        // REFACTORED: Use factory method for worm creation
+        const wormId = generateUniqueId('worm');
+        const wormElement = this.createWormElement({
+            id: wormId,
+            classNames: ['console-worm'],
+            segmentCount: this.WORM_SEGMENT_COUNT,
+            x: startX,
+            y: startY
+        });
 
-        // Worm body with segments (quarter-coin size ~24px)
-        const wormBody = document.createElement('div');
-        wormBody.className = 'worm-body';
-
-        // 5 segments for quarter-sized worm
-        for (let i = 0; i < 5; i++) {
-            const segment = document.createElement('div');
-            segment.className = 'worm-segment';
-            segment.style.setProperty('--segment-index', i);
-            wormBody.appendChild(segment);
-        }
-
-        wormElement.appendChild(wormBody);
-
-        // Position worm at console slot using VIEWPORT coordinates
-        wormElement.style.left = `${startX}px`;
-        wormElement.style.top = `${startY}px`;
-        wormElement.style.position = 'fixed'; // Use fixed positioning for viewport
-        wormElement.style.zIndex = '10000'; // MAXIMUM z-index - in front of ALL layers
-        wormElement.style.opacity = '1';
-        wormElement.style.visibility = 'visible';
-        wormElement.style.pointerEvents = 'auto'; // Allow clicks on worms
-
-        this.crossPanelContainer.appendChild(wormElement); // Add to cross-panel container
+        this.crossPanelContainer.appendChild(wormElement);
 
         // Store worm data with console slot reference
         const wormData = {
@@ -442,25 +483,25 @@ class WormSystem {
             targetSymbol: null,
             x: startX,
             y: startY,
-            velocityX: (Math.random() - 0.5) * 2.0, // Crawling movement
+            velocityX: (Math.random() - 0.5) * this.SPEED_CONSOLE_WORM,
             velocityY: (Math.random() - 0.5) * 1.0,
             active: true,
             hasStolen: false,
             isRushingToTarget: false,
-            roamingEndTime: Date.now() + 10000, // Roam for 10 seconds
+            roamingEndTime: Date.now() + this.ROAMING_DURATION_CONSOLE,
             isFlickering: false,
-            baseSpeed: 2.0, // Updated base speed
-            currentSpeed: 2.0,
+            baseSpeed: this.SPEED_CONSOLE_WORM,
+            currentSpeed: this.SPEED_CONSOLE_WORM,
             consoleSlotIndex: slotIndex,
             consoleSlotElement: slotElement,
             fromConsole: true,
-            crawlPhase: 0, // For crawling animation
-            direction: Math.random() * Math.PI * 2 // Random initial direction
+            crawlPhase: 0,
+            direction: Math.random() * Math.PI * 2
         };
 
         this.worms.push(wormData);
 
-        // Add click handler with RISK/REWARD: 80% kill, 20% clone (makes 2 worms!)
+        // Add click handler
         wormElement.addEventListener('click', (e) => {
             e.stopPropagation();
             this.handleWormClick(wormData);
@@ -486,40 +527,23 @@ class WormSystem {
             return;
         }
 
-        // Create worm element
-        const wormId = `worm-${Date.now()}-${Math.random()}`;
-        const wormElement = document.createElement('div');
-        wormElement.className = 'worm-container';
-        wormElement.id = wormId;
-
-        // Worm body with segments
-        const wormBody = document.createElement('div');
-        wormBody.className = 'worm-body';
-
-        for (let i = 0; i < 5; i++) {
-            const segment = document.createElement('div');
-            segment.className = 'worm-segment';
-            segment.style.setProperty('--segment-index', i);
-            wormBody.appendChild(segment);
-        }
-
-        wormElement.appendChild(wormBody);
-
         // Random starting position at bottom - USE VIEWPORT COORDINATES
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
         const startX = Math.random() * Math.max(0, viewportWidth - 80);
         const startY = Math.max(0, viewportHeight - 30);
 
-        wormElement.style.left = `${startX}px`;
-        wormElement.style.top = `${startY}px`;
-        wormElement.style.position = 'fixed'; // Use fixed for viewport positioning
-        wormElement.style.zIndex = '10000'; // MAXIMUM z-index - in front of ALL layers
-        wormElement.style.opacity = '1';
-        wormElement.style.visibility = 'visible';
-        wormElement.style.pointerEvents = 'auto'; // Allow clicks
+        // REFACTORED: Use factory method for worm creation
+        const wormId = generateUniqueId('worm');
+        const wormElement = this.createWormElement({
+            id: wormId,
+            classNames: [],
+            segmentCount: this.WORM_SEGMENT_COUNT,
+            x: startX,
+            y: startY
+        });
 
-        this.crossPanelContainer.appendChild(wormElement); // Use cross-panel container
+        this.crossPanelContainer.appendChild(wormElement);
 
         // Store worm data (non-console worm)
         const wormData = {
@@ -529,20 +553,20 @@ class WormSystem {
             targetElement: null,
             x: startX,
             y: startY,
-            velocityX: (Math.random() - 0.5) * 1.0,
+            velocityX: (Math.random() - 0.5) * this.SPEED_FALLBACK_WORM,
             velocityY: (Math.random() - 0.5) * 0.5,
             active: true,
             hasStolen: false,
-            roamingEndTime: Date.now() + 10000,
+            roamingEndTime: Date.now() + this.ROAMING_DURATION_CONSOLE,
             isFlickering: false,
-            baseSpeed: 1.0,
-            currentSpeed: 1.0,
+            baseSpeed: this.SPEED_FALLBACK_WORM,
+            currentSpeed: this.SPEED_FALLBACK_WORM,
             fromConsole: false
         };
 
         this.worms.push(wormData);
 
-        // Add click handler with RISK/REWARD: 80% kill, 20% multiply!
+        // Add click handler
         wormElement.addEventListener('click', (e) => {
             e.stopPropagation();
             this.handleWormClick(wormData);
@@ -568,59 +592,40 @@ class WormSystem {
             return;
         }
 
-        // Create worm element
-        const wormId = `border-worm-${Date.now()}-${Math.random()}`;
-        const wormElement = document.createElement('div');
-        wormElement.className = 'worm-container';
-        wormElement.id = wormId;
-
-        // Worm body with segments
-        const wormBody = document.createElement('div');
-        wormBody.className = 'worm-body';
-
-        for (let i = 0; i < 5; i++) {
-            const segment = document.createElement('div');
-            segment.className = 'worm-segment';
-            segment.style.setProperty('--segment-index', i);
-            wormBody.appendChild(segment);
-        }
-
-        wormElement.appendChild(wormBody);
-
         // Determine spawn position (spread around bottom and side borders)
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
+        const margin = this.BORDER_MARGIN;
+        const position = index / total; // 0 to 1
 
         let startX, startY;
-        const margin = 20;
-
-        // Distribute worms around borders
-        const position = index / total; // 0 to 1
 
         if (position < 0.5) {
             // Bottom border (0-50%)
-            const xPosition = position * 2; // 0 to 1
+            const xPosition = position * 2;
             startX = margin + xPosition * (viewportWidth - 2 * margin);
             startY = viewportHeight - margin;
         } else if (position < 0.75) {
             // Left border (50-75%)
-            const yPosition = (position - 0.5) * 4; // 0 to 1
+            const yPosition = (position - 0.5) * 4;
             startX = margin;
             startY = margin + yPosition * (viewportHeight - 2 * margin);
         } else {
             // Right border (75-100%)
-            const yPosition = (position - 0.75) * 4; // 0 to 1
+            const yPosition = (position - 0.75) * 4;
             startX = viewportWidth - margin;
             startY = margin + yPosition * (viewportHeight - 2 * margin);
         }
 
-        wormElement.style.left = `${startX}px`;
-        wormElement.style.top = `${startY}px`;
-        wormElement.style.position = 'fixed'; // Use fixed for viewport positioning
-        wormElement.style.zIndex = '10000';
-        wormElement.style.opacity = '1';
-        wormElement.style.visibility = 'visible';
-        wormElement.style.pointerEvents = 'auto'; // Allow clicks
+        // REFACTORED: Use factory method for worm creation
+        const wormId = generateUniqueId('border-worm');
+        const wormElement = this.createWormElement({
+            id: wormId,
+            classNames: [],
+            segmentCount: this.WORM_SEGMENT_COUNT,
+            x: startX,
+            y: startY
+        });
 
         this.crossPanelContainer.appendChild(wormElement);
 
@@ -633,17 +638,17 @@ class WormSystem {
             targetSymbol: null,
             x: startX,
             y: startY,
-            velocityX: (Math.random() - 0.5) * 2.0,
+            velocityX: (Math.random() - 0.5) * this.SPEED_BORDER_WORM,
             velocityY: (Math.random() - 0.5) * 1.0,
             active: true,
             hasStolen: false,
             isRushingToTarget: false,
-            roamingEndTime: Date.now() + 5000, // Shorter roam time - rush to steal
+            roamingEndTime: Date.now() + this.ROAMING_DURATION_BORDER,
             isFlickering: false,
-            baseSpeed: 2.5, // Faster than normal worms
-            currentSpeed: 2.5,
+            baseSpeed: this.SPEED_BORDER_WORM,
+            currentSpeed: this.SPEED_BORDER_WORM,
             fromConsole: false,
-            shouldExitToConsole: true, // Can escape through console
+            shouldExitToConsole: true,
             exitingToConsole: false,
             targetConsoleSlot: null,
             crawlPhase: Math.random() * Math.PI * 2,
@@ -677,25 +682,6 @@ class WormSystem {
             return;
         }
 
-        // Create purple worm element
-        const wormId = `purple-worm-${Date.now()}-${Math.random()}`;
-        const wormElement = document.createElement('div');
-        wormElement.className = 'worm-container purple-worm';
-        wormElement.id = wormId;
-
-        // Worm body with segments
-        const wormBody = document.createElement('div');
-        wormBody.className = 'worm-body';
-
-        for (let i = 0; i < 5; i++) {
-            const segment = document.createElement('div');
-            segment.className = 'worm-segment';
-            segment.style.setProperty('--segment-index', i);
-            wormBody.appendChild(segment);
-        }
-
-        wormElement.appendChild(wormBody);
-
         // Spawn from help button position - USE VIEWPORT COORDINATES
         // PERFORMANCE: Use cached element instead of getElementById
         const helpButton = this.cachedHelpButton || document.getElementById('help-button');
@@ -714,15 +700,17 @@ class WormSystem {
             console.log(`⚠️ Help button not found, using fallback position`);
         }
 
-        wormElement.style.left = `${startX}px`;
-        wormElement.style.top = `${startY}px`;
-        wormElement.style.position = 'fixed'; // Use fixed for viewport positioning
-        wormElement.style.zIndex = '10000';
-        wormElement.style.opacity = '1';
-        wormElement.style.visibility = 'visible';
-        wormElement.style.pointerEvents = 'auto'; // Allow clicks
+        // REFACTORED: Use factory method for worm creation
+        const wormId = generateUniqueId('purple-worm');
+        const wormElement = this.createWormElement({
+            id: wormId,
+            classNames: ['purple-worm'],
+            segmentCount: this.WORM_SEGMENT_COUNT,
+            x: startX,
+            y: startY
+        });
 
-        this.crossPanelContainer.appendChild(wormElement); // Use cross-panel container
+        this.crossPanelContainer.appendChild(wormElement);
 
         // Store purple worm data
         const wormData = {
@@ -733,24 +721,24 @@ class WormSystem {
             targetSymbol: null,
             x: startX,
             y: startY,
-            velocityX: (Math.random() - 0.5) * 1.0, // HALF SPEED (was 2.0)
-            velocityY: Math.random() * 0.75 + 0.5, // HALF SPEED downward movement
+            velocityX: (Math.random() - 0.5) * this.SPEED_PURPLE_WORM,
+            velocityY: Math.random() * 0.75 + 0.5,
             active: true,
             hasStolen: false,
-            isRushingToTarget: true, // IMMEDIATELY goes for visible symbols (no roaming)
-            roamingEndTime: Date.now(), // No roaming period
+            isRushingToTarget: true,
+            roamingEndTime: Date.now(),
             isFlickering: false,
-            baseSpeed: 1.0, // HALF SPEED of green worms (green is 2.0)
-            currentSpeed: 1.0,
-            isPurple: true, // FLAG: This is a purple worm!
+            baseSpeed: this.SPEED_PURPLE_WORM,
+            currentSpeed: this.SPEED_PURPLE_WORM,
+            isPurple: true,
             fromConsole: false,
-            shouldExitToConsole: true, // Purple worms exit through console
+            shouldExitToConsole: true,
             exitingToConsole: false,
             targetConsoleSlot: null,
             crawlPhase: 0,
             direction: Math.random() * Math.PI * 2,
-            canStealBlue: true, // Purple worms can steal blue symbols
-            prioritizeRed: true // Prioritize red symbols over blue
+            canStealBlue: true,
+            prioritizeRed: true
         };
 
         this.worms.push(wormData);
