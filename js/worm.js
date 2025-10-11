@@ -1006,9 +1006,9 @@ class WormSystem {
 
             // DEVIL POWER-UP: Override all behavior if rushing to devil
             if (worm.isRushingToDevil && worm.devilX !== undefined && worm.devilY !== undefined) {
+                const distance = calculateDistance(worm.x, worm.y, worm.devilX, worm.devilY);
                 const dx = worm.devilX - worm.x;
                 const dy = worm.devilY - worm.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (distance > 5) {
                     // Rush toward devil at double speed
@@ -1056,9 +1056,9 @@ class WormSystem {
                     const targetX = targetRect.left - containerRect.left + (targetRect.width / 2);
                     const targetY = targetRect.top - containerRect.top + (targetRect.height / 2);
 
+                    const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
                     const dx = targetX - worm.x;
                     const dy = targetY - worm.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
 
                     if (distance < 30) {
                         // Reached target - steal it!
@@ -1124,9 +1124,9 @@ class WormSystem {
                 const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
                 const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
 
+                const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
                 const dx = targetX - worm.x;
                 const dy = targetY - worm.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (distance < 20) {
                     // Reached console hole - escape with symbol!
@@ -1171,9 +1171,9 @@ class WormSystem {
                         const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
                         const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
 
+                        const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
                         const dx = targetX - worm.x;
                         const dy = targetY - worm.y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
 
                         if (distance < 20) {
                             // Reached console exit - purple worm escapes!
@@ -1488,9 +1488,7 @@ class WormSystem {
         const AOE_RADIUS = 18; // One vertical worm height
         const nearbyWorms = this.worms.filter(w => {
             if (w.id === worm.id || !w.active) return false;
-            const dx = w.x - worm.x;
-            const dy = w.y - worm.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
+            const distance = calculateDistance(worm.x, worm.y, w.x, w.y);
             return distance <= AOE_RADIUS;
         });
 
@@ -1921,9 +1919,9 @@ class WormSystem {
             });
 
             // Move toward closest worm
+            const dist = calculateDistance(spiderData.x, spiderData.y, closest.x, closest.y);
             const dx = closest.x - spiderData.x;
             const dy = closest.y - spiderData.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist < 30) {
                 // Convert worm to spider!
