@@ -134,7 +134,8 @@ function initSymbolRain() {
         const symbol = getSymbolFromPool(); // Use pooled element
         symbol.className = 'falling-symbol';
         symbol.textContent = forcedSymbol || symbols[Math.floor(Math.random() * symbols.length)];
-        symbol.style.left = (column * columnWidth + Math.random() * 30) + 'px';
+        // FIX: Increased horizontal offset from 30px to 40px to reduce pile-up
+        symbol.style.left = (column * columnWidth + Math.random() * 40) + 'px';
 
         if (isInitialPopulation) {
             symbol.style.top = `${Math.random() * symbolRainContainer.offsetHeight}px`;
@@ -286,9 +287,14 @@ function initSymbolRain() {
                 continue; // Skip this symbol, don't copy to writeIndex
             }
 
-            // Update position only if not colliding
+            // Update position - symbols move slower when near others instead of stopping completely
             if (!checkCollision(symbolObj)) {
+                // No collision - move at full speed
                 symbolObj.y += symbolFallSpeed;
+                symbolObj.element.style.top = `${symbolObj.y}px`;
+            } else {
+                // Collision detected - move at reduced speed to prevent pile-up
+                symbolObj.y += symbolFallSpeed * 0.3; // Move at 30% speed when crowded
                 symbolObj.element.style.top = `${symbolObj.y}px`;
             }
 

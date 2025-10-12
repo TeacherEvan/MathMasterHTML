@@ -144,6 +144,33 @@ Problems are stored in Markdown files (`Assets/{Level}_Lvl/*.md`) and parsed on 
 - **Max Worms**: 999 (effectively unlimited, `maxWorms = 999`)
 - **Spawn Queue**: Uses batching system to prevent frame drops during mass spawning
 
+**Purple Worm Mechanics (Advanced Enemy):**
+
+Purple worms are boss-level enemies with special behaviors that require strategic gameplay.
+
+- **Spawn Trigger**: 4+ wrong answers triggers purple worm spawn (`purpleWormTriggered` event)
+
+- **Symbol Stealing Priority**:
+  - **First**: Steal red (hidden) symbols only
+  - **Fallback**: If NO red symbols available, can steal blue (revealed) symbols
+  - This makes purple worms more dangerous as problems near completion
+
+- **Click Punishment Mechanic**:
+  - Clicking purple worm directly → Spawns GREEN clone worm (not purple)
+  - Green clone can be killed normally (click or rain symbol)
+  - Purple worm itself remains active
+  - **Intended behavior**: Punishes players for using wrong strategy
+
+- **Correct Kill Method**:
+  - Purple worms can ONLY be killed by clicking the matching symbol in Panel C rain
+  - Example: Purple worm carrying "X" → Click "X" in falling symbols → Purple worm explodes
+  - Forces players to engage with Panel C symbol rain system
+
+- **Difficulty Escalation**:
+  - Purple worms are intentionally harder to deal with
+  - Creates strategic depth (learn correct kill method vs brute force clicking)
+  - Skill progression mechanic (beginners struggle, experienced players know the strategy)
+
 **Power-Up System:**
 - **Chain Lightning** (⚡): Kills 5 worms initially, +2 per subsequent use
 - **Spider** (🕷️): Passive power-up (implementation TBD)
@@ -154,7 +181,8 @@ Problems are stored in Markdown files (`Assets/{Level}_Lvl/*.md`) and parsed on 
 **Cloning Curse (DEPRECATED):**
 - **Status**: Curse mechanic removed - worms now explode on direct click
 - **Code**: `cloningCurseActive` flag still exists but no longer functional
-- **Kill Methods**: Both direct clicks and rain symbol clicks destroy worms
+- **Kill Methods**: Both direct clicks and rain symbol clicks destroy GREEN worms
+- **Purple Worms Exception**: Purple worms use different mechanic (see above)
 
 **Key Mechanics:**
 - **No Worm Limit**: Effectively unlimited worms (`maxWorms = 999`)

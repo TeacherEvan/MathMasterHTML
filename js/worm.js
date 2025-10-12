@@ -17,8 +17,43 @@ class WormSystem {
 
         // ROW COMPLETION TRACKING
         this.rowsCompleted = 0; // Track number of rows completed in current problem
-        this.wormsPerRow = 5; // Base worms spawned on first row
-        this.additionalWormsPerRow = 0; // Additional worms per subsequent row (5 worms per row total)
+
+        // DIFFICULTY SCALING: Get current level from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentLevel = urlParams.get('level') || 'beginner';
+
+        // DIFFICULTY SETTINGS PER LEVEL
+        const difficultySettings = {
+            beginner: {
+                wormsPerRow: 3,
+                speed: 1.0,
+                roamTimeConsole: 8000,
+                roamTimeBorder: 5000
+            },
+            warrior: {
+                wormsPerRow: 5,
+                speed: 1.5,
+                roamTimeConsole: 6000,
+                roamTimeBorder: 4000
+            },
+            master: {
+                wormsPerRow: 8,
+                speed: 2.0,
+                roamTimeConsole: 4000,
+                roamTimeBorder: 3000
+            }
+        };
+
+        // Apply difficulty settings
+        const settings = difficultySettings[currentLevel] || difficultySettings.beginner;
+        this.wormsPerRow = settings.wormsPerRow;
+        this.difficultySpeedMultiplier = settings.speed;
+        this.difficultyRoamTimeConsole = settings.roamTimeConsole;
+        this.difficultyRoamTimeBorder = settings.roamTimeBorder;
+
+        this.additionalWormsPerRow = 0; // No additional escalation (already scaled by difficulty)
+
+        console.log(`🎮 Difficulty: ${currentLevel.toUpperCase()} - ${this.wormsPerRow} worms/row, ${this.difficultySpeedMultiplier}x speed, ${this.difficultyRoamTimeBorder}ms roam`);
 
         // CLONING CURSE MECHANIC
         this.cloningCurseActive = false; // Activated when purple worm turns green
@@ -57,12 +92,14 @@ class WormSystem {
         // CONSTANTS: Extract magic numbers for better maintainability
         this.WORM_SEGMENT_COUNT = 5;
         this.WORM_Z_INDEX = 10000;
-        this.ROAMING_DURATION_CONSOLE = 10000; // 10 seconds for console worms
-        this.ROAMING_DURATION_BORDER = 5000; // 5 seconds for border worms
-        this.SPEED_CONSOLE_WORM = 2.0;
-        this.SPEED_FALLBACK_WORM = 1.0;
-        this.SPEED_BORDER_WORM = 2.5;
-        this.SPEED_PURPLE_WORM = 1.0; // Half speed of normal worms
+        // FIX 1: Reduced roaming times for faster worm effectiveness (was 10000/5000)
+        this.ROAMING_DURATION_CONSOLE = 3000; // 3 seconds for console worms (was 10s)
+        this.ROAMING_DURATION_BORDER = 5000; // 5 seconds for border worms (unchanged)
+        // FIX 2: Base speeds (multiplied by difficulty scaling)
+        this.SPEED_CONSOLE_WORM = 2.0 * this.difficultySpeedMultiplier;
+        this.SPEED_FALLBACK_WORM = 1.0 * this.difficultySpeedMultiplier;
+        this.SPEED_BORDER_WORM = 2.5 * this.difficultySpeedMultiplier;
+        this.SPEED_PURPLE_WORM = 1.0; // Purple worm speed not scaled by difficulty
         this.SPAWN_QUEUE_DELAY = 50; // ms between spawn queue processing
         this.BORDER_MARGIN = 20; // px from viewport edge
 
@@ -492,7 +529,7 @@ class WormSystem {
             active: true,
             hasStolen: false,
             isRushingToTarget: false,
-            roamingEndTime: Date.now() + this.ROAMING_DURATION_CONSOLE,
+            roamingEndTime: Date.now() + this.difficultyRoamTimeConsole, // Use difficulty-scaled roam time
             isFlickering: false,
             baseSpeed: this.SPEED_CONSOLE_WORM,
             currentSpeed: this.SPEED_CONSOLE_WORM,
@@ -571,7 +608,7 @@ class WormSystem {
             velocityY: (Math.random() - 0.5) * 0.5,
             active: true,
             hasStolen: false,
-            roamingEndTime: Date.now() + this.ROAMING_DURATION_CONSOLE,
+            roamingEndTime: Date.now() + this.difficultyRoamTimeConsole, // Use difficulty-scaled roam time
             isFlickering: false,
             baseSpeed: this.SPEED_FALLBACK_WORM,
             currentSpeed: this.SPEED_FALLBACK_WORM,
@@ -663,7 +700,7 @@ class WormSystem {
             active: true,
             hasStolen: false,
             isRushingToTarget: false,
-            roamingEndTime: Date.now() + this.ROAMING_DURATION_BORDER,
+            roamingEndTime: Date.now() + this.difficultyRoamTimeBorder, // Use difficulty-scaled roam time
             isFlickering: false,
             baseSpeed: this.SPEED_BORDER_WORM,
             currentSpeed: this.SPEED_BORDER_WORM,
