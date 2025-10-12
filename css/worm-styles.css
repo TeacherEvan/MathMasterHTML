@@ -284,25 +284,6 @@
     }
 }
 
-/* Curse reset flash animation */
-@keyframes curse-reset-flash {
-    0% {
-        opacity: 0;
-    }
-
-    10% {
-        opacity: 0.6;
-    }
-
-    50% {
-        opacity: 0.3;
-    }
-
-    100% {
-        opacity: 0;
-    }
-}
-
 /* === EXPLOSION EFFECTS === */
 .worm-damaged {
     filter: hue-rotate(120deg) brightness(1.2) !important;

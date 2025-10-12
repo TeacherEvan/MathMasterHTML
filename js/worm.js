@@ -55,11 +55,6 @@ class WormSystem {
 
         console.log(`🎮 Difficulty: ${currentLevel.toUpperCase()} - ${this.wormsPerRow} worms/row, ${this.difficultySpeedMultiplier}x speed, ${this.difficultyRoamTimeBorder}ms roam`);
 
-        // CLONING CURSE MECHANIC
-        this.cloningCurseActive = false; // Activated when purple worm turns green
-        this.wormsKilledByRain = 0; // Count of worms killed via rain symbols (not direct clicks)
-        this.stolenBlueSymbols = []; // Track stolen blue symbols for replacement priority
-
         // POWER-UP SYSTEM
         this.powerUps = {
             chainLightning: 0, // Number of chain lightning power-ups collected
@@ -132,10 +127,6 @@ class WormSystem {
         document.addEventListener('problemCompleted', (event) => {
             console.log('🎉 Problem completed! Resetting row counter and cleaning up.');
             this.rowsCompleted = 0;
-
-            // Clear stolenBlueSymbols array to prevent memory leak
-            this.stolenBlueSymbols = [];
-            console.log('🧹 Cleared stolenBlueSymbols array');
 
             // Kill all worms and clean up cracks
             console.log('🎯 Problem completed - killing all worms!');
@@ -273,10 +264,6 @@ class WormSystem {
                 // GREEN WORM: Explode immediately
                 console.log(`💥 BOOM! User clicked rain symbol "${clickedSymbol}" - EXPLODING worm with stolen symbol!`);
 
-                // Track this as a rain kill (not direct click)
-                this.wormsKilledByRain++;
-                console.log(`📊 Worms killed by rain: ${this.wormsKilledByRain}`);
-
                 this.explodeWorm(worm, true); // Pass true to indicate this is a rain kill
             }
         });
@@ -295,47 +282,6 @@ class WormSystem {
             worm.targetSymbol = symbolValue;
             worm.roamingEndTime = Date.now(); // Stop roaming timer
         });
-    }
-
-    // Check if cloning curse should be reset (all worms eliminated via rain)
-    checkCurseReset() {
-        if (!this.cloningCurseActive) return;
-
-        const activeWorms = this.worms.filter(w => w.active);
-
-        if (activeWorms.length === 0) {
-            console.log('🔓 CURSE RESET! All worms eliminated via rain symbols!');
-            this.cloningCurseActive = false;
-            this.wormsKilledByRain = 0;
-            this.stolenBlueSymbols = []; // Clear stolen blue symbols tracking
-
-            // Visual feedback for curse reset
-            this.createCurseResetEffect();
-        } else {
-            console.log(`🔒 Curse still active. ${activeWorms.length} worm(s) remaining.`);
-        }
-    }
-
-    // Visual effect when curse is reset
-    createCurseResetEffect() {
-        const flash = document.createElement('div');
-        flash.style.position = 'fixed';
-        flash.style.top = '0';
-        flash.style.left = '0';
-        flash.style.width = '100vw';
-        flash.style.height = '100vh';
-        flash.style.background = 'radial-gradient(circle, rgba(0,255,255,0.3), transparent)';
-        flash.style.pointerEvents = 'none';
-        flash.style.zIndex = '999999';
-        flash.style.animation = 'curse-reset-flash 1s ease-out';
-
-        document.body.appendChild(flash);
-
-        setTimeout(() => {
-            if (flash.parentNode) {
-                flash.parentNode.removeChild(flash);
-            }
-        }, 1000);
     }
 
     initialize() {
@@ -885,10 +831,6 @@ class WormSystem {
                 availableSymbols = blueSymbols;
                 console.log(`🟣 PURPLE WORM - NO red symbols! Stealing blue symbols (${blueSymbols.length} available)`);
             }
-        } else if (this.cloningCurseActive) {
-            // Curse active - can steal ANY symbol (red or blue)
-            availableSymbols = allAvailableSymbols;
-            console.log(`🔮 CURSE ACTIVE - Worm can steal ANY symbol! ${availableSymbols.length} symbols available`);
         } else {
             // Normal worm - only steal red (hidden) symbols
             availableSymbols = allAvailableSymbols.filter(el =>
@@ -924,19 +866,6 @@ class WormSystem {
         const wasBlueSymbol = targetSymbol.classList.contains('revealed-symbol');
 
         console.log(`🐛 Worm ${worm.id} stealing ${wasBlueSymbol ? 'BLUE' : 'RED'} symbol: "${symbolValue}"`);
-
-        // Track if this was a blue symbol for replacement priority
-        if (wasBlueSymbol && this.cloningCurseActive) {
-            this.stolenBlueSymbols.push({
-                symbol: symbolValue,
-                element: targetSymbol,
-                wormId: worm.id
-            });
-            console.log(`📋 Tracking stolen BLUE symbol "${symbolValue}" for priority replacement`);
-
-            // Mark the element so game.js knows it was blue before being stolen
-            targetSymbol.dataset.wasRevealed = 'true';
-        }
 
         // Mark symbol as stolen and hide it
         targetSymbol.dataset.stolen = 'true';
@@ -1586,12 +1515,6 @@ class WormSystem {
             worm.targetElement.style.visibility = 'visible';
             delete worm.targetElement.dataset.stolen;
 
-            // Remove from stolen blue symbols tracking if it was a blue symbol
-            if (worm.wasBlueSymbol) {
-                this.stolenBlueSymbols = this.stolenBlueSymbols.filter(s => s.wormId !== worm.id);
-                console.log(`📋 Removed from stolen blue symbols tracking. Remaining: ${this.stolenBlueSymbols.length}`);
-            }
-
             console.log(`✅ Symbol "${worm.stolenSymbol}" returned to Panel B`);
         }
 
@@ -1601,12 +1524,8 @@ class WormSystem {
         // Create explosion particles
         this.createExplosionParticles(worm.x, worm.y);
 
-        // Flash the screen (different color for rain kills during curse)
-        if (isRainKill && this.cloningCurseActive) {
-            this.createExplosionFlash('#00ffff'); // Cyan flash for curse rain kills
-        } else {
-            this.createExplosionFlash();
-        }
+        // Flash the screen
+        this.createExplosionFlash();
 
         // Create persistent crack at worm's location
         this.createCrack(worm.x, worm.y);
