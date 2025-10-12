@@ -397,7 +397,8 @@
 .slime-splat::before {
     content: '🫟';
     display: block;
-    filter: hue-rotate(320deg) saturate(2); /* Make it red */
+    filter: hue-rotate(320deg) saturate(2);
+    /* Make it red */
 }
 
 @keyframes splat-appear {
@@ -507,10 +508,12 @@
         opacity: 0;
         transform: scale(0) rotate(0deg);
     }
+
     50% {
         opacity: 1;
         transform: scale(1.3) rotate(180deg);
     }
+
     100% {
         opacity: 1;
         transform: scale(1) rotate(360deg);
@@ -522,6 +525,7 @@
         opacity: 1;
         transform: scale(1);
     }
+
     100% {
         opacity: 0;
         transform: scale(2) translateY(-50px);
@@ -532,6 +536,7 @@
     0% {
         opacity: 1;
     }
+
     100% {
         opacity: 0;
     }
@@ -586,6 +591,19 @@
 .console-slot.locked {
     opacity: 0.5;
     pointer-events: none;
+}
+
+/* === POWER-UP ANIMATIONS === */
+@keyframes lightning-fade {
+    0% {
+        opacity: 1;
+        box-shadow: 0 0 10px cyan, 0 0 20px cyan;
+    }
+
+    100% {
+        opacity: 0;
+        box-shadow: 0 0 5px cyan;
+    }
 }
 
 /* === RESPONSIVE MOBILE STYLES === */
