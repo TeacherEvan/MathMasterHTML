@@ -55,11 +55,6 @@ class WormSystem {
 
         console.log(`🎮 Difficulty: ${currentLevel.toUpperCase()} - ${this.wormsPerRow} worms/row, ${this.difficultySpeedMultiplier}x speed, ${this.difficultyRoamTimeBorder}ms roam`);
 
-        // CLONING CURSE MECHANIC
-        this.cloningCurseActive = false; // Activated when purple worm turns green
-        this.wormsKilledByRain = 0; // Count of worms killed via rain symbols (not direct clicks)
-        this.stolenBlueSymbols = []; // Track stolen blue symbols for replacement priority
-
         // POWER-UP SYSTEM
         this.powerUps = {
             chainLightning: 0, // Number of chain lightning power-ups collected
@@ -103,6 +98,23 @@ class WormSystem {
         this.SPAWN_QUEUE_DELAY = 50; // ms between spawn queue processing
         this.BORDER_MARGIN = 20; // px from viewport edge
 
+        // POWER-UP CONSTANTS
+        this.POWER_UP_DROP_RATE = 0.10; // 10% chance to drop power-up
+        this.POWER_UP_TYPES = ['chainLightning', 'spider', 'devil'];
+
+        // ANIMATION TIMING CONSTANTS
+        this.EXPLOSION_CLEANUP_DELAY = 600; // ms - worm removal delay after explosion
+        this.WORM_REMOVAL_DELAY = 500; // ms - delay before removing worm from DOM
+        this.PROBLEM_COMPLETION_CLEANUP_DELAY = 2000; // ms - wait for explosions to finish
+        this.SLIME_SPLAT_DURATION = 10000; // ms - 10 seconds
+        this.SPIDER_HEART_DURATION = 60000; // ms - 1 minute
+        this.SKULL_DISPLAY_DURATION = 10000; // ms - 10 seconds
+
+        // WORM BEHAVIOR CONSTANTS
+        this.CLONE_WORM_ROAM_DURATION = 10000; // ms - cloned worm roaming time
+        this.DEVIL_PROXIMITY_DISTANCE = 50; // px
+        this.DEVIL_KILL_TIME = 5000; // ms - 5 seconds
+
         console.log('🐛 WormSystem initialized with new row-based spawning and power-up system');
     }
 
@@ -133,10 +145,6 @@ class WormSystem {
             console.log('🎉 Problem completed! Resetting row counter and cleaning up.');
             this.rowsCompleted = 0;
 
-            // Clear stolenBlueSymbols array to prevent memory leak
-            this.stolenBlueSymbols = [];
-            console.log('🧹 Cleared stolenBlueSymbols array');
-
             // Kill all worms and clean up cracks
             console.log('🎯 Problem completed - killing all worms!');
             this.killAllWorms();
@@ -144,7 +152,7 @@ class WormSystem {
             // Clean up cracks after worms are killed
             setTimeout(() => {
                 this.cleanupCracks();
-            }, 2000); // Wait 2 seconds for explosions to finish
+            }, this.PROBLEM_COMPLETION_CLEANUP_DELAY); // Wait for explosions to finish
         });        // PURPLE WORM: Listen for purple worm trigger (3 wrong answers)
         document.addEventListener('purpleWormTriggered', (event) => {
             console.log('🟣 Purple Worm System received purpleWormTriggered event:', event.detail);
@@ -273,10 +281,6 @@ class WormSystem {
                 // GREEN WORM: Explode immediately
                 console.log(`💥 BOOM! User clicked rain symbol "${clickedSymbol}" - EXPLODING worm with stolen symbol!`);
 
-                // Track this as a rain kill (not direct click)
-                this.wormsKilledByRain++;
-                console.log(`📊 Worms killed by rain: ${this.wormsKilledByRain}`);
-
                 this.explodeWorm(worm, true); // Pass true to indicate this is a rain kill
             }
         });
@@ -295,47 +299,6 @@ class WormSystem {
             worm.targetSymbol = symbolValue;
             worm.roamingEndTime = Date.now(); // Stop roaming timer
         });
-    }
-
-    // Check if cloning curse should be reset (all worms eliminated via rain)
-    checkCurseReset() {
-        if (!this.cloningCurseActive) return;
-
-        const activeWorms = this.worms.filter(w => w.active);
-
-        if (activeWorms.length === 0) {
-            console.log('🔓 CURSE RESET! All worms eliminated via rain symbols!');
-            this.cloningCurseActive = false;
-            this.wormsKilledByRain = 0;
-            this.stolenBlueSymbols = []; // Clear stolen blue symbols tracking
-
-            // Visual feedback for curse reset
-            this.createCurseResetEffect();
-        } else {
-            console.log(`🔒 Curse still active. ${activeWorms.length} worm(s) remaining.`);
-        }
-    }
-
-    // Visual effect when curse is reset
-    createCurseResetEffect() {
-        const flash = document.createElement('div');
-        flash.style.position = 'fixed';
-        flash.style.top = '0';
-        flash.style.left = '0';
-        flash.style.width = '100vw';
-        flash.style.height = '100vh';
-        flash.style.background = 'radial-gradient(circle, rgba(0,255,255,0.3), transparent)';
-        flash.style.pointerEvents = 'none';
-        flash.style.zIndex = '999999';
-        flash.style.animation = 'curse-reset-flash 1s ease-out';
-
-        document.body.appendChild(flash);
-
-        setTimeout(() => {
-            if (flash.parentNode) {
-                flash.parentNode.removeChild(flash);
-            }
-        }, 1000);
     }
 
     initialize() {
@@ -512,8 +475,8 @@ class WormSystem {
         this.crossPanelContainer.appendChild(wormElement);
 
         // POWER-UP: 10% chance to carry a power-up
-        const hasPowerUp = Math.random() < 0.10;
-        const powerUpType = hasPowerUp ? ['chainLightning', 'spider', 'devil'][Math.floor(Math.random() * 3)] : null;
+        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
+        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
 
         // Store worm data with console slot reference
         const wormData = {
@@ -593,8 +556,8 @@ class WormSystem {
         this.crossPanelContainer.appendChild(wormElement);
 
         // POWER-UP: 10% chance to carry a power-up
-        const hasPowerUp = Math.random() < 0.10;
-        const powerUpType = hasPowerUp ? ['chainLightning', 'spider', 'devil'][Math.floor(Math.random() * 3)] : null;
+        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
+        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
 
         // Store worm data (non-console worm)
         const wormData = {
@@ -713,8 +676,8 @@ class WormSystem {
         };
 
         // POWER-UP: 10% chance to carry a power-up
-        const hasPowerUp = Math.random() < 0.10;
-        const powerUpType = hasPowerUp ? ['chainLightning', 'spider', 'devil'][Math.floor(Math.random() * 3)] : null;
+        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
+        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
         wormData.hasPowerUp = hasPowerUp;
         wormData.powerUpType = powerUpType;
 
@@ -809,8 +772,8 @@ class WormSystem {
         };
 
         // POWER-UP: 10% chance to carry a power-up (even purple worms)
-        const hasPowerUp = Math.random() < 0.10;
-        const powerUpType = hasPowerUp ? ['chainLightning', 'spider', 'devil'][Math.floor(Math.random() * 3)] : null;
+        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
+        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
         wormData.hasPowerUp = hasPowerUp;
         wormData.powerUpType = powerUpType;
 
@@ -885,10 +848,6 @@ class WormSystem {
                 availableSymbols = blueSymbols;
                 console.log(`🟣 PURPLE WORM - NO red symbols! Stealing blue symbols (${blueSymbols.length} available)`);
             }
-        } else if (this.cloningCurseActive) {
-            // Curse active - can steal ANY symbol (red or blue)
-            availableSymbols = allAvailableSymbols;
-            console.log(`🔮 CURSE ACTIVE - Worm can steal ANY symbol! ${availableSymbols.length} symbols available`);
         } else {
             // Normal worm - only steal red (hidden) symbols
             availableSymbols = allAvailableSymbols.filter(el =>
@@ -924,19 +883,6 @@ class WormSystem {
         const wasBlueSymbol = targetSymbol.classList.contains('revealed-symbol');
 
         console.log(`🐛 Worm ${worm.id} stealing ${wasBlueSymbol ? 'BLUE' : 'RED'} symbol: "${symbolValue}"`);
-
-        // Track if this was a blue symbol for replacement priority
-        if (wasBlueSymbol && this.cloningCurseActive) {
-            this.stolenBlueSymbols.push({
-                symbol: symbolValue,
-                element: targetSymbol,
-                wormId: worm.id
-            });
-            console.log(`📋 Tracking stolen BLUE symbol "${symbolValue}" for priority replacement`);
-
-            // Mark the element so game.js knows it was blue before being stolen
-            targetSymbol.dataset.wasRevealed = 'true';
-        }
 
         // Mark symbol as stolen and hide it
         targetSymbol.dataset.stolen = 'true';
@@ -1424,7 +1370,7 @@ class WormSystem {
             active: true,
             hasStolen: false,
             isRushingToTarget: parentWorm.isRushingToTarget, // Inherit rushing state
-            roamingEndTime: Date.now() + 10000,
+            roamingEndTime: Date.now() + this.CLONE_WORM_ROAM_DURATION,
             isFlickering: false,
             baseSpeed: 2.0,
             currentSpeed: 2.0,
@@ -1586,12 +1532,6 @@ class WormSystem {
             worm.targetElement.style.visibility = 'visible';
             delete worm.targetElement.dataset.stolen;
 
-            // Remove from stolen blue symbols tracking if it was a blue symbol
-            if (worm.wasBlueSymbol) {
-                this.stolenBlueSymbols = this.stolenBlueSymbols.filter(s => s.wormId !== worm.id);
-                console.log(`📋 Removed from stolen blue symbols tracking. Remaining: ${this.stolenBlueSymbols.length}`);
-            }
-
             console.log(`✅ Symbol "${worm.stolenSymbol}" returned to Panel B`);
         }
 
@@ -1601,12 +1541,8 @@ class WormSystem {
         // Create explosion particles
         this.createExplosionParticles(worm.x, worm.y);
 
-        // Flash the screen (different color for rain kills during curse)
-        if (isRainKill && this.cloningCurseActive) {
-            this.createExplosionFlash('#00ffff'); // Cyan flash for curse rain kills
-        } else {
-            this.createExplosionFlash();
-        }
+        // Flash the screen
+        this.createExplosionFlash();
 
         // Create persistent crack at worm's location
         this.createCrack(worm.x, worm.y);
@@ -1712,9 +1648,9 @@ class WormSystem {
                     if (powerUp.parentNode) {
                         powerUp.parentNode.removeChild(powerUp);
                     }
-                }, 500);
+                }, this.WORM_REMOVAL_DELAY);
             }
-        }, 10000);
+        }, this.SLIME_SPLAT_DURATION);
     }
 
     // Collect power-up
@@ -1975,9 +1911,9 @@ class WormSystem {
                             if (spider.parentNode) {
                                 spider.parentNode.removeChild(spider);
                             }
-                        }, 10000); // Remove after 10 seconds
+                        }, this.SKULL_DISPLAY_DURATION); // Remove after 10 seconds
                     }
-                }, 60000);
+                }, this.SPIDER_HEART_DURATION);
             }
         });
 
@@ -2081,13 +2017,13 @@ class WormSystem {
             activeWorms.forEach(worm => {
                 const dist = Math.sqrt(Math.pow(worm.x - devilData.x, 2) + Math.pow(worm.y - devilData.y, 2));
 
-                if (dist < 50) {
+                if (dist < this.DEVIL_PROXIMITY_DISTANCE) {
                     // Worm is near devil
                     if (!devilData.wormProximity.has(worm.id)) {
                         devilData.wormProximity.set(worm.id, Date.now());
                     } else {
                         const timeNear = Date.now() - devilData.wormProximity.get(worm.id);
-                        if (timeNear >= 5000) {
+                        if (timeNear >= this.DEVIL_KILL_TIME) {
                             // Worm has been near for 5 seconds - kill it!
                             console.log(`👹 Worm ${worm.id} killed by devil (5s proximity)`);
 
@@ -2108,7 +2044,7 @@ class WormSystem {
                                 if (skull.parentNode) {
                                     skull.parentNode.removeChild(skull);
                                 }
-                            }, 10000);
+                            }, this.SKULL_DISPLAY_DURATION);
 
                             this.explodeWorm(worm, false);
                             devilData.wormProximity.delete(worm.id);
