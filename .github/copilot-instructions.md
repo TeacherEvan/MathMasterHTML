@@ -172,16 +172,17 @@ Purple worms are boss-level enemies with special behaviors that require strategi
   - Skill progression mechanic (beginners struggle, experienced players know the strategy)
 
 **Power-Up System:**
-- **Chain Lightning** (⚡): Kills 5 worms initially, +2 per subsequent use
-- **Spider** (🕷️): Passive power-up (implementation TBD)
-- **Devil** (👹): Passive power-up (implementation TBD)
-- **Collection**: Power-ups awarded after problem completion
+- **Chain Lightning** (⚡): Kills 5 worms initially, +2 per subsequent use (click power-up icon, then click worm to target)
+- **Spider** (🕷️): Spawns spider that converts worms to spiders (chain reaction), click spider → ❤️ → 💀
+- **Devil** (👹): Click to place devil, worms rush to it and die after 5s proximity
+- **Collection**: Power-ups have 10% drop chance from any killed worm
 - **Display**: Shows in help button tooltip with current counts
+- **Activation**: Click power-up icon in tooltip (NO keyboard shortcuts)
 
-**Cloning Curse (DEPRECATED):**
-- **Status**: Curse mechanic removed - worms now explode on direct click
-- **Code**: `cloningCurseActive` flag still exists but no longer functional
-- **Kill Methods**: Both direct clicks and rain symbol clicks destroy GREEN worms
+**Cloning Curse (REMOVED - October 2025):**
+- **Status**: Curse mechanic completely removed from codebase
+- **Code Cleanup**: All `cloningCurseActive` flags, tracking arrays, and related methods eliminated
+- **Kill Methods**: All worms (green and purple) explode on direct click OR rain symbol click
 - **Purple Worms Exception**: Purple worms use different mechanic (see above)
 
 **Key Mechanics:**

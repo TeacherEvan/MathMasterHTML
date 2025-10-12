@@ -98,6 +98,23 @@ class WormSystem {
         this.SPAWN_QUEUE_DELAY = 50; // ms between spawn queue processing
         this.BORDER_MARGIN = 20; // px from viewport edge
 
+        // POWER-UP CONSTANTS
+        this.POWER_UP_DROP_RATE = 0.10; // 10% chance to drop power-up
+        this.POWER_UP_TYPES = ['chainLightning', 'spider', 'devil'];
+
+        // ANIMATION TIMING CONSTANTS
+        this.EXPLOSION_CLEANUP_DELAY = 600; // ms - worm removal delay after explosion
+        this.WORM_REMOVAL_DELAY = 500; // ms - delay before removing worm from DOM
+        this.PROBLEM_COMPLETION_CLEANUP_DELAY = 2000; // ms - wait for explosions to finish
+        this.SLIME_SPLAT_DURATION = 10000; // ms - 10 seconds
+        this.SPIDER_HEART_DURATION = 60000; // ms - 1 minute
+        this.SKULL_DISPLAY_DURATION = 10000; // ms - 10 seconds
+
+        // WORM BEHAVIOR CONSTANTS
+        this.CLONE_WORM_ROAM_DURATION = 10000; // ms - cloned worm roaming time
+        this.DEVIL_PROXIMITY_DISTANCE = 50; // px
+        this.DEVIL_KILL_TIME = 5000; // ms - 5 seconds
+
         console.log('🐛 WormSystem initialized with new row-based spawning and power-up system');
     }
 
@@ -135,7 +152,7 @@ class WormSystem {
             // Clean up cracks after worms are killed
             setTimeout(() => {
                 this.cleanupCracks();
-            }, 2000); // Wait 2 seconds for explosions to finish
+            }, this.PROBLEM_COMPLETION_CLEANUP_DELAY); // Wait for explosions to finish
         });        // PURPLE WORM: Listen for purple worm trigger (3 wrong answers)
         document.addEventListener('purpleWormTriggered', (event) => {
             console.log('🟣 Purple Worm System received purpleWormTriggered event:', event.detail);
@@ -458,8 +475,8 @@ class WormSystem {
         this.crossPanelContainer.appendChild(wormElement);
 
         // POWER-UP: 10% chance to carry a power-up
-        const hasPowerUp = Math.random() < 0.10;
-        const powerUpType = hasPowerUp ? ['chainLightning', 'spider', 'devil'][Math.floor(Math.random() * 3)] : null;
+        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
+        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
 
         // Store worm data with console slot reference
         const wormData = {
@@ -539,8 +556,8 @@ class WormSystem {
         this.crossPanelContainer.appendChild(wormElement);
 
         // POWER-UP: 10% chance to carry a power-up
-        const hasPowerUp = Math.random() < 0.10;
-        const powerUpType = hasPowerUp ? ['chainLightning', 'spider', 'devil'][Math.floor(Math.random() * 3)] : null;
+        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
+        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
 
         // Store worm data (non-console worm)
         const wormData = {
@@ -659,8 +676,8 @@ class WormSystem {
         };
 
         // POWER-UP: 10% chance to carry a power-up
-        const hasPowerUp = Math.random() < 0.10;
-        const powerUpType = hasPowerUp ? ['chainLightning', 'spider', 'devil'][Math.floor(Math.random() * 3)] : null;
+        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
+        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
         wormData.hasPowerUp = hasPowerUp;
         wormData.powerUpType = powerUpType;
 
@@ -755,8 +772,8 @@ class WormSystem {
         };
 
         // POWER-UP: 10% chance to carry a power-up (even purple worms)
-        const hasPowerUp = Math.random() < 0.10;
-        const powerUpType = hasPowerUp ? ['chainLightning', 'spider', 'devil'][Math.floor(Math.random() * 3)] : null;
+        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
+        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
         wormData.hasPowerUp = hasPowerUp;
         wormData.powerUpType = powerUpType;
 
@@ -1353,7 +1370,7 @@ class WormSystem {
             active: true,
             hasStolen: false,
             isRushingToTarget: parentWorm.isRushingToTarget, // Inherit rushing state
-            roamingEndTime: Date.now() + 10000,
+            roamingEndTime: Date.now() + this.CLONE_WORM_ROAM_DURATION,
             isFlickering: false,
             baseSpeed: 2.0,
             currentSpeed: 2.0,
@@ -1631,9 +1648,9 @@ class WormSystem {
                     if (powerUp.parentNode) {
                         powerUp.parentNode.removeChild(powerUp);
                     }
-                }, 500);
+                }, this.WORM_REMOVAL_DELAY);
             }
-        }, 10000);
+        }, this.SLIME_SPLAT_DURATION);
     }
 
     // Collect power-up
@@ -1894,9 +1911,9 @@ class WormSystem {
                             if (spider.parentNode) {
                                 spider.parentNode.removeChild(spider);
                             }
-                        }, 10000); // Remove after 10 seconds
+                        }, this.SKULL_DISPLAY_DURATION); // Remove after 10 seconds
                     }
-                }, 60000);
+                }, this.SPIDER_HEART_DURATION);
             }
         });
 
@@ -2000,13 +2017,13 @@ class WormSystem {
             activeWorms.forEach(worm => {
                 const dist = Math.sqrt(Math.pow(worm.x - devilData.x, 2) + Math.pow(worm.y - devilData.y, 2));
 
-                if (dist < 50) {
+                if (dist < this.DEVIL_PROXIMITY_DISTANCE) {
                     // Worm is near devil
                     if (!devilData.wormProximity.has(worm.id)) {
                         devilData.wormProximity.set(worm.id, Date.now());
                     } else {
                         const timeNear = Date.now() - devilData.wormProximity.get(worm.id);
-                        if (timeNear >= 5000) {
+                        if (timeNear >= this.DEVIL_KILL_TIME) {
                             // Worm has been near for 5 seconds - kill it!
                             console.log(`👹 Worm ${worm.id} killed by devil (5s proximity)`);
 
@@ -2027,7 +2044,7 @@ class WormSystem {
                                 if (skull.parentNode) {
                                     skull.parentNode.removeChild(skull);
                                 }
-                            }, 10000);
+                            }, this.SKULL_DISPLAY_DURATION);
 
                             this.explodeWorm(worm, false);
                             devilData.wormProximity.delete(worm.id);
