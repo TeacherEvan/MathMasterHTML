@@ -916,257 +916,16 @@ class WormSystem {
             return;
         }
 
-        const currentTime = Date.now();
-
-        // CROSS-PANEL MOVEMENT: Use viewport dimensions instead of Panel B only
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-
-        // PERFORMANCE: Get Panel B boundaries once per frame, use cached rect
-        const panelBRect = this.getCachedContainerRect();
-
         this.worms.forEach(worm => {
             if (!worm.active) return;
 
             // Update crawl phase for animation
             worm.crawlPhase = (worm.crawlPhase + 0.05) % (Math.PI * 2);
 
-            // DEVIL POWER-UP: Override all behavior if rushing to devil
-            if (worm.isRushingToDevil && worm.devilX !== undefined && worm.devilY !== undefined) {
-                const distance = calculateDistance(worm.x, worm.y, worm.devilX, worm.devilY);
-                const dx = worm.devilX - worm.x;
-                const dy = worm.devilY - worm.y;
+            // Update behavior based on state
+            this.updateWormBehavior(worm);
 
-                if (distance > 5) {
-                    // Rush toward devil at double speed
-                    const rushSpeed = worm.baseSpeed * 2;
-                    worm.velocityX = (dx / distance) * rushSpeed;
-                    worm.velocityY = (dy / distance) * rushSpeed;
-
-                    worm.x += worm.velocityX;
-                    worm.y += worm.velocityY;
-
-                    // Rotate towards devil
-                    worm.element.style.transform = `rotate(${Math.atan2(dy, dx) + Math.PI}rad)`;
-                }
-
-                // Apply position
-                worm.element.style.left = `${worm.x}px`;
-                worm.element.style.top = `${worm.y}px`;
-                return; // Skip normal behavior
-            }
-
-            // Check if roaming period has ended and worm should steal
-            if (!worm.hasStolen && !worm.isRushingToTarget && currentTime >= worm.roamingEndTime) {
-                this.stealSymbol(worm);
-            }
-
-            // Rushing to red symbol that just appeared
-            if (worm.isRushingToTarget && !worm.hasStolen) {
-                // PERFORMANCE: Use cached revealed symbols
-                const revealedSymbols = this.getCachedRevealedSymbols();
-                let targetElement = null;
-
-                if (worm.targetSymbol) {
-                    const normalizedTarget = worm.targetSymbol.toLowerCase() === 'x' ? 'X' : worm.targetSymbol;
-                    targetElement = Array.from(revealedSymbols).find(el => {
-                        const elSymbol = el.textContent.toLowerCase() === 'x' ? 'X' : el.textContent;
-                        return elSymbol === normalizedTarget && !el.dataset.stolen;
-                    });
-                }
-
-                if (targetElement) {
-                    // Rush towards target symbol
-                    const targetRect = targetElement.getBoundingClientRect();
-                    const containerRect = this.getCachedContainerRect(); // PERFORMANCE: Use cached rect
-
-                    const targetX = targetRect.left - containerRect.left + (targetRect.width / 2);
-                    const targetY = targetRect.top - containerRect.top + (targetRect.height / 2);
-
-                    const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
-                    const dx = targetX - worm.x;
-                    const dy = targetY - worm.y;
-
-                    if (distance < 30) {
-                        // Reached target - steal it!
-                        this.stealSymbol(worm);
-                    } else {
-                        // Move towards target at double speed
-                        const rushSpeed = worm.baseSpeed * 2;
-                        worm.velocityX = (dx / distance) * rushSpeed;
-                        worm.velocityY = (dy / distance) * rushSpeed;
-
-                        worm.x += worm.velocityX;
-                        worm.y += worm.velocityY;
-                    }
-                } else {
-                    // Target disappeared, go back to roaming
-                    console.log(`🐛 Worm ${worm.id} lost target, resuming roaming`);
-                    worm.isRushingToTarget = false;
-                    worm.roamingEndTime = Date.now() + 5000;
-                }
-            }
-            // Roaming behavior - crawling movement ACROSS ALL PANELS
-            else if (!worm.hasStolen && !worm.isRushingToTarget) {
-                // Update direction slightly for natural movement
-                worm.direction += (Math.random() - 0.5) * 0.1;
-
-                // Crawling movement with inchworm effect
-                const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
-                worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
-                worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
-
-                worm.x += worm.velocityX;
-                worm.y += worm.velocityY;
-
-                // CROSS-PANEL BOUNDARIES: Worms can roam entire viewport
-                const margin = 20;
-                if (worm.x < margin) {
-                    worm.x = margin;
-                    worm.direction = Math.PI - worm.direction; // Reflect horizontally
-                }
-                if (worm.x > viewportWidth - margin) {
-                    worm.x = viewportWidth - margin;
-                    worm.direction = Math.PI - worm.direction;
-                }
-                if (worm.y < margin) {
-                    worm.y = margin;
-                    worm.direction = -worm.direction; // Reflect vertically
-                }
-                if (worm.y > viewportHeight - margin) {
-                    worm.y = viewportHeight - margin;
-                    worm.direction = -worm.direction;
-                }
-
-                // Rotate worm body to face movement direction (head points forward)
-                // Worm segments are laid out left-to-right, so head should point in direction
-                // FIX: Add π (180°) to flip worm so head faces forward instead of backward
-                worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
-            }
-            // Carrying symbol - return to console hole
-            else if (worm.hasStolen && worm.fromConsole && worm.consoleSlotElement) {
-                const slotRect = worm.consoleSlotElement.getBoundingClientRect();
-                const containerRect = this.getCachedContainerRect(); // PERFORMANCE: Use cached rect
-
-                const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
-                const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
-
-                const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
-                const dx = targetX - worm.x;
-                const dy = targetY - worm.y;
-
-                if (distance < 20) {
-                    // Reached console hole - escape with symbol!
-                    console.log(`🐛 Worm ${worm.id} escaped to console with symbol "${worm.stolenSymbol}"!`);
-                    console.log(`💀 Symbol "${worm.stolenSymbol}" stays HIDDEN until user clicks it again in Panel C`);
-                    this.removeWorm(worm);
-                    return;
-                }
-
-                // Move towards console with LSD colors!
-                worm.direction = Math.atan2(dy, dx);
-                worm.velocityX = (dx / distance) * worm.currentSpeed;
-                worm.velocityY = (dy / distance) * worm.currentSpeed;
-
-                worm.x += worm.velocityX;
-                worm.y += worm.velocityY;
-
-                // Rotate towards console (head points forward)
-                // FIX: Add π (180°) to flip worm so head faces forward
-                worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
-            }
-            // Carrying symbol but not from console - just roam with it
-            else if (worm.hasStolen && !worm.fromConsole) {
-                // PURPLE WORM CONSOLE EXIT: If this is a purple worm, exit through console
-                if (worm.isPurple && worm.shouldExitToConsole) {
-                    // Find empty console slot if not already targeting one
-                    if (!worm.exitingToConsole) {
-                        const emptySlotData = this.findEmptyConsoleSlot();
-                        if (emptySlotData) {
-                            worm.exitingToConsole = true;
-                            worm.targetConsoleSlot = emptySlotData.element;
-                            worm.targetConsoleSlotIndex = emptySlotData.index;
-                            console.log(`🟣 Purple worm ${worm.id} heading to exit at console slot ${emptySlotData.index}`);
-                        }
-                    }
-
-                    // If targeting a console slot, move toward it
-                    if (worm.exitingToConsole && worm.targetConsoleSlot) {
-                        const slotRect = worm.targetConsoleSlot.getBoundingClientRect();
-                        const containerRect = this.getCachedContainerRect();
-
-                        const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
-                        const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
-
-                        const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
-                        const dx = targetX - worm.x;
-                        const dy = targetY - worm.y;
-
-                        if (distance < 20) {
-                            // Reached console exit - purple worm escapes!
-                            console.log(`🟣 Purple worm ${worm.id} exited through console!`);
-                            this.removeWorm(worm);
-                            return;
-                        }
-
-                        // Move towards console exit
-                        worm.direction = Math.atan2(dy, dx);
-                        worm.velocityX = (dx / distance) * worm.currentSpeed;
-                        worm.velocityY = (dy / distance) * worm.currentSpeed;
-
-                        worm.x += worm.velocityX;
-                        worm.y += worm.velocityY;
-
-                        // Rotate towards console (head points forward)
-                        worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
-                    } else {
-                        // No console slot found yet, continue roaming
-                        worm.direction += (Math.random() - 0.5) * 0.1;
-
-                        const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
-                        worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
-                        worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
-
-                        worm.x += worm.velocityX;
-                        worm.y += worm.velocityY;
-                    }
-                } else {
-                    // Normal worm carrying symbol - continue roaming
-                    worm.direction += (Math.random() - 0.5) * 0.1;
-
-                    const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
-                    worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
-                    worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
-
-                    worm.x += worm.velocityX;
-                    worm.y += worm.velocityY;
-                }
-
-                // STRICT PANEL B BOUNDARIES
-                const margin = 20;
-                if (worm.x < margin) {
-                    worm.x = margin;
-                    worm.direction = Math.PI - worm.direction;
-                }
-                if (worm.x > panelBWidth - margin) {
-                    worm.x = panelBWidth - margin;
-                    worm.direction = Math.PI - worm.direction;
-                }
-                if (worm.y < margin) {
-                    worm.y = margin;
-                    worm.direction = -worm.direction;
-                }
-                if (worm.y > panelBHeight - margin) {
-                    worm.y = panelBHeight - margin;
-                    worm.direction = -worm.direction;
-                }
-
-                // Rotate worm to face movement direction (head points forward)
-                // FIX: Add π (180°) to flip worm so head faces forward
-                worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
-            }
-
-            // Apply position directly (no CSS transitions for smooth crawling)
+            // Apply position to DOM
             worm.element.style.left = `${worm.x}px`;
             worm.element.style.top = `${worm.y}px`;
         });
@@ -1177,6 +936,300 @@ class WormSystem {
         } else {
             this.animationFrameId = null;
         }
+    }
+
+    /**
+     * Update worm behavior based on current state (dispatcher method)
+     * @param {Object} worm - Worm data object
+     */
+    updateWormBehavior(worm) {
+        const currentTime = Date.now();
+
+        // Priority 1: Devil override
+        if (worm.isRushingToDevil && worm.devilX !== undefined && worm.devilY !== undefined) {
+            this.updateDevilBehavior(worm);
+            return;
+        }
+
+        // Priority 2: Roaming timeout → steal
+        if (!worm.hasStolen && !worm.isRushingToTarget && currentTime >= worm.roamingEndTime) {
+            this.stealSymbol(worm);
+            return;
+        }
+
+        // Priority 3: State-based behavior
+        if (worm.isRushingToTarget && !worm.hasStolen) {
+            this.updateRushingBehavior(worm);
+        } else if (!worm.hasStolen && !worm.isRushingToTarget) {
+            this.updateRoamingBehavior(worm);
+        } else if (worm.hasStolen && worm.fromConsole && worm.consoleSlotElement) {
+            this.updateConsoleReturnBehavior(worm);
+        } else if (worm.hasStolen) {
+            this.updateCarryingBehavior(worm);
+        }
+    }
+
+    /**
+     * Update worm behavior when rushing to devil power-up
+     * @param {Object} worm - Worm data object
+     */
+    updateDevilBehavior(worm) {
+        const distance = calculateDistance(worm.x, worm.y, worm.devilX, worm.devilY);
+        const dx = worm.devilX - worm.x;
+        const dy = worm.devilY - worm.y;
+
+        if (distance <= 5) return; // Already at devil
+
+        // Rush toward devil at double speed
+        const rushSpeed = worm.baseSpeed * 2;
+        worm.velocityX = (dx / distance) * rushSpeed;
+        worm.velocityY = (dy / distance) * rushSpeed;
+
+        worm.x += worm.velocityX;
+        worm.y += worm.velocityY;
+
+        // Rotate towards devil
+        worm.element.style.transform = `rotate(${Math.atan2(dy, dx) + Math.PI}rad)`;
+    }
+
+    /**
+     * Update worm behavior when rushing to steal a symbol
+     * @param {Object} worm - Worm data object
+     */
+    updateRushingBehavior(worm) {
+        // PERFORMANCE: Use cached revealed symbols
+        const revealedSymbols = this.getCachedRevealedSymbols();
+        let targetElement = null;
+
+        if (worm.targetSymbol) {
+            const normalizedTarget = worm.targetSymbol.toLowerCase() === 'x' ? 'X' : worm.targetSymbol;
+            targetElement = Array.from(revealedSymbols).find(el => {
+                const elSymbol = el.textContent.toLowerCase() === 'x' ? 'X' : el.textContent;
+                return elSymbol === normalizedTarget && !el.dataset.stolen;
+            });
+        }
+
+        if (targetElement) {
+            // Rush towards target symbol
+            const targetRect = targetElement.getBoundingClientRect();
+            const containerRect = this.getCachedContainerRect(); // PERFORMANCE: Use cached rect
+
+            const targetX = targetRect.left - containerRect.left + (targetRect.width / 2);
+            const targetY = targetRect.top - containerRect.top + (targetRect.height / 2);
+
+            const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
+            const dx = targetX - worm.x;
+            const dy = targetY - worm.y;
+
+            if (distance < 30) {
+                // Reached target - steal it!
+                this.stealSymbol(worm);
+            } else {
+                // Move towards target at double speed
+                const rushSpeed = worm.baseSpeed * 2;
+                worm.velocityX = (dx / distance) * rushSpeed;
+                worm.velocityY = (dy / distance) * rushSpeed;
+
+                worm.x += worm.velocityX;
+                worm.y += worm.velocityY;
+            }
+        } else {
+            // Target disappeared, go back to roaming
+            console.log(`🐛 Worm ${worm.id} lost target, resuming roaming`);
+            worm.isRushingToTarget = false;
+            worm.roamingEndTime = Date.now() + 5000;
+        }
+    }
+
+    /**
+     * Update worm behavior when roaming (before stealing)
+     * @param {Object} worm - Worm data object
+     */
+    updateRoamingBehavior(worm) {
+        // Update direction slightly for natural movement
+        worm.direction += (Math.random() - 0.5) * 0.1;
+
+        // Crawling movement with inchworm effect
+        const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
+        worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
+        worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
+
+        worm.x += worm.velocityX;
+        worm.y += worm.velocityY;
+
+        // Apply viewport boundaries
+        this.applyViewportBoundaries(worm);
+
+        // Rotate worm body to face movement direction (head points forward)
+        worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+    }
+
+    /**
+     * Update worm behavior when returning to console with stolen symbol
+     * @param {Object} worm - Worm data object
+     */
+    updateConsoleReturnBehavior(worm) {
+        const slotRect = worm.consoleSlotElement.getBoundingClientRect();
+        const containerRect = this.getCachedContainerRect(); // PERFORMANCE: Use cached rect
+
+        const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
+        const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
+
+        const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
+        const dx = targetX - worm.x;
+        const dy = targetY - worm.y;
+
+        if (distance < 20) {
+            // Reached console hole - escape with symbol!
+            console.log(`🐛 Worm ${worm.id} escaped to console with symbol "${worm.stolenSymbol}"!`);
+            console.log(`💀 Symbol "${worm.stolenSymbol}" stays HIDDEN until user clicks it again in Panel C`);
+            this.removeWorm(worm);
+            return;
+        }
+
+        // Move towards console
+        worm.direction = Math.atan2(dy, dx);
+        worm.velocityX = (dx / distance) * worm.currentSpeed;
+        worm.velocityY = (dy / distance) * worm.currentSpeed;
+
+        worm.x += worm.velocityX;
+        worm.y += worm.velocityY;
+
+        // Rotate towards console (head points forward)
+        worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+    }
+
+    /**
+     * Update worm behavior when carrying stolen symbol (not from console)
+     * @param {Object} worm - Worm data object
+     */
+    updateCarryingBehavior(worm) {
+        // PURPLE WORM CONSOLE EXIT: If this is a purple worm, exit through console
+        if (worm.isPurple && worm.shouldExitToConsole) {
+            // Find empty console slot if not already targeting one
+            if (!worm.exitingToConsole) {
+                const emptySlotData = this.findEmptyConsoleSlot();
+                if (emptySlotData) {
+                    worm.exitingToConsole = true;
+                    worm.targetConsoleSlot = emptySlotData.element;
+                    worm.targetConsoleSlotIndex = emptySlotData.index;
+                    console.log(`🟣 Purple worm ${worm.id} heading to exit at console slot ${emptySlotData.index}`);
+                }
+            }
+
+            // If targeting a console slot, move toward it
+            if (worm.exitingToConsole && worm.targetConsoleSlot) {
+                const slotRect = worm.targetConsoleSlot.getBoundingClientRect();
+                const containerRect = this.getCachedContainerRect();
+
+                const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
+                const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
+
+                const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
+                const dx = targetX - worm.x;
+                const dy = targetY - worm.y;
+
+                if (distance < 20) {
+                    // Reached console exit - purple worm escapes!
+                    console.log(`🟣 Purple worm ${worm.id} exited through console!`);
+                    this.removeWorm(worm);
+                    return;
+                }
+
+                // Move towards console exit
+                worm.direction = Math.atan2(dy, dx);
+                worm.velocityX = (dx / distance) * worm.currentSpeed;
+                worm.velocityY = (dy / distance) * worm.currentSpeed;
+
+                worm.x += worm.velocityX;
+                worm.y += worm.velocityY;
+
+                // Rotate towards console (head points forward)
+                worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+            } else {
+                // No console slot found yet, continue roaming
+                this.updateRoamingBehavior(worm);
+            }
+        } else {
+            // Normal worm carrying symbol - continue roaming
+            this.updateRoamingBehavior(worm);
+        }
+
+        // Apply Panel B boundaries for carrying worms
+        this.applyPanelBBoundaries(worm);
+    }
+
+    /**
+     * Apply viewport boundaries to worm position (for roaming worms)
+     * @param {Object} worm - Worm data object
+     */
+    applyViewportBoundaries(worm) {
+        const margin = 20;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        if (worm.x < margin) {
+            worm.x = margin;
+            worm.direction = Math.PI - worm.direction; // Reflect horizontally
+        }
+        if (worm.x > viewportWidth - margin) {
+            worm.x = viewportWidth - margin;
+            worm.direction = Math.PI - worm.direction;
+        }
+        if (worm.y < margin) {
+            worm.y = margin;
+            worm.direction = -worm.direction; // Reflect vertically
+        }
+        if (worm.y > viewportHeight - margin) {
+            worm.y = viewportHeight - margin;
+            worm.direction = -worm.direction;
+        }
+    }
+
+    /**
+     * Apply Panel B boundaries to worm position (for carrying worms)
+     * @param {Object} worm - Worm data object
+     */
+    applyPanelBBoundaries(worm) {
+        const margin = 20;
+        const panelBRect = this.getCachedContainerRect();
+        const panelBWidth = panelBRect.width;
+        const panelBHeight = panelBRect.height;
+
+        if (worm.x < margin) {
+            worm.x = margin;
+            worm.direction = Math.PI - worm.direction;
+        }
+        if (worm.x > panelBWidth - margin) {
+            worm.x = panelBWidth - margin;
+            worm.direction = Math.PI - worm.direction;
+        }
+        if (worm.y < margin) {
+            worm.y = margin;
+            worm.direction = -worm.direction;
+        }
+        if (worm.y > panelBHeight - margin) {
+            worm.y = panelBHeight - margin;
+            worm.direction = -worm.direction;
+        }
+
+        // Rotate worm to face movement direction (head points forward)
+        worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+    }
+
+    /**
+     * Check if worm is currently inside Panel B boundaries
+     * @param {Object} worm - Worm data object
+     * @returns {Boolean} - True if worm is in Panel B
+     */
+    isWormInPanelB(worm) {
+        const panelBRect = this.getCachedContainerRect();
+        return (
+            worm.x >= panelBRect.left &&
+            worm.x <= panelBRect.right &&
+            worm.y >= panelBRect.top &&
+            worm.y <= panelBRect.bottom
+        );
     }
 
     handleWormClick(worm) {
