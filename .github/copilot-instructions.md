@@ -25,7 +25,7 @@ document.dispatchEvent(new CustomEvent('symbolClicked', { detail: { symbol: 'X' 
 game.handleSymbolClick('X');
 ```
 
-Key events: `symbolClicked`, `symbolRevealed`, `first-line-solved`, `problemLineCompleted`, `lockLevelActivated`, `snakeWeaponTriggered`
+Key events: `symbolClicked`, `symbolRevealed`, `first-line-solved`, `problemLineCompleted`, `lockLevelActivated`
 
 ### 3. No Build Process Required
 - Open `game.html` directly in browser via local server: `python -m http.server 8000`
@@ -55,8 +55,7 @@ Key events: `symbolClicked`, `symbolRevealed`, `first-line-solved`, `problemLine
 | `game.js` | Core loop, problem validation, symbol revelation | `setupProblem()`, `revealSpecificSymbol()` |
 | `3rdDISPLAY.js` | Symbol rain animation (Panel C), spatial hash collision | `createFallingSymbol()`, `updateSpatialGrid()` |
 | `lock-manager.js` | Progressive lock via HTML component injection | `progressLockLevel()`, `loadLockComponent()` |
-| `worm.js` | Enemy AI: roam → target → steal → destruction | `spawnWormFromConsole()`, `explodeWorm()` |
-| `snake-weapon.js` | Defensive weapon (click lock when 4+ worms) | `spawnSnake()`, `huntWorms()` |
+| `worm.js` | Enemy AI: roam → target → steal → destruction | `spawnWormFromBorder()`, `explodeWorm()` |
 | `console-manager.js` | 3×3 quick-access grid (keyboard 1-9) | `addSymbolToConsole()`, `handleSlotClick()` |
 | `display-manager.js` | **Responsive font sizing (applies inline styles!)** | `applyFontSizes()` |
 | `performance-monitor.js` | FPS/DOM query tracking (toggle with 'P') | `updateMetrics()` |
@@ -90,9 +89,6 @@ new CustomEvent('lockLevelActivated', { detail: { level: 2 } })
 // Worm system
 new CustomEvent('wormSymbolCorrect', { detail: { symbol: 'X' } })
 new CustomEvent('purpleWormTriggered', { detail: { wrongAnswers: 4 } })
-
-// Snake weapon
-new CustomEvent('snakeWeaponTriggered', { detail: { wormCount: 7 } })
 ```
 
 ## Data Flow: Problem Loading
@@ -135,27 +131,37 @@ Problems are stored in Markdown files (`Assets/{Level}_Lvl/*.md`) and parsed on 
 ## Worm System (`js/worm.js`)
 
 **Worm Lifecycle:**
-1. **Spawn**: `spawnWormFromConsole()` triggered by `problemLineCompleted` event
-2. **Roaming**: Worm crawls randomly across Panel B for 3-8 seconds
+1. **Spawn**: Row-based spawning system triggered by `problemLineCompleted` event
+2. **Roaming**: Worm crawls randomly across Panel B for 5-10 seconds
 3. **Targeting**: When `symbolRevealed` event fires, roaming worms rush to steal that symbol
 4. **Stealing**: Worm reaches symbol, turns it gray/strikethrough, carries it away
 5. **Destruction**: User clicks matching symbol in Panel C rain OR clicks worm directly → explosion
 
-**Cloning Curse Mechanic:**
-- **Activation**: First direct click on ANY worm activates the cloning curse
-- **Effect**: While curse active, ALL worm clicks create clones instead of killing them
-- **Clone Abilities**: Clones can steal BLUE (revealed) symbols, not just red (hidden) ones
-- **Curse Reset**: Only breaks when ALL worms eliminated via rain symbols (not direct clicks)
-- **Visual Feedback**: Purple flash (curse active/clone), Cyan flash (curse reset)
+**Row-Based Spawning System:**
+- **First Row**: Spawns 5 worms (`wormsPerRow = 5`)
+- **Subsequent Rows**: Same 5 worms per row (no escalation, `additionalWormsPerRow = 0`)
+- **Spawn Location**: Worms spawn from viewport borders in staggered positions
+- **Max Worms**: 999 (effectively unlimited, `maxWorms = 999`)
+- **Spawn Queue**: Uses batching system to prevent frame drops during mass spawning
+
+**Power-Up System:**
+- **Chain Lightning** (⚡): Kills 5 worms initially, +2 per subsequent use
+- **Spider** (🕷️): Passive power-up (implementation TBD)
+- **Devil** (👹): Passive power-up (implementation TBD)
+- **Collection**: Power-ups awarded after problem completion
+- **Display**: Shows in help button tooltip with current counts
+
+**Cloning Curse (DEPRECATED):**
+- **Status**: Curse mechanic removed - worms now explode on direct click
+- **Code**: `cloningCurseActive` flag still exists but no longer functional
+- **Kill Methods**: Both direct clicks and rain symbol clicks destroy worms
 
 **Key Mechanics:**
-- Maximum 7 worms active at once (`maxWorms`)
-- Worms spawn from empty console slots (locks slot until worm dies)
-- Position updated via `requestAnimationFrame` loop, NOT CSS transitions
-- **Dual Kill Mechanic**: 
-  1. Click worm directly (activates curse on first click, clones on subsequent)
-  2. Click matching symbol in Panel C rain (if worm has stolen that symbol) - counts as rain kill
-- Symbol matching is case-insensitive ('X' === 'x')
+- **No Worm Limit**: Effectively unlimited worms (`maxWorms = 999`)
+- **Spawn Sources**: Border spawning system (not console slots)
+- **Console Slots**: Still used for worm spawn animation but not spawn limitation
+- **Position**: Updated via `requestAnimationFrame` loop, NOT CSS transitions
+- **Symbol Matching**: Case-insensitive ('X' === 'x')
 
 **CSS Classes:**
 - `.worm-container`: Main wrapper (z-index: 10000)
@@ -164,42 +170,6 @@ Problems are stored in Markdown files (`Assets/{Level}_Lvl/*.md`) and parsed on 
 - `.flickering`: LSD rainbow animation
 - `.worm-clicked`: Explosion animation
 - `.slime-splat`: Green splat mark after explosion
-
-## Snake Weapon System (`js/snake-weapon.js`)
-
-**Strategic Defensive Mechanic:**
-- **Trigger**: Click on lock (`#lock-display`) when 4+ worms are active
-- **Restriction**: One use per problem (resets on `problemCompleted` event)
-- **Purpose**: Powerful weapon to clear multiple worms when overwhelmed
-
-**Snake Properties:**
-- **Size**: 10 segments @ 18px each (2x worm size)
-- **Speed**: 1.8 units/frame (10% slower than worm speed of 2.0)
-- **Color**: Red gradient with scale texture
-- **Movement**: Cross-panel traversal (Panel A → B → C) via absolute coordinate system
-- **Detection Radius**: Worms flee when snake within 200px
-- **Eating Radius**: 25px collision distance
-
-**Lifecycle:**
-1. **Spawn**: Emerges from lock center in Panel A
-2. **Hunt**: Targets nearest worm using cross-panel distance calculation
-3. **Eat**: Consumes worm on collision, visual chomp animation
-4. **Repeat**: Continues hunting until all worms eliminated
-5. **Return**: Returns to lock at 1.5x speed when no worms remain
-
-**Worm Evasion AI:**
-```javascript
-if (distanceToSnake < 200) {
-    fleeSpeed = baseSpeed * 1.2  // 20% speed boost
-    element.classList.add('fleeing')  // Yellow glow + shake
-}
-```
-
-**Visual Feedback:**
-- Lock flashes orange when < 4 worms (not ready)
-- Lock flashes red when already used this problem
-- Chomping animation (1.4x scale) when eating
-- Worms show yellow glow + shake when fleeing
 
 ## Symbol Console System (`js/console-manager.js`)
 
@@ -346,8 +316,7 @@ if (distanceToSnake < 200) {
     - 🎮 = `game.js` (core game logic)
     - 🔒 = `lock-manager.js` (lock animation)
     - 🐛 = `worm.js` (worm system)
-    - � = `snake-weapon.js` (snake weapon)
-    - �📊 = `performance-monitor.js`
+    - 📊 = `performance-monitor.js`
     - 🎯 = `3rdDISPLAY.js` (symbol rain)
     - 🎮 = `console-manager.js`
 *   Example: `console.log('🐛 Worm System received problemLineCompleted event:', event.detail);`
@@ -367,8 +336,7 @@ if (distanceToSnake < 200) {
 The `Docs/` directory contains critical project knowledge:
 
 *   **`CSS_Override_Investigation.md`**: Deep dive into why CSS font size changes are ignored - explains inline style priority and specificity hierarchy. Read this FIRST before attempting any Panel A/B styling changes.
-*   **`Cloning_Curse_Implementation.md`**: Complete documentation of the cloning curse mechanic - activation, clone abilities, blue symbol stealing, and curse reset logic
-*   **`Snake_Weapon_Implementation.md`**: Full spec for the snake weapon system - cross-panel movement, worm evasion AI, performance optimizations
+*   **`Cloning_Curse_Implementation.md`**: Historical documentation of cloning curse mechanic (now DEPRECATED - feature removed but code artifacts remain)
 *   **`Panel_C_Performance_Audit.md`**: Full performance analysis with 12+ optimization opportunities and code examples
 *   **`Touch_Click_Optimization_Report.md`**: Detailed analysis of pointer events vs click events for mobile responsiveness
 *   **`Performance_Audit_Report.md`**: Historical performance issues and fixes (covers worm system and CSS corruption)
