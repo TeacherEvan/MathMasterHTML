@@ -331,7 +331,6 @@ CSS rules evaluated LAST (but overridden by inline styles)
 ## Related Documentation
 
 - `.github/copilot-instructions.md` - Full AI agent instructions (includes override warnings)
-- `Docs/Mobile_Layout_Implementation.md` - Mobile layout design decisions
 - `js/display-manager.js` - Primary font override system
 - `js/lock-responsive.js` - Lock scaling override system
 
