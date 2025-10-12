@@ -364,12 +364,11 @@ Purple worms are boss-level enemies with special behaviors that require strategi
 
 The `Docs/` directory contains critical project knowledge:
 
+*   **`DEVELOPMENT_GUIDE.md`**: Development best practices, recent code cleanup (October 2025), magic numbers guide, power-up status, testing guidelines, and common pitfalls. Read this for workflow and coding standards.
+*   **`ARCHITECTURE.md`**: Worm system architecture, lifecycle state machine, game balance considerations, event-driven communication, and technical implementation details. Read this to understand the adversarial gameplay mechanics.
+*   **`PERFORMANCE.md`**: Performance optimization guide with completed optimizations (Panel C, worm system, mobile), known bottlenecks, profiling techniques, and optimization patterns. Read this before making performance-critical changes.
 *   **`CSS_Override_Investigation.md`**: Deep dive into why CSS font size changes are ignored - explains inline style priority and specificity hierarchy. Read this FIRST before attempting any Panel A/B styling changes.
-*   **`Cloning_Curse_Implementation.md`**: Historical documentation of cloning curse mechanic (now DEPRECATED - feature removed but code artifacts remain)
-*   **`Panel_C_Performance_Audit.md`**: Full performance analysis with 12+ optimization opportunities and code examples
-*   **`Touch_Click_Optimization_Report.md`**: Detailed analysis of pointer events vs click events for mobile responsiveness
-*   **`Performance_Audit_Report.md`**: Historical performance issues and fixes (covers worm system and CSS corruption)
-*   **`Worm_System_Complete_Overhaul.md`**: Architecture documentation for the adversarial worm mechanics
+*   **`CODEBASE_AUDIT_REPORT_V2.md`**: Comprehensive audit report with code quality findings, dead code analysis, and optimization opportunities. Reference for understanding technical debt.
 
 **When debugging:** Always check relevant docs before making changes - they contain context about WHY certain patterns exist.
 
