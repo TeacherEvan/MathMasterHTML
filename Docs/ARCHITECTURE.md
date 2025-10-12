@@ -109,6 +109,7 @@ const wormStates = {
 ### Critical Balance Issue
 
 **Problem Identified**: Worms may be **ineffective** as adversaries if:
+
 - Players complete problems without losing symbols
 - Worms arrive too late (after player already solved row)
 - No difficulty scaling between Beginner/Warrior/Master
@@ -117,6 +118,7 @@ const wormStates = {
 ### Current Timing Analysis
 
 **Current Worm Timeline:**
+
 ```
 Row 1 complete (0s)
     ↓
@@ -130,6 +132,7 @@ Worms steal symbol (12s)
 ```
 
 **Player Timeline:**
+
 ```
 Row 1 complete (0s)
     ↓
@@ -164,6 +167,7 @@ this.SPEED_BORDER_WORM = 1.5;
 ### Potential Improvements (Not Yet Implemented)
 
 **1. Reduce Roaming Time:**
+
 ```javascript
 // Potential quick fix
 this.ROAMING_DURATION_CONSOLE = 3000;   // 3s instead of 8s
@@ -171,6 +175,7 @@ this.ROAMING_DURATION_BORDER = 5000;    // 5s instead of 10s
 ```
 
 **2. Add Difficulty Scaling:**
+
 ```javascript
 // Potential difficulty-based settings
 const difficultySettings = {
@@ -193,6 +198,7 @@ const difficultySettings = {
 ```
 
 **3. Earlier Spawn Timing:**
+
 ```javascript
 // Pre-spawn some worms on first symbol reveal
 document.addEventListener('symbolRevealed', (e) => {
@@ -221,6 +227,7 @@ document.addEventListener('symbolRevealed', (e) => {
 ### Key Events
 
 **Worm System Events:**
+
 ```javascript
 // Spawn trigger
 'problemLineCompleted' → { detail: { lineNumber: 1 } }
@@ -239,6 +246,7 @@ document.addEventListener('symbolRevealed', (e) => {
 ### Event Handlers
 
 **Spawn System** (`js/worm.js` lines ~230-250):
+
 ```javascript
 document.addEventListener('problemLineCompleted', (event) => {
     const lineNumber = event.detail?.lineNumber || 1;
@@ -255,6 +263,7 @@ document.addEventListener('problemLineCompleted', (event) => {
 ```
 
 **Target Detection** (`js/worm.js` lines ~280-300):
+
 ```javascript
 document.addEventListener('symbolRevealed', (event) => {
     const symbol = event.detail?.symbol;
@@ -306,6 +315,7 @@ const wormData = {
 ### Movement System
 
 **Crawling Animation** (`css/worm-styles.css`):
+
 ```css
 @keyframes worm-crawl {
     0% { transform: translateY(0) scaleX(1); }
@@ -317,6 +327,7 @@ const wormData = {
 ```
 
 **Position Updates** (`js/worm.js` - `animate()` method):
+
 - Uses `requestAnimationFrame` for 60fps smooth animation
 - Direct style manipulation (NOT CSS transitions)
 - Boundary clamping with 20px margins
@@ -377,6 +388,7 @@ processSpawnQueue() {
 ### 1. Code Duplication (Deferred)
 
 **Issue**: Three spawn methods with ~85% duplicate code (~360 lines):
+
 - `spawnWormFromConsole()` - 150 lines
 - `spawnWorm()` - 145 lines
 - `spawnWormFromBorder()` - 150 lines
@@ -391,22 +403,26 @@ processSpawnQueue() {
 **Priority**: High - affects core gameplay loop
 
 **Testing Needed**:
+
 - Measure actual symbol theft rates across difficulty levels
 - Track time-to-steal in real gameplay
 - Collect player feedback on worm effectiveness
 
 ### 3. Performance with 100+ Worms
 
-**Current State**: 
+**Current State**:
+
 - Max worms = 999 (effectively unlimited)
 - No spatial hash grid for collision detection
 - O(n²) collision checks in some cases
 
 **Potential Issues**:
+
 - Frame drops with 100+ active worms
 - Memory growth during long play sessions
 
 **Mitigation**:
+
 - Performance monitor available (press 'P' key)
 - Spawn queue system prevents spawn-time frame drops
 - Early testing shows stable 60fps with 30-40 worms
@@ -424,13 +440,15 @@ processSpawnQueue() {
 ### LSD Rainbow Flash
 
 **Trigger**: Worm steals symbol
-**Effect**: 
+**Effect**:
+
 - Hue rotation through full 360° spectrum
 - Drop-shadow color matches hue
 - 0.3s animation speed for intense flashing
 - 20% speed boost while active
 
 **CSS** (`css/worm-styles.css`):
+
 ```css
 @keyframes lsd-flicker {
     0% { filter: hue-rotate(0deg); }
@@ -464,6 +482,7 @@ processSpawnQueue() {
 ### Console Slot Locking
 
 **Mechanism**:
+
 ```javascript
 // Lock slot when worm spawns
 this.lockedConsoleSlots.add(slotIndex);
@@ -475,6 +494,7 @@ consoleSlot.classList.remove('locked');
 ```
 
 **Visual Feedback**:
+
 - Empty slots glow green when available for spawn
 - `.worm-spawning` class for slide-open animation
 - `.locked` class disables clicking during worm activity
@@ -494,24 +514,28 @@ See `Docs/DEVELOPMENT_GUIDE.md` for full power-up details.
 ## Testing Checklist
 
 ### Spawn System
+
 - [ ] Console spawning works for Row 1
 - [ ] Border spawning works for Rows 2+
 - [ ] Spawn queue prevents frame drops
 - [ ] Console slots lock/unlock correctly
 
 ### AI System
+
 - [ ] Worms roam for configured duration
 - [ ] Worms detect and rush to revealed symbols
 - [ ] Worms successfully steal symbols
 - [ ] Stolen symbols gray out correctly
 
 ### Death Mechanics
+
 - [ ] Click matching rain symbol → worm explodes
 - [ ] Symbol returns to Panel B on explosion
 - [ ] Slime splat appears at death location
 - [ ] Console unlocks after worm death
 
 ### Purple Worm (Boss)
+
 - [ ] Spawns after 4 wrong answers
 - [ ] Steals red symbols first
 - [ ] Falls back to blue symbols if no red available

@@ -29,6 +29,7 @@ This guide covers development best practices, recent changes, and coding standar
 **Phase 1: Dead Code Removal** - COMPLETE
 
 Successfully removed deprecated cloning curse system:
+
 - **81 lines removed** from `js/worm.js` (2282 → 2201 lines, -3.5%)
 - Eliminated `cloningCurseActive` flag and all related tracking
 - Removed `checkCurseReset()` and `createCurseResetEffect()` methods
@@ -36,6 +37,7 @@ Successfully removed deprecated cloning curse system:
 - Removed CSS animation `@keyframes curse-reset-flash`
 
 **Files Deleted:**
+
 - `js/problem-manager.js` (empty file)
 - `Docs/Cloning_Curse_Implementation.md` (deprecated feature)
 - `Docs/Snake_Weapon_Implementation.md` (non-existent feature)
@@ -43,6 +45,7 @@ Successfully removed deprecated cloning curse system:
 **Phase 3: Documentation Updates** - COMPLETE
 
 Updated all documentation to reflect current codebase state:
+
 - `.github/copilot-instructions.md` - Power-up details and cloning curse removal
 - `Docs/BRANCH_SYNC_SUMMARY.md` - Added cleanup results
 - All references to deprecated features removed
@@ -81,6 +84,7 @@ this.DEVIL_KILL_TIME = 5000;
 **CRITICAL RULE**: All inter-module communication uses DOM events. Never call functions directly between modules.
 
 **✅ Correct Pattern:**
+
 ```javascript
 // Dispatch event
 document.dispatchEvent(new CustomEvent('symbolClicked', { 
@@ -94,12 +98,14 @@ document.addEventListener('symbolClicked', (event) => {
 ```
 
 **❌ Wrong Pattern:**
+
 ```javascript
 // Direct function call between modules
 game.handleSymbolClick('X');  // NEVER DO THIS!
 ```
 
 **Key Events:**
+
 - `symbolClicked` - User clicks symbol
 - `symbolRevealed` - Symbol validated and revealed
 - `first-line-solved` - First correct answer triggers lock
@@ -117,6 +123,7 @@ game.handleSymbolClick('X');  // NEVER DO THIS!
 Hard-coded numerical values without explanatory variable names. They make code harder to understand and maintain.
 
 **❌ Bad Example:**
+
 ```javascript
 const hasPowerUp = Math.random() < 0.10;  // What is 0.10?
 setTimeout(() => cleanup(), 600);          // Why 600?
@@ -124,6 +131,7 @@ if (dist < 50) { killWorm(); }            // 50 what? pixels? units?
 ```
 
 **✅ Good Example:**
+
 ```javascript
 const POWER_UP_DROP_RATE = 0.10;              // 10% chance per worm
 const EXPLOSION_ANIMATION_DURATION = 600;     // ms - Must match CSS animation
@@ -144,6 +152,7 @@ if (dist < DEVIL_PROXIMITY_DISTANCE) { killWorm(); }
 ### Example: Balancing Game Difficulty
 
 **With Magic Numbers** (Hard):
+
 ```javascript
 // Must search entire file for these values:
 Math.random() < 0.10  // Find all instances
@@ -152,6 +161,7 @@ Math.random() < 0.10  // Find all instances
 ```
 
 **With Named Constants** (Easy):
+
 ```javascript
 // Just change values at top of file:
 this.POWER_UP_DROP_RATE = 0.15;           // Changed from 0.10
@@ -198,12 +208,14 @@ class WormSystem {
 ### ✅ All Power-Ups Fully Implemented
 
 **1. Chain Lightning ⚡**
+
 - Drop rate: 10%
 - Activation: Click icon in help tooltip
 - Behavior: Click worm → kills 5 worms initially, +2 per subsequent pickup
 - Location: `js/worm.js` lines 1802-1881
 
 **2. Spider 🕷️**
+
 - Drop rate: 10%
 - Activation: Click icon (auto-spawns)
 - Behavior: Hunts worms, converts them to spiders (chain reaction)
@@ -211,12 +223,14 @@ class WormSystem {
 - Location: `js/worm.js` lines 1883-1996
 
 **3. Devil 👹**
+
 - Drop rate: 10%
 - Activation: Click icon → click map to place
 - Behavior: Worms rush to devil, die after 5s proximity
 - Location: `js/worm.js` lines 1998-2105
 
 **UI/UX Details:**
+
 - NO keyboard shortcuts (user requirement)
 - Help tooltip shows current counts: `⚡ 2  🕷️ 1  👹  0`
 - Cursor changes to crosshair for targeting
@@ -248,17 +262,20 @@ http://localhost:8000/game.html?level=beginner
 ### Manual Testing Checklist
 
 **Power-Ups:**
+
 - [ ] Chain Lightning: Kill worms until ⚡ drops → click icon → click worm → verify 5+ kills
 - [ ] Spider: Collect 🕷️ → click icon → verify spider spawns and hunts worms
 - [ ] Devil: Collect 👹 → click icon → place devil → verify worms rush to it
 
 **Worm System:**
+
 - [ ] Console spawning: Complete row → verify worms spawn from console slots
 - [ ] Border spawning: Verify border spawns for rows 2+
 - [ ] Purple worms: Make 4+ mistakes → verify purple worm spawns
 - [ ] Symbol stealing: Verify worms steal and gray out symbols
 
 **Performance:**
+
 - [ ] Open performance monitor with 'P' key
 - [ ] Verify FPS stays 55+ with normal gameplay
 - [ ] Check for frame drops during multi-worm spawns
@@ -324,16 +341,19 @@ See `Docs/CSS_Override_Investigation.md` for full explanation.
 **Status**: ⚠️ DEFERRED (high complexity/risk)
 
 Three spawn methods have 85% code duplication (~360 lines):
+
 - `spawnWormFromConsole()` - 150 lines
 - `spawnWorm()` - 145 lines  
 - `spawnWormFromBorder()` - 150 lines
 
-**Reason for Deferral**: 
+**Reason for Deferral**:
+
 - High risk of breaking spawn mechanics
 - Requires comprehensive test suite
 - Better suited for separate PR with extensive testing
 
-**Recommendation**: 
+**Recommendation**:
+
 - Create unit tests for spawn logic first
 - Use factory pattern for consolidation
 - Extract helper methods incrementally
@@ -348,6 +368,7 @@ Three spawn methods have 85% code duplication (~360 lines):
 
 **Commit Convention**:
 Use emoji prefixes matching console logs for easy tracking:
+
 - 🎮 = Core game logic changes
 - 🔒 = Lock animation changes
 - 🐛 = Worm system changes
@@ -355,6 +376,7 @@ Use emoji prefixes matching console logs for easy tracking:
 - 🎯 = Symbol rain (Panel C) changes
 
 **Before Pushing**:
+
 1. Test locally with `python -m http.server 8000`
 2. Verify all difficulty levels work
 3. Check performance monitor (press 'P')

@@ -36,12 +36,14 @@ This guide documents performance optimizations, profiling techniques, and best p
 ### Performance Achievements (October 2025)
 
 **Panel C (Symbol Rain):**
+
 - FPS improvement: 48-52 → 58-60 (+20%)
 - Frame time: 19-21ms → 15-17ms (-20%)
 - DOM queries: 180-220/sec → 80-120/sec (-45%)
 - Memory growth: 8MB/min → 2MB/min (-75%)
 
 **Worm System:**
+
 - Spawn queue prevents frame drops during multi-worm spawns
 - Stable 60fps with 30-40 worms active
 - DOM query caching reduces queries by 60-80%
@@ -57,6 +59,7 @@ This guide documents performance optimizations, profiling techniques, and best p
 **Problem**: `transition: all` caused GPU thrashing on every property change
 
 **Before**:
+
 ```css
 .falling-symbol {
     transition: all 0.3s ease; /* Animates EVERY property change! */
@@ -64,6 +67,7 @@ This guide documents performance optimizations, profiling techniques, and best p
 ```
 
 **After**:
+
 ```css
 .falling-symbol {
     /* Only transition specific properties, not position */
@@ -78,6 +82,7 @@ This guide documents performance optimizations, profiling techniques, and best p
 **Problem**: `::before` elements doubled render layers (100 symbols → 200 layers)
 
 **Before**:
+
 ```css
 .falling-symbol::before {
     content: '';
@@ -88,6 +93,7 @@ This guide documents performance optimizations, profiling techniques, and best p
 ```
 
 **After**:
+
 ```css
 .falling-symbol {
     /* Expand clickable area via padding instead */
@@ -105,6 +111,7 @@ This guide documents performance optimizations, profiling techniques, and best p
 **Problem**: Checking timers every frame (60 checks/sec × 17 symbols = 1020 checks/sec)
 
 **Before**:
+
 ```javascript
 // Inside animateSymbols() called 60 times/sec
 symbols.forEach(sym => {
@@ -115,6 +122,7 @@ symbols.forEach(sym => {
 ```
 
 **After**:
+
 ```javascript
 // Separate 1-second interval, not in animation loop
 setInterval(() => {
@@ -133,6 +141,7 @@ setInterval(() => {
 **Problem**: `getBoundingClientRect()` on every frame caused layout thrashing
 
 **Before**:
+
 ```javascript
 // Called 60 times/sec
 function animateSymbols() {
@@ -142,6 +151,7 @@ function animateSymbols() {
 ```
 
 **After**:
+
 ```javascript
 let cachedContainerHeight = symbolRainContainer.getBoundingClientRect().height;
 
@@ -161,6 +171,7 @@ function animateSymbols() {
 **Problem**: Individual event listeners per symbol caused memory leaks
 
 **Before**:
+
 ```javascript
 function createFallingSymbol(column, isGuaranteed, symbol) {
     const elem = document.createElement('div');
@@ -169,6 +180,7 @@ function createFallingSymbol(column, isGuaranteed, symbol) {
 ```
 
 **After**:
+
 ```javascript
 // Single listener on container
 symbolRainContainer.addEventListener('pointerdown', (event) => {
@@ -184,6 +196,7 @@ symbolRainContainer.addEventListener('pointerdown', (event) => {
 **Problem**: Animation continued at full speed when tab hidden
 
 **After**:
+
 ```javascript
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
@@ -201,6 +214,7 @@ document.addEventListener('visibilitychange', () => {
 **Problem**: Creating/destroying elements every frame caused GC pressure
 
 **After**:
+
 ```javascript
 const symbolPool = [];
 const POOL_SIZE = 30;
@@ -226,6 +240,7 @@ function returnSymbolToPool(elem) {
 **Problem**: Excessive recalculation on window resize
 
 **After**:
+
 ```javascript
 window.addEventListener('resize', debounce(() => {
     updateContainerDimensions();
@@ -243,6 +258,7 @@ window.addEventListener('resize', debounce(() => {
 **Problem**: Spawning 5 worms simultaneously (25+ DOM elements) caused frame drops
 
 **Solution**:
+
 ```javascript
 processSpawnQueue() {
     if (this.isProcessingSpawnQueue || this.spawnQueue.length === 0) return;
@@ -268,6 +284,7 @@ processSpawnQueue() {
 **Problem**: 840+ DOM queries per second in animation loop
 
 **Before**:
+
 ```javascript
 animate() {
     this.worms.forEach(worm => {
@@ -278,6 +295,7 @@ animate() {
 ```
 
 **After**:
+
 ```javascript
 getCachedRevealedSymbols() {
     const now = Date.now();
@@ -305,6 +323,7 @@ getContainerRect() {
 **Problem**: O(n²) collision detection (75 symbols × 75 = 5,625 checks per frame)
 
 **Solution**:
+
 ```javascript
 // Divide screen into 100px cells
 updateSpatialGrid(symbolObj) {
@@ -336,6 +355,7 @@ function checkCollision(symbolObj) {
 **Problem**: 300ms click delay on mobile
 
 **Solution**:
+
 ```javascript
 // Before: 'click' event (300ms delay)
 elem.addEventListener('click', handler);
@@ -348,6 +368,7 @@ elem.addEventListener('pointerdown', (e) => {
 ```
 
 **CSS Improvements**:
+
 ```css
 .falling-symbol {
     touch-action: manipulation; /* Disable double-tap zoom */
@@ -356,6 +377,7 @@ elem.addEventListener('pointerdown', (e) => {
 ```
 
 **Impact**:
+
 - Mobile click delay: 300ms → ~10ms (96% faster)
 - Visual feedback: 300ms → 150ms (50% faster)
 - Better hit detection on small screens
@@ -369,6 +391,7 @@ elem.addEventListener('pointerdown', (e) => {
 **Status**: ⚠️ Deferred (high complexity/risk)
 
 **Issue**: Three spawn methods with 85% duplicate code (~360 lines total)
+
 - `spawnWormFromConsole()` - 150 lines
 - `spawnWorm()` - 145 lines
 - `spawnWormFromBorder()` - 150 lines
@@ -384,12 +407,14 @@ elem.addEventListener('pointerdown', (e) => {
 **File**: `css/worm-styles.css`
 
 **Historical Issues**:
+
 - Malformed `@keyframes` definitions
 - Typos (`opacit` instead of `opacity`)
 - Unclosed braces
 - Missing semicolons
 
-**Backup Files**: 
+**Backup Files**:
+
 - `worm-styles.css.backup` (clean version)
 - `worm-styles.css.corrupted` (broken version for reference)
 
@@ -398,11 +423,13 @@ elem.addEventListener('pointerdown', (e) => {
 ### 3. Performance with 100+ Worms
 
 **Current State**:
+
 - Max worms = 999 (effectively unlimited)
 - No worm-specific spatial hash grid
 - Tested stable with 30-40 worms
 
 **Potential Issues**:
+
 - Frame drops with 100+ active worms
 - O(n²) worm-to-symbol distance calculations
 - Memory growth during long sessions
@@ -410,6 +437,7 @@ elem.addEventListener('pointerdown', (e) => {
 **Testing Needed**: Stress test with 100+ simultaneous worms
 
 **Possible Solutions** (if needed):
+
 - Implement spatial hash for worm collision
 - Limit active worms per difficulty level
 - Cull off-screen worms more aggressively
@@ -423,6 +451,7 @@ elem.addEventListener('pointerdown', (e) => {
 **Toggle**: Press 'P' key during gameplay
 
 **Metrics Displayed**:
+
 - FPS (frames per second)
 - Frame Time (milliseconds)
 - DOM Queries/sec
@@ -431,6 +460,7 @@ elem.addEventListener('pointerdown', (e) => {
 - Memory Usage (approximate)
 
 **Color Coding**:
+
 - 🟢 Green: Good performance
 - 🟡 Yellow: Warning threshold
 - 🔴 Red: Critical performance issue
@@ -438,6 +468,7 @@ elem.addEventListener('pointerdown', (e) => {
 ### Browser DevTools Profiling
 
 **Chrome DevTools**:
+
 1. Open DevTools → Performance tab
 2. Start recording
 3. Play game for 30-60 seconds
@@ -449,6 +480,7 @@ elem.addEventListener('pointerdown', (e) => {
    - Scripting bottlenecks (yellow in flame chart)
 
 **Key Indicators**:
+
 - **Frame drops**: Sudden spikes in frame time
 - **Layout thrashing**: Purple bars in timeline
 - **GC pressure**: Frequent yellow spikes
@@ -461,6 +493,7 @@ elem.addEventListener('pointerdown', (e) => {
 ### DO: Best Practices ✅
 
 **1. Cache DOM Queries**
+
 ```javascript
 // Cache with time-based invalidation
 this.cachedElements = null;
@@ -477,6 +510,7 @@ getCached() {
 ```
 
 **2. Use Event Delegation**
+
 ```javascript
 // One listener on parent instead of many on children
 container.addEventListener('pointerdown', (e) => {
@@ -486,6 +520,7 @@ container.addEventListener('pointerdown', (e) => {
 ```
 
 **3. Implement Object Pooling**
+
 ```javascript
 const pool = [];
 function getFromPool() {
@@ -497,6 +532,7 @@ function returnToPool(obj) {
 ```
 
 **4. Throttle/Debounce Expensive Operations**
+
 ```javascript
 window.addEventListener('resize', debounce(() => {
     recalculateLayout();
@@ -504,6 +540,7 @@ window.addEventListener('resize', debounce(() => {
 ```
 
 **5. Use Page Visibility API**
+
 ```javascript
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
@@ -517,6 +554,7 @@ document.addEventListener('visibilitychange', () => {
 ### DON'T: Anti-Patterns ❌
 
 **1. DON'T use `transition: all`**
+
 ```css
 /* ❌ BAD - animates every property change */
 .element { transition: all 0.3s; }
@@ -526,6 +564,7 @@ document.addEventListener('visibilitychange', () => {
 ```
 
 **2. DON'T query DOM in animation loops**
+
 ```javascript
 /* ❌ BAD */
 function animate() {
@@ -540,6 +579,7 @@ function animate() {
 ```
 
 **3. DON'T use `::before`/`::after` on 100+ elements**
+
 ```css
 /* ❌ BAD - doubles render layers */
 .falling-symbol::before { content: ''; }
@@ -549,6 +589,7 @@ function animate() {
 ```
 
 **4. DON'T add listeners to dynamic elements**
+
 ```javascript
 /* ❌ BAD - memory leak */
 function createSymbol() {
@@ -562,6 +603,7 @@ container.addEventListener('click', (e) => {
 ```
 
 **5. DON'T skip throttling on resize/scroll**
+
 ```javascript
 /* ❌ BAD - runs 100+ times during resize */
 window.addEventListener('resize', updateLayout);
@@ -608,27 +650,32 @@ window.addEventListener('resize', debounce(updateLayout, 250));
 ### High Priority
 
 **1. Difficulty-Based Performance Tuning**
+
 - Reduce worm spawn rates on low-end devices
 - Auto-detect device capabilities and adjust
 - Progressive enhancement based on FPS
 
 **2. Web Workers for Heavy Calculations**
+
 - Move collision detection to worker thread
 - Offload worm pathfinding calculations
 - Keep main thread free for rendering
 
 **3. Lazy Loading for Lock Components**
+
 - Preload next lock component during gameplay
 - Reduce pause during lock transitions
 
 ### Medium Priority
 
 **4. IndexedDB for Problem Caching**
+
 - Cache parsed problems locally
 - Reduce network requests
 - Faster problem loading
 
 **5. Service Worker for Offline Play**
+
 - Cache all game assets
 - Enable offline gameplay
 - Faster repeat visits
@@ -636,11 +683,13 @@ window.addEventListener('resize', debounce(updateLayout, 250));
 ### Low Priority
 
 **6. WebGL Rendering for Symbol Rain**
+
 - Hardware-accelerated rendering
 - Support for 500+ simultaneous symbols
 - Advanced particle effects
 
 **7. GPU-Accelerated Worm Movement**
+
 - CSS transforms instead of top/left
 - 3D transforms for better compositing
 - Smoother animations on low-end devices
@@ -659,12 +708,14 @@ window.addEventListener('resize', debounce(updateLayout, 250));
 ### Stress Testing
 
 **100 Worm Test**:
+
 1. Modify `maxWorms` to force 100+ spawns
 2. Monitor FPS, frame time, memory
 3. Identify breaking point
 4. Document results
 
 **Symbol Rain Stress**:
+
 1. Increase spawn rate to 10 symbols/sec
 2. Monitor for frame drops
 3. Test collision detection performance
