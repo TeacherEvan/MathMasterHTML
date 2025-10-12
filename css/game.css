@@ -124,6 +124,19 @@ input:focus:not(:focus-visible),
 #panel-c {
     position: relative;
     cursor: pointer;
+    /* SMOOTH STARTUP: Fade in Panel C over 2 seconds to hide initial symbol distribution */
+    opacity: 0;
+    animation: panelFadeIn 2s ease-in-out forwards;
+}
+
+@keyframes panelFadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 #symbol-rain-container {
@@ -559,6 +572,7 @@ input:focus:not(:focus-visible),
         font-size: 18px;
     }
 }
+
 /* === GAME OVER MODAL === */
 .game-over-modal {
     position: fixed;
@@ -588,9 +602,26 @@ input:focus:not(:focus-visible),
 }
 
 @keyframes gameOverShake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-    20%, 40%, 60%, 80% { transform: translateX(10px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-10px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(10px);
+    }
 }
 
 .game-over-title {
@@ -604,8 +635,15 @@ input:focus:not(:focus-visible),
 }
 
 @keyframes pulseRed {
-    0%, 100% { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000, 3px 3px 0px #000; }
-    50% { text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000, 3px 3px 0px #000; }
+
+    0%,
+    100% {
+        text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000, 3px 3px 0px #000;
+    }
+
+    50% {
+        text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000, 3px 3px 0px #000;
+    }
 }
 
 .game-over-message {
