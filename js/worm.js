@@ -20,8 +20,8 @@ class WormSystem {
         this.wormsPerRow = 5; // Base worms spawned on first row
         this.additionalWormsPerRow = 0; // Additional worms per subsequent row (5 worms per row total)
 
-        // CLONING CURSE MECHANIC (REMOVED - Green worms now explode on click)
-        this.cloningCurseActive = false; // No longer used
+        // CLONING CURSE MECHANIC
+        this.cloningCurseActive = false; // Activated when purple worm turns green
         this.wormsKilledByRain = 0; // Count of worms killed via rain symbols (not direct clicks)
         this.stolenBlueSymbols = []; // Track stolen blue symbols for replacement priority
 
@@ -474,6 +474,10 @@ class WormSystem {
 
         this.crossPanelContainer.appendChild(wormElement);
 
+        // POWER-UP: 10% chance to carry a power-up
+        const hasPowerUp = Math.random() < 0.10;
+        const powerUpType = hasPowerUp ? ['chainLightning', 'spider', 'devil'][Math.floor(Math.random() * 3)] : null;
+
         // Store worm data with console slot reference
         const wormData = {
             id: wormId,
@@ -496,8 +500,14 @@ class WormSystem {
             consoleSlotElement: slotElement,
             fromConsole: true,
             crawlPhase: 0,
-            direction: Math.random() * Math.PI * 2
+            direction: Math.random() * Math.PI * 2,
+            hasPowerUp: hasPowerUp,
+            powerUpType: powerUpType
         };
+
+        if (hasPowerUp) {
+            console.log(`✨ Worm ${wormId} has power-up: ${powerUpType}`);
+        }
 
         this.worms.push(wormData);
 
@@ -545,6 +555,10 @@ class WormSystem {
 
         this.crossPanelContainer.appendChild(wormElement);
 
+        // POWER-UP: 10% chance to carry a power-up
+        const hasPowerUp = Math.random() < 0.10;
+        const powerUpType = hasPowerUp ? ['chainLightning', 'spider', 'devil'][Math.floor(Math.random() * 3)] : null;
+
         // Store worm data (non-console worm)
         const wormData = {
             id: wormId,
@@ -561,8 +575,14 @@ class WormSystem {
             isFlickering: false,
             baseSpeed: this.SPEED_FALLBACK_WORM,
             currentSpeed: this.SPEED_FALLBACK_WORM,
-            fromConsole: false
+            fromConsole: false,
+            hasPowerUp: hasPowerUp,
+            powerUpType: powerUpType
         };
+
+        if (hasPowerUp) {
+            console.log(`✨ Worm ${wormId} has power-up: ${powerUpType}`);
+        }
 
         this.worms.push(wormData);
 
@@ -655,6 +675,16 @@ class WormSystem {
             direction: Math.random() * Math.PI * 2
         };
 
+        // POWER-UP: 10% chance to carry a power-up
+        const hasPowerUp = Math.random() < 0.10;
+        const powerUpType = hasPowerUp ? ['chainLightning', 'spider', 'devil'][Math.floor(Math.random() * 3)] : null;
+        wormData.hasPowerUp = hasPowerUp;
+        wormData.powerUpType = powerUpType;
+
+        if (hasPowerUp) {
+            console.log(`✨ Border worm ${wormId} has power-up: ${powerUpType}`);
+        }
+
         this.worms.push(wormData);
 
         // Add click handler
@@ -740,6 +770,16 @@ class WormSystem {
             canStealBlue: true,
             prioritizeRed: true
         };
+
+        // POWER-UP: 10% chance to carry a power-up (even purple worms)
+        const hasPowerUp = Math.random() < 0.10;
+        const powerUpType = hasPowerUp ? ['chainLightning', 'spider', 'devil'][Math.floor(Math.random() * 3)] : null;
+        wormData.hasPowerUp = hasPowerUp;
+        wormData.powerUpType = powerUpType;
+
+        if (hasPowerUp) {
+            console.log(`✨ Purple worm ${wormId} has power-up: ${powerUpType}`);
+        }
 
         this.worms.push(wormData);
 
@@ -1258,7 +1298,7 @@ class WormSystem {
         // GREEN WORMS: Always explode on click (no cloning)
         console.log(`💥 Green worm ${worm.id} clicked - EXPLODING!`);
 
-        // Check if this worm has a power-up (will be implemented later)
+        // Drop power-up if this worm has one
         if (worm.hasPowerUp) {
             this.dropPowerUp(worm.x, worm.y, worm.powerUpType);
         }
@@ -1536,6 +1576,11 @@ class WormSystem {
 
         // Create slime splat that lasts 15 seconds
         this.createSlimeSplat(worm.x, worm.y);
+
+        // Drop power-up if this worm has one (and not killed by chain reaction to avoid spam)
+        if (worm.hasPowerUp && !isChainReaction) {
+            this.dropPowerUp(worm.x, worm.y, worm.powerUpType);
+        }
 
         setTimeout(() => {
             this.removeWorm(worm);
