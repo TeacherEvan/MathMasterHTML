@@ -286,6 +286,90 @@ class WormSystem {
         });
     }
 
+    /**
+     * HELPER: Assign power-up to worm
+     * Extracted from duplicate code in spawn methods
+     */
+    assignPowerUp() {
+        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
+        const powerUpType = hasPowerUp 
+            ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)]
+            : null;
+        
+        return { hasPowerUp, powerUpType };
+    }
+
+    /**
+     * HELPER: Build worm data object
+     * Extracted from duplicate code in spawn methods
+     */
+    buildWormData(config) {
+        const {
+            wormId, wormElement, startX, startY,
+            speed, roamDuration, spawnType,
+            hasPowerUp, powerUpType,
+            slotIndex = null, slotElement = null,
+            additionalProps = {}
+        } = config;
+        
+        const baseData = {
+            id: wormId,
+            element: wormElement,
+            stolenSymbol: null,
+            targetElement: null,
+            targetSymbol: null,
+            x: startX,
+            y: startY,
+            velocityX: (Math.random() - 0.5) * speed,
+            velocityY: (Math.random() - 0.5) * 1.0,
+            active: true,
+            hasStolen: false,
+            isRushingToTarget: false,
+            roamingEndTime: Date.now() + roamDuration,
+            isFlickering: false,
+            baseSpeed: speed,
+            currentSpeed: speed,
+            hasPowerUp: hasPowerUp,
+            powerUpType: powerUpType,
+            fromConsole: spawnType === 'console',
+            crawlPhase: additionalProps.crawlPhase || 0,
+            direction: additionalProps.direction || Math.random() * Math.PI * 2
+        };
+
+        // Add console-specific properties
+        if (slotIndex !== null) {
+            baseData.consoleSlotIndex = slotIndex;
+            baseData.consoleSlotElement = slotElement;
+        }
+
+        // Merge any additional properties
+        return { ...baseData, ...additionalProps };
+    }
+
+    /**
+     * HELPER: Register worm (add to array, attach listener, start animation)
+     * Extracted from duplicate code in spawn methods
+     */
+    registerWorm(wormData) {
+        this.worms.push(wormData);
+        
+        wormData.element.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.handleWormClick(wormData);
+        });
+        
+        if (wormData.hasPowerUp) {
+            console.log(`✨ Worm ${wormData.id} has power-up: ${wormData.powerUpType}`);
+        }
+        
+        console.log(`✅ Worm ${wormData.id} spawned at (${wormData.x.toFixed(0)}, ${wormData.y.toFixed(0)}). Total worms: ${this.worms.length}`);
+        
+        // Start animation loop if not already running
+        if (this.worms.length === 1) {
+            this.animate();
+        }
+    }
+
     // Notify roaming worms that a red symbol has appeared
     notifyWormsOfRedSymbol(symbolValue) {
         console.log(`🎯 Notifying worms of revealed red symbol: "${symbolValue}"`);
@@ -462,7 +546,7 @@ class WormSystem {
         const startX = slotRect.left + (slotRect.width / 2);
         const startY = slotRect.top + (slotRect.height / 2);
 
-        // REFACTORED: Use factory method for worm creation
+        // Create worm element
         const wormId = generateUniqueId('worm');
         const wormElement = this.createWormElement({
             id: wormId,
@@ -474,56 +558,24 @@ class WormSystem {
 
         this.crossPanelContainer.appendChild(wormElement);
 
-        // POWER-UP: 10% chance to carry a power-up
-        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
-        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
+        // Assign power-up using helper
+        const { hasPowerUp, powerUpType } = this.assignPowerUp();
 
-        // Store worm data with console slot reference
-        const wormData = {
-            id: wormId,
-            element: wormElement,
-            stolenSymbol: null,
-            targetElement: null,
-            targetSymbol: null,
-            x: startX,
-            y: startY,
-            velocityX: (Math.random() - 0.5) * this.SPEED_CONSOLE_WORM,
-            velocityY: (Math.random() - 0.5) * 1.0,
-            active: true,
-            hasStolen: false,
-            isRushingToTarget: false,
-            roamingEndTime: Date.now() + this.difficultyRoamTimeConsole, // Use difficulty-scaled roam time
-            isFlickering: false,
-            baseSpeed: this.SPEED_CONSOLE_WORM,
-            currentSpeed: this.SPEED_CONSOLE_WORM,
-            consoleSlotIndex: slotIndex,
-            consoleSlotElement: slotElement,
-            fromConsole: true,
-            crawlPhase: 0,
-            direction: Math.random() * Math.PI * 2,
-            hasPowerUp: hasPowerUp,
-            powerUpType: powerUpType
-        };
-
-        if (hasPowerUp) {
-            console.log(`✨ Worm ${wormId} has power-up: ${powerUpType}`);
-        }
-
-        this.worms.push(wormData);
-
-        // Add click handler
-        wormElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.handleWormClick(wormData);
+        // Build worm data using helper
+        const wormData = this.buildWormData({
+            wormId, wormElement, startX, startY,
+            speed: this.SPEED_CONSOLE_WORM,
+            roamDuration: this.difficultyRoamTimeConsole,
+            spawnType: 'console',
+            hasPowerUp, powerUpType,
+            slotIndex, slotElement,
+            additionalProps: { crawlPhase: 0 }
         });
 
-        console.log(`✅ Worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
-        console.log(`🐛 Worm will roam for 10 seconds before stealing`);
-
-        // Start animation loop if not already running
-        if (this.worms.length === 1) {
-            this.animate();
-        }
+        // Register worm using helper
+        this.registerWorm(wormData);
+        
+        console.log(`🐛 Worm will roam for ${this.difficultyRoamTimeConsole/1000} seconds before stealing`);
     }
 
     // Fallback spawn method for when console slots are all occupied
@@ -543,7 +595,7 @@ class WormSystem {
         const startX = Math.random() * Math.max(0, viewportWidth - 80);
         const startY = Math.max(0, viewportHeight - 30);
 
-        // REFACTORED: Use factory method for worm creation
+        // Create worm element
         const wormId = generateUniqueId('worm');
         const wormElement = this.createWormElement({
             id: wormId,
@@ -555,49 +607,21 @@ class WormSystem {
 
         this.crossPanelContainer.appendChild(wormElement);
 
-        // POWER-UP: 10% chance to carry a power-up
-        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
-        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
+        // Assign power-up using helper
+        const { hasPowerUp, powerUpType } = this.assignPowerUp();
 
-        // Store worm data (non-console worm)
-        const wormData = {
-            id: wormId,
-            element: wormElement,
-            stolenSymbol: null,
-            targetElement: null,
-            x: startX,
-            y: startY,
-            velocityX: (Math.random() - 0.5) * this.SPEED_FALLBACK_WORM,
-            velocityY: (Math.random() - 0.5) * 0.5,
-            active: true,
-            hasStolen: false,
-            roamingEndTime: Date.now() + this.difficultyRoamTimeConsole, // Use difficulty-scaled roam time
-            isFlickering: false,
-            baseSpeed: this.SPEED_FALLBACK_WORM,
-            currentSpeed: this.SPEED_FALLBACK_WORM,
-            fromConsole: false,
-            hasPowerUp: hasPowerUp,
-            powerUpType: powerUpType
-        };
-
-        if (hasPowerUp) {
-            console.log(`✨ Worm ${wormId} has power-up: ${powerUpType}`);
-        }
-
-        this.worms.push(wormData);
-
-        // Add click handler
-        wormElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.handleWormClick(wormData);
+        // Build worm data using helper
+        const wormData = this.buildWormData({
+            wormId, wormElement, startX, startY,
+            speed: this.SPEED_FALLBACK_WORM,
+            roamDuration: this.difficultyRoamTimeConsole,
+            spawnType: 'fallback',
+            hasPowerUp, powerUpType,
+            additionalProps: { velocityY: (Math.random() - 0.5) * 0.5 }
         });
 
-        console.log(`✅ Worm ${wormId} spawned (fallback mode). Total worms: ${this.worms.length}`);
-
-        // Start animation loop if not already running
-        if (this.worms.length === 1) {
-            this.animate();
-        }
+        // Register worm using helper
+        this.registerWorm(wormData);
     }
 
     // Spawn worm from border (bottom or sides) - used for row completion
@@ -637,7 +661,7 @@ class WormSystem {
             startY = margin + yPosition * (viewportHeight - 2 * margin);
         }
 
-        // REFACTORED: Use factory method for worm creation
+        // Create worm element
         const wormId = generateUniqueId('border-worm');
         const wormElement = this.createWormElement({
             id: wormId,
@@ -649,56 +673,26 @@ class WormSystem {
 
         this.crossPanelContainer.appendChild(wormElement);
 
-        // Store worm data
-        const wormData = {
-            id: wormId,
-            element: wormElement,
-            stolenSymbol: null,
-            targetElement: null,
-            targetSymbol: null,
-            x: startX,
-            y: startY,
-            velocityX: (Math.random() - 0.5) * this.SPEED_BORDER_WORM,
-            velocityY: (Math.random() - 0.5) * 1.0,
-            active: true,
-            hasStolen: false,
-            isRushingToTarget: false,
-            roamingEndTime: Date.now() + this.difficultyRoamTimeBorder, // Use difficulty-scaled roam time
-            isFlickering: false,
-            baseSpeed: this.SPEED_BORDER_WORM,
-            currentSpeed: this.SPEED_BORDER_WORM,
-            fromConsole: false,
-            shouldExitToConsole: true,
-            exitingToConsole: false,
-            targetConsoleSlot: null,
-            crawlPhase: Math.random() * Math.PI * 2,
-            direction: Math.random() * Math.PI * 2
-        };
+        // Assign power-up using helper
+        const { hasPowerUp, powerUpType } = this.assignPowerUp();
 
-        // POWER-UP: 10% chance to carry a power-up
-        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
-        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
-        wormData.hasPowerUp = hasPowerUp;
-        wormData.powerUpType = powerUpType;
-
-        if (hasPowerUp) {
-            console.log(`✨ Border worm ${wormId} has power-up: ${powerUpType}`);
-        }
-
-        this.worms.push(wormData);
-
-        // Add click handler
-        wormElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.handleWormClick(wormData);
+        // Build worm data using helper
+        const wormData = this.buildWormData({
+            wormId, wormElement, startX, startY,
+            speed: this.SPEED_BORDER_WORM,
+            roamDuration: this.difficultyRoamTimeBorder,
+            spawnType: 'border',
+            hasPowerUp, powerUpType,
+            additionalProps: {
+                shouldExitToConsole: true,
+                exitingToConsole: false,
+                targetConsoleSlot: null,
+                crawlPhase: Math.random() * Math.PI * 2
+            }
         });
 
-        console.log(`✅ Border worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
-
-        // Start animation loop if not already running
-        if (this.worms.length === 1) {
-            this.animate();
-        }
+        // Register worm using helper
+        this.registerWorm(wormData);
     }
 
     // PURPLE WORM: Spawn purple worm triggered by 2+ wrong answers
