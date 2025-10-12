@@ -28,7 +28,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // PURPLE WORM: Track consecutive wrong answers
     let consecutiveWrongAnswers = 0;
-    const PURPLE_WORM_THRESHOLD = 4; // Trigger purple worm after 4 wrong clicks
+    const PURPLE_WORM_THRESHOLD = 3; // Trigger purple worm after 3 wrong clicks (excluding worm clicks)
+
+    // PERFORMANCE: DOM query caching to reduce repeated querySelectorAll calls
+    let cachedStepSymbols = null;
+    let cachedStepIndex = -1; // Track which step is cached
+    let cacheInvalidated = true;
+
+    // PERFORMANCE: Get cached step symbols (refreshes when step changes)
+    function getCachedStepSymbols(stepIndex) {
+        if (cacheInvalidated || cachedStepIndex !== stepIndex || !cachedStepSymbols) {
+            cachedStepSymbols = solutionContainer.querySelectorAll(
+                `.solution-symbol[data-step-index="${stepIndex}"]`
+            );
+            cachedStepIndex = stepIndex;
+            cacheInvalidated = false;
+            console.log(`💾 Cached ${cachedStepSymbols.length} symbols for step ${stepIndex}`);
+        }
+        return cachedStepSymbols;
+    }
+
+    // PERFORMANCE: Invalidate cache when needed
+    function invalidateStepCache() {
+        cacheInvalidated = true;
+        cachedStepSymbols = null;
+    }
 
     // PERFORMANCE FIX: Defer heavy problem loading to prevent blocking animation
     // Use requestIdleCallback if available, otherwise setTimeout
@@ -142,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentStepIndex = 0;
         currentSymbolIndex = 0;
         revealedIndex = 0;
+        invalidateStepCache(); // PERFORMANCE: Invalidate cache on new problem
 
         // Show basic lock until activation
         if (lockDisplay && window.lockManager) {
@@ -208,6 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset step indices
         currentStepIndex = 0;
         currentSymbolIndex = 0;
+        invalidateStepCache(); // PERFORMANCE: Invalidate cache when changing problems
 
         setupProblem();
     }
@@ -220,14 +246,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /** Get next hidden symbol from solution - now accepts any symbol in current line */
     function getNextSymbol() {
-        // Find all hidden symbols in the current step
-        const currentStepSymbols = solutionContainer.querySelectorAll(
-            `[data-step-index="${currentStepIndex}"].hidden-symbol`
+        // PERFORMANCE: Use cached symbols
+        const currentStepSymbols = getCachedStepSymbols(currentStepIndex);
+        const hiddenSymbols = Array.from(currentStepSymbols).filter(el =>
+            el.classList.contains('hidden-symbol')
         );
 
-        if (currentStepSymbols.length > 0) {
+        if (hiddenSymbols.length > 0) {
             // Return array of all possible symbols in current line
-            const possibleSymbols = Array.from(currentStepSymbols).map(span => span.textContent);
+            const possibleSymbols = hiddenSymbols.map(span => span.textContent);
             console.log(`🎯 Current line has ${possibleSymbols.length} hidden symbols: [${possibleSymbols.join(', ')}]`);
             return possibleSymbols;
         }
@@ -261,14 +288,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // FIXED: Normalize X/x for matching
         const normalizedTarget = targetSymbol.toLowerCase() === 'x' ? 'X' : targetSymbol;
 
-        // Find the specific symbol in current step
-        const currentStepSymbols = solutionContainer.querySelectorAll(
-            `[data-step-index="${currentStepIndex}"].hidden-symbol`
+        // PERFORMANCE: Use cached symbols
+        const currentStepSymbols = getCachedStepSymbols(currentStepIndex);
+        const hiddenSymbols = Array.from(currentStepSymbols).filter(el =>
+            el.classList.contains('hidden-symbol')
         );
 
-        console.log(`📋 Found ${currentStepSymbols.length} hidden symbols in current step`);
+        console.log(`📋 Found ${hiddenSymbols.length} hidden symbols in current step`);
 
-        for (let span of currentStepSymbols) {
+        for (let span of hiddenSymbols) {
             const spanSymbol = span.textContent;
             const normalizedSpan = spanSymbol.toLowerCase() === 'x' ? 'X' : spanSymbol;
 
@@ -277,6 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (normalizedSpan === normalizedTarget) {
                 span.classList.remove('hidden-symbol');
                 span.classList.add('revealed-symbol');
+                invalidateStepCache(); // PERFORMANCE: Invalidate cache after DOM change
                 console.log(`✅ Successfully revealed symbol: "${targetSymbol}" in step ${currentStepIndex + 1}`);
 
                 // Dispatch event to notify worms that a RED symbol appeared!
@@ -372,6 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentStepIndex < currentProblem.steps.length - 1) {
                 currentStepIndex++;
                 currentSymbolIndex = 0;
+                invalidateStepCache(); // PERFORMANCE: Invalidate cache when moving to next step
                 console.log(`📋 Moving to step ${currentStepIndex + 1}: "${currentProblem.steps[currentStepIndex]}"`);
             } else {
                 console.log('🎉 All steps complete!');
