@@ -606,6 +606,32 @@
     }
 }
 
+@keyframes lightning-flash {
+    0% {
+        opacity: 1;
+        filter: brightness(2);
+    }
+    50% {
+        opacity: 1;
+        filter: brightness(1.5);
+    }
+    100% {
+        opacity: 0;
+        filter: brightness(1);
+    }
+}
+
+@keyframes sparkle-burst {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--angle-x), var(--angle-y)) scale(0.3);
+        opacity: 0;
+    }
+}
+
 /* === DEVIL POWER-UP ANIMATION === */
 @keyframes devil-pulsate {
 

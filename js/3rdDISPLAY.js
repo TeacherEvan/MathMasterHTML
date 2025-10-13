@@ -309,41 +309,32 @@ function initSymbolRain() {
         // Trim array to new length (no reallocation!)
         activeSymbols.length = writeIndex;
 
+        // PERFORMANCE: Helper to check if column is crowded (extract to avoid duplication)
+        function isColumnCrowded(col) {
+            for (let i = 0; i < activeSymbols.length; i++) {
+                if (activeSymbols[i].column === col && activeSymbols[i].y < 40) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         // Normal random spawning - optimized to reduce array iterations
         for (let col = 0; col < columns; col++) {
-            if (Math.random() < spawnRate) {
-                // Quick check: only spawn if column isn't crowded at top
-                // REDUCED from 100px to 40px to allow more symbols near top
-                let columnCrowded = false;
-                for (let i = 0; i < activeSymbols.length; i++) {
-                    if (activeSymbols[i].column === col && activeSymbols[i].y < 40) {
-                        columnCrowded = true;
-                        break; // Early exit optimization
-                    }
-                }
-
-                if (!columnCrowded) {
-                    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-                    createFallingSymbol(col, false, randomSymbol);
-                }
+            if (Math.random() < spawnRate && !isColumnCrowded(col)) {
+                const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                createFallingSymbol(col, false, randomSymbol);
             }
         }
 
         // BURST SPAWNING: Occasionally spawn 2-3 symbols simultaneously in different columns
         if (Math.random() < burstSpawnRate) {
             const burstCount = 2 + Math.floor(Math.random() * 2); // 2-3 symbols
+            
+            // Find columns that aren't crowded - reuse helper function
             const availableColumns = [];
-
-            // Find columns that aren't crowded
             for (let col = 0; col < columns; col++) {
-                let isCrowded = false;
-                for (let i = 0; i < activeSymbols.length; i++) {
-                    if (activeSymbols[i].column === col && activeSymbols[i].y < 40) {
-                        isCrowded = true;
-                        break;
-                    }
-                }
-                if (!isCrowded) {
+                if (!isColumnCrowded(col)) {
                     availableColumns.push(col);
                 }
             }

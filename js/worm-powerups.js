@@ -233,27 +233,124 @@ class WormPowerUpSystem {
         const length = Math.sqrt(dx * dx + dy * dy);
         const angle = Math.atan2(dy, dx);
 
+        // Create jagged lightning path using SVG for better visuals
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        
+        // Generate jagged lightning path with random deviations
+        const segments = Math.max(3, Math.floor(length / 50)); // More segments for longer bolts
+        let pathData = `M 0 0`;
+        
+        for (let i = 1; i < segments; i++) {
+            const progress = i / segments;
+            const targetX = length * progress;
+            
+            // Add random deviation perpendicular to line direction
+            const deviation = (Math.random() - 0.5) * 30;
+            
+            pathData += ` L ${targetX} ${deviation}`;
+        }
+        pathData += ` L ${length} 0`; // End at target
+        
+        path.setAttribute('d', pathData);
+        path.setAttribute('stroke', '#00ffff');
+        path.setAttribute('stroke-width', '3');
+        path.setAttribute('fill', 'none');
+        path.setAttribute('filter', 'url(#lightning-glow)');
+        
+        // Add glow filter
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+        filter.setAttribute('id', 'lightning-glow');
+        
+        const feGaussianBlur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
+        feGaussianBlur.setAttribute('stdDeviation', '3');
+        feGaussianBlur.setAttribute('result', 'coloredBlur');
+        
+        const feMerge = document.createElementNS('http://www.w3.org/2000/svg', 'feMerge');
+        const feMergeNode1 = document.createElementNS('http://www.w3.org/2000/svg', 'feMergeNode');
+        feMergeNode1.setAttribute('in', 'coloredBlur');
+        const feMergeNode2 = document.createElementNS('http://www.w3.org/2000/svg', 'feMergeNode');
+        feMergeNode2.setAttribute('in', 'SourceGraphic');
+        
+        feMerge.appendChild(feMergeNode1);
+        feMerge.appendChild(feMergeNode2);
+        filter.appendChild(feGaussianBlur);
+        filter.appendChild(feMerge);
+        defs.appendChild(filter);
+        
+        svg.appendChild(defs);
+        svg.appendChild(path);
+        
+        svg.style.cssText = `
+            position: absolute;
+            left: 0;
+            top: -15px;
+            width: ${length}px;
+            height: 30px;
+            overflow: visible;
+            pointer-events: none;
+        `;
+
         lightning.style.cssText = `
             position: fixed;
             left: ${x1}px;
             top: ${y1}px;
-            width: ${length}px;
-            height: 3px;
-            background: linear-gradient(90deg, cyan, white, cyan);
-            transform-origin: 0 0;
+            transform-origin: 0 50%;
             transform: rotate(${angle}rad);
             z-index: 10002;
-            box-shadow: 0 0 10px cyan, 0 0 20px cyan;
-            animation: lightning-fade 0.3s ease-out;
+            pointer-events: none;
+            animation: lightning-flash 0.3s ease-out;
         `;
-
+        
+        lightning.appendChild(svg);
         document.body.appendChild(lightning);
+
+        // Create additional spark particles at impact point
+        this.createLightningSparkles(x2, y2);
 
         setTimeout(() => {
             if (lightning.parentNode) {
                 lightning.parentNode.removeChild(lightning);
             }
         }, 300);
+    }
+
+    /**
+     * Create sparkle effect at lightning impact point
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     */
+    createLightningSparkles(x, y) {
+        for (let i = 0; i < 8; i++) {
+            const sparkle = document.createElement('div');
+            const angle = (Math.PI * 2 * i) / 8;
+            const distance = 20 + Math.random() * 20;
+            
+            sparkle.style.cssText = `
+                position: fixed;
+                left: ${x}px;
+                top: ${y}px;
+                width: 4px;
+                height: 4px;
+                background: #00ffff;
+                border-radius: 50%;
+                box-shadow: 0 0 8px #00ffff;
+                animation: sparkle-burst 0.4s ease-out forwards;
+                --angle-x: ${Math.cos(angle) * distance};
+                --angle-y: ${Math.sin(angle) * distance};
+                z-index: 10003;
+                pointer-events: none;
+            `;
+            
+            document.body.appendChild(sparkle);
+            
+            setTimeout(() => {
+                if (sparkle.parentNode) {
+                    sparkle.parentNode.removeChild(sparkle);
+                }
+            }, 400);
+        }
     }
 
     /**
@@ -526,11 +623,84 @@ class WormPowerUpSystem {
             display: flex;
             gap: 15px;
             border: 2px solid #0f0;
+            cursor: move;
+            user-select: none;
         `;
 
+        // Make it draggable
+        this.makeDraggable(display);
+
         document.body.appendChild(display);
-        console.log('📊 Power-up display created');
+        console.log('📊 Power-up display created (draggable)');
         return display;
+    }
+
+    /**
+     * Make element draggable
+     * @param {HTMLElement} element - Element to make draggable
+     */
+    makeDraggable(element) {
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
+
+        element.addEventListener('pointerdown', dragStart);
+        document.addEventListener('pointermove', drag);
+        document.addEventListener('pointerup', dragEnd);
+
+        function dragStart(e) {
+            // Only allow dragging from the display itself, not from power-up items
+            if (e.target.classList.contains('power-up-item')) {
+                return;
+            }
+
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+
+            if (e.target === element || e.target.parentElement === element) {
+                isDragging = true;
+                element.style.cursor = 'grabbing';
+            }
+        }
+
+        function drag(e) {
+            if (isDragging) {
+                e.preventDefault();
+                
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+
+                xOffset = currentX;
+                yOffset = currentY;
+
+                // Keep within viewport bounds
+                const rect = element.getBoundingClientRect();
+                const maxX = window.innerWidth - rect.width;
+                const maxY = window.innerHeight - rect.height;
+                
+                const boundedX = Math.max(0, Math.min(currentX, maxX));
+                const boundedY = Math.max(0, Math.min(currentY, maxY));
+
+                setTranslate(boundedX, boundedY, element);
+            }
+        }
+
+        function dragEnd(e) {
+            if (isDragging) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                element.style.cursor = 'move';
+            }
+        }
+
+        function setTranslate(xPos, yPos, el) {
+            el.style.transform = `translate(${xPos}px, ${yPos}px)`;
+        }
     }
 
     /**
