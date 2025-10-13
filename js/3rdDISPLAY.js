@@ -130,42 +130,28 @@ function initSymbolRain() {
     }
 
     // DESKTOP: Create falling symbol (vertical)
-    function createFallingSymbol(column, isInitialPopulation = false, forcedSymbol = null, initialY = null) {
-        const randomSymbol = forcedSymbol || symbols[Math.floor(Math.random() * symbols.length)];
+    function createFallingSymbol(column, isInitialPopulation = false, forcedSymbol = null) {
+        const symbol = getSymbolFromPool(); // Use pooled element
+        symbol.className = 'falling-symbol';
+        symbol.textContent = forcedSymbol || symbols[Math.floor(Math.random() * symbols.length)];
+        // FIX: Center the random offset around column position to prevent right-side bias
+        const horizontalOffset = (Math.random() - 0.5) * 40; // -20px to +20px
+        symbol.style.left = (column * columnWidth + columnWidth / 2 + horizontalOffset) + 'px';
 
-        // PERFORMANCE: Try to reuse pooled element first
-        const symbol = getSymbolFromPool();
-        symbol.textContent = randomSymbol;
-
-        const columnOffset = column * columnWidth;
-        const randomHorizontalOffset = (Math.random() - 0.5) * 30;
-
-        // Mobile vs Desktop positioning
-        if (isMobileMode) {
-            // Mobile: horizontal train layout (left to right)
-            const randomLeft = Math.random() * (symbolRainContainer.clientWidth - 60);
-            symbol.style.left = randomLeft + 'px';
-            symbol.style.top = (Math.random() * (cachedContainerHeight || window.innerHeight)) + 'px';
+        if (isInitialPopulation) {
+            symbol.style.top = `${Math.random() * symbolRainContainer.offsetHeight}px`;
         } else {
-            // Desktop: vertical columns (top to bottom)
-            symbol.style.left = (columnOffset + randomHorizontalOffset) + 'px';
-
-            // SMOOTH STARTUP: Use provided initialY for vertical distribution
-            if (initialY !== null) {
-                symbol.style.top = initialY + 'px';
-            } else if (isInitialPopulation) {
-                symbol.style.top = (Math.random() * (cachedContainerHeight || window.innerHeight)) + 'px';
-            } else {
-                symbol.style.top = '-50px';
-            }
+            symbol.style.top = '-50px';
         }
 
+        // PERFORMANCE: Event delegation - no listener needed per symbol!
+        // Container handles all clicks via event delegation (see init section)
         symbolRainContainer.appendChild(symbol);
 
         activeSymbols.push({
             element: symbol,
             column: column,
-            y: initialY !== null ? initialY : (isInitialPopulation ? parseFloat(symbol.style.top) : -50),
+            y: isInitialPopulation ? parseFloat(symbol.style.top) : -50,
             x: parseFloat(symbol.style.left),
             symbol: symbol.textContent
         });
@@ -176,26 +162,29 @@ function initSymbolRain() {
     }
 
     function populateInitialSymbols() {
-        // SMOOTH STARTUP: Distribute symbols vertically for gradual reveal
+        // MOBILE FIX: Reduce initial symbols on mobile to prevent overload
         const symbolMultiplier = isMobileMode ? 2 : 5; // Mobile: 2 per column, Desktop: 5 per column
         const initialSymbolCount = columns * symbolMultiplier;
         let spawned = 0;
 
-        console.log(`📱 Populating ${initialSymbolCount} initial symbols with vertical distribution (Mobile: ${isMobileMode})`);
+        console.log(`📱 Populating ${initialSymbolCount} initial symbols (Mobile: ${isMobileMode})`);
 
-        // PERFORMANCE + UX: Spawn all symbols immediately with vertical distribution
-        // This prevents the "buildup at top" effect and creates smooth Matrix rain from frame 1
-        const containerHeight = cachedContainerHeight || window.innerHeight;
+        // Gradually spawn symbols over time to prevent performance spike
+        function spawnBatch() {
+            const batchSize = 3; // Spawn 3 symbols at a time
+            const batchDelay = 50; // 50ms between batches
 
-        for (let i = 0; i < initialSymbolCount; i++) {
-            const randomColumn = Math.floor(Math.random() * columns);
-            // Distribute symbols evenly across viewport height (not all at top!)
-            const randomVerticalPosition = Math.random() * containerHeight;
-            createFallingSymbol(randomColumn, true, null, randomVerticalPosition);
-            spawned++;
+            for (let i = 0; i < batchSize && spawned < initialSymbolCount; i++) {
+                createFallingSymbol(Math.floor(Math.random() * columns), true);
+                spawned++;
+            }
+
+            if (spawned < initialSymbolCount) {
+                setTimeout(spawnBatch, batchDelay);
+            }
         }
 
-        console.log(`✅ Spawned ${spawned} symbols with vertical distribution`);
+        spawnBatch();
     }
 
     function handleSymbolClick(symbolElement, event) {

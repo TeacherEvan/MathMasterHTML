@@ -646,3 +646,15 @@
         height: 6px;
     }
 }
+
+/* === DEVIL POWER-UP PULSATION === */
+@keyframes devil-pulsate {
+    0%, 100% {
+        text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.6);
+        transform: scale(1);
+    }
+    50% {
+        text-shadow: 0 0 40px rgba(255, 0, 0, 1), 0 0 80px rgba(255, 50, 0, 0.8), 0 0 120px rgba(255, 0, 0, 0.6);
+        transform: scale(1.1);
+    }
+}
