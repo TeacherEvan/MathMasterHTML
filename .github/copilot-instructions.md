@@ -237,6 +237,15 @@ Purple worms are boss-level enemies with special behaviors that require strategi
 - Symbol fall speed: 0.6 (base), increases to max 6 over time
 - Global counter `window.symbolRainActiveCount` tracks active symbols for performance monitor
 
+**Collision Safety Mechanism (October 2025):**
+- Symbols that touch/overlap each other are automatically removed
+- Uses `checkTouching()` function to detect actual bounding box overlap
+- Both colliding symbols are removed in the same frame
+- Prevents symbol buildup that could degrade performance
+- Console logs: `🔴 SAFETY: Removing touching symbols "X" and "Y"`
+- Maintains typical active symbol count: 35-50 symbols
+- Integrates with existing DOM pooling and spatial hash grid systems
+
 ## Development Workflow
 
 *   **No Build Process**: Pure HTML/CSS/JS - no npm, webpack, or bundlers
