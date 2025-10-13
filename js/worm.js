@@ -1012,7 +1012,7 @@ class WormSystem {
         if (targetElement) {
             // Rush towards target symbol
             const targetRect = targetElement.getBoundingClientRect();
-            
+
             // FIX: Worms use viewport coordinates (fixed positioning), so use absolute coordinates
             const targetX = targetRect.left + (targetRect.width / 2);
             const targetY = targetRect.top + (targetRect.height / 2);
@@ -1070,7 +1070,7 @@ class WormSystem {
      */
     updateConsoleReturnBehavior(worm) {
         const slotRect = worm.consoleSlotElement.getBoundingClientRect();
-        
+
         // FIX: Worms use viewport coordinates (fixed positioning), so use absolute coordinates
         const targetX = slotRect.left + (slotRect.width / 2);
         const targetY = slotRect.top + (slotRect.height / 2);
@@ -1120,7 +1120,7 @@ class WormSystem {
             // If targeting a console slot, move toward it
             if (worm.exitingToConsole && worm.targetConsoleSlot) {
                 const slotRect = worm.targetConsoleSlot.getBoundingClientRect();
-                
+
                 // FIX: Worms use viewport coordinates (fixed positioning), so use absolute coordinates
                 const targetX = slotRect.left + (slotRect.width / 2);
                 const targetY = slotRect.top + (slotRect.height / 2);

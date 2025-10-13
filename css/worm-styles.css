@@ -608,15 +608,18 @@
 
 /* === DEVIL POWER-UP ANIMATION === */
 @keyframes devil-pulsate {
-    0%, 100% {
-        text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 
-                     0 0 40px rgba(255, 0, 0, 0.6);
+
+    0%,
+    100% {
+        text-shadow: 0 0 20px rgba(255, 0, 0, 0.8),
+            0 0 40px rgba(255, 0, 0, 0.6);
         transform: scale(1);
     }
+
     50% {
-        text-shadow: 0 0 30px rgba(255, 0, 0, 1), 
-                     0 0 60px rgba(255, 0, 0, 0.8),
-                     0 0 90px rgba(255, 0, 0, 0.6);
+        text-shadow: 0 0 30px rgba(255, 0, 0, 1),
+            0 0 60px rgba(255, 0, 0, 0.8),
+            0 0 90px rgba(255, 0, 0, 0.6);
         transform: scale(1.1);
     }
 }
