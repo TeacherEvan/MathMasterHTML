@@ -1074,10 +1074,10 @@ class WormSystem {
                 if (targetElement) {
                     // Rush towards target symbol
                     const targetRect = targetElement.getBoundingClientRect();
-                    const containerRect = this.getCachedContainerRect(); // PERFORMANCE: Use cached rect
-
-                    const targetX = targetRect.left - containerRect.left + (targetRect.width / 2);
-                    const targetY = targetRect.top - containerRect.top + (targetRect.height / 2);
+                    
+                    // FIX: Worms use viewport coordinates (fixed positioning), so use absolute coordinates
+                    const targetX = targetRect.left + (targetRect.width / 2);
+                    const targetY = targetRect.top + (targetRect.height / 2);
 
                     const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
                     const dx = targetX - worm.x;
@@ -1142,10 +1142,10 @@ class WormSystem {
             // Carrying symbol - return to console hole
             else if (worm.hasStolen && worm.fromConsole && worm.consoleSlotElement) {
                 const slotRect = worm.consoleSlotElement.getBoundingClientRect();
-                const containerRect = this.getCachedContainerRect(); // PERFORMANCE: Use cached rect
-
-                const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
-                const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
+                
+                // FIX: Worms use viewport coordinates (fixed positioning), so use absolute coordinates
+                const targetX = slotRect.left + (slotRect.width / 2);
+                const targetY = slotRect.top + (slotRect.height / 2);
 
                 const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
                 const dx = targetX - worm.x;
@@ -1189,10 +1189,10 @@ class WormSystem {
                     // If targeting a console slot, move toward it
                     if (worm.exitingToConsole && worm.targetConsoleSlot) {
                         const slotRect = worm.targetConsoleSlot.getBoundingClientRect();
-                        const containerRect = this.getCachedContainerRect();
-
-                        const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
-                        const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
+                        
+                        // FIX: Worms use viewport coordinates (fixed positioning), so use absolute coordinates
+                        const targetX = slotRect.left + (slotRect.width / 2);
+                        const targetY = slotRect.top + (slotRect.height / 2);
 
                         const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
                         const dx = targetX - worm.x;
@@ -1999,7 +1999,7 @@ class WormSystem {
             font-size: 60px;
             z-index: 10001;
             pointer-events: none;
-            text-shadow: 0 0 20px red;
+            animation: devil-pulsate 1.5s ease-in-out infinite;
         `;
 
         this.crossPanelContainer.appendChild(devil);
