@@ -1724,29 +1724,30 @@ class WormSystem {
             powerUpDisplay = document.createElement('div');
             powerUpDisplay.id = 'power-up-display';
             powerUpDisplay.style.cssText = `
-                position: relative;
+                position: fixed;
+                top: 20px;
+                right: 20px;
                 background: rgba(0, 0, 0, 0.9);
                 color: white;
                 padding: 8px;
                 border-radius: 8px;
                 font-family: 'Orbitron', monospace;
                 font-size: 16px;
-                z-index: 10002;
+                z-index: 9999;
                 display: flex;
                 justify-content: center;
                 gap: 12px;
                 border: 2px solid #0f0;
-                margin-top: 8px;
                 box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+                cursor: move;
+                user-select: none;
             `;
 
-            // Insert power-up display directly after the console element
-            if (consoleElement && consoleElement.parentNode) {
-                consoleElement.parentNode.insertBefore(powerUpDisplay, consoleElement.nextSibling);
-            } else {
-                // Fallback to body if console not found
-                document.body.appendChild(powerUpDisplay);
-            }
+            // Append to body for fixed positioning
+            document.body.appendChild(powerUpDisplay);
+
+            // Make draggable
+            this._makePowerUpDisplayDraggable(powerUpDisplay);
 
             this.cachedPowerUpDisplay = powerUpDisplay; // Cache the newly created display
         }
@@ -1777,6 +1778,71 @@ class WormSystem {
                 this.usePowerUp(type);
             });
         });
+    }
+
+    // Make power-up display draggable
+    _makePowerUpDisplayDraggable(element) {
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
+
+        element.addEventListener('pointerdown', dragStart);
+        document.addEventListener('pointermove', drag);
+        document.addEventListener('pointerup', dragEnd);
+
+        function dragStart(e) {
+            // Only allow dragging from the display itself, not from power-up items
+            if (e.target.classList.contains('power-up-item')) {
+                return;
+            }
+
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+
+            if (e.target === element || e.target.parentElement === element) {
+                isDragging = true;
+                element.style.cursor = 'grabbing';
+            }
+        }
+
+        function drag(e) {
+            if (isDragging) {
+                e.preventDefault();
+                
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+
+                xOffset = currentX;
+                yOffset = currentY;
+
+                // Keep within viewport bounds
+                const rect = element.getBoundingClientRect();
+                const maxX = window.innerWidth - rect.width;
+                const maxY = window.innerHeight - rect.height;
+                
+                const boundedX = Math.max(0, Math.min(currentX, maxX));
+                const boundedY = Math.max(0, Math.min(currentY, maxY));
+
+                setTranslate(boundedX, boundedY, element);
+            }
+        }
+
+        function dragEnd(e) {
+            if (isDragging) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                element.style.cursor = 'move';
+            }
+        }
+
+        function setTranslate(xPos, yPos, el) {
+            el.style.transform = `translate(${xPos}px, ${yPos}px)`;
+        }
     }
 
     // Use a power-up
