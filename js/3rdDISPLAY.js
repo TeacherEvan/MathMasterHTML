@@ -21,10 +21,16 @@ function initSymbolRain() {
     // Configuration
     let symbolFallSpeed = 0.6;
     const INITIAL_FALL_SPEED = 0.6; // Store initial speed for reset
-    const maxFallSpeed = 6;
+    const maxFallSpeed = 1.2; // 100% more than default (2x)
     const spawnRate = 0.3; // REDUCED from 0.4 to 0.3 to prevent overcrowding
     const burstSpawnRate = 0.10; // REDUCED from 15% to 10% chance for burst spawning
     const columnWidth = 50;
+
+    // Wave-based spawn system for initial population
+    const SYMBOLS_PER_WAVE = 5; // Release 5 symbols at a time
+    const WAVE_INTERVAL = 110; // Milliseconds between waves
+    let isInitialPopulation = true; // Flag to disable random spawning during startup
+    let wavesSpawned = 0;
 
     // Guaranteed spawn system - ensure all symbols appear every 5 seconds
     let lastSpawnTime = {};
@@ -162,29 +168,36 @@ function initSymbolRain() {
     }
 
     function populateInitialSymbols() {
-        // MOBILE FIX: Reduce initial symbols on mobile to prevent overload
-        const symbolMultiplier = isMobileMode ? 2 : 5; // Mobile: 2 per column, Desktop: 5 per column
-        const initialSymbolCount = columns * symbolMultiplier;
-        let spawned = 0;
+        // Wave-based spawn: Release 5 symbols at a time, evenly spread out
+        const totalWaves = isMobileMode ? 4 : 8; // Mobile: 4 waves (20 symbols), Desktop: 8 waves (40 symbols)
+        
+        console.log(`📱 Starting wave-based spawn: ${totalWaves} waves of ${SYMBOLS_PER_WAVE} symbols (Mobile: ${isMobileMode})`);
 
-        console.log(`📱 Populating ${initialSymbolCount} initial symbols (Mobile: ${isMobileMode})`);
-
-        // Gradually spawn symbols over time to prevent performance spike
-        function spawnBatch() {
-            const batchSize = 3; // Spawn 3 symbols at a time
-            const batchDelay = 50; // 50ms between batches
-
-            for (let i = 0; i < batchSize && spawned < initialSymbolCount; i++) {
-                createFallingSymbol(Math.floor(Math.random() * columns), true);
-                spawned++;
+        function spawnWave(waveNumber) {
+            if (waveNumber >= totalWaves) {
+                isInitialPopulation = false; // Enable random spawning
+                console.log(`✅ Initial population complete. ${wavesSpawned} waves spawned. Random spawning enabled.`);
+                return;
             }
 
-            if (spawned < initialSymbolCount) {
-                setTimeout(spawnBatch, batchDelay);
+            // Evenly distribute symbols across columns
+            const columnsToUse = Math.min(columns, SYMBOLS_PER_WAVE); // Don't exceed available columns
+            const columnStep = Math.floor(columns / columnsToUse);
+            
+            for (let i = 0; i < SYMBOLS_PER_WAVE && i < columns; i++) {
+                const column = (i * columnStep) % columns; // Evenly distribute
+                createFallingSymbol(column, true);
             }
+
+            wavesSpawned++;
+            console.log(`🌊 Wave ${waveNumber + 1}/${totalWaves} spawned (${SYMBOLS_PER_WAVE} symbols)`);
+
+            // Schedule next wave
+            setTimeout(() => spawnWave(waveNumber + 1), WAVE_INTERVAL);
         }
 
-        spawnBatch();
+        // Start the wave spawn sequence
+        spawnWave(0);
     }
 
     function handleSymbolClick(symbolElement, event) {
@@ -319,6 +332,11 @@ function initSymbolRain() {
             return false;
         }
 
+        // Skip random spawning during initial population phase
+        if (isInitialPopulation) {
+            return; // Let wave-based spawn handle initial population
+        }
+
         // Normal random spawning - optimized to reduce array iterations
         for (let col = 0; col < columns; col++) {
             if (Math.random() < spawnRate && !isColumnCrowded(col)) {
@@ -364,10 +382,10 @@ function initSymbolRain() {
     function startSpeedController() {
         setInterval(() => {
             if (!isMobileMode && symbolFallSpeed < maxFallSpeed) {
-                symbolFallSpeed *= 1.05; // Increase by 5%
+                symbolFallSpeed *= 1.10; // Increase by 10% every minute
                 console.log(`⏱️ Speed increased to: ${symbolFallSpeed.toFixed(2)} (max: ${maxFallSpeed})`);
             }
-        }, 10000); // Every 10 seconds
+        }, 60000); // Every 60 seconds (1 minute)
     }
 
     // Reset speed when problem completes
@@ -442,13 +460,13 @@ function initSymbolRain() {
     console.log('✅ Pointer events enabled for instant touch/click response');
 
     calculateColumns();
-    console.log(`📊 Creating ${columns * 5} initial symbols...`);
+    console.log(`📊 Starting wave-based initial spawn...`);
     populateInitialSymbols();
-    console.log(`✨ Created ${activeSymbols.length} symbols`);
+    console.log(`✨ Wave-based spawn initiated`);
     startAnimation();
     console.log('▶️ Animation started');
     startSpeedController();
-    console.log('⏱️ Speed controller started');
+    console.log('⏱️ Speed controller started (10% increase every 60 seconds)');
     startGuaranteedSpawnController();
     console.log('🎯 Guaranteed spawn controller started');
 
