@@ -277,6 +277,54 @@ function initSymbolRain() {
         }
     }
 
+    // SAFETY MECHANISM: Check if two symbols are actually touching (overlapping)
+    function checkTouching(symbolObj) {
+        if (isMobileMode) {
+            // Mobile: Check actual overlap (no buffer)
+            const symbolWidth = 60;
+
+            const neighbors = getNeighborCells(symbolObj.x, symbolObj.y);
+            for (let other of neighbors) {
+                if (other === symbolObj) continue;
+                
+                // Check if symbols are actually overlapping horizontally
+                const distance = Math.abs(symbolObj.x - other.x);
+                if (distance < symbolWidth) {
+                    return other; // Return the colliding symbol
+                }
+            }
+            return null;
+        } else {
+            // Desktop: Check actual overlap (no buffer) - both vertical and horizontal
+            const symbolHeight = 30;
+            const symbolWidth = 30;
+
+            const symbolLeft = symbolObj.x;
+            const symbolRight = symbolLeft + symbolWidth;
+            const symbolTop = symbolObj.y;
+            const symbolBottom = symbolTop + symbolHeight;
+
+            const neighbors = getNeighborCells(symbolObj.x, symbolObj.y);
+            for (let other of neighbors) {
+                if (other === symbolObj) continue;
+
+                const otherLeft = other.x;
+                const otherRight = otherLeft + symbolWidth;
+                const otherTop = other.y;
+                const otherBottom = otherTop + symbolHeight;
+
+                // Check for actual bounding box overlap
+                const horizontalOverlap = !(symbolRight <= otherLeft || symbolLeft >= otherRight);
+                const verticalOverlap = !(symbolBottom <= otherTop || symbolTop >= otherBottom);
+
+                if (horizontalOverlap && verticalOverlap) {
+                    return other; // Return the colliding symbol
+                }
+            }
+            return null;
+        }
+    }
+
     function animateSymbols() {
         // PERFORMANCE: Tab visibility throttling - run at ~1fps when tab hidden
         if (!isTabVisible && Math.random() > 0.016) {
@@ -289,6 +337,26 @@ function initSymbolRain() {
         // PERFORMANCE: Update spatial grid ONCE per frame instead of in every collision check
         updateSpatialGrid();
 
+        // SAFETY MECHANISM: Track symbols to be removed due to touching
+        const symbolsToRemove = new Set();
+
+        // First pass: Check for symbols that are touching and mark them for removal
+        for (let i = 0; i < activeSymbols.length; i++) {
+            const symbolObj = activeSymbols[i];
+            
+            // Skip if already marked for removal
+            if (symbolsToRemove.has(symbolObj)) continue;
+            
+            // Check if this symbol is touching another
+            const touchingSymbol = checkTouching(symbolObj);
+            if (touchingSymbol) {
+                // Mark both symbols for removal
+                symbolsToRemove.add(symbolObj);
+                symbolsToRemove.add(touchingSymbol);
+                console.log(`🔴 SAFETY: Removing touching symbols "${symbolObj.symbol}" and "${touchingSymbol.symbol}"`);
+            }
+        }
+
         // PERFORMANCE: Swap-and-pop instead of filter() to reuse array and reduce GC pressure
         let writeIndex = 0;
         for (let readIndex = 0; readIndex < activeSymbols.length; readIndex++) {
@@ -298,8 +366,9 @@ function initSymbolRain() {
             // Remove symbols more aggressively if they're near bottom and moving slowly
             const isOffScreen = symbolObj.y > containerHeight + 50;
             const isStuckAtBottom = symbolObj.y > containerHeight - 100 && activeSymbols.length > 30; // Remove stuck symbols when screen is crowded
+            const isTouching = symbolsToRemove.has(symbolObj); // SAFETY MECHANISM: Remove if touching
 
-            if (isOffScreen || isStuckAtBottom) {
+            if (isOffScreen || isStuckAtBottom || isTouching) {
                 symbolObj.element.remove();
                 returnSymbolToPool(symbolObj.element); // Return to pool
                 continue; // Skip this symbol, don't copy to writeIndex
