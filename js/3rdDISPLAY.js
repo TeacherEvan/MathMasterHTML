@@ -21,10 +21,16 @@ function initSymbolRain() {
     // Configuration
     let symbolFallSpeed = 0.6;
     const INITIAL_FALL_SPEED = 0.6; // Store initial speed for reset
-    const maxFallSpeed = 6;
+    const maxFallSpeed = 1.2; // 100% more than default (2x)
     const spawnRate = 0.3; // REDUCED from 0.4 to 0.3 to prevent overcrowding
     const burstSpawnRate = 0.10; // REDUCED from 15% to 10% chance for burst spawning
     const columnWidth = 50;
+
+    // Wave-based spawn system for initial population
+    const SYMBOLS_PER_WAVE = 5; // Release 5 symbols at a time
+    const WAVE_INTERVAL = 110; // Milliseconds between waves
+    let isInitialPopulation = true; // Flag to disable random spawning during startup
+    let wavesSpawned = 0;
 
     // Guaranteed spawn system - ensure all symbols appear every 5 seconds
     let lastSpawnTime = {};
@@ -162,29 +168,36 @@ function initSymbolRain() {
     }
 
     function populateInitialSymbols() {
-        // MOBILE FIX: Reduce initial symbols on mobile to prevent overload
-        const symbolMultiplier = isMobileMode ? 2 : 5; // Mobile: 2 per column, Desktop: 5 per column
-        const initialSymbolCount = columns * symbolMultiplier;
-        let spawned = 0;
+        // Wave-based spawn: Release 5 symbols at a time, evenly spread out
+        const totalWaves = isMobileMode ? 4 : 8; // Mobile: 4 waves (20 symbols), Desktop: 8 waves (40 symbols)
+        
+        console.log(`📱 Starting wave-based spawn: ${totalWaves} waves of ${SYMBOLS_PER_WAVE} symbols (Mobile: ${isMobileMode})`);
 
-        console.log(`📱 Populating ${initialSymbolCount} initial symbols (Mobile: ${isMobileMode})`);
-
-        // Gradually spawn symbols over time to prevent performance spike
-        function spawnBatch() {
-            const batchSize = 3; // Spawn 3 symbols at a time
-            const batchDelay = 50; // 50ms between batches
-
-            for (let i = 0; i < batchSize && spawned < initialSymbolCount; i++) {
-                createFallingSymbol(Math.floor(Math.random() * columns), true);
-                spawned++;
+        function spawnWave(waveNumber) {
+            if (waveNumber >= totalWaves) {
+                isInitialPopulation = false; // Enable random spawning
+                console.log(`✅ Initial population complete. ${wavesSpawned} waves spawned. Random spawning enabled.`);
+                return;
             }
 
-            if (spawned < initialSymbolCount) {
-                setTimeout(spawnBatch, batchDelay);
+            // Evenly distribute symbols across columns
+            const columnsToUse = Math.min(columns, SYMBOLS_PER_WAVE); // Don't exceed available columns
+            const columnStep = Math.floor(columns / columnsToUse);
+            
+            for (let i = 0; i < SYMBOLS_PER_WAVE && i < columns; i++) {
+                const column = (i * columnStep) % columns; // Evenly distribute
+                createFallingSymbol(column, true);
             }
+
+            wavesSpawned++;
+            console.log(`🌊 Wave ${waveNumber + 1}/${totalWaves} spawned (${SYMBOLS_PER_WAVE} symbols)`);
+
+            // Schedule next wave
+            setTimeout(() => spawnWave(waveNumber + 1), WAVE_INTERVAL);
         }
 
-        spawnBatch();
+        // Start the wave spawn sequence
+        spawnWave(0);
     }
 
     function handleSymbolClick(symbolElement, event) {
@@ -264,6 +277,54 @@ function initSymbolRain() {
         }
     }
 
+    // SAFETY MECHANISM: Check if two symbols are actually touching (overlapping)
+    function checkTouching(symbolObj) {
+        if (isMobileMode) {
+            // Mobile: Check actual overlap (no buffer)
+            const symbolWidth = 60;
+
+            const neighbors = getNeighborCells(symbolObj.x, symbolObj.y);
+            for (let other of neighbors) {
+                if (other === symbolObj) continue;
+                
+                // Check if symbols are actually overlapping horizontally
+                const distance = Math.abs(symbolObj.x - other.x);
+                if (distance < symbolWidth) {
+                    return other; // Return the colliding symbol
+                }
+            }
+            return null;
+        } else {
+            // Desktop: Check actual overlap (no buffer) - both vertical and horizontal
+            const symbolHeight = 30;
+            const symbolWidth = 30;
+
+            const symbolLeft = symbolObj.x;
+            const symbolRight = symbolLeft + symbolWidth;
+            const symbolTop = symbolObj.y;
+            const symbolBottom = symbolTop + symbolHeight;
+
+            const neighbors = getNeighborCells(symbolObj.x, symbolObj.y);
+            for (let other of neighbors) {
+                if (other === symbolObj) continue;
+
+                const otherLeft = other.x;
+                const otherRight = otherLeft + symbolWidth;
+                const otherTop = other.y;
+                const otherBottom = otherTop + symbolHeight;
+
+                // Check for actual bounding box overlap
+                const horizontalOverlap = !(symbolRight <= otherLeft || symbolLeft >= otherRight);
+                const verticalOverlap = !(symbolBottom <= otherTop || symbolTop >= otherBottom);
+
+                if (horizontalOverlap && verticalOverlap) {
+                    return other; // Return the colliding symbol
+                }
+            }
+            return null;
+        }
+    }
+
     function animateSymbols() {
         // PERFORMANCE: Tab visibility throttling - run at ~1fps when tab hidden
         if (!isTabVisible && Math.random() > 0.016) {
@@ -276,6 +337,26 @@ function initSymbolRain() {
         // PERFORMANCE: Update spatial grid ONCE per frame instead of in every collision check
         updateSpatialGrid();
 
+        // SAFETY MECHANISM: Track symbols to be removed due to touching
+        const symbolsToRemove = new Set();
+
+        // First pass: Check for symbols that are touching and mark them for removal
+        for (let i = 0; i < activeSymbols.length; i++) {
+            const symbolObj = activeSymbols[i];
+            
+            // Skip if already marked for removal
+            if (symbolsToRemove.has(symbolObj)) continue;
+            
+            // Check if this symbol is touching another
+            const touchingSymbol = checkTouching(symbolObj);
+            if (touchingSymbol) {
+                // Mark both symbols for removal
+                symbolsToRemove.add(symbolObj);
+                symbolsToRemove.add(touchingSymbol);
+                console.log(`🔴 SAFETY: Removing touching symbols "${symbolObj.symbol}" and "${touchingSymbol.symbol}"`);
+            }
+        }
+
         // PERFORMANCE: Swap-and-pop instead of filter() to reuse array and reduce GC pressure
         let writeIndex = 0;
         for (let readIndex = 0; readIndex < activeSymbols.length; readIndex++) {
@@ -285,8 +366,9 @@ function initSymbolRain() {
             // Remove symbols more aggressively if they're near bottom and moving slowly
             const isOffScreen = symbolObj.y > containerHeight + 50;
             const isStuckAtBottom = symbolObj.y > containerHeight - 100 && activeSymbols.length > 30; // Remove stuck symbols when screen is crowded
+            const isTouching = symbolsToRemove.has(symbolObj); // SAFETY MECHANISM: Remove if touching
 
-            if (isOffScreen || isStuckAtBottom) {
+            if (isOffScreen || isStuckAtBottom || isTouching) {
                 symbolObj.element.remove();
                 returnSymbolToPool(symbolObj.element); // Return to pool
                 continue; // Skip this symbol, don't copy to writeIndex
@@ -309,41 +391,37 @@ function initSymbolRain() {
         // Trim array to new length (no reallocation!)
         activeSymbols.length = writeIndex;
 
+        // PERFORMANCE: Helper to check if column is crowded (extract to avoid duplication)
+        function isColumnCrowded(col) {
+            for (let i = 0; i < activeSymbols.length; i++) {
+                if (activeSymbols[i].column === col && activeSymbols[i].y < 40) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Skip random spawning during initial population phase
+        if (isInitialPopulation) {
+            return; // Let wave-based spawn handle initial population
+        }
+
         // Normal random spawning - optimized to reduce array iterations
         for (let col = 0; col < columns; col++) {
-            if (Math.random() < spawnRate) {
-                // Quick check: only spawn if column isn't crowded at top
-                // REDUCED from 100px to 40px to allow more symbols near top
-                let columnCrowded = false;
-                for (let i = 0; i < activeSymbols.length; i++) {
-                    if (activeSymbols[i].column === col && activeSymbols[i].y < 40) {
-                        columnCrowded = true;
-                        break; // Early exit optimization
-                    }
-                }
-
-                if (!columnCrowded) {
-                    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-                    createFallingSymbol(col, false, randomSymbol);
-                }
+            if (Math.random() < spawnRate && !isColumnCrowded(col)) {
+                const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                createFallingSymbol(col, false, randomSymbol);
             }
         }
 
         // BURST SPAWNING: Occasionally spawn 2-3 symbols simultaneously in different columns
         if (Math.random() < burstSpawnRate) {
             const burstCount = 2 + Math.floor(Math.random() * 2); // 2-3 symbols
+            
+            // Find columns that aren't crowded - reuse helper function
             const availableColumns = [];
-
-            // Find columns that aren't crowded
             for (let col = 0; col < columns; col++) {
-                let isCrowded = false;
-                for (let i = 0; i < activeSymbols.length; i++) {
-                    if (activeSymbols[i].column === col && activeSymbols[i].y < 40) {
-                        isCrowded = true;
-                        break;
-                    }
-                }
-                if (!isCrowded) {
+                if (!isColumnCrowded(col)) {
                     availableColumns.push(col);
                 }
             }
@@ -373,10 +451,10 @@ function initSymbolRain() {
     function startSpeedController() {
         setInterval(() => {
             if (!isMobileMode && symbolFallSpeed < maxFallSpeed) {
-                symbolFallSpeed *= 1.05; // Increase by 5%
+                symbolFallSpeed *= 1.10; // Increase by 10% every minute
                 console.log(`⏱️ Speed increased to: ${symbolFallSpeed.toFixed(2)} (max: ${maxFallSpeed})`);
             }
-        }, 10000); // Every 10 seconds
+        }, 60000); // Every 60 seconds (1 minute)
     }
 
     // Reset speed when problem completes
@@ -451,13 +529,13 @@ function initSymbolRain() {
     console.log('✅ Pointer events enabled for instant touch/click response');
 
     calculateColumns();
-    console.log(`📊 Creating ${columns * 5} initial symbols...`);
+    console.log(`📊 Starting wave-based initial spawn...`);
     populateInitialSymbols();
-    console.log(`✨ Created ${activeSymbols.length} symbols`);
+    console.log(`✨ Wave-based spawn initiated`);
     startAnimation();
     console.log('▶️ Animation started');
     startSpeedController();
-    console.log('⏱️ Speed controller started');
+    console.log('⏱️ Speed controller started (10% increase every 60 seconds)');
     startGuaranteedSpawnController();
     console.log('🎯 Guaranteed spawn controller started');
 

@@ -966,14 +966,22 @@ class WormSystem {
 
     // GAME OVER: Check if all symbols have been stolen
     checkGameOverCondition() {
-        const revealedSymbols = this.getCachedRevealedSymbols();
-        const availableSymbols = Array.from(revealedSymbols).filter(el =>
-            !el.dataset.stolen &&
-            !el.classList.contains('space-symbol') &&
-            !el.classList.contains('completed-row-symbol')
-        );
+        // FIX: Query ALL symbol elements (not just revealed ones) because stolen symbols may not be in .revealed-symbol class
+        // We need to check both revealed and hidden symbols to see if they're stolen
+        const allSymbols = this.solutionContainer.querySelectorAll('.symbol:not(.space-symbol):not(.completed-row-symbol)');
+        
+        const availableSymbols = Array.from(allSymbols).filter(el => {
+            const isStolen = el.dataset.stolen === 'true';
+            const isSpace = el.classList.contains('space-symbol');
+            const isCompleted = el.classList.contains('completed-row-symbol');
+            
+            // Symbol is available if it's not stolen, not a space, and not from a completed row
+            return !isStolen && !isSpace && !isCompleted;
+        });
 
-        if (availableSymbols.length === 0) {
+        console.log(`🎮 Game Over Check: ${availableSymbols.length} symbols available out of ${allSymbols.length} total`);
+
+        if (availableSymbols.length === 0 && allSymbols.length > 0) {
             console.log('💀 GAME OVER! All symbols stolen!');
             this.triggerGameOver();
         }
@@ -2103,11 +2111,13 @@ class WormSystem {
         splat.className = 'slime-splat';
         splat.style.left = `${x}px`;
         splat.style.top = `${y}px`;
+        splat.style.position = 'fixed'; // Use fixed positioning to place at exact coordinates
 
         // Random rotation for variation
         splat.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 360}deg)`;
 
-        this.wormContainer.appendChild(splat);
+        // FIX: Append to cross-panel container so splat appears at worm's actual death location
+        this.crossPanelContainer.appendChild(splat);
 
         console.log(`🟢 Slime splat created at (${x}, ${y})`);
 

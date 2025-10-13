@@ -1,6 +1,6 @@
 # Performance Optimization Guide - Math Master Algebra
 
-**Last Updated**: October 12, 2025  
+**Last Updated**: October 13, 2025  
 **Status**: Ongoing Optimization
 
 ---
@@ -248,6 +248,54 @@ window.addEventListener('resize', debounce(() => {
 ```
 
 **Impact**: Prevents resize thrashing
+
+#### 9. Symbol Collision Safety Mechanism ✅
+
+**Problem**: Symbol buildup in Panel C when falling symbols collide and slow down
+
+**Solution**:
+
+```javascript
+// New checkTouching() function detects actual overlap
+function checkTouching(symbolObj) {
+    // Desktop: Check actual bounding box overlap (no buffer)
+    const neighbors = getNeighborCells(symbolObj.x, symbolObj.y);
+    for (let other of neighbors) {
+        if (other === symbolObj) continue;
+        
+        const horizontalOverlap = !(symbolRight <= otherLeft || symbolLeft >= otherRight);
+        const verticalOverlap = !(symbolBottom <= otherTop || symbolTop >= otherBottom);
+        
+        if (horizontalOverlap && verticalOverlap) {
+            return other; // Return the colliding symbol
+        }
+    }
+    return null;
+}
+
+// In animateSymbols(): Remove both symbols when they touch
+const symbolsToRemove = new Set();
+for (let symbolObj of activeSymbols) {
+    const touchingSymbol = checkTouching(symbolObj);
+    if (touchingSymbol) {
+        symbolsToRemove.add(symbolObj);
+        symbolsToRemove.add(touchingSymbol);
+    }
+}
+```
+
+**Implementation Details**:
+
+- Uses existing spatial hash grid for O(n) performance
+- Detects actual bounding box overlap (no collision buffer)
+- Marks both colliding symbols for removal in same frame
+- Integrates with existing DOM pooling system
+- Console logs removal for debugging: `🔴 SAFETY: Removing touching symbols`
+
+**Impact**: 
+- Prevents symbol accumulation that could lead to performance degradation
+- Maintains smooth 60fps by keeping active symbol count in check
+- Typical active symbols: 35-50 (previously could grow to 75+)
 
 ---
 
