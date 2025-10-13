@@ -55,13 +55,8 @@ class WormSystem {
 
         console.log(`🎮 Difficulty: ${currentLevel.toUpperCase()} - ${this.wormsPerRow} worms/row, ${this.difficultySpeedMultiplier}x speed, ${this.difficultyRoamTimeBorder}ms roam`);
 
-        // POWER-UP SYSTEM
-        this.powerUps = {
-            chainLightning: 0, // Number of chain lightning power-ups collected
-            spider: 0,
-            devil: 0
-        };
-        this.chainLightningKillCount = 5; // First use kills 5, then +2 per use
+        // POWER-UP SYSTEM - Delegated to WormPowerUpSystem class
+        this.powerUpSystem = null; // Will be initialized after DOM is ready
 
         // PERFORMANCE: DOM query caching
         this.cachedRevealedSymbols = null;
@@ -350,6 +345,12 @@ class WormSystem {
         this.cachedGameOverModal = document.getElementById('game-over-modal');
         console.log('💾 Cached DOM elements: helpButton, powerUpDisplay, panelC, gameOverModal');
 
+        // Initialize Power-Up System
+        if (!this.powerUpSystem && window.WormPowerUpSystem) {
+            this.powerUpSystem = new WormPowerUpSystem(this);
+            console.log('✨ Power-Up System initialized');
+        }
+
         // PERFORMANCE: Setup event listeners once
         this.setupEventListeners();
 
@@ -430,373 +431,276 @@ class WormSystem {
         return wormElement;
     }
 
-    // Spawn worm from console slot with slide-open animation
-    spawnWormFromConsole() {
-        this.initialize();
+    // ===================================================================
+    // UNIVERSAL WORM SPAWNER (Phase 2 Refactoring)
+    // ===================================================================
 
-        console.log(`🐛 spawnWormFromConsole() called. Current worms: ${this.worms.length}/${this.maxWorms}`);
+    /**
+     * Universal worm spawner - handles all spawn types
+     * @param {Object} config - Spawn configuration
+     * @returns {Object|null} - Worm data or null if spawn failed
+     */
+    spawnWormUniversal(config = {}) {
+        this.initialize();
 
         if (this.worms.length >= this.maxWorms) {
             console.log(`⚠️ Max worms (${this.maxWorms}) reached. No more spawning.`);
-            return;
+            return null;
         }
 
+        // Defaults
+        const defaults = {
+            type: 'normal',        // 'normal', 'console', 'border', 'purple'
+            x: null,               // Auto-calculate if null
+            y: null,
+            isPurple: false,
+            canStealBlue: false,
+            fromConsole: false,
+            consoleSlotIndex: null,
+            consoleSlotElement: null,
+            speed: this.SPEED_FALLBACK_WORM,
+            roamDuration: this.difficultyRoamTimeConsole,
+            classNames: [],
+            borderIndex: 0,
+            borderTotal: 1,
+            shouldExitToConsole: false
+        };
+
+        const cfg = { ...defaults, ...config };
+
+        // Calculate position if not provided
+        if (cfg.x === null || cfg.y === null) {
+            const pos = this.calculateSpawnPosition(cfg.type, cfg);
+            cfg.x = pos.x;
+            cfg.y = pos.y;
+        }
+
+        // Lock console slot if spawning from console
+        if (cfg.fromConsole && cfg.consoleSlotElement) {
+            this.lockedConsoleSlots.add(cfg.consoleSlotIndex);
+            cfg.consoleSlotElement.classList.add('worm-spawning', 'locked');
+            console.log(`🕳️ Worm spawning from console slot ${cfg.consoleSlotIndex + 1}`);
+        }
+
+        // Create worm element
+        const wormId = generateUniqueId(cfg.type === 'purple' ? 'purple-worm' : cfg.type === 'border' ? 'border-worm' : 'worm');
+        const wormElement = this.createWormElement({
+            id: wormId,
+            classNames: cfg.classNames,
+            segmentCount: this.WORM_SEGMENT_COUNT,
+            x: cfg.x,
+            y: cfg.y
+        });
+
+        this.crossPanelContainer.appendChild(wormElement);
+
+        // Power-up roll
+        const hasPowerUp = this.powerUpSystem.shouldDrop();
+        const powerUpType = hasPowerUp ?
+            this.powerUpSystem.TYPES[Math.floor(Math.random() * this.powerUpSystem.TYPES.length)] :
+            null;
+
+        // Create worm data
+        const wormData = {
+            id: wormId,
+            element: wormElement,
+            x: cfg.x,
+            y: cfg.y,
+            velocityX: (Math.random() - 0.5) * cfg.speed,
+            velocityY: (Math.random() - 0.5) * (cfg.speed / 2),
+            active: true,
+            hasStolen: false,
+            isRushingToTarget: cfg.isPurple,
+            roamingEndTime: Date.now() + cfg.roamDuration,
+            baseSpeed: cfg.speed,
+            currentSpeed: cfg.speed,
+            crawlPhase: Math.random() * Math.PI * 2,
+            direction: Math.random() * Math.PI * 2,
+
+            // Type-specific
+            isPurple: cfg.isPurple,
+            canStealBlue: cfg.canStealBlue,
+            fromConsole: cfg.fromConsole,
+            consoleSlotIndex: cfg.consoleSlotIndex,
+            consoleSlotElement: cfg.consoleSlotElement,
+            shouldExitToConsole: cfg.shouldExitToConsole,
+            exitingToConsole: false,
+            targetConsoleSlot: null,
+
+            // Power-up
+            hasPowerUp: hasPowerUp,
+            powerUpType: powerUpType,
+
+            // State
+            stolenSymbol: null,
+            targetElement: null,
+            targetSymbol: null,
+            isFlickering: false
+        };
+
+        // Purple worm specific flags
+        if (cfg.isPurple) {
+            wormData.prioritizeRed = true;
+        }
+
+        if (hasPowerUp) {
+            console.log(`✨ Worm ${wormId} has power-up: ${powerUpType}`);
+        }
+
+        this.worms.push(wormData);
+
+        // Add click handler
+        const clickHandler = cfg.isPurple ?
+            (e) => { e.stopPropagation(); this.handlePurpleWormClick(wormData); } :
+            (e) => { e.stopPropagation(); this.handleWormClick(wormData); };
+
+        wormElement.addEventListener('click', clickHandler);
+
+        // Store click handler reference for cleanup
+        if (cfg.isPurple) {
+            wormData.clickHandler = clickHandler;
+        }
+
+        console.log(`✅ Worm ${wormId} spawned at (${cfg.x.toFixed(0)}, ${cfg.y.toFixed(0)}). Total: ${this.worms.length}`);
+
+        // Start animation if first worm
+        if (this.worms.length === 1) {
+            this.animate();
+        }
+
+        return wormData;
+    }
+
+    /**
+     * Calculate spawn position based on spawn type
+     * @param {String} type - Spawn type ('normal', 'console', 'border', 'purple')
+     * @param {Object} config - Configuration object
+     * @returns {Object} - {x, y} coordinates
+     */
+    calculateSpawnPosition(type, config) {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        switch (type) {
+            case 'console':
+                if (!config.consoleSlotElement) {
+                    console.warn('⚠️ Console spawn without slot element, using fallback');
+                    return { x: Math.random() * viewportWidth, y: viewportHeight - 30 };
+                }
+                const slotRect = config.consoleSlotElement.getBoundingClientRect();
+                return {
+                    x: slotRect.left + (slotRect.width / 2),
+                    y: slotRect.top + (slotRect.height / 2)
+                };
+
+            case 'border':
+                const position = config.borderIndex / config.borderTotal;
+                const margin = this.BORDER_MARGIN;
+
+                if (position < 0.5) {
+                    // Bottom edge (0-50%)
+                    const xPosition = position * 2;
+                    return {
+                        x: margin + xPosition * (viewportWidth - 2 * margin),
+                        y: viewportHeight - margin
+                    };
+                } else if (position < 0.75) {
+                    // Left edge (50-75%)
+                    const yPosition = (position - 0.5) * 4;
+                    return {
+                        x: margin,
+                        y: margin + yPosition * (viewportHeight - 2 * margin)
+                    };
+                } else {
+                    // Right edge (75-100%)
+                    const yPosition = (position - 0.75) * 4;
+                    return {
+                        x: viewportWidth - margin,
+                        y: margin + yPosition * (viewportHeight - 2 * margin)
+                    };
+                }
+
+            case 'purple':
+                const helpButton = this.cachedHelpButton || document.getElementById('help-button');
+                if (helpButton) {
+                    const rect = helpButton.getBoundingClientRect();
+                    return {
+                        x: rect.left + (rect.width / 2),
+                        y: rect.top + (rect.height / 2)
+                    };
+                }
+                return {
+                    x: Math.random() * Math.max(0, viewportWidth - 80),
+                    y: -50
+                };
+
+            default: // 'normal'
+                return {
+                    x: Math.random() * Math.max(0, viewportWidth - 80),
+                    y: Math.max(0, viewportHeight - 30)
+                };
+        }
+    }
+
+    // ===================================================================
+    // BACKWARD-COMPATIBLE SPAWN WRAPPERS (call spawnWormUniversal)
+    // ===================================================================
+
+    // Spawn worm from console slot with slide-open animation
+    spawnWormFromConsole() {
         // Find empty console slot
         const slotData = this.findEmptyConsoleSlot();
         if (!slotData) {
             console.log('⚠️ All console slots occupied or locked, spawning worm normally');
-            this.spawnWorm(); // Fallback to normal spawn
-            return;
+            return this.spawnWorm(); // Fallback to normal spawn
         }
 
         const { element: slotElement, index: slotIndex } = slotData;
 
-        // Lock this console slot
-        this.lockedConsoleSlots.add(slotIndex);
-        slotElement.classList.add('worm-spawning', 'locked');
-
-        console.log(`🕳️ Worm spawning from console slot ${slotIndex + 1}`);
-
-        // Get slot position for worm spawn point (viewport coordinates)
-        const slotRect = slotElement.getBoundingClientRect();
-        const startX = slotRect.left + (slotRect.width / 2);
-        const startY = slotRect.top + (slotRect.height / 2);
-
-        // REFACTORED: Use factory method for worm creation
-        const wormId = generateUniqueId('worm');
-        const wormElement = this.createWormElement({
-            id: wormId,
-            classNames: ['console-worm'],
-            segmentCount: this.WORM_SEGMENT_COUNT,
-            x: startX,
-            y: startY
-        });
-
-        this.crossPanelContainer.appendChild(wormElement);
-
-        // POWER-UP: 10% chance to carry a power-up
-        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
-        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
-
-        // Store worm data with console slot reference
-        const wormData = {
-            id: wormId,
-            element: wormElement,
-            stolenSymbol: null,
-            targetElement: null,
-            targetSymbol: null,
-            x: startX,
-            y: startY,
-            velocityX: (Math.random() - 0.5) * this.SPEED_CONSOLE_WORM,
-            velocityY: (Math.random() - 0.5) * 1.0,
-            active: true,
-            hasStolen: false,
-            isRushingToTarget: false,
-            roamingEndTime: Date.now() + this.difficultyRoamTimeConsole, // Use difficulty-scaled roam time
-            isFlickering: false,
-            baseSpeed: this.SPEED_CONSOLE_WORM,
-            currentSpeed: this.SPEED_CONSOLE_WORM,
+        return this.spawnWormUniversal({
+            type: 'console',
+            fromConsole: true,
             consoleSlotIndex: slotIndex,
             consoleSlotElement: slotElement,
-            fromConsole: true,
-            crawlPhase: 0,
-            direction: Math.random() * Math.PI * 2,
-            hasPowerUp: hasPowerUp,
-            powerUpType: powerUpType
-        };
-
-        if (hasPowerUp) {
-            console.log(`✨ Worm ${wormId} has power-up: ${powerUpType}`);
-        }
-
-        this.worms.push(wormData);
-
-        // Add click handler
-        wormElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.handleWormClick(wormData);
+            speed: this.SPEED_CONSOLE_WORM,
+            roamDuration: this.difficultyRoamTimeConsole,
+            classNames: ['console-worm']
         });
-
-        console.log(`✅ Worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
-        console.log(`🐛 Worm will roam for 10 seconds before stealing`);
-
-        // Start animation loop if not already running
-        if (this.worms.length === 1) {
-            this.animate();
-        }
     }
 
     // Fallback spawn method for when console slots are all occupied
     spawnWorm() {
-        this.initialize();
-
-        console.log(`🐛 spawnWorm() called (fallback). Current worms: ${this.worms.length}/${this.maxWorms}`);
-
-        if (this.worms.length >= this.maxWorms) {
-            console.log(`⚠️ Max worms (${this.maxWorms}) reached. No more spawning.`);
-            return;
-        }
-
-        // Random starting position at bottom - USE VIEWPORT COORDINATES
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const startX = Math.random() * Math.max(0, viewportWidth - 80);
-        const startY = Math.max(0, viewportHeight - 30);
-
-        // REFACTORED: Use factory method for worm creation
-        const wormId = generateUniqueId('worm');
-        const wormElement = this.createWormElement({
-            id: wormId,
-            classNames: [],
-            segmentCount: this.WORM_SEGMENT_COUNT,
-            x: startX,
-            y: startY
+        return this.spawnWormUniversal({
+            type: 'normal',
+            speed: this.SPEED_FALLBACK_WORM,
+            roamDuration: this.difficultyRoamTimeConsole
         });
-
-        this.crossPanelContainer.appendChild(wormElement);
-
-        // POWER-UP: 10% chance to carry a power-up
-        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
-        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
-
-        // Store worm data (non-console worm)
-        const wormData = {
-            id: wormId,
-            element: wormElement,
-            stolenSymbol: null,
-            targetElement: null,
-            x: startX,
-            y: startY,
-            velocityX: (Math.random() - 0.5) * this.SPEED_FALLBACK_WORM,
-            velocityY: (Math.random() - 0.5) * 0.5,
-            active: true,
-            hasStolen: false,
-            roamingEndTime: Date.now() + this.difficultyRoamTimeConsole, // Use difficulty-scaled roam time
-            isFlickering: false,
-            baseSpeed: this.SPEED_FALLBACK_WORM,
-            currentSpeed: this.SPEED_FALLBACK_WORM,
-            fromConsole: false,
-            hasPowerUp: hasPowerUp,
-            powerUpType: powerUpType
-        };
-
-        if (hasPowerUp) {
-            console.log(`✨ Worm ${wormId} has power-up: ${powerUpType}`);
-        }
-
-        this.worms.push(wormData);
-
-        // Add click handler
-        wormElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.handleWormClick(wormData);
-        });
-
-        console.log(`✅ Worm ${wormId} spawned (fallback mode). Total worms: ${this.worms.length}`);
-
-        // Start animation loop if not already running
-        if (this.worms.length === 1) {
-            this.animate();
-        }
     }
 
     // Spawn worm from border (bottom or sides) - used for row completion
     spawnWormFromBorder(data = {}) {
-        this.initialize();
-
         const { index = 0, total = 1 } = data;
-        console.log(`🐛 spawnWormFromBorder() called. Worm ${index + 1}/${total}. Current worms: ${this.worms.length}/${this.maxWorms}`);
 
-        if (this.worms.length >= this.maxWorms) {
-            console.log(`⚠️ Max worms (${this.maxWorms}) reached. No more spawning.`);
-            return;
-        }
-
-        // Determine spawn position (spread around bottom and side borders)
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const margin = this.BORDER_MARGIN;
-        const position = index / total; // 0 to 1
-
-        let startX, startY;
-
-        if (position < 0.5) {
-            // Bottom border (0-50%)
-            const xPosition = position * 2;
-            startX = margin + xPosition * (viewportWidth - 2 * margin);
-            startY = viewportHeight - margin;
-        } else if (position < 0.75) {
-            // Left border (50-75%)
-            const yPosition = (position - 0.5) * 4;
-            startX = margin;
-            startY = margin + yPosition * (viewportHeight - 2 * margin);
-        } else {
-            // Right border (75-100%)
-            const yPosition = (position - 0.75) * 4;
-            startX = viewportWidth - margin;
-            startY = margin + yPosition * (viewportHeight - 2 * margin);
-        }
-
-        // REFACTORED: Use factory method for worm creation
-        const wormId = generateUniqueId('border-worm');
-        const wormElement = this.createWormElement({
-            id: wormId,
-            classNames: [],
-            segmentCount: this.WORM_SEGMENT_COUNT,
-            x: startX,
-            y: startY
+        return this.spawnWormUniversal({
+            type: 'border',
+            borderIndex: index,
+            borderTotal: total,
+            speed: this.SPEED_BORDER_WORM,
+            roamDuration: this.difficultyRoamTimeBorder,
+            shouldExitToConsole: true
         });
-
-        this.crossPanelContainer.appendChild(wormElement);
-
-        // Store worm data
-        const wormData = {
-            id: wormId,
-            element: wormElement,
-            stolenSymbol: null,
-            targetElement: null,
-            targetSymbol: null,
-            x: startX,
-            y: startY,
-            velocityX: (Math.random() - 0.5) * this.SPEED_BORDER_WORM,
-            velocityY: (Math.random() - 0.5) * 1.0,
-            active: true,
-            hasStolen: false,
-            isRushingToTarget: false,
-            roamingEndTime: Date.now() + this.difficultyRoamTimeBorder, // Use difficulty-scaled roam time
-            isFlickering: false,
-            baseSpeed: this.SPEED_BORDER_WORM,
-            currentSpeed: this.SPEED_BORDER_WORM,
-            fromConsole: false,
-            shouldExitToConsole: true,
-            exitingToConsole: false,
-            targetConsoleSlot: null,
-            crawlPhase: Math.random() * Math.PI * 2,
-            direction: Math.random() * Math.PI * 2
-        };
-
-        // POWER-UP: 10% chance to carry a power-up
-        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
-        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
-        wormData.hasPowerUp = hasPowerUp;
-        wormData.powerUpType = powerUpType;
-
-        if (hasPowerUp) {
-            console.log(`✨ Border worm ${wormId} has power-up: ${powerUpType}`);
-        }
-
-        this.worms.push(wormData);
-
-        // Add click handler
-        wormElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.handleWormClick(wormData);
-        });
-
-        console.log(`✅ Border worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
-
-        // Start animation loop if not already running
-        if (this.worms.length === 1) {
-            this.animate();
-        }
     }
 
     // PURPLE WORM: Spawn purple worm triggered by 2+ wrong answers
     spawnPurpleWorm() {
-        this.initialize();
-
-        console.log(`🟣 spawnPurpleWorm() called. Current worms: ${this.worms.length}/${this.maxWorms}`);
-
-        if (this.worms.length >= this.maxWorms) {
-            console.log(`⚠️ Max worms (${this.maxWorms}) reached. Cannot spawn purple worm.`);
-            return;
-        }
-
-        // Spawn from help button position - USE VIEWPORT COORDINATES
-        // PERFORMANCE: Use cached element instead of getElementById
-        const helpButton = this.cachedHelpButton || document.getElementById('help-button');
-        let startX, startY;
-
-        if (helpButton) {
-            const helpRect = helpButton.getBoundingClientRect();
-            startX = helpRect.left + (helpRect.width / 2);
-            startY = helpRect.top + (helpRect.height / 2);
-            console.log(`🟣 Purple worm spawning from help button at (${startX.toFixed(0)}, ${startY.toFixed(0)})`);
-        } else {
-            // Fallback if help button not found
-            const viewportWidth = window.innerWidth;
-            startX = Math.random() * Math.max(0, viewportWidth - 80);
-            startY = -50; // Start above viewport
-            console.log(`⚠️ Help button not found, using fallback position`);
-        }
-
-        // REFACTORED: Use factory method for worm creation
-        const wormId = generateUniqueId('purple-worm');
-        const wormElement = this.createWormElement({
-            id: wormId,
-            classNames: ['purple-worm'],
-            segmentCount: this.WORM_SEGMENT_COUNT,
-            x: startX,
-            y: startY
-        });
-
-        this.crossPanelContainer.appendChild(wormElement);
-
-        // Store purple worm data
-        const wormData = {
-            id: wormId,
-            element: wormElement,
-            stolenSymbol: null,
-            targetElement: null,
-            targetSymbol: null,
-            x: startX,
-            y: startY,
-            velocityX: (Math.random() - 0.5) * this.SPEED_PURPLE_WORM,
-            velocityY: Math.random() * 0.75 + 0.5,
-            active: true,
-            hasStolen: false,
-            isRushingToTarget: true,
-            roamingEndTime: Date.now(),
-            isFlickering: false,
-            baseSpeed: this.SPEED_PURPLE_WORM,
-            currentSpeed: this.SPEED_PURPLE_WORM,
+        return this.spawnWormUniversal({
+            type: 'purple',
             isPurple: true,
-            fromConsole: false,
-            shouldExitToConsole: true,
-            exitingToConsole: false,
-            targetConsoleSlot: null,
-            crawlPhase: 0,
-            direction: Math.random() * Math.PI * 2,
             canStealBlue: true,
-            prioritizeRed: true
-        };
-
-        // POWER-UP: 10% chance to carry a power-up (even purple worms)
-        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
-        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
-        wormData.hasPowerUp = hasPowerUp;
-        wormData.powerUpType = powerUpType;
-
-        if (hasPowerUp) {
-            console.log(`✨ Purple worm ${wormId} has power-up: ${powerUpType}`);
-        }
-
-        this.worms.push(wormData);
-
-        // PURPLE WORM CLICK: Always clones
-        wormData.clickHandler = (e) => {
-            e.stopPropagation();
-            this.handlePurpleWormClick(wormData);
-        };
-        wormElement.addEventListener('click', wormData.clickHandler);
-
-        console.log(`🟣 Purple worm ${wormId} spawned from help button at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
-        console.log(`🟣 Purple worm moves at HALF SPEED, prioritizes RED symbols, and CLONES on click!`);
-
-        // Start animation loop if not already running
-        if (this.worms.length === 1) {
-            this.animate();
-        }
+            speed: this.SPEED_PURPLE_WORM,
+            classNames: ['purple-worm'],
+            shouldExitToConsole: true
+        });
     }
 
     stealSymbol(worm) {
@@ -1012,257 +916,16 @@ class WormSystem {
             return;
         }
 
-        const currentTime = Date.now();
-
-        // CROSS-PANEL MOVEMENT: Use viewport dimensions instead of Panel B only
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-
-        // PERFORMANCE: Get Panel B boundaries once per frame, use cached rect
-        const panelBRect = this.getCachedContainerRect();
-
         this.worms.forEach(worm => {
             if (!worm.active) return;
 
             // Update crawl phase for animation
             worm.crawlPhase = (worm.crawlPhase + 0.05) % (Math.PI * 2);
 
-            // DEVIL POWER-UP: Override all behavior if rushing to devil
-            if (worm.isRushingToDevil && worm.devilX !== undefined && worm.devilY !== undefined) {
-                const distance = calculateDistance(worm.x, worm.y, worm.devilX, worm.devilY);
-                const dx = worm.devilX - worm.x;
-                const dy = worm.devilY - worm.y;
+            // Update behavior based on state
+            this.updateWormBehavior(worm);
 
-                if (distance > 5) {
-                    // Rush toward devil at double speed
-                    const rushSpeed = worm.baseSpeed * 2;
-                    worm.velocityX = (dx / distance) * rushSpeed;
-                    worm.velocityY = (dy / distance) * rushSpeed;
-
-                    worm.x += worm.velocityX;
-                    worm.y += worm.velocityY;
-
-                    // Rotate towards devil
-                    worm.element.style.transform = `rotate(${Math.atan2(dy, dx) + Math.PI}rad)`;
-                }
-
-                // Apply position
-                worm.element.style.left = `${worm.x}px`;
-                worm.element.style.top = `${worm.y}px`;
-                return; // Skip normal behavior
-            }
-
-            // Check if roaming period has ended and worm should steal
-            if (!worm.hasStolen && !worm.isRushingToTarget && currentTime >= worm.roamingEndTime) {
-                this.stealSymbol(worm);
-            }
-
-            // Rushing to red symbol that just appeared
-            if (worm.isRushingToTarget && !worm.hasStolen) {
-                // PERFORMANCE: Use cached revealed symbols
-                const revealedSymbols = this.getCachedRevealedSymbols();
-                let targetElement = null;
-
-                if (worm.targetSymbol) {
-                    const normalizedTarget = worm.targetSymbol.toLowerCase() === 'x' ? 'X' : worm.targetSymbol;
-                    targetElement = Array.from(revealedSymbols).find(el => {
-                        const elSymbol = el.textContent.toLowerCase() === 'x' ? 'X' : el.textContent;
-                        return elSymbol === normalizedTarget && !el.dataset.stolen;
-                    });
-                }
-
-                if (targetElement) {
-                    // Rush towards target symbol
-                    const targetRect = targetElement.getBoundingClientRect();
-                    const containerRect = this.getCachedContainerRect(); // PERFORMANCE: Use cached rect
-
-                    const targetX = targetRect.left - containerRect.left + (targetRect.width / 2);
-                    const targetY = targetRect.top - containerRect.top + (targetRect.height / 2);
-
-                    const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
-                    const dx = targetX - worm.x;
-                    const dy = targetY - worm.y;
-
-                    if (distance < 30) {
-                        // Reached target - steal it!
-                        this.stealSymbol(worm);
-                    } else {
-                        // Move towards target at double speed
-                        const rushSpeed = worm.baseSpeed * 2;
-                        worm.velocityX = (dx / distance) * rushSpeed;
-                        worm.velocityY = (dy / distance) * rushSpeed;
-
-                        worm.x += worm.velocityX;
-                        worm.y += worm.velocityY;
-                    }
-                } else {
-                    // Target disappeared, go back to roaming
-                    console.log(`🐛 Worm ${worm.id} lost target, resuming roaming`);
-                    worm.isRushingToTarget = false;
-                    worm.roamingEndTime = Date.now() + 5000;
-                }
-            }
-            // Roaming behavior - crawling movement ACROSS ALL PANELS
-            else if (!worm.hasStolen && !worm.isRushingToTarget) {
-                // Update direction slightly for natural movement
-                worm.direction += (Math.random() - 0.5) * 0.1;
-
-                // Crawling movement with inchworm effect
-                const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
-                worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
-                worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
-
-                worm.x += worm.velocityX;
-                worm.y += worm.velocityY;
-
-                // CROSS-PANEL BOUNDARIES: Worms can roam entire viewport
-                const margin = 20;
-                if (worm.x < margin) {
-                    worm.x = margin;
-                    worm.direction = Math.PI - worm.direction; // Reflect horizontally
-                }
-                if (worm.x > viewportWidth - margin) {
-                    worm.x = viewportWidth - margin;
-                    worm.direction = Math.PI - worm.direction;
-                }
-                if (worm.y < margin) {
-                    worm.y = margin;
-                    worm.direction = -worm.direction; // Reflect vertically
-                }
-                if (worm.y > viewportHeight - margin) {
-                    worm.y = viewportHeight - margin;
-                    worm.direction = -worm.direction;
-                }
-
-                // Rotate worm body to face movement direction (head points forward)
-                // Worm segments are laid out left-to-right, so head should point in direction
-                // FIX: Add π (180°) to flip worm so head faces forward instead of backward
-                worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
-            }
-            // Carrying symbol - return to console hole
-            else if (worm.hasStolen && worm.fromConsole && worm.consoleSlotElement) {
-                const slotRect = worm.consoleSlotElement.getBoundingClientRect();
-                const containerRect = this.getCachedContainerRect(); // PERFORMANCE: Use cached rect
-
-                const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
-                const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
-
-                const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
-                const dx = targetX - worm.x;
-                const dy = targetY - worm.y;
-
-                if (distance < 20) {
-                    // Reached console hole - escape with symbol!
-                    console.log(`🐛 Worm ${worm.id} escaped to console with symbol "${worm.stolenSymbol}"!`);
-                    console.log(`💀 Symbol "${worm.stolenSymbol}" stays HIDDEN until user clicks it again in Panel C`);
-                    this.removeWorm(worm);
-                    return;
-                }
-
-                // Move towards console with LSD colors!
-                worm.direction = Math.atan2(dy, dx);
-                worm.velocityX = (dx / distance) * worm.currentSpeed;
-                worm.velocityY = (dy / distance) * worm.currentSpeed;
-
-                worm.x += worm.velocityX;
-                worm.y += worm.velocityY;
-
-                // Rotate towards console (head points forward)
-                // FIX: Add π (180°) to flip worm so head faces forward
-                worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
-            }
-            // Carrying symbol but not from console - just roam with it
-            else if (worm.hasStolen && !worm.fromConsole) {
-                // PURPLE WORM CONSOLE EXIT: If this is a purple worm, exit through console
-                if (worm.isPurple && worm.shouldExitToConsole) {
-                    // Find empty console slot if not already targeting one
-                    if (!worm.exitingToConsole) {
-                        const emptySlotData = this.findEmptyConsoleSlot();
-                        if (emptySlotData) {
-                            worm.exitingToConsole = true;
-                            worm.targetConsoleSlot = emptySlotData.element;
-                            worm.targetConsoleSlotIndex = emptySlotData.index;
-                            console.log(`🟣 Purple worm ${worm.id} heading to exit at console slot ${emptySlotData.index}`);
-                        }
-                    }
-
-                    // If targeting a console slot, move toward it
-                    if (worm.exitingToConsole && worm.targetConsoleSlot) {
-                        const slotRect = worm.targetConsoleSlot.getBoundingClientRect();
-                        const containerRect = this.getCachedContainerRect();
-
-                        const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
-                        const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
-
-                        const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
-                        const dx = targetX - worm.x;
-                        const dy = targetY - worm.y;
-
-                        if (distance < 20) {
-                            // Reached console exit - purple worm escapes!
-                            console.log(`🟣 Purple worm ${worm.id} exited through console!`);
-                            this.removeWorm(worm);
-                            return;
-                        }
-
-                        // Move towards console exit
-                        worm.direction = Math.atan2(dy, dx);
-                        worm.velocityX = (dx / distance) * worm.currentSpeed;
-                        worm.velocityY = (dy / distance) * worm.currentSpeed;
-
-                        worm.x += worm.velocityX;
-                        worm.y += worm.velocityY;
-
-                        // Rotate towards console (head points forward)
-                        worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
-                    } else {
-                        // No console slot found yet, continue roaming
-                        worm.direction += (Math.random() - 0.5) * 0.1;
-
-                        const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
-                        worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
-                        worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
-
-                        worm.x += worm.velocityX;
-                        worm.y += worm.velocityY;
-                    }
-                } else {
-                    // Normal worm carrying symbol - continue roaming
-                    worm.direction += (Math.random() - 0.5) * 0.1;
-
-                    const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
-                    worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
-                    worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
-
-                    worm.x += worm.velocityX;
-                    worm.y += worm.velocityY;
-                }
-
-                // STRICT PANEL B BOUNDARIES
-                const margin = 20;
-                if (worm.x < margin) {
-                    worm.x = margin;
-                    worm.direction = Math.PI - worm.direction;
-                }
-                if (worm.x > panelBWidth - margin) {
-                    worm.x = panelBWidth - margin;
-                    worm.direction = Math.PI - worm.direction;
-                }
-                if (worm.y < margin) {
-                    worm.y = margin;
-                    worm.direction = -worm.direction;
-                }
-                if (worm.y > panelBHeight - margin) {
-                    worm.y = panelBHeight - margin;
-                    worm.direction = -worm.direction;
-                }
-
-                // Rotate worm to face movement direction (head points forward)
-                // FIX: Add π (180°) to flip worm so head faces forward
-                worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
-            }
-
-            // Apply position directly (no CSS transitions for smooth crawling)
+            // Apply position to DOM
             worm.element.style.left = `${worm.x}px`;
             worm.element.style.top = `${worm.y}px`;
         });
@@ -1273,6 +936,300 @@ class WormSystem {
         } else {
             this.animationFrameId = null;
         }
+    }
+
+    /**
+     * Update worm behavior based on current state (dispatcher method)
+     * @param {Object} worm - Worm data object
+     */
+    updateWormBehavior(worm) {
+        const currentTime = Date.now();
+
+        // Priority 1: Devil override
+        if (worm.isRushingToDevil && worm.devilX !== undefined && worm.devilY !== undefined) {
+            this.updateDevilBehavior(worm);
+            return;
+        }
+
+        // Priority 2: Roaming timeout → steal
+        if (!worm.hasStolen && !worm.isRushingToTarget && currentTime >= worm.roamingEndTime) {
+            this.stealSymbol(worm);
+            return;
+        }
+
+        // Priority 3: State-based behavior
+        if (worm.isRushingToTarget && !worm.hasStolen) {
+            this.updateRushingBehavior(worm);
+        } else if (!worm.hasStolen && !worm.isRushingToTarget) {
+            this.updateRoamingBehavior(worm);
+        } else if (worm.hasStolen && worm.fromConsole && worm.consoleSlotElement) {
+            this.updateConsoleReturnBehavior(worm);
+        } else if (worm.hasStolen) {
+            this.updateCarryingBehavior(worm);
+        }
+    }
+
+    /**
+     * Update worm behavior when rushing to devil power-up
+     * @param {Object} worm - Worm data object
+     */
+    updateDevilBehavior(worm) {
+        const distance = calculateDistance(worm.x, worm.y, worm.devilX, worm.devilY);
+        const dx = worm.devilX - worm.x;
+        const dy = worm.devilY - worm.y;
+
+        if (distance <= 5) return; // Already at devil
+
+        // Rush toward devil at double speed
+        const rushSpeed = worm.baseSpeed * 2;
+        worm.velocityX = (dx / distance) * rushSpeed;
+        worm.velocityY = (dy / distance) * rushSpeed;
+
+        worm.x += worm.velocityX;
+        worm.y += worm.velocityY;
+
+        // Rotate towards devil
+        worm.element.style.transform = `rotate(${Math.atan2(dy, dx) + Math.PI}rad)`;
+    }
+
+    /**
+     * Update worm behavior when rushing to steal a symbol
+     * @param {Object} worm - Worm data object
+     */
+    updateRushingBehavior(worm) {
+        // PERFORMANCE: Use cached revealed symbols
+        const revealedSymbols = this.getCachedRevealedSymbols();
+        let targetElement = null;
+
+        if (worm.targetSymbol) {
+            const normalizedTarget = worm.targetSymbol.toLowerCase() === 'x' ? 'X' : worm.targetSymbol;
+            targetElement = Array.from(revealedSymbols).find(el => {
+                const elSymbol = el.textContent.toLowerCase() === 'x' ? 'X' : el.textContent;
+                return elSymbol === normalizedTarget && !el.dataset.stolen;
+            });
+        }
+
+        if (targetElement) {
+            // Rush towards target symbol
+            const targetRect = targetElement.getBoundingClientRect();
+            const containerRect = this.getCachedContainerRect(); // PERFORMANCE: Use cached rect
+
+            const targetX = targetRect.left - containerRect.left + (targetRect.width / 2);
+            const targetY = targetRect.top - containerRect.top + (targetRect.height / 2);
+
+            const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
+            const dx = targetX - worm.x;
+            const dy = targetY - worm.y;
+
+            if (distance < 30) {
+                // Reached target - steal it!
+                this.stealSymbol(worm);
+            } else {
+                // Move towards target at double speed
+                const rushSpeed = worm.baseSpeed * 2;
+                worm.velocityX = (dx / distance) * rushSpeed;
+                worm.velocityY = (dy / distance) * rushSpeed;
+
+                worm.x += worm.velocityX;
+                worm.y += worm.velocityY;
+            }
+        } else {
+            // Target disappeared, go back to roaming
+            console.log(`🐛 Worm ${worm.id} lost target, resuming roaming`);
+            worm.isRushingToTarget = false;
+            worm.roamingEndTime = Date.now() + 5000;
+        }
+    }
+
+    /**
+     * Update worm behavior when roaming (before stealing)
+     * @param {Object} worm - Worm data object
+     */
+    updateRoamingBehavior(worm) {
+        // Update direction slightly for natural movement
+        worm.direction += (Math.random() - 0.5) * 0.1;
+
+        // Crawling movement with inchworm effect
+        const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
+        worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
+        worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
+
+        worm.x += worm.velocityX;
+        worm.y += worm.velocityY;
+
+        // Apply viewport boundaries
+        this.applyViewportBoundaries(worm);
+
+        // Rotate worm body to face movement direction (head points forward)
+        worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+    }
+
+    /**
+     * Update worm behavior when returning to console with stolen symbol
+     * @param {Object} worm - Worm data object
+     */
+    updateConsoleReturnBehavior(worm) {
+        const slotRect = worm.consoleSlotElement.getBoundingClientRect();
+        const containerRect = this.getCachedContainerRect(); // PERFORMANCE: Use cached rect
+
+        const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
+        const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
+
+        const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
+        const dx = targetX - worm.x;
+        const dy = targetY - worm.y;
+
+        if (distance < 20) {
+            // Reached console hole - escape with symbol!
+            console.log(`🐛 Worm ${worm.id} escaped to console with symbol "${worm.stolenSymbol}"!`);
+            console.log(`💀 Symbol "${worm.stolenSymbol}" stays HIDDEN until user clicks it again in Panel C`);
+            this.removeWorm(worm);
+            return;
+        }
+
+        // Move towards console
+        worm.direction = Math.atan2(dy, dx);
+        worm.velocityX = (dx / distance) * worm.currentSpeed;
+        worm.velocityY = (dy / distance) * worm.currentSpeed;
+
+        worm.x += worm.velocityX;
+        worm.y += worm.velocityY;
+
+        // Rotate towards console (head points forward)
+        worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+    }
+
+    /**
+     * Update worm behavior when carrying stolen symbol (not from console)
+     * @param {Object} worm - Worm data object
+     */
+    updateCarryingBehavior(worm) {
+        // PURPLE WORM CONSOLE EXIT: If this is a purple worm, exit through console
+        if (worm.isPurple && worm.shouldExitToConsole) {
+            // Find empty console slot if not already targeting one
+            if (!worm.exitingToConsole) {
+                const emptySlotData = this.findEmptyConsoleSlot();
+                if (emptySlotData) {
+                    worm.exitingToConsole = true;
+                    worm.targetConsoleSlot = emptySlotData.element;
+                    worm.targetConsoleSlotIndex = emptySlotData.index;
+                    console.log(`🟣 Purple worm ${worm.id} heading to exit at console slot ${emptySlotData.index}`);
+                }
+            }
+
+            // If targeting a console slot, move toward it
+            if (worm.exitingToConsole && worm.targetConsoleSlot) {
+                const slotRect = worm.targetConsoleSlot.getBoundingClientRect();
+                const containerRect = this.getCachedContainerRect();
+
+                const targetX = slotRect.left - containerRect.left + (slotRect.width / 2);
+                const targetY = slotRect.top - containerRect.top + (slotRect.height / 2);
+
+                const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
+                const dx = targetX - worm.x;
+                const dy = targetY - worm.y;
+
+                if (distance < 20) {
+                    // Reached console exit - purple worm escapes!
+                    console.log(`🟣 Purple worm ${worm.id} exited through console!`);
+                    this.removeWorm(worm);
+                    return;
+                }
+
+                // Move towards console exit
+                worm.direction = Math.atan2(dy, dx);
+                worm.velocityX = (dx / distance) * worm.currentSpeed;
+                worm.velocityY = (dy / distance) * worm.currentSpeed;
+
+                worm.x += worm.velocityX;
+                worm.y += worm.velocityY;
+
+                // Rotate towards console (head points forward)
+                worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+            } else {
+                // No console slot found yet, continue roaming
+                this.updateRoamingBehavior(worm);
+            }
+        } else {
+            // Normal worm carrying symbol - continue roaming
+            this.updateRoamingBehavior(worm);
+        }
+
+        // Apply Panel B boundaries for carrying worms
+        this.applyPanelBBoundaries(worm);
+    }
+
+    /**
+     * Apply viewport boundaries to worm position (for roaming worms)
+     * @param {Object} worm - Worm data object
+     */
+    applyViewportBoundaries(worm) {
+        const margin = 20;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        if (worm.x < margin) {
+            worm.x = margin;
+            worm.direction = Math.PI - worm.direction; // Reflect horizontally
+        }
+        if (worm.x > viewportWidth - margin) {
+            worm.x = viewportWidth - margin;
+            worm.direction = Math.PI - worm.direction;
+        }
+        if (worm.y < margin) {
+            worm.y = margin;
+            worm.direction = -worm.direction; // Reflect vertically
+        }
+        if (worm.y > viewportHeight - margin) {
+            worm.y = viewportHeight - margin;
+            worm.direction = -worm.direction;
+        }
+    }
+
+    /**
+     * Apply Panel B boundaries to worm position (for carrying worms)
+     * @param {Object} worm - Worm data object
+     */
+    applyPanelBBoundaries(worm) {
+        const margin = 20;
+        const panelBRect = this.getCachedContainerRect();
+        const panelBWidth = panelBRect.width;
+        const panelBHeight = panelBRect.height;
+
+        if (worm.x < margin) {
+            worm.x = margin;
+            worm.direction = Math.PI - worm.direction;
+        }
+        if (worm.x > panelBWidth - margin) {
+            worm.x = panelBWidth - margin;
+            worm.direction = Math.PI - worm.direction;
+        }
+        if (worm.y < margin) {
+            worm.y = margin;
+            worm.direction = -worm.direction;
+        }
+        if (worm.y > panelBHeight - margin) {
+            worm.y = panelBHeight - margin;
+            worm.direction = -worm.direction;
+        }
+
+        // Rotate worm to face movement direction (head points forward)
+        worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+    }
+
+    /**
+     * Check if worm is currently inside Panel B boundaries
+     * @param {Object} worm - Worm data object
+     * @returns {Boolean} - True if worm is in Panel B
+     */
+    isWormInPanelB(worm) {
+        const panelBRect = this.getCachedContainerRect();
+        return (
+            worm.x >= panelBRect.left &&
+            worm.x <= panelBRect.right &&
+            worm.y >= panelBRect.top &&
+            worm.y <= panelBRect.bottom
+        );
     }
 
     handleWormClick(worm) {
@@ -1552,7 +1509,9 @@ class WormSystem {
 
         // Drop power-up if this worm has one (and not killed by chain reaction to avoid spam)
         if (worm.hasPowerUp && !isChainReaction) {
-            this.dropPowerUp(worm.x, worm.y, worm.powerUpType);
+            if (this.powerUpSystem) {
+                this.powerUpSystem.drop(worm.x, worm.y, worm.powerUpType);
+            }
         }
 
         setTimeout(() => {
@@ -1602,480 +1561,18 @@ class WormSystem {
         }, 200);
     }
 
-    // Drop power-up at worm location
-    dropPowerUp(x, y, type = null) {
-        // Random power-up type if not specified
-        if (!type) {
-            const types = ['chainLightning', 'spider', 'devil'];
-            type = types[Math.floor(Math.random() * types.length)];
-        }
-
-        const powerUp = document.createElement('div');
-        powerUp.className = 'power-up';
-        powerUp.dataset.type = type;
-
-        // Set emoji based on type
-        const emojis = {
-            chainLightning: '⚡',
-            spider: '🕷️',
-            devil: '👹'
-        };
-        powerUp.textContent = emojis[type] || '⭐';
-
-        powerUp.style.left = `${x}px`;
-        powerUp.style.top = `${y}px`;
-        powerUp.style.position = 'fixed';
-        powerUp.style.fontSize = '30px';
-        powerUp.style.zIndex = '10001';
-        powerUp.style.cursor = 'pointer';
-        powerUp.style.animation = 'power-up-appear 0.5s ease-out';
-        powerUp.style.pointerEvents = 'auto';
-
-        // Click to collect
-        powerUp.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.collectPowerUp(type, powerUp);
-        });
-
-        this.crossPanelContainer.appendChild(powerUp);
-        console.log(`✨ Power-up "${type}" dropped at (${x.toFixed(0)}, ${y.toFixed(0)})`);
-
-        // Auto-remove after 10 seconds if not collected
-        setTimeout(() => {
-            if (powerUp.parentNode) {
-                powerUp.style.animation = 'power-up-fade 0.5s ease-out';
-                setTimeout(() => {
-                    if (powerUp.parentNode) {
-                        powerUp.parentNode.removeChild(powerUp);
-                    }
-                }, this.WORM_REMOVAL_DELAY);
-            }
-        }, this.SLIME_SPLAT_DURATION);
-    }
-
-    // Collect power-up
-    collectPowerUp(type, element) {
-        this.powerUps[type]++;
-        console.log(`🎁 Collected ${type} power-up! Total: ${this.powerUps[type]}`);
-
-        // Chain Lightning: Increase kill count with each pickup
-        if (type === 'chainLightning') {
-            // Only increase after first pickup
-            if (this.powerUps[type] > 1) {
-                this.chainLightningKillCount += 2;
-                console.log(`⚡ Chain Lightning kill count increased to ${this.chainLightningKillCount}`);
-            }
-        }
-
-        // Visual feedback
-        element.style.animation = 'power-up-collect 0.3s ease-out';
-
-        // Update console display (will be implemented)
-        this.updatePowerUpDisplay();
-
-        setTimeout(() => {
-            if (element.parentNode) {
-                element.parentNode.removeChild(element);
-            }
-        }, 300);
-    }
-
-    // Update power-up display on console
-    updatePowerUpDisplay() {
-        console.log(`📊 Power-ups: ⚡${this.powerUps.chainLightning} 🕷️${this.powerUps.spider} 👹${this.powerUps.devil}`);
-
-        // PERFORMANCE: Use cached elements
-        let powerUpDisplay = this.cachedPowerUpDisplay || document.getElementById('power-up-display');
-        const consoleElement = this.consoleElement || document.getElementById('symbol-console');
-
-        if (!powerUpDisplay) {
-            powerUpDisplay = document.createElement('div');
-            powerUpDisplay.id = 'power-up-display';
-            powerUpDisplay.style.cssText = `
-                position: absolute;
-                background: rgba(0, 0, 0, 0.8);
-                color: white;
-                padding: 10px;
-                border-radius: 10px;
-                font-family: 'Orbitron', monospace;
-                font-size: 18px;
-                z-index: 10002;
-                display: flex;
-                gap: 15px;
-                border: 2px solid #0f0;
-            `;
-
-            // Position above console if available
-            if (consoleElement) {
-                const consoleRect = consoleElement.getBoundingClientRect();
-                powerUpDisplay.style.position = 'fixed';
-                powerUpDisplay.style.bottom = `${window.innerHeight - consoleRect.top + 10}px`;
-                powerUpDisplay.style.left = `${consoleRect.left}px`;
-            } else {
-                // Fallback to bottom right
-                powerUpDisplay.style.position = 'fixed';
-                powerUpDisplay.style.bottom = '20px';
-                powerUpDisplay.style.right = '20px';
-            }
-
-            document.body.appendChild(powerUpDisplay);
-            this.cachedPowerUpDisplay = powerUpDisplay; // Cache the newly created display
-        }
-
-        powerUpDisplay.innerHTML = `
-            <div class="power-up-item" data-type="chainLightning" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s; position: relative;">
-                ⚡ ${this.powerUps.chainLightning}
-                ${this.powerUps.chainLightning > 0 ? `<div style="position: absolute; top: -10px; right: -10px; font-size: 12px; color: #0ff;">${this.chainLightningKillCount}</div>` : ''}
-            </div>
-            <div class="power-up-item" data-type="spider" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s;">
-                🕷️ ${this.powerUps.spider}
-            </div>
-            <div class="power-up-item" data-type="devil" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s;">
-                👹 ${this.powerUps.devil}
-            </div>
-        `;
-
-        // Add click handlers
-        powerUpDisplay.querySelectorAll('.power-up-item').forEach(item => {
-            item.addEventListener('mouseenter', () => {
-                item.style.background = 'rgba(0, 255, 0, 0.3)';
-            });
-            item.addEventListener('mouseleave', () => {
-                item.style.background = 'transparent';
-            });
-            item.addEventListener('click', () => {
-                const type = item.dataset.type;
-                this.usePowerUp(type);
-            });
-        });
-    }
-
-    // Use a power-up
-    usePowerUp(type) {
-        if (this.powerUps[type] <= 0) {
-            console.log(`⚠️ No ${type} power-ups available!`);
-            return;
-        }
-
-        console.log(`🎮 Using ${type} power-up!`);
-        this.powerUps[type]--;
-
-        if (type === 'chainLightning') {
-            this.activateChainLightning();
-        } else if (type === 'spider') {
-            this.activateSpider();
-        } else if (type === 'devil') {
-            this.activateDevil();
-        }
-
-        this.updatePowerUpDisplay();
-    }
-
-    // Chain Lightning: Click worm to kill 5 + nearby worms
-    activateChainLightning() {
-        console.log(`⚡ CHAIN LIGHTNING ACTIVATED! Click a worm to unleash the power!`);
-
-        // Calculate kill count (5 for first use, then +2 for each subsequent use)
-        const killCount = this.chainLightningKillCount;
-        console.log(`⚡ Will kill ${killCount} worms in proximity`);
-
-        // Set up one-time click listener on worms
-        const handleWormClickForLightning = (e, worm) => {
-            e.stopPropagation();
-            console.log(`⚡ Chain Lightning targeting worm ${worm.id}!`);
-
-            // Find closest worms
-            const sortedWorms = this.worms
-                .filter(w => w.active)
-                .sort((a, b) => {
-                    const distA = Math.sqrt(Math.pow(a.x - worm.x, 2) + Math.pow(a.y - worm.y, 2));
-                    const distB = Math.sqrt(Math.pow(b.x - worm.x, 2) + Math.pow(b.y - worm.y, 2));
-                    return distA - distB;
-                })
-                .slice(0, killCount);
-
-            console.log(`⚡ Killing ${sortedWorms.length} worms with chain lightning!`);
-
-            // Visual effect
-            sortedWorms.forEach((targetWorm, index) => {
-                setTimeout(() => {
-                    // Lightning bolt effect
-                    const bolt = document.createElement('div');
-                    bolt.style.cssText = `
-                        position: fixed;
-                        left: ${worm.x}px;
-                        top: ${worm.y}px;
-                        width: 3px;
-                        height: ${Math.sqrt(Math.pow(targetWorm.x - worm.x, 2) + Math.pow(targetWorm.y - worm.y, 2))}px;
-                        background: linear-gradient(180deg, #fff, #0ff, #fff);
-                        transform-origin: top left;
-                        transform: rotate(${Math.atan2(targetWorm.y - worm.y, targetWorm.x - worm.x) + Math.PI / 2}rad);
-                        z-index: 10003;
-                        box-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
-                        pointer-events: none;
-                    `;
-                    document.body.appendChild(bolt);
-
-                    setTimeout(() => {
-                        if (bolt.parentNode) bolt.parentNode.removeChild(bolt);
-                    }, 200);
-
-                    // Explode worm
-                    this.explodeWorm(targetWorm, false);
-                }, index * 100);
-            });
-
-            // RESET: Count resets when used (back to 5 for next collection)
-            this.chainLightningKillCount = 5;
-
-            // Remove temporary listeners
-            this.worms.forEach(w => {
-                if (w.element && w.tempLightningHandler) {
-                    w.element.removeEventListener('click', w.tempLightningHandler);
-                    delete w.tempLightningHandler;
-                }
-            });
-
-            // Reset cursor
-            document.body.style.cursor = '';
-        };
-
-        // Add temporary click listeners to all worms
-        this.worms.forEach(w => {
-            if (w.active && w.element) {
-                w.tempLightningHandler = (e) => handleWormClickForLightning(e, w);
-                w.element.addEventListener('click', w.tempLightningHandler);
-            }
-        });
-
-        // Change cursor to indicate power-up is active
-        document.body.style.cursor = 'crosshair';
-    }
-
-    // Spider: Spawns spider that converts worms to spiders, which convert more worms
-    activateSpider() {
-        console.log(`🕷️ SPIDER ACTIVATED! Spawning conversion spider...`);
-
-        // Find closest worm
-        const activeWorms = this.worms.filter(w => w.active);
-        if (activeWorms.length === 0) {
-            console.log(`⚠️ No worms to convert!`);
-            return;
-        }
-
-        // Spawn spider at random location
-        const startX = Math.random() * window.innerWidth;
-        const startY = Math.random() * window.innerHeight;
-
-        this.spawnSpider(startX, startY);
-    }
-
-    spawnSpider(x, y) {
-        const spider = document.createElement('div');
-        spider.className = 'spider-entity';
-        spider.textContent = '🕷️';
-        spider.style.cssText = `
-            position: fixed;
-            left: ${x}px;
-            top: ${y}px;
-            font-size: 40px;
-            z-index: 10001;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        `;
-
-        const spiderData = {
-            id: `spider-${Date.now()}`,
-            element: spider,
-            x: x,
-            y: y,
-            type: 'spider',
-            active: true,
-            createdAt: Date.now(),
-            isHeart: false
-        };
-
-        // Click to turn into heart
-        spider.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (!spiderData.isHeart) {
-                spider.textContent = '❤️';
-                spiderData.isHeart = true;
-                console.log(`🕷️ Spider clicked - turned into ❤️!`);
-
-                // After 1 minute, turn to skull
-                setTimeout(() => {
-                    if (spider.parentNode) {
-                        spider.textContent = '💀';
-                        setTimeout(() => {
-                            if (spider.parentNode) {
-                                spider.parentNode.removeChild(spider);
-                            }
-                        }, this.SKULL_DISPLAY_DURATION); // Remove after 10 seconds
-                    }
-                }, this.SPIDER_HEART_DURATION);
-            }
-        });
-
-        this.crossPanelContainer.appendChild(spider);
-
-        // Move spider toward closest worm
-        const moveSpider = () => {
-            if (!spiderData.active || spiderData.isHeart) return;
-
-            const activeWorms = this.worms.filter(w => w.active);
-            if (activeWorms.length === 0) {
-                console.log(`🕷️ No more worms to convert`);
-                return;
-            }
-
-            // Find closest worm
-            const closest = activeWorms.reduce((prev, curr) => {
-                const prevDist = Math.sqrt(Math.pow(prev.x - spiderData.x, 2) + Math.pow(prev.y - spiderData.y, 2));
-                const currDist = Math.sqrt(Math.pow(curr.x - spiderData.x, 2) + Math.pow(curr.y - spiderData.y, 2));
-                return currDist < prevDist ? curr : prev;
-            });
-
-            // Move toward closest worm
-            const dist = calculateDistance(spiderData.x, spiderData.y, closest.x, closest.y);
-            const dx = closest.x - spiderData.x;
-            const dy = closest.y - spiderData.y;
-
-            if (dist < 30) {
-                // Convert worm to spider!
-                console.log(`🕷️ Spider converted worm ${closest.id} to another spider!`);
-                this.removeWorm(closest);
-                this.spawnSpider(closest.x, closest.y);
-
-                // Remove this spider
-                if (spider.parentNode) {
-                    spider.parentNode.removeChild(spider);
-                }
-                spiderData.active = false;
-            } else {
-                // Move toward worm
-                const speed = 5;
-                spiderData.x += (dx / dist) * speed;
-                spiderData.y += (dy / dist) * speed;
-                spider.style.left = `${spiderData.x}px`;
-                spider.style.top = `${spiderData.y}px`;
-
-                requestAnimationFrame(moveSpider);
-            }
-        };
-
-        moveSpider();
-    }
-
-    // Devil: Click location to spawn devil, worms rush to it and die after 5s proximity
-    activateDevil() {
-        console.log(`👹 DEVIL ACTIVATED! Click location to spawn devil...`);
-
-        // One-time click listener
-        const handleDevilClick = (e) => {
-            const x = e.clientX;
-            const y = e.clientY;
-
-            console.log(`👹 Devil spawning at (${x}, ${y})`);
-
-            this.spawnDevil(x, y);
-
-            // Remove listener and reset cursor
-            document.removeEventListener('click', handleDevilClick);
-            document.body.style.cursor = '';
-        };
-
-        document.addEventListener('click', handleDevilClick);
-        document.body.style.cursor = 'crosshair';
-    }
-
-    spawnDevil(x, y) {
-        const devil = document.createElement('div');
-        devil.textContent = '👹';
-        devil.style.cssText = `
-            position: fixed;
-            left: ${x}px;
-            top: ${y}px;
-            font-size: 60px;
-            z-index: 10001;
-            pointer-events: none;
-            text-shadow: 0 0 20px red;
-        `;
-
-        this.crossPanelContainer.appendChild(devil);
-
-        // Track worms near devil
-        const devilData = {
-            x: x,
-            y: y,
-            wormProximity: new Map() // Track how long each worm has been near
-        };
-
-        const checkProximity = () => {
-            const activeWorms = this.worms.filter(w => w.active);
-
-            activeWorms.forEach(worm => {
-                const dist = Math.sqrt(Math.pow(worm.x - devilData.x, 2) + Math.pow(worm.y - devilData.y, 2));
-
-                if (dist < this.DEVIL_PROXIMITY_DISTANCE) {
-                    // Worm is near devil
-                    if (!devilData.wormProximity.has(worm.id)) {
-                        devilData.wormProximity.set(worm.id, Date.now());
-                    } else {
-                        const timeNear = Date.now() - devilData.wormProximity.get(worm.id);
-                        if (timeNear >= this.DEVIL_KILL_TIME) {
-                            // Worm has been near for 5 seconds - kill it!
-                            console.log(`👹 Worm ${worm.id} killed by devil (5s proximity)`);
-
-                            // Create skull emoji
-                            const skull = document.createElement('div');
-                            skull.textContent = '💀';
-                            skull.style.cssText = `
-                                position: fixed;
-                                left: ${worm.x}px;
-                                top: ${worm.y}px;
-                                font-size: 30px;
-                                z-index: 10002;
-                                pointer-events: none;
-                            `;
-                            this.crossPanelContainer.appendChild(skull);
-
-                            setTimeout(() => {
-                                if (skull.parentNode) {
-                                    skull.parentNode.removeChild(skull);
-                                }
-                            }, this.SKULL_DISPLAY_DURATION);
-
-                            this.explodeWorm(worm, false);
-                            devilData.wormProximity.delete(worm.id);
-                        }
-                    }
-
-                    // Make worm rush toward devil (override normal behavior)
-                    worm.isRushingToDevil = true;
-                    worm.devilX = devilData.x;
-                    worm.devilY = devilData.y;
-                } else {
-                    // Worm left proximity
-                    if (devilData.wormProximity.has(worm.id)) {
-                        devilData.wormProximity.delete(worm.id);
-                    }
-                    worm.isRushingToDevil = false;
-                }
-            });
-
-            if (activeWorms.length > 0) {
-                requestAnimationFrame(checkProximity);
-            } else {
-                // No more worms, remove devil
-                if (devil.parentNode) {
-                    devil.parentNode.removeChild(devil);
-                }
-            }
-        };
-
-        checkProximity();
-    }
+    // === POWER-UP METHODS REMOVED ===
+    // All power-up logic has been extracted to js/worm-powerups.js
+    // The following methods were removed (~470 lines):
+    // - dropPowerUp()
+    // - collectPowerUp()
+    // - updatePowerUpDisplay()
+    // - usePowerUp()
+    // - activateChainLightning()
+    // - activateSpider()
+    // - spawnSpider()
+    // - activateDevil()
+    // - spawnDevil()
 
     createSlimeSplat(x, y) {
         const splat = document.createElement('div');
