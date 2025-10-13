@@ -611,7 +611,7 @@ class WormPowerUpSystem {
         display.id = 'power-up-display';
         display.style.cssText = `
             position: fixed;
-            bottom: 20px;
+            top: 20px;
             right: 20px;
             background: rgba(0, 0, 0, 0.8);
             color: white;
@@ -619,7 +619,7 @@ class WormPowerUpSystem {
             border-radius: 10px;
             font-family: 'Orbitron', monospace;
             font-size: 18px;
-            z-index: 10002;
+            z-index: 9999;
             display: flex;
             gap: 15px;
             border: 2px solid #0f0;
@@ -631,7 +631,7 @@ class WormPowerUpSystem {
         this.makeDraggable(display);
 
         document.body.appendChild(display);
-        console.log('📊 Power-up display created (draggable)');
+        console.log('📊 Power-up display created (draggable, positioned at top-right)');
         return display;
     }
 
