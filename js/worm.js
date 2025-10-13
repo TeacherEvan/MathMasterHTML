@@ -1692,33 +1692,30 @@ class WormSystem {
             powerUpDisplay = document.createElement('div');
             powerUpDisplay.id = 'power-up-display';
             powerUpDisplay.style.cssText = `
-                position: absolute;
-                background: rgba(0, 0, 0, 0.8);
+                position: relative;
+                background: rgba(0, 0, 0, 0.9);
                 color: white;
-                padding: 10px;
-                border-radius: 10px;
+                padding: 8px;
+                border-radius: 8px;
                 font-family: 'Orbitron', monospace;
-                font-size: 18px;
+                font-size: 16px;
                 z-index: 10002;
                 display: flex;
-                gap: 15px;
+                justify-content: center;
+                gap: 12px;
                 border: 2px solid #0f0;
+                margin-top: 8px;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
             `;
 
-            // Position above console if available
-            if (consoleElement) {
-                const consoleRect = consoleElement.getBoundingClientRect();
-                powerUpDisplay.style.position = 'fixed';
-                powerUpDisplay.style.bottom = `${window.innerHeight - consoleRect.top + 10}px`;
-                powerUpDisplay.style.left = `${consoleRect.left}px`;
+            // Insert power-up display directly after the console element
+            if (consoleElement && consoleElement.parentNode) {
+                consoleElement.parentNode.insertBefore(powerUpDisplay, consoleElement.nextSibling);
             } else {
-                // Fallback to bottom right
-                powerUpDisplay.style.position = 'fixed';
-                powerUpDisplay.style.bottom = '20px';
-                powerUpDisplay.style.right = '20px';
+                // Fallback to body if console not found
+                document.body.appendChild(powerUpDisplay);
             }
 
-            document.body.appendChild(powerUpDisplay);
             this.cachedPowerUpDisplay = powerUpDisplay; // Cache the newly created display
         }
 

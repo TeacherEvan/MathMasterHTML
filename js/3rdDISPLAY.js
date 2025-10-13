@@ -134,8 +134,9 @@ function initSymbolRain() {
         const symbol = getSymbolFromPool(); // Use pooled element
         symbol.className = 'falling-symbol';
         symbol.textContent = forcedSymbol || symbols[Math.floor(Math.random() * symbols.length)];
-        // FIX: Increased horizontal offset from 30px to 40px to reduce pile-up
-        symbol.style.left = (column * columnWidth + Math.random() * 40) + 'px';
+        // FIX: Center the random offset around column position to prevent right-side bias
+        const horizontalOffset = (Math.random() - 0.5) * 40; // -20px to +20px
+        symbol.style.left = (column * columnWidth + columnWidth / 2 + horizontalOffset) + 'px';
 
         if (isInitialPopulation) {
             symbol.style.top = `${Math.random() * symbolRainContainer.offsetHeight}px`;
