@@ -1,8 +1,27 @@
 # Math Master Algebra - AI Agent Instructions
 
-Educational math game with Matrix-themed UI. Players solve algebra by clicking falling symbols. Pure HTML/CSS/JS - **no build tools, no dependencies**.
+Educational math game with Matrix-themed UI where players solve algebra equations by clicking falling symbols. Pure HTML/CSS/JS - **no build tools, no dependencies, no npm**.
 
-**Critical**: This project uses event-driven architecture and inline style overrides. Read the warnings below before editing.
+**Critical**: This project uses strict event-driven architecture and inline style overrides. Read the warnings below before making any edits.
+
+## Quick Start for AI Agents
+
+```powershell
+# 1. Start local server (REQUIRED - file:// protocol causes CORS errors)
+python -m http.server 8000
+
+# 2. Open in browser
+# http://localhost:8000/game.html?level=beginner
+
+# 3. Toggle performance monitor during development
+# Press 'P' key to see FPS, DOM queries, worm count, etc.
+```
+
+**First-Time Reading Priority:**
+1. Read "Critical Rules" section below (⚠️)
+2. Check "Architecture: Three-Panel System" for component layout
+3. Review "Event-Driven Communication" for module interaction patterns
+4. Scan "Common Pitfalls" before making changes
 
 ## ⚠️ Critical Rules - Read First
 
@@ -28,9 +47,19 @@ game.handleSymbolClick('X');
 Key events: `symbolClicked`, `symbolRevealed`, `first-line-solved`, `problemLineCompleted`, `lockLevelActivated`
 
 ### 3. No Build Process Required
-- Open `game.html` directly in browser via local server: `python -m http.server 8000`
-- Access via `http://localhost:8000/game.html?level=beginner`
-- **Never use `file://` protocol** - causes CORS issues with problem loading
+- **Direct Browser Loading**: Open `game.html` via local HTTP server
+- **Zero Dependencies**: No package.json, no node_modules, no build scripts
+- **Hot Reload**: Simple F5 refresh to see changes (no webpack, no bundler)
+- **Local Server Required**: `python -m http.server 8000` (NOT `file://` protocol)
+- **Access URL**: `http://localhost:8000/game.html?level=beginner`
+- **CORS Warning**: Loading problem files from disk requires HTTP server
+
+### 4. File Corruption History
+**CRITICAL**: `css/worm-styles.css` has a history of corruption during edits
+- **Backup Strategy**: Always create `.backup` file before editing
+- **Known Issues**: Malformed `@keyframes`, unclosed braces, typos like `opacit`
+- **Recovery Files**: `worm-styles.css.backup`, `worm-styles.css.corrupted` exist
+- **Best Practice**: Use syntax validator before committing CSS changes
 
 ## Architecture: Three-Panel System
 
@@ -258,6 +287,24 @@ Purple worms are boss-level enemies with special behaviors that require strategi
 *   **Debugging**: Console uses emoji-prefixed logs (🎮, 🔒, 🐛, 🐍) for easy filtering
 *   **Performance**: Press 'P' key to toggle performance overlay
 
+## Browser Developer Tools Setup
+
+**Recommended Console Filters:**
+```
+🎮  - game.js (core game logic)
+🔒  - lock-manager.js (lock animation)
+🐛  - worm.js (worm system)
+📊  - performance-monitor.js
+🎯  - 3rdDISPLAY.js (symbol rain)
+💾  - DOM cache operations
+```
+
+**Performance Profiling:**
+1. Press 'P' to show overlay (FPS, DOM queries, worm count)
+2. Check console for cache hits/misses (💾 emoji)
+3. Look for yellow/red metrics in performance overlay
+4. Use browser DevTools Performance tab for frame analysis
+
 ## Deployment
 
 *   **Platforms**: GitHub Pages, Netlify, Vercel, Cloudflare Pages (all free)
@@ -389,3 +436,32 @@ The `Docs/` directory contains critical project knowledge:
 *   **Commit Convention**: Use emoji prefixes matching console logs (🎮, 🔒, 🐛, 📊, 🎯) for easy tracking
 *   **Testing Before Push**: Always test locally with `python -m http.server 8000` before pushing to main
 *   **Critical Files**: Never commit changes to `css/worm-styles.css` without backup - file has history of corruption
+
+## Testing Checklist
+
+Before committing changes, verify:
+
+**✅ Functionality:**
+- [ ] Test all 3 difficulty levels (`?level=beginner|warrior|master`)
+- [ ] Verify symbol clicking in Panel C (falling symbols)
+- [ ] Test console keyboard shortcuts (1-9)
+- [ ] Confirm worm spawning on line completion
+- [ ] Check lock animation progression (6 levels)
+- [ ] Test worm killing (click worm or matching rain symbol)
+- [ ] Verify purple worm mechanics (4+ wrong answers)
+
+**✅ Performance:**
+- [ ] Press 'P' to check FPS (should be 55-60 on desktop)
+- [ ] Verify DOM queries < 150/sec
+- [ ] Check memory growth < 5MB/min
+- [ ] Test mobile responsiveness (font sizes apply)
+
+**✅ Browser Compatibility:**
+- [ ] Chrome/Edge (primary target)
+- [ ] Firefox (check `requestAnimationFrame` loops)
+- [ ] Mobile Safari (touch events with `pointerdown`)
+
+**✅ Console Errors:**
+- [ ] No red errors in console
+- [ ] Check for CORS errors (means local server not running)
+- [ ] Verify problem file loads successfully
