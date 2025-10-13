@@ -115,6 +115,33 @@ class WormSystem {
         this.DEVIL_PROXIMITY_DISTANCE = 50; // px
         this.DEVIL_KILL_TIME = 5000; // ms - 5 seconds
 
+        // DISTANCE THRESHOLDS
+        this.DISTANCE_STEAL_SYMBOL = 30; // px - how close to symbol to steal it
+        this.DISTANCE_CONSOLE_ARRIVAL = 20; // px - how close to console to escape
+        this.DISTANCE_TARGET_RUSH = 30; // px - when rushing to target symbol
+        this.DISTANCE_ROAM_RESUME = 5; // px - lost target, resume roaming
+
+        // EXPLOSION CONSTANTS
+        this.EXPLOSION_AOE_RADIUS = 18; // px - one worm height for chain reactions
+        this.EXPLOSION_PARTICLE_COUNT = 12; // number of particles per explosion
+
+        // MOVEMENT CONSTANTS
+        this.RUSH_SPEED_MULTIPLIER = 2.0; // 2x speed when rushing to target
+        this.FLICKER_SPEED_BOOST = 1.2; // 20% speed boost when carrying symbol
+        this.CRAWL_AMPLITUDE = 0.5; // inchworm effect amplitude
+        this.DIRECTION_CHANGE_RATE = 0.1; // random direction change per frame
+        this.CRAWL_PHASE_INCREMENT = 0.05; // crawl animation speed
+
+        // SPAWN CONSTANTS
+        this.WORM_SPAWN_OFFSET_RANGE = 60; // px - max offset when cloning
+        this.CLONE_POSITION_OFFSET = 30; // px - purple worm clone offset
+
+        // TIMING CONSTANTS
+        this.ROAM_RESUME_DURATION = 5000; // ms - resume roaming after losing target
+        this.CLONE_BIRTH_ANIMATION = 500; // ms - clone birth effect duration
+        this.EXPLOSION_CHAIN_DELAY = 150; // ms - delay between chain explosions
+        this.PURPLE_CLONE_ROAM_TIME = 8000; // ms - purple clone roaming time
+
         console.log('🐛 WormSystem initialized with new row-based spawning and power-up system');
     }
 
@@ -903,7 +930,7 @@ class WormSystem {
         console.log(`🌈 Worm ${worm.id} stole ${wasBlueSymbol ? 'blue' : 'red'} symbol - ACTIVATING LSD FLICKER with 20% SPEED BOOST!`);
         worm.isFlickering = true;
         worm.element.classList.add('flickering');
-        worm.currentSpeed = worm.baseSpeed * 1.2; // 20% speed boost!
+        worm.currentSpeed = worm.baseSpeed * this.FLICKER_SPEED_BOOST; // 20% speed boost!
 
         // Add stolen symbol indicator (symbol follows worm)
         const stolenSymbolDiv = document.createElement('div');
@@ -1006,6 +1033,87 @@ class WormSystem {
         }, 100);
     }
 
+    // ========================================
+    // MOVEMENT UTILITIES (Phase 2 Refactoring)
+    // ========================================
+
+    /**
+     * Calculate velocity toward target position
+     * @private
+     */
+    _calculateVelocityToTarget(worm, targetX, targetY, speedMultiplier = 1) {
+        const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
+        const dx = targetX - worm.x;
+        const dy = targetY - worm.y;
+
+        const speed = worm.baseSpeed * speedMultiplier;
+
+        return {
+            velocityX: (dx / distance) * speed,
+            velocityY: (dy / distance) * speed,
+            distance: distance,
+            direction: Math.atan2(dy, dx)
+        };
+    }
+
+    /**
+     * Apply boundary constraints to worm position
+     * @private
+     */
+    _constrainToBounds(worm, bounds) {
+        const { width, height, margin = this.BORDER_MARGIN } = bounds;
+
+        if (worm.x < margin) {
+            worm.x = margin;
+            worm.direction = Math.PI - worm.direction;
+        }
+        if (worm.x > width - margin) {
+            worm.x = width - margin;
+            worm.direction = Math.PI - worm.direction;
+        }
+        if (worm.y < margin) {
+            worm.y = margin;
+            worm.direction = -worm.direction;
+        }
+        if (worm.y > height - margin) {
+            worm.y = height - margin;
+            worm.direction = -worm.direction;
+        }
+    }
+
+    /**
+     * Update worm rotation to face movement direction
+     * @private
+     */
+    _updateWormRotation(worm) {
+        // Add π (180°) to flip worm so head faces forward
+        worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+    }
+
+    /**
+     * Apply crawling movement with inchworm effect
+     * @private
+     */
+    _applyCrawlMovement(worm) {
+        worm.direction += (Math.random() - 0.5) * this.DIRECTION_CHANGE_RATE;
+        const crawlOffset = Math.sin(worm.crawlPhase) * this.CRAWL_AMPLITUDE;
+
+        worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
+        worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
+
+        worm.x += worm.velocityX;
+        worm.y += worm.velocityY;
+    }
+
+    /**
+     * Apply worm position to DOM element
+     * @private
+     */
+    _applyWormPosition(worm) {
+        worm.element.style.left = `${worm.x}px`;
+        worm.element.style.top = `${worm.y}px`;
+    }
+
     animate() {
         if (this.worms.length === 0) {
             this.animationFrameId = null;
@@ -1025,7 +1133,7 @@ class WormSystem {
             if (!worm.active) return;
 
             // Update crawl phase for animation
-            worm.crawlPhase = (worm.crawlPhase + 0.05) % (Math.PI * 2);
+            worm.crawlPhase = (worm.crawlPhase + this.CRAWL_PHASE_INCREMENT) % (Math.PI * 2);
 
             // DEVIL POWER-UP: Override all behavior if rushing to devil
             if (worm.isRushingToDevil && worm.devilX !== undefined && worm.devilY !== undefined) {
@@ -1074,7 +1182,7 @@ class WormSystem {
                 if (targetElement) {
                     // Rush towards target symbol
                     const targetRect = targetElement.getBoundingClientRect();
-                    
+
                     // FIX: Worms use viewport coordinates (fixed positioning), so use absolute coordinates
                     const targetX = targetRect.left + (targetRect.width / 2);
                     const targetY = targetRect.top + (targetRect.height / 2);
@@ -1083,12 +1191,12 @@ class WormSystem {
                     const dx = targetX - worm.x;
                     const dy = targetY - worm.y;
 
-                    if (distance < 30) {
+                    if (distance < this.DISTANCE_STEAL_SYMBOL) {
                         // Reached target - steal it!
                         this.stealSymbol(worm);
                     } else {
                         // Move towards target at double speed
-                        const rushSpeed = worm.baseSpeed * 2;
+                        const rushSpeed = worm.baseSpeed * this.RUSH_SPEED_MULTIPLIER;
                         worm.velocityX = (dx / distance) * rushSpeed;
                         worm.velocityY = (dy / distance) * rushSpeed;
 
@@ -1099,59 +1207,27 @@ class WormSystem {
                     // Target disappeared, go back to roaming
                     console.log(`🐛 Worm ${worm.id} lost target, resuming roaming`);
                     worm.isRushingToTarget = false;
-                    worm.roamingEndTime = Date.now() + 5000;
+                    worm.roamingEndTime = Date.now() + this.ROAM_RESUME_DURATION;
                 }
             }
             // Roaming behavior - crawling movement ACROSS ALL PANELS
             else if (!worm.hasStolen && !worm.isRushingToTarget) {
-                // Update direction slightly for natural movement
-                worm.direction += (Math.random() - 0.5) * 0.1;
-
-                // Crawling movement with inchworm effect
-                const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
-                worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
-                worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
-
-                worm.x += worm.velocityX;
-                worm.y += worm.velocityY;
-
-                // CROSS-PANEL BOUNDARIES: Worms can roam entire viewport
-                const margin = 20;
-                if (worm.x < margin) {
-                    worm.x = margin;
-                    worm.direction = Math.PI - worm.direction; // Reflect horizontally
-                }
-                if (worm.x > viewportWidth - margin) {
-                    worm.x = viewportWidth - margin;
-                    worm.direction = Math.PI - worm.direction;
-                }
-                if (worm.y < margin) {
-                    worm.y = margin;
-                    worm.direction = -worm.direction; // Reflect vertically
-                }
-                if (worm.y > viewportHeight - margin) {
-                    worm.y = viewportHeight - margin;
-                    worm.direction = -worm.direction;
-                }
-
-                // Rotate worm body to face movement direction (head points forward)
-                // Worm segments are laid out left-to-right, so head should point in direction
-                // FIX: Add π (180°) to flip worm so head faces forward instead of backward
-                worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+                this._applyCrawlMovement(worm);
+                this._constrainToBounds(worm, {
+                    width: viewportWidth,
+                    height: viewportHeight
+                });
+                this._updateWormRotation(worm);
             }
             // Carrying symbol - return to console hole
             else if (worm.hasStolen && worm.fromConsole && worm.consoleSlotElement) {
                 const slotRect = worm.consoleSlotElement.getBoundingClientRect();
-                
-                // FIX: Worms use viewport coordinates (fixed positioning), so use absolute coordinates
                 const targetX = slotRect.left + (slotRect.width / 2);
                 const targetY = slotRect.top + (slotRect.height / 2);
 
-                const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
-                const dx = targetX - worm.x;
-                const dy = targetY - worm.y;
+                const velocity = this._calculateVelocityToTarget(worm, targetX, targetY, 1.0);
 
-                if (distance < 20) {
+                if (velocity.distance < this.DISTANCE_CONSOLE_ARRIVAL) {
                     // Reached console hole - escape with symbol!
                     console.log(`🐛 Worm ${worm.id} escaped to console with symbol "${worm.stolenSymbol}"!`);
                     console.log(`💀 Symbol "${worm.stolenSymbol}" stays HIDDEN until user clicks it again in Panel C`);
@@ -1160,16 +1236,12 @@ class WormSystem {
                 }
 
                 // Move towards console with LSD colors!
-                worm.direction = Math.atan2(dy, dx);
-                worm.velocityX = (dx / distance) * worm.currentSpeed;
-                worm.velocityY = (dy / distance) * worm.currentSpeed;
-
+                worm.direction = velocity.direction;
+                worm.velocityX = velocity.velocityX;
+                worm.velocityY = velocity.velocityY;
                 worm.x += worm.velocityX;
                 worm.y += worm.velocityY;
-
-                // Rotate towards console (head points forward)
-                // FIX: Add π (180°) to flip worm so head faces forward
-                worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+                this._updateWormRotation(worm);
             }
             // Carrying symbol but not from console - just roam with it
             else if (worm.hasStolen && !worm.fromConsole) {
@@ -1189,16 +1261,12 @@ class WormSystem {
                     // If targeting a console slot, move toward it
                     if (worm.exitingToConsole && worm.targetConsoleSlot) {
                         const slotRect = worm.targetConsoleSlot.getBoundingClientRect();
-                        
-                        // FIX: Worms use viewport coordinates (fixed positioning), so use absolute coordinates
                         const targetX = slotRect.left + (slotRect.width / 2);
                         const targetY = slotRect.top + (slotRect.height / 2);
 
-                        const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
-                        const dx = targetX - worm.x;
-                        const dy = targetY - worm.y;
+                        const velocity = this._calculateVelocityToTarget(worm, targetX, targetY, 1.0);
 
-                        if (distance < 20) {
+                        if (velocity.distance < this.DISTANCE_CONSOLE_ARRIVAL) {
                             // Reached console exit - purple worm escapes!
                             console.log(`🟣 Purple worm ${worm.id} exited through console!`);
                             this.removeWorm(worm);
@@ -1206,65 +1274,27 @@ class WormSystem {
                         }
 
                         // Move towards console exit
-                        worm.direction = Math.atan2(dy, dx);
-                        worm.velocityX = (dx / distance) * worm.currentSpeed;
-                        worm.velocityY = (dy / distance) * worm.currentSpeed;
-
+                        worm.direction = velocity.direction;
+                        worm.velocityX = velocity.velocityX;
+                        worm.velocityY = velocity.velocityY;
                         worm.x += worm.velocityX;
                         worm.y += worm.velocityY;
-
-                        // Rotate towards console (head points forward)
-                        worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+                        this._updateWormRotation(worm);
                     } else {
                         // No console slot found yet, continue roaming
-                        worm.direction += (Math.random() - 0.5) * 0.1;
-
-                        const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
-                        worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
-                        worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
-
-                        worm.x += worm.velocityX;
-                        worm.y += worm.velocityY;
+                        this._applyCrawlMovement(worm);
                     }
                 } else {
                     // Normal worm carrying symbol - continue roaming
-                    worm.direction += (Math.random() - 0.5) * 0.1;
-
-                    const crawlOffset = Math.sin(worm.crawlPhase) * 0.5;
-                    worm.velocityX = Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
-                    worm.velocityY = Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
-
-                    worm.x += worm.velocityX;
-                    worm.y += worm.velocityY;
+                    this._applyCrawlMovement(worm);
                 }
 
-                // STRICT PANEL B BOUNDARIES
-                const margin = 20;
-                if (worm.x < margin) {
-                    worm.x = margin;
-                    worm.direction = Math.PI - worm.direction;
-                }
-                if (worm.x > panelBWidth - margin) {
-                    worm.x = panelBWidth - margin;
-                    worm.direction = Math.PI - worm.direction;
-                }
-                if (worm.y < margin) {
-                    worm.y = margin;
-                    worm.direction = -worm.direction;
-                }
-                if (worm.y > panelBHeight - margin) {
-                    worm.y = panelBHeight - margin;
-                    worm.direction = -worm.direction;
-                }
-
-                // Rotate worm to face movement direction (head points forward)
-                // FIX: Add π (180°) to flip worm so head faces forward
-                worm.element.style.transform = `rotate(${worm.direction + Math.PI}rad)`;
+                // Note: Panel B boundaries would be applied here if needed (currently unreachable code)
+                this._updateWormRotation(worm);
             }
 
             // Apply position directly (no CSS transitions for smooth crawling)
-            worm.element.style.left = `${worm.x}px`;
-            worm.element.style.top = `${worm.y}px`;
+            this._applyWormPosition(worm);
         });
 
         // Continue animation if there are active worms
@@ -1305,106 +1335,12 @@ class WormSystem {
         this.clonePurpleWorm(worm);
     }
 
-    cloneWorm(parentWorm) {
-        if (!parentWorm.active) return;
-
-        console.log(`🐛 Worm ${parentWorm.id} clicked! Creating CLONE with same mission...`);
-
-        // Check if we can spawn more worms
-        if (this.worms.length >= this.maxWorms) {
-            console.log(`⚠️ Max worms (${this.maxWorms}) reached. Cannot clone.`);
-            // Flash effect to indicate max reached
-            parentWorm.element.style.animation = 'worm-flash 0.3s ease-out';
-            setTimeout(() => {
-                parentWorm.element.style.animation = '';
-            }, 300);
-            return;
-        }
-
-        // Create a new worm near the parent
-        const newWormId = `worm-clone-${Date.now()}-${Math.random()}`;
-        const newWormElement = document.createElement('div');
-        newWormElement.className = 'worm-container';
-        newWormElement.id = newWormId;
-
-        // Worm body with segments
-        const wormBody = document.createElement('div');
-        wormBody.className = 'worm-body';
-
-        for (let i = 0; i < 5; i++) {
-            const segment = document.createElement('div');
-            segment.className = 'worm-segment';
-            segment.style.setProperty('--segment-index', i);
-            wormBody.appendChild(segment);
-        }
-
-        newWormElement.appendChild(wormBody);
-
-        // Position near parent worm with slight offset - USE VIEWPORT COORDINATES
-        const offsetX = (Math.random() - 0.5) * 60;
-        const offsetY = (Math.random() - 0.5) * 60;
-        const newX = Math.max(0, Math.min(window.innerWidth - 50, parentWorm.x + offsetX));
-        const newY = Math.max(0, Math.min(window.innerHeight - 50, parentWorm.y + offsetY));
-
-        newWormElement.style.left = `${newX}px`;
-        newWormElement.style.top = `${newY}px`;
-        newWormElement.style.position = 'fixed'; // Use fixed for viewport positioning
-        newWormElement.style.zIndex = '10000';
-        newWormElement.style.opacity = '1';
-        newWormElement.style.visibility = 'visible';
-        newWormElement.style.pointerEvents = 'auto'; // Allow clicks
-
-        this.crossPanelContainer.appendChild(newWormElement); // Use cross-panel container
-
-        // Create clone with SAME MISSION as parent
-        const cloneData = {
-            id: newWormId,
-            element: newWormElement,
-            stolenSymbol: null,
-            targetElement: null,
-            targetSymbol: parentWorm.targetSymbol, // SAME TARGET as parent!
-            x: newX,
-            y: newY,
-            velocityX: (Math.random() - 0.5) * 2.0,
-            velocityY: (Math.random() - 0.5) * 1.0,
-            active: true,
-            hasStolen: false,
-            isRushingToTarget: parentWorm.isRushingToTarget, // Inherit rushing state
-            roamingEndTime: Date.now() + this.CLONE_WORM_ROAM_DURATION,
-            isFlickering: false,
-            baseSpeed: 2.0,
-            currentSpeed: 2.0,
-            fromConsole: false, // Clones don't return to console
-            crawlPhase: Math.random() * Math.PI * 2,
-            direction: Math.random() * Math.PI * 2
-        };
-
-        this.worms.push(cloneData);
-
-        // Add click handler with RISK/REWARD: 80% kill, 20% multiply!
-        newWormElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.handleWormClick(cloneData);
-        });
-
-        // Clone birth effect on both worms
-        parentWorm.element.classList.add('worm-multiply');
-        newWormElement.classList.add('worm-multiply');
-
-        setTimeout(() => {
-            parentWorm.element.classList.remove('worm-multiply');
-            newWormElement.classList.remove('worm-multiply');
-        }, 500);
-
-        console.log(`✅ Worm cloned! New clone ${newWormId} targeting same symbol: "${cloneData.targetSymbol || 'any'}". Total worms: ${this.worms.length}`);
-
-        // Start animation loop if not already running
-        if (!this.animationFrameId) {
-            this.animate();
-        }
-    }
-
     // PURPLE WORM: Clone purple worm (maintains purple properties)
+    /**
+     * Clone a purple worm - creates another purple worm as punishment for clicking
+     * This is the ONLY cloning mechanic remaining (cloning curse removed Oct 2025)
+     * Purple worms can only be killed by clicking matching symbol in Panel C rain.
+     */
     clonePurpleWorm(parentWorm) {
         if (!parentWorm.active) return;
 
@@ -1440,7 +1376,7 @@ class WormSystem {
         newWormElement.appendChild(wormBody);
 
         // Position clone near parent with random offset - USE VIEWPORT COORDINATES
-        const offset = 30;
+        const offset = this.CLONE_POSITION_OFFSET;
         const newX = Math.max(0, Math.min(window.innerWidth - 50, parentWorm.x + (Math.random() - 0.5) * offset * 2));
         const newY = Math.max(0, Math.min(window.innerHeight - 50, parentWorm.y + (Math.random() - 0.5) * offset * 2));
 
@@ -1468,7 +1404,7 @@ class WormSystem {
             active: true,
             hasStolen: false,
             isRushingToTarget: parentWorm.isRushingToTarget,
-            roamingEndTime: Date.now() + 8000,
+            roamingEndTime: Date.now() + this.PURPLE_CLONE_ROAM_TIME,
             isFlickering: false,
             baseSpeed: 2.0,
             currentSpeed: 2.0,
@@ -1494,7 +1430,7 @@ class WormSystem {
         setTimeout(() => {
             parentWorm.element.classList.remove('worm-multiply');
             newWormElement.classList.remove('worm-multiply');
-        }, 500);
+        }, this.CLONE_BIRTH_ANIMATION);
 
         console.log(`🟣 Purple worm cloned! New clone ${newWormId}. Total worms: ${this.worms.length}`);
 
@@ -1508,11 +1444,10 @@ class WormSystem {
         console.log(`💥 EXPLODING worm ${worm.id} (${isRainKill ? 'RAIN KILL' : 'direct click'}${isChainReaction ? ' - CHAIN REACTION' : ''}) and returning symbol "${worm.stolenSymbol}"!`);
 
         // AOE DAMAGE: Check for nearby worms and trigger chain explosions
-        const AOE_RADIUS = 18; // One vertical worm height
         const nearbyWorms = this.worms.filter(w => {
             if (w.id === worm.id || !w.active) return false;
             const distance = calculateDistance(worm.x, worm.y, w.x, w.y);
-            return distance <= AOE_RADIUS;
+            return distance <= this.EXPLOSION_AOE_RADIUS;
         });
 
         if (nearbyWorms.length > 0) {
@@ -1522,7 +1457,7 @@ class WormSystem {
                 nearbyWorms.forEach(nearbyWorm => {
                     this.explodeWorm(nearbyWorm, false, true); // Chain explosion!
                 });
-            }, 150);
+            }, this.EXPLOSION_CHAIN_DELAY);
         }
 
         // Return stolen symbol to its original position
@@ -1561,9 +1496,8 @@ class WormSystem {
     }
 
     createExplosionParticles(x, y) {
-        // Create 12 particle fragments flying outward
-        const particleCount = 12;
-        for (let i = 0; i < particleCount; i++) {
+        // Create particle fragments flying outward
+        for (let i = 0; i < this.EXPLOSION_PARTICLE_COUNT; i++) {
             const particle = document.createElement('div');
             particle.className = 'explosion-particle';
 

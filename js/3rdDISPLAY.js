@@ -22,8 +22,8 @@ function initSymbolRain() {
     let symbolFallSpeed = 0.6;
     const INITIAL_FALL_SPEED = 0.6; // Store initial speed for reset
     const maxFallSpeed = 6;
-    const spawnRate = 0.4; // INCREASED from 0.2 to 0.4 for more frequent spawning
-    const burstSpawnRate = 0.15; // 15% chance to spawn burst of 2-3 symbols
+    const spawnRate = 0.3; // REDUCED from 0.4 to 0.3 to prevent overcrowding
+    const burstSpawnRate = 0.10; // REDUCED from 15% to 10% chance for burst spawning
     const columnWidth = 50;
 
     // Guaranteed spawn system - ensure all symbols appear every 5 seconds
@@ -281,8 +281,12 @@ function initSymbolRain() {
         for (let readIndex = 0; readIndex < activeSymbols.length; readIndex++) {
             const symbolObj = activeSymbols[readIndex];
 
-            // Check if symbol should be removed (out of bounds)
-            if (symbolObj.y > containerHeight + 50) {
+            // Check if symbol should be removed (out of bounds or stuck at bottom)
+            // Remove symbols more aggressively if they're near bottom and moving slowly
+            const isOffScreen = symbolObj.y > containerHeight + 50;
+            const isStuckAtBottom = symbolObj.y > containerHeight - 100 && activeSymbols.length > 30; // Remove stuck symbols when screen is crowded
+
+            if (isOffScreen || isStuckAtBottom) {
                 symbolObj.element.remove();
                 returnSymbolToPool(symbolObj.element); // Return to pool
                 continue; // Skip this symbol, don't copy to writeIndex
@@ -295,7 +299,7 @@ function initSymbolRain() {
                 symbolObj.element.style.top = `${symbolObj.y}px`;
             } else {
                 // Collision detected - move at reduced speed to prevent pile-up
-                symbolObj.y += symbolFallSpeed * 0.3; // Move at 30% speed when crowded
+                symbolObj.y += symbolFallSpeed * 0.5; // INCREASED from 30% to 50% speed to reduce accumulation
                 symbolObj.element.style.top = `${symbolObj.y}px`;
             }
 
