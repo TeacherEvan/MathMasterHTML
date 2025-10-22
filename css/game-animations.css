@@ -1,0 +1,125 @@
+/* game-animations.css - Keyframe Animations for Game */
+/* Extracted from game.css to improve maintainability */
+
+/* Problem display pulsing effect */
+@keyframes problemPulse {
+    0%,
+    100% {
+        color: #ff6666;
+        text-shadow: 0 0 10px rgba(255, 102, 102, 0.5);
+    }
+
+    50% {
+        color: #ff9999;
+        text-shadow: 0 0 15px rgba(255, 153, 153, 0.8);
+    }
+}
+
+/* Wall separator pulsing glow */
+@keyframes wallPulse {
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+    }
+}
+
+/* Panel C fade-in on load */
+@keyframes panelFadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Symbol click effect */
+@keyframes symbolClick {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* Rotate phone icon animation */
+@keyframes rotatePhone {
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(90deg);
+    }
+}
+
+/* Modal fade-in animation */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Modal fade-out animation */
+@keyframes modalFadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(0.8) translateY(-50px);
+    }
+}
+
+/* Game over shake effect */
+@keyframes gameOverShake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-10px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(10px);
+    }
+}
+
+/* Game over red pulsing text */
+@keyframes pulseRed {
+    0%,
+    100% {
+        text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000, 3px 3px 0px #000;
+    }
+
+    50% {
+        text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000, 3px 3px 0px #000;
+    }
+}
