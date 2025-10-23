@@ -2,7 +2,7 @@
 console.log("🐛 Worm System Loading...");
 
 // ========================================
-// WORM SYSTEM CLASS
+// WORM SYSTEM CLASS (Refactored)
 // ========================================
 
 class WormSystem {
@@ -20,7 +20,6 @@ class WormSystem {
         this.animationFrameId = null;
         this.spawnTimer = null;
         this.firstWormSpawned = false;
-        this.lockedConsoleSlots = new Set(); // Track which console slots have active worms
         this.crossPanelContainer = null; // Container for cross-panel worm movement
 
         // ROW COMPLETION TRACKING
@@ -78,10 +77,6 @@ class WormSystem {
         this.containerRectCacheTime = 0;
         this.CACHE_DURATION_TARGETS = 100; // Refresh revealed symbols every 100ms
         this.CACHE_DURATION_RECT = 200; // Refresh container rect every 200ms
-
-        // PERFORMANCE: Spawn batching queue to prevent frame drops
-        this.spawnQueue = [];
-        this.isProcessingSpawnQueue = false;
 
         // PERFORMANCE: Guard to prevent duplicate event listener registration
         this.eventListenersInitialized = false;
@@ -150,7 +145,35 @@ class WormSystem {
         this.EXPLOSION_CHAIN_DELAY = 150; // ms - delay between chain explosions
         this.PURPLE_CLONE_ROAM_TIME = 8000; // ms - purple clone roaming time
 
-        console.log('🐛 WormSystem initialized with new row-based spawning and power-up system');
+        // ========================================
+        // REFACTORED MODULES INTEGRATION
+        // ========================================
+        
+        // Initialize factory for worm creation
+        this.factory = new WormFactory({
+            segmentCount: this.WORM_SEGMENT_COUNT,
+            zIndex: this.WORM_Z_INDEX,
+            dropRate: this.POWER_UP_DROP_RATE,
+            powerUpTypes: this.POWER_UP_TYPES
+        });
+
+        // Initialize movement handler
+        this.movement = new WormMovement({
+            borderMargin: this.BORDER_MARGIN,
+            rushSpeedMultiplier: this.RUSH_SPEED_MULTIPLIER,
+            flickerSpeedBoost: this.FLICKER_SPEED_BOOST,
+            crawlAmplitude: this.CRAWL_AMPLITUDE,
+            directionChangeRate: this.DIRECTION_CHANGE_RATE,
+            crawlPhaseIncrement: this.CRAWL_PHASE_INCREMENT
+        });
+
+        // Initialize spawn manager
+        this.spawnManager = new WormSpawnManager({
+            queueDelay: this.SPAWN_QUEUE_DELAY,
+            maxWorms: this.maxWorms
+        });
+
+        console.log('🐛 WormSystem initialized with refactored modules');
     }
 
     // ========================================
@@ -244,34 +267,19 @@ class WormSystem {
 
     // PERFORMANCE: Queue worm spawn to prevent frame drops on multi-spawn
     queueWormSpawn(type, data = {}) {
-        this.spawnQueue.push({ type, data, timestamp: Date.now() });
-        console.log(`📋 Queued ${type} worm spawn. Queue length: ${this.spawnQueue.length}`);
+        this.spawnManager.queueSpawn(type, data);
         this.processSpawnQueue();
     }
 
-    // PERFORMANCE: Process spawn queue one at a time with RAF spacing
+    // PERFORMANCE: Process spawn queue using refactored spawn manager
     processSpawnQueue() {
-        if (this.isProcessingSpawnQueue || this.spawnQueue.length === 0) return;
-
-        this.isProcessingSpawnQueue = true;
-
-        requestAnimationFrame(() => {
-            const spawn = this.spawnQueue.shift();
-
-            if (spawn.type === 'console') {
+        this.spawnManager.processQueue((type, data) => {
+            if (type === 'console') {
                 this.spawnWormFromConsole();
-            } else if (spawn.type === 'purple') {
+            } else if (type === 'purple') {
                 this.spawnPurpleWorm();
-            } else if (spawn.type === 'border') {
-                this.spawnWormFromBorder(spawn.data);
-            }
-
-            this.isProcessingSpawnQueue = false;
-
-            // If more spawns queued, process next one after delay
-            if (this.spawnQueue.length > 0) {
-                setTimeout(() => this.processSpawnQueue(), this.SPAWN_QUEUE_DELAY);
-                console.log(`⏱️ Processing next spawn in queue (${this.spawnQueue.length} remaining)...`);
+            } else if (type === 'border') {
+                this.spawnWormFromBorder(data);
             }
         });
     }
@@ -428,135 +436,8 @@ class WormSystem {
     }
 
     // ========================================
-    // FACTORY METHODS (Phase 4 Refactoring)
+    // HELPER: Find empty console slot
     // ========================================
-
-    /**
-     * FACTORY METHOD: Create worm element with consistent structure
-     * Eliminates ~200 lines of duplicate code across spawn methods
-     * @param {Object} config - Worm configuration
-     * @param {string} config.id - Unique worm ID
-     * @param {string[]} config.classNames - Additional CSS classes
-     * @param {number} config.segmentCount - Number of worm segments (default: 5)
-     * @param {number} config.x - Starting X position
-     * @param {number} config.y - Starting Y position
-     * @returns {HTMLElement} Configured worm element
-     */
-    createWormElement(config) {
-        const {
-            id,
-            classNames = [],
-            segmentCount = this.WORM_SEGMENT_COUNT,
-            x,
-            y
-        } = config;
-
-        // Create main worm container
-        const wormElement = document.createElement('div');
-        wormElement.className = ['worm-container', ...classNames].join(' ');
-        wormElement.id = id;
-
-        // Create worm body with segments
-        const wormBody = document.createElement('div');
-        wormBody.className = 'worm-body';
-
-        for (let i = 0; i < segmentCount; i++) {
-            const segment = document.createElement('div');
-            segment.className = 'worm-segment';
-            segment.style.setProperty('--segment-index', i);
-            wormBody.appendChild(segment);
-        }
-
-        wormElement.appendChild(wormBody);
-
-        // Apply consistent positioning and styling
-        wormElement.style.left = `${x}px`;
-        wormElement.style.top = `${y}px`;
-        wormElement.style.position = 'fixed';
-        wormElement.style.zIndex = String(this.WORM_Z_INDEX);
-        wormElement.style.opacity = '1';
-        wormElement.style.visibility = 'visible';
-        wormElement.style.pointerEvents = 'auto';
-
-        return wormElement;
-    }
-
-    /**
-     * FACTORY METHOD: Create worm data object with consistent structure
-     * Eliminates duplication across spawn methods
-     * @param {Object} config - Worm data configuration
-     * @returns {Object} Configured worm data object
-     */
-    _createWormData(config) {
-        const {
-            id,
-            element,
-            x,
-            y,
-            baseSpeed,
-            roamDuration,
-            isPurple = false,
-            fromConsole = false,
-            consoleSlotIndex = undefined,
-            consoleSlotElement = undefined,
-            targetSymbol = null
-        } = config;
-
-        // POWER-UP: 10% chance to carry a power-up
-        const hasPowerUp = Math.random() < this.POWER_UP_DROP_RATE;
-        const powerUpType = hasPowerUp ? this.POWER_UP_TYPES[Math.floor(Math.random() * this.POWER_UP_TYPES.length)] : null;
-
-        const wormData = {
-            id: id,
-            element: element,
-            stolenSymbol: null,
-            targetElement: null,
-            targetSymbol: targetSymbol,
-            x: x,
-            y: y,
-            velocityX: (Math.random() - 0.5) * baseSpeed,
-            velocityY: (Math.random() - 0.5) * (isPurple ? 0.75 : 1.0),
-            active: true,
-            hasStolen: false,
-            isRushingToTarget: isPurple || (targetSymbol !== null),
-            roamingEndTime: Date.now() + roamDuration,
-            isFlickering: false,
-            baseSpeed: baseSpeed,
-            currentSpeed: baseSpeed,
-            fromConsole: fromConsole,
-            crawlPhase: Math.random() * Math.PI * 2,
-            direction: Math.random() * Math.PI * 2,
-            hasPowerUp: hasPowerUp,
-            powerUpType: powerUpType
-        };
-
-        // Console-specific properties
-        if (fromConsole) {
-            wormData.consoleSlotIndex = consoleSlotIndex;
-            wormData.consoleSlotElement = consoleSlotElement;
-        }
-
-        // Purple worm-specific properties
-        if (isPurple) {
-            wormData.isPurple = true;
-            wormData.shouldExitToConsole = true;
-            wormData.exitingToConsole = false;
-            wormData.targetConsoleSlot = null;
-            wormData.canStealBlue = true;
-            wormData.prioritizeRed = true;
-        } else {
-            // Border worms exit to console
-            wormData.shouldExitToConsole = !fromConsole;
-            wormData.exitingToConsole = false;
-            wormData.targetConsoleSlot = null;
-        }
-
-        if (hasPowerUp) {
-            console.log(`✨ Worm ${id} has power-up: ${powerUpType}`);
-        }
-
-        return wormData;
-    }
 
     // ========================================
     // SPAWN MANAGEMENT
@@ -568,8 +449,7 @@ class WormSystem {
 
         console.log(`🐛 spawnWormFromConsole() called. Current worms: ${this.worms.length}/${this.maxWorms}`);
 
-        if (this.worms.length >= this.maxWorms) {
-            console.log(`⚠️ Max worms (${this.maxWorms}) reached. No more spawning.`);
+        if (!this.spawnManager.canSpawn(this.worms.length)) {
             return;
         }
 
@@ -583,20 +463,14 @@ class WormSystem {
 
         const { element: slotElement, index: slotIndex } = slotData;
 
-        // Lock this console slot
-        this.lockedConsoleSlots.add(slotIndex);
-        slotElement.classList.add('worm-spawning', 'locked');
-
-        console.log(`🕳️ Worm spawning from console slot ${slotIndex + 1}`);
-
         // Get slot position for worm spawn point (viewport coordinates)
         const slotRect = slotElement.getBoundingClientRect();
         const startX = slotRect.left + (slotRect.width / 2);
         const startY = slotRect.top + (slotRect.height / 2);
 
-        // REFACTORED: Use factory method for worm creation
+        // REFACTORED: Use factory module for worm creation
         const wormId = generateUniqueId('worm');
-        const wormElement = this.createWormElement({
+        const wormElement = this.factory.createWormElement({
             id: wormId,
             classNames: ['console-worm'],
             segmentCount: this.WORM_SEGMENT_COUNT,
@@ -606,8 +480,8 @@ class WormSystem {
 
         this.crossPanelContainer.appendChild(wormElement);
 
-        // REFACTORED: Use factory method for worm data
-        const wormData = this._createWormData({
+        // REFACTORED: Use factory module for worm data
+        const wormData = this.factory.createWormData({
             id: wormId,
             element: wormElement,
             x: startX,
@@ -619,6 +493,13 @@ class WormSystem {
             consoleSlotElement: slotElement
         });
 
+        // Track console slot locking
+        if (!this.lockedConsoleSlots) {
+            this.lockedConsoleSlots = new Set();
+        }
+        this.lockedConsoleSlots.add(slotIndex);
+        slotElement.classList.add('worm-spawning', 'locked');
+
         this.worms.push(wormData);
 
         // Add click handler
@@ -628,7 +509,6 @@ class WormSystem {
         });
 
         console.log(`✅ Worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
-        console.log(`🐛 Worm will roam for 10 seconds before stealing`);
 
         // Start animation loop if not already running
         if (this.worms.length === 1) {
@@ -642,35 +522,31 @@ class WormSystem {
 
         console.log(`🐛 spawnWorm() called (fallback). Current worms: ${this.worms.length}/${this.maxWorms}`);
 
-        if (this.worms.length >= this.maxWorms) {
-            console.log(`⚠️ Max worms (${this.maxWorms}) reached. No more spawning.`);
+        if (!this.spawnManager.canSpawn(this.worms.length)) {
             return;
         }
 
-        // Random starting position at bottom - USE VIEWPORT COORDINATES
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const startX = Math.random() * Math.max(0, viewportWidth - 80);
-        const startY = Math.max(0, viewportHeight - 30);
+        // REFACTORED: Use factory module for position calculation
+        const position = this.factory.calculateFallbackSpawnPosition();
 
-        // REFACTORED: Use factory method for worm creation
+        // REFACTORED: Use factory module for worm creation
         const wormId = generateUniqueId('worm');
-        const wormElement = this.createWormElement({
+        const wormElement = this.factory.createWormElement({
             id: wormId,
             classNames: [],
             segmentCount: this.WORM_SEGMENT_COUNT,
-            x: startX,
-            y: startY
+            x: position.x,
+            y: position.y
         });
 
         this.crossPanelContainer.appendChild(wormElement);
 
-        // REFACTORED: Use factory method for worm data
-        const wormData = this._createWormData({
+        // REFACTORED: Use factory module for worm data
+        const wormData = this.factory.createWormData({
             id: wormId,
             element: wormElement,
-            x: startX,
-            y: startY,
+            x: position.x,
+            y: position.y,
             baseSpeed: this.SPEED_FALLBACK_WORM,
             roamDuration: this.difficultyRoamTimeConsole,
             fromConsole: false
@@ -699,54 +575,31 @@ class WormSystem {
         const { index = 0, total = 1 } = data;
         console.log(`🐛 spawnWormFromBorder() called. Worm ${index + 1}/${total}. Current worms: ${this.worms.length}/${this.maxWorms}`);
 
-        if (this.worms.length >= this.maxWorms) {
-            console.log(`⚠️ Max worms (${this.maxWorms}) reached. No more spawning.`);
+        if (!this.spawnManager.canSpawn(this.worms.length)) {
             return;
         }
 
-        // Determine spawn position (spread around bottom and side borders)
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const margin = this.BORDER_MARGIN;
-        const position = index / total; // 0 to 1
+        // REFACTORED: Use factory module for border position calculation
+        const position = this.factory.calculateBorderSpawnPosition(index, total, this.BORDER_MARGIN);
 
-        let startX, startY;
-
-        if (position < 0.5) {
-            // Bottom border (0-50%)
-            const xPosition = position * 2;
-            startX = margin + xPosition * (viewportWidth - 2 * margin);
-            startY = viewportHeight - margin;
-        } else if (position < 0.75) {
-            // Left border (50-75%)
-            const yPosition = (position - 0.5) * 4;
-            startX = margin;
-            startY = margin + yPosition * (viewportHeight - 2 * margin);
-        } else {
-            // Right border (75-100%)
-            const yPosition = (position - 0.75) * 4;
-            startX = viewportWidth - margin;
-            startY = margin + yPosition * (viewportHeight - 2 * margin);
-        }
-
-        // REFACTORED: Use factory method for worm creation
+        // REFACTORED: Use factory module for worm creation
         const wormId = generateUniqueId('border-worm');
-        const wormElement = this.createWormElement({
+        const wormElement = this.factory.createWormElement({
             id: wormId,
             classNames: [],
             segmentCount: this.WORM_SEGMENT_COUNT,
-            x: startX,
-            y: startY
+            x: position.x,
+            y: position.y
         });
 
         this.crossPanelContainer.appendChild(wormElement);
 
-        // REFACTORED: Use factory method for worm data
-        const wormData = this._createWormData({
+        // REFACTORED: Use factory module for worm data
+        const wormData = this.factory.createWormData({
             id: wormId,
             element: wormElement,
-            x: startX,
-            y: startY,
+            x: position.x,
+            y: position.y,
             baseSpeed: this.SPEED_BORDER_WORM,
             roamDuration: this.difficultyRoamTimeBorder,
             fromConsole: false
@@ -760,7 +613,7 @@ class WormSystem {
             this.handleWormClick(wormData);
         });
 
-        console.log(`✅ Border worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
+        console.log(`✅ Border worm ${wormId} spawned at (${position.x.toFixed(0)}, ${position.y.toFixed(0)}). Total worms: ${this.worms.length}`);
 
         // Start animation loop if not already running
         if (this.worms.length === 1) {
@@ -774,8 +627,7 @@ class WormSystem {
 
         console.log(`🟣 spawnPurpleWorm() called. Current worms: ${this.worms.length}/${this.maxWorms}`);
 
-        if (this.worms.length >= this.maxWorms) {
-            console.log(`⚠️ Max worms (${this.maxWorms}) reached. Cannot spawn purple worm.`);
+        if (!this.spawnManager.canSpawn(this.worms.length)) {
             return;
         }
 
@@ -790,16 +642,16 @@ class WormSystem {
             startY = helpRect.top + (helpRect.height / 2);
             console.log(`🟣 Purple worm spawning from help button at (${startX.toFixed(0)}, ${startY.toFixed(0)})`);
         } else {
-            // Fallback if help button not found
-            const viewportWidth = window.innerWidth;
-            startX = Math.random() * Math.max(0, viewportWidth - 80);
+            // REFACTORED: Use factory module for fallback position
+            const position = this.factory.calculateFallbackSpawnPosition();
+            startX = position.x;
             startY = -50; // Start above viewport
             console.log(`⚠️ Help button not found, using fallback position`);
         }
 
-        // REFACTORED: Use factory method for worm creation
+        // REFACTORED: Use factory module for worm creation
         const wormId = generateUniqueId('purple-worm');
-        const wormElement = this.createWormElement({
+        const wormElement = this.factory.createWormElement({
             id: wormId,
             classNames: ['purple-worm'],
             segmentCount: this.WORM_SEGMENT_COUNT,
@@ -809,8 +661,8 @@ class WormSystem {
 
         this.crossPanelContainer.appendChild(wormElement);
 
-        // REFACTORED: Use factory method for worm data (purple worm)
-        const wormData = this._createWormData({
+        // REFACTORED: Use factory module for worm data (purple worm)
+        const wormData = this.factory.createWormData({
             id: wormId,
             element: wormElement,
             x: startX,
@@ -831,7 +683,7 @@ class WormSystem {
         wormElement.addEventListener('click', wormData.clickHandler);
 
         console.log(`🟣 Purple worm ${wormId} spawned from help button at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
-        console.log(`🟣 Purple worm moves at HALF SPEED, prioritizes RED symbols, and CLONES on click!`);
+        console.log(`🟣 Purple worm moves slower, prioritizes RED symbols, and CLONES on click!`);
 
         // Start animation loop if not already running
         if (this.worms.length === 1) {
@@ -1059,45 +911,42 @@ class WormSystem {
     }
 
     // ========================================
-    // MOVEMENT UTILITIES (Phase 2 Refactoring)
+    // MOVEMENT UTILITIES (Delegated to WormMovement module)
     // ========================================
 
     /**
-     * Calculate velocity toward target position
+     * Calculate velocity toward target position (delegates to movement module)
      * @private
      */
     _calculateVelocityToTarget(worm, targetX, targetY, speedMultiplier = 1) {
-        const distance = calculateDistance(worm.x, worm.y, targetX, targetY);
-        const dx = targetX - worm.x;
-        const dy = targetY - worm.y;
-
-        const speed = worm.baseSpeed * speedMultiplier;
-
-        return {
-            velocityX: (dx / distance) * speed,
-            velocityY: (dy / distance) * speed,
-            distance: distance,
-            direction: Math.atan2(dy, dx)
-        };
+        return this.movement.calculateVelocityToTarget(worm, targetX, targetY, speedMultiplier);
     }
 
     /**
-     * Apply boundary constraints to worm position
+     * Apply boundary constraints to worm position (delegates to movement module)
      * @private
      */
     _constrainToBounds(worm, bounds) {
-        const { width, height, margin = this.BORDER_MARGIN } = bounds;
+        this.movement.constrainToBounds(worm, bounds);
+    }
 
-        if (worm.x < margin) {
-            worm.x = margin;
-            worm.direction = Math.PI - worm.direction;
-        }
-        if (worm.x > width - margin) {
-            worm.x = width - margin;
-            worm.direction = Math.PI - worm.direction;
-        }
-        if (worm.y < margin) {
-            worm.y = margin;
+    /**
+     * Check if worm reached target (delegates to movement module)
+     * @private (placeholder for future refactoring)
+     */
+    _hasReachedTarget(worm, targetX, targetY, threshold) {
+        return this.movement.hasReachedTarget(worm, targetX, targetY, threshold);
+    }
+
+    /**
+     * Update worm position (delegates to movement module)
+     * @private (placeholder - kept for compatibility)
+     */
+    _updatePosition_old_reference(worm) {
+        // Old inline implementation - to be replaced with:
+        // this.movement.updatePosition(worm);
+        if (worm.y < this.BORDER_MARGIN) {
+            worm.y = this.BORDER_MARGIN;
             worm.direction = -worm.direction;
         }
         if (worm.y > height - margin) {
