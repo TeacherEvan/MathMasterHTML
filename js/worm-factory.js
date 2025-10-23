@@ -3,15 +3,33 @@ console.log("🏭 Worm Factory Module Loading...");
 
 /**
  * WormFactory - Handles creation of worm elements and data objects
- * Extracted from WormSystem to reduce complexity and improve maintainability
+ * 
+ * This factory implements the Factory Pattern to centralize worm creation logic.
+ * Extracted from WormSystem to reduce complexity and improve maintainability.
+ * 
+ * @class
+ * @example
+ * const factory = new WormFactory({
+ *   segmentCount: 5,
+ *   zIndex: 10000,
+ *   dropRate: 0.10
+ * });
+ * 
+ * const wormElement = factory.createWormElement({
+ *   id: 'worm-123',
+ *   classNames: ['purple-worm'],
+ *   x: 100,
+ *   y: 200
+ * });
  */
 class WormFactory {
     /**
+     * Create a new WormFactory instance
      * @param {Object} config - Factory configuration
-     * @param {number} config.segmentCount - Default number of worm segments
-     * @param {number} config.zIndex - Z-index for worm elements
-     * @param {number} config.dropRate - Power-up drop rate
-     * @param {string[]} config.powerUpTypes - Available power-up types
+     * @param {number} [config.segmentCount=5] - Default number of worm segments
+     * @param {number} [config.zIndex=10000] - Z-index for worm elements
+     * @param {number} [config.dropRate=0.10] - Power-up drop rate (0-1)
+     * @param {string[]} [config.powerUpTypes=['chainLightning','spider','devil']] - Available power-up types
      */
     constructor(config = {}) {
         this.WORM_SEGMENT_COUNT = config.segmentCount || 5;
