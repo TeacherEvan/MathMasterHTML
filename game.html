@@ -83,7 +83,14 @@
             }
         }
 
-        /* Ensure the body has the correct styles */
+        /* Ensure the html and body have black backgrounds (prevents white border in fullscreen) */
+        html {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+        }
+
         body {
             margin: 0;
             padding: 0;
