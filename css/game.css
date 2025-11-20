@@ -22,6 +22,32 @@ input:focus:not(:focus-visible),
     outline: none !important;
 }
 
+/* FULLSCREEN FIX: Ensure black background in fullscreen mode across all browsers */
+/* This prevents the white border that appears around the viewport in fullscreen */
+html:fullscreen,
+html:-webkit-full-screen,
+html:-moz-full-screen,
+html:-ms-fullscreen {
+    background: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body:fullscreen,
+body:-webkit-full-screen,
+body:-moz-full-screen,
+body:-ms-fullscreen {
+    background: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Fullscreen backdrop (the area behind the fullscreen element) */
+::backdrop,
+::-webkit-backdrop {
+    background: #000 !important;
+}
+
 /* New styles for the three-panel layout */
 .grid-container {
     display: grid;
