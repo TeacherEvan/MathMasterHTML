@@ -1386,6 +1386,9 @@ class WormSystem {
     explodeWorm(worm, isRainKill = false, isChainReaction = false) {
         console.log(`💥 EXPLODING worm ${worm.id} (${isRainKill ? 'RAIN KILL' : 'direct click'}${isChainReaction ? ' - CHAIN REACTION' : ''}) and returning symbol "${worm.stolenSymbol}"!`);
 
+        // FIX: Mark worm inactive IMMEDIATELY to stop movement during explosion animation
+        worm.active = false;
+
         // AOE DAMAGE: Check for nearby worms and trigger chain explosions
         const nearbyWorms = this.worms.filter(w => {
             if (w.id === worm.id || !w.active) return false;
@@ -1435,7 +1438,7 @@ class WormSystem {
 
         setTimeout(() => {
             this.removeWorm(worm);
-        }, 500);
+        }, this.WORM_REMOVAL_DELAY);
     }
 
     createExplosionParticles(x, y) {
@@ -1444,7 +1447,7 @@ class WormSystem {
             const particle = document.createElement('div');
             particle.className = 'explosion-particle';
 
-            const angle = (i / particleCount) * Math.PI * 2;
+            const angle = (i / this.EXPLOSION_PARTICLE_COUNT) * Math.PI * 2;
             const speed = 100 + Math.random() * 100;
             const distance = 80 + Math.random() * 40;
 
