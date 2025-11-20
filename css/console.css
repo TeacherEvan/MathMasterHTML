@@ -35,7 +35,8 @@
     font-weight: 700;
     color: #00ff00;
     cursor: pointer;
-    transition: all 0.3s ease;
+    /* PERFORMANCE: Only transition specific properties, not 'all' */
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
     overflow: hidden;
     /* TOUCH FIX: Prevent tap delay and double-tap zoom */
@@ -196,7 +197,8 @@
     font-weight: 700;
     color: #00ff00;
     cursor: pointer;
-    transition: all 0.3s ease;
+    /* PERFORMANCE: Only transition specific properties, not 'all' */
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
 }
 
 .symbol-choice:hover {
@@ -233,7 +235,8 @@
     font-weight: 700;
     color: #00ff00;
     cursor: pointer;
-    transition: all 0.3s ease;
+    /* PERFORMANCE: Only transition specific properties, not 'all' */
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
 }
 
 .position-choice:hover {
@@ -267,7 +270,8 @@
     font-weight: 700;
     color: #888;
     cursor: pointer;
-    transition: all 0.3s ease;
+    /* PERFORMANCE: Only transition specific properties, not 'all' */
+    transition: border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
     text-transform: uppercase;
 }
 
