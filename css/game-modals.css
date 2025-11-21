@@ -80,7 +80,8 @@
     font-weight: 900;
     color: #000;
     cursor: pointer;
-    transition: all 0.3s ease;
+    /* PERFORMANCE: Only transition specific properties, not 'all' */
+    transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 3px;
     box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
@@ -164,7 +165,8 @@
     background: linear-gradient(145deg, #ff0000, #cc0000);
     color: #fff;
     cursor: pointer;
-    transition: all 0.3s ease;
+    /* PERFORMANCE: Only transition specific properties, not 'all' */
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 2px;
     box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
