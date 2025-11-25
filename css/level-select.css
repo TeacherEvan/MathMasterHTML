@@ -142,7 +142,8 @@
             padding: 30px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            /* PERFORMANCE: Only transition properties that animate on hover */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
             overflow: hidden;
             box-shadow:
@@ -412,7 +413,8 @@
             font-weight: 700;
             font-size: clamp(1rem, 2vw, 1.2rem);
             cursor: pointer;
-            transition: all 0.3s ease;
+            /* PERFORMANCE: Only transition properties that animate on hover */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
             position: relative;
@@ -465,7 +467,8 @@
             font-size: clamp(1rem, 2vw, 1.2rem);
             color: #ccc;
             cursor: pointer;
-            transition: all 0.3s ease;
+            /* PERFORMANCE: Only transition properties that animate on hover */
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, color 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 20px;
@@ -628,7 +631,8 @@
             font-size: 14px;
             color: #fff;
             cursor: pointer;
-            transition: all 0.3s ease;
+            /* PERFORMANCE: Only transition properties that animate on hover */
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
             box-shadow: 0 4px 15px rgba(255, 51, 51, 0.3);

@@ -33,7 +33,7 @@ function calculateDistance(x1, y1, x2, y2) {
  */
 function createDOMElement(tag, className, styles = {}) {
     const element = document.createElement(tag);
-    
+
     if (className) {
         if (Array.isArray(className)) {
             element.className = className.join(' ');
@@ -41,11 +41,11 @@ function createDOMElement(tag, className, styles = {}) {
             element.className = className;
         }
     }
-    
+
     Object.entries(styles).forEach(([key, value]) => {
         element.style[key] = value;
     });
-    
+
     return element;
 }
 
@@ -56,6 +56,14 @@ function createDOMElement(tag, className, styles = {}) {
  */
 function generateUniqueId(prefix = 'item') {
     return `${prefix}-${Date.now()}-${Math.random()}`;
+}
+
+// Expose utility functions globally for use across modules
+if (typeof window !== 'undefined') {
+    window.normalizeSymbol = normalizeSymbol;
+    window.calculateDistance = calculateDistance;
+    window.createDOMElement = createDOMElement;
+    window.generateUniqueId = generateUniqueId;
 }
 
 /**
@@ -69,7 +77,7 @@ const Logger = {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get('debug') === 'true' || localStorage.getItem('mathmaster_debug') === 'true';
     },
-    
+
     // Log levels
     LEVELS: {
         DEBUG: 0,
@@ -77,10 +85,10 @@ const Logger = {
         WARN: 2,
         ERROR: 3
     },
-    
+
     // Current log level (can be changed)
     currentLevel: 1, // INFO by default
-    
+
     /**
      * Debug level logging (most verbose)
      * @param {string} emoji - Emoji prefix for module identification
@@ -91,7 +99,7 @@ const Logger = {
             console.log(emoji, ...args);
         }
     },
-    
+
     /**
      * Info level logging (important events)
      * @param {string} emoji - Emoji prefix for module identification
@@ -102,7 +110,7 @@ const Logger = {
             console.log(emoji, ...args);
         }
     },
-    
+
     /**
      * Warning level logging (always shown)
      * @param {string} emoji - Emoji prefix for module identification
@@ -113,7 +121,7 @@ const Logger = {
             console.warn(emoji, ...args);
         }
     },
-    
+
     /**
      * Error level logging (always shown)
      * @param {string} emoji - Emoji prefix for module identification
@@ -124,7 +132,7 @@ const Logger = {
             console.error(emoji, ...args);
         }
     },
-    
+
     /**
      * Group logging (collapsible console groups)
      * @param {string} label - Group label
@@ -137,7 +145,7 @@ const Logger = {
             console.groupEnd();
         }
     },
-    
+
     /**
      * Enable debug mode programmatically
      */
@@ -145,7 +153,7 @@ const Logger = {
         localStorage.setItem('mathmaster_debug', 'true');
         console.log('🔧 Debug mode enabled. Refresh page to see verbose logs.');
     },
-    
+
     /**
      * Disable debug mode programmatically
      */
@@ -167,10 +175,10 @@ if (typeof window !== 'undefined') {
 const ResourceManager = {
     // Track active timers
     _timers: new Set(),
-    
+
     // Track active intervals
     _intervals: new Set(),
-    
+
     /**
      * Create a tracked timeout that will be automatically cleaned up
      * @param {Function} callback - Function to execute
@@ -185,7 +193,7 @@ const ResourceManager = {
         this._timers.add(timerId);
         return timerId;
     },
-    
+
     /**
      * Create a tracked interval that will be automatically cleaned up
      * @param {Function} callback - Function to execute
@@ -197,7 +205,7 @@ const ResourceManager = {
         this._intervals.add(intervalId);
         return intervalId;
     },
-    
+
     /**
      * Clear a tracked timeout
      * @param {number} timerId - Timer ID to clear
@@ -206,7 +214,7 @@ const ResourceManager = {
         clearTimeout(timerId);
         this._timers.delete(timerId);
     },
-    
+
     /**
      * Clear a tracked interval
      * @param {number} intervalId - Interval ID to clear
@@ -215,7 +223,7 @@ const ResourceManager = {
         clearInterval(intervalId);
         this._intervals.delete(intervalId);
     },
-    
+
     /**
      * Clean up all tracked timers and intervals
      * Call this when navigating away or resetting the game
@@ -226,16 +234,16 @@ const ResourceManager = {
             clearTimeout(timerId);
         });
         this._timers.clear();
-        
+
         // Clear all intervals
         this._intervals.forEach(intervalId => {
             clearInterval(intervalId);
         });
         this._intervals.clear();
-        
+
         console.log('🧹 ResourceManager: All timers and intervals cleaned up');
     },
-    
+
     /**
      * Get current resource usage stats
      * @returns {Object} Stats object
@@ -252,7 +260,7 @@ const ResourceManager = {
 // Make ResourceManager available globally
 if (typeof window !== 'undefined') {
     window.ResourceManager = ResourceManager;
-    
+
     // Clean up resources when page is about to unload
     window.addEventListener('beforeunload', () => {
         ResourceManager.cleanupAll();

@@ -70,7 +70,8 @@
     /* Increased by 30% from 80px */
     max-height: 156px !important;
     /* Increased by 30% from 120px */
-    transition: all 0.3s ease;
+    /* PERFORMANCE: Only transition transform, not all properties */
+    transition: transform 0.3s ease;
     transform-origin: center center !important;
     margin: 0 auto !important;
     transform: scale(var(--lock-body-scale, 1.3));

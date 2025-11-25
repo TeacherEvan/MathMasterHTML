@@ -9,7 +9,7 @@ class WormSystem {
     // ========================================
     // CONSTRUCTOR & INITIALIZATION
     // ========================================
-    
+
     constructor() {
         this.worms = [];
         this.maxWorms = 999; // No practical limit - let chaos reign!
@@ -148,7 +148,7 @@ class WormSystem {
         // ========================================
         // REFACTORED MODULES INTEGRATION
         // ========================================
-        
+
         // Initialize factory for worm creation
         this.factory = new WormFactory({
             segmentCount: this.WORM_SEGMENT_COUNT,
@@ -821,12 +821,12 @@ class WormSystem {
         // FIX: Query ALL symbol elements (not just revealed ones) because stolen symbols may not be in .revealed-symbol class
         // We need to check both revealed and hidden symbols to see if they're stolen
         const allSymbols = this.solutionContainer.querySelectorAll('.symbol:not(.space-symbol):not(.completed-row-symbol)');
-        
+
         const availableSymbols = Array.from(allSymbols).filter(el => {
             const isStolen = el.dataset.stolen === 'true';
             const isSpace = el.classList.contains('space-symbol');
             const isCompleted = el.classList.contains('completed-row-symbol');
-            
+
             // Symbol is available if it's not stolen, not a space, and not from a completed row
             return !isStolen && !isSpace && !isCompleted;
         });
@@ -941,10 +941,13 @@ class WormSystem {
     /**
      * Update worm position (delegates to movement module)
      * @private (placeholder - kept for compatibility)
+     * @deprecated Use movement module instead
      */
     _updatePosition_old_reference(worm) {
         // Old inline implementation - to be replaced with:
         // this.movement.updatePosition(worm);
+        const height = window.innerHeight;
+        const margin = this.BORDER_MARGIN;
         if (worm.y < this.BORDER_MARGIN) {
             worm.y = this.BORDER_MARGIN;
             worm.direction = -worm.direction;
@@ -1664,7 +1667,7 @@ class WormSystem {
         function drag(e) {
             if (isDragging) {
                 e.preventDefault();
-                
+
                 currentX = e.clientX - initialX;
                 currentY = e.clientY - initialY;
 
@@ -1675,7 +1678,7 @@ class WormSystem {
                 const rect = element.getBoundingClientRect();
                 const maxX = window.innerWidth - rect.width;
                 const maxY = window.innerHeight - rect.height;
-                
+
                 const boundedX = Math.max(0, Math.min(currentX, maxX));
                 const boundedY = Math.max(0, Math.min(currentY, maxY));
 

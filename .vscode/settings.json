@@ -1,12 +1,19 @@
 {
     "javascript.validate.enable": true,
     "javascript.implicitProjectConfig.checkJs": false,
-    "eslint.enable": false,
+    "eslint.enable": true,
     "files.associations": {
         "*.js": "javascript"
     },
     "cSpell.words": [
         "Orbitron",
-        "αβγθλμ"
+        "αβγθλμ",
+        "ehthumbs",
+        "eslintcache",
+        "mathmaster",
+        "pointerdown",
+        "powerups",
+        "worm",
+        "worms"
     ]
 }

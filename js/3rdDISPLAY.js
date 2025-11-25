@@ -33,7 +33,7 @@ function initSymbolRain() {
     let wavesSpawned = 0;
 
     // Guaranteed spawn system - ensure all symbols appear every 5 seconds
-    let lastSpawnTime = {};
+    const lastSpawnTime = {};
     symbols.forEach(sym => {
         lastSpawnTime[sym] = Date.now() - Math.random() * 2000;
     });
@@ -55,7 +55,7 @@ function initSymbolRain() {
 
     // PERFORMANCE: Spatial hash grid for O(n) collision detection instead of O(n²)
     const GRID_CELL_SIZE = 100; // 100px cells
-    let spatialGrid = new Map();
+    const spatialGrid = new Map();
 
     // PERFORMANCE: Debounce utility to prevent excessive function calls
     function debounce(func, wait) {
@@ -238,7 +238,7 @@ function initSymbolRain() {
 
             // PERFORMANCE: Only check nearby symbols from spatial grid
             const neighbors = getNeighborCells(symbolObj.x, symbolObj.y);
-            for (let other of neighbors) {
+            for (const other of neighbors) {
                 if (other === symbolObj) continue;
                 const distance = symbolObj.x - other.x;
                 if (distance > 0 && distance < symbolWidth + horizontalBuffer) {
@@ -258,7 +258,7 @@ function initSymbolRain() {
 
             // PERFORMANCE: Only check nearby symbols from spatial grid (not ALL symbols!)
             const neighbors = getNeighborCells(symbolObj.x, symbolObj.y);
-            for (let other of neighbors) {
+            for (const other of neighbors) {
                 if (other === symbolObj) continue;
 
                 const otherLeft = other.x;
@@ -284,7 +284,7 @@ function initSymbolRain() {
             const symbolWidth = 60;
 
             const neighbors = getNeighborCells(symbolObj.x, symbolObj.y);
-            for (let other of neighbors) {
+            for (const other of neighbors) {
                 if (other === symbolObj) continue;
                 
                 // Check if symbols are actually overlapping horizontally
@@ -305,7 +305,7 @@ function initSymbolRain() {
             const symbolBottom = symbolTop + symbolHeight;
 
             const neighbors = getNeighborCells(symbolObj.x, symbolObj.y);
-            for (let other of neighbors) {
+            for (const other of neighbors) {
                 if (other === symbolObj) continue;
 
                 const otherLeft = other.x;

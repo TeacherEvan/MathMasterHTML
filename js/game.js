@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         console.log(`📋 Found ${hiddenSymbols.length} hidden symbols in current step`);
 
-        for (let span of hiddenSymbols) {
+        for (const span of hiddenSymbols) {
             const spanSymbol = span.textContent;
             const normalizedSpan = spanSymbol.toLowerCase() === 'x' ? 'X' : spanSymbol;
 
@@ -526,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let symbolRestored = false;
         let wasBlueSymbol = false;
 
-        for (let stolenSymbol of stolenSymbols) {
+        for (const stolenSymbol of stolenSymbols) {
             const stolenText = stolenSymbol.textContent;
             const normalizedStolen = stolenText.toLowerCase() === 'x' ? 'X' : stolenText;
 
