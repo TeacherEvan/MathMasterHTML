@@ -1466,7 +1466,7 @@ class WormSystem {
             particle.className = 'explosion-particle';
 
             const angle = (i / this.EXPLOSION_PARTICLE_COUNT) * Math.PI * 2;
-            const _speed = 100 + Math.random() * 100; // Reserved for velocity calculations
+            // TODO: Add velocity calculations here if/when explosion particles need movement speed.
             const distance = 80 + Math.random() * 40;
 
             particle.style.left = `${x}px`;
