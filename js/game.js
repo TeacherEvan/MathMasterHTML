@@ -377,10 +377,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentStepHiddenSymbols.length === 0) {
             console.log(`🎉 Line ${currentStepIndex + 1} completed!`);
 
-            // SPECIAL EFFECT: Lightning flash for ALL row completions
-            console.log(`⚡ ROW ${currentStepIndex + 1} COMPLETED - Triggering lightning flash!`);
+            // ENHANCED SPECIAL EFFECTS: Multi-layered celebration for line completion
+            console.log(`⚡ ROW ${currentStepIndex + 1} COMPLETED - Triggering enhanced effects!`);
+            
+            // 1. Lightning flash
             createLightningFlash();
+            
+            // 2. Particle burst from center
+            createParticleBurst();
+            
+            // 3. Success popup text
+            createSuccessPopup(`LINE ${currentStepIndex + 1} COMPLETE!`);
+            
+            // 4. Transform row to pulsating cyan
             transformRowToPulsatingCyan(currentStepIndex);
+            
+            // 5. Shine effect sweep across solution
+            createShineEffect();
 
             // Trigger worm spawning for completed line
             console.log('🐛 DISPATCHING problemLineCompleted EVENT - This should spawn a worm!');
@@ -454,6 +467,88 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         console.log(`✅ Row ${stepIndex + 1} transformed - ${rowSymbols.length} symbols now pulsating cyan`);
+    }
+
+    /** Create particle burst effect */
+    function createParticleBurst() {
+        const particleCount = 20;
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'completion-particle';
+            
+            // Random direction and distance
+            const angle = (Math.PI * 2 * i) / particleCount;
+            const distance = 100 + Math.random() * 150;
+            const targetX = Math.cos(angle) * distance;
+            const targetY = Math.sin(angle) * distance;
+            
+            particle.style.left = `${centerX}px`;
+            particle.style.top = `${centerY}px`;
+            particle.style.setProperty('--particle-x', `${targetX}px`);
+            particle.style.setProperty('--particle-y', `${targetY}px`);
+            
+            document.body.appendChild(particle);
+            
+            // Remove after animation
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 1000);
+        }
+        
+        console.log('✨ Particle burst created!');
+    }
+
+    /** Create success popup text */
+    function createSuccessPopup(text) {
+        const popup = document.createElement('div');
+        popup.className = 'success-popup';
+        popup.textContent = text;
+        
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        
+        popup.style.left = `${centerX}px`;
+        popup.style.top = `${centerY}px`;
+        popup.style.transform = 'translate(-50%, -50%)';
+        
+        document.body.appendChild(popup);
+        
+        // Remove after animation
+        setTimeout(() => {
+            if (popup.parentNode) {
+                popup.parentNode.removeChild(popup);
+            }
+        }, 1500);
+        
+        console.log(`📣 Success popup created: "${text}"`);
+    }
+
+    /** Create shine sweep effect */
+    function createShineEffect() {
+        const shine = document.createElement('div');
+        shine.className = 'shine-effect';
+        
+        // Add to solution container
+        const container = document.getElementById('solution-container');
+        if (container) {
+            container.style.position = 'relative';
+            container.style.overflow = 'hidden';
+            container.appendChild(shine);
+            
+            // Remove after animation
+            setTimeout(() => {
+                if (shine.parentNode) {
+                    shine.parentNode.removeChild(shine);
+                }
+            }, 1000);
+            
+            console.log('✨ Shine effect created!');
+        }
     }
 
     /** Check if all solution steps have been revealed */
