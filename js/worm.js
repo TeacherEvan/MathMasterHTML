@@ -1588,8 +1588,6 @@ class WormSystem {
 
         // PERFORMANCE: Use cached elements
         let powerUpDisplay = this.cachedPowerUpDisplay || document.getElementById('power-up-display');
-        const _consoleElement = this.consoleElement || document.getElementById('symbol-console'); // Reserved for future console integration
-
         if (!powerUpDisplay) {
             powerUpDisplay = document.createElement('div');
             powerUpDisplay.id = 'power-up-display';
