@@ -488,7 +488,6 @@ function initSymbolRain() {
     // PERFORMANCE + TOUCH FIX: Use pointerdown for instant response (no 300ms delay)
     // Pointer Events API unifies mouse, touch, and pen input
     let isPointerDown = false;
-    let lastClickedSymbol = null;
 
     symbolRainContainer.addEventListener('pointerdown', (event) => {
         // Prevent accidental double-handling
@@ -499,20 +498,20 @@ function initSymbolRain() {
         if (symbol && symbolRainContainer.contains(symbol)) {
             // Prevent default to avoid click delay and text selection
             event.preventDefault();
-            lastClickedSymbol = symbol;
+            // lastClickedSymbol tracking removed - not currently used
             handleSymbolClick(symbol, event);
         }
     }, { passive: false }); // Non-passive to allow preventDefault
 
     symbolRainContainer.addEventListener('pointerup', () => {
         isPointerDown = false;
-        lastClickedSymbol = null;
+        // lastClickedSymbol = null; // Removed - not currently used
     });
 
     // Prevent pointer cancel from breaking the interaction
     symbolRainContainer.addEventListener('pointercancel', () => {
         isPointerDown = false;
-        lastClickedSymbol = null;
+        // lastClickedSymbol = null; // Removed - not currently used
     });
 
     // Fallback for older browsers that don't support Pointer Events

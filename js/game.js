@@ -22,8 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentProblemIndex = 0;
     let currentProblem = null;
     let currentStepIndex = 0;
-    let currentSymbolIndex = 0;
-    let revealedIndex = 0;
+    // Removed unused tracking variables: currentSymbolIndex, revealedIndex
     let correctAnswersCount = 0;
 
     // PURPLE WORM: Track consecutive wrong answers
@@ -127,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         while ((match = problemRegex.exec(markdownContent)) !== null) {
             try {
-                const problemNumber = match[1];
+                const _problemNumber = match[1]; // Available for future use
                 const problemText = match[2];
                 const stepsText = match[3];
 
@@ -164,8 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Reset indices
         currentStepIndex = 0;
-        currentSymbolIndex = 0;
-        revealedIndex = 0;
+        // currentSymbolIndex = 0; // Removed - unused tracking variable
+        // revealedIndex = 0; // Removed - unused tracking variable
         invalidateStepCache(); // PERFORMANCE: Invalidate cache on new problem
 
         // Show basic lock until activation
@@ -232,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Reset step indices
         currentStepIndex = 0;
-        currentSymbolIndex = 0;
+        // currentSymbolIndex = 0; // Removed - unused tracking variable
         invalidateStepCache(); // PERFORMANCE: Invalidate cache when changing problems
 
         setupProblem();
@@ -400,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Move to next step if available
             if (currentStepIndex < currentProblem.steps.length - 1) {
                 currentStepIndex++;
-                currentSymbolIndex = 0;
+                // currentSymbolIndex = 0; // Removed - unused tracking variable
                 invalidateStepCache(); // PERFORMANCE: Invalidate cache when moving to next step
                 console.log(`📋 Moving to step ${currentStepIndex + 1}: "${currentProblem.steps[currentStepIndex]}"`);
             } else {
