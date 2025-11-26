@@ -75,7 +75,7 @@ class LockResponsiveManager {
     }
 
     detectResolution(viewport) {
-        const { width, height: _height } = viewport; // height reserved for future use
+        const { width } = viewport;
 
         // Check against resolution breakpoints
         if (width >= this.resolutionBreakpoints['4k'].width) {
