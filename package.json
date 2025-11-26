@@ -9,7 +9,11 @@
         "lint:fix": "eslint js/ --fix",
         "verify": "node scripts/verify.js",
         "verify:quick": "npm run lint && echo '✅ Lint passed!'",
-        "test": "echo 'Open http://localhost:8000/game.html?level=beginner and press P to view performance monitor'"
+        "test": "npx playwright test",
+        "test:ui": "npx playwright test --ui",
+        "test:headed": "npx playwright test --headed",
+        "test:report": "npx playwright show-report",
+        "test:manual": "echo 'Open http://localhost:8000/game.html?level=beginner and press P to view performance monitor'"
     },
     "keywords": [
         "math",

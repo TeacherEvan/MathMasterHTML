@@ -4,6 +4,89 @@
 
 ---
 
+## 2025-11-26 (Session 3) | Two-Click Power-Up System + Playwright Tests
+
+### ✨ Feature Added: Two-Click Power-Up Selection System
+
+**Request:** Add 2-click feature: 1st click = selection, 2nd click = placement
+
+**Implementation:**
+
+1. **First Click** = SELECT power-up (highlights, shows tooltip, crosshair cursor)
+2. **Second Click** = PLACE/ACTIVATE at click location
+3. **Same Icon Again** = DESELECT (cancel)
+4. **ESC Key** = Cancel any selection
+
+**Files Modified:**
+
+| File | Changes |
+|------|---------|
+| `js/worm-powerups.js` | Added selection state, new methods, updated display |
+| `css/worm-effects.css` | Added selection animations, tooltip styles |
+
+**Key Methods Added:**
+
+```javascript
+selectPowerUp(type)      // First click - highlight & prepare
+deselectPowerUp()        // Cancel selection
+_setupPlacementHandler() // Listen for second click
+_executePlacement()      // Activate power-up at location
+```
+
+**UI Improvements:**
+
+- Selected power-up shows cyan highlight + "SELECTED" label
+- Tooltip shows instructions for each power-up type
+- Crosshair cursor during placement mode
+- Visual pulse animation on selected item
+
+---
+
+### 🧪 Added: Playwright E2E Tests
+
+**New Files:**
+
+| File | Purpose |
+|------|---------|
+| `playwright.config.js` | Playwright configuration |
+| `tests/powerups.spec.js` | Power-up system tests (~250 lines) |
+
+**Test Suites:**
+
+1. **Power-Up Two-Click System** (8 tests)
+   - Display inventory
+   - Select on first click
+   - Deselect on same click
+   - ESC key cancels
+   - Place on second click
+   - Spider spawn at location
+   - Zero inventory prevention
+   - Switch between power-ups
+
+2. **Power-Up Chain Lightning** (1 test)
+   - Refund if no worms
+
+3. **Game Flow Integration** (3 tests)
+   - Game page loads
+   - Level select works
+   - Index navigation
+
+4. **Worm System Basic Tests** (3 tests)
+   - System initializes
+   - Spawn from console
+   - Purple worm trigger
+
+**New npm Scripts:**
+
+```bash
+npm test           # Run all Playwright tests
+npm run test:ui    # Interactive test UI
+npm run test:headed # Run with visible browser
+npm run test:report # View test report
+```
+
+---
+
 ## 2025-11-26 (Session 2) | Purple Worm Cache Bug Fix
 
 ### 🐛 Bug Fixed: Purple Worms STILL Not Stealing Symbols
