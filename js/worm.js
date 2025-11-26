@@ -12,7 +12,7 @@ class WormSystem {
 
     constructor() {
         this.worms = [];
-        this.maxWorms = 999; // No practical limit - let chaos reign!
+        this.maxWorms = 999; // Reasonable limit to prevent system crash from infinite cloning
         this.wormContainer = null;
         this.solutionContainer = null;
         this.consoleElement = null;
@@ -1049,6 +1049,52 @@ class WormSystem {
             });
         }
 
+        // PURPLE WORM FIX: If no targetSymbol, find nearest available symbol
+        if (!targetElement && worm.isRushingToTarget) {
+            const allSymbols = Array.from(revealedSymbols).filter(el =>
+                !el.dataset.stolen &&
+                !el.classList.contains('space-symbol') &&
+                !el.classList.contains('completed-row-symbol')
+            );
+
+            // Purple worms prefer red (hidden) symbols, fallback to blue
+            let availableSymbols;
+            if (worm.isPurple && worm.canStealBlue) {
+                const redSymbols = allSymbols.filter(el => el.classList.contains('hidden-symbol'));
+                if (redSymbols.length > 0) {
+                    availableSymbols = redSymbols;
+                } else {
+                    availableSymbols = allSymbols.filter(el => el.classList.contains('revealed-symbol'));
+                }
+            } else {
+                availableSymbols = allSymbols.filter(el => el.classList.contains('hidden-symbol'));
+            }
+
+            if (availableSymbols.length > 0) {
+                // Find nearest symbol to worm
+                let nearestSymbol = null;
+                let nearestDistance = Infinity;
+
+                availableSymbols.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    const symbolX = rect.left + rect.width / 2;
+                    const symbolY = rect.top + rect.height / 2;
+                    const distance = Math.sqrt(Math.pow(worm.x - symbolX, 2) + Math.pow(worm.y - symbolY, 2));
+
+                    if (distance < nearestDistance) {
+                        nearestDistance = distance;
+                        nearestSymbol = el;
+                    }
+                });
+
+                if (nearestSymbol) {
+                    worm.targetSymbol = nearestSymbol.textContent;
+                    targetElement = nearestSymbol;
+                    console.log(`🟣 Purple worm ${worm.id} found nearest symbol: "${worm.targetSymbol}" (${nearestDistance.toFixed(0)}px away)`);
+                }
+            }
+        }
+
         if (targetElement) {
             // Rush towards target symbol
             const targetRect = targetElement.getBoundingClientRect();
@@ -1114,6 +1160,15 @@ class WormSystem {
 
         const velocity = this._calculateVelocityToTarget(worm, targetX, targetY, 1.0);
 
+        // Trigger pull-in animation when getting close to console
+        if (velocity.distance < 50 && !worm.pullingIn) {
+            const carriedSymbol = worm.element.querySelector('.carried-symbol');
+            if (carriedSymbol) {
+                carriedSymbol.classList.add('pulling-in');
+                worm.pullingIn = true;
+            }
+        }
+
         if (velocity.distance < this.DISTANCE_CONSOLE_ARRIVAL) {
             // Reached console hole - escape with symbol!
             console.log(`🐛 Worm ${worm.id} escaped to console with symbol "${worm.stolenSymbol}"!`);
@@ -1163,6 +1218,15 @@ class WormSystem {
                 const targetY = slotRect.top + (slotRect.height / 2);
 
                 const velocity = this._calculateVelocityToTarget(worm, targetX, targetY, 1.0);
+
+                // Trigger pull-in animation when getting close to console
+                if (velocity.distance < 50 && !worm.pullingIn) {
+                    const carriedSymbol = worm.element.querySelector('.carried-symbol');
+                    if (carriedSymbol) {
+                        carriedSymbol.classList.add('pulling-in');
+                        worm.pullingIn = true;
+                    }
+                }
 
                 if (velocity.distance < this.DISTANCE_CONSOLE_ARRIVAL) {
                     // Reached console exit - purple worm escapes!

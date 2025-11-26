@@ -270,6 +270,59 @@
     }
 }
 
+/* === CARRIED SYMBOL STYLES === */
+.carried-symbol {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: bold;
+    color: #ff6666;
+    text-shadow:
+        0 0 8px rgba(255, 102, 102, 0.9),
+        0 0 16px rgba(255, 0, 0, 0.6),
+        0 1px 2px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    z-index: 10001;
+    animation: symbol-float 0.8s ease-in-out infinite;
+}
+
+/* Subtle floating animation while being carried */
+@keyframes symbol-float {
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(-3px);
+    }
+}
+
+/* Pull-in animation when approaching console hole */
+.carried-symbol.pulling-in {
+    animation: symbol-pull-in 0.4s ease-in forwards;
+}
+
+@keyframes symbol-pull-in {
+    0% {
+        transform: translateX(-50%) translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    60% {
+        transform: translateX(-50%) translateY(8px) scale(0.7);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translateX(-50%) translateY(15px) scale(0.2);
+        opacity: 0;
+    }
+}
+
 /* Purple flash for cloning curse activation/continuation */
 @keyframes worm-flash-purple {
     0% {
@@ -286,4 +339,3 @@
         transform: scale(1);
     }
 }
-

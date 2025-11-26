@@ -12,7 +12,7 @@
 
 **Root Cause Analysis:**
 
-```
+```text
 getCachedRevealedSymbols() → only queries '.revealed-symbol'
   ↓
 _updateWormRushingToTarget() filters for '.hidden-symbol'
@@ -62,7 +62,7 @@ const allSymbols = Array.from(this.getCachedAllSymbols()).filter(el =>
 
 **Root Cause Analysis:**
 
-```
+```text
 Spawn: isPurple=true, isRushingToTarget=true, targetSymbol=null
   ↓
 _updateWormRushingToTarget() called
@@ -78,36 +78,6 @@ System accumulates worms → crash
 
 **Solution Applied:** Modified `_updateWormRushingToTarget()` in `js/worm.js` (lines ~1050-1095) to find nearest available symbol when `targetSymbol` is null.
 
-**Code Added:**
-
-```javascript
-// Find nearest symbol for purple worms that lost their target
-if (!targetSymbol && worm.isPurple) {
-    const symbols = document.querySelectorAll('.symbol-span:not(.stolen)');
-    let nearest = null;
-    let nearestDist = Infinity;
-    
-    for (const sym of symbols) {
-        const rect = sym.getBoundingClientRect();
-        const dist = Math.hypot(
-            rect.left - worm.x,
-            rect.top - worm.y
-        );
-        // Prioritize red symbols for purple worms
-        const isRed = sym.classList.contains('red-symbol');
-        const adjustedDist = isRed ? dist * 0.5 : dist;
-        if (adjustedDist < nearestDist) {
-            nearestDist = adjustedDist;
-            nearest = sym;
-        }
-    }
-    if (nearest) {
-        worm.targetSymbol = nearest;
-        targetSymbol = nearest;
-    }
-}
-```
-
 ---
 
 ### ✨ Feature Added: Carried Symbol Animation
@@ -119,35 +89,6 @@ if (!targetSymbol && worm.isPurple) {
 1. **Positioning:** Above worm head with slight offset
 2. **Float Animation:** Gentle bobbing while carried
 3. **Pull-In Animation:** Symbol pulls toward console when approaching
-
-**CSS Added (~50 lines):**
-
-```css
-.carried-symbol {
-    position: fixed;
-    transform: translate(-50%, -100%);
-    font-size: 1.4em;
-    text-shadow: 0 0 10px currentColor;
-    z-index: 1100;
-    animation: carriedFloat 0.8s ease-in-out infinite;
-    pointer-events: none;
-}
-
-@keyframes carriedFloat {
-    0%, 100% { transform: translate(-50%, -100%) translateY(0); }
-    50% { transform: translate(-50%, -100%) translateY(-5px); }
-}
-
-.carried-symbol.pull-in {
-    animation: pullToConsole 0.3s ease-in forwards;
-}
-
-@keyframes pullToConsole {
-    to { transform: translate(-50%, -50%) scale(0.5); opacity: 0.5; }
-}
-```
-
-**JS Trigger Added:** Added pull-in class trigger at 50px from console in `_updateWormReturningToConsole()` and `_updateWormCarryingSymbol()`.
 
 ---
 

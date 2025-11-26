@@ -40,21 +40,21 @@ const GameConstants = {
         // Appearance
         SEGMENT_COUNT: 5,
         Z_INDEX: 10000,
-        
+
         // Limits
-        MAX_WORMS: 999, // Effectively unlimited
-        
+        MAX_WORMS: 999, // Reasonable limit to prevent crash from infinite cloning
+
         // Speeds (multiplied by difficulty)
         SPEED_CONSOLE: 2.0,
         SPEED_FALLBACK: 1.0,
         SPEED_BORDER: 2.5,
         SPEED_PURPLE: 1.0, // Not scaled by difficulty
-        
+
         // Roaming durations
         ROAM_DURATION_CONSOLE: 3000, // ms
         ROAM_DURATION_BORDER: 5000,  // ms
         ROAM_RESUME_DURATION: 5000,  // ms
-        
+
         // Movement
         RUSH_SPEED_MULTIPLIER: 2.0,
         FLICKER_SPEED_BOOST: 1.2,
@@ -62,13 +62,13 @@ const GameConstants = {
         DIRECTION_CHANGE_RATE: 0.1,
         CRAWL_PHASE_INCREMENT: 0.05,
         BORDER_MARGIN: 20, // px from viewport edge
-        
+
         // Distance thresholds
         DISTANCE_STEAL_SYMBOL: 30,      // px
         DISTANCE_CONSOLE_ARRIVAL: 20,   // px
         DISTANCE_TARGET_RUSH: 30,       // px
         DISTANCE_ROAM_RESUME: 5,        // px
-        
+
         // Timing
         SPAWN_QUEUE_DELAY: 50,                      // ms
         EXPLOSION_CLEANUP_DELAY: 600,               // ms
@@ -78,14 +78,14 @@ const GameConstants = {
         EXPLOSION_CHAIN_DELAY: 150,                 // ms
         CLONE_WORM_ROAM_DURATION: 10000,            // ms
         PURPLE_CLONE_ROAM_TIME: 8000,               // ms
-        
+
         // Spawn offsets
         WORM_SPAWN_OFFSET_RANGE: 60,  // px
         CLONE_POSITION_OFFSET: 30,    // px
-        
+
         // Explosion
         EXPLOSION_AOE_RADIUS: 18,      // px
-        EXPLOSION_PARTICLE_COUNT: 12
+        EXPLOSION_PARTICLE_COUNT: 120
     },
 
     // ========================================
@@ -99,16 +99,16 @@ const GameConstants = {
             spider: '🕷️',
             devil: '👹'
         },
-        
+
         // Durations
         SLIME_SPLAT_DURATION: 10000,   // ms - 10 seconds
         SPIDER_HEART_DURATION: 60000,   // ms - 1 minute
         SKULL_DISPLAY_DURATION: 10000,  // ms - 10 seconds
-        
+
         // Chain lightning
         CHAIN_LIGHTNING_INITIAL_KILLS: 5,
         CHAIN_LIGHTNING_INCREMENT: 2,
-        
+
         // Devil
         DEVIL_PROXIMITY_DISTANCE: 50,  // px
         DEVIL_KILL_TIME: 5000           // ms
@@ -140,7 +140,7 @@ const GameConstants = {
         MAX_FALL_SPEED: 6.0,
         SPEED_INCREMENT_INTERVAL: 60000, // ms - 1 minute
         SPEED_INCREMENT_PERCENT: 0.1,    // 10% increase
-        
+
         // Collision safety
         COLLISION_CHECK_ENABLED: true,
         TYPICAL_ACTIVE_COUNT: 40 // Expected active symbols
