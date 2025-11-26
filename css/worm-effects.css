@@ -328,10 +328,12 @@
         opacity: 1;
         filter: brightness(2);
     }
+
     50% {
         opacity: 1;
         filter: brightness(1.5);
     }
+
     100% {
         opacity: 0;
         filter: brightness(1);
@@ -343,6 +345,7 @@
         transform: translate(0, 0) scale(1);
         opacity: 1;
     }
+
     100% {
         transform: translate(var(--angle-x), var(--angle-y)) scale(0.3);
         opacity: 0;
@@ -392,11 +395,59 @@
 
 /* === DEVIL POWER-UP PULSATION === */
 @keyframes devil-pulsate {
-    0%, 100% {
+
+    0%,
+    100% {
         text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.6);
         transform: scale(1);
     }
+
     50% {
         text-shadow: 0 0 40px rgba(255, 0, 0, 1), 0 0 80px rgba(255, 50, 0, 0.8), 0 0 120px rgba(255, 0, 0, 0.6);
         transform: scale(1.1);
     }
+}
+
+/* === TWO-CLICK POWER-UP SELECTION === */
+.power-up-placement-mode {
+    cursor: crosshair !important;
+}
+
+.power-up-placement-mode * {
+    cursor: crosshair !important;
+}
+
+.power-up-item.selected {
+    background: rgba(0, 255, 255, 0.4) !important;
+    border: 2px solid #0ff !important;
+    box-shadow: 0 0 15px #0ff !important;
+    animation: power-up-selected-pulse 1s ease-in-out infinite;
+}
+
+@keyframes power-up-selected-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px #0ff;
+    }
+
+    50% {
+        box-shadow: 0 0 20px #0ff, 0 0 30px rgba(0, 255, 255, 0.5);
+    }
+}
+
+@keyframes tooltip-appear {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+#power-up-tooltip {
+    animation: tooltip-appear 0.3s ease-out;
+}

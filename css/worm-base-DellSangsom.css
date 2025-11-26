@@ -1,0 +1,341 @@
+/* worm-base.css - Base Worm Styles */
+/* Extracted from worm-styles.css - Container, body, segments, variants, and states */
+
+/* Worm System Styles - Clean Version - Quarter-coin sized green worms */
+
+/* === BASE WORM CONTAINER === */
+.worm-container {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    z-index: 10000 !important;
+    cursor: pointer;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+.worm-container:hover {
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 1)) drop-shadow(0 0 15px rgba(0, 255, 0, 1));
+    transform: scale(1.1);
+}
+
+/* === WORM BODY AND SEGMENTS === */
+.worm-body {
+    display: flex;
+    align-items: center;
+}
+
+.worm-segment {
+    width: 9px;
+    height: 9px;
+    background: radial-gradient(circle at 30% 30%, #00ff00, #00ee00, #00cc00);
+    border: 1px solid #00ff00;
+    border-radius: 50%;
+    margin-left: -2px;
+    animation: worm-crawl 0.8s ease-in-out infinite;
+    animation-delay: calc(var(--segment-index, 0) * 0.15s);
+    position: relative;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4),
+        0 1px 2px rgba(0, 0, 0, 0.8),
+        0 0 4px rgba(0, 255, 0, 0.6);
+    opacity: 1 !important;
+}
+
+.worm-segment:first-child {
+    --segment-index: 0;
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle at 30% 30%, #00ff66, #00ee44, #00cc33);
+    border: 1.5px solid #00ff00;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5),
+        0 1px 3px rgba(0, 0, 0, 0.9),
+        0 0 6px rgba(0, 255, 0, 0.8);
+    opacity: 1 !important;
+}
+
+/* Worm eyes on head */
+.worm-segment:first-child::before,
+.worm-segment:first-child::after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #000;
+    border-radius: 50%;
+    top: 3px;
+    animation: worm-blink 3s ease-in-out infinite;
+}
+
+.worm-segment:first-child::before {
+    left: 2.5px;
+}
+
+.worm-segment:first-child::after {
+    right: 2.5px;
+}
+
+/* === ANIMATIONS === */
+@keyframes worm-blink {
+
+    0%,
+    90%,
+    100% {
+        height: 2px;
+        opacity: 1;
+    }
+
+    92%,
+    98% {
+        height: 0.5px;
+        opacity: 0.3;
+    }
+}
+
+@keyframes worm-crawl {
+    0% {
+        transform: translateY(0) scaleX(1);
+    }
+
+    25% {
+        transform: translateY(-2px) scaleX(1.15);
+    }
+
+    50% {
+        transform: translateY(0) scaleX(0.9);
+    }
+
+    75% {
+        transform: translateY(2px) scaleX(1.1);
+    }
+
+    100% {
+        transform: translateY(0) scaleX(1);
+    }
+}
+
+/* === PURPLE WORM VARIANT === */
+.worm-container.purple-worm {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 10px rgba(138, 43, 226, 0.8));
+}
+
+.worm-container.purple-worm:hover {
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 1)) drop-shadow(0 0 15px rgba(138, 43, 226, 1));
+    transform: scale(1.1);
+}
+
+.worm-container.purple-worm .worm-segment {
+    background: radial-gradient(circle at 30% 30%, #b57edc, #9966cc, #7a4d99);
+    border: 1px solid #b57edc;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4),
+        0 1px 2px rgba(0, 0, 0, 0.8),
+        0 0 4px rgba(138, 43, 226, 0.6);
+}
+
+.worm-container.purple-worm .worm-segment:first-child {
+    background: radial-gradient(circle at 30% 30%, #c99eff, #b57edc, #9966cc);
+    border: 1.5px solid #b57edc;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5),
+        0 1px 3px rgba(0, 0, 0, 0.9),
+        0 0 6px rgba(138, 43, 226, 0.8);
+}
+
+.worm-container.purple-worm .worm-segment:first-child::before {
+    background: radial-gradient(circle, #ff00ff, #cc00ff);
+    box-shadow: inset 0 0.5px 1px rgba(255, 255, 255, 0.6),
+        0 0 2px rgba(138, 43, 226, 0.9);
+}
+
+.worm-container.purple-worm .worm-segment:first-child::after {
+    background: radial-gradient(circle, #ff00ff, #cc00ff);
+    box-shadow: inset 0 0.5px 1px rgba(255, 255, 255, 0.6),
+        0 0 2px rgba(138, 43, 226, 0.9);
+}
+
+.worm-container.purple-worm.flickering {
+    animation: purple-lsd-flicker 0.3s linear infinite;
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 20px rgba(138, 43, 226, 1));
+}
+
+@keyframes purple-lsd-flicker {
+    0% {
+        filter: hue-rotate(0deg) saturate(150%) brightness(1.2);
+    }
+
+    25% {
+        filter: hue-rotate(90deg) saturate(150%) brightness(1.2);
+    }
+
+    50% {
+        filter: hue-rotate(180deg) saturate(150%) brightness(1.2);
+    }
+
+    75% {
+        filter: hue-rotate(270deg) saturate(150%) brightness(1.2);
+    }
+
+    100% {
+        filter: hue-rotate(360deg) saturate(150%) brightness(1.2);
+    }
+}
+
+/* === WORM STATES === */
+.worm-container.carrying {
+    animation: worm-bounce 0.6s ease-in-out infinite;
+}
+
+@keyframes worm-bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+.worm-container.flickering {
+    animation: lsd-flicker 0.3s linear infinite;
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 0, 255, 1));
+}
+
+@keyframes lsd-flicker {
+    0% {
+        filter: drop-shadow(0 3px 8px rgba(255, 0, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 0, 0, 1)) hue-rotate(0deg);
+    }
+
+    14% {
+        filter: drop-shadow(0 3px 8px rgba(255, 165, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 165, 0, 1)) hue-rotate(60deg);
+    }
+
+    28% {
+        filter: drop-shadow(0 3px 8px rgba(255, 255, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 255, 0, 1)) hue-rotate(120deg);
+    }
+
+    42% {
+        filter: drop-shadow(0 3px 8px rgba(0, 255, 0, 0.9)) drop-shadow(0 0 20px rgba(0, 255, 0, 1)) hue-rotate(180deg);
+    }
+
+    57% {
+        filter: drop-shadow(0 3px 8px rgba(0, 0, 255, 0.9)) drop-shadow(0 0 20px rgba(0, 0, 255, 1)) hue-rotate(240deg);
+    }
+
+    71% {
+        filter: drop-shadow(0 3px 8px rgba(75, 0, 130, 0.9)) drop-shadow(0 0 20px rgba(75, 0, 130, 1)) hue-rotate(300deg);
+    }
+
+    85% {
+        filter: drop-shadow(0 3px 8px rgba(238, 130, 238, 0.9)) drop-shadow(0 0 20px rgba(238, 130, 238, 1)) hue-rotate(330deg);
+    }
+
+    100% {
+        filter: drop-shadow(0 3px 8px rgba(255, 0, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 0, 0, 1)) hue-rotate(360deg);
+    }
+}
+
+.worm-container.worm-multiply {
+    animation: worm-multiply 0.5s ease-out;
+}
+
+@keyframes worm-multiply {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+        filter: drop-shadow(0 0 30px rgba(255, 255, 0, 1));
+    }
+}
+
+/* Red flash for bad luck (20% chance backfire) */
+@keyframes worm-flash-red {
+    0% {
+        filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 30px rgba(255, 0, 0, 1)) drop-shadow(0 0 50px rgba(255, 0, 0, 0.8));
+        transform: scale(1.3);
+    }
+
+    100% {
+        filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+        transform: scale(1);
+    }
+}
+
+/* === CARRIED SYMBOL STYLES === */
+.carried-symbol {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: bold;
+    color: #ff6666;
+    text-shadow:
+        0 0 8px rgba(255, 102, 102, 0.9),
+        0 0 16px rgba(255, 0, 0, 0.6),
+        0 1px 2px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    z-index: 10001;
+    animation: symbol-float 0.8s ease-in-out infinite;
+}
+
+/* Subtle floating animation while being carried */
+@keyframes symbol-float {
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(-3px);
+    }
+}
+
+/* Pull-in animation when approaching console hole */
+.carried-symbol.pulling-in {
+    animation: symbol-pull-in 0.4s ease-in forwards;
+}
+
+@keyframes symbol-pull-in {
+    0% {
+        transform: translateX(-50%) translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    60% {
+        transform: translateX(-50%) translateY(8px) scale(0.7);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translateX(-50%) translateY(15px) scale(0.2);
+        opacity: 0;
+    }
+}
+
+/* Purple flash for cloning curse activation/continuation */
+@keyframes worm-flash-purple {
+    0% {
+        filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 40px rgba(255, 0, 255, 1)) drop-shadow(0 0 60px rgba(138, 43, 226, 0.9));
+        transform: scale(1.4);
+    }
+
+    100% {
+        filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+        transform: scale(1);
+    }
+}

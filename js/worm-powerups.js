@@ -4,6 +4,12 @@ console.log("✨ Power-Up System Loading...");
 /**
  * Manages all power-up logic including drop, collection, and activation
  * Extracted from WormSystem to improve maintainability
+ * 
+ * TWO-CLICK SYSTEM:
+ * 1. First click on power-up icon = SELECT (highlight, ready for placement)
+ * 2. Second click on game area = PLACE/ACTIVATE the power-up
+ * 3. Click same icon again = DESELECT (cancel selection)
+ * 4. ESC key = DESELECT any selected power-up
  */
 class WormPowerUpSystem {
     constructor(wormSystem) {
@@ -15,6 +21,11 @@ class WormPowerUpSystem {
             spider: 0,
             devil: 0
         };
+
+        // TWO-CLICK SYSTEM: Selection state
+        this.selectedPowerUp = null; // Currently selected power-up type
+        this.isPlacementMode = false; // Whether waiting for placement click
+        this.placementHandler = null; // Stored handler for cleanup
 
         // Chain lightning progression
         this.chainLightningKillCount = 5; // First use kills 5, then +2 per collection
@@ -30,6 +41,11 @@ class WormPowerUpSystem {
             spider: '🕷️',
             devil: '👹'
         };
+        this.DESCRIPTIONS = {
+            chainLightning: 'Click a worm to chain-kill nearby worms',
+            spider: 'Click to spawn spider that converts worms',
+            devil: 'Click to place devil magnet that attracts worms'
+        };
 
         // Timing constants
         this.SLIME_SPLAT_DURATION = 10000; // ms - power-up lifetime
@@ -38,7 +54,22 @@ class WormPowerUpSystem {
         this.DEVIL_PROXIMITY_DISTANCE = 50; // px
         this.DEVIL_KILL_TIME = 5000; // ms - 5 seconds near devil
 
-        console.log('✨ Power-Up System initialized');
+        // Setup ESC key handler for deselection
+        this._setupKeyboardHandler();
+
+        console.log('✨ Power-Up System initialized (Two-Click Mode enabled)');
+    }
+
+    /**
+     * Setup keyboard handler for ESC to cancel selection
+     * @private
+     */
+    _setupKeyboardHandler() {
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.selectedPowerUp) {
+                this.deselectPowerUp();
+            }
+        });
     }
 
     /**
@@ -134,31 +165,318 @@ class WormPowerUpSystem {
     }
 
     /**
-     * Use a power-up
-     * @param {string} type - Power-up type to use
+     * TWO-CLICK SYSTEM: Select a power-up (first click)
+     * @param {string} type - Power-up type to select
      */
-    use(type) {
-        if (this.inventory[type] <= 0) {
-            console.log(`⚠️ No ${type} power-ups available!`);
+    selectPowerUp(type) {
+        // If already selected, deselect (toggle)
+        if (this.selectedPowerUp === type) {
+            this.deselectPowerUp();
             return;
         }
 
-        console.log(`🎮 Using ${type} power-up!`);
-        this.inventory[type]--;
-
-        // Delegate to activation method
-        const methodName = `activate${this.capitalize(type)}`;
-        if (typeof this[methodName] === 'function') {
-            this[methodName]();
-        } else {
-            console.error(`❌ Unknown power-up type: ${type}`);
+        // Check if available
+        if (this.inventory[type] <= 0) {
+            console.log(`⚠️ No ${type} power-ups available!`);
+            this._showTooltip(`No ${this.EMOJIS[type]} available!`, 'warning');
+            return;
         }
 
+        // Deselect any previous selection
+        if (this.selectedPowerUp) {
+            this.deselectPowerUp();
+        }
+
+        // Select new power-up
+        this.selectedPowerUp = type;
+        this.isPlacementMode = true;
+        console.log(`🎯 ${this.EMOJIS[type]} SELECTED! ${this.DESCRIPTIONS[type]}`);
+
+        // Update UI to show selection
+        this.updateDisplay();
+
+        // Show placement instructions
+        this._showTooltip(`${this.EMOJIS[type]} selected - ${this.DESCRIPTIONS[type]}`, 'info');
+
+        // Change cursor to indicate placement mode
+        document.body.style.cursor = 'crosshair';
+        document.body.classList.add('power-up-placement-mode');
+
+        // Setup placement click handler
+        this._setupPlacementHandler(type);
+    }
+
+    /**
+     * TWO-CLICK SYSTEM: Deselect current power-up (cancel)
+     */
+    deselectPowerUp() {
+        if (!this.selectedPowerUp) return;
+
+        console.log(`❌ ${this.EMOJIS[this.selectedPowerUp]} deselected`);
+
+        // Cleanup placement handler
+        this._cleanupPlacementHandler();
+
+        // Reset state
+        this.selectedPowerUp = null;
+        this.isPlacementMode = false;
+
+        // Reset cursor
+        document.body.style.cursor = '';
+        document.body.classList.remove('power-up-placement-mode');
+
+        // Update UI
+        this.updateDisplay();
+        this._hideTooltip();
+    }
+
+    /**
+     * Setup placement click handler for two-click system
+     * @param {string} type - Power-up type being placed
+     * @private
+     */
+    _setupPlacementHandler(type) {
+        // Remove any existing handler
+        this._cleanupPlacementHandler();
+
+        this.placementHandler = (e) => {
+            // Ignore clicks on power-up display itself
+            if (e.target.closest('#power-up-display')) {
+                return;
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Execute the power-up at click location
+            this._executePlacement(type, e.clientX, e.clientY, e);
+        };
+
+        // Add with capture to ensure we get the click first
+        document.addEventListener('click', this.placementHandler, { capture: true });
+    }
+
+    /**
+     * Cleanup placement click handler
+     * @private
+     */
+    _cleanupPlacementHandler() {
+        if (this.placementHandler) {
+            document.removeEventListener('click', this.placementHandler, { capture: true });
+            this.placementHandler = null;
+        }
+    }
+
+    /**
+     * Execute power-up placement (second click)
+     * @param {string} type - Power-up type
+     * @param {number} x - Click X coordinate
+     * @param {number} y - Click Y coordinate
+     * @param {Event} event - Original click event
+     * @private
+     */
+    _executePlacement(type, x, y, event) {
+        console.log(`🎮 Placing ${this.EMOJIS[type]} at (${x}, ${y})`);
+
+        // Deduct from inventory
+        this.inventory[type]--;
+
+        // Execute based on type
+        switch (type) {
+            case 'chainLightning':
+                this._executeChainLightning(x, y, event);
+                break;
+            case 'spider':
+                this._executeSpider(x, y);
+                break;
+            case 'devil':
+                this._executeDevil(x, y);
+                break;
+            default:
+                console.error(`❌ Unknown power-up type: ${type}`);
+        }
+
+        // Reset selection state
+        this.deselectPowerUp();
         this.updateDisplay();
     }
 
     /**
+     * Execute Chain Lightning at position
+     * @private
+     */
+    _executeChainLightning(x, y, event) {
+        // Find worm closest to click position
+        const clickedWorm = this._findWormAtPosition(x, y);
+
+        if (clickedWorm) {
+            this._chainLightningFromWorm(clickedWorm);
+        } else {
+            // No worm at click - find nearest worm to click position
+            const nearestWorm = this._findNearestWorm(x, y);
+            if (nearestWorm) {
+                this._chainLightningFromWorm(nearestWorm);
+            } else {
+                console.log(`⚠️ No worms to target!`);
+                // Refund the power-up
+                this.inventory.chainLightning++;
+                this._showTooltip('No worms to target!', 'warning');
+            }
+        }
+    }
+
+    /**
+     * Execute Spider spawn at position
+     * @private
+     */
+    _executeSpider(x, y) {
+        this.spawnSpider(x, y);
+    }
+
+    /**
+     * Execute Devil spawn at position
+     * @private
+     */
+    _executeDevil(x, y) {
+        this.spawnDevil(x, y);
+    }
+
+    /**
+     * Find worm at or near click position
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     * @returns {Object|null} Worm data or null
+     * @private
+     */
+    _findWormAtPosition(x, y) {
+        const threshold = 50; // Click tolerance in pixels
+        return this.wormSystem.worms.find(w => {
+            if (!w.active) return false;
+            const dist = Math.sqrt(Math.pow(w.x - x, 2) + Math.pow(w.y - y, 2));
+            return dist < threshold;
+        });
+    }
+
+    /**
+     * Find nearest active worm to position
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     * @returns {Object|null} Worm data or null
+     * @private
+     */
+    _findNearestWorm(x, y) {
+        const activeWorms = this.wormSystem.worms.filter(w => w.active);
+        if (activeWorms.length === 0) return null;
+
+        return activeWorms.reduce((nearest, worm) => {
+            const distCurrent = Math.sqrt(Math.pow(worm.x - x, 2) + Math.pow(worm.y - y, 2));
+            const distNearest = nearest ? Math.sqrt(Math.pow(nearest.x - x, 2) + Math.pow(nearest.y - y, 2)) : Infinity;
+            return distCurrent < distNearest ? worm : nearest;
+        }, null);
+    }
+
+    /**
+     * Execute chain lightning from a specific worm
+     * @param {Object} worm - Starting worm
+     * @private
+     */
+    _chainLightningFromWorm(worm) {
+        const killCount = this.chainLightningKillCount;
+        console.log(`⚡ Chain Lightning targeting worm ${worm.id}! Will kill ${killCount} worms`);
+
+        // Find closest worms
+        const sortedWorms = this.wormSystem.worms
+            .filter(w => w.active)
+            .sort((a, b) => {
+                const distA = Math.sqrt(Math.pow(a.x - worm.x, 2) + Math.pow(a.y - worm.y, 2));
+                const distB = Math.sqrt(Math.pow(b.x - worm.x, 2) + Math.pow(b.y - worm.y, 2));
+                return distA - distB;
+            })
+            .slice(0, killCount);
+
+        console.log(`⚡ Killing ${sortedWorms.length} worms with chain lightning!`);
+
+        // Kill with delay for visual effect
+        sortedWorms.forEach((targetWorm, index) => {
+            setTimeout(() => {
+                if (targetWorm.active) {
+                    this.createLightningBolt(worm.x, worm.y, targetWorm.x, targetWorm.y);
+                    this.wormSystem.createExplosionFlash('#00ffff');
+                    this.wormSystem.explodeWorm(targetWorm, false, true);
+                }
+            }, index * 100);
+        });
+
+        // Reset kill count back to 5
+        this.chainLightningKillCount = 5;
+    }
+
+    /**
+     * Show tooltip notification
+     * @param {string} message - Message to display
+     * @param {string} type - 'info', 'warning', or 'success'
+     * @private
+     */
+    _showTooltip(message, type = 'info') {
+        // Remove existing tooltip
+        this._hideTooltip();
+
+        const tooltip = document.createElement('div');
+        tooltip.id = 'power-up-tooltip';
+        tooltip.textContent = message;
+
+        const colors = {
+            info: '#0ff',
+            warning: '#ff0',
+            success: '#0f0'
+        };
+
+        tooltip.style.cssText = `
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: ${colors[type] || colors.info};
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            z-index: 10010;
+            border: 2px solid ${colors[type] || colors.info};
+            animation: tooltip-appear 0.3s ease-out;
+            pointer-events: none;
+        `;
+
+        document.body.appendChild(tooltip);
+
+        // Auto-hide after 3 seconds
+        setTimeout(() => this._hideTooltip(), 3000);
+    }
+
+    /**
+     * Hide tooltip
+     * @private
+     */
+    _hideTooltip() {
+        const existing = document.getElementById('power-up-tooltip');
+        if (existing) {
+            existing.remove();
+        }
+    }
+
+    /**
+     * Use a power-up (LEGACY - now redirects to selectPowerUp for two-click system)
+     * @param {string} type - Power-up type to use
+     */
+    use(type) {
+        // Redirect to two-click selection system
+        this.selectPowerUp(type);
+    }
+
+    /**
      * CHAIN LIGHTNING: Click worm to kill nearby worms
+     * @deprecated Use _executeChainLightning instead (two-click system)
      */
     activateChainLightning() {
         console.log(`⚡ CHAIN LIGHTNING ACTIVATED! Click a worm to unleash!`);
@@ -236,52 +554,52 @@ class WormPowerUpSystem {
         // Create jagged lightning path using SVG for better visuals
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        
+
         // Generate jagged lightning path with random deviations
         const segments = Math.max(3, Math.floor(length / 50)); // More segments for longer bolts
         let pathData = `M 0 0`;
-        
+
         for (let i = 1; i < segments; i++) {
             const progress = i / segments;
             const targetX = length * progress;
-            
+
             // Add random deviation perpendicular to line direction
             const deviation = (Math.random() - 0.5) * 30;
-            
+
             pathData += ` L ${targetX} ${deviation}`;
         }
         pathData += ` L ${length} 0`; // End at target
-        
+
         path.setAttribute('d', pathData);
         path.setAttribute('stroke', '#00ffff');
         path.setAttribute('stroke-width', '3');
         path.setAttribute('fill', 'none');
         path.setAttribute('filter', 'url(#lightning-glow)');
-        
+
         // Add glow filter
         const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
         const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
         filter.setAttribute('id', 'lightning-glow');
-        
+
         const feGaussianBlur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
         feGaussianBlur.setAttribute('stdDeviation', '3');
         feGaussianBlur.setAttribute('result', 'coloredBlur');
-        
+
         const feMerge = document.createElementNS('http://www.w3.org/2000/svg', 'feMerge');
         const feMergeNode1 = document.createElementNS('http://www.w3.org/2000/svg', 'feMergeNode');
         feMergeNode1.setAttribute('in', 'coloredBlur');
         const feMergeNode2 = document.createElementNS('http://www.w3.org/2000/svg', 'feMergeNode');
         feMergeNode2.setAttribute('in', 'SourceGraphic');
-        
+
         feMerge.appendChild(feMergeNode1);
         feMerge.appendChild(feMergeNode2);
         filter.appendChild(feGaussianBlur);
         filter.appendChild(feMerge);
         defs.appendChild(filter);
-        
+
         svg.appendChild(defs);
         svg.appendChild(path);
-        
+
         svg.style.cssText = `
             position: absolute;
             left: 0;
@@ -302,7 +620,7 @@ class WormPowerUpSystem {
             pointer-events: none;
             animation: lightning-flash 0.3s ease-out;
         `;
-        
+
         lightning.appendChild(svg);
         document.body.appendChild(lightning);
 
@@ -326,7 +644,7 @@ class WormPowerUpSystem {
             const sparkle = document.createElement('div');
             const angle = (Math.PI * 2 * i) / 8;
             const distance = 20 + Math.random() * 20;
-            
+
             sparkle.style.cssText = `
                 position: fixed;
                 left: ${x}px;
@@ -342,9 +660,9 @@ class WormPowerUpSystem {
                 z-index: 10003;
                 pointer-events: none;
             `;
-            
+
             document.body.appendChild(sparkle);
-            
+
             setTimeout(() => {
                 if (sparkle.parentNode) {
                     sparkle.parentNode.removeChild(sparkle);
@@ -569,35 +887,63 @@ class WormPowerUpSystem {
      * Update power-up display UI
      */
     updateDisplay() {
-        console.log(`📊 Power-ups: ⚡${this.inventory.chainLightning} 🕷️${this.inventory.spider} 👹${this.inventory.devil}`);
+        console.log(`📊 Power-ups: ⚡${this.inventory.chainLightning} 🕷️${this.inventory.spider} 👹${this.inventory.devil}${this.selectedPowerUp ? ` | Selected: ${this.selectedPowerUp}` : ''}`);
 
         if (!this.displayElement) {
             this.displayElement = this.createDisplayElement();
         }
 
+        // Build display with selection highlighting
+        const createItem = (type, emoji, count) => {
+            const isSelected = this.selectedPowerUp === type;
+            const hasStock = count > 0;
+            const selectedStyle = isSelected ?
+                'background: rgba(0, 255, 255, 0.4); border: 2px solid #0ff; box-shadow: 0 0 10px #0ff;' :
+                'border: 2px solid transparent;';
+            const availableStyle = hasStock ? 'opacity: 1;' : 'opacity: 0.5;';
+            const cursorStyle = hasStock ? 'cursor: pointer;' : 'cursor: not-allowed;';
+
+            let extraInfo = '';
+            if (type === 'chainLightning' && count > 0) {
+                extraInfo = `<div style="position: absolute; top: -10px; right: -10px; font-size: 12px; color: #0ff;">${this.chainLightningKillCount}</div>`;
+            }
+            if (isSelected) {
+                extraInfo += `<div style="position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #0ff; white-space: nowrap;">SELECTED</div>`;
+            }
+
+            return `
+                <div class="power-up-item" data-type="${type}" data-testid="powerup-${type}" 
+                     style="${cursorStyle} padding: 8px; border-radius: 8px; transition: all 0.2s; position: relative; ${selectedStyle} ${availableStyle}">
+                    ${emoji} ${count}
+                    ${extraInfo}
+                </div>
+            `;
+        };
+
         this.displayElement.innerHTML = `
-            <div class="power-up-item" data-type="chainLightning" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s; position: relative;">
-                ⚡ ${this.inventory.chainLightning}
-                ${this.inventory.chainLightning > 0 ? `<div style="position: absolute; top: -10px; right: -10px; font-size: 12px; color: #0ff;">${this.chainLightningKillCount}</div>` : ''}
-            </div>
-            <div class="power-up-item" data-type="spider" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s;">
-                🕷️ ${this.inventory.spider}
-            </div>
-            <div class="power-up-item" data-type="devil" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s;">
-                👹 ${this.inventory.devil}
-            </div>
+            ${createItem('chainLightning', '⚡', this.inventory.chainLightning)}
+            ${createItem('spider', '🕷️', this.inventory.spider)}
+            ${createItem('devil', '👹', this.inventory.devil)}
         `;
 
         // Re-add click handlers and hover effects
         this.displayElement.querySelectorAll('.power-up-item').forEach(item => {
+            const type = item.dataset.type;
+            const hasStock = this.inventory[type] > 0;
+
             item.addEventListener('mouseenter', () => {
-                item.style.background = 'rgba(0, 255, 0, 0.3)';
+                if (hasStock && this.selectedPowerUp !== type) {
+                    item.style.background = 'rgba(0, 255, 0, 0.3)';
+                }
             });
             item.addEventListener('mouseleave', () => {
-                item.style.background = 'transparent';
+                if (this.selectedPowerUp !== type) {
+                    item.style.background = 'transparent';
+                }
             });
-            item.addEventListener('click', () => {
-                this.use(item.dataset.type);
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.selectPowerUp(type);
             });
         });
     }
@@ -609,6 +955,7 @@ class WormPowerUpSystem {
     createDisplayElement() {
         const display = document.createElement('div');
         display.id = 'power-up-display';
+        display.dataset.testid = 'power-up-display';
         display.style.cssText = `
             position: fixed;
             top: 20px;
@@ -670,7 +1017,7 @@ class WormPowerUpSystem {
         function drag(e) {
             if (isDragging) {
                 e.preventDefault();
-                
+
                 currentX = e.clientX - initialX;
                 currentY = e.clientY - initialY;
 
@@ -681,7 +1028,7 @@ class WormPowerUpSystem {
                 const rect = element.getBoundingClientRect();
                 const maxX = window.innerWidth - rect.width;
                 const maxY = window.innerHeight - rect.height;
-                
+
                 const boundedX = Math.max(0, Math.min(currentX, maxX));
                 const boundedY = Math.max(0, Math.min(currentY, maxY));
 
