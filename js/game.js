@@ -518,11 +518,9 @@ document.addEventListener('DOMContentLoaded', () => {
             particleContainer.appendChild(particle);
         }
         
-        // Clean up after animation
+        // Clean up after animation using modern remove() method
         setTimeout(() => {
-            if (particleContainer.parentNode) {
-                particleContainer.parentNode.removeChild(particleContainer);
-            }
+            particleContainer.remove();
         }, 1000);
     }
 
@@ -551,11 +549,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         document.body.appendChild(banner);
         
-        // Clean up after animation
+        // Clean up after animation using modern remove() method
         setTimeout(() => {
-            if (banner.parentNode) {
-                banner.parentNode.removeChild(banner);
-            }
+            banner.remove();
         }, 1500);
     }
 
@@ -569,18 +565,13 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         rowSymbols.forEach((symbol, index) => {
-            // Staggered animation for wave effect
-            setTimeout(() => {
-                // Remove red styling and add cyan pulsating
-                symbol.classList.remove('revealed-symbol');
-                symbol.classList.add('completed-row-symbol');
-                
-                // Add individual pop effect
-                symbol.style.animation = 'symbol-pop 0.3s ease-out';
-                setTimeout(() => {
-                    symbol.style.animation = 'pulsating-cyan 2s ease-in-out infinite';
-                }, 300);
-            }, index * 30); // 30ms stagger between symbols
+            // Staggered animation for wave effect using CSS animation-delay instead of nested setTimeout
+            symbol.classList.remove('revealed-symbol');
+            symbol.classList.add('completed-row-symbol');
+            
+            // Use CSS custom property for staggered animation
+            symbol.style.setProperty('--stagger-delay', `${index * 30}ms`);
+            symbol.style.animation = `symbol-pop 0.3s ease-out ${index * 30}ms, pulsating-cyan 2s ease-in-out ${index * 30 + 300}ms infinite`;
         });
 
         console.log(`✅ Row ${stepIndex + 1} transformed - ${rowSymbols.length} symbols now pulsating cyan`);
