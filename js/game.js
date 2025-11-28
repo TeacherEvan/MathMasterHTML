@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         while ((match = problemRegex.exec(markdownContent)) !== null) {
             try {
-                const problemNumber = match[1];
+                const _problemNumber = match[1]; // Prefixed - for future problem numbering
                 const problemText = match[2];
                 const stepsText = match[3];
 
@@ -378,10 +378,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentStepHiddenSymbols.length === 0) {
             console.log(`🎉 Line ${currentStepIndex + 1} completed!`);
 
-            // SPECIAL EFFECT: Lightning flash for ALL row completions
-            console.log(`⚡ ROW ${currentStepIndex + 1} COMPLETED - Triggering lightning flash!`);
-            createLightningFlash();
-            transformRowToPulsatingCyan(currentStepIndex);
+            // ENHANCED DRAMATIC EFFECTS for row completion
+            console.log(`⚡ ROW ${currentStepIndex + 1} COMPLETED - Triggering enhanced celebration!`);
+            createDramaticLineCompletion(currentStepIndex);
 
             // Trigger worm spawning for completed line
             console.log('🐛 DISPATCHING problemLineCompleted EVENT - This should spawn a worm!');
@@ -408,6 +407,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkProblemCompletion();
             }
         }
+    }
+
+    /** Create dramatic celebration for line completion */
+    function createDramaticLineCompletion(stepIndex) {
+        // 1. Lightning flash
+        createLightningFlash();
+        
+        // 2. Screen shake effect
+        createScreenShake();
+        
+        // 3. Celebration particles
+        createCelebrationParticles(stepIndex);
+        
+        // 4. Victory banner briefly
+        showVictoryBanner(stepIndex + 1);
+        
+        // 5. Transform row to pulsating cyan
+        transformRowToPulsatingCyan(stepIndex);
     }
 
     /** Create lightning flash effect */
@@ -439,6 +456,105 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
 
+    /** Create screen shake effect for impact */
+    function createScreenShake() {
+        console.log('📳 Creating screen shake effect...');
+        document.body.classList.add('screen-shake');
+        setTimeout(() => {
+            document.body.classList.remove('screen-shake');
+        }, 500);
+    }
+
+    /** Create celebration particles around the completed row */
+    function createCelebrationParticles(stepIndex) {
+        console.log('✨ Creating celebration particles...');
+        
+        const row = solutionContainer.querySelector(`[data-step-index="${stepIndex}"]`);
+        if (!row) return;
+        
+        const rect = row.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        // Create particle container
+        const particleContainer = document.createElement('div');
+        particleContainer.className = 'celebration-particles';
+        particleContainer.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 10000;
+        `;
+        document.body.appendChild(particleContainer);
+        
+        // Create multiple particles
+        const colors = ['#00ffff', '#00ff00', '#ffff00', '#ff00ff', '#ff6600'];
+        const symbols = ['★', '✦', '◆', '●', '⚡'];
+        
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+            const angle = (i / 20) * Math.PI * 2;
+            const velocity = 150 + Math.random() * 100;
+            const endX = Math.cos(angle) * velocity;
+            const endY = Math.sin(angle) * velocity;
+            
+            particle.textContent = randomSymbol;
+            particle.style.cssText = `
+                position: absolute;
+                left: ${centerX}px;
+                top: ${centerY}px;
+                font-size: ${16 + Math.random() * 12}px;
+                color: ${randomColor};
+                text-shadow: 0 0 10px ${randomColor};
+                --end-x: ${endX}px;
+                --end-y: ${endY}px;
+                animation: particle-explode 0.8s ease-out forwards;
+            `;
+            particleContainer.appendChild(particle);
+        }
+        
+        // Clean up after animation using modern remove() method
+        setTimeout(() => {
+            particleContainer.remove();
+        }, 1000);
+    }
+
+    /** Show victory banner for completed line */
+    function showVictoryBanner(lineNumber) {
+        console.log(`🏆 Showing victory banner for line ${lineNumber}...`);
+        
+        const banner = document.createElement('div');
+        banner.className = 'victory-banner';
+        banner.innerHTML = `<span class="victory-text">LINE ${lineNumber} COMPLETE!</span>`;
+        banner.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-family: 'Orbitron', monospace;
+            font-size: 2em;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff, 2px 2px 0 #000;
+            z-index: 10001;
+            pointer-events: none;
+            animation: victory-popup 1.5s ease-out forwards;
+            white-space: nowrap;
+        `;
+        
+        document.body.appendChild(banner);
+        
+        // Clean up after animation using modern remove() method
+        setTimeout(() => {
+            banner.remove();
+        }, 1500);
+    }
+
     /** Transform completed row to pulsating cyan */
     function transformRowToPulsatingCyan(stepIndex) {
         console.log(`💙 Transforming row ${stepIndex + 1} to pulsating cyan...`);
@@ -448,10 +564,14 @@ document.addEventListener('DOMContentLoaded', () => {
             `[data-step-index="${stepIndex}"].solution-symbol:not(.hidden-symbol):not(.space-symbol):not(.completed-row-symbol)`
         );
 
-        rowSymbols.forEach(symbol => {
-            // Remove red styling and add cyan pulsating
+        rowSymbols.forEach((symbol, index) => {
+            // Staggered animation for wave effect using CSS animation-delay instead of nested setTimeout
             symbol.classList.remove('revealed-symbol');
             symbol.classList.add('completed-row-symbol');
+            
+            // Use CSS custom property for staggered animation
+            symbol.style.setProperty('--stagger-delay', `${index * 30}ms`);
+            symbol.style.animation = `symbol-pop 0.3s ease-out ${index * 30}ms, pulsating-cyan 2s ease-in-out ${index * 30 + 300}ms infinite`;
         });
 
         console.log(`✅ Row ${stepIndex + 1} transformed - ${rowSymbols.length} symbols now pulsating cyan`);

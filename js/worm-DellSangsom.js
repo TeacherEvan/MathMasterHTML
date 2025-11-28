@@ -1539,7 +1539,7 @@ class WormSystem {
             particle.className = 'explosion-particle';
 
             const angle = (i / this.EXPLOSION_PARTICLE_COUNT) * Math.PI * 2;
-            const speed = 100 + Math.random() * 100;
+            const _speed = 100 + Math.random() * 100; // Reserved for particle speed animation
             const distance = 80 + Math.random() * 40;
 
             particle.style.left = `${x}px`;
@@ -1661,7 +1661,7 @@ class WormSystem {
 
         // PERFORMANCE: Use cached elements
         let powerUpDisplay = this.cachedPowerUpDisplay || document.getElementById('power-up-display');
-        const consoleElement = this.consoleElement || document.getElementById('symbol-console');
+        const _consoleElement = this.consoleElement || document.getElementById('symbol-console'); // Reserved for console integration
 
         if (!powerUpDisplay) {
             powerUpDisplay = document.createElement('div');

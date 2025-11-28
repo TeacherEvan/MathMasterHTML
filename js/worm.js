@@ -73,6 +73,8 @@ class WormSystem {
         // PERFORMANCE: DOM query caching
         this.cachedRevealedSymbols = null;
         this.revealedSymbolsCacheTime = 0;
+        this.cachedAllSymbols = null; // FIX: Cache for ALL symbols (for purple worms)
+        this.allSymbolsCacheTime = 0;
         this.cachedContainerRect = null;
         this.containerRectCacheTime = 0;
         this.CACHE_DURATION_TARGETS = 100; // Refresh revealed symbols every 100ms
@@ -250,6 +252,16 @@ class WormSystem {
         return this.cachedRevealedSymbols;
     }
 
+    // FIX: Get ALL solution symbols (for purple worms that can steal hidden symbols)
+    getCachedAllSymbols() {
+        const now = Date.now();
+        if (!this.cachedAllSymbols || (now - this.allSymbolsCacheTime) > this.CACHE_DURATION_TARGETS) {
+            this.cachedAllSymbols = this.solutionContainer.querySelectorAll('.solution-symbol');
+            this.allSymbolsCacheTime = now;
+        }
+        return this.cachedAllSymbols;
+    }
+
     // PERFORMANCE: Get cached container bounding rect (refreshes every 200ms instead of every frame)
     getCachedContainerRect() {
         const now = Date.now();
@@ -263,6 +275,7 @@ class WormSystem {
     // PERFORMANCE: Invalidate caches when symbols change
     invalidateSymbolCache() {
         this.cachedRevealedSymbols = null;
+        this.cachedAllSymbols = null; // FIX: Also invalidate all symbols cache
     }
 
     // PERFORMANCE: Queue worm spawn to prevent frame drops on multi-spawn
@@ -714,11 +727,11 @@ class WormSystem {
             return;
         }
 
-        // PERFORMANCE: Use cached revealed symbols instead of querying every time
-        const revealedSymbols = this.getCachedRevealedSymbols();
+        // FIX: Purple worms need access to ALL symbols (including hidden), not just revealed
+        const symbolsSource = worm.isPurple ? this.getCachedAllSymbols() : this.getCachedRevealedSymbols();
 
         // Get all available symbols (not stolen, not spaces, not completed)
-        const allAvailableSymbols = Array.from(revealedSymbols).filter(el =>
+        const allAvailableSymbols = Array.from(symbolsSource).filter(el =>
             !el.dataset.stolen &&
             !el.classList.contains('space-symbol') &&
             !el.classList.contains('completed-row-symbol')
@@ -1037,13 +1050,14 @@ class WormSystem {
             return false;
         }
 
-        // PERFORMANCE: Use cached revealed symbols
-        const revealedSymbols = this.getCachedRevealedSymbols();
+        // FIX: Purple worms need access to ALL symbols (including hidden), not just revealed
+        // Use getCachedAllSymbols() for purple worms, getCachedRevealedSymbols() for normal worms
+        const symbolsToSearch = worm.isPurple ? this.getCachedAllSymbols() : this.getCachedRevealedSymbols();
         let targetElement = null;
 
         if (worm.targetSymbol) {
             const normalizedTarget = worm.targetSymbol.toLowerCase() === 'x' ? 'X' : worm.targetSymbol;
-            targetElement = Array.from(revealedSymbols).find(el => {
+            targetElement = Array.from(symbolsToSearch).find(el => {
                 const elSymbol = el.textContent.toLowerCase() === 'x' ? 'X' : el.textContent;
                 return elSymbol === normalizedTarget && !el.dataset.stolen;
             });
@@ -1051,7 +1065,7 @@ class WormSystem {
 
         // PURPLE WORM FIX: If no targetSymbol, find nearest available symbol
         if (!targetElement && worm.isRushingToTarget) {
-            const allSymbols = Array.from(revealedSymbols).filter(el =>
+            const allSymbols = Array.from(symbolsToSearch).filter(el =>
                 !el.dataset.stolen &&
                 !el.classList.contains('space-symbol') &&
                 !el.classList.contains('completed-row-symbol')
@@ -1063,8 +1077,10 @@ class WormSystem {
                 const redSymbols = allSymbols.filter(el => el.classList.contains('hidden-symbol'));
                 if (redSymbols.length > 0) {
                     availableSymbols = redSymbols;
+                    console.log(`🟣 Purple worm ${worm.id} found ${redSymbols.length} red (hidden) symbols to target`);
                 } else {
                     availableSymbols = allSymbols.filter(el => el.classList.contains('revealed-symbol'));
+                    console.log(`🟣 Purple worm ${worm.id} no red symbols, targeting ${availableSymbols.length} blue symbols`);
                 }
             } else {
                 availableSymbols = allSymbols.filter(el => el.classList.contains('hidden-symbol'));
@@ -1515,7 +1531,7 @@ class WormSystem {
             particle.className = 'explosion-particle';
 
             const angle = (i / this.EXPLOSION_PARTICLE_COUNT) * Math.PI * 2;
-            const speed = 100 + Math.random() * 100;
+            const _speed = 100 + Math.random() * 100; // Reserved for particle speed animation
             const distance = 80 + Math.random() * 40;
 
             particle.style.left = `${x}px`;
@@ -1637,7 +1653,7 @@ class WormSystem {
 
         // PERFORMANCE: Use cached elements
         let powerUpDisplay = this.cachedPowerUpDisplay || document.getElementById('power-up-display');
-        const consoleElement = this.consoleElement || document.getElementById('symbol-console');
+        const _consoleElement = this.consoleElement || document.getElementById('symbol-console'); // Reserved for console integration
 
         if (!powerUpDisplay) {
             powerUpDisplay = document.createElement('div');
