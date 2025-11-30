@@ -58,12 +58,31 @@ function generateUniqueId(prefix = 'item') {
     return `${prefix}-${Date.now()}-${Math.random()}`;
 }
 
+/**
+ * Debounce function to prevent excessive function calls
+ * @param {Function} func - Function to debounce
+ * @param {number} wait - Delay in milliseconds
+ * @returns {Function} Debounced function
+ */
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 // Expose utility functions globally for use across modules
 if (typeof window !== 'undefined') {
     window.normalizeSymbol = normalizeSymbol;
     window.calculateDistance = calculateDistance;
     window.createDOMElement = createDOMElement;
     window.generateUniqueId = generateUniqueId;
+    window.debounce = debounce;
 }
 
 /**

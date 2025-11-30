@@ -57,18 +57,7 @@ function initSymbolRain() {
     const GRID_CELL_SIZE = 100; // 100px cells
     const spatialGrid = new Map();
 
-    // PERFORMANCE: Debounce utility to prevent excessive function calls
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
+    // PERFORMANCE: Use shared debounce utility from utils.js (window.debounce)
 
     function getCellKey(x, y) {
         const cellX = Math.floor(x / GRID_CELL_SIZE);
@@ -551,7 +540,8 @@ function initSymbolRain() {
     });
 
     // PERFORMANCE: Debounced resize handler (250ms delay prevents excessive recalculation)
-    const debouncedResize = debounce(() => {
+    // Use shared debounce utility from utils.js
+    const debouncedResize = window.debounce(() => {
         console.log('🔄 Window resized, recalculating columns...');
         isMobileMode = window.innerWidth <= 768 || document.body.classList.contains('res-mobile');
         console.log(`📱 Mobile mode: ${isMobileMode}`);

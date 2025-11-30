@@ -776,9 +776,10 @@ class WormSystem {
         // If worm has a target symbol, try to find it
         let targetSymbol = null;
         if (worm.targetSymbol) {
-            const normalizedTarget = worm.targetSymbol.toLowerCase() === 'x' ? 'X' : worm.targetSymbol;
+            // Use shared normalizeSymbol utility from utils.js
+            const normalizedTarget = normalizeSymbol(worm.targetSymbol);
             targetSymbol = availableSymbols.find(el => {
-                const elSymbol = el.textContent.toLowerCase() === 'x' ? 'X' : el.textContent;
+                const elSymbol = normalizeSymbol(el.textContent);
                 return elSymbol === normalizedTarget;
             });
         }
@@ -1056,9 +1057,10 @@ class WormSystem {
         let targetElement = null;
 
         if (worm.targetSymbol) {
-            const normalizedTarget = worm.targetSymbol.toLowerCase() === 'x' ? 'X' : worm.targetSymbol;
+            // Use shared normalizeSymbol utility from utils.js
+            const normalizedTarget = normalizeSymbol(worm.targetSymbol);
             targetElement = Array.from(symbolsToSearch).find(el => {
-                const elSymbol = el.textContent.toLowerCase() === 'x' ? 'X' : el.textContent;
+                const elSymbol = normalizeSymbol(el.textContent);
                 return elSymbol === normalizedTarget && !el.dataset.stolen;
             });
         }
@@ -1087,7 +1089,7 @@ class WormSystem {
             }
 
             if (availableSymbols.length > 0) {
-                // Find nearest symbol to worm
+                // Find nearest symbol to worm - use shared calculateDistance utility
                 let nearestSymbol = null;
                 let nearestDistance = Infinity;
 
@@ -1095,7 +1097,7 @@ class WormSystem {
                     const rect = el.getBoundingClientRect();
                     const symbolX = rect.left + rect.width / 2;
                     const symbolY = rect.top + rect.height / 2;
-                    const distance = Math.sqrt(Math.pow(worm.x - symbolX, 2) + Math.pow(worm.y - symbolY, 2));
+                    const distance = calculateDistance(worm.x, worm.y, symbolX, symbolY);
 
                     if (distance < nearestDistance) {
                         nearestDistance = distance;
@@ -1378,8 +1380,8 @@ class WormSystem {
             return;
         }
 
-        // Create purple clone near parent
-        const newWormId = `purple-clone-${Date.now()}-${Math.random()}`;
+        // Create purple clone near parent - use shared generateUniqueId utility
+        const newWormId = generateUniqueId('purple-clone');
         const newWormElement = document.createElement('div');
         newWormElement.className = 'worm-container purple-worm';
         newWormElement.id = newWormId;

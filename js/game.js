@@ -269,9 +269,9 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`🔍 Checking symbol "${clickedSymbol}" against expected symbols:`, expectedSymbols);
 
         if (expectedSymbols && Array.isArray(expectedSymbols)) {
-            // FIXED: Normalize X/x comparison - treat them as the same
-            const normalizedClicked = clickedSymbol.toLowerCase() === 'x' ? 'X' : clickedSymbol;
-            const normalizedExpected = expectedSymbols.map(s => s.toLowerCase() === 'x' ? 'X' : s);
+            // Use shared normalizeSymbol utility from utils.js
+            const normalizedClicked = normalizeSymbol(clickedSymbol);
+            const normalizedExpected = expectedSymbols.map(s => normalizeSymbol(s));
 
             const result = normalizedExpected.includes(normalizedClicked);
             console.log(`🎯 Symbol "${clickedSymbol}" normalized to "${normalizedClicked}" - match result: ${result}`);
@@ -285,8 +285,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function revealSpecificSymbol(targetSymbol) {
         console.log(`🔍 Attempting to reveal symbol: "${targetSymbol}" in step ${currentStepIndex}`);
 
-        // FIXED: Normalize X/x for matching
-        const normalizedTarget = targetSymbol.toLowerCase() === 'x' ? 'X' : targetSymbol;
+        // Use shared normalizeSymbol utility from utils.js
+        const normalizedTarget = normalizeSymbol(targetSymbol);
 
         // PERFORMANCE: Use cached symbols
         const currentStepSymbols = getCachedStepSymbols(currentStepIndex);
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (const span of hiddenSymbols) {
             const spanSymbol = span.textContent;
-            const normalizedSpan = spanSymbol.toLowerCase() === 'x' ? 'X' : spanSymbol;
+            const normalizedSpan = normalizeSymbol(spanSymbol);
 
             console.log(`🔎 Comparing "${normalizedTarget}" with hidden symbol "${normalizedSpan}"`);
 
@@ -641,14 +641,15 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`🎯 Symbol Rain click - Clicked: "${clicked}"`);
 
         // PRIORITY 1: Check if this symbol was stolen by a worm (includes blue symbols!)
-        const normalizedClicked = clicked.toLowerCase() === 'x' ? 'X' : clicked;
+        // Use shared normalizeSymbol utility from utils.js
+        const normalizedClicked = normalizeSymbol(clicked);
         const stolenSymbols = solutionContainer.querySelectorAll('[data-stolen="true"]');
         let symbolRestored = false;
         let wasBlueSymbol = false;
 
         for (const stolenSymbol of stolenSymbols) {
             const stolenText = stolenSymbol.textContent;
-            const normalizedStolen = stolenText.toLowerCase() === 'x' ? 'X' : stolenText;
+            const normalizedStolen = normalizeSymbol(stolenText);
 
             if (normalizedStolen === normalizedClicked) {
                 // Check if this was a blue (revealed) symbol before being stolen

@@ -221,16 +221,12 @@ class DisplayManager {
             // Keep hidden - functionality preserved for debugging
             console.log(`📺 Resolution Indicator: ${indicator.textContent}`);
         }
-    } debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
+    }
+
+    // Use shared debounce utility from utils.js
+    // Method wrapper for class context binding
+    debounce(func, wait) {
+        return window.debounce(func, wait);
     }
 
     getCurrentResolution() {

@@ -180,17 +180,9 @@ class LockResponsiveManager {
         }));
     }
 
-    // Debounce function to prevent excessive resize events
+    // Use shared debounce utility from utils.js
     debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
+        return window.debounce(func, wait);
     }
 
     // Public API methods
