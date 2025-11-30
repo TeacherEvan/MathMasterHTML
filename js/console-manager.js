@@ -11,6 +11,7 @@ class ConsoleManager {
         this.modal = null;
         this.isPendingSelection = false;
         // REFACTORED: Use shared getLevelFromURL utility from utils.js
+        // Fallback ensures code works even if utils.js hasn't loaded yet (defensive coding)
         this.currentLevel = typeof getLevelFromURL === 'function' ? getLevelFromURL() : this._getLevelFromURLFallback();
 
         this.init();

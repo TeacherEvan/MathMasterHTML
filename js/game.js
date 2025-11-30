@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // PERFORMANCE FIX: Defer heavy problem loading to prevent blocking animation
-    // Uses shared utility from utils.js
+    // Uses shared deferExecution() utility from utils.js
 
     // Load problems based on level
     function loadProblems() {
