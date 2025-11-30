@@ -17,8 +17,7 @@ class LockManager {
         }
 
         // PERFORMANCE FIX: Defer basic lock display to prevent blocking
-        // Use requestIdleCallback if available, otherwise setTimeout
-        const deferExecution = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
+        // REFACTORED: Use shared deferExecution utility from utils.js
         deferExecution(() => {
             this.showBasicLock();
         });

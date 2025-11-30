@@ -50,6 +50,8 @@ export default [
                 calculateDistance: "writable",
                 createDOMElement: "writable",
                 generateUniqueId: "writable",
+                getLevelFromURL: "writable",
+                deferExecution: "writable",
 
                 // Functions exposed globally
                 getActiveSymbolCount: "writable",

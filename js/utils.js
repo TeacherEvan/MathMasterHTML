@@ -58,12 +58,36 @@ function generateUniqueId(prefix = 'item') {
     return `${prefix}-${Date.now()}-${Math.random()}`;
 }
 
+/**
+ * Get current level from URL parameters
+ * @returns {string} Level name ('beginner', 'warrior', or 'master')
+ */
+function getLevelFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('level') || 'beginner';
+}
+
+/**
+ * Deferred execution utility - uses requestIdleCallback if available, else setTimeout
+ * Useful for deferring heavy operations to prevent blocking animations
+ * @param {Function} callback - Function to execute
+ */
+function deferExecution(callback) {
+    if (window.requestIdleCallback) {
+        window.requestIdleCallback(callback);
+    } else {
+        setTimeout(callback, 1);
+    }
+}
+
 // Expose utility functions globally for use across modules
 if (typeof window !== 'undefined') {
     window.normalizeSymbol = normalizeSymbol;
     window.calculateDistance = calculateDistance;
     window.createDOMElement = createDOMElement;
     window.generateUniqueId = generateUniqueId;
+    window.getLevelFromURL = getLevelFromURL;
+    window.deferExecution = deferExecution;
 }
 
 /**

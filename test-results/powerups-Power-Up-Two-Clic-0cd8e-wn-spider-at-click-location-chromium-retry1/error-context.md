@@ -1,0 +1,81 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - heading "Math Master - Unlock Your Mind" [level=2] [ref=e4]
+    - paragraph [ref=e5]:
+      - text: Math stimulates your brain's problem-solving capabilities, allowing you to see vastly different solutions to everyday problems. Once you finish the game, remember to always use your powers for good 😉
+      - strong [ref=e6]: "Important Notes:"
+      - text: 1. When your muscles train, they burn. Frustration is the brain's way of expressing the "burn". Take a break if necessary, but allow your brain time to let it do its thing without you interrupting it by overthinking everything.
+      - text: 2. The help button has no limit. No one will know you used it.
+    - button "NEXT ➔" [ref=e7] [cursor=pointer]
+  - button "← Back" [ref=e8] [cursor=pointer]
+  - generic [ref=e9]:
+    - generic [ref=e21]: 5 + 3 - X = 6
+    - generic [ref=e23]:
+      - button "HELP" [ref=e24]
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - generic [ref=e28]: "5"
+          - generic [ref=e29]: +
+          - generic [ref=e30]: "3"
+          - generic [ref=e31]: "-"
+          - generic [ref=e32]: X
+          - generic [ref=e33]: =
+          - generic [ref=e34]: "6"
+        - generic [ref=e35]:
+          - generic [ref=e36]: "8"
+          - generic [ref=e37]: "-"
+          - generic [ref=e38]: X
+          - generic [ref=e39]: =
+          - generic [ref=e40]: "6"
+        - generic [ref=e41]:
+          - generic [ref=e42]: X
+          - generic [ref=e43]: =
+          - generic [ref=e44]: "8"
+          - generic [ref=e45]: "-"
+          - generic [ref=e46]: "6"
+        - generic [ref=e47]:
+          - generic [ref=e48]: X
+          - generic [ref=e49]: =
+          - generic [ref=e50]: "2"
+      - generic [ref=e51]:
+        - button [ref=e52]
+        - button [ref=e53]
+        - button [ref=e54]
+        - button [ref=e55]
+        - button [ref=e56]
+        - button [ref=e57]
+        - button [ref=e58]
+        - button [ref=e59]
+        - button [ref=e60]
+    - generic [ref=e63]:
+      - generic [ref=e64] [cursor=pointer]: x
+      - generic [ref=e65] [cursor=pointer]: X
+      - generic [ref=e66] [cursor=pointer]: "3"
+      - generic [ref=e67] [cursor=pointer]: ×
+      - generic [ref=e68] [cursor=pointer]: "8"
+      - generic [ref=e69] [cursor=pointer]: ÷
+      - generic [ref=e70] [cursor=pointer]: "4"
+      - generic [ref=e71] [cursor=pointer]: "7"
+      - generic [ref=e72] [cursor=pointer]: "4"
+      - generic [ref=e73] [cursor=pointer]: X
+      - generic [ref=e74] [cursor=pointer]: "9"
+      - generic [ref=e75] [cursor=pointer]: "9"
+      - generic [ref=e76] [cursor=pointer]: "-"
+      - generic [ref=e77] [cursor=pointer]: "9"
+      - generic [ref=e78] [cursor=pointer]: =
+      - generic [ref=e79] [cursor=pointer]: "0"
+      - generic [ref=e80] [cursor=pointer]: "6"
+      - generic [ref=e81] [cursor=pointer]: +
+      - generic [ref=e82] [cursor=pointer]: ÷
+      - generic [ref=e83] [cursor=pointer]: "9"
+      - generic [ref=e84] [cursor=pointer]: "6"
+      - generic [ref=e85] [cursor=pointer]: ×
+      - generic [ref=e86] [cursor=pointer]: x
+      - generic [ref=e87] [cursor=pointer]: "8"
+      - generic [ref=e88] [cursor=pointer]: "1"
+      - generic [ref=e89] [cursor=pointer]: +
+      - generic [ref=e90] [cursor=pointer]: "3"
+```
