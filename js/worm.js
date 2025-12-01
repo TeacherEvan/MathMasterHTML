@@ -774,11 +774,12 @@ class WormSystem {
         }
 
         // If worm has a target symbol, try to find it
+        // REFACTORED: Use shared normalizeSymbol utility from utils.js
         let targetSymbol = null;
         if (worm.targetSymbol) {
-            const normalizedTarget = worm.targetSymbol.toLowerCase() === 'x' ? 'X' : worm.targetSymbol;
+            const normalizedTarget = normalizeSymbol(worm.targetSymbol);
             targetSymbol = availableSymbols.find(el => {
-                const elSymbol = el.textContent.toLowerCase() === 'x' ? 'X' : el.textContent;
+                const elSymbol = normalizeSymbol(el.textContent);
                 return elSymbol === normalizedTarget;
             });
         }
@@ -1055,10 +1056,11 @@ class WormSystem {
         const symbolsToSearch = worm.isPurple ? this.getCachedAllSymbols() : this.getCachedRevealedSymbols();
         let targetElement = null;
 
+        // REFACTORED: Use shared normalizeSymbol utility from utils.js
         if (worm.targetSymbol) {
-            const normalizedTarget = worm.targetSymbol.toLowerCase() === 'x' ? 'X' : worm.targetSymbol;
+            const normalizedTarget = normalizeSymbol(worm.targetSymbol);
             targetElement = Array.from(symbolsToSearch).find(el => {
-                const elSymbol = el.textContent.toLowerCase() === 'x' ? 'X' : el.textContent;
+                const elSymbol = normalizeSymbol(el.textContent);
                 return elSymbol === normalizedTarget && !el.dataset.stolen;
             });
         }

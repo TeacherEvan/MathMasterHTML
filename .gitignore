@@ -42,6 +42,10 @@ build/
 # Cline AI assistant
 .cline/
 
+# Playwright test artifacts
+test-results/
+playwright-report/
+
 # Snapshots (if not needed in repo)
 # .snapshots/
 

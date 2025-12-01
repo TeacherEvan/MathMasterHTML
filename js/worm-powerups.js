@@ -350,9 +350,10 @@ class WormPowerUpSystem {
      */
     _findWormAtPosition(x, y) {
         const threshold = 50; // Click tolerance in pixels
+        // REFACTORED: Use shared calculateDistance utility from utils.js
         return this.wormSystem.worms.find(w => {
             if (!w.active) return false;
-            const dist = Math.sqrt(Math.pow(w.x - x, 2) + Math.pow(w.y - y, 2));
+            const dist = calculateDistance(w.x, w.y, x, y);
             return dist < threshold;
         });
     }
@@ -368,9 +369,10 @@ class WormPowerUpSystem {
         const activeWorms = this.wormSystem.worms.filter(w => w.active);
         if (activeWorms.length === 0) return null;
 
+        // REFACTORED: Use shared calculateDistance utility from utils.js
         return activeWorms.reduce((nearest, worm) => {
-            const distCurrent = Math.sqrt(Math.pow(worm.x - x, 2) + Math.pow(worm.y - y, 2));
-            const distNearest = nearest ? Math.sqrt(Math.pow(nearest.x - x, 2) + Math.pow(nearest.y - y, 2)) : Infinity;
+            const distCurrent = calculateDistance(worm.x, worm.y, x, y);
+            const distNearest = nearest ? calculateDistance(nearest.x, nearest.y, x, y) : Infinity;
             return distCurrent < distNearest ? worm : nearest;
         }, null);
     }
@@ -385,11 +387,12 @@ class WormPowerUpSystem {
         console.log(`⚡ Chain Lightning targeting worm ${worm.id}! Will kill ${killCount} worms`);
 
         // Find closest worms
+        // REFACTORED: Use shared calculateDistance utility from utils.js
         const sortedWorms = this.wormSystem.worms
             .filter(w => w.active)
             .sort((a, b) => {
-                const distA = Math.sqrt(Math.pow(a.x - worm.x, 2) + Math.pow(a.y - worm.y, 2));
-                const distB = Math.sqrt(Math.pow(b.x - worm.x, 2) + Math.pow(b.y - worm.y, 2));
+                const distA = calculateDistance(a.x, a.y, worm.x, worm.y);
+                const distB = calculateDistance(b.x, b.y, worm.x, worm.y);
                 return distA - distB;
             })
             .slice(0, killCount);
@@ -489,11 +492,12 @@ class WormPowerUpSystem {
             console.log(`⚡ Chain Lightning targeting worm ${worm.id}!`);
 
             // Find closest worms
+            // REFACTORED: Use shared calculateDistance utility from utils.js
             const sortedWorms = this.wormSystem.worms
                 .filter(w => w.active)
                 .sort((a, b) => {
-                    const distA = Math.sqrt(Math.pow(a.x - worm.x, 2) + Math.pow(a.y - worm.y, 2));
-                    const distB = Math.sqrt(Math.pow(b.x - worm.x, 2) + Math.pow(b.y - worm.y, 2));
+                    const distA = calculateDistance(a.x, a.y, worm.x, worm.y);
+                    const distB = calculateDistance(b.x, b.y, worm.x, worm.y);
                     return distA - distB;
                 })
                 .slice(0, killCount);
@@ -755,13 +759,14 @@ class WormPowerUpSystem {
             }
 
             // Find closest worm
+            // REFACTORED: Use shared calculateDistance utility from utils.js
             const closest = activeWorms.reduce((prev, curr) => {
-                const prevDist = Math.sqrt(Math.pow(prev.x - spiderData.x, 2) + Math.pow(prev.y - spiderData.y, 2));
-                const currDist = Math.sqrt(Math.pow(curr.x - spiderData.x, 2) + Math.pow(curr.y - spiderData.y, 2));
+                const prevDist = calculateDistance(prev.x, prev.y, spiderData.x, spiderData.y);
+                const currDist = calculateDistance(curr.x, curr.y, spiderData.x, spiderData.y);
                 return currDist < prevDist ? curr : prev;
             });
 
-            const dist = Math.sqrt(Math.pow(closest.x - spiderData.x, 2) + Math.pow(closest.y - spiderData.y, 2));
+            const dist = calculateDistance(closest.x, closest.y, spiderData.x, spiderData.y);
 
             if (dist < 30) {
                 // Convert worm → spider (chain reaction!)
@@ -836,8 +841,9 @@ class WormPowerUpSystem {
         const checkProximity = () => {
             const activeWorms = this.wormSystem.worms.filter(w => w.active);
 
+            // REFACTORED: Use shared calculateDistance utility from utils.js
             activeWorms.forEach(worm => {
-                const dist = Math.sqrt(Math.pow(worm.x - devilData.x, 2) + Math.pow(worm.y - devilData.y, 2));
+                const dist = calculateDistance(worm.x, worm.y, devilData.x, devilData.y);
 
                 if (dist < this.DEVIL_PROXIMITY_DISTANCE) {
                     // Worm is near devil

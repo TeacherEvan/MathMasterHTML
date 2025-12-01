@@ -10,12 +10,15 @@ class ConsoleManager {
         this.consoleElement = null;
         this.modal = null;
         this.isPendingSelection = false;
-        this.currentLevel = this.getLevelFromURL(); // Get level from URL
+        // REFACTORED: Use shared getLevelFromURL utility from utils.js
+        // Fallback ensures code works even if utils.js hasn't loaded yet (defensive coding)
+        this.currentLevel = typeof getLevelFromURL === 'function' ? getLevelFromURL() : this._getLevelFromURLFallback();
 
         this.init();
     }
 
-    getLevelFromURL() {
+    // Fallback in case utils.js hasn't loaded yet
+    _getLevelFromURLFallback() {
         const params = new URLSearchParams(window.location.search);
         return params.get('level') || 'beginner';
     }
