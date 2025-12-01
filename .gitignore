@@ -48,3 +48,6 @@ playwright-report/
 
 # Snapshots (if not needed in repo)
 # .snapshots/
+
+# Test results
+test-results/
