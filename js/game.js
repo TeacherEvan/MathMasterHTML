@@ -21,10 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let problems = [];
     let currentProblemIndex = 0;
     let currentProblem = null;
-    let currentStepIndex = 0;
-    let currentSymbolIndex = 0;
-    let revealedIndex = 0;
-    let correctAnswersCount = 0;
+    let currentSolutionStepIndex = 0;
+    let totalCorrectAnswers = 0;
 
     // PURPLE WORM: Track consecutive wrong answers
     let consecutiveWrongAnswers = 0;
@@ -163,9 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`📚 Solution steps:`, currentProblem.steps);
 
         // Reset indices
-        currentStepIndex = 0;
-        currentSymbolIndex = 0;
-        revealedIndex = 0;
+        currentSolutionStepIndex = 0;
         invalidateStepCache(); // PERFORMANCE: Invalidate cache on new problem
 
         // Show basic lock until activation
@@ -231,8 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentProblem = problems[currentProblemIndex];
 
         // Reset step indices
-        currentStepIndex = 0;
-        currentSymbolIndex = 0;
+        currentSolutionStepIndex = 0;
         invalidateStepCache(); // PERFORMANCE: Invalidate cache when changing problems
 
         setupProblem();
@@ -247,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /** Get next hidden symbol from solution - now accepts any symbol in current line */
     function getNextSymbol() {
         // PERFORMANCE: Use cached symbols
-        const currentStepSymbols = getCachedStepSymbols(currentStepIndex);
+        const currentStepSymbols = getCachedStepSymbols(currentSolutionStepIndex);
         const hiddenSymbols = Array.from(currentStepSymbols).filter(el =>
             el.classList.contains('hidden-symbol')
         );
@@ -283,13 +278,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /** Reveal specific symbol in current line - FIXED X/x DETECTION */
     function revealSpecificSymbol(targetSymbol) {
-        console.log(`🔍 Attempting to reveal symbol: "${targetSymbol}" in step ${currentStepIndex}`);
+        console.log(`🔍 Attempting to reveal symbol: "${targetSymbol}" in step ${currentSolutionStepIndex}`);
 
         // Use shared normalizeSymbol utility from utils.js
         const normalizedTarget = normalizeSymbol(targetSymbol);
 
         // PERFORMANCE: Use cached symbols
-        const currentStepSymbols = getCachedStepSymbols(currentStepIndex);
+        const currentStepSymbols = getCachedStepSymbols(currentSolutionStepIndex);
         const hiddenSymbols = Array.from(currentStepSymbols).filter(el =>
             el.classList.contains('hidden-symbol')
         );
@@ -306,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 span.classList.remove('hidden-symbol');
                 span.classList.add('revealed-symbol');
                 invalidateStepCache(); // PERFORMANCE: Invalidate cache after DOM change
-                console.log(`✅ Successfully revealed symbol: "${targetSymbol}" in step ${currentStepIndex + 1}`);
+                console.log(`✅ Successfully revealed symbol: "${targetSymbol}" in step ${currentSolutionStepIndex + 1}`);
 
                 // Dispatch event to notify worms that a RED symbol appeared!
                 document.dispatchEvent(new CustomEvent('symbolRevealed', {
@@ -324,13 +319,13 @@ document.addEventListener('DOMContentLoaded', () => {
     /** Handle correct symbol selection */
     function handleCorrectAnswer(clickedSymbol) {
         console.log(`✅ Correct symbol clicked: "${clickedSymbol}"`);
-        correctAnswersCount++;
+        totalCorrectAnswers++;
 
         // PURPLE WORM: Reset wrong answer counter on correct answer
         consecutiveWrongAnswers = 0;
 
         // Dispatch first-line-solved event for LockManager
-        if (correctAnswersCount === 1) {
+        if (totalCorrectAnswers === 1) {
             console.log('🔒 First correct answer - dispatching first-line-solved event');
             document.dispatchEvent(new Event('first-line-solved'));
         }
@@ -372,15 +367,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkLineCompletion() {
         // Check if current step has any hidden symbols left
         const currentStepHiddenSymbols = solutionContainer.querySelectorAll(
-            `[data-step-index="${currentStepIndex}"].hidden-symbol`
+            `[data-step-index="${currentSolutionStepIndex}"].hidden-symbol`
         );
 
         if (currentStepHiddenSymbols.length === 0) {
-            console.log(`🎉 Line ${currentStepIndex + 1} completed!`);
+            console.log(`🎉 Line ${currentSolutionStepIndex + 1} completed!`);
 
             // ENHANCED DRAMATIC EFFECTS for row completion
-            console.log(`⚡ ROW ${currentStepIndex + 1} COMPLETED - Triggering enhanced celebration!`);
-            createDramaticLineCompletion(currentStepIndex);
+            console.log(`⚡ ROW ${currentSolutionStepIndex + 1} COMPLETED - Triggering enhanced celebration!`);
+            createDramaticLineCompletion(currentSolutionStepIndex);
 
             // Trigger worm spawning for completed line
             console.log('🐛 DISPATCHING problemLineCompleted EVENT - This should spawn a worm!');
@@ -388,20 +383,19 @@ document.addEventListener('DOMContentLoaded', () => {
             // Enhanced event dispatch with line details
             document.dispatchEvent(new CustomEvent('problemLineCompleted', {
                 detail: {
-                    lineNumber: currentStepIndex + 1,
-                    lineText: currentProblem.steps[currentStepIndex]
+                    lineNumber: currentSolutionStepIndex + 1,
+                    lineText: currentProblem.steps[currentSolutionStepIndex]
                 }
             }));
 
             // Log the completion for debugging
-            console.log(`🔒 Line ${currentStepIndex + 1} completed - triggering lock progression`);
+            console.log(`🔒 Line ${currentSolutionStepIndex + 1} completed - triggering lock progression`);
 
             // Move to next step if available
-            if (currentStepIndex < currentProblem.steps.length - 1) {
-                currentStepIndex++;
-                currentSymbolIndex = 0;
+            if (currentSolutionStepIndex < currentProblem.steps.length - 1) {
+                currentSolutionStepIndex++;
                 invalidateStepCache(); // PERFORMANCE: Invalidate cache when moving to next step
-                console.log(`📋 Moving to step ${currentStepIndex + 1}: "${currentProblem.steps[currentStepIndex]}"`);
+                console.log(`📋 Moving to step ${currentSolutionStepIndex + 1}: "${currentProblem.steps[currentSolutionStepIndex]}"`);
             } else {
                 console.log('🎉 All steps complete!');
                 checkProblemCompletion();
@@ -597,7 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 const completionMessage = `Problem ${currentProblemIndex + 1} completed!\n` +
                     `Steps completed: ${currentProblem.steps.length}\n` +
-                    `Correct answers: ${correctAnswersCount}`;
+                    `Correct answers: ${totalCorrectAnswers}`;
 
                 console.log(completionMessage);
 

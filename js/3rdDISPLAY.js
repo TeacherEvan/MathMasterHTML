@@ -33,15 +33,15 @@ function initSymbolRain() {
     let wavesSpawned = 0;
 
     // Guaranteed spawn system - ensure all symbols appear every 5 seconds
-    const lastSpawnTime = {};
-    symbols.forEach(sym => {
-        lastSpawnTime[sym] = Date.now() - Math.random() * 2000;
+    const lastSymbolSpawnTimestamp = {};
+    symbols.forEach(symbolChar => {
+        lastSymbolSpawnTimestamp[symbolChar] = Date.now() - Math.random() * 2000;
     });
-    const GUARANTEED_SPAWN_INTERVAL = 5000; // 5 seconds
+    const GUARANTEED_SPAWN_INTERVAL_MS = 5000; // 5 seconds
 
-    let columns = 0;
-    let activeSymbols = [];
-    let animationRunning = false;
+    let columnCount = 0;
+    let activeFallingSymbols = [];
+    let isAnimationRunning = false;
 
     // PERFORMANCE: Cache container dimensions to prevent layout thrashing
     let cachedContainerHeight = 0;
@@ -67,7 +67,7 @@ function initSymbolRain() {
 
     function updateSpatialGrid() {
         spatialGrid.clear();
-        activeSymbols.forEach(symbolObj => {
+        activeFallingSymbols.forEach(symbolObj => {
             const key = getCellKey(symbolObj.x, symbolObj.y);
             if (!spatialGrid.has(key)) {
                 spatialGrid.set(key, []);
@@ -96,8 +96,8 @@ function initSymbolRain() {
     function calculateColumns() {
         const containerWidth = symbolRainContainer.offsetWidth;
         cachedContainerHeight = symbolRainContainer.offsetHeight; // Cache height here
-        columns = Math.floor(containerWidth / columnWidth);
-        console.log(`📏 Container dimensions: ${containerWidth}x${cachedContainerHeight}, Columns: ${columns}`);
+        columnCount = Math.floor(containerWidth / columnWidth);
+        console.log(`📏 Container dimensions: ${containerWidth}x${cachedContainerHeight}, Columns: ${columnCount}`);
     }
 
     // PERFORMANCE: Get symbol from pool or create new one
@@ -143,7 +143,7 @@ function initSymbolRain() {
         // Container handles all clicks via event delegation (see init section)
         symbolRainContainer.appendChild(symbol);
 
-        activeSymbols.push({
+        activeFallingSymbols.push({
             element: symbol,
             column: column,
             y: isInitialPopulation ? parseFloat(symbol.style.top) : -50,
@@ -152,7 +152,7 @@ function initSymbolRain() {
         });
 
         if (forcedSymbol) {
-            lastSpawnTime[forcedSymbol] = Date.now();
+            lastSymbolSpawnTimestamp[forcedSymbol] = Date.now();
         }
     }
 
@@ -169,12 +169,12 @@ function initSymbolRain() {
                 return;
             }
 
-            // Evenly distribute symbols across columns
-            const columnsToUse = Math.min(columns, SYMBOLS_PER_WAVE); // Don't exceed available columns
-            const columnStep = Math.floor(columns / columnsToUse);
+            // Evenly distribute symbols across columnCount
+            const columnsToUse = Math.min(columnCount, SYMBOLS_PER_WAVE); // Don't exceed available columnCount
+            const columnStep = Math.floor(columnCount / columnsToUse);
             
-            for (let i = 0; i < SYMBOLS_PER_WAVE && i < columns; i++) {
-                const column = (i * columnStep) % columns; // Evenly distribute
+            for (let i = 0; i < SYMBOLS_PER_WAVE && i < columnCount; i++) {
+                const column = (i * columnStep) % columnCount; // Evenly distribute
                 createFallingSymbol(column, true);
             }
 
@@ -213,7 +213,7 @@ function initSymbolRain() {
             if (symbolElement.parentNode) {
                 symbolElement.parentNode.removeChild(symbolElement);
             }
-            activeSymbols = activeSymbols.filter(s => s.element !== symbolElement);
+            activeFallingSymbols = activeFallingSymbols.filter(s => s.element !== symbolElement);
             // PERFORMANCE: Return element to pool for reuse
             returnSymbolToPool(symbolElement);
         }, 500);
@@ -330,8 +330,8 @@ function initSymbolRain() {
         const symbolsToRemove = new Set();
 
         // First pass: Check for symbols that are touching and mark them for removal
-        for (let i = 0; i < activeSymbols.length; i++) {
-            const symbolObj = activeSymbols[i];
+        for (let i = 0; i < activeFallingSymbols.length; i++) {
+            const symbolObj = activeFallingSymbols[i];
             
             // Skip if already marked for removal
             if (symbolsToRemove.has(symbolObj)) continue;
@@ -348,13 +348,13 @@ function initSymbolRain() {
 
         // PERFORMANCE: Swap-and-pop instead of filter() to reuse array and reduce GC pressure
         let writeIndex = 0;
-        for (let readIndex = 0; readIndex < activeSymbols.length; readIndex++) {
-            const symbolObj = activeSymbols[readIndex];
+        for (let readIndex = 0; readIndex < activeFallingSymbols.length; readIndex++) {
+            const symbolObj = activeFallingSymbols[readIndex];
 
             // Check if symbol should be removed (out of bounds or stuck at bottom)
             // Remove symbols more aggressively if they're near bottom and moving slowly
             const isOffScreen = symbolObj.y > containerHeight + 50;
-            const isStuckAtBottom = symbolObj.y > containerHeight - 100 && activeSymbols.length > 30; // Remove stuck symbols when screen is crowded
+            const isStuckAtBottom = symbolObj.y > containerHeight - 100 && activeFallingSymbols.length > 30; // Remove stuck symbols when screen is crowded
             const isTouching = symbolsToRemove.has(symbolObj); // SAFETY MECHANISM: Remove if touching
 
             if (isOffScreen || isStuckAtBottom || isTouching) {
@@ -375,15 +375,16 @@ function initSymbolRain() {
             }
 
             // Keep this symbol - copy to writeIndex
-            activeSymbols[writeIndex++] = symbolObj;
+            activeFallingSymbols[writeIndex++] = symbolObj;
         }
         // Trim array to new length (no reallocation!)
-        activeSymbols.length = writeIndex;
+        activeFallingSymbols.length = writeIndex;
 
         // PERFORMANCE: Helper to check if column is crowded (extract to avoid duplication)
-        function isColumnCrowded(col) {
-            for (let i = 0; i < activeSymbols.length; i++) {
-                if (activeSymbols[i].column === col && activeSymbols[i].y < 40) {
+        function isColumnCrowded(targetColumnIndex) {
+            for (let symbolIndex = 0; symbolIndex < activeFallingSymbols.length; symbolIndex++) {
+                const currentSymbol = activeFallingSymbols[symbolIndex];
+                if (currentSymbol.column === targetColumnIndex && currentSymbol.y < 40) {
                     return true;
                 }
             }
@@ -396,40 +397,40 @@ function initSymbolRain() {
         }
 
         // Normal random spawning - optimized to reduce array iterations
-        for (let col = 0; col < columns; col++) {
-            if (Math.random() < spawnRate && !isColumnCrowded(col)) {
+        for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+            if (Math.random() < spawnRate && !isColumnCrowded(columnIndex)) {
                 const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-                createFallingSymbol(col, false, randomSymbol);
+                createFallingSymbol(columnIndex, false, randomSymbol);
             }
         }
 
         // BURST SPAWNING: Occasionally spawn 2-3 symbols simultaneously in different columns
         if (Math.random() < burstSpawnRate) {
-            const burstCount = 2 + Math.floor(Math.random() * 2); // 2-3 symbols
+            const burstSymbolCount = 2 + Math.floor(Math.random() * 2); // 2-3 symbols
             
             // Find columns that aren't crowded - reuse helper function
-            const availableColumns = [];
-            for (let col = 0; col < columns; col++) {
-                if (!isColumnCrowded(col)) {
-                    availableColumns.push(col);
+            const availableColumnIndices = [];
+            for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+                if (!isColumnCrowded(columnIndex)) {
+                    availableColumnIndices.push(columnIndex);
                 }
             }
 
             // Spawn burst symbols in random available columns
-            for (let i = 0; i < burstCount && availableColumns.length > 0; i++) {
-                const randomIndex = Math.floor(Math.random() * availableColumns.length);
-                const col = availableColumns.splice(randomIndex, 1)[0]; // Remove selected column
+            for (let burstIndex = 0; burstIndex < burstSymbolCount && availableColumnIndices.length > 0; burstIndex++) {
+                const randomArrayIndex = Math.floor(Math.random() * availableColumnIndices.length);
+                const selectedColumnIndex = availableColumnIndices.splice(randomArrayIndex, 1)[0]; // Remove selected column
                 const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-                createFallingSymbol(col, false, randomSymbol);
+                createFallingSymbol(selectedColumnIndex, false, randomSymbol);
             }
         }
     }
 
     function startAnimation() {
-        if (animationRunning) return;
-        animationRunning = true;
+        if (isAnimationRunning) return;
+        isAnimationRunning = true;
         function loop() {
-            if (animationRunning) {
+            if (isAnimationRunning) {
                 animateSymbols();
                 requestAnimationFrame(loop);
             }
@@ -461,11 +462,11 @@ function initSymbolRain() {
     // PERFORMANCE: Check guaranteed spawns every 1 second instead of 60x per second
     function startGuaranteedSpawnController() {
         setInterval(() => {
-            const currentTime = Date.now();
-            symbols.forEach(sym => {
-                if (currentTime - lastSpawnTime[sym] > GUARANTEED_SPAWN_INTERVAL) {
-                    const randomColumn = Math.floor(Math.random() * columns);
-                    createFallingSymbol(randomColumn, false, sym);
+            const currentTimestamp = Date.now();
+            symbols.forEach(symbolChar => {
+                if (currentTimestamp - lastSymbolSpawnTimestamp[symbolChar] > GUARANTEED_SPAWN_INTERVAL_MS) {
+                    const randomColumnIndex = Math.floor(Math.random() * columnCount);
+                    createFallingSymbol(randomColumnIndex, false, symbolChar);
                 }
             });
         }, 1000); // Check once per second
@@ -476,41 +477,41 @@ function initSymbolRain() {
 
     // PERFORMANCE + TOUCH FIX: Use pointerdown for instant response (no 300ms delay)
     // Pointer Events API unifies mouse, touch, and pen input
-    let isPointerDown = false;
-    let lastClickedSymbol = null;
+    let isPointerCurrentlyDown = false;
+    let _lastClickedFallingSymbol = null; // Prefixed: tracked for potential future debugging
 
     symbolRainContainer.addEventListener('pointerdown', (event) => {
         // Prevent accidental double-handling
-        if (isPointerDown) return;
-        isPointerDown = true;
+        if (isPointerCurrentlyDown) return;
+        isPointerCurrentlyDown = true;
 
-        const symbol = event.target.closest('.falling-symbol');
-        if (symbol && symbolRainContainer.contains(symbol)) {
+        const fallingSymbolElement = event.target.closest('.falling-symbol');
+        if (fallingSymbolElement && symbolRainContainer.contains(fallingSymbolElement)) {
             // Prevent default to avoid click delay and text selection
             event.preventDefault();
-            lastClickedSymbol = symbol;
-            handleSymbolClick(symbol, event);
+            _lastClickedFallingSymbol = fallingSymbolElement;
+            handleSymbolClick(fallingSymbolElement, event);
         }
     }, { passive: false }); // Non-passive to allow preventDefault
 
     symbolRainContainer.addEventListener('pointerup', () => {
-        isPointerDown = false;
-        lastClickedSymbol = null;
+        isPointerCurrentlyDown = false;
+        _lastClickedFallingSymbol = null;
     });
 
     // Prevent pointer cancel from breaking the interaction
     symbolRainContainer.addEventListener('pointercancel', () => {
-        isPointerDown = false;
-        lastClickedSymbol = null;
+        isPointerCurrentlyDown = false;
+        _lastClickedFallingSymbol = null;
     });
 
     // Fallback for older browsers that don't support Pointer Events
     if (!window.PointerEvent) {
         console.warn('⚠️ Pointer Events not supported, falling back to click events');
         symbolRainContainer.addEventListener('click', (event) => {
-            const symbol = event.target.closest('.falling-symbol');
-            if (symbol && symbolRainContainer.contains(symbol)) {
-                handleSymbolClick(symbol, event);
+            const fallingSymbolElement = event.target.closest('.falling-symbol');
+            if (fallingSymbolElement && symbolRainContainer.contains(fallingSymbolElement)) {
+                handleSymbolClick(fallingSymbolElement, event);
             }
         });
     }
@@ -542,7 +543,7 @@ function initSymbolRain() {
     // PERFORMANCE: Debounced resize handler (250ms delay prevents excessive recalculation)
     // Use shared debounce utility from utils.js
     const debouncedResize = window.debounce(() => {
-        console.log('🔄 Window resized, recalculating columns...');
+        console.log('🔄 Window resized, recalculating columnCount...');
         isMobileMode = window.innerWidth <= 768 || document.body.classList.contains('res-mobile');
         console.log(`📱 Mobile mode: ${isMobileMode}`);
         calculateColumns();
@@ -558,7 +559,7 @@ function initSymbolRain() {
     });
     // Expose symbol count for performance monitoring
     window.getActiveSymbolCount = function () {
-        return activeSymbols.length;
+        return activeFallingSymbols.length;
     };
 }
 
