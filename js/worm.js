@@ -1,5 +1,5 @@
 // js/worm.js - Enhanced Worm System with Crawling Behavior
-console.log("🐛 Worm System Loading...");
+Logger.debug("🐛", "Worm System Loading...");
 
 // ========================================
 // WORM SYSTEM CLASS (Refactored)
@@ -60,7 +60,7 @@ class WormSystem {
 
         this.additionalWormsPerRow = 0; // No additional escalation (already scaled by difficulty)
 
-        console.log(`🎮 Difficulty: ${currentLevel.toUpperCase()} - ${this.wormsPerRow} worms/row, ${this.difficultySpeedMultiplier}x speed, ${this.difficultyRoamTimeBorder}ms roam`);
+        Logger.info(`🎮`, `Difficulty: ${currentLevel.toUpperCase()} - ${this.wormsPerRow} worms/row, ${this.difficultySpeedMultiplier}x speed, ${this.difficultyRoamTimeBorder}ms roam`);
 
         // POWER-UP SYSTEM
         this.powerUps = {
