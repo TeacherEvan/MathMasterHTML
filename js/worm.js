@@ -25,6 +25,9 @@ class WormSystem {
         // ROW COMPLETION TRACKING
         this.rowsCompleted = 0; // Track number of rows completed in current problem
 
+        // CONSOLE SLOT TRACKING
+        this.lockedConsoleSlots = new Set(); // Track which console slots are locked by active worms
+
         // DIFFICULTY SCALING: Get current level from URL
         const urlParams = new URLSearchParams(window.location.search);
         const currentLevel = urlParams.get('level') || 'beginner';
@@ -505,9 +508,6 @@ class WormSystem {
 
         // Handle console slot locking if applicable
         if (fromConsole && consoleSlotIndex !== null && consoleSlotElement) {
-            if (!this.lockedConsoleSlots) {
-                this.lockedConsoleSlots = new Set();
-            }
             this.lockedConsoleSlots.add(consoleSlotIndex);
             consoleSlotElement.classList.add('worm-spawning', 'locked');
         }
