@@ -1,5 +1,5 @@
 // js/worm.js - Enhanced Worm System with Crawling Behavior
-console.log("🐛 Worm System Loading...");
+Logger.debug("🐛", "Worm System Loading...");
 
 // ========================================
 // WORM SYSTEM CLASS (Refactored)
@@ -24,6 +24,9 @@ class WormSystem {
 
         // ROW COMPLETION TRACKING
         this.rowsCompleted = 0; // Track number of rows completed in current problem
+
+        // CONSOLE SLOT TRACKING
+        this.lockedConsoleSlots = new Set(); // Track which console slots are locked by active worms
 
         // DIFFICULTY SCALING: Get current level from URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -60,7 +63,7 @@ class WormSystem {
 
         this.additionalWormsPerRow = 0; // No additional escalation (already scaled by difficulty)
 
-        console.log(`🎮 Difficulty: ${currentLevel.toUpperCase()} - ${this.wormsPerRow} worms/row, ${this.difficultySpeedMultiplier}x speed, ${this.difficultyRoamTimeBorder}ms roam`);
+        Logger.info(`🎮`, `Difficulty: ${currentLevel.toUpperCase()} - ${this.wormsPerRow} worms/row, ${this.difficultySpeedMultiplier}x speed, ${this.difficultyRoamTimeBorder}ms roam`);
 
         // POWER-UP SYSTEM
         this.powerUps = {
@@ -456,20 +459,83 @@ class WormSystem {
     // SPAWN MANAGEMENT
     // ========================================
 
-    // Spawn worm from console slot with slide-open animation
-    spawnWormFromConsole() {
-        this.initialize();
+    // REFACTORED: Unified spawn helper to eliminate duplication
+    // All spawn methods follow the same pattern with different spawn configs
+    _spawnWormWithConfig(config) {
+        const {
+            logMessage,
+            position,
+            wormIdPrefix = 'worm',
+            classNames = [],
+            baseSpeed,
+            roamDuration,
+            fromConsole = false,
+            consoleSlotIndex = null,
+            consoleSlotElement = null
+        } = config;
 
-        console.log(`🐛 spawnWormFromConsole() called. Current worms: ${this.worms.length}/${this.maxWorms}`);
+        this.initialize();
+        Logger.debug("🐛", logMessage);
 
         if (!this.spawnManager.canSpawn(this.worms.length)) {
-            return;
+            return null;
         }
 
+        // Create worm element
+        const wormId = generateUniqueId(wormIdPrefix);
+        const wormElement = this.factory.createWormElement({
+            id: wormId,
+            classNames,
+            segmentCount: this.WORM_SEGMENT_COUNT,
+            x: position.x,
+            y: position.y
+        });
+
+        this.crossPanelContainer.appendChild(wormElement);
+
+        // Create worm data
+        const wormData = this.factory.createWormData({
+            id: wormId,
+            element: wormElement,
+            x: position.x,
+            y: position.y,
+            baseSpeed,
+            roamDuration,
+            fromConsole,
+            consoleSlotIndex,
+            consoleSlotElement
+        });
+
+        // Handle console slot locking if applicable
+        if (fromConsole && consoleSlotIndex !== null && consoleSlotElement) {
+            this.lockedConsoleSlots.add(consoleSlotIndex);
+            consoleSlotElement.classList.add('worm-spawning', 'locked');
+        }
+
+        this.worms.push(wormData);
+
+        // Add click handler
+        wormElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.handleWormClick(wormData);
+        });
+
+        Logger.debug("✅", `Worm ${wormId} spawned at (${position.x.toFixed(0)}, ${position.y.toFixed(0)}). Total worms: ${this.worms.length}`);
+
+        // Start animation loop if not already running
+        if (this.worms.length === 1) {
+            this.animate();
+        }
+
+        return wormData;
+    }
+
+    // Spawn worm from console slot with slide-open animation
+    spawnWormFromConsole() {
         // Find empty console slot
         const slotData = this.findEmptyConsoleSlot();
         if (!slotData) {
-            console.log('⚠️ All console slots occupied or locked, spawning worm normally');
+            Logger.warn('⚠️', 'All console slots occupied or locked, spawning worm normally');
             this.spawnWorm(); // Fallback to normal spawn
             return;
         }
@@ -478,160 +544,56 @@ class WormSystem {
 
         // Get slot position for worm spawn point (viewport coordinates)
         const slotRect = slotElement.getBoundingClientRect();
-        const startX = slotRect.left + (slotRect.width / 2);
-        const startY = slotRect.top + (slotRect.height / 2);
+        const position = {
+            x: slotRect.left + (slotRect.width / 2),
+            y: slotRect.top + (slotRect.height / 2)
+        };
 
-        // REFACTORED: Use factory module for worm creation
-        const wormId = generateUniqueId('worm');
-        const wormElement = this.factory.createWormElement({
-            id: wormId,
+        // Use unified spawn helper
+        return this._spawnWormWithConfig({
+            logMessage: `🐛 spawnWormFromConsole() called. Current worms: ${this.worms.length}/${this.maxWorms}`,
+            position,
+            wormIdPrefix: 'worm',
             classNames: ['console-worm'],
-            segmentCount: this.WORM_SEGMENT_COUNT,
-            x: startX,
-            y: startY
-        });
-
-        this.crossPanelContainer.appendChild(wormElement);
-
-        // REFACTORED: Use factory module for worm data
-        const wormData = this.factory.createWormData({
-            id: wormId,
-            element: wormElement,
-            x: startX,
-            y: startY,
             baseSpeed: this.SPEED_CONSOLE_WORM,
             roamDuration: this.difficultyRoamTimeConsole,
             fromConsole: true,
             consoleSlotIndex: slotIndex,
             consoleSlotElement: slotElement
         });
-
-        // Track console slot locking
-        if (!this.lockedConsoleSlots) {
-            this.lockedConsoleSlots = new Set();
-        }
-        this.lockedConsoleSlots.add(slotIndex);
-        slotElement.classList.add('worm-spawning', 'locked');
-
-        this.worms.push(wormData);
-
-        // Add click handler
-        wormElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.handleWormClick(wormData);
-        });
-
-        console.log(`✅ Worm ${wormId} spawned at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`);
-
-        // Start animation loop if not already running
-        if (this.worms.length === 1) {
-            this.animate();
-        }
     }
 
     // Fallback spawn method for when console slots are all occupied
     spawnWorm() {
-        this.initialize();
-
-        console.log(`🐛 spawnWorm() called (fallback). Current worms: ${this.worms.length}/${this.maxWorms}`);
-
-        if (!this.spawnManager.canSpawn(this.worms.length)) {
-            return;
-        }
-
-        // REFACTORED: Use factory module for position calculation
         const position = this.factory.calculateFallbackSpawnPosition();
 
-        // REFACTORED: Use factory module for worm creation
-        const wormId = generateUniqueId('worm');
-        const wormElement = this.factory.createWormElement({
-            id: wormId,
+        // Use unified spawn helper
+        return this._spawnWormWithConfig({
+            logMessage: `🐛 spawnWorm() called (fallback). Current worms: ${this.worms.length}/${this.maxWorms}`,
+            position,
+            wormIdPrefix: 'worm',
             classNames: [],
-            segmentCount: this.WORM_SEGMENT_COUNT,
-            x: position.x,
-            y: position.y
-        });
-
-        this.crossPanelContainer.appendChild(wormElement);
-
-        // REFACTORED: Use factory module for worm data
-        const wormData = this.factory.createWormData({
-            id: wormId,
-            element: wormElement,
-            x: position.x,
-            y: position.y,
             baseSpeed: this.SPEED_FALLBACK_WORM,
             roamDuration: this.difficultyRoamTimeConsole,
             fromConsole: false
         });
-
-        this.worms.push(wormData);
-
-        // Add click handler
-        wormElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.handleWormClick(wormData);
-        });
-
-        console.log(`✅ Worm ${wormId} spawned (fallback mode). Total worms: ${this.worms.length}`);
-
-        // Start animation loop if not already running
-        if (this.worms.length === 1) {
-            this.animate();
-        }
     }
 
     // Spawn worm from border (bottom or sides) - used for row completion
     spawnWormFromBorder(data = {}) {
-        this.initialize();
-
         const { index = 0, total = 1 } = data;
-        console.log(`🐛 spawnWormFromBorder() called. Worm ${index + 1}/${total}. Current worms: ${this.worms.length}/${this.maxWorms}`);
-
-        if (!this.spawnManager.canSpawn(this.worms.length)) {
-            return;
-        }
-
-        // REFACTORED: Use factory module for border position calculation
         const position = this.factory.calculateBorderSpawnPosition(index, total, this.BORDER_MARGIN);
 
-        // REFACTORED: Use factory module for worm creation
-        const wormId = generateUniqueId('border-worm');
-        const wormElement = this.factory.createWormElement({
-            id: wormId,
+        // Use unified spawn helper
+        return this._spawnWormWithConfig({
+            logMessage: `🐛 spawnWormFromBorder() called. Worm ${index + 1}/${total}. Current worms: ${this.worms.length}/${this.maxWorms}`,
+            position,
+            wormIdPrefix: 'border-worm',
             classNames: [],
-            segmentCount: this.WORM_SEGMENT_COUNT,
-            x: position.x,
-            y: position.y
-        });
-
-        this.crossPanelContainer.appendChild(wormElement);
-
-        // REFACTORED: Use factory module for worm data
-        const wormData = this.factory.createWormData({
-            id: wormId,
-            element: wormElement,
-            x: position.x,
-            y: position.y,
             baseSpeed: this.SPEED_BORDER_WORM,
             roamDuration: this.difficultyRoamTimeBorder,
             fromConsole: false
         });
-
-        this.worms.push(wormData);
-
-        // Add click handler
-        wormElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.handleWormClick(wormData);
-        });
-
-        console.log(`✅ Border worm ${wormId} spawned at (${position.x.toFixed(0)}, ${position.y.toFixed(0)}). Total worms: ${this.worms.length}`);
-
-        // Start animation loop if not already running
-        if (this.worms.length === 1) {
-            this.animate();
-        }
     }
 
     // PURPLE WORM: Spawn purple worm triggered by 2+ wrong answers
