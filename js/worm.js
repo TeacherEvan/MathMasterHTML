@@ -472,7 +472,7 @@ class WormSystem {
         } = config;
 
         this.initialize();
-        console.log(logMessage);
+        Logger.debug("🐛", logMessage);
 
         if (!this.spawnManager.canSpawn(this.worms.length)) {
             return null;
@@ -520,7 +520,7 @@ class WormSystem {
             this.handleWormClick(wormData);
         });
 
-        console.log(`✅ Worm ${wormId} spawned at (${position.x.toFixed(0)}, ${position.y.toFixed(0)}). Total worms: ${this.worms.length}`);
+        Logger.debug("✅", `Worm ${wormId} spawned at (${position.x.toFixed(0)}, ${position.y.toFixed(0)}). Total worms: ${this.worms.length}`);
 
         // Start animation loop if not already running
         if (this.worms.length === 1) {
@@ -535,7 +535,7 @@ class WormSystem {
         // Find empty console slot
         const slotData = this.findEmptyConsoleSlot();
         if (!slotData) {
-            console.log('⚠️ All console slots occupied or locked, spawning worm normally');
+            Logger.warn('⚠️', 'All console slots occupied or locked, spawning worm normally');
             this.spawnWorm(); // Fallback to normal spawn
             return;
         }
