@@ -1,0 +1,76 @@
+{
+  "name": "Math Master - Unlock Your Mind",
+  "short_name": "Math Master",
+  "description": "An educational algebra game with Matrix-themed interface where players solve equations by clicking falling symbols",
+  "start_url": "/",
+  "display": "fullscreen",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "landscape",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/Images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "education",
+    "games"
+  ],
+  "screenshots": [
+    {
+      "src": "/Images/Gameplay1.jpg",
+      "sizes": "1920x1080",
+      "type": "image/jpeg",
+      "label": "Game interface showing three panels"
+    },
+    {
+      "src": "/Images/Welcome%20screen.jpg",
+      "sizes": "1920x1080",
+      "type": "image/jpeg",
+      "label": "Welcome screen with Matrix animation"
+    },
+    {
+      "src": "/Images/Level%20select.jpg",
+      "sizes": "1920x1080",
+      "type": "image/jpeg",
+      "label": "Level selection screen"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Play Beginner",
+      "short_name": "Beginner",
+      "description": "Start beginner level",
+      "url": "/game.html?level=beginner",
+      "icons": [{ "src": "/Images/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Play Warrior",
+      "short_name": "Warrior",
+      "description": "Start warrior level",
+      "url": "/game.html?level=warrior",
+      "icons": [{ "src": "/Images/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Play Master",
+      "short_name": "Master",
+      "description": "Start master level",
+      "url": "/game.html?level=master",
+      "icons": [{ "src": "/Images/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "lang": "en-US",
+  "dir": "ltr"
+}
