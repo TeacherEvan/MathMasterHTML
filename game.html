@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="css/worm-base.css">
     <link rel="stylesheet" href="css/worm-effects.css">
     <link rel="stylesheet" href="css/lock-responsive.css?v=20251007-mobile-fix">
+    <link rel="stylesheet" href="css/modern-ux-enhancements.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         #back-button {
@@ -28,25 +29,33 @@
             bottom: 20px;
             left: 20px;
             z-index: 100;
-            background: linear-gradient(145deg, #333, #111);
-            border: 2px solid #888;
+            background: linear-gradient(145deg, rgba(0, 50, 0, 0.8), rgba(0, 20, 0, 0.9));
+            border: 2px solid #00ff00;
             border-radius: 25px;
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-family: 'Orbitron', monospace;
             font-weight: 700;
             font-size: 14px;
-            color: #ccc;
+            color: #00ff00;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-transform: uppercase;
             letter-spacing: 1px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            will-change: transform, box-shadow;
         }
 
         #back-button:hover {
-            border-color: #00ff00;
-            color: #00ff00;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
-            transform: scale(1.05);
+            border-color: #00ff99;
+            color: #00ff99;
+            box-shadow: 0 6px 12px rgba(0, 255, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        #back-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 255, 0, 0.2);
         }
 
         /* Game container layout */
@@ -139,7 +148,7 @@
         <div class="rotate-text">Please rotate your device to landscape mode</div>
     </div>
 
-    <button id="back-button" onclick="goBack()">← Back</button>
+    <button id="back-button" onclick="goBack()" data-ripple aria-label="Go back to level selection">← Back</button>
 
     <!-- Main Game Container -->
     <div class="grid-container">
@@ -153,8 +162,8 @@
 
         <!-- Panel B: Solution and Worms -->
         <div id="panel-b" class="display-panel">
-            <button id="help-button">HELP</button>
-            <div id="solution-container"></div>
+            <button id="help-button" data-ripple aria-label="Get help with current problem">HELP</button>
+            <div id="solution-container" class="custom-scrollbar"></div>
             <div id="worm-container"></div>
             <!-- Symbol Console (moved from Panel A) -->
             <div id="symbol-console">
@@ -221,6 +230,10 @@
     <!-- Core utilities and constants -->
     <script src="js/utils.js"></script>
     <script src="js/constants.js"></script>
+    <!-- UX Enhancements - Load early for toast/loading features -->
+    <script src="js/ux-enhancements.js"></script>
+    <!-- Lazy loading for components -->
+    <script src="js/lazy-component-loader.js"></script>
     <!-- Display and monitoring -->
     <script src="js/display-manager.js?v=20251007-mobile-fix"></script>
     <script src="js/performance-monitor.js"></script>
