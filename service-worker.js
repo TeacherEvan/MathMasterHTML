@@ -155,9 +155,13 @@ async function networkFirst(request) {
             const cache = await caches.open(RUNTIME_CACHE);
             
             // Check if this URL matches lazy cache patterns
-            const shouldCache = LAZY_CACHE_PATTERNS.some(pattern => 
-                pattern.test(request.url)
-            );
+            let shouldCache = false;
+            for (const pattern of LAZY_CACHE_PATTERNS) {
+                if (pattern.test(request.url)) {
+                    shouldCache = true;
+                    break;
+                }
+            }
             
             if (shouldCache) {
                 console.log('[ServiceWorker] Caching new resource:', request.url);
@@ -240,7 +244,7 @@ function fallbackResponse(request) {
             </head>
             <body>
                 <div class="offline-container">
-                    <h1>📡 You're Offline</h1>
+                    <h1>You're Offline</h1>
                     <p>Math Master requires an internet connection for this page.</p>
                     <button onclick="location.reload()">Try Again</button>
                 </div>
@@ -299,8 +303,12 @@ self.addEventListener('sync', (event) => {
 });
 
 async function syncGameplayData() {
-    // TODO: Implement gameplay data sync when backend is added
-    console.log('[ServiceWorker] Syncing gameplay data...');
+    // Gameplay data sync will be implemented when backend API is available
+    // Planned features:
+    // - Sync progress across devices
+    // - Save high scores to cloud
+    // - Track problem completion stats
+    console.log('[ServiceWorker] Gameplay data sync queued for backend integration');
 }
 
 // ============================================

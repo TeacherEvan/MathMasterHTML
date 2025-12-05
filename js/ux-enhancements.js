@@ -11,8 +11,6 @@ class ToastNotificationManager {
     constructor() {
         this.toastContainer = this.createToastContainer();
         this.activeToasts = new Set();
-        this.toastQueue = [];
-        this.isProcessing = false;
     }
 
     createToastContainer() {

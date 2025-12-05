@@ -135,11 +135,18 @@
    ============================================ */
 
 .modal-backdrop-blur {
+    /* Fallback for browsers without backdrop-filter support */
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    background: rgba(0, 0, 0, 0.7);
     animation: backdrop-fade-in 0.3s ease-out;
     will-change: backdrop-filter, opacity;
+}
+
+@supports (backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px)) {
+    .modal-backdrop-blur {
+        background: rgba(0, 0, 0, 0.7);
+    }
 }
 
 @keyframes backdrop-fade-in {

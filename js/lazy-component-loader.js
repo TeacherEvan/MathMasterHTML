@@ -113,6 +113,24 @@ class LazyComponentLoader {
     }
 
     /**
+     * Get lock component filename for a given level
+     * Handles inconsistent naming convention (line-1 vs Line-5)
+     * @param {number} level - Lock level (1-6)
+     * @returns {string} - Filename
+     */
+    getLockComponentFilename(level) {
+        const filenameMap = {
+            1: 'Line-1-transformer.html',
+            2: 'line-2-transformer.html',
+            3: 'line-3-transformer.html',
+            4: 'line-4-transformer.html',
+            5: 'Line-5-transformer.html',
+            6: 'line-6-transformer.html'
+        };
+        return filenameMap[level] || `line-${level}-transformer.html`;
+    }
+
+    /**
      * Preload next N lock components based on current level
      * @param {number} currentLevel - Current lock level
      * @param {number} lookahead - Number of levels to preload ahead
@@ -124,10 +142,7 @@ class LazyComponentLoader {
         for (let i = 1; i <= lookahead; i++) {
             const nextLevel = currentLevel + i;
             if (nextLevel <= maxLevel) {
-                // Handle inconsistent naming (line-1 vs Line-5)
-                const fileName = nextLevel === 1 || nextLevel === 2 || nextLevel === 3 || nextLevel === 4 || nextLevel === 6
-                    ? `line-${nextLevel}-transformer.html`
-                    : `Line-${nextLevel}-transformer.html`;
+                const fileName = this.getLockComponentFilename(nextLevel);
                 componentPaths.push(`lock-components/${fileName}`);
             }
         }
@@ -208,10 +223,8 @@ class LazyLockManager {
         }
 
         try {
-            // Determine component path (handle naming inconsistencies)
-            const fileName = level === 1 || level === 2 || level === 3 || level === 4 || level === 6
-                ? `line-${level}-transformer.html`
-                : `Line-${level}-transformer.html`;
+            // Determine component path using shared utility
+            const fileName = this.componentLoader.getLockComponentFilename(level);
             const componentPath = `lock-components/${fileName}`;
 
             // Load component
