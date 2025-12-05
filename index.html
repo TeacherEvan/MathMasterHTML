@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Math Master - An educational algebra game with Matrix-themed interface. Unlock your mind through interactive problem-solving.">
     <meta name="theme-color" content="#000000">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="/Images/icon-192.png">
+    
     <title>Math Master - Unlock Your Mind</title>
     
     <!-- Preload critical resources -->
@@ -601,5 +608,8 @@
             }
         });
     </script>
+    
+    <!-- Service Worker Registration -->
+    <script src="js/service-worker-register.js"></script>
 </body>
 </html> 
