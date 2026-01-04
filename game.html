@@ -4,13 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Play Math Master - Solve algebra equations by clicking falling symbols in this Matrix-themed educational game.">
+    <meta name="description"
+        content="Play Math Master - Solve algebra equations by clicking falling symbols in this Matrix-themed educational game.">
     <meta name="theme-color" content="#000000">
-    
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/Images/icon-192.png">
-    
+
     <title>Math Master - Unlock Your Mind - Game</title>
 
     <!-- Preload critical resources -->
@@ -27,6 +28,7 @@
     <link rel="stylesheet" href="css/console.css">
     <link rel="stylesheet" href="css/worm-base.css">
     <link rel="stylesheet" href="css/worm-effects.css">
+    <link rel="stylesheet" href="css/score-timer.css">
     <link rel="stylesheet" href="css/lock-responsive.css?v=20251007-mobile-fix">
     <link rel="stylesheet" href="css/modern-ux-enhancements.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
@@ -157,6 +159,18 @@
 
     <button id="back-button" onclick="goBack()" data-ripple aria-label="Go back to level selection">← Back</button>
 
+    <!-- Score + Timer HUD -->
+    <div id="game-hud" class="game-hud" aria-label="Game HUD">
+        <div id="score-display" class="hud-block score-display">
+            <div class="hud-label">SCORE</div>
+            <div id="score-value" class="hud-value">1000</div>
+        </div>
+        <div id="timer-display" class="hud-block timer-display timer-pulse-slow">
+            <div class="hud-label">TIME</div>
+            <div id="timer-value" class="hud-value">60</div>
+        </div>
+    </div>
+
     <!-- Main Game Container -->
     <div class="grid-container">
         <!-- Panel A: Lock and Problem -->
@@ -170,6 +184,8 @@
         <!-- Panel B: Solution and Worms -->
         <div id="panel-b" class="display-panel">
             <button id="help-button" data-ripple aria-label="Get help with current problem">HELP</button>
+            <button id="clarify-button" data-ripple
+                aria-label="Ask for clarifications about ambiguous problem aspects">CLARIFY</button>
             <div id="solution-container" class="custom-scrollbar"></div>
             <div id="worm-container"></div>
             <!-- Symbol Console (moved from Panel A) -->
@@ -259,6 +275,9 @@
     <script src="js/lock-responsive.js"></script>
     <script src="js/lock-manager.js?v=20251007-mobile-fix"></script>
     <script src="js/console-manager.js"></script>
+    <!-- Timer + scoring + persistence -->
+    <script src="js/player-storage.js"></script>
+    <script src="js/score-timer-manager.js"></script>
     <!-- Main game logic -->
     <script src="js/game.js"></script>
     <script>
@@ -305,7 +324,7 @@
             enterFullscreen();
         });
     </script>
-    
+
     <!-- Service Worker Registration -->
     <script src="js/service-worker-register.js"></script>
 

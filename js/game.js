@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const solutionContainer = document.getElementById("solution-container");
   const lockDisplay = document.getElementById("lock-display");
   const helpButton = document.getElementById("help-button");
+  const clarifyButton = document.getElementById("clarify-button");
 
   // Parse URL parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -14,6 +15,14 @@ document.addEventListener("DOMContentLoaded", () => {
     urlParams.get("lockComponent") || "level-1-transformer.html";
 
   console.log(`🎮 Loading level: ${level}, Lock component: ${lockComponent}`);
+
+  // Init persistence + timer/score HUD
+  if (window.PlayerStorage) {
+    window.PlayerStorage.init();
+  }
+  if (window.ScoreTimerManager) {
+    window.ScoreTimerManager.init({ level });
+  }
 
   // Apply level theme to body
   document.body.className = `level-${level}`;
@@ -188,9 +197,46 @@ document.addEventListener("DOMContentLoaded", () => {
     // Setup the step-by-step solution display
     setupStepDisplay();
 
+    // Start (or restart) the 60s step timer + score for this new problem
+    if (window.ScoreTimerManager) {
+      window.ScoreTimerManager.onProblemStarted();
+    }
+
     console.log(
       `📝 Problem setup complete with ${currentProblem.steps.length} solution steps`
     );
+  }
+
+  // Investigative clarification prompt (minimal UI)
+  if (clarifyButton) {
+    clarifyButton.addEventListener("click", () => {
+      const question = window.prompt(
+        "What is unclear or ambiguous? Ask a clarification question:",
+        ""
+      );
+
+      if (!question || question.trim().length === 0) return;
+
+      const problemText = currentProblem?.problem || "(no problem loaded)";
+      const stepText =
+        currentProblem?.steps?.[currentSolutionStepIndex] || "(no step loaded)";
+
+      const responseLines = [
+        "Clarification checklist (investigation):",
+        "1) Define the goal: what must be solved for?",
+        "2) Define variables/meaning (e.g., what does x represent?).",
+        "3) State constraints: integers/reals? domain restrictions?",
+        "4) Confirm operations: × vs x, ÷ vs /, and order of operations.",
+        "5) Identify ambiguity: missing parentheses? implied multiplication?",
+        "",
+        `Your question: ${question.trim()}`,
+        "",
+        `Current problem: ${problemText}`,
+        `Current step (window B): ${stepText}`,
+      ];
+
+      window.alert(responseLines.join("\n"));
+    });
   }
 
   function setupStepDisplay() {
@@ -362,10 +408,10 @@ document.addEventListener("DOMContentLoaded", () => {
       level: "normal",
       screenEffect: null,
     };
-    if (typeof ComboSystem !== "undefined") {
-      comboFeedback = ComboSystem.hit();
+    if (window.ComboSystem) {
+      comboFeedback = window.ComboSystem.hit();
       console.log(
-        `🔥 Combo: ${ComboSystem.getCombo()}x (${comboFeedback.level})`
+        `🔥 Combo: ${window.ComboSystem.getCombo()}x (${comboFeedback.level})`
       );
     }
 
@@ -403,8 +449,8 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("❌ Incorrect symbol clicked!");
 
     // COMBO SYSTEM: Break combo on wrong answer
-    if (typeof ComboSystem !== "undefined") {
-      ComboSystem.break();
+    if (window.ComboSystem) {
+      window.ComboSystem.break();
     }
 
     // PURPLE WORM: Increment wrong answer counter
@@ -456,6 +502,9 @@ document.addEventListener("DOMContentLoaded", () => {
           detail: {
             lineNumber: currentSolutionStepIndex + 1,
             lineText: currentProblem.steps[currentSolutionStepIndex],
+            totalLines: currentProblem.steps.length,
+            isLastStep:
+              currentSolutionStepIndex >= currentProblem.steps.length - 1,
           },
         })
       );
