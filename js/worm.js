@@ -461,6 +461,21 @@ class WormSystem {
     // PERFORMANCE: Setup event listeners once
     this.setupEventListeners();
 
+    // POWER-UP SYSTEM (Two-click UI): initialize extracted module if available
+    if (!this.powerUpSystem && window.WormPowerUpSystem) {
+      try {
+        this.powerUpSystem = new window.WormPowerUpSystem(this);
+
+        // Keep inventories in sync with the WormSystem's existing counters
+        this.powerUpSystem.inventory = this.powerUps;
+        this.powerUpSystem.chainLightningKillCount =
+          this.chainLightningKillCount;
+        this.powerUpSystem.updateDisplay();
+      } catch (e) {
+        console.warn("⚠️ Failed to initialize WormPowerUpSystem:", e);
+      }
+    }
+
     this.isInitialized = true;
     console.log("✅ Worm System initialized successfully");
   }

@@ -48,8 +48,13 @@ console.log("⏱️ ScoreTimerManager loading...");
     _stepDurationMs: 60000,
     _scoreAtStepStart: 1000,
 
-    _currentProblemScore: 1000,
+    // Banked total for the current problem ("level" == entire problem)
+    _bankedProblemScore: 0,
+    // Live step score counts down from 1000 -> 0 each step
+    _currentStepScore: 1000,
     _paused: false,
+    _gameStarted: false,
+    _zeroLocked: false,
 
     init({ level } = {}) {
       // Pull config from GameConstants if present
@@ -65,14 +70,15 @@ console.log("⏱️ ScoreTimerManager loading...");
       }
 
       this._stepDurationMs = this._cfg.stepDurationSeconds * 1000;
-      this._currentProblemScore = this._cfg.initialScore;
-      this._scoreAtStepStart = this._currentProblemScore;
+      this._bankedProblemScore = 0;
+      this._currentStepScore = this._cfg.initialScore;
+      this._scoreAtStepStart = this._cfg.initialScore;
 
       this._timerValueEl = document.getElementById("timer-value");
       this._timerDisplayEl = document.getElementById("timer-display");
       this._scoreValueEl = document.getElementById("score-value");
 
-      this._setDisplayedScore(this._currentProblemScore);
+      this._setDisplayedScore(this.getDisplayedScore());
       this._setDisplayedTime(this._cfg.stepDurationSeconds);
       this._applyPhaseStyles(this._cfg.stepDurationSeconds);
 
@@ -89,10 +95,29 @@ console.log("⏱️ ScoreTimerManager loading...");
     },
 
     onProblemStarted() {
-      this._currentProblemScore = this._cfg.initialScore;
+      this._bankedProblemScore = 0;
+      this._currentStepScore = this._cfg.initialScore;
+      this._zeroLocked = false;
       this._paused = false;
-      this.startStep();
-      this._setDisplayedScore(this._currentProblemScore);
+      this._setDisplayedScore(this.getDisplayedScore());
+
+      if (this._gameStarted) {
+        this.startStep();
+      } else {
+        // Don't burn time behind the How-To-Play modal
+        this._setDisplayedTime(this._cfg.stepDurationSeconds);
+        this._applyPhaseStyles(this._cfg.stepDurationSeconds);
+      }
+    },
+
+    setGameStarted() {
+      console.log("⏱️ setGameStarted() called - already started:", this._gameStarted, "_paused:", this._paused);
+      if (this._gameStarted) return;
+      this._gameStarted = true;
+      if (!this._paused) {
+        console.log("⏱️ setGameStarted() calling startStep()");
+        this.startStep();
+      }
     },
 
     onProblemCompleted(levelKey) {
@@ -108,7 +133,7 @@ console.log("⏱️ ScoreTimerManager loading...");
               (typeof getLevelFromURL === "function"
                 ? getLevelFromURL()
                 : "beginner"),
-            this._currentProblemScore
+            this.getDisplayedScore()
           );
           console.log("💾 Saved score:", { name, levelKey, level });
         } catch (e) {
@@ -118,19 +143,28 @@ console.log("⏱️ ScoreTimerManager loading...");
     },
 
     startStep() {
+      console.log("⏱️ startStep() called - _paused:", this._paused, "_zeroLocked:", this._zeroLocked);
+      if (this._paused || this._zeroLocked) {
+        console.log("⏱️ startStep() returning early due to paused/zeroLocked");
+        return;
+      }
+
       this._stepStartMs = Date.now();
-      this._scoreAtStepStart = this._currentProblemScore;
+      this._scoreAtStepStart = this._cfg.initialScore;
 
       this._clearInterval();
 
+      const self = this;
       const tick = () => {
-        this._update();
+        self._update();
       };
 
       if (window.ResourceManager) {
         this._intervalId = ResourceManager.setInterval(tick, 100);
+        console.log("⏱️ Interval created via ResourceManager, ID:", this._intervalId);
       } else {
         this._intervalId = setInterval(tick, 100);
+        console.log("⏱️ Interval created via native setInterval, ID:", this._intervalId);
       }
 
       this._update();
@@ -151,12 +185,18 @@ console.log("⏱️ ScoreTimerManager loading...");
     },
 
     completeStep(detail) {
-      // Lock current score (already clamped) and add bonus to form new total
-      const locked = Math.max(0, Math.round(this._currentProblemScore));
-      this._currentProblemScore = locked + this._cfg.stepBonus;
+      if (this._zeroLocked) {
+        this._setDisplayedScore(0);
+        return;
+      }
 
-      // Always reflect the locked+bonus score immediately
-      this._setDisplayedScore(this._currentProblemScore);
+      // Lock current step score and add bonus to banked problem total
+      const lockedStep = Math.max(0, Math.round(this._currentStepScore));
+      this._bankedProblemScore += lockedStep + this._cfg.stepBonus;
+      this._currentStepScore = this._cfg.initialScore;
+
+      // Reflect new total immediately
+      this._setDisplayedScore(this.getDisplayedScore());
 
       const isLastStep = Boolean(detail?.isLastStep);
       if (isLastStep) {
@@ -164,6 +204,7 @@ console.log("⏱️ ScoreTimerManager loading...");
         // Do NOT start a new countdown; keep score locked until next problem.
         this._paused = true;
         this._clearInterval();
+        this._setDisplayedTime(0);
       } else {
         // Immediately begin decrementing again for the next step
         this.startStep();
@@ -182,9 +223,9 @@ console.log("⏱️ ScoreTimerManager loading...");
       document.dispatchEvent(
         new CustomEvent("scoreLocked", {
           detail: {
-            lockedScore: locked,
+            lockedScore: lockedStep,
             bonusAdded: this._cfg.stepBonus,
-            newScore: this._currentProblemScore,
+            newScore: this.getDisplayedScore(),
             isLastStep,
           },
         })
@@ -197,25 +238,46 @@ console.log("⏱️ ScoreTimerManager loading...");
     },
 
     _update() {
+      if (this._paused || this._zeroLocked) {
+        console.log("⏱️ _update() returning early - _paused:", this._paused, "_zeroLocked:", this._zeroLocked);
+        return;
+      }
+
       const remainingMs = this._getRemainingMs();
       const remainingSeconds = Math.ceil(remainingMs / 1000);
+      
+      // Debug: log every second (when remainingMs is close to a full second)
+      if (remainingMs % 1000 < 150) {
+        console.log("⏱️ Timer tick:", remainingSeconds, "s, score:", this._currentStepScore);
+      }
 
-      // Update current score linearly with remaining time
+      // Update step score linearly 1000 -> 0 over the step duration
       const ratio =
         this._stepDurationMs > 0 ? remainingMs / this._stepDurationMs : 0;
       const computed = Math.round(this._scoreAtStepStart * ratio);
-      this._currentProblemScore = Math.max(0, computed);
+      this._currentStepScore = Math.max(0, computed);
 
       this._setDisplayedTime(remainingSeconds);
-      this._setDisplayedScore(this._currentProblemScore);
+      this._setDisplayedScore(this.getDisplayedScore());
       this._applyPhaseStyles(remainingSeconds);
 
       if (remainingMs <= 0) {
         this._clearInterval();
-        this._currentProblemScore = 0;
+        // If a player fails a step, score locks at 0 for the remainder of the problem
+        this._bankedProblemScore = 0;
+        this._currentStepScore = 0;
+        this._zeroLocked = true;
         this._setDisplayedScore(0);
         document.dispatchEvent(new CustomEvent("timerExpired"));
       }
+    },
+
+    getDisplayedScore() {
+      if (this._zeroLocked) return 0;
+      return Math.max(
+        0,
+        Math.round(this._bankedProblemScore + this._currentStepScore)
+      );
     },
 
     _applyPhaseStyles(remainingSeconds) {
