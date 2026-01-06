@@ -253,6 +253,9 @@
     <!-- Core utilities and constants -->
     <script src="js/utils.js"></script>
     <script src="js/constants.js"></script>
+    <!-- New modular managers -->
+    <script src="js/problem-manager.js"></script>
+    <script src="js/symbol-manager.js"></script>
     <!-- UX Enhancements - Load early for toast/loading features -->
     <script src="js/ux-enhancements.js"></script>
     <!-- Lazy loading for components -->
@@ -314,6 +317,9 @@
                     setTimeout(() => {
                         modal.style.display = 'none';
                         console.log('🎮 How to Play modal dismissed - game ready to start');
+                        // Start countdown + score decrement AFTER the modal is gone
+                        // (idempotent; game.js may also call this)
+                        window.ScoreTimerManager?.setGameStarted?.();
                         // Trigger fullscreen after user interaction (required by browsers)
                         enterFullscreen();
                     }, 300);

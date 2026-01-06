@@ -742,6 +742,12 @@ class WormSystem {
   // ========================================
 
   stealSymbol(worm) {
+    // ERROR HANDLING: Validate worm parameter
+    if (!worm || !worm.element) {
+      Logger.warn("⚠️", "stealSymbol called with invalid worm object");
+      return;
+    }
+
     // CROSS-PANEL CHECK: Worm can only steal symbols when inside Panel B
     // PERFORMANCE: Use cached container rect instead of live query
     const panelBRect = this.getCachedContainerRect();
@@ -829,6 +835,14 @@ class WormSystem {
     if (!targetSymbol) {
       targetSymbol =
         availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
+    }
+
+    // ERROR HANDLING: Verify targetSymbol exists and has required properties
+    if (!targetSymbol || !targetSymbol.textContent) {
+      Logger.warn("⚠️", `Worm ${worm.id} could not find valid target symbol`);
+      worm.roamingEndTime = Date.now() + 5000;
+      worm.isRushingToTarget = false;
+      return;
     }
 
     const symbolValue = targetSymbol.textContent;
@@ -1610,6 +1624,22 @@ class WormSystem {
   // ========================================
 
   explodeWorm(worm, isRainKill = false, isChainReaction = false) {
+    // ERROR HANDLING: Validate worm parameter
+    if (!worm) {
+      Logger.warn("⚠️", "explodeWorm called with null worm");
+      return;
+    }
+    if (!worm.element) {
+      Logger.warn(
+        "⚠️",
+        "explodeWorm called with worm missing element",
+        worm.id
+      );
+      // Still try to clean up worm from array
+      this.worms = this.worms.filter((w) => w.id !== worm.id);
+      return;
+    }
+
     console.log(
       `💥 EXPLODING worm ${worm.id} (${isRainKill ? "RAIN KILL" : "direct click"}${isChainReaction ? " - CHAIN REACTION" : ""}) and returning symbol "${worm.stolenSymbol}"!`
     );

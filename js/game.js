@@ -27,10 +27,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Don't start the per-step countdown behind the How-To-Play modal
     if (startGameButton && window.ScoreTimerManager) {
       startGameButton.addEventListener("click", () => {
-        // game.html uses a ~300ms fade-out; give it a bit of buffer
+        // game.html uses a ~300ms fade-out; increase buffer to ensure modal is gone
         setTimeout(() => {
           window.ScoreTimerManager.setGameStarted();
-        }, 350);
+        }, 500);
       });
     }
 
@@ -65,9 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         cachedStepIndex = stepIndex;
         cacheInvalidated = false;
-        console.log(
-          `💾 Cached ${cachedStepSymbols.length} symbols for step ${stepIndex}`
-        );
       }
       return cachedStepSymbols;
     }
@@ -114,16 +111,12 @@ document.addEventListener("DOMContentLoaded", () => {
         .then((data) => {
           // Parse problems from markdown
           problems = parseProblemsFromMarkdown(data);
-          console.log(
-            `📖 Loaded ${problems.length} problems for ${level} level`
-          );
 
           // Start with the first problem
           if (problems.length > 0) {
             currentProblem = problems[currentProblemIndex];
             setupProblem();
           } else {
-            console.error("❌ No problems found in the loaded file");
             // Use fallback problem
             currentProblem = {
               problem: "4x = 24",
@@ -132,8 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setupProblem();
           }
         })
-        .catch((error) => {
-          console.error("❌ Error loading problems:", error);
+        .catch(() => {
           // Fallback to a default problem
           currentProblem = {
             problem: "4x = 24",
@@ -171,14 +163,11 @@ document.addEventListener("DOMContentLoaded", () => {
               currentSymbol: 0,
             });
           }
-        } catch (e) {
-          console.error("Error parsing problem:", e);
+        } catch (_e) {
+          // Skip malformed problems silently
         }
       }
 
-      console.log(
-        `📚 Parsed ${parsedProblems.length} problems with multi-step solutions`
-      );
       return parsedProblems;
     }
 
@@ -188,12 +177,8 @@ document.addEventListener("DOMContentLoaded", () => {
         !currentProblem.steps ||
         currentProblem.steps.length === 0
       ) {
-        console.error("❌ Problem setup failed - invalid problem data");
         return;
       }
-
-      console.log(`🎯 Setting up problem: ${currentProblem.problem}`);
-      console.log(`📚 Solution steps:`, currentProblem.steps);
 
       // Reset indices
       currentSolutionStepIndex = 0;
@@ -214,10 +199,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (window.ScoreTimerManager) {
         window.ScoreTimerManager.onProblemStarted();
       }
-
-      console.log(
-        `📝 Problem setup complete with ${currentProblem.steps.length} solution steps`
-      );
     }
 
     // Investigative clarification prompt (minimal UI)
@@ -288,16 +269,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       solutionContainer.appendChild(stepsContainer);
-      console.log(`📋 Created ${currentProblem.steps.length} solution steps`);
     }
 
     // Move to next problem
     function nextProblem() {
       currentProblemIndex++;
       if (currentProblemIndex >= problems.length) {
-        // Loop back to first problem for now
+        // Loop back to first problem
         currentProblemIndex = 0;
-        console.log("🔄 Looping back to first problem");
       }
       currentProblem = problems[currentProblemIndex];
 
@@ -324,24 +303,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (hiddenSymbols.length > 0) {
         // Return array of all possible symbols in current line
-        const possibleSymbols = hiddenSymbols.map((span) => span.textContent);
-        console.log(
-          `🎯 Current line has ${possibleSymbols.length} hidden symbols: [${possibleSymbols.join(", ")}]`
-        );
-        return possibleSymbols;
+        return hiddenSymbols.map((span) => span.textContent);
       }
 
-      console.log("🏁 No more hidden symbols in current step");
       return null;
     }
 
     /** Check if clicked symbol exists in current line - FIXED X/x DETECTION */
     function isSymbolInCurrentLine(clickedSymbol) {
       const expectedSymbols = getNextSymbol();
-      console.log(
-        `🔍 Checking symbol "${clickedSymbol}" against expected symbols:`,
-        expectedSymbols
-      );
 
       if (expectedSymbols && Array.isArray(expectedSymbols)) {
         // REFACTORED: Use shared normalizeSymbol utility from utils.js
@@ -350,22 +320,13 @@ document.addEventListener("DOMContentLoaded", () => {
           normalizeSymbol(s)
         );
 
-        const result = normalizedExpected.includes(normalizedClicked);
-        console.log(
-          `🎯 Symbol "${clickedSymbol}" normalized to "${normalizedClicked}" - match result: ${result}`
-        );
-        return result;
+        return normalizedExpected.includes(normalizedClicked);
       }
-      console.log(`❌ No expected symbols available`);
       return false;
     }
 
     /** Reveal specific symbol in current line - FIXED X/x DETECTION */
     function revealSpecificSymbol(targetSymbol) {
-      console.log(
-        `🔍 Attempting to reveal symbol: "${targetSymbol}" in step ${currentSolutionStepIndex}`
-      );
-
       // REFACTORED: Use shared normalizeSymbol utility from utils.js
       const normalizedTarget = normalizeSymbol(targetSymbol);
 
@@ -375,25 +336,14 @@ document.addEventListener("DOMContentLoaded", () => {
         el.classList.contains("hidden-symbol")
       );
 
-      console.log(
-        `📋 Found ${hiddenSymbols.length} hidden symbols in current step`
-      );
-
       for (const span of hiddenSymbols) {
         const spanSymbol = span.textContent;
         const normalizedSpan = normalizeSymbol(spanSymbol);
-
-        console.log(
-          `🔎 Comparing "${normalizedTarget}" with hidden symbol "${normalizedSpan}"`
-        );
 
         if (normalizedSpan === normalizedTarget) {
           span.classList.remove("hidden-symbol");
           span.classList.add("revealed-symbol");
           invalidateStepCache(); // PERFORMANCE: Invalidate cache after DOM change
-          console.log(
-            `✅ Successfully revealed symbol: "${targetSymbol}" in step ${currentSolutionStepIndex + 1}`
-          );
 
           // Dispatch event to notify worms that a RED symbol appeared!
           document.dispatchEvent(
@@ -406,13 +356,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      console.log(`❌ Symbol "${targetSymbol}" not found in current step`);
       return false;
     }
 
     /** Handle correct symbol selection */
     function handleCorrectAnswer(clickedSymbol) {
-      console.log(`✅ Correct symbol clicked: "${clickedSymbol}"`);
       totalCorrectAnswers++;
 
       // PURPLE WORM: Reset wrong answer counter on correct answer
@@ -426,16 +374,10 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       if (window.ComboSystem) {
         comboFeedback = window.ComboSystem.hit();
-        console.log(
-          `🔥 Combo: ${window.ComboSystem.getCombo()}x (${comboFeedback.level})`
-        );
       }
 
       // Dispatch first-line-solved event for LockManager
       if (totalCorrectAnswers === 1) {
-        console.log(
-          "🔒 First correct answer - dispatching first-line-solved event"
-        );
         document.dispatchEvent(new Event("first-line-solved"));
       }
 
@@ -462,8 +404,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /** Handle incorrect symbol selection */
     function handleIncorrectAnswer() {
-      console.log("❌ Incorrect symbol clicked!");
-
       // COMBO SYSTEM: Break combo on wrong answer
       if (window.ComboSystem) {
         window.ComboSystem.break();
@@ -471,13 +411,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // PURPLE WORM: Increment wrong answer counter
       consecutiveWrongAnswers++;
-      console.log(
-        `🟣 Consecutive wrong answers: ${consecutiveWrongAnswers}/${PURPLE_WORM_THRESHOLD}`
-      );
 
       // Trigger purple worm on threshold
       if (consecutiveWrongAnswers >= PURPLE_WORM_THRESHOLD) {
-        console.log("🟣 PURPLE WORM TRIGGERED! 2+ wrong answers!");
         document.dispatchEvent(
           new CustomEvent("purpleWormTriggered", {
             detail: { wrongAnswerCount: consecutiveWrongAnswers },
@@ -499,18 +435,10 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       if (currentStepHiddenSymbols.length === 0) {
-        console.log(`🎉 Line ${currentSolutionStepIndex + 1} completed!`);
-
         // ENHANCED DRAMATIC EFFECTS for row completion
-        console.log(
-          `⚡ ROW ${currentSolutionStepIndex + 1} COMPLETED - Triggering enhanced celebration!`
-        );
         createDramaticLineCompletion(currentSolutionStepIndex);
 
         // Trigger worm spawning for completed line
-        console.log(
-          "🐛 DISPATCHING problemLineCompleted EVENT - This should spawn a worm!"
-        );
 
         // Enhanced event dispatch with line details
         document.dispatchEvent(
@@ -525,20 +453,11 @@ document.addEventListener("DOMContentLoaded", () => {
           })
         );
 
-        // Log the completion for debugging
-        console.log(
-          `🔒 Line ${currentSolutionStepIndex + 1} completed - triggering lock progression`
-        );
-
         // Move to next step if available
         if (currentSolutionStepIndex < currentProblem.steps.length - 1) {
           currentSolutionStepIndex++;
           invalidateStepCache(); // PERFORMANCE: Invalidate cache when moving to next step
-          console.log(
-            `📋 Moving to step ${currentSolutionStepIndex + 1}: "${currentProblem.steps[currentSolutionStepIndex]}"`
-          );
         } else {
-          console.log("🎉 All steps complete!");
           checkProblemCompletion();
         }
       }
@@ -564,8 +483,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /** Create lightning flash effect */
     function createLightningFlash() {
-      console.log("⚡ Creating lightning flash effect...");
-
       // Create lightning overlay
       const lightning = document.createElement("div");
       lightning.className = "lightning-flash";
@@ -593,7 +510,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /** Create screen shake effect for impact */
     function createScreenShake() {
-      console.log("📳 Creating screen shake effect...");
       document.body.classList.add("screen-shake");
       setTimeout(() => {
         document.body.classList.remove("screen-shake");
@@ -602,8 +518,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /** Create celebration particles around the completed row */
     function createCelebrationParticles(stepIndex) {
-      console.log("✨ Creating celebration particles...");
-
       const row = solutionContainer.querySelector(
         `[data-step-index="${stepIndex}"]`
       );
@@ -664,8 +578,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /** Show victory banner for completed line */
     function showVictoryBanner(lineNumber) {
-      console.log(`🏆 Showing victory banner for line ${lineNumber}...`);
-
       const banner = document.createElement("div");
       banner.className = "victory-banner";
       banner.innerHTML = `<span class="victory-text">LINE ${lineNumber} COMPLETE!</span>`;
@@ -695,8 +607,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /** Transform completed row to pulsating cyan */
     function transformRowToPulsatingCyan(stepIndex) {
-      console.log(`💙 Transforming row ${stepIndex + 1} to pulsating cyan...`);
-
       // Get ALL non-hidden, non-space symbols in the completed row
       const rowSymbols = solutionContainer.querySelectorAll(
         `[data-step-index="${stepIndex}"].solution-symbol:not(.hidden-symbol):not(.space-symbol):not(.completed-row-symbol)`
@@ -711,10 +621,6 @@ document.addEventListener("DOMContentLoaded", () => {
         symbol.style.setProperty("--stagger-delay", `${index * 30}ms`);
         symbol.style.animation = `symbol-pop 0.3s ease-out ${index * 30}ms, pulsating-cyan 2s ease-in-out ${index * 30 + 300}ms infinite`;
       });
-
-      console.log(
-        `✅ Row ${stepIndex + 1} transformed - ${rowSymbols.length} symbols now pulsating cyan`
-      );
     }
 
     /** Check if all solution steps have been revealed */
@@ -728,32 +634,16 @@ document.addEventListener("DOMContentLoaded", () => {
         (el) => !el.dataset.stolen
       );
 
-      console.log(
-        `🔍 Total hidden symbols: ${hiddenSymbols.length}, Non-stolen: ${nonStolenHiddenSymbols.length}`
-      );
-
       if (nonStolenHiddenSymbols.length === 0) {
-        console.log(
-          "🎉 Problem Complete - All steps revealed (stolen symbols don't block progression)!"
-        );
-
         // Enhanced completion effect
         solutionContainer.style.animation = "completionGlow 1s ease-in-out";
 
         // Show completion message and trigger console modal
         setTimeout(() => {
-          const completionMessage =
-            `Problem ${currentProblemIndex + 1} completed!\n` +
-            `Steps completed: ${currentProblem.steps.length}\n` +
-            `Correct answers: ${totalCorrectAnswers}`;
-
-          console.log(completionMessage);
-
           // Reset completion effect
           solutionContainer.style.animation = "";
 
           // Dispatch problemCompleted event to trigger console modal
-          console.log("📡 Dispatching problemCompleted event");
           document.dispatchEvent(new CustomEvent("problemCompleted"));
 
           // Wait for console symbol to be added before moving to next problem
@@ -764,8 +654,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Event Listeners
     helpButton.addEventListener("click", () => {
-      console.log("💡 Help button clicked");
-
       // Get available symbols in current line
       const availableSymbols = getNextSymbol();
       if (availableSymbols && availableSymbols.length > 0) {
@@ -787,8 +675,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("symbolClicked", (e) => {
       const clicked = e.detail.symbol;
 
-      console.log(`🎯 Symbol Rain click - Clicked: "${clicked}"`);
-
       // PRIORITY 1: Check if this symbol was stolen by a worm (includes blue symbols!)
       // REFACTORED: Use shared normalizeSymbol utility from utils.js
       const normalizedClicked = normalizeSymbol(clicked);
@@ -805,10 +691,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (normalizedStolen === normalizedClicked) {
           // Check if this was a blue (revealed) symbol before being stolen
           wasBlueSymbol = stolenSymbol.dataset.wasRevealed === "true";
-
-          console.log(
-            `🔄 Restoring stolen ${wasBlueSymbol ? "BLUE" : "RED"} symbol "${clicked}" in Panel B!`
-          );
 
           // Restore the symbol
           stolenSymbol.classList.remove("stolen", "hidden-symbol");
@@ -827,9 +709,6 @@ document.addEventListener("DOMContentLoaded", () => {
           if (wasBlueSymbol) {
             document.body.style.background =
               "radial-gradient(circle, rgba(0,255,255,0.3), rgba(0,0,0,1))";
-            console.log(
-              `💎 BLUE symbol restored - game can continue progressing!`
-            );
           } else {
             document.body.style.background =
               "radial-gradient(circle, rgba(0,255,255,0.2), rgba(0,0,0,1))";
@@ -839,11 +718,8 @@ document.addEventListener("DOMContentLoaded", () => {
             document.body.style.background = "";
           }, 300);
 
-          console.log(`✅ Symbol "${clicked}" successfully restored!`);
-
           // CRITICAL: Check line completion after restoration
           // This ensures game progression isn't blocked by stolen symbols
-          console.log(`🔍 Checking line completion after restoration...`);
           checkLineCompletion();
 
           break;
@@ -867,8 +743,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("wormSymbolCorrect", (e) => {
       const symbol = e.detail.symbol;
 
-      console.log(`🐛✅ Worm symbol event - Symbol: ${symbol}`);
-
       if (isSymbolInCurrentLine(symbol)) {
         handleCorrectAnswer(symbol);
       }
@@ -876,9 +750,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Listen for worm symbol saved events (when player clicks worm to save symbol)
     document.addEventListener("wormSymbolSaved", (e) => {
-      const { symbol, wormId } = e.detail;
-
-      console.log(`🎯✅ Player saved symbol "${symbol}" from worm ${wormId}!`);
+      const { symbol, wormId: _wormId } = e.detail;
 
       // Add visual feedback for saving a symbol
       document.body.style.background =
@@ -886,21 +758,10 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         document.body.style.background = "";
       }, 500);
-
-      // Could add scoring or other rewards here
-      console.log(`💯 Good job! Symbol "${symbol}" has been saved!`);
     });
 
     // Listen for console symbol added events (from console manager)
-    document.addEventListener("consoleSymbolAdded", (e) => {
-      console.log("🎮 Console symbol added, moving to next problem");
-
-      if (e.detail) {
-        console.log(
-          `📊 Console update: ${e.detail.symbol} added to position ${e.detail.position + 1}`
-        );
-      }
-
+    document.addEventListener("consoleSymbolAdded", () => {
       // Continue to next problem after console interaction
       setTimeout(() => {
         nextProblem();
@@ -1046,8 +907,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     `;
     document.head.appendChild(gameStyles);
-
-    console.log("✅ Game initialization complete!");
   } catch (error) {
     console.error("❌ Game initialization failed:", error);
     // Show user-friendly error message

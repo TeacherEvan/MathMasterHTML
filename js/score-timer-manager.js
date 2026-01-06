@@ -111,12 +111,21 @@ console.log("⏱️ ScoreTimerManager loading...");
     },
 
     setGameStarted() {
-      console.log("⏱️ setGameStarted() called - already started:", this._gameStarted, "_paused:", this._paused);
+      console.log(
+        "⏱️ setGameStarted() called - already started:",
+        this._gameStarted,
+        "_paused:",
+        this._paused,
+        "timestamp:",
+        Date.now()
+      );
       if (this._gameStarted) return;
       this._gameStarted = true;
       if (!this._paused) {
         console.log("⏱️ setGameStarted() calling startStep()");
         this.startStep();
+      } else {
+        console.log("⏱️ setGameStarted() not calling startStep() because paused");
       }
     },
 
@@ -143,7 +152,16 @@ console.log("⏱️ ScoreTimerManager loading...");
     },
 
     startStep() {
-      console.log("⏱️ startStep() called - _paused:", this._paused, "_zeroLocked:", this._zeroLocked);
+      console.log(
+        "⏱️ startStep() called - _paused:",
+        this._paused,
+        "_zeroLocked:",
+        this._zeroLocked,
+        "_gameStarted:",
+        this._gameStarted,
+        "timestamp:",
+        Date.now()
+      );
       if (this._paused || this._zeroLocked) {
         console.log("⏱️ startStep() returning early due to paused/zeroLocked");
         return;
@@ -161,10 +179,16 @@ console.log("⏱️ ScoreTimerManager loading...");
 
       if (window.ResourceManager) {
         this._intervalId = ResourceManager.setInterval(tick, 100);
-        console.log("⏱️ Interval created via ResourceManager, ID:", this._intervalId);
+        console.log(
+          "⏱️ Interval created via ResourceManager, ID:",
+          this._intervalId
+        );
       } else {
         this._intervalId = setInterval(tick, 100);
-        console.log("⏱️ Interval created via native setInterval, ID:", this._intervalId);
+        console.log(
+          "⏱️ Interval created via native setInterval, ID:",
+          this._intervalId
+        );
       }
 
       this._update();
@@ -239,16 +263,26 @@ console.log("⏱️ ScoreTimerManager loading...");
 
     _update() {
       if (this._paused || this._zeroLocked) {
-        console.log("⏱️ _update() returning early - _paused:", this._paused, "_zeroLocked:", this._zeroLocked);
+        console.log(
+          "⏱️ _update() returning early - _paused:",
+          this._paused,
+          "_zeroLocked:",
+          this._zeroLocked
+        );
         return;
       }
 
       const remainingMs = this._getRemainingMs();
       const remainingSeconds = Math.ceil(remainingMs / 1000);
-      
+
       // Debug: log every second (when remainingMs is close to a full second)
       if (remainingMs % 1000 < 150) {
-        console.log("⏱️ Timer tick:", remainingSeconds, "s, score:", this._currentStepScore);
+        console.log(
+          "⏱️ Timer tick:",
+          remainingSeconds,
+          "s, score:",
+          this._currentStepScore
+        );
       }
 
       // Update step score linearly 1000 -> 0 over the step duration
