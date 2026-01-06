@@ -32,17 +32,17 @@ function initSymbolRain() {
   let isMobileMode =
     window.innerWidth <= 768 || document.body.classList.contains("res-mobile");
 
-  // Configuration
+  // Configuration - INCREASED DENSITY
   let symbolFallSpeed = 0.6;
   const INITIAL_FALL_SPEED = 0.6; // Store initial speed for reset
   const maxFallSpeed = 1.2; // 100% more than default (2x)
-  const spawnRate = 0.3; // REDUCED from 0.4 to 0.3 to prevent overcrowding
-  const burstSpawnRate = 0.1; // REDUCED from 15% to 10% chance for burst spawning
+  const spawnRate = 0.5; // INCREASED from 0.3 to 0.5 (67% more symbols)
+  const burstSpawnRate = 0.15; // INCREASED from 0.1 to 0.15 (50% more bursts)
   const columnWidth = 50;
 
-  // Wave-based spawn system for initial population
-  const SYMBOLS_PER_WAVE = 5; // Release 5 symbols at a time
-  const WAVE_INTERVAL = 110; // Milliseconds between waves
+  // Wave-based spawn system for initial population - INCREASED DENSITY
+  const SYMBOLS_PER_WAVE = 7; // INCREASED from 5 to 7 symbols at a time (40% more)
+  const WAVE_INTERVAL = 80; // REDUCED from 110 to 80ms (27% faster waves)
   let isInitialPopulation = true; // Flag to disable random spawning during startup
   let wavesSpawned = 0;
 
@@ -52,6 +52,12 @@ function initSymbolRain() {
     lastSymbolSpawnTimestamp[symbolChar] = Date.now() - Math.random() * 2000;
   });
   const GUARANTEED_SPAWN_INTERVAL_MS = 5000; // 5 seconds
+
+  // PERIODIC FACE REVEAL SYSTEM - symbols show enhanced form every 5 seconds
+  const FACE_REVEAL_INTERVAL_MS = 5000; // 5 seconds
+  const FACE_REVEAL_DURATION_MS = 1500; // 1.5 seconds reveal duration
+  let lastFaceRevealTime = Date.now();
+  let activeFaceReveals = new Set(); // Track symbols currently in face reveal state
 
   let columnCount = 0;
   let activeFallingSymbols = [];
@@ -179,6 +185,8 @@ function initSymbolRain() {
       y: isInitialPopulation ? parseFloat(symbol.style.top) : -50,
       x: parseFloat(symbol.style.left),
       symbol: symbol.textContent,
+      isInFaceReveal: false, // FACE REVEAL: Track if symbol is in enhanced reveal state
+      faceRevealStartTime: 0, // FACE REVEAL: When the reveal started
     });
 
     if (forcedSymbol) {
@@ -251,9 +259,11 @@ function initSymbolRain() {
 
   function checkCollision(symbolObj) {
     if (isMobileMode) {
-      // Mobile: Check horizontal spacing
+      // Mobile: Check horizontal spacing - INCREASED BUFFER for face reveal symbols
       const symbolWidth = 60;
-      const horizontalBuffer = 80; // Space between symbols in train
+      const baseHorizontalBuffer = 80; // Space between symbols in train
+      const faceRevealBuffer = symbolObj.isInFaceReveal ? 120 : 0; // Extra space for face reveal
+      const horizontalBuffer = baseHorizontalBuffer + faceRevealBuffer;
 
       // PERFORMANCE: Only check nearby symbols from spatial grid
       const neighbors = getNeighborCells(symbolObj.x, symbolObj.y);
@@ -266,11 +276,16 @@ function initSymbolRain() {
       }
       return false;
     } else {
-      // Desktop: Check vertical collision with increased spacing
+      // Desktop: Check vertical collision with increased spacing - ENHANCED for face reveal
       const symbolHeight = 30;
       const symbolWidth = 30;
-      const collisionBuffer = 40;
-      const horizontalBuffer = 35;
+      const baseCollisionBuffer = 40;
+      const baseHorizontalBuffer = 35;
+
+      // FACE REVEAL: Increased buffers to prevent overlaps during reveal phases
+      const faceRevealMultiplier = symbolObj.isInFaceReveal ? 2.5 : 1; // 2.5x buffer when revealing
+      const collisionBuffer = baseCollisionBuffer * faceRevealMultiplier;
+      const horizontalBuffer = baseHorizontalBuffer * faceRevealMultiplier;
 
       const symbolLeft = symbolObj.x;
       const symbolRight = symbolLeft + symbolWidth;
@@ -359,6 +374,46 @@ function initSymbolRain() {
 
     // PERFORMANCE: Use cached height instead of querying DOM every frame
     const containerHeight = cachedContainerHeight;
+
+    // FACE REVEAL SYSTEM: Check for periodic face reveals every 5 seconds
+    const currentTime = Date.now();
+    if (currentTime - lastFaceRevealTime >= FACE_REVEAL_INTERVAL_MS) {
+      // Trigger face reveal for a random selection of visible symbols
+      const visibleSymbols = activeFallingSymbols.filter(s => s.y > 0 && s.y < containerHeight);
+      if (visibleSymbols.length > 0) {
+        // Reveal 3-5 symbols at once for dramatic effect
+        const revealCount = Math.min(3 + Math.floor(Math.random() * 3), visibleSymbols.length);
+        for (let i = 0; i < revealCount; i++) {
+          const randomIndex = Math.floor(Math.random() * visibleSymbols.length);
+          const symbolObj = visibleSymbols.splice(randomIndex, 1)[0]; // Remove to avoid double selection
+
+          if (!symbolObj.isInFaceReveal) {
+            symbolObj.isInFaceReveal = true;
+            symbolObj.faceRevealStartTime = currentTime;
+            activeFaceReveals.add(symbolObj);
+
+            // Apply face reveal styling
+            symbolObj.element.classList.add('face-reveal');
+            symbolObj.element.style.transform = 'scale(1.3)';
+            symbolObj.element.style.textShadow = '0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff';
+            symbolObj.element.style.filter = 'brightness(1.5)';
+          }
+        }
+      }
+      lastFaceRevealTime = currentTime;
+    }
+
+    // FACE REVEAL: Clean up expired face reveals
+    for (const symbolObj of activeFaceReveals) {
+      if (currentTime - symbolObj.faceRevealStartTime >= FACE_REVEAL_DURATION_MS) {
+        symbolObj.isInFaceReveal = false;
+        symbolObj.element.classList.remove('face-reveal');
+        symbolObj.element.style.transform = '';
+        symbolObj.element.style.textShadow = '';
+        symbolObj.element.style.filter = '';
+        activeFaceReveals.delete(symbolObj);
+      }
+    }
 
     // PERFORMANCE: Update spatial grid ONCE per frame instead of in every collision check
     updateSpatialGrid();

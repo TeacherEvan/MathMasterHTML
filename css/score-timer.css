@@ -1,15 +1,32 @@
 /* css/score-timer.css - Timer + Score HUD */
+/* UI Boundary Management: Elements have defined regions to prevent overlap */
+
+/* ============================================
+   TOP BAR LAYOUT SYSTEM
+   Prevents timer/score/powerup overlaps via 
+   defined zones with CSS Grid
+   ============================================ */
 
 .game-hud {
   position: fixed;
   top: 12px;
   left: 12px;
   right: 12px;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  /* 3-zone layout: score (left) | spacer (center for powerups) | timer (right) */
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "score powerup-zone timer";
   align-items: flex-start;
+  gap: 20px; /* Minimum spacing between HUD elements */
   z-index: 10005;
   pointer-events: none;
+}
+
+/* Reserved zone for powerup display (middle area) */
+.game-hud::after {
+  content: "";
+  grid-area: powerup-zone;
+  min-width: 200px; /* Reserve space for powerup display */
 }
 
 .hud-block {
@@ -20,9 +37,23 @@
   border-radius: 10px;
   padding: 10px 14px;
   min-width: 120px;
+  max-width: 160px; /* Prevent expansion into adjacent zones */
   text-align: center;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
+  /* Boundary box markers for collision detection */
+  box-sizing: border-box;
+}
+
+/* Explicit grid placement to prevent overlap */
+.score-display {
+  grid-area: score;
+  justify-self: start;
+}
+
+.timer-display {
+  grid-area: timer;
+  justify-self: end;
 }
 
 .hud-label {
@@ -37,6 +68,7 @@
   line-height: 1.05;
 }
 
+/* Score display - positioned in left zone */
 .score-display {
   color: #00ff00;
 }
@@ -90,6 +122,47 @@
     box-shadow:
       0 0 20px currentColor,
       0 0 34px currentColor;
+  }
+}
+
+/* ============================================
+   POWERUP DISPLAY POSITIONING
+   Integrated into top bar center zone
+   ============================================ */
+
+/* Override powerup display positioning to fit in center zone */
+#power-up-display {
+  position: fixed !important;
+  top: 12px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  z-index: 10004 !important; /* Below HUD elements but above game */
+  /* Boundary constraints */
+  max-width: calc(100vw - 360px); /* Leave room for score and timer */
+}
+
+/* Mobile adjustments for powerup display */
+@media (max-width: 768px) {
+  #power-up-display {
+    top: 70px !important; /* Below HUD on mobile */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    max-width: calc(100vw - 40px);
+  }
+
+  .game-hud {
+    gap: 10px;
+  }
+
+  .hud-block {
+    min-width: 90px;
+    max-width: 120px;
+    padding: 6px 10px;
+  }
+
+  .hud-value {
+    font-size: 22px;
   }
 }
 

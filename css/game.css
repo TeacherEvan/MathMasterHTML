@@ -65,16 +65,24 @@ body:-ms-fullscreen {
     flex-direction: column;
 }
 
+/* ============================================
+   PANEL A - Problem Display Layout
+   Prevents score/problem overlap via defined regions
+   ============================================ */
+
 #panel-a {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
+    /* Reserve top area for score HUD (80px safe zone) */
+    padding-top: 80px;
 }
 
 #problem-container {
     position: absolute;
-    top: 116px;
+    /* Positioned below the HUD safe zone to prevent overlap */
+    top: 90px; /* Below score HUD (was 116px, reduced for better spacing) */
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
@@ -86,6 +94,12 @@ body:-ms-fullscreen {
     white-space: nowrap;
     letter-spacing: 2px;
     line-height: 1.2;
+    /* Boundary constraints to prevent overlap with lock display */
+    max-width: 90%;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    /* Clear visual boundary for debugging */
+    border-radius: 4px;
 }
 
 #solution-container {
@@ -103,11 +117,13 @@ body:-ms-fullscreen {
 
 #lock-display {
     position: absolute;
-    top: 50%;
+    /* Positioned in center but with top margin to avoid problem-container */
+    top: calc(50% + 40px); /* Shifted down to create clearance from problem */
     left: 50%;
     transform: translate(-50%, -50%);
     width: 80%;
-    height: 80%;
+    height: 70%; /* Reduced height to prevent overlap with problem above */
+    max-height: calc(100vh - 200px); /* Ensure it doesn't extend into problem zone */
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;

@@ -11,7 +11,7 @@
 | **Request Type**   | Debug & Fix MathMasterHTML Issues                    |
 | **Priority**       | High (timer/score bugs, modularization, performance) |
 | **Status**         | ✅ COMPLETED                                         |
-| **Billable Hours** | ~2 sessions                                          |
+| **Billable Hours** | ~3 sessions                                          |
 
 ---
 
@@ -27,6 +27,7 @@
 8. ✅ "Plan for testing and validation steps"
 9. ✅ "Remove debug console.log statements for production readiness"
 10. ✅ "Add integration tests for new modules"
+11. ✅ "Add error handling to critical worm.js methods"
 
 ---
 
@@ -141,6 +142,14 @@
 - ✅ Manager integration tests added and passing (10/10)
 - ✅ All 28 Playwright tests passing
 
+### Phase 6: Error Handling & Robustness (COMPLETED - Session 3)
+
+- ✅ Added null/undefined checks to `stealSymbol()` in worm.js
+- ✅ Added null/undefined checks to `explodeWorm()` in worm.js
+- ✅ Added defensive validation for targetSymbol selection
+- ✅ Uses Logger.warn() for error conditions (production-safe)
+- ✅ All 28 tests still passing after changes
+
 ---
 
 ## 📁 FILES MODIFIED
@@ -154,15 +163,18 @@
 | `js/3rdDISPLAY.js`       | Modified | Removed debug console.log (558 lines, 0 logs)                        |
 | `tests/timer.spec.js`    | Modified | Stabilized assertions (countdown + console timing)                   |
 | `tests/managers.spec.js` | Created  | 10 integration tests for ProblemManager and SymbolManager            |
-| `JOBCARD.md`             | Updated  | Added session 2 findings and completion status                       |
+| `js/worm.js`             | Modified | Added error handling to stealSymbol() and explodeWorm()              |
+| `JOBCARD.md`             | Updated  | Added session 3 findings and completion status                       |
 
 ---
 
 ## ⚠️ REMAINING ITEMS (LOW PRIORITY)
 
-1. **Worm System Logs:** worm.js still has ~113 console.log statements (intentional for game state debugging)
-2. **ES6 Modules:** Future enhancement - convert to proper ES6 module imports for tree-shaking
+1. **Worm System Logs:** worm.js still has ~113 console.log statements (can migrate to Logger utility for conditional logging)
+2. **ES6 Modules:** Future enhancement - convert to proper ES6 module imports for tree-shaking (deferred per WORM_ES6_MODULES_ASSESSMENT.md)
 3. **Bundle Splitting:** Could implement code splitting for very large files
+4. **JSDoc Documentation:** ~10% of worm.js methods have JSDoc (6-8 hours to complete)
+5. **Constants Consolidation:** worm.js has duplicate constants that could reference GameConstants (low risk refactor)
 
 ---
 
@@ -171,26 +183,31 @@
 Based on the optimization analysis from IMPLEMENTATION_SUMMARY_OPTIMIZATION_2025.md, here are the prioritized remaining tasks integrated with existing diagnostic notes and modularization progress:
 
 ### Immediate Priority (High Impact, Low Risk)
+
 - [ ] Enable Logger in production builds (depends on utils.js Logger implementation)
 - [ ] Migrate high-risk files to ResourceManager (worm.js, game.js, worm-powerups.js - 38 uncleaned timers)
 - [ ] Monitor memory usage in production (integrate with existing performance monitoring)
 
 ### Short-term Priority (Medium Impact, Medium Risk)
+
 - [ ] Add automated performance tests (build on existing Playwright suite)
 - [ ] Create production build pipeline (Terser, cssnano, Rollup/esbuild)
 - [ ] Add memory leak detection tests (complement ResourceManager)
 
 ### Long-term Priority (Low Impact, Variable Risk)
+
 - [ ] Migrate all files to use Logger (321 console.log statements, including ~113 in worm.js)
 - [ ] Migrate all files to use ResourceManager (61 timers total, 82% leak rate)
 - [ ] Add comprehensive test suite (expand beyond current 28 tests)
 
 **Dependencies:**
+
 - Logger/ResourceManager migration depends on modularization progress (problem-manager.js, symbol-manager.js, worm-factory.js completed)
 - Production build pipeline enables Logger enablement and addresses bundle splitting
 - Memory monitoring requires ResourceManager adoption and complements existing performance optimizations
 
 **Integration Notes:**
+
 - Builds on completed modularization (worm system split into factory/movement/spawn/powerups modules)
 - Complements existing performance optimizations (lazy loading, object pooling, DOM caching, spatial hash grid)
 - Aligns with diagnostic findings (timer leaks, debug logging, ES6 modules future enhancement)

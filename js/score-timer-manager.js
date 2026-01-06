@@ -91,7 +91,56 @@ console.log("⏱️ ScoreTimerManager loading...");
         this.onProblemCompleted(level);
       });
 
+      // Register HUD elements with UIBoundaryManager for collision detection
+      this._registerWithBoundaryManager();
+
       console.log("✅ ScoreTimerManager initialized");
+    },
+
+    /**
+     * Register HUD elements with UIBoundaryManager for collision detection
+     * @private
+     */
+    _registerWithBoundaryManager() {
+      if (!window.uiBoundaryManager) {
+        console.log(
+          "⏱️ UIBoundaryManager not available, skipping registration"
+        );
+        return;
+      }
+
+      const scoreDisplay = document.getElementById("score-display");
+      const timerDisplay = document.getElementById("timer-display");
+
+      if (scoreDisplay) {
+        window.uiBoundaryManager.register("score-display", scoreDisplay, {
+          zone: "top-left",
+          priority: 10, // High priority - won't be moved
+          fixed: true,
+          constraints: {
+            minX: 0,
+            maxX: window.innerWidth * 0.33,
+            minY: 0,
+            maxY: 100,
+          },
+        });
+      }
+
+      if (timerDisplay) {
+        window.uiBoundaryManager.register("timer-display", timerDisplay, {
+          zone: "top-right",
+          priority: 10, // High priority - won't be moved
+          fixed: true,
+          constraints: {
+            minX: window.innerWidth * 0.67,
+            maxX: window.innerWidth,
+            minY: 0,
+            maxY: 100,
+          },
+        });
+      }
+
+      console.log("⏱️ HUD elements registered with UIBoundaryManager");
     },
 
     onProblemStarted() {
@@ -125,7 +174,9 @@ console.log("⏱️ ScoreTimerManager loading...");
         console.log("⏱️ setGameStarted() calling startStep()");
         this.startStep();
       } else {
-        console.log("⏱️ setGameStarted() not calling startStep() because paused");
+        console.log(
+          "⏱️ setGameStarted() not calling startStep() because paused"
+        );
       }
     },
 
