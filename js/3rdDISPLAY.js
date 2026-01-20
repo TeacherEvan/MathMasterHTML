@@ -61,6 +61,7 @@ function initSymbolRain() {
   let columnCount = 0;
   let activeFallingSymbols = [];
   let isAnimationRunning = false;
+  const symbolsToRemove = new Set(); // Reuse set to avoid per-frame allocations
 
   // PERFORMANCE: Cache container dimensions to prevent layout thrashing
   let cachedContainerHeight = 0;
@@ -127,6 +128,30 @@ function initSymbolRain() {
     const containerWidth = symbolRainContainer.offsetWidth;
     cachedContainerHeight = symbolRainContainer.offsetHeight; // Cache height here
     columnCount = Math.floor(containerWidth / columnWidth);
+  }
+
+  function resetFaceRevealStyles(symbolElement) {
+    symbolElement.classList.remove("face-reveal");
+    symbolElement.style.transform = "";
+    symbolElement.style.textShadow = "";
+    symbolElement.style.filter = "";
+  }
+
+  function applyFaceRevealStyles(symbolElement) {
+    symbolElement.classList.add("face-reveal");
+    symbolElement.style.transform = "scale(1.3)";
+    symbolElement.style.textShadow =
+      "0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff";
+    symbolElement.style.filter = "brightness(1.5)";
+  }
+
+  function cleanupSymbolObject(symbolObj) {
+    if (activeFaceReveals.has(symbolObj)) {
+      activeFaceReveals.delete(symbolObj);
+      resetFaceRevealStyles(symbolObj.element);
+    }
+    symbolObj.element.remove();
+    returnSymbolToPool(symbolObj.element);
   }
 
   // PERFORMANCE: Get symbol from pool or create new one
@@ -244,13 +269,19 @@ function initSymbolRain() {
 
     // Remove from DOM and clean up after animation
     setTimeout(() => {
+      const symbolObj = activeFallingSymbols.find(
+        (s) => s.element === symbolElement,
+      );
+      if (symbolObj) {
+        activeFallingSymbols = activeFallingSymbols.filter(
+          (s) => s.element !== symbolElement,
+        );
+        cleanupSymbolObject(symbolObj);
+        return;
+      }
       if (symbolElement.parentNode) {
         symbolElement.parentNode.removeChild(symbolElement);
       }
-      activeFallingSymbols = activeFallingSymbols.filter(
-        (s) => s.element !== symbolElement,
-      );
-      // PERFORMANCE: Return element to pool for reuse
       returnSymbolToPool(symbolElement);
     }, 500);
   }
@@ -364,6 +395,64 @@ function initSymbolRain() {
     }
   }
 
+  function isColumnCrowded(targetColumnIndex) {
+    for (
+      let symbolIndex = 0;
+      symbolIndex < activeFallingSymbols.length;
+      symbolIndex++
+    ) {
+      const currentSymbol = activeFallingSymbols[symbolIndex];
+      if (currentSymbol.column === targetColumnIndex && currentSymbol.y < 40) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function triggerFaceRevealIfNeeded(containerHeight, currentTime) {
+    if (currentTime - lastFaceRevealTime < FACE_REVEAL_INTERVAL_MS) {
+      return;
+    }
+
+    const visibleSymbols = activeFallingSymbols.filter(
+      (s) => s.y > 0 && s.y < containerHeight,
+    );
+    if (visibleSymbols.length === 0) {
+      lastFaceRevealTime = currentTime;
+      return;
+    }
+
+    const revealCount = Math.min(
+      3 + Math.floor(Math.random() * 3),
+      visibleSymbols.length,
+    );
+    for (let i = 0; i < revealCount; i++) {
+      const randomIndex = Math.floor(Math.random() * visibleSymbols.length);
+      const symbolObj = visibleSymbols.splice(randomIndex, 1)[0];
+
+      if (!symbolObj.isInFaceReveal) {
+        symbolObj.isInFaceReveal = true;
+        symbolObj.faceRevealStartTime = currentTime;
+        activeFaceReveals.add(symbolObj);
+        applyFaceRevealStyles(symbolObj.element);
+      }
+    }
+    lastFaceRevealTime = currentTime;
+  }
+
+  function cleanupFaceReveals(currentTime) {
+    for (const symbolObj of activeFaceReveals) {
+      if (
+        currentTime - symbolObj.faceRevealStartTime >=
+        FACE_REVEAL_DURATION_MS
+      ) {
+        symbolObj.isInFaceReveal = false;
+        resetFaceRevealStyles(symbolObj.element);
+        activeFaceReveals.delete(symbolObj);
+      }
+    }
+  }
+
   function animateSymbols() {
     // PERFORMANCE: Tab visibility throttling - run at ~1fps when tab hidden
     if (!isTabVisible && Math.random() > 0.016) {
@@ -375,58 +464,14 @@ function initSymbolRain() {
 
     // FACE REVEAL SYSTEM: Check for periodic face reveals every 5 seconds
     const currentTime = Date.now();
-    if (currentTime - lastFaceRevealTime >= FACE_REVEAL_INTERVAL_MS) {
-      // Trigger face reveal for a random selection of visible symbols
-      const visibleSymbols = activeFallingSymbols.filter(
-        (s) => s.y > 0 && s.y < containerHeight,
-      );
-      if (visibleSymbols.length > 0) {
-        // Reveal 3-5 symbols at once for dramatic effect
-        const revealCount = Math.min(
-          3 + Math.floor(Math.random() * 3),
-          visibleSymbols.length,
-        );
-        for (let i = 0; i < revealCount; i++) {
-          const randomIndex = Math.floor(Math.random() * visibleSymbols.length);
-          const symbolObj = visibleSymbols.splice(randomIndex, 1)[0]; // Remove to avoid double selection
-
-          if (!symbolObj.isInFaceReveal) {
-            symbolObj.isInFaceReveal = true;
-            symbolObj.faceRevealStartTime = currentTime;
-            activeFaceReveals.add(symbolObj);
-
-            // Apply face reveal styling
-            symbolObj.element.classList.add("face-reveal");
-            symbolObj.element.style.transform = "scale(1.3)";
-            symbolObj.element.style.textShadow =
-              "0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff";
-            symbolObj.element.style.filter = "brightness(1.5)";
-          }
-        }
-      }
-      lastFaceRevealTime = currentTime;
-    }
-
-    // FACE REVEAL: Clean up expired face reveals
-    for (const symbolObj of activeFaceReveals) {
-      if (
-        currentTime - symbolObj.faceRevealStartTime >=
-        FACE_REVEAL_DURATION_MS
-      ) {
-        symbolObj.isInFaceReveal = false;
-        symbolObj.element.classList.remove("face-reveal");
-        symbolObj.element.style.transform = "";
-        symbolObj.element.style.textShadow = "";
-        symbolObj.element.style.filter = "";
-        activeFaceReveals.delete(symbolObj);
-      }
-    }
+    triggerFaceRevealIfNeeded(containerHeight, currentTime);
+    cleanupFaceReveals(currentTime);
 
     // PERFORMANCE: Update spatial grid ONCE per frame instead of in every collision check
     updateSpatialGrid();
 
     // SAFETY MECHANISM: Track symbols to be removed due to touching
-    const symbolsToRemove = new Set();
+    symbolsToRemove.clear();
 
     // First pass: Check for symbols that are touching and mark them for removal
     for (let i = 0; i < activeFallingSymbols.length; i++) {
@@ -461,8 +506,7 @@ function initSymbolRain() {
       const isTouching = symbolsToRemove.has(symbolObj); // SAFETY MECHANISM: Remove if touching
 
       if (isOffScreen || isStuckAtBottom || isTouching) {
-        symbolObj.element.remove();
-        returnSymbolToPool(symbolObj.element); // Return to pool
+        cleanupSymbolObject(symbolObj);
         continue; // Skip this symbol, don't copy to writeIndex
       }
 
@@ -482,24 +526,6 @@ function initSymbolRain() {
     }
     // Trim array to new length (no reallocation!)
     activeFallingSymbols.length = writeIndex;
-
-    // PERFORMANCE: Helper to check if column is crowded (extract to avoid duplication)
-    function isColumnCrowded(targetColumnIndex) {
-      for (
-        let symbolIndex = 0;
-        symbolIndex < activeFallingSymbols.length;
-        symbolIndex++
-      ) {
-        const currentSymbol = activeFallingSymbols[symbolIndex];
-        if (
-          currentSymbol.column === targetColumnIndex &&
-          currentSymbol.y < 40
-        ) {
-          return true;
-        }
-      }
-      return false;
-    }
 
     // Skip random spawning during initial population phase
     if (isInitialPopulation) {
