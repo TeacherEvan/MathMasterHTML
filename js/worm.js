@@ -66,7 +66,11 @@ class WormSystem {
 
     Logger.info(
       `🎮`,
-      `Difficulty: ${currentLevel.toUpperCase()} - ${this.wormsPerRow} worms/row, ${this.difficultySpeedMultiplier}x speed, ${this.difficultyRoamTimeBorder}ms roam`
+      `Difficulty: ${currentLevel.toUpperCase()} - ${
+        this.wormsPerRow
+      } worms/row, ${this.difficultySpeedMultiplier}x speed, ${
+        this.difficultyRoamTimeBorder
+      }ms roam`,
     );
 
     // POWER-UP SYSTEM
@@ -144,6 +148,20 @@ class WormSystem {
     this.DIRECTION_CHANGE_RATE = 0.1; // random direction change per frame
     this.CRAWL_PHASE_INCREMENT = 0.05; // crawl animation speed
 
+    // AGGRESSION & CURSOR AVOIDANCE CONSTANTS
+    this.AGGRESSION_MIN_DISTANCE = 40; // px
+    this.AGGRESSION_MAX_DISTANCE = 420; // px
+    this.AGGRESSION_MAX_SPEED_BOOST = 1.6; // +160%
+    this.PATHFINDING_DISTANCE = 600; // px
+    this.INTERCEPT_DISTANCE = 220; // px
+    this.PATH_RECALC_INTERVAL = 200; // ms
+    this.PATH_CELL_SIZE = 60; // px
+    this.CURSOR_THREAT_RADIUS = 140; // px
+    this.CURSOR_ESCAPE_RADIUS = 220; // px
+    this.CURSOR_ESCAPE_DURATION = 700; // ms
+    this.CURSOR_ESCAPE_MULTIPLIER = 2.2; // speed multiplier when escaping
+    this.WORM_CLICK_GRACE_WINDOW = 900; // ms for double-click kill
+
     // SPAWN CONSTANTS
     this.WORM_SPAWN_OFFSET_RANGE = 60; // px - max offset when cloning
     this.CLONE_POSITION_OFFSET = 30; // px - purple worm clone offset
@@ -182,6 +200,41 @@ class WormSystem {
       maxWorms: this.maxWorms,
     });
 
+    // Initialize cursor tracking, aggression model, and pathfinding
+    this.cursorTracker = new WormCursorTracker({ throttleMs: 16 });
+    this.aggressionModel = new WormAggressionModel({
+      minDistance: this.AGGRESSION_MIN_DISTANCE,
+      maxDistance: this.AGGRESSION_MAX_DISTANCE,
+      maxSpeedBoost: this.AGGRESSION_MAX_SPEED_BOOST,
+      pathfindingDistance: this.PATHFINDING_DISTANCE,
+      interceptDistance: this.INTERCEPT_DISTANCE,
+    });
+    this.pathfinder = new WormPathfinder({
+      cellSize: this.PATH_CELL_SIZE,
+      maxIterations: 1200,
+      obstaclePadding: 12,
+    });
+    this.obstacleMap = new WormObstacleMap({
+      cacheDuration: 200,
+      padding: 8,
+    });
+    this.evasion = new WormEvasion({
+      cursorThreatRadius: this.CURSOR_THREAT_RADIUS,
+      cursorEscapeRadius: this.CURSOR_ESCAPE_RADIUS,
+      cursorEscapeMultiplier: this.CURSOR_ESCAPE_MULTIPLIER,
+      obstacleAvoidStrength: 0.9,
+      obstaclePadding: 12,
+    });
+
+    this.cursorState = {
+      x: 0,
+      y: 0,
+      isActive: false,
+      pointerType: "mouse",
+      lastUpdate: 0,
+      lastTap: 0,
+    };
+
     console.log("🐛 WormSystem initialized with refactored modules");
   }
 
@@ -200,16 +253,17 @@ class WormSystem {
 
     // Listen for the custom event dispatched by game.js
     document.addEventListener("problemLineCompleted", (event) => {
+      const detail = /** @type {CustomEvent} */ (event).detail;
       console.log(
         "🐛 Worm System received problemLineCompleted event:",
-        event.detail
+        detail,
       );
       this.rowsCompleted++;
       const wormsToSpawn =
         this.wormsPerRow +
         (this.rowsCompleted - 1) * this.additionalWormsPerRow;
       console.log(
-        `📊 Row ${this.rowsCompleted} completed. Spawning ${wormsToSpawn} worms!`
+        `📊 Row ${this.rowsCompleted} completed. Spawning ${wormsToSpawn} worms!`,
       );
 
       // Spawn multiple worms spread around borders
@@ -220,8 +274,10 @@ class WormSystem {
 
     // CONSOLIDATED: Listen for problem completion (reset row counter + cleanup)
     document.addEventListener("problemCompleted", (event) => {
+      const detail = /** @type {CustomEvent} */ (event).detail;
       console.log(
-        "🎉 Problem completed! Resetting row counter and cleaning up."
+        "🎉 Problem completed! Resetting row counter and cleaning up.",
+        detail,
       );
       this.rowsCompleted = 0;
 
@@ -235,23 +291,40 @@ class WormSystem {
       }, this.PROBLEM_COMPLETION_CLEANUP_DELAY); // Wait for explosions to finish
     }); // PURPLE WORM: Listen for purple worm trigger (3 wrong answers)
     document.addEventListener("purpleWormTriggered", (event) => {
+      const detail = /** @type {CustomEvent} */ (event).detail;
       console.log(
         "🟣 Purple Worm System received purpleWormTriggered event:",
-        event.detail
+        detail,
       );
       this.queueWormSpawn("purple");
     });
 
     // Listen for symbol clicks in rain display to check if worm's target was clicked
     document.addEventListener("symbolClicked", (event) => {
-      this.checkWormTargetClickForExplosion(event.detail.symbol);
+      const detail = /** @type {CustomEvent} */ (event).detail;
+      this.checkWormTargetClickForExplosion(detail.symbol);
     });
 
     // Listen for symbol reveals to trigger worm targeting
     document.addEventListener("symbolRevealed", (event) => {
-      console.log("🎯 Symbol revealed event:", event.detail);
-      this.notifyWormsOfRedSymbol(event.detail.symbol);
+      const detail = /** @type {CustomEvent} */ (event).detail;
+      console.log("🎯 Symbol revealed event:", detail);
+      this.notifyWormsOfRedSymbol(detail.symbol);
     });
+
+    // Cursor tracking for evasion (event-driven)
+    document.addEventListener("wormCursorUpdate", (event) => {
+      const detail = /** @type {CustomEvent} */ (event).detail;
+      this.cursorState = detail;
+    });
+    document.addEventListener("wormCursorTap", (event) => {
+      const detail = /** @type {CustomEvent} */ (event).detail;
+      this.cursorState = detail;
+    });
+
+    if (this.cursorTracker) {
+      this.cursorTracker.start();
+    }
 
     this.eventListenersInitialized = true;
     console.log("✅ WormSystem event listeners initialized");
@@ -268,8 +341,9 @@ class WormSystem {
       !this.cachedRevealedSymbols ||
       now - this.revealedSymbolsCacheTime > this.CACHE_DURATION_TARGETS
     ) {
-      this.cachedRevealedSymbols =
-        this.solutionContainer.querySelectorAll(".revealed-symbol");
+      this.cachedRevealedSymbols = this.solutionContainer.querySelectorAll(
+        ".revealed-symbol",
+      );
       this.revealedSymbolsCacheTime = now;
     }
     return this.cachedRevealedSymbols;
@@ -282,8 +356,9 @@ class WormSystem {
       !this.cachedAllSymbols ||
       now - this.allSymbolsCacheTime > this.CACHE_DURATION_TARGETS
     ) {
-      this.cachedAllSymbols =
-        this.solutionContainer.querySelectorAll(".solution-symbol");
+      this.cachedAllSymbols = this.solutionContainer.querySelectorAll(
+        ".solution-symbol",
+      );
       this.allSymbolsCacheTime = now;
     }
     return this.cachedAllSymbols;
@@ -346,7 +421,7 @@ class WormSystem {
         // PURPLE WORM: Turn green when matching symbol clicked (must click worm to destroy)
         if (worm.isPurple) {
           console.log(
-            `🟣→🟢 User clicked rain symbol "${clickedSymbol}" - Purple worm ${worm.id} turns GREEN!`
+            `🟣→🟢 User clicked rain symbol "${clickedSymbol}" - Purple worm ${worm.id} turns GREEN!`,
           );
 
           // Turn worm green (damaged state)
@@ -367,7 +442,7 @@ class WormSystem {
           worm.clickHandler = (e) => {
             e.stopPropagation();
             console.log(
-              `💥 Green (was purple) worm ${worm.id} clicked - EXPLODING!`
+              `💥 Green (was purple) worm ${worm.id} clicked - EXPLODING!`,
             );
 
             // Drop power-up when purple worm (now green) is destroyed
@@ -382,7 +457,7 @@ class WormSystem {
 
         // GREEN WORM: Explode immediately
         console.log(
-          `💥 BOOM! User clicked rain symbol "${clickedSymbol}" - EXPLODING worm with stolen symbol!`
+          `💥 BOOM! User clicked rain symbol "${clickedSymbol}" - EXPLODING worm with stolen symbol!`,
         );
 
         this.explodeWorm(worm, true); // Pass true to indicate this is a rain kill
@@ -399,11 +474,14 @@ class WormSystem {
 
       // Worm stops roaming and rushes to this symbol
       console.log(
-        `🐛 Worm ${worm.id} detected red symbol "${symbolValue}" - RUSHING TO TARGET!`
+        `🐛 Worm ${worm.id} detected red symbol "${symbolValue}" - RUSHING TO TARGET!`,
       );
       worm.isRushingToTarget = true;
       worm.targetSymbol = symbolValue;
       worm.roamingEndTime = Date.now(); // Stop roaming timer
+      worm.path = null;
+      worm.pathIndex = 0;
+      worm.lastPathUpdate = 0;
     });
   }
 
@@ -455,7 +533,7 @@ class WormSystem {
     this.cachedPanelC = document.getElementById("third-display");
     this.cachedGameOverModal = document.getElementById("game-over-modal");
     console.log(
-      "💾 Cached DOM elements: helpButton, powerUpDisplay, panelC, gameOverModal"
+      "💾 Cached DOM elements: helpButton, powerUpDisplay, panelC, gameOverModal",
     );
 
     // PERFORMANCE: Setup event listeners once
@@ -468,8 +546,7 @@ class WormSystem {
 
         // Keep inventories in sync with the WormSystem's existing counters
         this.powerUpSystem.inventory = this.powerUps;
-        this.powerUpSystem.chainLightningKillCount =
-          this.chainLightningKillCount;
+        this.powerUpSystem.chainLightningKillCount = this.chainLightningKillCount;
         this.powerUpSystem.updateDisplay();
       } catch (e) {
         console.warn("⚠️ Failed to initialize WormPowerUpSystem:", e);
@@ -569,12 +646,14 @@ class WormSystem {
     // Add click handler
     wormElement.addEventListener("click", (e) => {
       e.stopPropagation();
-      this.handleWormClick(wormData);
+      this.handleWormInteraction(wormData, e);
     });
 
     Logger.debug(
       "✅",
-      `Worm ${wormId} spawned at (${position.x.toFixed(0)}, ${position.y.toFixed(0)}). Total worms: ${this.worms.length}`
+      `Worm ${wormId} spawned at (${position.x.toFixed(
+        0,
+      )}, ${position.y.toFixed(0)}). Total worms: ${this.worms.length}`,
     );
 
     // Start animation loop if not already running
@@ -592,7 +671,7 @@ class WormSystem {
     if (!slotData) {
       Logger.warn(
         "⚠️",
-        "All console slots occupied or locked, spawning worm normally"
+        "All console slots occupied or locked, spawning worm normally",
       );
       this.spawnWorm(); // Fallback to normal spawn
       return;
@@ -643,12 +722,13 @@ class WormSystem {
     const position = this.factory.calculateBorderSpawnPosition(
       index,
       total,
-      this.BORDER_MARGIN
+      this.BORDER_MARGIN,
     );
 
     // Use unified spawn helper
     return this._spawnWormWithConfig({
-      logMessage: `🐛 spawnWormFromBorder() called. Worm ${index + 1}/${total}. Current worms: ${this.worms.length}/${this.maxWorms}`,
+      logMessage: `🐛 spawnWormFromBorder() called. Worm ${index +
+        1}/${total}. Current worms: ${this.worms.length}/${this.maxWorms}`,
       position,
       wormIdPrefix: "border-worm",
       classNames: [],
@@ -663,7 +743,7 @@ class WormSystem {
     this.initialize();
 
     console.log(
-      `🟣 spawnPurpleWorm() called. Current worms: ${this.worms.length}/${this.maxWorms}`
+      `🟣 spawnPurpleWorm() called. Current worms: ${this.worms.length}/${this.maxWorms}`,
     );
 
     if (!this.spawnManager.canSpawn(this.worms.length)) {
@@ -681,7 +761,9 @@ class WormSystem {
       startX = helpRect.left + helpRect.width / 2;
       startY = helpRect.top + helpRect.height / 2;
       console.log(
-        `🟣 Purple worm spawning from help button at (${startX.toFixed(0)}, ${startY.toFixed(0)})`
+        `🟣 Purple worm spawning from help button at (${startX.toFixed(
+          0,
+        )}, ${startY.toFixed(0)})`,
       );
     } else {
       // REFACTORED: Use factory module for fallback position
@@ -725,10 +807,12 @@ class WormSystem {
     wormElement.addEventListener("click", wormData.clickHandler);
 
     console.log(
-      `🟣 Purple worm ${wormId} spawned from help button at (${startX.toFixed(0)}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`
+      `🟣 Purple worm ${wormId} spawned from help button at (${startX.toFixed(
+        0,
+      )}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`,
     );
     console.log(
-      `🟣 Purple worm moves slower, prioritizes RED symbols, and CLONES on click!`
+      `🟣 Purple worm moves slower, prioritizes RED symbols, and CLONES on click!`,
     );
 
     // Start animation loop if not already running
@@ -775,7 +859,7 @@ class WormSystem {
       (el) =>
         !el.dataset.stolen &&
         !el.classList.contains("space-symbol") &&
-        !el.classList.contains("completed-row-symbol")
+        !el.classList.contains("completed-row-symbol"),
     );
 
     // PURPLE WORM LOGIC: Only steal blue symbols when NO red symbols available
@@ -783,32 +867,32 @@ class WormSystem {
     if (worm.canStealBlue && worm.isPurple) {
       // First, try to get red (hidden) symbols only
       const redSymbols = allAvailableSymbols.filter((el) =>
-        el.classList.contains("hidden-symbol")
+        el.classList.contains("hidden-symbol"),
       );
 
       if (redSymbols.length > 0) {
         // Red symbols available - purple worm steals red symbols like normal
         availableSymbols = redSymbols;
         console.log(
-          `🟣 PURPLE WORM - ${redSymbols.length} red symbols available (preferring red)`
+          `🟣 PURPLE WORM - ${redSymbols.length} red symbols available (preferring red)`,
         );
       } else {
         // NO red symbols - now purple worm can steal blue symbols!
         const blueSymbols = allAvailableSymbols.filter((el) =>
-          el.classList.contains("revealed-symbol")
+          el.classList.contains("revealed-symbol"),
         );
         availableSymbols = blueSymbols;
         console.log(
-          `🟣 PURPLE WORM - NO red symbols! Stealing blue symbols (${blueSymbols.length} available)`
+          `🟣 PURPLE WORM - NO red symbols! Stealing blue symbols (${blueSymbols.length} available)`,
         );
       }
     } else {
       // Normal worm - only steal red (hidden) symbols
       availableSymbols = allAvailableSymbols.filter((el) =>
-        el.classList.contains("hidden-symbol")
+        el.classList.contains("hidden-symbol"),
       );
       console.log(
-        `🐛 Normal worm - ${availableSymbols.length} red symbols available`
+        `🐛 Normal worm - ${availableSymbols.length} red symbols available`,
       );
     }
 
@@ -849,7 +933,9 @@ class WormSystem {
     const wasBlueSymbol = targetSymbol.classList.contains("revealed-symbol");
 
     console.log(
-      `🐛 Worm ${worm.id} stealing ${wasBlueSymbol ? "BLUE" : "RED"} symbol: "${symbolValue}"`
+      `🐛 Worm ${worm.id} stealing ${
+        wasBlueSymbol ? "BLUE" : "RED"
+      } symbol: "${symbolValue}"`,
     );
 
     // Mark symbol as stolen and hide it
@@ -866,10 +952,15 @@ class WormSystem {
     worm.isRushingToTarget = false;
     worm.element.dataset.stolenSymbol = symbolValue;
     worm.wasBlueSymbol = wasBlueSymbol; // Track if it was blue
+    worm.path = null;
+    worm.pathIndex = 0;
+    worm.lastPathUpdate = 0;
 
     // ACTIVATE LSD FLICKER when stealing symbol!
     console.log(
-      `🌈 Worm ${worm.id} stole ${wasBlueSymbol ? "blue" : "red"} symbol - ACTIVATING LSD FLICKER with 20% SPEED BOOST!`
+      `🌈 Worm ${worm.id} stole ${
+        wasBlueSymbol ? "blue" : "red"
+      } symbol - ACTIVATING LSD FLICKER with 20% SPEED BOOST!`,
     );
     worm.isFlickering = true;
     worm.element.classList.add("flickering");
@@ -885,7 +976,7 @@ class WormSystem {
     worm.element.appendChild(stolenSymbolDiv);
 
     console.log(
-      `🐛 Worm now carrying "${symbolValue}" and heading back to console hole!`
+      `🐛 Worm now carrying "${symbolValue}" and heading back to console hole!`,
     );
 
     // GAME OVER CHECK: Did worm steal the last available symbol?
@@ -897,7 +988,7 @@ class WormSystem {
     // FIX: Query ALL symbol elements (not just revealed ones) because stolen symbols may not be in .revealed-symbol class
     // We need to check both revealed and hidden symbols to see if they're stolen
     const allSymbols = this.solutionContainer.querySelectorAll(
-      ".symbol:not(.space-symbol):not(.completed-row-symbol)"
+      ".symbol:not(.space-symbol):not(.completed-row-symbol)",
     );
 
     const availableSymbols = Array.from(allSymbols).filter((el) => {
@@ -910,7 +1001,7 @@ class WormSystem {
     });
 
     console.log(
-      `🎮 Game Over Check: ${availableSymbols.length} symbols available out of ${allSymbols.length} total`
+      `🎮 Game Over Check: ${availableSymbols.length} symbols available out of ${allSymbols.length} total`,
     );
 
     if (availableSymbols.length === 0 && allSymbols.length > 0) {
@@ -961,7 +1052,8 @@ class WormSystem {
     window.consoleManager.saveProgress();
 
     console.log(
-      `💔 PENALTY: Removed "${removedSymbol}" from console slot ${randomIndex + 1}`
+      `💔 PENALTY: Removed "${removedSymbol}" from console slot ${randomIndex +
+        1}`,
     );
   }
 
@@ -1007,7 +1099,7 @@ class WormSystem {
       worm,
       targetX,
       targetY,
-      speedMultiplier
+      speedMultiplier,
     );
   }
 
@@ -1104,7 +1196,7 @@ class WormSystem {
       worm.x,
       worm.y,
       worm.devilX,
-      worm.devilY
+      worm.devilY,
     );
     const dx = worm.devilX - worm.x;
     const dy = worm.devilY - worm.y;
@@ -1119,12 +1211,150 @@ class WormSystem {
       worm.y += worm.velocityY;
 
       // Rotate towards devil
-      worm.element.style.transform = `rotate(${Math.atan2(dy, dx) + Math.PI}rad)`;
+      worm.element.style.transform = `rotate(${Math.atan2(dy, dx) +
+        Math.PI}rad)`;
     }
 
     // Apply position
     this._applyWormPosition(worm);
     return true; // Handled, skip other behaviors
+  }
+
+  /**
+   * Select available symbols for a worm based on rules (purple vs green)
+   * @private
+   */
+  _getAvailableSymbolsForWorm(worm, symbolsSource) {
+    const allAvailableSymbols = /** @type {HTMLElement[]} */ (Array.from(
+      symbolsSource,
+    ).filter(
+      (el) =>
+        !el.dataset.stolen &&
+        !el.classList.contains("space-symbol") &&
+        !el.classList.contains("completed-row-symbol"),
+    ));
+
+    if (worm.isPurple && worm.canStealBlue) {
+      const redSymbols = allAvailableSymbols.filter((el) =>
+        el.classList.contains("hidden-symbol"),
+      );
+      if (redSymbols.length > 0) return redSymbols;
+
+      return allAvailableSymbols.filter((el) =>
+        el.classList.contains("revealed-symbol"),
+      );
+    }
+
+    return allAvailableSymbols.filter((el) =>
+      el.classList.contains("hidden-symbol"),
+    );
+  }
+
+  /**
+   * Resolve target element for a worm (keeps targetSymbol and targetElement synced)
+   * @private
+   */
+  _resolveTargetElement(worm, symbolsSource) {
+    const availableSymbols = this._getAvailableSymbolsForWorm(
+      worm,
+      symbolsSource,
+    );
+
+    if (availableSymbols.length === 0) {
+      return null;
+    }
+
+    let targetElement = null;
+
+    if (worm.targetSymbol) {
+      const normalizedTarget = normalizeSymbol(worm.targetSymbol);
+      targetElement = availableSymbols.find((el) => {
+        const elSymbol = normalizeSymbol(el.textContent);
+        return elSymbol === normalizedTarget;
+      });
+    }
+
+    if (!targetElement) {
+      /** @type {HTMLElement | null} */
+      let nearestSymbol = null;
+      let nearestDistance = Infinity;
+
+      availableSymbols.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        const symbolX = rect.left + rect.width / 2;
+        const symbolY = rect.top + rect.height / 2;
+        const distance = Math.sqrt(
+          Math.pow(worm.x - symbolX, 2) + Math.pow(worm.y - symbolY, 2),
+        );
+
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestSymbol = el;
+        }
+      });
+
+      if (nearestSymbol) {
+        targetElement = nearestSymbol;
+        worm.targetSymbol = nearestSymbol.textContent;
+      }
+    }
+
+    return targetElement;
+  }
+
+  /**
+   * Handle cursor evasion (highest priority during targeting)
+   * @private
+   */
+  _updateWormEvadingCursor(worm, viewportWidth, viewportHeight) {
+    if (worm.hasStolen || !this.evasion) return false;
+    if (!this.evasion.isCursorThreat(worm, this.cursorState)) return false;
+
+    const escape = this.evasion.getCursorEscapeVector(
+      worm,
+      this.cursorState,
+      worm.baseSpeed,
+    );
+
+    worm.velocityX = escape.velocityX;
+    worm.velocityY = escape.velocityY;
+    worm.direction = escape.direction;
+    worm.x += worm.velocityX;
+    worm.y += worm.velocityY;
+
+    this._constrainToBounds(worm, {
+      width: viewportWidth,
+      height: viewportHeight,
+    });
+    this._updateWormRotation(worm);
+
+    return true;
+  }
+
+  /**
+   * Apply escape burst after first click (double-click kill)
+   * @private
+   */
+  _updateWormEscapeBurst(worm, viewportWidth, viewportHeight) {
+    const now = Date.now();
+    if (!worm.escapeUntil || now > worm.escapeUntil || !worm.escapeVector) {
+      return false;
+    }
+
+    const speed = worm.baseSpeed * this.CURSOR_ESCAPE_MULTIPLIER;
+    worm.velocityX = worm.escapeVector.x * speed;
+    worm.velocityY = worm.escapeVector.y * speed;
+    worm.direction = Math.atan2(worm.velocityY, worm.velocityX);
+    worm.x += worm.velocityX;
+    worm.y += worm.velocityY;
+
+    this._constrainToBounds(worm, {
+      width: viewportWidth,
+      height: viewportHeight,
+    });
+    this._updateWormRotation(worm);
+
+    return true;
   }
 
   /**
@@ -1137,125 +1367,127 @@ class WormSystem {
       return false;
     }
 
-    // FIX: Purple worms need access to ALL symbols (including hidden), not just revealed
-    // Use getCachedAllSymbols() for purple worms, getCachedRevealedSymbols() for normal worms
     const symbolsToSearch = worm.isPurple
       ? this.getCachedAllSymbols()
       : this.getCachedRevealedSymbols();
-    let targetElement = null;
 
-    // REFACTORED: Use shared normalizeSymbol utility from utils.js
-    if (worm.targetSymbol) {
-      const normalizedTarget = normalizeSymbol(worm.targetSymbol);
-      targetElement = Array.from(symbolsToSearch).find((el) => {
-        const elSymbol = normalizeSymbol(el.textContent);
-        return elSymbol === normalizedTarget && !el.dataset.stolen;
-      });
+    const targetElement = this._resolveTargetElement(worm, symbolsToSearch);
+
+    if (!targetElement) {
+      console.log(`🐛 Worm ${worm.id} has no symbols to target, roaming...`);
+      worm.isRushingToTarget = false;
+      worm.path = null;
+      worm.pathIndex = 0;
+      return false;
     }
 
-    // PURPLE WORM FIX: If no targetSymbol, find nearest available symbol
-    if (!targetElement && worm.isRushingToTarget) {
-      const allSymbols = Array.from(symbolsToSearch).filter(
-        (el) =>
-          !el.dataset.stolen &&
-          !el.classList.contains("space-symbol") &&
-          !el.classList.contains("completed-row-symbol")
-      );
+    worm.targetElement = targetElement;
 
-      // Purple worms prefer red (hidden) symbols, fallback to blue
-      let availableSymbols;
-      if (worm.isPurple && worm.canStealBlue) {
-        const redSymbols = allSymbols.filter((el) =>
-          el.classList.contains("hidden-symbol")
-        );
-        if (redSymbols.length > 0) {
-          availableSymbols = redSymbols;
-          console.log(
-            `🟣 Purple worm ${worm.id} found ${redSymbols.length} red (hidden) symbols to target`
-          );
-        } else {
-          availableSymbols = allSymbols.filter((el) =>
-            el.classList.contains("revealed-symbol")
-          );
-          console.log(
-            `🟣 Purple worm ${worm.id} no red symbols, targeting ${availableSymbols.length} blue symbols`
-          );
-        }
-      } else {
-        availableSymbols = allSymbols.filter((el) =>
-          el.classList.contains("hidden-symbol")
-        );
-      }
+    const targetRect = targetElement.getBoundingClientRect();
+    let targetX = targetRect.left + targetRect.width / 2;
+    let targetY = targetRect.top + targetRect.height / 2;
 
-      if (availableSymbols.length > 0) {
-        // Find nearest symbol to worm
-        let nearestSymbol = null;
-        let nearestDistance = Infinity;
+    const distanceToTarget = this.movement.calculateDistance(
+      worm.x,
+      worm.y,
+      targetX,
+      targetY,
+    );
 
-        availableSymbols.forEach((el) => {
-          const rect = el.getBoundingClientRect();
-          const symbolX = rect.left + rect.width / 2;
-          const symbolY = rect.top + rect.height / 2;
-          const distance = Math.sqrt(
-            Math.pow(worm.x - symbolX, 2) + Math.pow(worm.y - symbolY, 2)
-          );
+    const aggression = this.aggressionModel
+      ? this.aggressionModel.getAggression(distanceToTarget)
+      : {
+          level: 0,
+          speedMultiplier: 1,
+          usePathfinding: false,
+          useIntercept: false,
+        };
 
-          if (distance < nearestDistance) {
-            nearestDistance = distance;
-            nearestSymbol = el;
-          }
-        });
+    worm.aggressionLevel = aggression.level;
 
-        if (nearestSymbol) {
-          worm.targetSymbol = nearestSymbol.textContent;
-          targetElement = nearestSymbol;
-          console.log(
-            `🟣 Purple worm ${worm.id} found nearest symbol: "${worm.targetSymbol}" (${nearestDistance.toFixed(0)}px away)`
-          );
-        }
-      }
+    if (aggression.useIntercept) {
+      const leadFactor = 0.12;
+      targetX += (targetX - worm.x) * leadFactor;
+      targetY += (targetY - worm.y) * leadFactor;
     }
 
-    if (targetElement) {
-      // Rush towards target symbol
-      const targetRect = targetElement.getBoundingClientRect();
-      const targetX = targetRect.left + targetRect.width / 2;
-      const targetY = targetRect.top + targetRect.height / 2;
+    const obstacles = this.obstacleMap
+      ? this.obstacleMap.getObstacleRects()
+      : [];
 
-      const velocity = this._calculateVelocityToTarget(
-        worm,
-        targetX,
-        targetY,
-        this.RUSH_SPEED_MULTIPLIER
-      );
-
-      // NEAR-MISS EXCITEMENT: Trigger warning when worm is close but not stealing yet
-      const NEAR_MISS_THRESHOLD = 80; // px
-      if (
-        velocity.distance < NEAR_MISS_THRESHOLD &&
-        velocity.distance >= this.DISTANCE_STEAL_SYMBOL
-      ) {
-        this._triggerNearMissWarning(worm, targetElement, velocity.distance);
-      }
-
-      if (velocity.distance < this.DISTANCE_STEAL_SYMBOL) {
-        // Reached target - steal it!
-        this._clearNearMissWarning();
-        this.stealSymbol(worm);
-      } else {
-        // Move towards target
-        worm.velocityX = velocity.velocityX;
-        worm.velocityY = velocity.velocityY;
-        worm.x += worm.velocityX;
-        worm.y += worm.velocityY;
+    if (aggression.usePathfinding && this.pathfinder) {
+      const now = Date.now();
+      if (!worm.path || now - worm.lastPathUpdate > this.PATH_RECALC_INTERVAL) {
+        const path = this.pathfinder.findPath(
+          { x: worm.x, y: worm.y },
+          { x: targetX, y: targetY },
+          { width: window.innerWidth, height: window.innerHeight },
+          obstacles,
+        );
+        worm.path = path.length > 0 ? path : null;
+        worm.pathIndex = 0;
+        worm.lastPathUpdate = now;
       }
     } else {
-      // Target disappeared, go back to roaming
-      console.log(`🐛 Worm ${worm.id} lost target, resuming roaming`);
-      worm.isRushingToTarget = false;
-      worm.roamingEndTime = Date.now() + this.ROAM_RESUME_DURATION;
-      return false; // Continue with roaming behavior
+      worm.path = null;
+      worm.pathIndex = 0;
     }
+
+    let waypoint = { x: targetX, y: targetY };
+    if (worm.path && worm.path.length > 0) {
+      const index = Math.min(worm.pathIndex, worm.path.length - 1);
+      waypoint = worm.path[index];
+
+      const waypointDistance = this.movement.calculateDistance(
+        worm.x,
+        worm.y,
+        waypoint.x,
+        waypoint.y,
+      );
+
+      if (
+        waypointDistance < this.DISTANCE_TARGET_RUSH &&
+        worm.pathIndex < worm.path.length - 1
+      ) {
+        worm.pathIndex += 1;
+      }
+    }
+
+    // NEAR-MISS EXCITEMENT: Trigger warning when worm is close but not stealing yet
+    const NEAR_MISS_THRESHOLD = 80; // px
+    if (
+      distanceToTarget < NEAR_MISS_THRESHOLD &&
+      distanceToTarget >= this.DISTANCE_STEAL_SYMBOL
+    ) {
+      this._triggerNearMissWarning(worm, targetElement, distanceToTarget);
+    }
+
+    if (distanceToTarget < this.DISTANCE_STEAL_SYMBOL) {
+      // Reached target - steal it on direct contact
+      this._clearNearMissWarning();
+      this.stealSymbol(worm);
+      return true;
+    }
+
+    const velocity = this._calculateVelocityToTarget(
+      worm,
+      waypoint.x,
+      waypoint.y,
+      aggression.speedMultiplier,
+    );
+
+    worm.velocityX = velocity.velocityX;
+    worm.velocityY = velocity.velocityY;
+
+    if (this.evasion) {
+      const avoidance = this.evasion.applyObstacleAvoidance(worm, obstacles);
+      worm.velocityX += avoidance.x;
+      worm.velocityY += avoidance.y;
+    }
+
+    worm.direction = Math.atan2(worm.velocityY, worm.velocityX);
+    worm.x += worm.velocityX;
+    worm.y += worm.velocityY;
 
     return true; // Handled
   }
@@ -1271,6 +1503,16 @@ class WormSystem {
     }
 
     this._applyCrawlMovement(worm);
+
+    if (this.evasion && this.obstacleMap) {
+      const avoidance = this.evasion.applyObstacleAvoidance(
+        worm,
+        this.obstacleMap.getObstacleRects(),
+      );
+      worm.x += avoidance.x;
+      worm.y += avoidance.y;
+    }
+
     this._constrainToBounds(worm, {
       width: viewportWidth,
       height: viewportHeight,
@@ -1298,7 +1540,7 @@ class WormSystem {
       worm,
       targetX,
       targetY,
-      1.0
+      1.0,
     );
 
     // Trigger pull-in animation when getting close to console
@@ -1313,10 +1555,10 @@ class WormSystem {
     if (velocity.distance < this.DISTANCE_CONSOLE_ARRIVAL) {
       // Reached console hole - escape with symbol!
       console.log(
-        `🐛 Worm ${worm.id} escaped to console with symbol "${worm.stolenSymbol}"!`
+        `🐛 Worm ${worm.id} escaped to console with symbol "${worm.stolenSymbol}"!`,
       );
       console.log(
-        `💀 Symbol "${worm.stolenSymbol}" stays HIDDEN until user clicks it again in Panel C`
+        `💀 Symbol "${worm.stolenSymbol}" stays HIDDEN until user clicks it again in Panel C`,
       );
       this.removeWorm(worm);
       return true; // Handled and removed
@@ -1353,7 +1595,7 @@ class WormSystem {
           worm.targetConsoleSlot = emptySlotData.element;
           worm.targetConsoleSlotIndex = emptySlotData.index;
           console.log(
-            `🟣 Purple worm ${worm.id} heading to exit at console slot ${emptySlotData.index}`
+            `🟣 Purple worm ${worm.id} heading to exit at console slot ${emptySlotData.index}`,
           );
         }
       }
@@ -1368,7 +1610,7 @@ class WormSystem {
           worm,
           targetX,
           targetY,
-          1.0
+          1.0,
         );
 
         // Trigger pull-in animation when getting close to console
@@ -1413,7 +1655,6 @@ class WormSystem {
       return;
     }
 
-    const currentTime = Date.now();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
@@ -1424,19 +1665,30 @@ class WormSystem {
       worm.crawlPhase =
         (worm.crawlPhase + this.CRAWL_PHASE_INCREMENT) % (Math.PI * 2);
 
-      // Check if roaming period has ended and worm should steal
-      if (
-        !worm.hasStolen &&
-        !worm.isRushingToTarget &&
-        currentTime >= worm.roamingEndTime
-      ) {
-        this.stealSymbol(worm);
+      // Always keep worms targeting when symbols exist
+      if (!worm.hasStolen && !worm.isRushingToTarget) {
+        const symbolsToSearch = worm.isPurple
+          ? this.getCachedAllSymbols()
+          : this.getCachedRevealedSymbols();
+        const targetElement = this._resolveTargetElement(worm, symbolsToSearch);
+        if (targetElement) {
+          worm.isRushingToTarget = true;
+          worm.targetElement = targetElement;
+        }
       }
 
       // REFACTORED: Use state handlers for clean separation of concerns
-      // Priority order: Devil > Target Rush > Console Return > Carrying > Roaming
+      // Priority order: Devil > Escape Burst > Cursor Evasion > Target Rush > Console Return > Carrying > Roaming
       if (this._updateWormRushingToDevil(worm)) {
         return; // Devil rush handled, skip other behaviors
+      }
+
+      if (this._updateWormEscapeBurst(worm, viewportWidth, viewportHeight)) {
+        return;
+      }
+
+      if (this._updateWormEvadingCursor(worm, viewportWidth, viewportHeight)) {
+        return;
       }
 
       if (this._updateWormRushingToTarget(worm)) {
@@ -1467,6 +1719,53 @@ class WormSystem {
   // ========================================
   // WORM CLICK HANDLERS & CLONING
   // ========================================
+
+  handleWormInteraction(worm, event) {
+    if (!worm || !worm.active) return;
+
+    if (worm.isPurple) {
+      this.handlePurpleWormClick(worm);
+      return;
+    }
+
+    const now = Date.now();
+    if (
+      !worm.lastHitTime ||
+      now - worm.lastHitTime > this.WORM_CLICK_GRACE_WINDOW
+    ) {
+      worm.lastHitTime = now;
+      this._triggerWormEscape(worm, event);
+      return;
+    }
+
+    worm.lastHitTime = 0;
+    this.handleWormClick(worm);
+  }
+
+  _triggerWormEscape(worm, event) {
+    const now = Date.now();
+    worm.escapeUntil = now + this.CURSOR_ESCAPE_DURATION;
+
+    const cursor = this.cursorState;
+    let dx = Math.random() - 0.5;
+    let dy = Math.random() - 0.5;
+
+    if (cursor && cursor.isActive) {
+      dx = worm.x - cursor.x;
+      dy = worm.y - cursor.y;
+    } else if (event && typeof event.clientX === "number") {
+      dx = worm.x - event.clientX;
+      dy = worm.y - event.clientY;
+    }
+
+    const distance = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+    worm.escapeVector = {
+      x: dx / distance,
+      y: dy / distance,
+    };
+
+    console.log(`🐛 Worm ${worm.id} escaped click - first strike used`);
+  }
 
   handleWormClick(worm) {
     if (!worm.active) return;
@@ -1508,7 +1807,7 @@ class WormSystem {
     if (!parentWorm.active) return;
 
     console.log(
-      `🟣 Purple worm ${parentWorm.id} cloning! Creating purple clone...`
+      `🟣 Purple worm ${parentWorm.id} cloning! Creating purple clone...`,
     );
 
     // Check if we can spawn more worms
@@ -1534,7 +1833,7 @@ class WormSystem {
     for (let i = 0; i < 5; i++) {
       const segment = document.createElement("div");
       segment.className = "worm-segment";
-      segment.style.setProperty("--segment-index", i);
+      segment.style.setProperty("--segment-index", String(i));
       wormBody.appendChild(segment);
     }
 
@@ -1546,15 +1845,15 @@ class WormSystem {
       0,
       Math.min(
         window.innerWidth - 50,
-        parentWorm.x + (Math.random() - 0.5) * offset * 2
-      )
+        parentWorm.x + (Math.random() - 0.5) * offset * 2,
+      ),
     );
     const newY = Math.max(
       0,
       Math.min(
         window.innerHeight - 50,
-        parentWorm.y + (Math.random() - 0.5) * offset * 2
-      )
+        parentWorm.y + (Math.random() - 0.5) * offset * 2,
+      ),
     );
 
     newWormElement.style.left = `${newX}px`;
@@ -1590,6 +1889,13 @@ class WormSystem {
       fromConsole: false,
       crawlPhase: Math.random() * Math.PI * 2,
       direction: Math.random() * Math.PI * 2,
+      aggressionLevel: 0,
+      path: null,
+      pathIndex: 0,
+      lastPathUpdate: 0,
+      lastHitTime: 0,
+      escapeUntil: 0,
+      escapeVector: null,
     };
 
     this.worms.push(cloneData);
@@ -1610,7 +1916,7 @@ class WormSystem {
     }, this.CLONE_BIRTH_ANIMATION);
 
     console.log(
-      `🟣 Purple worm cloned! New clone ${newWormId}. Total worms: ${this.worms.length}`
+      `🟣 Purple worm cloned! New clone ${newWormId}. Total worms: ${this.worms.length}`,
     );
 
     // Start animation loop if not already running
@@ -1633,7 +1939,7 @@ class WormSystem {
       Logger.warn(
         "⚠️",
         "explodeWorm called with worm missing element",
-        worm.id
+        worm.id,
       );
       // Still try to clean up worm from array
       this.worms = this.worms.filter((w) => w.id !== worm.id);
@@ -1641,7 +1947,11 @@ class WormSystem {
     }
 
     console.log(
-      `💥 EXPLODING worm ${worm.id} (${isRainKill ? "RAIN KILL" : "direct click"}${isChainReaction ? " - CHAIN REACTION" : ""}) and returning symbol "${worm.stolenSymbol}"!`
+      `💥 EXPLODING worm ${worm.id} (${
+        isRainKill ? "RAIN KILL" : "direct click"
+      }${isChainReaction ? " - CHAIN REACTION" : ""}) and returning symbol "${
+        worm.stolenSymbol
+      }"!`,
     );
 
     // FIX: Mark worm inactive IMMEDIATELY to stop movement during explosion animation
@@ -1657,7 +1967,7 @@ class WormSystem {
           wasPurple: worm.isPurple || false,
           stolenSymbol: worm.stolenSymbol || null,
         },
-      })
+      }),
     );
 
     // AOE DAMAGE: Check for nearby worms and trigger chain explosions
@@ -1669,7 +1979,7 @@ class WormSystem {
 
     if (nearbyWorms.length > 0) {
       console.log(
-        `💥 CHAIN REACTION! ${nearbyWorms.length} worms caught in blast radius!`
+        `💥 CHAIN REACTION! ${nearbyWorms.length} worms caught in blast radius!`,
       );
       // Delay chain explosions slightly for visual effect
       setTimeout(() => {
@@ -1726,8 +2036,14 @@ class WormSystem {
 
       particle.style.left = `${x}px`;
       particle.style.top = `${y}px`;
-      particle.style.setProperty("--angle-x", Math.cos(angle) * distance);
-      particle.style.setProperty("--angle-y", Math.sin(angle) * distance);
+      particle.style.setProperty(
+        "--angle-x",
+        String(Math.cos(angle) * distance),
+      );
+      particle.style.setProperty(
+        "--angle-y",
+        String(Math.sin(angle) * distance),
+      );
 
       this.wormContainer.appendChild(particle);
 
@@ -1790,11 +2106,13 @@ class WormSystem {
           distance: distance,
           urgencyLevel: urgencyLevel,
         },
-      })
+      }),
     );
 
     console.log(
-      `⚠️ NEAR MISS! Worm ${worm.id} is ${distance.toFixed(0)}px from stealing "${worm.targetSymbol}"!`
+      `⚠️ NEAR MISS! Worm ${worm.id} is ${distance.toFixed(
+        0,
+      )}px from stealing "${worm.targetSymbol}"!`,
     );
   }
 
@@ -1859,7 +2177,7 @@ class WormSystem {
 
     this.crossPanelContainer.appendChild(powerUp);
     console.log(
-      `✨ Power-up "${type}" dropped at (${x.toFixed(0)}, ${y.toFixed(0)})`
+      `✨ Power-up "${type}" dropped at (${x.toFixed(0)}, ${y.toFixed(0)})`,
     );
 
     // Auto-remove after 10 seconds if not collected
@@ -1886,7 +2204,7 @@ class WormSystem {
       if (this.powerUps[type] > 1) {
         this.chainLightningKillCount += 2;
         console.log(
-          `⚡ Chain Lightning kill count increased to ${this.chainLightningKillCount}`
+          `⚡ Chain Lightning kill count increased to ${this.chainLightningKillCount}`,
         );
       }
     }
@@ -1907,7 +2225,7 @@ class WormSystem {
   // Update power-up display on console
   updatePowerUpDisplay() {
     console.log(
-      `📊 Power-ups: ⚡${this.powerUps.chainLightning} 🕷️${this.powerUps.spider} 👹${this.powerUps.devil}`
+      `📊 Power-ups: ⚡${this.powerUps.chainLightning} 🕷️${this.powerUps.spider} 👹${this.powerUps.devil}`,
     );
 
     // PERFORMANCE: Use cached elements
@@ -1951,7 +2269,11 @@ class WormSystem {
     powerUpDisplay.innerHTML = `
             <div class="power-up-item" data-type="chainLightning" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s; position: relative;">
                 ⚡ ${this.powerUps.chainLightning}
-                ${this.powerUps.chainLightning > 0 ? `<div style="position: absolute; top: -10px; right: -10px; font-size: 12px; color: #0ff;">${this.chainLightningKillCount}</div>` : ""}
+                ${
+                  this.powerUps.chainLightning > 0
+                    ? `<div style="position: absolute; top: -10px; right: -10px; font-size: 12px; color: #0ff;">${this.chainLightningKillCount}</div>`
+                    : ""
+                }
             </div>
             <div class="power-up-item" data-type="spider" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s;">
                 🕷️ ${this.powerUps.spider}
@@ -2065,7 +2387,7 @@ class WormSystem {
   // Chain Lightning: Click worm to kill 5 + nearby worms
   activateChainLightning() {
     console.log(
-      `⚡ CHAIN LIGHTNING ACTIVATED! Click a worm to unleash the power!`
+      `⚡ CHAIN LIGHTNING ACTIVATED! Click a worm to unleash the power!`,
     );
 
     // Calculate kill count (5 for first use, then +2 for each subsequent use)
@@ -2082,17 +2404,17 @@ class WormSystem {
         .filter((w) => w.active)
         .sort((a, b) => {
           const distA = Math.sqrt(
-            Math.pow(a.x - worm.x, 2) + Math.pow(a.y - worm.y, 2)
+            Math.pow(a.x - worm.x, 2) + Math.pow(a.y - worm.y, 2),
           );
           const distB = Math.sqrt(
-            Math.pow(b.x - worm.x, 2) + Math.pow(b.y - worm.y, 2)
+            Math.pow(b.x - worm.x, 2) + Math.pow(b.y - worm.y, 2),
           );
           return distA - distB;
         })
         .slice(0, killCount);
 
       console.log(
-        `⚡ Killing ${sortedWorms.length} worms with chain lightning!`
+        `⚡ Killing ${sortedWorms.length} worms with chain lightning!`,
       );
 
       // Visual effect
@@ -2105,10 +2427,17 @@ class WormSystem {
                         left: ${worm.x}px;
                         top: ${worm.y}px;
                         width: 3px;
-                        height: ${Math.sqrt(Math.pow(targetWorm.x - worm.x, 2) + Math.pow(targetWorm.y - worm.y, 2))}px;
+                        height: ${Math.sqrt(
+                          Math.pow(targetWorm.x - worm.x, 2) +
+                            Math.pow(targetWorm.y - worm.y, 2),
+                        )}px;
                         background: linear-gradient(180deg, #fff, #0ff, #fff);
                         transform-origin: top left;
-                        transform: rotate(${Math.atan2(targetWorm.y - worm.y, targetWorm.x - worm.x) + Math.PI / 2}rad);
+                        transform: rotate(${Math.atan2(
+                          targetWorm.y - worm.y,
+                          targetWorm.x - worm.x,
+                        ) +
+                          Math.PI / 2}rad);
                         z-index: 10003;
                         box-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
                         pointer-events: none;
@@ -2232,11 +2561,11 @@ class WormSystem {
       const closest = activeWorms.reduce((prev, curr) => {
         const prevDist = Math.sqrt(
           Math.pow(prev.x - spiderData.x, 2) +
-            Math.pow(prev.y - spiderData.y, 2)
+            Math.pow(prev.y - spiderData.y, 2),
         );
         const currDist = Math.sqrt(
           Math.pow(curr.x - spiderData.x, 2) +
-            Math.pow(curr.y - spiderData.y, 2)
+            Math.pow(curr.y - spiderData.y, 2),
         );
         return currDist < prevDist ? curr : prev;
       });
@@ -2246,7 +2575,7 @@ class WormSystem {
         spiderData.x,
         spiderData.y,
         closest.x,
-        closest.y
+        closest.y,
       );
       const dx = closest.x - spiderData.x;
       const dy = closest.y - spiderData.y;
@@ -2254,7 +2583,7 @@ class WormSystem {
       if (dist < 30) {
         // Convert worm to spider!
         console.log(
-          `🕷️ Spider converted worm ${closest.id} to another spider!`
+          `🕷️ Spider converted worm ${closest.id} to another spider!`,
         );
         this.removeWorm(closest);
         this.spawnSpider(closest.x, closest.y);
@@ -2328,7 +2657,7 @@ class WormSystem {
 
       activeWorms.forEach((worm) => {
         const dist = Math.sqrt(
-          Math.pow(worm.x - devilData.x, 2) + Math.pow(worm.y - devilData.y, 2)
+          Math.pow(worm.x - devilData.x, 2) + Math.pow(worm.y - devilData.y, 2),
         );
 
         if (dist < this.DEVIL_PROXIMITY_DISTANCE) {
@@ -2399,7 +2728,8 @@ class WormSystem {
     splat.style.position = "fixed"; // Use fixed positioning to place at exact coordinates
 
     // Random rotation for variation
-    splat.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 360}deg)`;
+    splat.style.transform = `translate(-50%, -50%) rotate(${Math.random() *
+      360}deg)`;
 
     // FIX: Append to cross-panel container so splat appears at worm's actual death location
     this.crossPanelContainer.appendChild(splat);
@@ -2465,7 +2795,7 @@ class WormSystem {
     }
 
     console.log(
-      `🐛 Worm ${wormData.id} removed. Active worms: ${this.worms.length}`
+      `🐛 Worm ${wormData.id} removed. Active worms: ${this.worms.length}`,
     );
   }
 
@@ -2475,7 +2805,7 @@ class WormSystem {
 
   killAllWorms() {
     console.log(
-      `💀 KILLING ALL WORMS! Total worms to kill: ${this.worms.length}`
+      `💀 KILLING ALL WORMS! Total worms to kill: ${this.worms.length}`,
     );
 
     // Create a copy of the worms array to iterate over
@@ -2523,8 +2853,9 @@ class WormSystem {
 
     // Clear stolen flags from symbols
     if (this.solutionContainer) {
-      const stolenSymbols =
-        this.solutionContainer.querySelectorAll("[data-stolen]");
+      const stolenSymbols = this.solutionContainer.querySelectorAll(
+        "[data-stolen]",
+      );
       stolenSymbols.forEach((el) => {
         el.style.visibility = "visible";
         el.classList.remove("stolen");

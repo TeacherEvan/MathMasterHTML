@@ -44,7 +44,6 @@ function initSymbolRain() {
   const SYMBOLS_PER_WAVE = 7; // INCREASED from 5 to 7 symbols at a time (40% more)
   const WAVE_INTERVAL = 80; // REDUCED from 110 to 80ms (27% faster waves)
   let isInitialPopulation = true; // Flag to disable random spawning during startup
-  let wavesSpawned = 0;
 
   // Guaranteed spawn system - ensure all symbols appear every 5 seconds
   const lastSymbolSpawnTimestamp = {};
@@ -57,7 +56,7 @@ function initSymbolRain() {
   const FACE_REVEAL_INTERVAL_MS = 5000; // 5 seconds
   const FACE_REVEAL_DURATION_MS = 1500; // 1.5 seconds reveal duration
   let lastFaceRevealTime = Date.now();
-  let activeFaceReveals = new Set(); // Track symbols currently in face reveal state
+  const activeFaceReveals = new Set(); // Track symbols currently in face reveal state
 
   let columnCount = 0;
   let activeFallingSymbols = [];
@@ -158,7 +157,7 @@ function initSymbolRain() {
   function createFallingSymbol(
     column,
     isInitialPopulation = false,
-    forcedSymbol = null
+    forcedSymbol = null,
   ) {
     const symbol = getSymbolFromPool(); // Use pooled element
     symbol.className = "falling-symbol";
@@ -170,7 +169,8 @@ function initSymbolRain() {
       column * columnWidth + columnWidth / 2 + horizontalOffset + "px";
 
     if (isInitialPopulation) {
-      symbol.style.top = `${Math.random() * symbolRainContainer.offsetHeight}px`;
+      symbol.style.top = `${Math.random() *
+        symbolRainContainer.offsetHeight}px`;
     } else {
       symbol.style.top = "-50px";
     }
@@ -213,8 +213,6 @@ function initSymbolRain() {
         createFallingSymbol(column, true);
       }
 
-      wavesSpawned++;
-
       // Schedule next wave
       setTimeout(() => spawnWave(waveNumber + 1), WAVE_INTERVAL);
     }
@@ -241,7 +239,7 @@ function initSymbolRain() {
 
     // Dispatch event immediately (no delay)
     document.dispatchEvent(
-      new CustomEvent("symbolClicked", { detail: { symbol: clickedSymbol } })
+      new CustomEvent("symbolClicked", { detail: { symbol: clickedSymbol } }),
     );
 
     // Remove from DOM and clean up after animation
@@ -250,7 +248,7 @@ function initSymbolRain() {
         symbolElement.parentNode.removeChild(symbolElement);
       }
       activeFallingSymbols = activeFallingSymbols.filter(
-        (s) => s.element !== symbolElement
+        (s) => s.element !== symbolElement,
       );
       // PERFORMANCE: Return element to pool for reuse
       returnSymbolToPool(symbolElement);
@@ -379,10 +377,15 @@ function initSymbolRain() {
     const currentTime = Date.now();
     if (currentTime - lastFaceRevealTime >= FACE_REVEAL_INTERVAL_MS) {
       // Trigger face reveal for a random selection of visible symbols
-      const visibleSymbols = activeFallingSymbols.filter(s => s.y > 0 && s.y < containerHeight);
+      const visibleSymbols = activeFallingSymbols.filter(
+        (s) => s.y > 0 && s.y < containerHeight,
+      );
       if (visibleSymbols.length > 0) {
         // Reveal 3-5 symbols at once for dramatic effect
-        const revealCount = Math.min(3 + Math.floor(Math.random() * 3), visibleSymbols.length);
+        const revealCount = Math.min(
+          3 + Math.floor(Math.random() * 3),
+          visibleSymbols.length,
+        );
         for (let i = 0; i < revealCount; i++) {
           const randomIndex = Math.floor(Math.random() * visibleSymbols.length);
           const symbolObj = visibleSymbols.splice(randomIndex, 1)[0]; // Remove to avoid double selection
@@ -393,10 +396,11 @@ function initSymbolRain() {
             activeFaceReveals.add(symbolObj);
 
             // Apply face reveal styling
-            symbolObj.element.classList.add('face-reveal');
-            symbolObj.element.style.transform = 'scale(1.3)';
-            symbolObj.element.style.textShadow = '0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff';
-            symbolObj.element.style.filter = 'brightness(1.5)';
+            symbolObj.element.classList.add("face-reveal");
+            symbolObj.element.style.transform = "scale(1.3)";
+            symbolObj.element.style.textShadow =
+              "0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff";
+            symbolObj.element.style.filter = "brightness(1.5)";
           }
         }
       }
@@ -405,12 +409,15 @@ function initSymbolRain() {
 
     // FACE REVEAL: Clean up expired face reveals
     for (const symbolObj of activeFaceReveals) {
-      if (currentTime - symbolObj.faceRevealStartTime >= FACE_REVEAL_DURATION_MS) {
+      if (
+        currentTime - symbolObj.faceRevealStartTime >=
+        FACE_REVEAL_DURATION_MS
+      ) {
         symbolObj.isInFaceReveal = false;
-        symbolObj.element.classList.remove('face-reveal');
-        symbolObj.element.style.transform = '';
-        symbolObj.element.style.textShadow = '';
-        symbolObj.element.style.filter = '';
+        symbolObj.element.classList.remove("face-reveal");
+        symbolObj.element.style.transform = "";
+        symbolObj.element.style.textShadow = "";
+        symbolObj.element.style.filter = "";
         activeFaceReveals.delete(symbolObj);
       }
     }
@@ -527,11 +534,11 @@ function initSymbolRain() {
         burstIndex++
       ) {
         const randomArrayIndex = Math.floor(
-          Math.random() * availableColumnIndices.length
+          Math.random() * availableColumnIndices.length,
         );
         const selectedColumnIndex = availableColumnIndices.splice(
           randomArrayIndex,
-          1
+          1,
         )[0]; // Remove selected column
         const randomSymbol =
           symbols[Math.floor(Math.random() * symbols.length)];
@@ -611,7 +618,7 @@ function initSymbolRain() {
         handleSymbolClick(fallingSymbolElement, event);
       }
     },
-    { passive: false }
+    { passive: false },
   ); // Non-passive to allow preventDefault
 
   symbolRainContainer.addEventListener("pointerup", () => {
@@ -665,7 +672,7 @@ function initSymbolRain() {
     isMobileMode = isMobile;
   });
   // Expose symbol count for performance monitoring
-  window.getActiveSymbolCount = function () {
+  window.getActiveSymbolCount = function() {
     return activeFallingSymbols.length;
   };
 }

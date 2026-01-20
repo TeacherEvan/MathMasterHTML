@@ -184,11 +184,11 @@ class UIBoundaryManager {
 
     const xOverlap = Math.max(
       0,
-      Math.min(boxA.right, boxB.right) - Math.max(boxA.x, boxB.x)
+      Math.min(boxA.right, boxB.right) - Math.max(boxA.x, boxB.x),
     );
     const yOverlap = Math.max(
       0,
-      Math.min(boxA.bottom, boxB.bottom) - Math.max(boxA.y, boxB.y)
+      Math.min(boxA.bottom, boxB.bottom) - Math.max(boxA.y, boxB.y),
     );
 
     return xOverlap * yOverlap;
@@ -284,14 +284,14 @@ class UIBoundaryManager {
 
     console.warn(
       `📐 OVERLAP DETECTED: "${elementA}" overlaps with "${elementB}"`,
-      details
+      details,
     );
 
     // Dispatch event for external listeners
     document.dispatchEvent(
       new CustomEvent("uiOverlapDetected", {
         detail: logEntry,
-      })
+      }),
     );
   }
 
@@ -448,14 +448,14 @@ class UIBoundaryManager {
     style.transform = "none";
 
     console.log(
-      `📐 Repositioned "${id}" to (${newPosition.x}, ${newPosition.y})`
+      `📐 Repositioned "${id}" to (${newPosition.x}, ${newPosition.y})`,
     );
 
     // Dispatch event
     document.dispatchEvent(
       new CustomEvent("uiElementRepositioned", {
         detail: { id, newPosition },
-      })
+      }),
     );
   }
 
@@ -484,7 +484,7 @@ class UIBoundaryManager {
     if (entry.fixed) return;
 
     const higherPriorityOverlaps = overlaps.filter(
-      (o) => o.entry.priority > entry.priority
+      (o) => o.entry.priority > entry.priority,
     );
     if (higherPriorityOverlaps.length === 0) {
       // This element has equal or higher priority, reposition the others
@@ -555,10 +555,10 @@ class UIBoundaryManager {
 
     this._checkIntervalId = setInterval(
       this._periodicCheck,
-      this.config.checkInterval
+      this.config.checkInterval,
     );
     console.log(
-      `📐 Started periodic overlap check (every ${this.config.checkInterval}ms)`
+      `📐 Started periodic overlap check (every ${this.config.checkInterval}ms)`,
     );
   }
 
@@ -607,7 +607,7 @@ class UIBoundaryManager {
     }
 
     const violations = [];
-    let adjustedPosition = { ...proposedPosition };
+    const adjustedPosition = { ...proposedPosition };
 
     const box = this.getBoundingBox(entry.element);
     const testBox = {

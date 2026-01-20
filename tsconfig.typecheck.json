@@ -1,0 +1,39 @@
+{
+    "extends": "./jsconfig.json",
+    "compilerOptions": {
+        "noEmit": true,
+        "checkJs": true,
+        "allowJs": true,
+        "maxNodeModuleJsDepth": 0,
+        "lib": [
+            "ES2021",
+            "DOM"
+        ],
+        "types": [
+            "./types/global"
+        ]
+    },
+    "include": [
+        "js/worm.js",
+        "js/worm-factory.js",
+        "js/worm-movement.js",
+        "js/worm-spawn-manager.js",
+        "js/worm-aggression.js",
+        "js/worm-cursor-tracker.js",
+        "js/worm-pathfinding.js",
+        "js/worm-obstacle-map.js",
+        "js/worm-evasion.js",
+        "types/global.d.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "tests/**",
+        "scripts/**",
+        "service-worker.js",
+        "playwright.config.js",
+        "eslint.config.js",
+        "js/worm-behavior.js",
+        "js/worm-constants.js",
+        "js/worm-renderer.js"
+    ]
+}

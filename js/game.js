@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
         !cachedStepSymbols
       ) {
         cachedStepSymbols = solutionContainer.querySelectorAll(
-          `.solution-symbol[data-step-index="${stepIndex}"]`
+          `.solution-symbol[data-step-index="${stepIndex}"]`,
         );
         cachedStepIndex = stepIndex;
         cacheInvalidated = false;
@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
               currentSymbol: 0,
             });
           }
-        } catch (_e) {
+        } catch {
           // Skip malformed problems silently
         }
       }
@@ -206,7 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
       clarifyButton.addEventListener("click", () => {
         const question = window.prompt(
           "What is unclear or ambiguous? Ask a clarification question:",
-          ""
+          "",
         );
 
         if (!question || question.trim().length === 0) return;
@@ -298,7 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // PERFORMANCE: Use cached symbols
       const currentStepSymbols = getCachedStepSymbols(currentSolutionStepIndex);
       const hiddenSymbols = Array.from(currentStepSymbols).filter((el) =>
-        el.classList.contains("hidden-symbol")
+        el.classList.contains("hidden-symbol"),
       );
 
       if (hiddenSymbols.length > 0) {
@@ -317,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // REFACTORED: Use shared normalizeSymbol utility from utils.js
         const normalizedClicked = normalizeSymbol(clickedSymbol);
         const normalizedExpected = expectedSymbols.map((s) =>
-          normalizeSymbol(s)
+          normalizeSymbol(s),
         );
 
         return normalizedExpected.includes(normalizedClicked);
@@ -333,7 +333,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // PERFORMANCE: Use cached symbols
       const currentStepSymbols = getCachedStepSymbols(currentSolutionStepIndex);
       const hiddenSymbols = Array.from(currentStepSymbols).filter((el) =>
-        el.classList.contains("hidden-symbol")
+        el.classList.contains("hidden-symbol"),
       );
 
       for (const span of hiddenSymbols) {
@@ -349,7 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
           document.dispatchEvent(
             new CustomEvent("symbolRevealed", {
               detail: { symbol: targetSymbol, element: span },
-            })
+            }),
           );
 
           return true;
@@ -417,7 +417,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.dispatchEvent(
           new CustomEvent("purpleWormTriggered", {
             detail: { wrongAnswerCount: consecutiveWrongAnswers },
-          })
+          }),
         );
         // Reset counter after triggering (can trigger again with 2 more wrong answers)
         consecutiveWrongAnswers = 0;
@@ -431,7 +431,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function checkLineCompletion() {
       // Check if current step has any hidden symbols left
       const currentStepHiddenSymbols = solutionContainer.querySelectorAll(
-        `[data-step-index="${currentSolutionStepIndex}"].hidden-symbol`
+        `[data-step-index="${currentSolutionStepIndex}"].hidden-symbol`,
       );
 
       if (currentStepHiddenSymbols.length === 0) {
@@ -450,7 +450,7 @@ document.addEventListener("DOMContentLoaded", () => {
               isLastStep:
                 currentSolutionStepIndex >= currentProblem.steps.length - 1,
             },
-          })
+          }),
         );
 
         // Move to next step if available
@@ -519,7 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
     /** Create celebration particles around the completed row */
     function createCelebrationParticles(stepIndex) {
       const row = solutionContainer.querySelector(
-        `[data-step-index="${stepIndex}"]`
+        `[data-step-index="${stepIndex}"]`,
       );
       if (!row) return;
 
@@ -609,7 +609,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function transformRowToPulsatingCyan(stepIndex) {
       // Get ALL non-hidden, non-space symbols in the completed row
       const rowSymbols = solutionContainer.querySelectorAll(
-        `[data-step-index="${stepIndex}"].solution-symbol:not(.hidden-symbol):not(.space-symbol):not(.completed-row-symbol)`
+        `[data-step-index="${stepIndex}"].solution-symbol:not(.hidden-symbol):not(.space-symbol):not(.completed-row-symbol)`,
       );
 
       rowSymbols.forEach((symbol, index) => {
@@ -619,19 +619,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Use CSS custom property for staggered animation
         symbol.style.setProperty("--stagger-delay", `${index * 30}ms`);
-        symbol.style.animation = `symbol-pop 0.3s ease-out ${index * 30}ms, pulsating-cyan 2s ease-in-out ${index * 30 + 300}ms infinite`;
+        symbol.style.animation = `symbol-pop 0.3s ease-out ${index *
+          30}ms, pulsating-cyan 2s ease-in-out ${index * 30 + 300}ms infinite`;
       });
     }
 
     /** Check if all solution steps have been revealed */
     function checkProblemCompletion() {
       // Check if all symbols in all steps have been revealed (excluding stolen ones)
-      const hiddenSymbols =
-        solutionContainer.querySelectorAll(".hidden-symbol");
+      const hiddenSymbols = solutionContainer.querySelectorAll(
+        ".hidden-symbol",
+      );
 
       // Filter out stolen symbols - they don't block completion
       const nonStolenHiddenSymbols = Array.from(hiddenSymbols).filter(
-        (el) => !el.dataset.stolen
+        (el) => !el.dataset.stolen,
       );
 
       if (nonStolenHiddenSymbols.length === 0) {
@@ -679,7 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // REFACTORED: Use shared normalizeSymbol utility from utils.js
       const normalizedClicked = normalizeSymbol(clicked);
       const stolenSymbols = solutionContainer.querySelectorAll(
-        '[data-stolen="true"]'
+        '[data-stolen="true"]',
       );
       let symbolRestored = false;
       let wasBlueSymbol = false;
@@ -750,7 +752,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Listen for worm symbol saved events (when player clicks worm to save symbol)
     document.addEventListener("wormSymbolSaved", (e) => {
-      const { symbol, wormId: _wormId } = e.detail;
+      const { symbol: _symbol, wormId: _wormId } = e.detail;
 
       // Add visual feedback for saving a symbol
       document.body.style.background =

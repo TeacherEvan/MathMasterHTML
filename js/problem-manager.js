@@ -37,7 +37,7 @@ const ProblemManager = {
       }
       const data = await response.text();
       this._problems = this._parseProblemsFromMarkdown(data);
-    } catch (_error) {
+    } catch {
       // Fallback problem
       this._problems = [
         {
@@ -77,7 +77,7 @@ const ProblemManager = {
             currentSymbol: 0,
           });
         }
-      } catch (_e) {
+      } catch {
         // Skip malformed problems silently
       }
     }
