@@ -33,28 +33,26 @@ function initSymbolRain() {
     window.innerWidth <= 768 || document.body.classList.contains("res-mobile");
 
   // Configuration - INCREASED DENSITY
-  let symbolFallSpeed = 0.6;
-  const INITIAL_FALL_SPEED = 0.6; // Store initial speed for reset
-  const maxFallSpeed = 1.2; // 100% more than default (2x)
-  const spawnRate = 0.5; // INCREASED from 0.3 to 0.5 (67% more symbols)
-  const burstSpawnRate = 0.15; // INCREASED from 0.1 to 0.15 (50% more bursts)
-  const columnWidth = 50;
+  const SymbolRainConfig = {
+    symbolFallSpeed: 0.6,
+    initialFallSpeed: 0.6,
+    maxFallSpeed: 1.2,
+    spawnRate: 0.5,
+    burstSpawnRate: 0.15,
+    symbolsPerWave: 7,
+    waveInterval: 80,
+    faceRevealInterval: 5000,
+    faceRevealDuration: 1500,
+    guaranteedSpawnInterval: 5000,
+    columnWidth: 50,
+    gridCellSize: 100,
+    poolSize: 30,
+  };
 
-  // Wave-based spawn system for initial population - INCREASED DENSITY
-  const SYMBOLS_PER_WAVE = 7; // INCREASED from 5 to 7 symbols at a time (40% more)
-  const WAVE_INTERVAL = 80; // REDUCED from 110 to 80ms (27% faster waves)
-  let isInitialPopulation = true; // Flag to disable random spawning during startup
-
-  // Guaranteed spawn system - ensure all symbols appear every 5 seconds
-  const lastSymbolSpawnTimestamp = {};
-  symbols.forEach((symbolChar) => {
-    lastSymbolSpawnTimestamp[symbolChar] = Date.now() - Math.random() * 2000;
-  });
-  const GUARANTEED_SPAWN_INTERVAL_MS = 5000; // 5 seconds
+  let symbolFallSpeed = SymbolRainConfig.initialFallSpeed;
+  let isInitialPopulation = true;
 
   // PERIODIC FACE REVEAL SYSTEM - symbols show enhanced form every 5 seconds
-  const FACE_REVEAL_INTERVAL_MS = 5000; // 5 seconds
-  const FACE_REVEAL_DURATION_MS = 1500; // 1.5 seconds reveal duration
   let lastFaceRevealTime = Date.now();
   const activeFaceReveals = new Set(); // Track symbols currently in face reveal state
 
@@ -71,10 +69,8 @@ function initSymbolRain() {
 
   // PERFORMANCE: DOM element pooling to reduce GC pressure
   const symbolPool = [];
-  const POOL_SIZE = 30;
 
   // PERFORMANCE: Spatial hash grid for O(n) collision detection instead of O(n²)
-  const GRID_CELL_SIZE = 100; // 100px cells
   const spatialGrid = new Map();
 
   // PERFORMANCE: Debounce utility to prevent excessive function calls
@@ -90,44 +86,58 @@ function initSymbolRain() {
     };
   }
 
-  function getCellKey(x, y) {
-    const cellX = Math.floor(x / GRID_CELL_SIZE);
-    const cellY = Math.floor(y / GRID_CELL_SIZE);
-    return `${cellX},${cellY}`;
-  }
+  const SpatialGrid = {
+    getCellKey(x, y) {
+      const cellX = Math.floor(x / SymbolRainConfig.gridCellSize);
+      const cellY = Math.floor(y / SymbolRainConfig.gridCellSize);
+      return `${cellX},${cellY}`;
+    },
 
-  function updateSpatialGrid() {
-    spatialGrid.clear();
-    activeFallingSymbols.forEach((symbolObj) => {
-      const key = getCellKey(symbolObj.x, symbolObj.y);
-      if (!spatialGrid.has(key)) {
-        spatialGrid.set(key, []);
-      }
-      spatialGrid.get(key).push(symbolObj);
-    });
-  }
+    update(activeSymbols) {
+      spatialGrid.clear();
+      activeSymbols.forEach((symbolObj) => {
+        const key = this.getCellKey(symbolObj.x, symbolObj.y);
+        if (!spatialGrid.has(key)) {
+          spatialGrid.set(key, []);
+        }
+        spatialGrid.get(key).push(symbolObj);
+      });
+    },
 
-  function getNeighborCells(x, y) {
-    const cellX = Math.floor(x / GRID_CELL_SIZE);
-    const cellY = Math.floor(y / GRID_CELL_SIZE);
-    const neighbors = [];
+    getNeighbors(x, y) {
+      const cellX = Math.floor(x / SymbolRainConfig.gridCellSize);
+      const cellY = Math.floor(y / SymbolRainConfig.gridCellSize);
+      const neighbors = [];
 
-    // Check current cell and 8 surrounding cells
-    for (let dx = -1; dx <= 1; dx++) {
-      for (let dy = -1; dy <= 1; dy++) {
-        const key = `${cellX + dx},${cellY + dy}`;
-        if (spatialGrid.has(key)) {
-          neighbors.push(...spatialGrid.get(key));
+      // Check current cell and 8 surrounding cells
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          const key = `${cellX + dx},${cellY + dy}`;
+          if (spatialGrid.has(key)) {
+            neighbors.push(...spatialGrid.get(key));
+          }
         }
       }
-    }
-    return neighbors;
+      return neighbors;
+    },
+  };
+
+  // Deprecated: old standalone functions mapped to new object for safety during refactor
+  // (In a full rewrite, these would be removed entirely)
+  function getCellKey(x, y) {
+    return SpatialGrid.getCellKey(x, y);
+  }
+  function updateSpatialGrid() {
+    SpatialGrid.update(activeFallingSymbols);
+  }
+  function getNeighborCells(x, y) {
+    return SpatialGrid.getNeighbors(x, y);
   }
 
   function calculateColumns() {
     const containerWidth = symbolRainContainer.offsetWidth;
     cachedContainerHeight = symbolRainContainer.offsetHeight; // Cache height here
-    columnCount = Math.floor(containerWidth / columnWidth);
+    columnCount = Math.floor(containerWidth / SymbolRainConfig.columnWidth);
   }
 
   function resetFaceRevealStyles(symbolElement) {
@@ -154,28 +164,38 @@ function initSymbolRain() {
     returnSymbolToPool(symbolObj.element);
   }
 
-  // PERFORMANCE: Get symbol from pool or create new one
-  function getSymbolFromPool() {
-    if (symbolPool.length > 0) {
-      const symbol = symbolPool.pop();
-      symbol.style.display = "block";
-      return symbol;
-    }
-    // Create new element if pool is empty
-    const symbol = document.createElement("div");
-    symbol.className = "falling-symbol";
-    return symbol;
-  }
+  // PERFORMANCE: DOM element pooling to reduce GC pressure
+  const SymbolPool = {
+    pool: [],
 
-  // PERFORMANCE: Return symbol to pool for reuse
+    get() {
+      if (this.pool.length > 0) {
+        const symbol = this.pool.pop();
+        symbol.style.display = "block";
+        return symbol;
+      }
+      const symbol = document.createElement("div");
+      symbol.className = "falling-symbol";
+      return symbol;
+    },
+
+    return(symbolElement) {
+      if (this.pool.length < SymbolRainConfig.poolSize) {
+        symbolElement.style.display = "none";
+        symbolElement.className = "falling-symbol";
+        this.pool.push(symbolElement);
+      } else {
+        symbolElement.remove();
+      }
+    },
+  };
+
+  // Deprecated: wrappers for backward compatibility during refactor
+  function getSymbolFromPool() {
+    return SymbolPool.get();
+  }
   function returnSymbolToPool(symbolElement) {
-    if (symbolPool.length < POOL_SIZE) {
-      symbolElement.style.display = "none";
-      symbolElement.className = "falling-symbol"; // Reset classes
-      symbolPool.push(symbolElement);
-    } else {
-      symbolElement.remove(); // Pool full, discard
-    }
+    SymbolPool.return(symbolElement);
   }
 
   // DESKTOP: Create falling symbol (vertical)
@@ -184,14 +204,17 @@ function initSymbolRain() {
     isInitialPopulation = false,
     forcedSymbol = null,
   ) {
-    const symbol = getSymbolFromPool(); // Use pooled element
+    const symbol = SymbolPool.get(); // Use pooled element
     symbol.className = "falling-symbol";
     symbol.textContent =
       forcedSymbol || symbols[Math.floor(Math.random() * symbols.length)];
     // FIX: Center the random offset around column position to prevent right-side bias
     const horizontalOffset = (Math.random() - 0.5) * 40; // -20px to +20px
     symbol.style.left =
-      column * columnWidth + columnWidth / 2 + horizontalOffset + "px";
+      column * SymbolRainConfig.columnWidth +
+      SymbolRainConfig.columnWidth / 2 +
+      horizontalOffset +
+      "px";
 
     if (isInitialPopulation) {
       symbol.style.top = `${Math.random() *
@@ -230,16 +253,26 @@ function initSymbolRain() {
       }
 
       // Evenly distribute symbols across columnCount
-      const columnsToUse = Math.min(columnCount, SYMBOLS_PER_WAVE); // Don't exceed available columnCount
+      const columnsToUse = Math.min(
+        columnCount,
+        SymbolRainConfig.symbolsPerWave,
+      ); // Don't exceed available columnCount
       const columnStep = Math.floor(columnCount / columnsToUse);
 
-      for (let i = 0; i < SYMBOLS_PER_WAVE && i < columnCount; i++) {
+      for (
+        let i = 0;
+        i < SymbolRainConfig.symbolsPerWave && i < columnCount;
+        i++
+      ) {
         const column = (i * columnStep) % columnCount; // Evenly distribute
         createFallingSymbol(column, true);
       }
 
       // Schedule next wave
-      setTimeout(() => spawnWave(waveNumber + 1), WAVE_INTERVAL);
+      setTimeout(
+        () => spawnWave(waveNumber + 1),
+        SymbolRainConfig.waveInterval,
+      );
     }
 
     // Start the wave spawn sequence
@@ -410,7 +443,10 @@ function initSymbolRain() {
   }
 
   function triggerFaceRevealIfNeeded(containerHeight, currentTime) {
-    if (currentTime - lastFaceRevealTime < FACE_REVEAL_INTERVAL_MS) {
+    if (
+      currentTime - lastFaceRevealTime <
+      SymbolRainConfig.faceRevealInterval
+    ) {
       return;
     }
 
@@ -444,7 +480,7 @@ function initSymbolRain() {
     for (const symbolObj of activeFaceReveals) {
       if (
         currentTime - symbolObj.faceRevealStartTime >=
-        FACE_REVEAL_DURATION_MS
+        SymbolRainConfig.faceRevealDuration
       ) {
         symbolObj.isInFaceReveal = false;
         resetFaceRevealStyles(symbolObj.element);
@@ -534,7 +570,10 @@ function initSymbolRain() {
 
     // Normal random spawning - optimized to reduce array iterations
     for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-      if (Math.random() < spawnRate && !isColumnCrowded(columnIndex)) {
+      if (
+        Math.random() < SymbolRainConfig.spawnRate &&
+        !isColumnCrowded(columnIndex)
+      ) {
         const randomSymbol =
           symbols[Math.floor(Math.random() * symbols.length)];
         createFallingSymbol(columnIndex, false, randomSymbol);
@@ -542,7 +581,7 @@ function initSymbolRain() {
     }
 
     // BURST SPAWNING: Occasionally spawn 2-3 symbols simultaneously in different columns
-    if (Math.random() < burstSpawnRate) {
+    if (Math.random() < SymbolRainConfig.burstSpawnRate) {
       const burstSymbolCount = 2 + Math.floor(Math.random() * 2); // 2-3 symbols
 
       // Find columns that aren't crowded - reuse helper function
@@ -587,7 +626,7 @@ function initSymbolRain() {
 
   function startSpeedController() {
     setInterval(() => {
-      if (!isMobileMode && symbolFallSpeed < maxFallSpeed) {
+      if (!isMobileMode && symbolFallSpeed < SymbolRainConfig.maxFallSpeed) {
         symbolFallSpeed *= 1.1; // Increase by 10% every minute
       }
     }, 60000); // Every 60 seconds (1 minute)
@@ -595,7 +634,7 @@ function initSymbolRain() {
 
   // Reset speed when problem completes
   function resetSpeed() {
-    symbolFallSpeed = INITIAL_FALL_SPEED;
+    symbolFallSpeed = SymbolRainConfig.initialFallSpeed;
   }
 
   // Listen for problem completion to reset speed
@@ -610,7 +649,7 @@ function initSymbolRain() {
       symbols.forEach((symbolChar) => {
         if (
           currentTimestamp - lastSymbolSpawnTimestamp[symbolChar] >
-          GUARANTEED_SPAWN_INTERVAL_MS
+          SymbolRainConfig.guaranteedSpawnInterval
         ) {
           const randomColumnIndex = Math.floor(Math.random() * columnCount);
           createFallingSymbol(randomColumnIndex, false, symbolChar);

@@ -117,10 +117,11 @@
 
 - Extracted face reveal and column-crowding helpers to reduce per-frame allocations in [js/3rdDISPLAY.js](js/3rdDISPLAY.js).
 - Consolidated face reveal styling logic for reuse and clarity.
+- Implemented `SymbolRainConfig` to consolidate magic numbers and `SymbolPool` object for cleaner pooling logic.
 
 ### 📌 Remaining
 
-- Continue 3rdDISPLAY modularization (constants/behavior split) and add targeted tests.
+- Add targeted unit/integration tests for `3rdDISPLAY.js` refactored components.
 
 ---
 
