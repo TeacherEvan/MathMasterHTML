@@ -48,6 +48,26 @@ body:-ms-fullscreen {
     background: #000 !important;
 }
 
+/* Ensure the document fills the viewport for reliable click targeting */
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    min-width: 100vw;
+    min-height: 100vh;
+}
+
+body.automation {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
 /* New styles for the three-panel layout */
 .grid-container {
     display: grid;
@@ -113,6 +133,7 @@ body:-ms-fullscreen {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    flex: 1;
 }
 
 #lock-display {

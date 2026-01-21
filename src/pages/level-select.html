@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Choose your difficulty level in Math Master - Educational algebra game with three challenging levels.">
+    <meta name="theme-color" content="#000000">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/Images/icon-192.png">
+
+    <title>Math Master - Unlock Your Mind - Level Select</title>
+
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link rel="stylesheet" href="/src/styles/css/level-select.css">
+    <link rel="stylesheet" href="/src/styles/css/modern-ux-enhancements.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+    </style>
+</head>
+
+<body>
+    <!-- Matrix Rain Background -->
+    <div class="matrix-bg" id="matrixBg"></div>
+
+    <!-- Header Section -->
+    <div class="header">
+        <h1 class="main-title">MATH MASTER</h1>
+        <h2 class="subtitle">Unlock Your Mind</h2>
+        <p class="level-select-subtitle">Choose Your Mathematical Challenge</p>
+    </div>
+
+    <!-- Reset Progress Button -->
+    <button class="reset-progress-btn" onclick="resetProgress()">🔄 Reset Progress</button>
+
+    <!-- Main Level Selection Container -->
+    <div class="level-container">
+        <div class="levels-grid">
+            <!-- Easy Level - Addition/Subtraction -->
+            <div class="level-card level-easy" onclick="selectLevel('easy', this)">
+                <div class="level-icon">🌱</div>
+                <h3 class="level-title">EASY</h3>
+                <p class="level-description">
+                    Master the foundations with addition and subtraction algebra.
+                    Each problem contains BOTH + and - operations for complete practice.
+                </p>
+                <div class="level-stats">
+                    <div class="stat">
+                        <span class="stat-value">50</span>
+                        <span class="stat-label">Problems</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">+ & −</span>
+                        <span class="stat-label">Both Operations</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">⭐</span>
+                        <span class="stat-label">Difficulty</span>
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-label">Your Progress</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+                <button class="level-button">Start Journey</button>
+            </div>
+
+            <!-- Medium Level - Multiplication -->
+            <div class="level-card level-medium" onclick="selectLevel('medium', this)">
+                <div class="level-icon">🔥</div>
+                <h3 class="level-title">MEDIUM</h3>
+                <p class="level-description">
+                    Rise to the challenge with multi-operation algebra.
+                    Each problem contains addition, subtraction, AND multiplication.
+                </p>
+                <div class="level-stats">
+                    <div class="stat">
+                        <span class="stat-value">50</span>
+                        <span class="stat-label">Problems</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">+/−/×</span>
+                        <span class="stat-label">All Three Ops</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">⭐⭐</span>
+                        <span class="stat-label">Difficulty</span>
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-label">Your Progress</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+                <button class="level-button">Accept Challenge</button>
+            </div>
+
+            <!-- Hard Level - Division -->
+            <div class="level-card level-hard" onclick="selectLevel('medium-too', this)">
+                <div class="level-icon">⚡</div>
+                <h3 class="level-title">MEDIUM TOO</h3>
+                <p class="level-description">
+                    Conquer the test with division algebra.
+                    Achieve mastery and become closer to unlocking your full potential.
+                </p>
+                <div class="level-stats">
+                    <div class="stat">
+                        <span class="stat-value">50</span>
+                        <span class="stat-label">Problems</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">÷</span>
+                        <span class="stat-label">Operations</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">⭐⭐⭐</span>
+                        <span class="stat-label">Difficulty</span>
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-label">Your Progress</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+                <button class="level-button">Prove Mastery</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="navigation">
+        <button class="back-button" onclick="goBack()">← Return to Welcome</button>
+        <div class="creator-credit">Created by Teacher Evan</div>
+    </div>
+
+    <!-- Floating Math Symbols -->
+    <div class="math-symbol" style="top: 20%; left: 5%; animation-delay: 0s;">∑</div>
+    <div class="math-symbol" style="top: 30%; right: 8%; animation-delay: 1s;">∫</div>
+    <div class="math-symbol" style="top: 50%; left: 3%; animation-delay: 2s;">∞</div>
+    <div class="math-symbol" style="top: 65%; right: 5%; animation-delay: 3s;">√</div>
+    <div class="math-symbol" style="top: 75%; left: 90%; animation-delay: 4s;">π</div>
+    <div class="math-symbol" style="top: 85%; left: 15%; animation-delay: 5s;">α</div>
+    <div class="math-symbol" style="top: 10%; right: 25%; animation-delay: 6s;">β</div>
+    <div class="math-symbol" style="top: 40%; left: 80%; animation-delay: 7s;">γ</div>
+
+    <script>
+        // Matrix Rain Effect - Inherited from welcome screen
+        function createMatrixRain() {
+            const matrixBg = document.getElementById('matrixBg');
+            const symbols = '0123456789+-×÷=XxΣπ∞√±∆αβγθλμ';
+            const columns = Math.floor(window.innerWidth / 20);
+
+            // Clear existing columns
+            matrixBg.innerHTML = '';
+
+            for (let i = 0; i < columns; i++) {
+                const column = document.createElement('div');
+                column.className = 'matrix-column';
+                column.style.left = i * 20 + 'px';
+                column.style.animationDuration = (Math.random() * 4 + 3) + 's';
+                column.style.animationDelay = Math.random() * 3 + 's';
+
+                // Create falling text
+                let text = '';
+                const length = Math.floor(Math.random() * 15) + 8;
+                for (let j = 0; j < length; j++) {
+                    text += symbols[Math.floor(Math.random() * symbols.length)] + '<br>';
+                }
+                column.innerHTML = text;
+
+                matrixBg.appendChild(column);
+            }
+        }
+
+        // Click Ripple Effect
+        function createRipple(event, target) {
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+
+            const rect = target.getBoundingClientRect();
+            const size = 60;
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+
+            target.appendChild(ripple);
+
+            setTimeout(() => {
+                if (target.contains(ripple)) {
+                    target.removeChild(ripple);
+                }
+            }, 600);
+        }
+
+        // Level Selection Handler
+        function selectLevel(difficulty, cardElement) {
+            // Create ripple effect
+            createRipple(event, cardElement);
+
+            // Add selection animation
+            cardElement.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                cardElement.style.transform = '';
+            }, 150);
+
+            // Navigate based on difficulty
+            setTimeout(() => {
+                switch (difficulty) {
+                    case 'easy':
+                        window.location.href = '/src/pages/game.html?level=beginner&lockComponent=level-1-transformer.html';
+                        break;
+                    case 'medium':
+                        window.location.href = '/src/pages/game.html?level=warrior&lockComponent=level-1-transformer.html';
+                        break;
+                    case 'medium-too':
+                        window.location.href = '/src/pages/game.html?level=master&lockComponent=level-1-transformer.html';
+                        break;
+                }
+            }, 300);
+        }
+
+        // Navigation Functions
+        function goBack() {
+            createRipple(event, event.target);
+            setTimeout(() => {
+                window.location.href = '/src/pages/index.html';
+            }, 300);
+        }
+
+        // Dynamic Progress Animation - LOAD FROM LOCAL STORAGE
+        function animateProgress() {
+            const levels = ['beginner', 'warrior', 'master'];
+            const progressBars = document.querySelectorAll('.progress-fill');
+            const cards = document.querySelectorAll('.level-card');
+
+            progressBars.forEach((bar, index) => {
+                const levelName = levels[index];
+                const countKey = `mathmaster_problems_${levelName}`;
+                const problemsCompleted = parseInt(localStorage.getItem(countKey) || '0');
+
+                // Calculate percentage (assuming 50 problems per level max for display)
+                const maxProblems = 50;
+                const percentage = Math.min((problemsCompleted / maxProblems) * 100, 100);
+
+                // Update stats display
+                const card = cards[index];
+                const statsSection = card.querySelector('.level-stats');
+                if (statsSection && problemsCompleted > 0) {
+                    // Add completion stat
+                    let completionStat = statsSection.querySelector('.completion-stat');
+                    if (!completionStat) {
+                        completionStat = document.createElement('div');
+                        completionStat.className = 'stat completion-stat';
+                        completionStat.innerHTML = `
+                            <span class="stat-value">${problemsCompleted}</span>
+                            <span class="stat-label">Completed</span>
+                        `;
+                        statsSection.appendChild(completionStat);
+                    } else {
+                        completionStat.querySelector('.stat-value').textContent = problemsCompleted;
+                    }
+                }
+
+                // Animate progress bar
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.transition = 'width 2s ease-in-out';
+                    bar.style.width = `${percentage}%`;
+                }, index * 200);
+            });
+        }
+
+        // RESET PROGRESS FUNCTION
+        function resetProgress() {
+            if (confirm('⚠️ Are you sure you want to reset ALL progress? This will clear your console slots and problem completion counts for all levels!')) {
+                const levels = ['beginner', 'warrior', 'master'];
+                levels.forEach(level => {
+                    localStorage.removeItem(`mathmaster_console_${level}`);
+                    localStorage.removeItem(`mathmaster_problems_${level}`);
+                });
+                console.log('🔄 All progress reset!');
+                alert('✅ Progress reset successfully!');
+                location.reload(); // Reload page to show updated progress
+            }
+        }
+
+        // Card Entrance Animation
+        function animateCards() {
+            const cards = document.querySelectorAll('.level-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(50px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200 + 500);
+            });
+        }
+
+        // Dynamic Background Effects
+        function addDynamicEffects() {
+            const title = document.querySelector('.main-title');
+            const subtitle = document.querySelector('.subtitle');
+
+            // Add random glow intensity variations
+            setInterval(() => {
+                const intensity = Math.random() * 0.3 + 0.8;
+                title.style.filter = `brightness(${intensity})`;
+            }, 3000);
+
+            // Subtitle color variations
+            const colors = ['#ffd700', '#ffcc00', '#ffaa00'];
+            let colorIndex = 0;
+            setInterval(() => {
+                subtitle.style.color = colors[colorIndex];
+                colorIndex = (colorIndex + 1) % colors.length;
+            }, 5000);
+        }
+
+        // Initialize everything when page loads
+        window.addEventListener('load', () => {
+            createMatrixRain();
+            addDynamicEffects();
+            animateCards();
+            setTimeout(animateProgress, 1000);
+        });
+
+        // Recreate matrix rain on window resize
+        window.addEventListener('resize', () => {
+            createMatrixRain();
+        });
+
+        // Keyboard Support
+        document.addEventListener('keydown', (event) => {
+            const cards = document.querySelectorAll('.level-card');
+            let selectedCard = null;
+
+            switch (event.key) {
+                case '1':
+                    selectedCard = cards[0];
+                    selectLevel('easy', selectedCard);
+                    break;
+                case '2':
+                    selectedCard = cards[1];
+                    selectLevel('medium', selectedCard);
+                    break;
+                case '3':
+                    selectedCard = cards[2];
+                    selectLevel('hard', selectedCard);
+                    break;
+                case 'Escape':
+                case 'Backspace':
+                    goBack();
+                    break;
+            }
+
+            if (selectedCard) {
+                selectedCard.style.animation = 'bounce-easy 0.3s ease-in-out';
+                setTimeout(() => {
+                    selectedCard.style.animation = '';
+                }, 300);
+            }
+        });
+
+        // Touch Support for Mobile
+        document.addEventListener('touchstart', (event) => {
+            if (event.target.closest('.level-card')) {
+                event.target.closest('.level-card').style.transform = 'scale(0.98)';
+            }
+        });
+
+        document.addEventListener('touchend', (event) => {
+            if (event.target.closest('.level-card')) {
+                event.target.closest('.level-card').style.transform = '';
+            }
+        });
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script src="/src/scripts/service-worker-register.js"></script>
+</body>

@@ -151,7 +151,7 @@ const GameConstants = {
   // ========================================
   LOCK: {
     TOTAL_LEVELS: 6,
-    COMPONENT_BASE_PATH: "lock-components/",
+    COMPONENT_BASE_PATH: "/src/assets/components/lock-components/",
     ANIMATION_DELAY: 300, // ms - for line 3 special case
   },
 
@@ -180,11 +180,11 @@ const GameConstants = {
   // ASSET PATHS
   // ========================================
   PATHS: {
-    ASSETS_BASE: "Assets",
-    BEGINNER: "Assets/Beginner_Lvl/beginner_problems.md",
-    WARRIOR: "Assets/Warrior_Lvl/warrior_problems.md",
-    MASTER: "Assets/Master_Lvl/master_problems.md",
-    LOCK_COMPONENTS: "lock-components/",
+    ASSETS_BASE: "/src/assets/problems/Assets",
+    BEGINNER: "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.md",
+    WARRIOR: "/src/assets/problems/Assets/Warrior_Lvl/warrior_problems.md",
+    MASTER: "/src/assets/problems/Assets/Master_Lvl/master_problems.md",
+    LOCK_COMPONENTS: "/src/assets/components/lock-components/",
   },
 
   // ========================================
@@ -271,5 +271,5 @@ console.log("✅ Constants Module Loaded");
 console.log(
   "⚙️ Game configured with",
   Object.keys(GameConstants).length,
-  "constant groups"
+  "constant groups",
 );

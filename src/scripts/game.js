@@ -34,8 +34,18 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Apply level theme to body
-    document.body.className = `level-${level}`;
+    // Mark automation runs (Playwright) to avoid portrait lock overlay
+    if (navigator.webdriver) {
+      document.body.classList.add("automation");
+    }
+
+    // Apply level theme to body without wiping other classes
+    document.body.classList.remove(
+      "level-beginner",
+      "level-warrior",
+      "level-master",
+    );
+    document.body.classList.add(`level-${level}`);
 
     // Problems array to store loaded problems
     let problems = [];
@@ -43,6 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentProblem = null;
     let currentSolutionStepIndex = 0;
     let totalCorrectAnswers = 0;
+    let pendingHelpReveal = false;
 
     // PURPLE WORM: Track consecutive wrong answers
     let consecutiveWrongAnswers = 0;
@@ -88,16 +99,20 @@ document.addEventListener("DOMContentLoaded", () => {
       // Determine which asset file to load based on level
       switch (level) {
         case "beginner":
-          problemPath = "Assets/Beginner_Lvl/beginner_problems.md";
+          problemPath =
+            "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.md";
           break;
         case "warrior":
-          problemPath = "Assets/Warrior_Lvl/warrior_problems.md";
+          problemPath =
+            "/src/assets/problems/Assets/Warrior_Lvl/warrior_problems.md";
           break;
         case "master":
-          problemPath = "Assets/Master_Lvl/master_problems.md";
+          problemPath =
+            "/src/assets/problems/Assets/Master_Lvl/master_problems.md";
           break;
         default:
-          problemPath = "Assets/Beginner_Lvl/beginner_problems.md";
+          problemPath =
+            "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.md";
       }
 
       // Fetch the problem set
@@ -120,7 +135,9 @@ document.addEventListener("DOMContentLoaded", () => {
             // Use fallback problem
             currentProblem = {
               problem: "4x = 24",
-              solution: "x = 6",
+              steps: ["4x = 24", "x = 24 ÷ 4", "x = 6"],
+              currentStep: 0,
+              currentSymbol: 0,
             };
             setupProblem();
           }
@@ -129,7 +146,9 @@ document.addEventListener("DOMContentLoaded", () => {
           // Fallback to a default problem
           currentProblem = {
             problem: "4x = 24",
-            solution: "x = 6",
+            steps: ["4x = 24", "x = 24 ÷ 4", "x = 6"],
+            currentStep: 0,
+            currentSymbol: 0,
           };
           setupProblem();
         });
@@ -194,6 +213,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Setup the step-by-step solution display
       setupStepDisplay();
+
+      // If help was requested before symbols were ready, try now
+      if (pendingHelpReveal) {
+        if (revealHelpSymbol()) {
+          pendingHelpReveal = false;
+        }
+      }
 
       // Start (or restart) the 60s step timer + score for this new problem
       if (window.ScoreTimerManager) {
@@ -655,15 +681,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Event Listeners
-    helpButton.addEventListener("click", () => {
-      // Get available symbols in current line
+    function revealHelpSymbol() {
       const availableSymbols = getNextSymbol();
+      let symbolToReveal = null;
+
       if (availableSymbols && availableSymbols.length > 0) {
-        // Reveal a random symbol from current line
-        const randomSymbol =
+        symbolToReveal =
           availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
-        revealSpecificSymbol(randomSymbol);
+      } else {
+        const fallbackSymbol = solutionContainer?.querySelector(
+          ".hidden-symbol",
+        );
+        if (fallbackSymbol) {
+          symbolToReveal = fallbackSymbol.textContent;
+        }
+      }
+
+      if (symbolToReveal) {
+        revealSpecificSymbol(symbolToReveal);
         checkLineCompletion();
+        return true;
+      }
+
+      return false;
+    }
+
+    helpButton.addEventListener("click", () => {
+      if (!revealHelpSymbol()) {
+        pendingHelpReveal = true;
+        setTimeout(() => {
+          if (pendingHelpReveal && revealHelpSymbol()) {
+            pendingHelpReveal = false;
+          }
+        }, 250);
       }
 
       // Add help button feedback

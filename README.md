@@ -230,42 +230,36 @@ Problems are stored in Markdown files:
 ## 📁 Project Structure
 
 ```
-MathMaster-Algebra/
-├── index.html                 # Welcome screen
-├── level-select.html          # Difficulty selection
-├── game.html                  # Main game interface
-├── Assets/
-│   ├── Beginner_Lvl/
-│   │   └── beginner_problems.md   # 50 problems
-│   ├── Warrior_Lvl/
-│   │   └── warrior_problems.md    # 50 problems
-│   └── Master_Lvl/
-│       └── master_problems.md     # 50 problems
-├── js/
-│   ├── game.js                # Core game logic
-│   ├── lock-manager.js        # Lock animation system
-│   ├── worm.js                # Worm mechanics
-│   ├── console-manager.js     # Quick access console
-│   └── 3rdDISPLAY.js          # Symbol rain
-├── css/
-│   ├── game.css               # Three-panel layout
-│   ├── lock-responsive.css    # Lock scaling
-│   ├── console.css            # Console styling
-│   └── worm-styles.css        # Worm animations
-├── lock-components/
-│   ├── Line-1-transformer.html
-│   ├── line-2-transformer.html
-│   ├── line-3-transformer.html
-│   ├── line-4-transformer.html
-│   ├── Line-5-transformer.html
-│   └── line-6-transformer.html
-└── Docs/
-    ├── BugFix_Jobcard_Critical.md
-    ├── Worm_System_Improvements.md
-    ├── Lock animation audit.md
-    ├── Console_Quick_Reference.md
-    ├── Console_Feature_Implementation.md
-    └── Final_Code_Review.md
+MathMasterHTML/
+├── src/
+│   ├── pages/                 # HTML pages
+│   │   ├── index.html         # Welcome screen
+│   │   ├── level-select.html  # Difficulty selection
+│   │   └── game.html          # Main game interface
+│   ├── scripts/               # JavaScript modules
+│   │   ├── game.js            # Core game logic
+│   │   ├── lock-manager.js    # Lock animation system
+│   │   ├── worm.js            # Worm mechanics
+│   │   ├── console-manager.js # Quick access console
+│   │   ├── 3rdDISPLAY.js      # Symbol rain
+│   │   └── ...                # Other modules
+│   ├── styles/                # CSS stylesheets
+│   │   ├── game.css           # Three-panel layout
+│   │   ├── lock-responsive.css# Lock scaling
+│   │   ├── console.css        # Console styling
+│   │   └── ...                # Other styles
+│   ├── assets/                # Static assets
+│   │   ├── problems/          # Math problem data
+│   │   │   ├── Beginner_Lvl/
+│   │   │   ├── Warrior_Lvl/
+│   │   │   └── Master_Lvl/
+│   │   ├── images/            # Image assets
+│   │   └── components/        # HTML components
+│   ├── tools/                 # Utility scripts
+│   └── types/                 # TypeScript definitions
+├── tests/                     # Test files
+├── docs/                      # Documentation
+└── (root config files)
 ```
 
 ---

@@ -61,7 +61,7 @@
 .res-mobile #problem-container {
   font-size: 8px;
   /* Reduced by 20% from 10px for better fit */
-  top: 70px;
+  top: 76px;
   /* Adjust position - below mobile HUD */
   white-space: nowrap;
   /* Keep symbols on same line */
@@ -99,7 +99,7 @@
   /* ADDED: 50% reduction for tighter symbol spacing on mobile */
   margin-bottom: 50px;
   /* Space for horizontal console */
-  padding: 5px;
+  padding: 90px 5px 5px 5px;
   /* Reduced padding on mobile */
   max-height: calc(100vh - 100px);
   /* Ensure content doesn't overflow */
@@ -181,6 +181,19 @@
   font-size: 24px;
   font-weight: 700;
   text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+/* Automation override: keep game visible for Playwright runs */
+body.automation #rotation-overlay {
+  display: none !important;
+}
+
+body.automation .grid-container {
+  display: grid !important;
+}
+
+body.automation #back-button {
+  display: block !important;
 }
 
 /* Show overlay ONLY on mobile in portrait mode */

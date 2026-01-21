@@ -18,16 +18,20 @@ const ProblemManager = {
     let problemPath = "";
     switch (level) {
       case "beginner":
-        problemPath = "Assets/Beginner_Lvl/beginner_problems.md";
+        problemPath =
+          "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.md";
         break;
       case "warrior":
-        problemPath = "Assets/Warrior_Lvl/warrior_problems.md";
+        problemPath =
+          "/src/assets/problems/Assets/Warrior_Lvl/warrior_problems.md";
         break;
       case "master":
-        problemPath = "Assets/Master_Lvl/master_problems.md";
+        problemPath =
+          "/src/assets/problems/Assets/Master_Lvl/master_problems.md";
         break;
       default:
-        problemPath = "Assets/Beginner_Lvl/beginner_problems.md";
+        problemPath =
+          "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.md";
     }
 
     try {

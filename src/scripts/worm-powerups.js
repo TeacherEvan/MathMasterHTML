@@ -95,7 +95,7 @@ class WormPowerUpSystem {
     this.wormSystem.crossPanelContainer.appendChild(powerUp);
 
     console.log(
-      `✨ Power-up "${type}" dropped at (${x.toFixed(0)}, ${y.toFixed(0)})`
+      `✨ Power-up "${type}" dropped at (${x.toFixed(0)}, ${y.toFixed(0)})`,
     );
 
     // Auto-remove after timeout
@@ -103,7 +103,8 @@ class WormPowerUpSystem {
       if (powerUp.parentNode) {
         powerUp.parentNode.removeChild(powerUp);
         console.log(
-          `⏱️ Power-up "${type}" expired after ${this.SLIME_SPLAT_DURATION / 1000}s`
+          `⏱️ Power-up "${type}" expired after ${this.SLIME_SPLAT_DURATION /
+            1000}s`,
         );
       }
     }, this.SLIME_SPLAT_DURATION);
@@ -155,7 +156,7 @@ class WormPowerUpSystem {
     if (type === "chainLightning" && this.inventory[type] > 1) {
       this.chainLightningKillCount += 2;
       console.log(
-        `⚡ Chain Lightning kill count increased to ${this.chainLightningKillCount}`
+        `⚡ Chain Lightning kill count increased to ${this.chainLightningKillCount}`,
       );
     }
 
@@ -204,12 +205,15 @@ class WormPowerUpSystem {
     // Show placement instructions
     this._showTooltip(
       `${this.EMOJIS[type]} selected - ${this.DESCRIPTIONS[type]}`,
-      "info"
+      "info",
     );
 
     // Change cursor to indicate placement mode
     document.body.style.cursor = "crosshair";
     document.body.classList.add("power-up-placement-mode");
+    document.documentElement.classList.add("power-up-placement-mode");
+    document.documentElement.style.pointerEvents = "none";
+    document.body.style.pointerEvents = "auto";
 
     // Setup placement click handler
     this._setupPlacementHandler(type);
@@ -233,6 +237,9 @@ class WormPowerUpSystem {
     // Reset cursor
     document.body.style.cursor = "";
     document.body.classList.remove("power-up-placement-mode");
+    document.documentElement.classList.remove("power-up-placement-mode");
+    document.documentElement.style.pointerEvents = "";
+    document.body.style.pointerEvents = "";
 
     // Update UI
     this.updateDisplay();
@@ -400,7 +407,7 @@ class WormPowerUpSystem {
   _chainLightningFromWorm(worm) {
     const killCount = this.chainLightningKillCount;
     console.log(
-      `⚡ Chain Lightning targeting worm ${worm.id}! Will kill ${killCount} worms`
+      `⚡ Chain Lightning targeting worm ${worm.id}! Will kill ${killCount} worms`,
     );
 
     // Find closest worms
@@ -520,7 +527,7 @@ class WormPowerUpSystem {
         .slice(0, killCount);
 
       console.log(
-        `⚡ Killing ${sortedWorms.length} worms with chain lightning!`
+        `⚡ Killing ${sortedWorms.length} worms with chain lightning!`,
       );
 
       // Kill with delay for visual effect
@@ -532,7 +539,7 @@ class WormPowerUpSystem {
               worm.x,
               worm.y,
               targetWorm.x,
-              targetWorm.y
+              targetWorm.y,
             );
             this.wormSystem.createExplosionFlash("#00ffff");
             this.wormSystem.explodeWorm(targetWorm, false, true);
@@ -608,29 +615,29 @@ class WormPowerUpSystem {
     const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
     const filter = document.createElementNS(
       "http://www.w3.org/2000/svg",
-      "filter"
+      "filter",
     );
     filter.setAttribute("id", "lightning-glow");
 
     const feGaussianBlur = document.createElementNS(
       "http://www.w3.org/2000/svg",
-      "feGaussianBlur"
+      "feGaussianBlur",
     );
     feGaussianBlur.setAttribute("stdDeviation", "3");
     feGaussianBlur.setAttribute("result", "coloredBlur");
 
     const feMerge = document.createElementNS(
       "http://www.w3.org/2000/svg",
-      "feMerge"
+      "feMerge",
     );
     const feMergeNode1 = document.createElementNS(
       "http://www.w3.org/2000/svg",
-      "feMergeNode"
+      "feMergeNode",
     );
     feMergeNode1.setAttribute("in", "coloredBlur");
     const feMergeNode2 = document.createElementNS(
       "http://www.w3.org/2000/svg",
-      "feMergeNode"
+      "feMergeNode",
     );
     feMergeNode2.setAttribute("in", "SourceGraphic");
 
@@ -804,13 +811,13 @@ class WormPowerUpSystem {
           prev.x,
           prev.y,
           spiderData.x,
-          spiderData.y
+          spiderData.y,
         );
         const currDist = calculateDistance(
           curr.x,
           curr.y,
           spiderData.x,
-          spiderData.y
+          spiderData.y,
         );
         return currDist < prevDist ? curr : prev;
       });
@@ -819,13 +826,13 @@ class WormPowerUpSystem {
         closest.x,
         closest.y,
         spiderData.x,
-        spiderData.y
+        spiderData.y,
       );
 
       if (dist < 30) {
         // Convert worm → spider (chain reaction!)
         console.log(
-          `🕷️ Spider converted worm ${closest.id} to another spider!`
+          `🕷️ Spider converted worm ${closest.id} to another spider!`,
         );
         this.wormSystem.removeWorm(closest);
         this.spawnSpider(closest.x, closest.y);
@@ -903,7 +910,7 @@ class WormPowerUpSystem {
           worm.x,
           worm.y,
           devilData.x,
-          devilData.y
+          devilData.y,
         );
 
         if (dist < this.DEVIL_PROXIMITY_DISTANCE) {
@@ -916,7 +923,8 @@ class WormPowerUpSystem {
             const timeNear = Date.now() - devilData.wormProximity.get(worm.id);
             if (timeNear >= this.DEVIL_KILL_TIME) {
               console.log(
-                `👹 Devil killed worm ${worm.id} after ${this.DEVIL_KILL_TIME / 1000}s proximity!`
+                `👹 Devil killed worm ${worm.id} after ${this.DEVIL_KILL_TIME /
+                  1000}s proximity!`,
               );
               this.wormSystem.explodeWorm(worm, false, false);
               devilData.wormProximity.delete(worm.id);
@@ -957,7 +965,11 @@ class WormPowerUpSystem {
    */
   updateDisplay() {
     console.log(
-      `📊 Power-ups: ⚡${this.inventory.chainLightning} 🕷️${this.inventory.spider} 👹${this.inventory.devil}${this.selectedPowerUp ? ` | Selected: ${this.selectedPowerUp}` : ""}`
+      `📊 Power-ups: ⚡${this.inventory.chainLightning} 🕷️${
+        this.inventory.spider
+      } 👹${this.inventory.devil}${
+        this.selectedPowerUp ? ` | Selected: ${this.selectedPowerUp}` : ""
+      }`,
     );
 
     if (!this.displayElement) {
@@ -1030,25 +1042,24 @@ class WormPowerUpSystem {
     display.id = "power-up-display";
     display.dataset.testid = "power-up-display";
     display.style.cssText = `
-            position: fixed;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px;
-            border-radius: 10px;
-            font-family: 'Orbitron', monospace;
-            font-size: 18px;
-            z-index: 10004;
-            display: flex;
-            gap: 15px;
-            border: 2px solid #0f0;
-            cursor: move;
-            user-select: none;
-            max-width: calc(100vw - 360px);
-            box-sizing: border-box;
-        `;
+        position: fixed;
+        top: 12px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 10px;
+        border-radius: 10px;
+        font-family: 'Orbitron', monospace;
+        font-size: 18px;
+        z-index: 10004;
+        display: flex;
+        gap: 15px;
+        border: 2px solid #0f0;
+        cursor: move;
+        user-select: none;
+        max-width: 320px;
+        box-sizing: border-box;
+      `;
 
     // Make it draggable with boundary validation
     this.makeDraggable(display);
@@ -1128,14 +1139,14 @@ class WormPowerUpSystem {
         if (window.uiBoundaryManager) {
           const validation = window.uiBoundaryManager.validatePosition(
             "power-up-display",
-            { x: boundedX, y: boundedY }
+            { x: boundedX, y: boundedY },
           );
           if (!validation.valid) {
             boundedX = validation.adjustedPosition.x;
             boundedY = validation.adjustedPosition.y;
             console.log(
               "📐 Position adjusted by boundary manager:",
-              validation.violations
+              validation.violations,
             );
           }
         }

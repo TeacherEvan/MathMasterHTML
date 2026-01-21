@@ -91,9 +91,7 @@
 
 .timer-display {
   color: #00bfff;
-  transition:
-    color 350ms linear,
-    border-color 350ms linear;
+  transition: color 350ms linear, border-color 350ms linear;
   animation: timerPulse 1500ms ease-in-out infinite;
 }
 
@@ -119,9 +117,7 @@
   }
   50% {
     transform: scale(1.06);
-    box-shadow:
-      0 0 20px currentColor,
-      0 0 34px currentColor;
+    box-shadow: 0 0 20px currentColor, 0 0 34px currentColor;
   }
 }
 
@@ -145,7 +141,7 @@
 /* Mobile adjustments for powerup display */
 @media (max-width: 768px) {
   #power-up-display {
-    top: 70px !important; /* Below HUD on mobile */
+    top: 86px !important; /* Below HUD on mobile with extra clearance */
     left: 50% !important;
     transform: translateX(-50%) !important;
     max-width: calc(100vw - 40px);

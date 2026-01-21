@@ -1,0 +1,509 @@
+/* ==================================================
+   MODERN UX ENHANCEMENTS - Production-Grade Styling
+   ================================================== */
+
+/* ============================================
+   LOADING STATES & SKELETONS
+   ============================================ */
+
+.loading-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 255, 0, 0.05) 0%,
+    rgba(0, 255, 0, 0.15) 50%,
+    rgba(0, 255, 0, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite ease-in-out;
+  border-radius: 4px;
+  will-change: background-position;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.problem-loading-skeleton {
+  height: 40px;
+  margin: 20px auto;
+  max-width: 300px;
+}
+
+.solution-loading-skeleton {
+  height: 30px;
+  margin: 10px 0;
+  width: 80%;
+}
+
+/* Loading spinner for async operations */
+.loading-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 255, 0, 0.1);
+  border-top-color: #00ff00;
+  border-radius: 50%;
+  animation: spinner-rotate 0.8s linear infinite;
+  will-change: transform;
+}
+
+@keyframes spinner-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   BUTTON RIPPLE EFFECTS
+   ============================================ */
+
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0, 255, 0, 0.4);
+  transform: scale(0);
+  animation: ripple-expand 0.6s ease-out;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+@keyframes ripple-expand {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Enhanced button states */
+.modern-button {
+  position: relative;
+  padding: 12px 24px;
+  font-family: "Orbitron", monospace;
+  font-weight: 700;
+  border: 2px solid #00ff00;
+  background: linear-gradient(145deg, rgba(0, 50, 0, 0.8), rgba(0, 20, 0, 0.9));
+  color: #00ff00;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  will-change: transform, box-shadow;
+}
+
+.modern-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 255, 0, 0.3);
+  border-color: #00ff99;
+  color: #00ff99;
+}
+
+.modern-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 255, 0, 0.2);
+}
+
+.modern-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.modern-button:hover::before {
+  left: 100%;
+}
+
+/* ============================================
+   ENHANCED MODAL ANIMATIONS
+   ============================================ */
+
+.modal-backdrop-blur {
+  /* Fallback for browsers without backdrop-filter support */
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: backdrop-fade-in 0.3s ease-out;
+  will-change: backdrop-filter, opacity;
+}
+
+@supports (backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px)) {
+  .modal-backdrop-blur {
+    background: rgba(0, 0, 0, 0.7);
+  }
+}
+
+@keyframes backdrop-fade-in {
+  from {
+    backdrop-filter: blur(0px);
+    opacity: 0;
+  }
+  to {
+    backdrop-filter: blur(8px);
+    opacity: 1;
+  }
+}
+
+.modal-content-enhanced {
+  animation: modal-slide-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 255, 0, 0.2);
+  will-change: transform, opacity;
+}
+
+@keyframes modal-slide-up {
+  from {
+    transform: translateY(100px) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   PROGRESS INDICATORS
+   ============================================ */
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(0, 255, 0, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ff00, #00ff99);
+  border-radius: 4px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+  will-change: width;
+}
+
+.progress-bar-animated {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar-animated::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: progress-shine 1.5s infinite;
+}
+
+@keyframes progress-shine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ============================================
+   TOAST NOTIFICATIONS
+   ============================================ */
+
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  padding: 16px 24px;
+  background: rgba(0, 20, 0, 0.95);
+  border: 2px solid #00ff00;
+  border-radius: 8px;
+  color: #00ff00;
+  font-family: "Orbitron", monospace;
+  font-size: 14px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 255, 0, 0.3);
+  animation: toast-slide-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: auto;
+  will-change: transform, opacity;
+}
+
+@keyframes toast-slide-in {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast.toast-success {
+  border-color: #00ff00;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 255, 0, 0.4);
+}
+
+.toast.toast-error {
+  border-color: #ff0000;
+  color: #ff6666;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 0, 0, 0.4);
+}
+
+.toast.toast-warning {
+  border-color: #ffd700;
+  color: #ffd700;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.toast.toast-hide {
+  animation: toast-slide-out 0.4s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+}
+
+@keyframes toast-slide-out {
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   MICRO-INTERACTIONS
+   ============================================ */
+
+/* Symbol hover glow effect */
+.falling-symbol {
+  transition: filter 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: filter, transform;
+}
+
+.falling-symbol:hover {
+  filter: brightness(1.5) drop-shadow(0 0 10px currentColor);
+  transform: scale(1.1);
+}
+
+.falling-symbol:active {
+  transform: scale(0.95);
+}
+
+/* Console slot pulse effect */
+.console-slot {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, box-shadow;
+}
+
+.console-slot:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 255, 0, 0.3);
+}
+
+.console-slot:active {
+  transform: translateY(-1px);
+}
+
+/* Help button pulsing attention */
+#help-button {
+  animation: help-pulse 2s ease-in-out infinite;
+  will-change: box-shadow;
+  position: relative;
+  z-index: 10010;
+}
+
+@keyframes help-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+  }
+}
+
+/* ============================================
+   SCROLL ENHANCEMENTS
+   ============================================ */
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 0, 0.5) rgba(0, 255, 0, 0.1);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 255, 0, 0.1);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 0, 0.5);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 0, 0.8);
+}
+
+/* ============================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================ */
+
+/* High contrast focus indicators for keyboard navigation */
+.keyboard-focus:focus-visible {
+  outline: 3px solid #00ff00;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(0, 255, 0, 0.2);
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Skip to content link for keyboard users */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  background: #00ff00;
+  color: #000;
+  padding: 8px 16px;
+  z-index: 100000;
+  font-family: "Orbitron", monospace;
+  font-weight: 700;
+  border-radius: 0 0 8px 0;
+  text-decoration: none;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ============================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================ */
+
+/* GPU acceleration for frequently animated elements */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform;
+}
+
+/* Contain paint and layout for better performance */
+.contain-optimized {
+  contain: layout style paint;
+}
+
+/* Reduce motion for users with motion sensitivity */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .loading-skeleton {
+    animation: none;
+    background: rgba(0, 255, 0, 0.1);
+  }
+}
+
+/* ============================================
+   DARK MODE SUPPORT (Future Enhancement)
+   ============================================ */
+
+@media (prefers-color-scheme: light) {
+  /* Currently the game is dark-themed only
+       This can be used for future light mode support */
+}
+
+/* ============================================
+   RESPONSIVE TOUCH ENHANCEMENTS
+   ============================================ */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Touch device optimizations */
+  .modern-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .falling-symbol {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .console-slot {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}
+
+/* ============================================
+   PRINT STYLES (For documentation/reports)
+   ============================================ */
+
+@media print {
+  .toast-container,
+  .loading-spinner,
+  .ripple-effect {
+    display: none !important;
+  }
+}

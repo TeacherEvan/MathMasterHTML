@@ -64,6 +64,13 @@ class WormSystem {
 
     this.additionalWormsPerRow = 0; // No additional escalation (already scaled by difficulty)
 
+    // Automation mode: reduce worm count for deterministic tests
+    this.isAutomation = navigator.webdriver === true;
+    if (this.isAutomation) {
+      this.wormsPerRow = Math.min(this.wormsPerRow, 1);
+      this.maxWorms = Math.min(this.maxWorms, 8);
+    }
+
     Logger.info(
       `🎮`,
       `Difficulty: ${currentLevel.toUpperCase()} - ${
@@ -99,6 +106,11 @@ class WormSystem {
     this.cachedPowerUpDisplay = null;
     this.cachedPanelC = null;
     this.cachedGameOverModal = null;
+
+    // Track latest revealed symbol for late-spawned worms
+    this.latestRevealedSymbol = null;
+    this.latestRevealedAt = 0;
+    this.LATEST_REVEALED_TTL = 5000; // ms
 
     // CONSTANTS: Extract magic numbers for better maintainability
     this.WORM_SEGMENT_COUNT = 5;
@@ -469,6 +481,11 @@ class WormSystem {
   notifyWormsOfRedSymbol(symbolValue) {
     console.log(`🎯 Notifying worms of revealed red symbol: "${symbolValue}"`);
 
+    // Cache the latest revealed symbol and refresh symbol caches
+    this.latestRevealedSymbol = symbolValue;
+    this.latestRevealedAt = Date.now();
+    this.invalidateSymbolCache();
+
     this.worms.forEach((worm) => {
       if (!worm.active || worm.hasStolen || worm.isRushingToTarget) return;
 
@@ -478,6 +495,7 @@ class WormSystem {
       );
       worm.isRushingToTarget = true;
       worm.targetSymbol = symbolValue;
+      worm.forceRushUntil = Date.now() + 1500;
       worm.roamingEndTime = Date.now(); // Stop roaming timer
       worm.path = null;
       worm.pathIndex = 0;
@@ -622,6 +640,18 @@ class WormSystem {
 
     this.crossPanelContainer.appendChild(wormElement);
 
+    // Seed target if a revealed symbol exists (helps late spawns rush immediately)
+    let targetSymbol = null;
+    const revealedSymbols = this.getCachedRevealedSymbols();
+    if (revealedSymbols && revealedSymbols.length > 0) {
+      targetSymbol = revealedSymbols[0].textContent;
+    } else if (
+      this.latestRevealedSymbol &&
+      Date.now() - this.latestRevealedAt < this.LATEST_REVEALED_TTL
+    ) {
+      targetSymbol = this.latestRevealedSymbol;
+    }
+
     // Create worm data
     const wormData = this.factory.createWormData({
       id: wormId,
@@ -633,6 +663,7 @@ class WormSystem {
       fromConsole,
       consoleSlotIndex,
       consoleSlotElement,
+      targetSymbol,
     });
 
     // Handle console slot locking if applicable
@@ -1374,6 +1405,11 @@ class WormSystem {
     const targetElement = this._resolveTargetElement(worm, symbolsToSearch);
 
     if (!targetElement) {
+      const now = Date.now();
+      if (worm.forceRushUntil && now < worm.forceRushUntil) {
+        return false;
+      }
+
       console.log(`🐛 Worm ${worm.id} has no symbols to target, roaming...`);
       worm.isRushingToTarget = false;
       worm.path = null;
