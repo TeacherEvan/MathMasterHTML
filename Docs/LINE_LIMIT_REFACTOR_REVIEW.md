@@ -2,7 +2,9 @@
 
 ## Target
 
-src/scripts/utils.js
+- src/scripts/ui-boundary-manager.js
+- src/scripts/lock-manager.js
+- src/styles/css/modern-ux-enhancements.css
 
 ## Review Summary
 
@@ -15,7 +17,7 @@ src/scripts/utils.js
 - Risk: load order regression.
   - Mitigation: explicit script order in src/pages/game.html.
 - Risk: missing globals if a file fails to load.
-  - Mitigation: keep a lightweight utils.js shim; log success messages.
+  - Mitigation: core exposes globals and helper modules are defensive.
 
 ## Performance Considerations
 
@@ -25,8 +27,8 @@ src/scripts/utils.js
 ## Security Considerations
 
 - No new dynamic code execution.
-- Uses existing localStorage keys only.
+- No new storage keys added.
 
 ## Decision
 
-Approved to execute refactor of utils.js in this session.
+Approved to execute refactor of UIBoundaryManager and LockManager; trim CSS comments to meet the 500 LOC limit.

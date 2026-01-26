@@ -1,11 +1,3 @@
-/* ==================================================
-   MODERN UX ENHANCEMENTS - Production-Grade Styling
-   ================================================== */
-
-/* ============================================
-   LOADING STATES & SKELETONS
-   ============================================ */
-
 .loading-skeleton {
   background: linear-gradient(
     90deg,
@@ -40,7 +32,6 @@
   width: 80%;
 }
 
-/* Loading spinner for async operations */
 .loading-spinner {
   display: inline-block;
   width: 40px;
@@ -60,10 +51,6 @@
     transform: rotate(360deg);
   }
 }
-
-/* ============================================
-   BUTTON RIPPLE EFFECTS
-   ============================================ */
 
 .ripple-container {
   position: relative;
@@ -88,7 +75,6 @@
   }
 }
 
-/* Enhanced button states */
 .modern-button {
   position: relative;
   padding: 12px 24px;

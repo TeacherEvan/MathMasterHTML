@@ -2,16 +2,21 @@
 
 ## Goal
 
-Refactor one monolithic file per session to ensure no file exceeds 500 lines of code, while preserving the event-driven architecture and runtime behavior.
+Refactor one or more monolithic files per session to ensure no file exceeds 500 lines of code, while preserving the event-driven architecture and runtime behavior.
 
-## Scope (Session 1)
+## Scope (Session 2)
 
-Target: src/scripts/utils.js (841 lines)
+Targets:
+
+1. src/scripts/ui-boundary-manager.js (727 lines)
+2. src/scripts/lock-manager.js (689 lines)
+3. src/styles/css/modern-ux-enhancements.css (510 lines)
 
 ## Rationale
 
-- Large utility module mixes unrelated concerns (core helpers, logging, resources, combo system, achievements).
-- Splitting improves cohesion, testability, and maintainability.
+- UI boundary management and lock manager exceed 500 LOC and mix core logic with helpers.
+- CSS file exceeds 500 LOC due to section headers and verbose comments.
+- Splitting and trimming improves cohesion, testability, and maintainability.
 
 ## Constraints
 
@@ -23,27 +28,34 @@ Target: src/scripts/utils.js (841 lines)
 
 Create small, single-responsibility scripts:
 
-1. utils-core.js: normalizeSymbol, calculateDistance, generateUniqueId, getLevelFromURL, deferExecution
-2. utils-dom.js: createDOMElement
-3. utils-logging.js: Logger
-4. utils-resource-manager.js: ResourceManager
-5. utils-combo.js: ComboSystem
-6. utils-achievements.js: AchievementSystem
-7. utils.js: compatibility shim (minimal, < 500 lines)
+1. ui-boundary-manager.core.js: registration, overlap checks, log helper
+2. ui-boundary-manager.positioning.js: safe positioning + reposition logic
+3. ui-boundary-manager.monitoring.js: resize + periodic checks
+4. ui-boundary-manager.debug.js: validation + debug utilities
+5. ui-boundary-manager.js: bootstrap instance
+6. lock-manager.loader.js: component loading + normalize naming
+7. lock-manager.animations.js: activation + animation helpers
+8. lock-manager.js: core event wiring + state + basic lock rendering
+
+CSS:
+
+9. modern-ux-enhancements.css: trim comment-only headers to stay under 500 LOC
 
 ## Integration Plan
 
 - Update src/pages/game.html to load new scripts in a safe order:
-  utils-core → utils-dom → utils-logging → utils-resource-manager → utils-combo → utils-achievements → utils
+  ui-boundary-manager.core → ui-boundary-manager.positioning → ui-boundary-manager.monitoring → ui-boundary-manager.debug → ui-boundary-manager
+  lock-manager → lock-manager.loader → lock-manager.animations
 - Keep global symbols identical to current behavior.
 
 ## Testing Plan
 
 - Smoke test in browser: load game page and verify console for errors.
-- Check that combo and achievement events still dispatch.
-- Confirm ResourceManager cleanup on beforeunload.
+- Verify UIBoundaryManager overlap checks and reposition events still fire.
+- Verify lock progression still advances on problem events.
 - No automated tests added in this session (documented for later).
 
 ## Rollback Plan
 
-- Revert to previous utils.js and restore original script tag in game.html.
+- Revert to previous ui-boundary-manager.js and lock-manager.js.
+- Restore original script order in src/pages/game.html.

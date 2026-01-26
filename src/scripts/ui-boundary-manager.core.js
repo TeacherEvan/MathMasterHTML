@@ -1,5 +1,5 @@
-// js/ui-boundary-manager.js - UI Collision Detection and Boundary Management
-console.log("📐 UIBoundaryManager loading...");
+// js/ui-boundary-manager.core.js - UI Collision Detection and Boundary Management (Core)
+console.log("📐 UIBoundaryManager core loading...");
 
 /**
  * UIBoundaryManager - Manages UI element boundaries, detects overlaps,
@@ -294,22 +294,7 @@ class UIBoundaryManager {
       }),
     );
   }
-  // Positioning methods moved to ui-boundary-manager.positioning.js
-
-  // Monitoring and debug methods moved to ui-boundary-manager.monitoring.js and
-  // ui-boundary-manager.debug.js
 }
 
 // Export to window
 window.UIBoundaryManager = UIBoundaryManager;
-
-// Create default instance
-window.uiBoundaryManager = new UIBoundaryManager({
-  minSpacing: 10,
-  logOverlaps: true,
-  autoReposition: true,
-  checkInterval: 500,
-  enablePeriodic: true,
-});
-
-console.log("✅ UIBoundaryManager loaded and default instance created");

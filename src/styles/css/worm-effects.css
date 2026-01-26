@@ -1,7 +1,3 @@
-/* worm-effects.css - Worm Visual Effects and Animations */
-/* Extracted from worm-styles.css - Explosions, splats, cracks, power-ups, and animations */
-
-/* === EXPLOSION EFFECTS === */
 .worm-damaged {
   filter: hue-rotate(120deg) brightness(1.2) !important;
 }
@@ -109,7 +105,6 @@
   }
 }
 
-/* === BLOOD SPLAT EFFECT === */
 .slime-splat {
   position: absolute;
   font-size: 60px;
@@ -124,7 +119,6 @@
   content: "🫟";
   display: block;
   filter: hue-rotate(320deg) saturate(2);
-  /* Make it red */
 }
 
 @keyframes splat-appear {
@@ -158,7 +152,6 @@
   }
 }
 
-/* === WORM CRACK MARKS === */
 .worm-crack {
   position: absolute;
   width: 40px;
@@ -213,7 +206,6 @@
   }
 }
 
-/* === STOLEN SYMBOL EFFECTS === */
 @keyframes stolen-fade {
   from {
     opacity: 1;
@@ -226,7 +218,6 @@
   }
 }
 
-/* === POWER-UP STYLES === */
 .power-up {
   position: fixed;
   pointer-events: auto;
@@ -301,7 +292,6 @@
   }
 }
 
-/* === CONSOLE SLOT WORM SPAWN EFFECTS === */
 .console-slot.worm-spawning {
   animation: slot-open 0.5s ease-out;
   background: radial-gradient(
@@ -332,7 +322,6 @@
   pointer-events: none;
 }
 
-/* === POWER-UP ANIMATIONS === */
 @keyframes lightning-fade {
   0% {
     opacity: 1;
@@ -374,7 +363,6 @@
   }
 }
 
-/* === DEVIL POWER-UP ANIMATION === */
 @keyframes devil-pulsate {
   0%,
   100% {
@@ -389,7 +377,6 @@
   }
 }
 
-/* === RESPONSIVE MOBILE STYLES === */
 @media (max-width: 768px) {
   .worm-segment {
     width: 7px;
@@ -412,7 +399,6 @@
   }
 }
 
-/* === DEVIL POWER-UP PULSATION === */
 @keyframes devil-pulsate {
   0%,
   100% {
@@ -427,7 +413,6 @@
   }
 }
 
-/* === TWO-CLICK POWER-UP SELECTION === */
 .power-up-placement-mode {
   cursor: crosshair !important;
 }
@@ -436,7 +421,6 @@
   cursor: crosshair !important;
 }
 
-/* Keep root element from intercepting clicks during placement mode */
 html.power-up-placement-mode {
   pointer-events: none !important;
 }
@@ -480,9 +464,6 @@ body.power-up-placement-mode {
   animation: tooltip-appear 0.3s ease-out;
 }
 
-/* === NEAR-MISS EXCITEMENT SYSTEM === */
-
-/* Target symbol when worm is close */
 .near-miss-target {
   animation: near-miss-pulse 0.3s ease-in-out infinite !important;
   position: relative;
@@ -523,7 +504,6 @@ body.power-up-placement-mode {
   }
 }
 
-/* Screen border warning during near-miss */
 .near-miss-active::after {
   content: "";
   position: fixed;
