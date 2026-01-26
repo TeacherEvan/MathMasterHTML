@@ -35,7 +35,11 @@ export default defineConfig({
     },
     {
       name: "iphone-13",
-      use: { ...devices["iPhone 13"] },
+      use: {
+        ...devices["iPhone 13"],
+        viewport: { width: 844, height: 390 },
+        screen: { width: 844, height: 390 },
+      },
     },
     {
       name: "pixel-7",

@@ -37,6 +37,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Mark automation runs (Playwright) to avoid portrait lock overlay
     if (navigator.webdriver) {
       document.body.classList.add("automation");
+      if (window.screen?.orientation?.lock) {
+        window.screen.orientation.lock("landscape").catch(() => {});
+      }
     }
 
     // Apply level theme to body without wiping other classes
