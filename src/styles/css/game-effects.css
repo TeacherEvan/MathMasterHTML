@@ -1,0 +1,136 @@
+@keyframes pulsating-red {
+  0% {
+    color: #ff6666;
+    text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+  }
+  50% {
+    color: #ff9999;
+    text-shadow: 0 0 20px #ff0000, 0 0 30px #ff0000;
+  }
+  100% {
+    color: #ff6666;
+    text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+  }
+}
+
+@keyframes pulsating-cyan {
+  0%,
+  100% {
+    color: #00ffff;
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+  }
+  50% {
+    color: #66ffff;
+    text-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00d4ff;
+  }
+}
+
+@keyframes lightning-strike {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  20% {
+    opacity: 0.3;
+  }
+  30% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes completionGlow {
+  0% {
+    box-shadow: inset 0 0 15px rgba(0, 255, 0, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: inset 0 0 30px rgba(0, 255, 0, 0.8),
+      0 0 50px rgba(0, 255, 0, 0.6);
+    transform: scale(1.02);
+  }
+  100% {
+    box-shadow: inset 0 0 15px rgba(0, 255, 0, 0.4);
+    transform: scale(1);
+  }
+}
+
+.problem-text {
+  font-size: 2.5em;
+  font-weight: 700;
+  text-align: center;
+  animation: pulsating-red 2s ease-in-out infinite;
+}
+
+.steps-container {
+  font-family: "Orbitron", monospace; /* cSpell:ignore Orbitron */
+  font-size: 1.65em; /* Increased by 50% */
+  line-height: 1.8;
+}
+
+.solution-step {
+  margin-bottom: 8px;
+  padding: 4px 0;
+}
+
+.solution-symbol {
+  display: inline-block;
+  min-width: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.hidden-symbol {
+  color: transparent;
+  background: transparent; /* Hide text boxes */
+  border-radius: 2px;
+  text-shadow: none;
+}
+
+.revealed-symbol {
+  color: #ff0000; /* Changed from green to red */
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.6); /* Changed from green to red */
+  background: rgba(255, 0, 0, 0.1); /* Changed from green to red */
+  border-radius: 2px;
+}
+
+.completed-row-symbol {
+  color: #00ffff;
+  text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00d4ff;
+  background: rgba(0, 255, 255, 0.15);
+  border-radius: 2px;
+  animation: pulsating-cyan 2s ease-in-out infinite;
+  font-weight: bold;
+}
+
+.space-symbol {
+  margin: 0 4px;
+  background: transparent;
+}
+
+.lock-error {
+  color: #ff4444;
+  text-align: center;
+  font-size: 1.2em;
+  padding: 20px;
+}
+
+.lock-waiting {
+  color: #ffd700;
+  text-align: center;
+  font-size: 1.1em;
+  padding: 20px;
+  opacity: 0.8;
+  font-style: italic;
+  animation: pulse 2s ease-in-out infinite;
+}

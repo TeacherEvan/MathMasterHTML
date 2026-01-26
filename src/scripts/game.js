@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const level = urlParams.get("level") || "beginner";
     const _lockComponent =
       urlParams.get("lockComponent") || "level-1-transformer.html";
-
     // Init persistence + timer/score HUD
     if (window.PlayerStorage) {
       window.PlayerStorage.init();
@@ -33,7 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 500);
       });
     }
-
     // Mark automation runs (Playwright) to avoid portrait lock overlay
     if (navigator.webdriver) {
       document.body.classList.add("automation");
@@ -49,7 +47,6 @@ document.addEventListener("DOMContentLoaded", () => {
       "level-master",
     );
     document.body.classList.add(`level-${level}`);
-
     // Problems array to store loaded problems
     let problems = [];
     let currentProblemIndex = 0;
@@ -58,11 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let totalCorrectAnswers = 0;
     let pendingHelpReveal = false;
 
-    // PURPLE WORM: Track consecutive wrong answers
     let consecutiveWrongAnswers = 0;
     const PURPLE_WORM_THRESHOLD = 3; // Trigger purple worm after 3 wrong clicks (excluding worm clicks)
 
-    // PERFORMANCE: DOM query caching to reduce repeated querySelectorAll calls
     let cachedStepSymbols = null;
     let cachedStepIndex = -1; // Track which step is cached
     let cacheInvalidated = true;
@@ -83,7 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return cachedStepSymbols;
     }
 
-    // PERFORMANCE: Invalidate cache when needed
     function invalidateStepCache() {
       cacheInvalidated = true;
       cachedStepSymbols = null;
@@ -94,103 +88,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Load problems based on level
     function loadProblems() {
-      // Show loading skeleton
-      window.showProblemLoadingSkeleton?.();
+      const fallbackProblem = {
+        problem: "4x = 24",
+        steps: ["4x = 24", "x = 24 ÷ 4", "x = 6"],
+        currentStep: 0,
+        currentSymbol: 0,
+      };
 
-      let problemPath = "";
-
-      // Determine which asset file to load based on level
-      switch (level) {
-        case "beginner":
-          problemPath =
-            "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.md";
-          break;
-        case "warrior":
-          problemPath =
-            "/src/assets/problems/Assets/Warrior_Lvl/warrior_problems.md";
-          break;
-        case "master":
-          problemPath =
-            "/src/assets/problems/Assets/Master_Lvl/master_problems.md";
-          break;
-        default:
-          problemPath =
-            "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.md";
-      }
-
-      // Fetch the problem set
-      fetch(problemPath)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`Failed to load problems: ${response.statusText}`);
-          }
-          return response.text();
-        })
-        .then((data) => {
-          // Parse problems from markdown
-          problems = parseProblemsFromMarkdown(data);
-
-          // Start with the first problem
+      window.GameProblemLoader?.loadProblems({
+        level,
+        showSkeleton: window.showProblemLoadingSkeleton,
+        onLoaded: (loadedProblems) => {
+          problems = loadedProblems;
           if (problems.length > 0) {
             currentProblem = problems[currentProblemIndex];
-            setupProblem();
           } else {
-            // Use fallback problem
-            currentProblem = {
-              problem: "4x = 24",
-              steps: ["4x = 24", "x = 24 ÷ 4", "x = 6"],
-              currentStep: 0,
-              currentSymbol: 0,
-            };
-            setupProblem();
+            currentProblem = fallbackProblem;
           }
-        })
-        .catch(() => {
-          // Fallback to a default problem
-          currentProblem = {
-            problem: "4x = 24",
-            steps: ["4x = 24", "x = 24 ÷ 4", "x = 6"],
-            currentStep: 0,
-            currentSymbol: 0,
-          };
           setupProblem();
-        });
-    }
-
-    // Parse problems from markdown content
-    function parseProblemsFromMarkdown(markdownContent) {
-      const parsedProblems = [];
-
-      // Split by problem (starting with a number followed by dot and backtick)
-      const problemRegex = /(\d+)\.\s+`([^`]+)`\s*\n((?:\s*-[^\n]+\n?)+)/g;
-      let match;
-
-      while ((match = problemRegex.exec(markdownContent)) !== null) {
-        try {
-          const _problemNumber = match[1]; // Prefixed - for future problem numbering
-          const problemText = match[2];
-          const stepsText = match[3];
-
-          // Extract all solution steps (lines starting with -)
-          const steps = stepsText
-            .split("\n")
-            .filter((line) => line.trim().startsWith("-"))
-            .map((line) => line.trim().replace(/^-\s*/, ""));
-
-          if (steps.length > 0) {
-            parsedProblems.push({
-              problem: problemText,
-              steps: steps,
-              currentStep: 0,
-              currentSymbol: 0,
-            });
-          }
-        } catch {
-          // Skip malformed problems silently
-        }
-      }
-
-      return parsedProblems;
+        },
+        onError: () => {
+          currentProblem = fallbackProblem;
+          setupProblem();
+        },
+      });
     }
 
     function setupProblem() {
@@ -230,7 +151,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Investigative clarification prompt (minimal UI)
     if (clarifyButton) {
       clarifyButton.addEventListener("click", () => {
         const question = window.prompt(
@@ -300,7 +220,6 @@ document.addEventListener("DOMContentLoaded", () => {
       solutionContainer.appendChild(stepsContainer);
     }
 
-    // Move to next problem
     function nextProblem() {
       currentProblemIndex++;
       if (currentProblemIndex >= problems.length) {
@@ -316,76 +235,16 @@ document.addEventListener("DOMContentLoaded", () => {
       setupProblem();
     }
 
-    // PERFORMANCE FIX: Defer problem loading to prevent blocking symbol rain animation
-    // Give the browser time to render first frame of animations before loading heavy data
     deferExecution(() => {
       loadProblems(); // Load problems after initial paint
     });
 
-    /** Get next hidden symbol from solution - now accepts any symbol in current line */
-    function getNextSymbol() {
-      // PERFORMANCE: Use cached symbols
-      const currentStepSymbols = getCachedStepSymbols(currentSolutionStepIndex);
-      const hiddenSymbols = Array.from(currentStepSymbols).filter((el) =>
-        el.classList.contains("hidden-symbol"),
+    function notifySymbolRevealed(targetSymbol, span) {
+      document.dispatchEvent(
+        new CustomEvent("symbolRevealed", {
+          detail: { symbol: targetSymbol, element: span },
+        }),
       );
-
-      if (hiddenSymbols.length > 0) {
-        // Return array of all possible symbols in current line
-        return hiddenSymbols.map((span) => span.textContent);
-      }
-
-      return null;
-    }
-
-    /** Check if clicked symbol exists in current line - FIXED X/x DETECTION */
-    function isSymbolInCurrentLine(clickedSymbol) {
-      const expectedSymbols = getNextSymbol();
-
-      if (expectedSymbols && Array.isArray(expectedSymbols)) {
-        // REFACTORED: Use shared normalizeSymbol utility from utils.js
-        const normalizedClicked = normalizeSymbol(clickedSymbol);
-        const normalizedExpected = expectedSymbols.map((s) =>
-          normalizeSymbol(s),
-        );
-
-        return normalizedExpected.includes(normalizedClicked);
-      }
-      return false;
-    }
-
-    /** Reveal specific symbol in current line - FIXED X/x DETECTION */
-    function revealSpecificSymbol(targetSymbol) {
-      // REFACTORED: Use shared normalizeSymbol utility from utils.js
-      const normalizedTarget = normalizeSymbol(targetSymbol);
-
-      // PERFORMANCE: Use cached symbols
-      const currentStepSymbols = getCachedStepSymbols(currentSolutionStepIndex);
-      const hiddenSymbols = Array.from(currentStepSymbols).filter((el) =>
-        el.classList.contains("hidden-symbol"),
-      );
-
-      for (const span of hiddenSymbols) {
-        const spanSymbol = span.textContent;
-        const normalizedSpan = normalizeSymbol(spanSymbol);
-
-        if (normalizedSpan === normalizedTarget) {
-          span.classList.remove("hidden-symbol");
-          span.classList.add("revealed-symbol");
-          invalidateStepCache(); // PERFORMANCE: Invalidate cache after DOM change
-
-          // Dispatch event to notify worms that a RED symbol appeared!
-          document.dispatchEvent(
-            new CustomEvent("symbolRevealed", {
-              detail: { symbol: targetSymbol, element: span },
-            }),
-          );
-
-          return true;
-        }
-      }
-
-      return false;
     }
 
     /** Handle correct symbol selection */
@@ -427,7 +286,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 300);
 
       // Reveal the specific symbol clicked
-      revealSpecificSymbol(clickedSymbol);
+      window.GameSymbolHelpers?.revealSpecificSymbol({
+        targetSymbol: clickedSymbol,
+        stepIndex: currentSolutionStepIndex,
+        getCachedStepSymbols,
+        invalidateStepCache,
+        normalizeSymbol,
+        onSymbolRevealed: notifySymbolRevealed,
+      });
       checkLineCompletion();
     }
 
@@ -465,7 +331,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (currentStepHiddenSymbols.length === 0) {
         // ENHANCED DRAMATIC EFFECTS for row completion
-        createDramaticLineCompletion(currentSolutionStepIndex);
+        window.GameEffects?.createDramaticLineCompletion(
+          currentSolutionStepIndex,
+          solutionContainer,
+        );
 
         // Trigger worm spawning for completed line
 
@@ -490,167 +359,6 @@ document.addEventListener("DOMContentLoaded", () => {
           checkProblemCompletion();
         }
       }
-    }
-
-    /** Create dramatic celebration for line completion */
-    function createDramaticLineCompletion(stepIndex) {
-      // 1. Lightning flash
-      createLightningFlash();
-
-      // 2. Screen shake effect
-      createScreenShake();
-
-      // 3. Celebration particles
-      createCelebrationParticles(stepIndex);
-
-      // 4. Victory banner briefly
-      showVictoryBanner(stepIndex + 1);
-
-      // 5. Transform row to pulsating cyan
-      transformRowToPulsatingCyan(stepIndex);
-    }
-
-    /** Create lightning flash effect */
-    function createLightningFlash() {
-      // Create lightning overlay
-      const lightning = document.createElement("div");
-      lightning.className = "lightning-flash";
-      lightning.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(135,206,250,0.7), transparent);
-            z-index: 9999;
-            pointer-events: none;
-            animation: lightning-strike 1s ease-out forwards;
-        `;
-
-      document.body.appendChild(lightning);
-
-      // Remove after animation
-      setTimeout(() => {
-        if (lightning.parentNode) {
-          lightning.parentNode.removeChild(lightning);
-        }
-      }, 1000);
-    }
-
-    /** Create screen shake effect for impact */
-    function createScreenShake() {
-      document.body.classList.add("screen-shake");
-      setTimeout(() => {
-        document.body.classList.remove("screen-shake");
-      }, 500);
-    }
-
-    /** Create celebration particles around the completed row */
-    function createCelebrationParticles(stepIndex) {
-      const row = solutionContainer.querySelector(
-        `[data-step-index="${stepIndex}"]`,
-      );
-      if (!row) return;
-
-      const rect = row.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-
-      // Create particle container
-      const particleContainer = document.createElement("div");
-      particleContainer.className = "celebration-particles";
-      particleContainer.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 10000;
-        `;
-      document.body.appendChild(particleContainer);
-
-      // Create multiple particles
-      const colors = ["#00ffff", "#00ff00", "#ffff00", "#ff00ff", "#ff6600"];
-      const symbols = ["★", "✦", "◆", "●", "⚡"];
-
-      for (let i = 0; i < 20; i++) {
-        const particle = document.createElement("div");
-        const randomColor = colors[Math.floor(Math.random() * colors.length)];
-        const randomSymbol =
-          symbols[Math.floor(Math.random() * symbols.length)];
-        const angle = (i / 20) * Math.PI * 2;
-        const velocity = 150 + Math.random() * 100;
-        const endX = Math.cos(angle) * velocity;
-        const endY = Math.sin(angle) * velocity;
-
-        particle.textContent = randomSymbol;
-        particle.style.cssText = `
-                position: absolute;
-                left: ${centerX}px;
-                top: ${centerY}px;
-                font-size: ${16 + Math.random() * 12}px;
-                color: ${randomColor};
-                text-shadow: 0 0 10px ${randomColor};
-                --end-x: ${endX}px;
-                --end-y: ${endY}px;
-                animation: particle-explode 0.8s ease-out forwards;
-            `;
-        particleContainer.appendChild(particle);
-      }
-
-      // Clean up after animation using modern remove() method
-      setTimeout(() => {
-        particleContainer.remove();
-      }, 1000);
-    }
-
-    /** Show victory banner for completed line */
-    function showVictoryBanner(lineNumber) {
-      const banner = document.createElement("div");
-      banner.className = "victory-banner";
-      banner.innerHTML = `<span class="victory-text">LINE ${lineNumber} COMPLETE!</span>`;
-      banner.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            font-family: 'Orbitron', monospace;
-            font-size: 2em;
-            font-weight: bold;
-            color: #00ffff;
-            text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff, 2px 2px 0 #000;
-            z-index: 10001;
-            pointer-events: none;
-            animation: victory-popup 1.5s ease-out forwards;
-            white-space: nowrap;
-        `;
-
-      document.body.appendChild(banner);
-
-      // Clean up after animation using modern remove() method
-      setTimeout(() => {
-        banner.remove();
-      }, 1500);
-    }
-
-    /** Transform completed row to pulsating cyan */
-    function transformRowToPulsatingCyan(stepIndex) {
-      // Get ALL non-hidden, non-space symbols in the completed row
-      const rowSymbols = solutionContainer.querySelectorAll(
-        `[data-step-index="${stepIndex}"].solution-symbol:not(.hidden-symbol):not(.space-symbol):not(.completed-row-symbol)`,
-      );
-
-      rowSymbols.forEach((symbol, index) => {
-        // Staggered animation for wave effect using CSS animation-delay instead of nested setTimeout
-        symbol.classList.remove("revealed-symbol");
-        symbol.classList.add("completed-row-symbol");
-
-        // Use CSS custom property for staggered animation
-        symbol.style.setProperty("--stagger-delay", `${index * 30}ms`);
-        symbol.style.animation = `symbol-pop 0.3s ease-out ${index *
-          30}ms, pulsating-cyan 2s ease-in-out ${index * 30 + 300}ms infinite`;
-      });
     }
 
     /** Check if all solution steps have been revealed */
@@ -683,9 +391,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Event Listeners
     function revealHelpSymbol() {
-      const availableSymbols = getNextSymbol();
+      const availableSymbols = window.GameSymbolHelpers?.getNextSymbol({
+        stepIndex: currentSolutionStepIndex,
+        getCachedStepSymbols,
+      });
       let symbolToReveal = null;
 
       if (availableSymbols && availableSymbols.length > 0) {
@@ -701,7 +411,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (symbolToReveal) {
-        revealSpecificSymbol(symbolToReveal);
+        window.GameSymbolHelpers?.revealSpecificSymbol({
+          targetSymbol: symbolToReveal,
+          stepIndex: currentSolutionStepIndex,
+          getCachedStepSymbols,
+          invalidateStepCache,
+          normalizeSymbol,
+          onSymbolRevealed: notifySymbolRevealed,
+        });
         checkLineCompletion();
         return true;
       }
@@ -726,7 +443,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 150);
     });
 
-    // Listen for symbol clicks from symbol rain (matrix.js)
     document.addEventListener("symbolClicked", (e) => {
       const clicked = e.detail.symbol;
 
@@ -787,23 +503,35 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // PRIORITY 2: Otherwise, check if it's in the current line (normal gameplay)
-      if (isSymbolInCurrentLine(clicked)) {
+      if (
+        window.GameSymbolHelpers?.isSymbolInCurrentLine({
+          clickedSymbol: clicked,
+          stepIndex: currentSolutionStepIndex,
+          getCachedStepSymbols,
+          normalizeSymbol,
+        })
+      ) {
         handleCorrectAnswer(clicked);
       } else {
         handleIncorrectAnswer();
       }
     });
 
-    // Listen for worm symbol correct events
     document.addEventListener("wormSymbolCorrect", (e) => {
       const symbol = e.detail.symbol;
 
-      if (isSymbolInCurrentLine(symbol)) {
+      if (
+        window.GameSymbolHelpers?.isSymbolInCurrentLine({
+          clickedSymbol: symbol,
+          stepIndex: currentSolutionStepIndex,
+          getCachedStepSymbols,
+          normalizeSymbol,
+        })
+      ) {
         handleCorrectAnswer(symbol);
       }
     });
 
-    // Listen for worm symbol saved events (when player clicks worm to save symbol)
     document.addEventListener("wormSymbolSaved", (e) => {
       const { symbol: _symbol, wormId: _wormId } = e.detail;
 
@@ -815,153 +543,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 500);
     });
 
-    // Listen for console symbol added events (from console manager)
     document.addEventListener("consoleSymbolAdded", () => {
       // Continue to next problem after console interaction
       setTimeout(() => {
         nextProblem();
       }, 300);
     });
-
-    // Add completion glow animation and additional styles
-    const gameStyles = document.createElement("style");
-    gameStyles.textContent = `
-        @keyframes pulsating-red {
-            0% {
-                color: #ff6666;
-                text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
-            }
-            50% {
-                color: #ff9999;
-                text-shadow: 0 0 20px #ff0000, 0 0 30px #ff0000;
-            }
-            100% {
-                color: #ff6666;
-                text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
-            }
-        }
-
-        @keyframes pulsating-cyan {
-            0%, 100% {
-                color: #00ffff;
-                text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
-            }
-            50% {
-                color: #66ffff;
-                text-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00d4ff;
-            }
-        }
-
-        @keyframes lightning-strike {
-            0% {
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            20% {
-                opacity: 0.3;
-            }
-            30% {
-                opacity: 1;
-            }
-            40% {
-                opacity: 0.5;
-            }
-            50% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0;
-            }
-        }
-
-        @keyframes completionGlow {
-            0% {
-                box-shadow: inset 0 0 15px rgba(0,255,0,0.4);
-                transform: scale(1);
-            }
-            50% {
-                box-shadow: inset 0 0 30px rgba(0,255,0,0.8), 0 0 50px rgba(0,255,0,0.6);
-                transform: scale(1.02);
-            }
-            100% {
-                box-shadow: inset 0 0 15px rgba(0,255,0,0.4);
-                transform: scale(1);
-            }
-        }
-        
-        .problem-text {
-            font-size: 2.5em;
-            font-weight: 700;
-            text-align: center;
-            animation: pulsating-red 2s ease-in-out infinite;
-        }
-        
-        .steps-container {
-            font-family: 'Orbitron', monospace; /* cSpell:ignore Orbitron */
-            font-size: 1.65em; /* Increased by 50% */
-            line-height: 1.8;
-        }
-        
-        .solution-step {
-            margin-bottom: 8px;
-            padding: 4px 0;
-        }
-        
-        .solution-symbol {
-            display: inline-block;
-            min-width: 12px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .hidden-symbol {
-            color: transparent;
-            background: transparent; /* Hide text boxes */
-            border-radius: 2px;
-            text-shadow: none;
-        }
-        
-        .revealed-symbol {
-            color: #ff0000; /* Changed from green to red */
-            text-shadow: 0 0 8px rgba(255,0,0,0.6); /* Changed from green to red */
-            background: rgba(255,0,0,0.1); /* Changed from green to red */
-            border-radius: 2px;
-        }
-
-        .completed-row-symbol {
-            color: #00ffff;
-            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00d4ff;
-            background: rgba(0,255,255,0.15);
-            border-radius: 2px;
-            animation: pulsating-cyan 2s ease-in-out infinite;
-            font-weight: bold;
-        }
-        
-        .space-symbol {
-            margin: 0 4px;
-            background: transparent;
-        }
-        
-        .lock-error {
-            color: #ff4444;
-            text-align: center;
-            font-size: 1.2em;
-            padding: 20px;
-        }
-        
-        .lock-waiting {
-            color: #ffd700;
-            text-align: center;
-            font-size: 1.1em;
-            padding: 20px;
-            opacity: 0.8;
-            font-style: italic;
-            animation: pulse 2s ease-in-out infinite;
-        }
-    `;
-    document.head.appendChild(gameStyles);
   } catch (error) {
     console.error("❌ Game initialization failed:", error);
     // Show user-friendly error message

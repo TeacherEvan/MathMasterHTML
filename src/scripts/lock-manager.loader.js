@@ -46,16 +46,34 @@ console.log("🔒 LockManager loader helpers loading...");
             styles += style.outerHTML;
           });
 
+          // Load linked stylesheets (dedupe by href)
+          const linkElements = doc.head.querySelectorAll(
+            'link[rel="stylesheet"]',
+          );
+          linkElements.forEach((link) => {
+            const href = link.getAttribute("href");
+            if (!href) return;
+            const existing = document.head.querySelector(
+              `link[rel="stylesheet"][href="${href}"]`,
+            );
+            if (!existing) {
+              const newLink = document.createElement("link");
+              newLink.rel = "stylesheet";
+              newLink.href = href;
+              document.head.appendChild(newLink);
+            }
+          });
+
           // Extract body content
           const bodyContent = doc.body.innerHTML;
 
           // Wrap content in lock-component-wrapper
           const wrappedContent = `
-                        ${styles}
-                        <div class="lock-component-wrapper">
-                            ${bodyContent}
-                        </div>
-                    `;
+                  ${styles}
+                  <div class="lock-component-wrapper">
+                    ${bodyContent}
+                  </div>
+                `;
 
           // Insert into container
           this.container.innerHTML = wrappedContent;

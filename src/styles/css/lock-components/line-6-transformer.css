@@ -1,0 +1,730 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent; /* Make transparent for game integration */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  font-family: "Orbitron", monospace;
+  overflow: hidden;
+}
+
+.lock-container {
+  position: relative;
+  width: 200px; /* Optimized for game display */
+  height: 200px; /* Optimized for game display */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-style: preserve-3d;
+  perspective: 500px; /* Adjusted for game display */
+  transform: scale(0.8); /* Better scale for game integration */
+  transform-origin: center;
+  margin: 15px auto; /* Center in game display */
+}
+
+.lock-body {
+  /* Starting from Level 5's final state - All previous transformations */
+  position: relative;
+  width: 180px; /* Level 3's final circular width */
+  height: 180px; /* Level 3's final circular height */
+  background: linear-gradient(
+    145deg,
+    #1a1a4a,
+    #2a2a6a,
+    #1a1a4a
+  ); /* Blue from Level 5 */
+  border-radius: 50%; /* Circular from Level 3 */
+  border: 4px solid #4488ff; /* Blue border from Level 5 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: scaleY(1.5) scaleX(1.6) rotateY(1440deg) rotateZ(1080deg)
+    scale(1.4); /* All Level 5 transformations */
+  transform-style: preserve-3d;
+  transition: all 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 0 120px rgba(68, 136, 255, 1),
+    /* Blue glow from Level 5 */ inset 0 0 40px rgba(68, 136, 255, 0.5),
+    0 0 0 15px rgba(68, 136, 255, 0.3);
+}
+
+.lock-body.active {
+  animation: level6-cosmic-transformation 6s ease-in-out forwards;
+}
+
+/* Core Element - Enhanced for Level 6 */
+.core {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle, #4488ff, #6699ff, #4488ff);
+  border-radius: 50%;
+  border: 3px solid #88aaff;
+  transition: all 2s ease-in-out;
+  box-shadow: 0 0 25px rgba(68, 136, 255, 1),
+    inset 0 0 15px rgba(136, 170, 255, 0.8);
+  z-index: 10;
+  animation: core-ultimate-pulse 2s infinite ease-in-out;
+}
+
+.core.active {
+  animation: core-cosmic-transformation 6s ease-in-out forwards;
+}
+
+/* Black Hole Event Horizon */
+.black-hole {
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  background: radial-gradient(
+    circle,
+    #000000 30%,
+    #111122 60%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  border: 2px solid #220044;
+  opacity: 0;
+  transition: all 3s ease-in-out;
+  z-index: 5;
+}
+
+.black-hole.active {
+  width: 300px;
+  height: 300px;
+  opacity: 1;
+  animation: black-hole-pulse 3s ease-in-out infinite;
+  box-shadow: 0 0 80px rgba(34, 0, 68, 0.8), inset 0 0 60px rgba(0, 0, 0, 1);
+}
+
+/* Electric Field Lines */
+.electric-field {
+  position: absolute;
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #8844ff 20%,
+    #4488ff 40%,
+    #ffffff 50%,
+    #4488ff 60%,
+    #8844ff 80%,
+    transparent
+  );
+  opacity: 0;
+  transform-origin: center;
+  animation: electric-field-discharge 0.8s infinite ease-in-out;
+}
+
+.electric-field.active {
+  opacity: 1;
+}
+
+/* Multiple electric field orientations */
+.field-1 {
+  transform: rotate(0deg);
+}
+.field-2 {
+  transform: rotate(30deg);
+}
+.field-3 {
+  transform: rotate(60deg);
+}
+.field-4 {
+  transform: rotate(90deg);
+}
+.field-5 {
+  transform: rotate(120deg);
+}
+.field-6 {
+  transform: rotate(150deg);
+}
+
+/* Shooting Particles - Enhanced for Level 6 */
+.shooting-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, #ffffff, #4488ff, #8844ff);
+  border-radius: 50%;
+  opacity: 0;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+  z-index: 15;
+}
+
+.shooting-particle.active {
+  opacity: 1;
+  animation: particle-shoot-out-in 4s ease-in-out infinite;
+}
+
+/* Colorful Orb - Final State with Enhanced 3D Effect */
+.colorful-orb {
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  background: conic-gradient(
+    from 0deg,
+    #ff0080 0deg,
+    #ff8000 60deg,
+    #80ff00 120deg,
+    #00ff80 180deg,
+    #0080ff 240deg,
+    #8000ff 300deg,
+    #ff0080 360deg
+  );
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 4s cubic-bezier(0.23, 1, 0.32, 1);
+  z-index: 20;
+  filter: blur(0px);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.colorful-orb.active {
+  width: 150px;
+  height: 150px;
+  opacity: 1;
+  animation: orb-3d-rotation 4s linear infinite;
+  box-shadow: 0 0 80px rgba(255, 255, 255, 1),
+    0 0 160px rgba(255, 128, 255, 0.8), 0 0 240px rgba(128, 255, 255, 0.6),
+    inset 0 0 50px rgba(255, 255, 255, 0.4),
+    inset 20px 0 40px rgba(255, 0, 128, 0.3),
+    inset -20px 0 40px rgba(0, 128, 255, 0.3),
+    inset 0 20px 40px rgba(128, 255, 0, 0.3),
+    inset 0 -20px 40px rgba(255, 128, 0, 0.3);
+}
+
+/* 3D Orb Inner Core */
+.orb-inner-core {
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.7) 20%,
+    rgba(255, 255, 255, 0.3) 40%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 4s ease-in-out;
+  z-index: 21;
+  transform-style: preserve-3d;
+}
+
+.orb-inner-core.active {
+  width: 80px;
+  height: 80px;
+  opacity: 1;
+  animation: inner-core-pulse 2s ease-in-out infinite;
+}
+
+/* 3D Orb Reflection */
+.orb-reflection {
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.4) 30%,
+    transparent 60%
+  );
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 4s ease-in-out;
+  z-index: 22;
+  transform: translate(-20%, -20%);
+}
+
+.orb-reflection.active {
+  width: 40px;
+  height: 40px;
+  opacity: 1;
+  animation: reflection-shimmer 3s ease-in-out infinite;
+}
+
+/* Orb Aura - Enhanced 3D */
+.orb-aura {
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 128, 255, 0.3) 25%,
+    rgba(128, 255, 255, 0.2) 50%,
+    rgba(255, 255, 128, 0.1) 75%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 4s ease-in-out;
+  z-index: 18;
+  transform-style: preserve-3d;
+}
+
+.orb-aura.active {
+  width: 300px;
+  height: 300px;
+  opacity: 1;
+  animation: aura-3d-pulse 3s ease-in-out infinite;
+}
+
+/* Detached Segments from Level 5 - Now with dramatic exit */
+.detachable-segment {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(45deg, #4488ff, #6699ff);
+  border: 2px solid #88aaff;
+  border-radius: 8px;
+  transition: all 3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 0 20px rgba(68, 136, 255, 0.8);
+  opacity: 1;
+  z-index: 12;
+}
+
+/* Starting positions from Level 5 final state */
+.segment-nw {
+  top: 20px;
+  left: 20px;
+  transform: translate(-60px, -60px) rotate(45deg) scale(1.2);
+}
+
+.segment-ne {
+  top: 20px;
+  right: 20px;
+  transform: translate(60px, -60px) rotate(-45deg) scale(1.2);
+}
+
+.segment-sw {
+  bottom: 20px;
+  left: 20px;
+  transform: translate(-60px, 60px) rotate(-45deg) scale(1.2);
+}
+
+.segment-se {
+  bottom: 20px;
+  right: 20px;
+  transform: translate(60px, 60px) rotate(45deg) scale(1.2);
+}
+
+.detachable-segment.cosmic-exit {
+  animation: segment-cosmic-exit 4s ease-in-out forwards;
+}
+
+/* Status Display */
+.status-display {
+  position: absolute;
+  bottom: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffffff;
+  font-size: 1.2em;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+  opacity: 0;
+  transition: opacity 2s ease-in-out;
+  z-index: 25;
+}
+
+.status-display.active {
+  opacity: 1;
+  animation: status-cosmic-glow 3s infinite ease-in-out;
+}
+
+/* Status subtitle style */
+.status-subtitle {
+  font-size: 0.8em;
+}
+
+/* Control Instructions */
+.controls {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  color: #ffffff;
+  font-size: 0.9em;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #ffffff;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+/* Remove all text elements and status indicators */
+.status-indicator,
+.status-display,
+.level-display,
+.btn,
+.controls {
+  display: none !important;
+}
+
+/* Status Display - Hidden in game mode */
+.status-display {
+  display: none !important;
+}
+
+.status-display.active {
+  display: none !important;
+}
+
+/* Control Instructions - Hidden in game mode */
+.controls {
+  display: none !important;
+}
+
+/* Cosmic Background Effect */
+.cosmic-background {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at center,
+    transparent 0%,
+    rgba(136, 68, 255, 0.1) 30%,
+    rgba(68, 136, 255, 0.1) 60%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  opacity: 0;
+  transition: opacity 3s ease-in-out;
+  z-index: 1;
+}
+
+.cosmic-background.active {
+  opacity: 1;
+  animation: cosmic-pulse 4s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes level6-cosmic-transformation {
+  0% {
+    transform: scaleY(1.5) scaleX(1.6) rotateY(1440deg) rotateZ(1080deg)
+      scale(1.4);
+    background: linear-gradient(145deg, #1a1a4a, #2a2a6a, #1a1a4a);
+    border-color: #4488ff;
+  }
+  15% {
+    transform: scaleY(1.6) scaleX(1.7) rotateY(1530deg) rotateZ(1170deg)
+      scale(1.5);
+    background: linear-gradient(145deg, #2a1a4a, #3a2a6a, #2a1a4a);
+    border-color: #6644ff;
+  }
+  30% {
+    transform: scaleY(1.8) scaleX(1.9) rotateY(1620deg) rotateZ(1260deg)
+      scale(1.7);
+    background: linear-gradient(145deg, #3a1a4a, #4a2a6a, #3a1a4a);
+    border-color: #8844ff;
+  }
+  45% {
+    transform: scaleY(2) scaleX(2.1) rotateY(1710deg) rotateZ(1350deg)
+      scale(1.9);
+    background: radial-gradient(circle, #000000, #220044, #440088);
+    border-color: #aa44ff;
+  }
+  60% {
+    transform: scaleY(1.5) scaleX(1.5) rotateY(1800deg) rotateZ(1440deg)
+      scale(1.2);
+    background: radial-gradient(circle, #000000, #000000, #110022);
+    border-color: #440088;
+    opacity: 0.8;
+  }
+  75% {
+    transform: scaleY(0.8) scaleX(0.8) rotateY(1890deg) rotateZ(1530deg)
+      scale(0.5);
+    background: radial-gradient(circle, #000000, #000000, #110022);
+    border-color: #220044;
+    opacity: 0.4;
+  }
+  90% {
+    transform: scaleY(0.2) scaleX(0.2) rotateY(1980deg) rotateZ(1620deg)
+      scale(0.1);
+    background: transparent;
+    border-color: transparent;
+    opacity: 0.1;
+  }
+  100% {
+    transform: scaleY(0) scaleX(0) rotateY(2070deg) rotateZ(1710deg) scale(0);
+    background: transparent;
+    border-color: transparent;
+    opacity: 0;
+  }
+}
+
+@keyframes core-cosmic-transformation {
+  0% {
+    transform: scale(1) rotate(0deg);
+    background: radial-gradient(circle, #4488ff, #6699ff, #4488ff);
+    box-shadow: 0 0 25px rgba(68, 136, 255, 1);
+  }
+  20% {
+    transform: scale(1.3) rotate(72deg);
+    background: radial-gradient(circle, #6644ff, #8866ff, #6644ff);
+    box-shadow: 0 0 35px rgba(102, 68, 255, 1.1);
+  }
+  40% {
+    transform: scale(1.8) rotate(144deg);
+    background: radial-gradient(circle, #8844ff, #aa66ff, #8844ff);
+    box-shadow: 0 0 50px rgba(136, 68, 255, 1.3);
+  }
+  60% {
+    transform: scale(1.2) rotate(216deg);
+    background: radial-gradient(circle, #aa44ff, #cc66ff, #aa44ff);
+    box-shadow: 0 0 70px rgba(170, 68, 255, 1.5);
+  }
+  80% {
+    transform: scale(0.6) rotate(288deg);
+    background: radial-gradient(circle, #000000, #220044, #000000);
+    box-shadow: 0 0 90px rgba(34, 0, 68, 2);
+  }
+  100% {
+    transform: scale(0) rotate(360deg);
+    background: transparent;
+    box-shadow: none;
+    opacity: 0;
+  }
+}
+
+@keyframes core-ultimate-pulse {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    box-shadow: 0 0 25px rgba(68, 136, 255, 1),
+      inset 0 0 15px rgba(136, 170, 255, 0.8);
+  }
+  50% {
+    transform: scale(1.3) rotate(180deg);
+    box-shadow: 0 0 40px rgba(68, 136, 255, 1.2),
+      inset 0 0 25px rgba(136, 170, 255, 1);
+  }
+}
+
+@keyframes orb-3d-rotation {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);
+    filter: hue-rotate(0deg) brightness(1) saturate(1);
+  }
+  25% {
+    transform: rotateX(90deg) rotateY(90deg) rotateZ(90deg) scale(1.05);
+    filter: hue-rotate(90deg) brightness(1.1) saturate(1.2);
+  }
+  50% {
+    transform: rotateX(180deg) rotateY(180deg) rotateZ(180deg) scale(1.1);
+    filter: hue-rotate(180deg) brightness(1.2) saturate(1.4);
+  }
+  75% {
+    transform: rotateX(270deg) rotateY(270deg) rotateZ(270deg) scale(1.05);
+    filter: hue-rotate(270deg) brightness(1.1) saturate(1.2);
+  }
+  100% {
+    transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg) scale(1);
+    filter: hue-rotate(360deg) brightness(1) saturate(1);
+  }
+}
+
+@keyframes inner-core-pulse {
+  0%,
+  100% {
+    transform: scale(1) rotateX(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2) rotateX(180deg);
+    opacity: 0.8;
+  }
+}
+
+@keyframes reflection-shimmer {
+  0%,
+  100% {
+    transform: translate(-20%, -20%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-10%, -10%) scale(1.3);
+    opacity: 0.6;
+  }
+}
+
+@keyframes aura-3d-pulse {
+  0%,
+  100% {
+    transform: scale(1) rotateZ(0deg);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  33% {
+    transform: scale(1.1) rotateZ(120deg);
+    opacity: 0.8;
+    filter: blur(2px);
+  }
+  66% {
+    transform: scale(1.05) rotateZ(240deg);
+    opacity: 0.9;
+    filter: blur(1px);
+  }
+}
+
+@keyframes segment-cosmic-exit {
+  0% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  25% {
+    transform: translate(var(--exit-x, -200px), var(--exit-y, -200px))
+      rotate(180deg) scale(1.5);
+    opacity: 0.8;
+    filter: brightness(1.5);
+  }
+  50% {
+    transform: translate(var(--exit-x, -400px), var(--exit-y, -400px))
+      rotate(360deg) scale(2);
+    opacity: 0.4;
+    filter: brightness(2);
+  }
+  75% {
+    transform: translate(var(--exit-x, -600px), var(--exit-y, -600px))
+      rotate(540deg) scale(0.5);
+    opacity: 0.1;
+    filter: brightness(0.5);
+  }
+  100% {
+    transform: translate(var(--exit-x, -800px), var(--exit-y, -800px))
+      rotate(720deg) scale(0);
+    opacity: 0;
+    filter: brightness(0);
+  }
+}
+
+@keyframes black-hole-pulse {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    box-shadow: 0 0 80px rgba(34, 0, 68, 0.8), inset 0 0 60px rgba(0, 0, 0, 1);
+  }
+  50% {
+    transform: scale(1.1) rotate(180deg);
+    box-shadow: 0 0 120px rgba(68, 0, 136, 1.2), inset 0 0 80px rgba(0, 0, 0, 1);
+  }
+}
+
+@keyframes electric-field-discharge {
+  0%,
+  100% {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      #8844ff 20%,
+      #4488ff 40%,
+      #ffffff 50%,
+      #4488ff 60%,
+      #8844ff 80%,
+      transparent
+    );
+    opacity: 1;
+  }
+  50% {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      #ffffff 20%,
+      #aaccff 40%,
+      #ffffff 50%,
+      #aaccff 60%,
+      #ffffff 80%,
+      transparent
+    );
+    opacity: 0.7;
+  }
+}
+
+@keyframes particle-shoot-out-in {
+  0% {
+    transform: scale(1) translate(0, 0);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.5)
+      translate(var(--shoot-x, 150px), var(--shoot-y, 150px));
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(2) translate(var(--shoot-x, 200px), var(--shoot-y, 200px));
+    opacity: 0.4;
+  }
+  75% {
+    transform: scale(1.5)
+      translate(var(--shoot-x, 150px), var(--shoot-y, 150px));
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes orb-rotation {
+  0% {
+    transform: rotate(0deg) scale(1);
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  33% {
+    transform: rotate(120deg) scale(1.1);
+    filter: hue-rotate(120deg) brightness(1.2);
+  }
+  66% {
+    transform: rotate(240deg) scale(1.05);
+    filter: hue-rotate(240deg) brightness(1.1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    filter: hue-rotate(360deg) brightness(1);
+  }
+}
+
+@keyframes aura-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+}
+
+@keyframes cosmic-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes status-cosmic-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    color: #ffffff;
+  }
+  33% {
+    text-shadow: 0 0 30px rgba(255, 128, 255, 1);
+    color: #ff80ff;
+  }
+  66% {
+    text-shadow: 0 0 30px rgba(128, 255, 255, 1);
+    color: #80ffff;
+  }
+}

@@ -75,7 +75,7 @@ function initSymbolRain() {
     symbols.forEach((s) => (lastSymbolSpawnTimestamp[s] = now));
 
     // PERIODIC FACE REVEAL SYSTEM - symbols show enhanced form every 5 seconds
-    let lastFaceRevealTime = Date.now();
+    const faceRevealState = { lastFaceRevealTime: Date.now() };
     const activeFaceReveals = new Set(); // Track symbols currently in face reveal state
 
     let columnCount = 0;
@@ -89,410 +89,44 @@ function initSymbolRain() {
     // PERFORMANCE: Tab visibility throttling (saves 95% CPU when tab hidden)
     let isTabVisible = !document.hidden;
 
-    // PERFORMANCE: Spatial hash grid for O(n) collision detection instead of O(n²)
-    const spatialGrid = new Map();
-
-    // PERFORMANCE: Debounce utility to prevent excessive function calls
-    function debounce(func, wait) {
-      let timeout;
-      return function executedFunction(...args) {
-        const later = () => {
-          clearTimeout(timeout);
-          func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-      };
+    const SymbolRainHelpers = window.SymbolRainHelpers;
+    if (!SymbolRainHelpers) {
+      console.error("❌ SymbolRainHelpers not loaded");
+      return;
     }
 
-    const SpatialGrid = {
-      getCellKey(x, y) {
-        const cellX = Math.floor(x / SymbolRainConfig.gridCellSize);
-        const cellY = Math.floor(y / SymbolRainConfig.gridCellSize);
-        return `${cellX},${cellY}`;
-      },
-
-      update(activeSymbols) {
-        spatialGrid.clear();
-        activeSymbols.forEach((symbolObj) => {
-          const key = this.getCellKey(symbolObj.x, symbolObj.y);
-          if (!spatialGrid.has(key)) {
-            spatialGrid.set(key, []);
-          }
-          spatialGrid.get(key).push(symbolObj);
-        });
-      },
-
-      getNeighbors(x, y) {
-        const cellX = Math.floor(x / SymbolRainConfig.gridCellSize);
-        const cellY = Math.floor(y / SymbolRainConfig.gridCellSize);
-        const neighbors = [];
-
-        // Check current cell and 8 surrounding cells
-        for (let dx = -1; dx <= 1; dx++) {
-          for (let dy = -1; dy <= 1; dy++) {
-            const key = `${cellX + dx},${cellY + dy}`;
-            if (spatialGrid.has(key)) {
-              neighbors.push(...spatialGrid.get(key));
-            }
-          }
-        }
-        return neighbors;
-      },
-    };
+    const SpatialGrid = SymbolRainHelpers.createSpatialGrid(SymbolRainConfig);
+    const SymbolPool = SymbolRainHelpers.createSymbolPool(SymbolRainConfig);
+    const debounce = SymbolRainHelpers.debounce;
 
     function calculateColumns() {
-      const containerWidth = symbolRainContainer.offsetWidth;
-      cachedContainerHeight = symbolRainContainer.offsetHeight; // Cache height here
-      columnCount = Math.floor(containerWidth / SymbolRainConfig.columnWidth);
-    }
-
-    function resetFaceRevealStyles(symbolElement) {
-      symbolElement.classList.remove("face-reveal");
-      symbolElement.style.transform = "";
-      symbolElement.style.textShadow = "";
-      symbolElement.style.filter = "";
-    }
-
-    function applyFaceRevealStyles(symbolElement) {
-      symbolElement.classList.add("face-reveal");
-      symbolElement.style.transform = "scale(1.3)";
-      symbolElement.style.textShadow =
-        "0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff";
-      symbolElement.style.filter = "brightness(1.5)";
-    }
-
-    function cleanupSymbolObject(symbolObj) {
-      if (activeFaceReveals.has(symbolObj)) {
-        activeFaceReveals.delete(symbolObj);
-        resetFaceRevealStyles(symbolObj.element);
-      }
-      symbolObj.element.remove();
-      SymbolPool.release(symbolObj.element);
-    }
-
-    // PERFORMANCE: DOM element pooling to reduce GC pressure
-    const SymbolPool = {
-      pool: [],
-
-      get() {
-        if (this.pool.length > 0) {
-          const symbol = this.pool.pop();
-          symbol.style.display = "block";
-          return symbol;
-        }
-        const symbol = document.createElement("div");
-        symbol.className = "falling-symbol";
-        return symbol;
-      },
-
-      release(symbolElement) {
-        if (this.pool.length < SymbolRainConfig.poolSize) {
-          symbolElement.style.display = "none";
-          symbolElement.className = "falling-symbol";
-          this.pool.push(symbolElement);
-        } else {
-          symbolElement.remove();
-        }
-      },
-    };
-
-    // DESKTOP: Create falling symbol (vertical)
-    function createFallingSymbol(
-      column,
-      isInitialPopulation = false,
-      forcedSymbol = null,
-    ) {
-      const symbol = SymbolPool.get(); // Use pooled element
-      symbol.className = "falling-symbol";
-      symbol.textContent =
-        forcedSymbol || symbols[Math.floor(Math.random() * symbols.length)];
-      // FIX: Center the random offset around column position to prevent right-side bias
-      const horizontalOffset = (Math.random() - 0.5) * 40; // -20px to +20px
-      symbol.style.left =
-        column * SymbolRainConfig.columnWidth +
-        SymbolRainConfig.columnWidth / 2 +
-        horizontalOffset +
-        "px";
-
-      if (isInitialPopulation) {
-        symbol.style.top = `${Math.random() *
-          symbolRainContainer.offsetHeight}px`;
-      } else {
-        symbol.style.top = "-50px";
-      }
-
-      // PERFORMANCE: Event delegation - no listener needed per symbol!
-      // Container handles all clicks via event delegation (see init section)
-      symbolRainContainer.appendChild(symbol);
-
-      activeFallingSymbols.push({
-        element: symbol,
-        column: column,
-        y: isInitialPopulation ? parseFloat(symbol.style.top) : -50,
-        x: parseFloat(symbol.style.left),
-        symbol: symbol.textContent,
-        isInFaceReveal: false, // FACE REVEAL: Track if symbol is in enhanced reveal state
-        faceRevealStartTime: 0, // FACE REVEAL: When the reveal started
-      });
-
-      if (forcedSymbol) {
-        lastSymbolSpawnTimestamp[forcedSymbol] = Date.now();
-      }
+      const {
+        columnCount: newColumnCount,
+        containerHeight,
+      } = SymbolRainHelpers.calculateColumns(
+        symbolRainContainer,
+        SymbolRainConfig,
+      );
+      cachedContainerHeight = containerHeight;
+      columnCount = newColumnCount;
     }
 
     function populateInitialSymbols() {
-      // Wave-based spawn: Release 5 symbols at a time, evenly spread out
-      const totalWaves = isMobileMode ? 4 : 8; // Mobile: 4 waves (20 symbols), Desktop: 8 waves (40 symbols)
-
-      function spawnWave(waveNumber) {
-        if (waveNumber >= totalWaves) {
-          isInitialPopulation = false; // Enable random spawning
-          return;
-        }
-
-        // Evenly distribute symbols across columnCount
-        const columnsToUse = Math.min(
+      SymbolRainHelpers.populateInitialSymbols(
+        {
+          config: SymbolRainConfig,
           columnCount,
-          SymbolRainConfig.symbolsPerWave,
-        ); // Don't exceed available columnCount
-        const columnStep = Math.floor(columnCount / columnsToUse);
-
-        for (
-          let i = 0;
-          i < SymbolRainConfig.symbolsPerWave && i < columnCount;
-          i++
-        ) {
-          const column = (i * columnStep) % columnCount; // Evenly distribute
-          createFallingSymbol(column, true);
-        }
-
-        // Schedule next wave
-        setTimeout(
-          () => spawnWave(waveNumber + 1),
-          SymbolRainConfig.waveInterval,
-        );
-      }
-
-      // Start the wave spawn sequence
-      spawnWave(0);
-    }
-
-    function handleSymbolClick(symbolElement, event) {
-      // Quick validation check
-      if (!document.getElementById("panel-c").contains(event.target)) {
-        return;
-      }
-
-      // Prevent multiple clicks on same symbol
-      if (symbolElement.classList.contains("clicked")) {
-        return;
-      }
-
-      const clickedSymbol = symbolElement.textContent;
-
-      // INSTANT FEEDBACK: Apply clicked class immediately
-      symbolElement.classList.add("clicked");
-
-      // Dispatch event immediately (no delay)
-      document.dispatchEvent(
-        new CustomEvent("symbolClicked", { detail: { symbol: clickedSymbol } }),
+          isMobileMode,
+          activeFallingSymbols,
+          symbols,
+          symbolRainContainer,
+          symbolPool: SymbolPool,
+          lastSymbolSpawnTimestamp,
+        },
+        () => {
+          isInitialPopulation = false;
+        },
       );
-
-      // Remove from DOM and clean up after animation
-      setTimeout(() => {
-        const symbolObj = activeFallingSymbols.find(
-          (s) => s.element === symbolElement,
-        );
-        if (symbolObj) {
-          activeFallingSymbols = activeFallingSymbols.filter(
-            (s) => s.element !== symbolElement,
-          );
-          cleanupSymbolObject(symbolObj);
-          return;
-        }
-        if (symbolElement.parentNode) {
-          symbolElement.parentNode.removeChild(symbolElement);
-        }
-        SymbolPool.release(symbolElement);
-      }, 500);
-    }
-
-    function checkCollision(symbolObj) {
-      if (isMobileMode) {
-        // Mobile: Check horizontal spacing - INCREASED BUFFER for face reveal symbols
-        const symbolWidth = SymbolRainConfig.mobileSymbolWidth;
-        const baseHorizontalBuffer = SymbolRainConfig.mobileHorizontalBuffer;
-        const faceRevealBuffer = symbolObj.isInFaceReveal
-          ? SymbolRainConfig.mobileFaceRevealBuffer
-          : 0;
-        const horizontalBuffer = baseHorizontalBuffer + faceRevealBuffer;
-
-        // PERFORMANCE: Only check nearby symbols from spatial grid
-        const neighbors = SpatialGrid.getNeighbors(symbolObj.x, symbolObj.y);
-        for (const other of neighbors) {
-          if (other === symbolObj) continue;
-          const distance = symbolObj.x - other.x;
-          if (distance > 0 && distance < symbolWidth + horizontalBuffer) {
-            return true;
-          }
-        }
-        return false;
-      } else {
-        // Desktop: Check vertical collision with increased spacing - ENHANCED for face reveal
-        const symbolHeight = SymbolRainConfig.desktopSymbolHeight;
-        const symbolWidth = SymbolRainConfig.desktopSymbolWidth;
-        const baseCollisionBuffer = SymbolRainConfig.desktopCollisionBuffer;
-        const baseHorizontalBuffer = SymbolRainConfig.desktopHorizontalBuffer;
-
-        // FACE REVEAL: Increased buffers to prevent overlaps during reveal phases
-        const faceRevealMultiplier = symbolObj.isInFaceReveal
-          ? SymbolRainConfig.faceRevealBufferMultiplier
-          : 1;
-        const collisionBuffer = baseCollisionBuffer * faceRevealMultiplier;
-        const horizontalBuffer = baseHorizontalBuffer * faceRevealMultiplier;
-
-        const symbolLeft = symbolObj.x;
-        const symbolRight = symbolLeft + symbolWidth;
-
-        // PERFORMANCE: Only check nearby symbols from spatial grid (not ALL symbols!)
-        const neighbors = SpatialGrid.getNeighbors(symbolObj.x, symbolObj.y);
-        for (const other of neighbors) {
-          if (other === symbolObj) continue;
-
-          const otherLeft = other.x;
-          const otherRight = otherLeft + symbolWidth;
-
-          const horizontalOverlap = !(
-            symbolRight + horizontalBuffer < otherLeft ||
-            symbolLeft > otherRight + horizontalBuffer
-          );
-
-          if (horizontalOverlap) {
-            const distance = other.y - symbolObj.y;
-            if (distance > 0 && distance < symbolHeight + collisionBuffer) {
-              return true;
-            }
-          }
-        }
-        return false;
-      }
-    }
-
-    // SAFETY MECHANISM: Check if two symbols are actually touching (overlapping)
-    function checkTouching(symbolObj) {
-      if (isMobileMode) {
-        // Mobile: Check actual overlap (no buffer)
-        const symbolWidth = SymbolRainConfig.mobileSymbolWidth;
-
-        const neighbors = SpatialGrid.getNeighbors(symbolObj.x, symbolObj.y);
-        for (const other of neighbors) {
-          if (other === symbolObj) continue;
-
-          // Check if symbols are actually overlapping horizontally
-          const distance = Math.abs(symbolObj.x - other.x);
-          if (distance < symbolWidth) {
-            return other; // Return the colliding symbol
-          }
-        }
-        return null;
-      } else {
-        // Desktop: Check actual overlap (no buffer) - both vertical and horizontal
-        const symbolHeight = SymbolRainConfig.desktopSymbolHeight;
-        const symbolWidth = SymbolRainConfig.desktopSymbolWidth;
-
-        const symbolLeft = symbolObj.x;
-        const symbolRight = symbolLeft + symbolWidth;
-        const symbolTop = symbolObj.y;
-        const symbolBottom = symbolTop + symbolHeight;
-
-        const neighbors = SpatialGrid.getNeighbors(symbolObj.x, symbolObj.y);
-        for (const other of neighbors) {
-          if (other === symbolObj) continue;
-
-          const otherLeft = other.x;
-          const otherRight = otherLeft + symbolWidth;
-          const otherTop = other.y;
-          const otherBottom = otherTop + symbolHeight;
-
-          // Check for actual bounding box overlap
-          const horizontalOverlap = !(
-            symbolRight <= otherLeft || symbolLeft >= otherRight
-          );
-          const verticalOverlap = !(
-            symbolBottom <= otherTop || symbolTop >= otherBottom
-          );
-
-          if (horizontalOverlap && verticalOverlap) {
-            return other; // Return the colliding symbol
-          }
-        }
-        return null;
-      }
-    }
-
-    function isColumnCrowded(targetColumnIndex) {
-      for (
-        let symbolIndex = 0;
-        symbolIndex < activeFallingSymbols.length;
-        symbolIndex++
-      ) {
-        const currentSymbol = activeFallingSymbols[symbolIndex];
-        if (
-          currentSymbol.column === targetColumnIndex &&
-          currentSymbol.y < 40
-        ) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    function triggerFaceRevealIfNeeded(containerHeight, currentTime) {
-      if (
-        currentTime - lastFaceRevealTime <
-        SymbolRainConfig.faceRevealInterval
-      ) {
-        return;
-      }
-
-      const visibleSymbols = activeFallingSymbols.filter(
-        (s) => s.y > 0 && s.y < containerHeight,
-      );
-      if (visibleSymbols.length === 0) {
-        lastFaceRevealTime = currentTime;
-        return;
-      }
-
-      const revealCount = Math.min(
-        3 + Math.floor(Math.random() * 3),
-        visibleSymbols.length,
-      );
-      for (let i = 0; i < revealCount; i++) {
-        const randomIndex = Math.floor(Math.random() * visibleSymbols.length);
-        const symbolObj = visibleSymbols.splice(randomIndex, 1)[0];
-
-        if (!symbolObj.isInFaceReveal) {
-          symbolObj.isInFaceReveal = true;
-          symbolObj.faceRevealStartTime = currentTime;
-          activeFaceReveals.add(symbolObj);
-          applyFaceRevealStyles(symbolObj.element);
-        }
-      }
-      lastFaceRevealTime = currentTime;
-    }
-
-    function cleanupFaceReveals(currentTime) {
-      for (const symbolObj of activeFaceReveals) {
-        if (
-          currentTime - symbolObj.faceRevealStartTime >=
-          SymbolRainConfig.faceRevealDuration
-        ) {
-          symbolObj.isInFaceReveal = false;
-          resetFaceRevealStyles(symbolObj.element);
-          activeFaceReveals.delete(symbolObj);
-        }
-      }
     }
 
     function animateSymbols() {
@@ -506,8 +140,20 @@ function initSymbolRain() {
 
       // FACE REVEAL SYSTEM: Check for periodic face reveals every 5 seconds
       const currentTime = Date.now();
-      triggerFaceRevealIfNeeded(containerHeight, currentTime);
-      cleanupFaceReveals(currentTime);
+      SymbolRainHelpers.triggerFaceRevealIfNeeded(
+        {
+          activeFallingSymbols,
+          activeFaceReveals,
+          config: SymbolRainConfig,
+        },
+        faceRevealState,
+        containerHeight,
+        currentTime,
+      );
+      SymbolRainHelpers.cleanupFaceReveals(
+        { activeFaceReveals, config: SymbolRainConfig },
+        currentTime,
+      );
 
       // PERFORMANCE: Update spatial grid ONCE per frame instead of in every collision check
       SpatialGrid.update(activeFallingSymbols);
@@ -523,7 +169,14 @@ function initSymbolRain() {
         if (symbolsToRemove.has(symbolObj)) continue;
 
         // Check if this symbol is touching another
-        const touchingSymbol = checkTouching(symbolObj);
+        const touchingSymbol = SymbolRainHelpers.checkTouching(
+          {
+            config: SymbolRainConfig,
+            isMobileMode,
+            spatialGrid: SpatialGrid,
+          },
+          symbolObj,
+        );
         if (touchingSymbol) {
           // Mark both symbols for removal
           symbolsToRemove.add(symbolObj);
@@ -549,12 +202,25 @@ function initSymbolRain() {
         const isTouching = symbolsToRemove.has(symbolObj); // SAFETY MECHANISM: Remove if touching
 
         if (isOffScreen || isStuckAtBottom || isTouching) {
-          cleanupSymbolObject(symbolObj);
+          SymbolRainHelpers.cleanupSymbolObject({
+            symbolObj,
+            activeFaceReveals,
+            symbolPool: SymbolPool,
+          });
           continue; // Skip this symbol, don't copy to writeIndex
         }
 
         // Update position - symbols move slower when near others instead of stopping completely
-        if (!checkCollision(symbolObj)) {
+        if (
+          !SymbolRainHelpers.checkCollision(
+            {
+              config: SymbolRainConfig,
+              isMobileMode,
+              spatialGrid: SpatialGrid,
+            },
+            symbolObj,
+          )
+        ) {
           // No collision - move at full speed
           symbolObj.y += symbolFallSpeed;
           symbolObj.element.style.top = `${symbolObj.y}px`;
@@ -580,11 +246,25 @@ function initSymbolRain() {
       for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
         if (
           Math.random() < SymbolRainConfig.spawnRate &&
-          !isColumnCrowded(columnIndex)
+          !SymbolRainHelpers.isColumnCrowded(activeFallingSymbols, columnIndex)
         ) {
           const randomSymbol =
             symbols[Math.floor(Math.random() * symbols.length)];
-          createFallingSymbol(columnIndex, false, randomSymbol);
+          SymbolRainHelpers.createFallingSymbol(
+            {
+              symbols,
+              symbolRainContainer,
+              config: SymbolRainConfig,
+              activeFallingSymbols,
+              symbolPool: SymbolPool,
+              lastSymbolSpawnTimestamp,
+            },
+            {
+              column: columnIndex,
+              isInitialPopulation: false,
+              forcedSymbol: randomSymbol,
+            },
+          );
         }
       }
 
@@ -595,7 +275,12 @@ function initSymbolRain() {
         // Find columns that aren't crowded - reuse helper function
         const availableColumnIndices = [];
         for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-          if (!isColumnCrowded(columnIndex)) {
+          if (
+            !SymbolRainHelpers.isColumnCrowded(
+              activeFallingSymbols,
+              columnIndex,
+            )
+          ) {
             availableColumnIndices.push(columnIndex);
           }
         }
@@ -615,7 +300,21 @@ function initSymbolRain() {
           )[0]; // Remove selected column
           const randomSymbol =
             symbols[Math.floor(Math.random() * symbols.length)];
-          createFallingSymbol(selectedColumnIndex, false, randomSymbol);
+          SymbolRainHelpers.createFallingSymbol(
+            {
+              symbols,
+              symbolRainContainer,
+              config: SymbolRainConfig,
+              activeFallingSymbols,
+              symbolPool: SymbolPool,
+              lastSymbolSpawnTimestamp,
+            },
+            {
+              column: selectedColumnIndex,
+              isInitialPopulation: false,
+              forcedSymbol: randomSymbol,
+            },
+          );
         }
       }
     }
@@ -660,7 +359,21 @@ function initSymbolRain() {
             SymbolRainConfig.guaranteedSpawnInterval
           ) {
             const randomColumnIndex = Math.floor(Math.random() * columnCount);
-            createFallingSymbol(randomColumnIndex, false, symbolChar);
+            SymbolRainHelpers.createFallingSymbol(
+              {
+                symbols,
+                symbolRainContainer,
+                config: SymbolRainConfig,
+                activeFallingSymbols,
+                symbolPool: SymbolPool,
+                lastSymbolSpawnTimestamp,
+              },
+              {
+                column: randomColumnIndex,
+                isInitialPopulation: false,
+                forcedSymbol: symbolChar,
+              },
+            );
           }
         });
       }, 1000); // Check once per second
@@ -688,7 +401,15 @@ function initSymbolRain() {
           // Prevent default to avoid click delay and text selection
           event.preventDefault();
           _lastClickedFallingSymbol = fallingSymbolElement;
-          handleSymbolClick(fallingSymbolElement, event);
+          SymbolRainHelpers.handleSymbolClick(
+            {
+              activeFallingSymbols,
+              symbolPool: SymbolPool,
+              activeFaceReveals,
+            },
+            fallingSymbolElement,
+            event,
+          );
         }
       },
       { passive: false },
@@ -713,7 +434,15 @@ function initSymbolRain() {
           fallingSymbolElement &&
           symbolRainContainer.contains(fallingSymbolElement)
         ) {
-          handleSymbolClick(fallingSymbolElement, event);
+          SymbolRainHelpers.handleSymbolClick(
+            {
+              activeFallingSymbols,
+              symbolPool: SymbolPool,
+              activeFaceReveals,
+            },
+            fallingSymbolElement,
+            event,
+          );
         }
       });
     }

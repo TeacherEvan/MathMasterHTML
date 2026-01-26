@@ -59,3 +59,21 @@ CSS:
 
 - Revert to previous ui-boundary-manager.js and lock-manager.js.
 - Restore original script order in src/pages/game.html.
+
+## Scope (Session 3)
+
+Targets:
+
+1. `src/assets/components/lock-components/Line-1-transformer.html`
+2. `src/assets/components/lock-components/Line-5-transformer.html`
+3. `src/assets/components/lock-components/line-6-transformer.html`
+
+## Rationale
+
+- HTML files contained large inline `<style>` blocks causing them to exceed 500 LOC.
+- Separation of CSS improves cacheability and maintainability.
+
+## Execution
+
+- Extracted styles to `src/styles/css/lock-components/`.
+- Replaced inline styles with `<link rel="stylesheet">`.
