@@ -1,17 +1,93 @@
 # 🎫 JOB CARD
 
+## Session: 2026-01-26 | Agent: GitHub Copilot
+
+---
+
+## 📋 WORK ORDER SUMMARY
+
+| Field              | Value                                               |
+| ------------------ | --------------------------------------------------- |
+| **Request Type**   | Line-limit enforcement (modular refactor, utils.js) |
+| **Priority**       | High (maintainability, scalability, code quality)   |
+| **Status**         | ✅ COMPLETED                                        |
+| **Billable Hours** | 1 session                                           |
+
+---
+
+## 🎯 OBJECTIVES RECEIVED
+
+1. ✅ Ensure no file exceeds 500 LOC (begin with one monolith)
+2. ✅ Plan first, document, review, then execute one monolith
+3. ✅ Preserve event-driven architecture and runtime behavior
+
+---
+
+## 🧠 EXECUTION SUMMARY (ONE MONOLITH)
+
+### Target: src/scripts/utils.js (841 lines)
+
+- Split into cohesive utility modules without introducing new dependencies
+- Preserved globals for backward compatibility
+- Updated script load order in game page
+
+---
+
+## 📁 FILES CREATED/MODIFIED
+
+| File                                    | Action   | Description                                                                                                    |
+| --------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| `Docs/LINE_LIMIT_REFACTOR_PLAN.md`      | Created  | Plan + scope for line-limit refactor session 1                                                                 |
+| `Docs/LINE_LIMIT_REFACTOR_REVIEW.md`    | Created  | Review/approval notes before execution                                                                         |
+| `src/scripts/utils-core.js`             | Created  | Core helpers (`normalizeSymbol`, `calculateDistance`, `generateUniqueId`, `getLevelFromURL`, `deferExecution`) |
+| `src/scripts/utils-dom.js`              | Created  | DOM helper (`createDOMElement`)                                                                                |
+| `src/scripts/utils-logging.js`          | Created  | `Logger` implementation                                                                                        |
+| `src/scripts/utils-resource-manager.js` | Created  | `ResourceManager` cleanup tracking                                                                             |
+| `src/scripts/utils-combo.js`            | Created  | `ComboSystem` module                                                                                           |
+| `src/scripts/utils-achievements.js`     | Created  | `AchievementSystem` module                                                                                     |
+| `src/scripts/utils.js`                  | Modified | Slim shim (compatibility layer)                                                                                |
+| `src/pages/game.html`                   | Modified | Script order to load split modules                                                                             |
+
+---
+
+## ✅ QUALITY & BEST PRACTICES
+
+- **SOLID/Clean Code:** Single-responsibility modules, improved cohesion
+- **Performance:** Smaller files improve parse and cache behavior
+- **Security:** No new dynamic execution or storage keys
+- **Scalability:** Clear separation enables incremental refactors
+
+---
+
+## ✅ TEST STATUS
+
+- Tests not run (not requested)
+
+---
+
+## 📞 HANDOFF NOTES
+
+**Current State:** `utils.js` split into focused modules; load order updated.
+
+**Next Monolith Candidates:**
+
+1. `src/scripts/game.js`
+2. `src/scripts/3rdDISPLAY.js`
+
+---
+
 ## Session: 2026-01-21 | Agent: Roo (Structure Reorganization)
 
 ---
 
 ## 📋 WORK ORDER SUMMARY
 
-| Field              | Value                                         |
-| ------------------ | --------------------------------------------- |
-| **Request Type**   | Project Structure Analysis & Reorganization   |
+| Field              | Value                                             |
+| ------------------ | ------------------------------------------------- |
+| **Request Type**   | Project Structure Analysis & Reorganization       |
 | **Priority**       | High (organization, scalability, maintainability) |
-| **Status**         | ✅ COMPLETED                                  |
-| **Billable Hours** | 1 session                                     |
+| **Status**         | ✅ COMPLETED                                      |
+| **Billable Hours** | 1 session                                         |
 
 ---
 
@@ -78,6 +154,7 @@
 ## 📁 STRUCTURE TRANSFORMATION
 
 ### Before:
+
 ```
 MathMasterHTML/
 ├── index.html, game.html, level-select.html
@@ -95,6 +172,7 @@ MathMasterHTML/
 ```
 
 ### After:
+
 ```
 MathMasterHTML/
 ├── src/
@@ -117,18 +195,18 @@ MathMasterHTML/
 
 ## 📁 FILES CREATED/MODIFIED
 
-| File/Directory | Action | Description |
-|---------------|--------|-------------|
-| `src/` | Created | New source code root directory |
-| `src/pages/` | Created | HTML pages container |
-| `src/scripts/` | Created | JavaScript modules container |
-| `src/styles/` | Created | CSS stylesheets container |
-| `src/assets/` | Created | Static assets container |
-| `src/tools/` | Created | Utility scripts container |
-| `src/types/` | Created | Type definitions container |
-| `FILE_INDEX.md` | Created | Comprehensive file index with metadata |
-| `README.md` | Modified | Updated project structure section |
-| `JOBCARD.md` | Updated | Added session completion |
+| File/Directory  | Action   | Description                            |
+| --------------- | -------- | -------------------------------------- |
+| `src/`          | Created  | New source code root directory         |
+| `src/pages/`    | Created  | HTML pages container                   |
+| `src/scripts/`  | Created  | JavaScript modules container           |
+| `src/styles/`   | Created  | CSS stylesheets container              |
+| `src/assets/`   | Created  | Static assets container                |
+| `src/tools/`    | Created  | Utility scripts container              |
+| `src/types/`    | Created  | Type definitions container             |
+| `FILE_INDEX.md` | Created  | Comprehensive file index with metadata |
+| `README.md`     | Modified | Updated project structure section      |
+| `JOBCARD.md`    | Updated  | Added session completion               |
 
 ---
 
