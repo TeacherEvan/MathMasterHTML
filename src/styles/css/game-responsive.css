@@ -61,8 +61,8 @@
 .res-mobile #problem-container {
   font-size: 8px;
   /* Reduced by 20% from 10px for better fit */
-  top: 76px;
-  /* Adjust position - below mobile HUD */
+  top: 90px;
+  /* Adjust position - below mobile HUD (fix overlap: score ends at ~80px) */
   white-space: nowrap;
   /* Keep symbols on same line */
   overflow: visible;
