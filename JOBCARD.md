@@ -6,6 +6,84 @@
 
 ## 📋 WORK ORDER SUMMARY
 
+| Field              | Value                                      |
+| ------------------ | ------------------------------------------ |
+| **Request Type**   | Line-limit enforcement (worms + power-ups) |
+| **Priority**       | High (maintainability, scalability)        |
+| **Status**         | ✅ COMPLETED                               |
+| **Billable Hours** | 1 session                                  |
+
+---
+
+## 🎯 OBJECTIVES RECEIVED
+
+1. ✅ Split worm system files to stay under 500 LOC
+2. ✅ Split power-up system files to stay under 500 LOC
+3. ✅ Preserve event-driven architecture and runtime behavior
+4. ✅ Update script order to load split modules
+
+---
+
+## 🧠 EXECUTION SUMMARY
+
+- Refactored `worm.js` into a slim core class with constructor + initialization only.
+- Extracted WormSystem methods into focused helper scripts (events, cache, spawn, behavior, movement, interactions, effects, powerups, cleanup).
+- Refactored `worm-powerups.js` into a slim class wrapper and split functionality into core/selection/effects/UI helpers.
+- Updated script order in game page to load new split modules in a safe sequence.
+
+---
+
+## 📁 FILES CREATED/MODIFIED
+
+| File                                          | Action   | Description                              |
+| --------------------------------------------- | -------- | ---------------------------------------- |
+| `src/scripts/worm-system.cache.js`            | Created  | Cached symbol/rect helpers               |
+| `src/scripts/worm-system.events.js`           | Created  | Event wiring + symbol targeting handlers |
+| `src/scripts/worm-system.spawn.js`            | Created  | Spawn helpers + queue handling           |
+| `src/scripts/worm-system.behavior.js`         | Created  | Steal logic + game-over checks           |
+| `src/scripts/worm-system.movement.js`         | Created  | Movement + animation loop                |
+| `src/scripts/worm-system.interactions.js`     | Created  | Click handling + purple cloning          |
+| `src/scripts/worm-system.effects.js`          | Created  | Explosions, cracks, splats, near-miss    |
+| `src/scripts/worm-system.powerups.js`         | Created  | Worm-side power-up logic                 |
+| `src/scripts/worm-system.powerups.effects.js` | Created  | Worm-side power-up activation effects    |
+| `src/scripts/worm-system.cleanup.js`          | Created  | Cleanup and reset helpers                |
+| `src/scripts/worm-powerups.core.js`           | Created  | Power-up core helpers                    |
+| `src/scripts/worm-powerups.selection.js`      | Created  | Two-click selection + placement          |
+| `src/scripts/worm-powerups.effects.js`        | Created  | Lightning/spider/devil effects           |
+| `src/scripts/worm-powerups.ui.js`             | Created  | Power-up UI + tooltips                   |
+| `src/scripts/worm.js`                         | Modified | Slim core class only                     |
+| `src/scripts/worm-powerups.js`                | Modified | Slim wrapper class only                  |
+| `src/pages/game.html`                         | Modified | Added new script load order              |
+
+---
+
+## ✅ QUALITY & BEST PRACTICES
+
+- **SOLID/Clean Code:** Single-responsibility modules for worm logic and power-ups.
+- **Performance:** No per-frame overhead added; existing caches retained.
+- **Security:** No new dynamic execution or storage keys.
+
+---
+
+## ✅ TEST STATUS
+
+- Tests not run (not requested)
+
+---
+
+## 📞 HANDOFF NOTES
+
+- Worm system and power-ups now comply with 500 LOC file limit.
+- Lock component HTML files still exceed 500 LOC and remain for a future session per scope.
+
+---
+
+## Session: 2026-01-26 | Agent: GitHub Copilot
+
+---
+
+## 📋 WORK ORDER SUMMARY
+
 | Field              | Value                                                  |
 | ------------------ | ------------------------------------------------------ |
 | **Request Type**   | Line-limit enforcement (modular refactor, UI/Lock/CSS) |

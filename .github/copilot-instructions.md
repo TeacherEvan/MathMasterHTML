@@ -55,7 +55,9 @@ Panel C: Falling symbols (Matrix rain)        → js/3rdDISPLAY.js
 | Module | Purpose |
 |--------|---------|
 | `game.js` | Core loop, problem validation, symbol revelation |
-| `worm.js` | Enemy AI: roam → target → steal → destruction (2172 lines, main complexity) |
+| `worm.js` | Worm core class (constructor + initialization only) |
+| `worm-system.*.js` | Worm AI modules: events, spawn, behavior, movement, interactions, effects, cleanup |
+| `worm-powerups.*.js` | Two-click power-up system: core, selection, UI, effects |
 | `3rdDISPLAY.js` | Symbol rain with spatial hash collision detection |
 | `lock-manager.js` | Progressive lock via HTML injection from `lock-components/` |
 | `display-manager.js` | Responsive font sizing (**applies inline styles!**) |
@@ -73,6 +75,8 @@ Problems in `Assets/{Level}_Lvl/*.md` are parsed with regex:
 ```
 
 ## Worm System (`js/worm.js`)
+
+**Split Files:** Worm logic is now partitioned into `worm-system.*.js` helpers. Keep changes within the correct helper file and preserve the event-driven flow.
 
 **Lifecycle:** Spawn → Roaming (5-10s) → Targeting → Stealing → Destruction
 
