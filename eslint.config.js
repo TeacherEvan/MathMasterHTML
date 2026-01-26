@@ -9,15 +9,19 @@ export default [
       "*.backup",
       "*.corrupted",
       "**/*.min.js",
-      "js/worm-behavior.js",
-      "js/worm-constants.js",
-      "js/worm-renderer.js",
+      "src/scripts/worm-behavior.js",
+      "src/scripts/worm-constants.js",
+      "src/scripts/worm-renderer.js",
     ],
   },
 
   // JavaScript files configuration
   {
-    files: ["js/**/*.js", "lock/**/*.js", "middle-screen/**/*.js"],
+    files: [
+      "src/scripts/**/*.js",
+      "lock/**/*.js",
+      "src/tools/middle-screen/**/*.js",
+    ],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "script", // Browser scripts, not ES modules

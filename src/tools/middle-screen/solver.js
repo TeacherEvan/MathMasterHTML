@@ -2,7 +2,7 @@
 
 let firstLineAnnounced = false;
 
-function onLineSolved(rowIdx) {
+function _onLineSolved(rowIdx) {
 	// rowIdx === 0  → first visible line
 	if (rowIdx === 0 && !firstLineAnnounced) {
 		firstLineAnnounced = true;

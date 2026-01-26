@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "npx http-server -p 8000 -c-1 --cors",
-    "lint": "eslint js/",
-    "lint:fix": "eslint js/ --fix",
-    "verify": "node scripts/verify.js",
+    "lint": "eslint src/scripts lock src/tools/middle-screen",
+    "lint:fix": "eslint src/scripts lock src/tools/middle-screen --fix",
+    "verify": "node src/tools/scripts/verify.js",
     "verify:quick": "npm run lint && echo '✅ Lint passed!'",
     "typecheck": "npx tsc --noEmit --project tsconfig.typecheck.json",
     "test": "npx playwright test",

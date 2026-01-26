@@ -25,7 +25,7 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const ROOT = resolve(__dirname, '..');
+const ROOT = resolve(__dirname, '..', '..', '..');
 
 // ============================================
 // CONFIGURATION
@@ -37,12 +37,12 @@ const CRITICAL_FILES = [
     'game.html',
     'index.html',
     'level-select.html',
-    'js/worm.js',
-    'js/game.js',
-    'js/constants.js',
-    'js/utils.js',
-    'css/worm-base.css',
-    'css/game.css',
+    'src/scripts/worm.js',
+    'src/scripts/game.js',
+    'src/scripts/constants.js',
+    'src/scripts/utils.js',
+    'src/styles/css/worm-base.css',
+    'src/styles/css/game.css',
     'Docs/_INDEX.md',
     'Docs/_AGENT_QUICKSTART.md'
 ];
@@ -53,8 +53,8 @@ const REQUIRED_DOCS = [
     'WORM_DEVELOPER_GUIDE.md'
 ];
 
-const JS_DIRECTORIES = ['js', 'lock', 'middle-screen'];
-const CSS_DIRECTORIES = ['css'];
+const JS_DIRECTORIES = ['src/scripts', 'lock', 'src/tools/middle-screen'];
+const CSS_DIRECTORIES = ['src/styles/css', 'lock'];
 
 // ============================================
 // UTILITIES

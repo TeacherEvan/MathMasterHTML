@@ -69,7 +69,7 @@ function initSymbolRain() {
 
     let symbolFallSpeed = SymbolRainConfig.initialFallSpeed;
     let isInitialPopulation = true;
-    let lastSymbolSpawnTimestamp = {}; // Track spawn times for guaranteed interval
+    const lastSymbolSpawnTimestamp = {}; // Track spawn times for guaranteed interval
     // Initialize timestamps to prevent immediate mass spawning
     const now = Date.now();
     symbols.forEach((s) => (lastSymbolSpawnTimestamp[s] = now));
@@ -79,7 +79,7 @@ function initSymbolRain() {
     const activeFaceReveals = new Set(); // Track symbols currently in face reveal state
 
     let columnCount = 0;
-    let activeFallingSymbols = [];
+    const activeFallingSymbols = [];
     let isAnimationRunning = false;
     const symbolsToRemove = new Set(); // Reuse set to avoid per-frame allocations
 

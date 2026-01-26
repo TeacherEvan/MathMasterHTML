@@ -148,7 +148,7 @@ class LockManager {
       });
   }
 
-  loadLockComponent(componentName) {
+  loadLockComponent(_componentName) {
     // Method moved to lock-manager.loader.js
   }
 
