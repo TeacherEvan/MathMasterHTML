@@ -3,9 +3,9 @@ console.log("🐛 Worm movement module loader loading...");
 
 // Load worm movement modules in dependency order
 const wormMovementModules = [
-  "src/scripts/worm-movement-core.js",
-  "src/scripts/worm-movement-behaviors.js",
-  "src/scripts/worm-movement-navigation.js",
+  "/src/scripts/worm-movement-core.js",
+  "/src/scripts/worm-movement-behaviors.js",
+  "/src/scripts/worm-movement-navigation.js",
 ];
 
 let loadedWormModules = 0;

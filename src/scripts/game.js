@@ -3,10 +3,10 @@ console.log("🎮 Game module loader loading...");
 
 // Load game modules in dependency order
 const gameModules = [
-  "src/scripts/game-init.js",
-  "src/scripts/game-problem-manager.js",
-  "src/scripts/game-symbol-handler.js",
-  "src/scripts/game-state-manager.js",
+  "/src/scripts/game-init.js",
+  "/src/scripts/game-problem-manager.js",
+  "/src/scripts/game-symbol-handler.js",
+  "/src/scripts/game-state-manager.js",
 ];
 
 let loadedModules = 0;
