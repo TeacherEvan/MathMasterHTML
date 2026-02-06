@@ -5,6 +5,9 @@ console.log("🎮 Game module loader loading...");
 const gameModules = [
   "/src/scripts/game-init.js",
   "/src/scripts/game-problem-manager.js",
+  "/src/scripts/game-symbol-handler.stolen.js",
+  "/src/scripts/game-symbol-handler.core.js",
+  "/src/scripts/game-symbol-handler.events.js",
   "/src/scripts/game-symbol-handler.js",
   "/src/scripts/game-state-manager.js",
 ];
