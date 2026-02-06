@@ -2,6 +2,84 @@
   window.WormPowerUpEffects = window.WormPowerUpEffects || {};
 
   window.WormPowerUpEffects.applyChainEffects = function(proto) {
+    proto._executeChainLightning = function(x, y, event) {
+      const clickedWorm = this._findWormAtPosition(x, y);
+
+      if (clickedWorm) {
+        this._chainLightningFromWorm(clickedWorm);
+      } else {
+        const nearestWorm = this._findNearestWorm(x, y);
+        if (nearestWorm) {
+          this._chainLightningFromWorm(nearestWorm);
+        } else {
+          console.log("⚠️ No worms to target!");
+          this.inventory.chainLightning++;
+          this._showTooltip("No worms to target!", "warning");
+          this._dispatchInventoryChanged();
+        }
+      }
+    };
+
+    proto._findWormAtPosition = function(x, y) {
+      const threshold = 50;
+      return this.wormSystem.worms.find((w) => {
+        if (!w.active) return false;
+        const dist = calculateDistance(w.x, w.y, x, y);
+        return dist < threshold;
+      });
+    };
+
+    proto._findNearestWorm = function(x, y) {
+      const activeWorms = this.wormSystem.worms.filter((w) => w.active);
+      if (activeWorms.length === 0) return null;
+
+      return activeWorms.reduce((nearest, worm) => {
+        const distCurrent = calculateDistance(worm.x, worm.y, x, y);
+        const distNearest = nearest
+          ? calculateDistance(nearest.x, nearest.y, x, y)
+          : Infinity;
+        return distCurrent < distNearest ? worm : nearest;
+      }, null);
+    };
+
+    proto._chainLightningFromWorm = function(worm) {
+      const killCount = this.chainLightningKillCount;
+      console.log(
+        `⚡ Chain Lightning targeting worm ${worm.id}! Will kill ${killCount} worms`,
+      );
+
+      const sortedWorms = this.wormSystem.worms
+        .filter((w) => w.active)
+        .sort((a, b) => {
+          const distA = calculateDistance(a.x, a.y, worm.x, worm.y);
+          const distB = calculateDistance(b.x, b.y, worm.x, worm.y);
+          return distA - distB;
+        })
+        .slice(0, killCount);
+
+      console.log(
+        `⚡ Killing ${sortedWorms.length} worms with chain lightning!`,
+      );
+
+      sortedWorms.forEach((targetWorm, index) => {
+        setTimeout(() => {
+          if (targetWorm.active) {
+            this.createLightningBolt(
+              worm.x,
+              worm.y,
+              targetWorm.x,
+              targetWorm.y,
+            );
+            this.wormSystem.createExplosionFlash("#00ffff");
+            this.wormSystem.explodeWorm(targetWorm, false, true);
+          }
+        }, index * 100);
+      });
+
+      this.chainLightningKillCount = 5;
+      this._dispatchInventoryChanged();
+    };
+
     proto.activateChainLightning = function() {
       console.log("⚡ CHAIN LIGHTNING ACTIVATED! Click a worm to unleash!");
 
@@ -197,5 +275,13 @@
         }, 400);
       }
     };
+  };
+
+  if (!window.WormPowerUpEffectsRegistry) {
+    window.WormPowerUpEffectsRegistry = {};
+  }
+
+  window.WormPowerUpEffectsRegistry.chainLightning = function(system, payload) {
+    system._executeChainLightning(payload.x, payload.y, payload.originalEvent);
   };
 })();

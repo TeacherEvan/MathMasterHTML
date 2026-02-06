@@ -57,6 +57,10 @@ class WormPowerUpSystem {
     // Setup ESC key handler for deselection
     this._setupKeyboardHandler();
 
+    if (typeof this._bindUIEventHandlers === "function") {
+      this._bindUIEventHandlers();
+    }
+
     console.log("✨ Power-Up System initialized (Two-Click Mode enabled)");
   }
 }

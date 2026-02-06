@@ -2,6 +2,10 @@
   window.WormPowerUpEffects = window.WormPowerUpEffects || {};
 
   window.WormPowerUpEffects.applySpiderEffects = function(proto) {
+    proto._executeSpider = function(x, y) {
+      this.spawnSpider(x, y);
+    };
+
     proto.activateSpider = function() {
       console.log("🕷️ SPIDER ACTIVATED! Spawning conversion spider...");
 
@@ -122,5 +126,13 @@
 
       moveSpider();
     };
+  };
+
+  if (!window.WormPowerUpEffectsRegistry) {
+    window.WormPowerUpEffectsRegistry = {};
+  }
+
+  window.WormPowerUpEffectsRegistry.spider = function(system, payload) {
+    system._executeSpider(payload.x, payload.y);
   };
 })();

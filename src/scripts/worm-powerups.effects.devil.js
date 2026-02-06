@@ -2,6 +2,10 @@
   window.WormPowerUpEffects = window.WormPowerUpEffects || {};
 
   window.WormPowerUpEffects.applyDevilEffects = function(proto) {
+    proto._executeDevil = function(x, y) {
+      this.spawnDevil(x, y);
+    };
+
     proto.activateDevil = function() {
       console.log("👹 DEVIL ACTIVATED! Click location to spawn devil...");
 
@@ -88,5 +92,13 @@
 
       checkProximity();
     };
+  };
+
+  if (!window.WormPowerUpEffectsRegistry) {
+    window.WormPowerUpEffectsRegistry = {};
+  }
+
+  window.WormPowerUpEffectsRegistry.devil = function(system, payload) {
+    system._executeDevil(payload.x, payload.y);
   };
 })();

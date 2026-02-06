@@ -109,12 +109,36 @@
 
     // Visual feedback
     element.style.animation = "power-up-collect 0.3s ease-out";
-    this.updateDisplay();
+    this._dispatchInventoryChanged();
 
     setTimeout(() => {
       if (element.parentNode) {
         element.parentNode.removeChild(element);
       }
     }, 300);
+  };
+
+  proto._dispatchInventoryChanged = function() {
+    document.dispatchEvent(
+      new CustomEvent("powerUpInventoryChanged", {
+        detail: {
+          system: this,
+          inventory: { ...this.inventory },
+          chainLightningKillCount: this.chainLightningKillCount,
+        },
+      }),
+    );
+  };
+
+  proto._dispatchSelectionChanged = function() {
+    document.dispatchEvent(
+      new CustomEvent("powerUpSelectionChanged", {
+        detail: {
+          system: this,
+          selectedPowerUp: this.selectedPowerUp,
+          isPlacementMode: this.isPlacementMode,
+        },
+      }),
+    );
   };
 })();

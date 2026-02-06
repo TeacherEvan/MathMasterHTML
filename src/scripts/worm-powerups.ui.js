@@ -50,6 +50,22 @@
     setTimeout(() => this._hideTooltip(), 3000);
   };
 
+  proto._bindUIEventHandlers = function() {
+    if (this._uiEventsBound) return;
+
+    this._uiEventsBound = true;
+
+    document.addEventListener("powerUpInventoryChanged", (event) => {
+      if (event.detail?.system && event.detail.system !== this) return;
+      this.updateDisplay();
+    });
+
+    document.addEventListener("powerUpSelectionChanged", (event) => {
+      if (event.detail?.system && event.detail.system !== this) return;
+      this.updateDisplay();
+    });
+  };
+
   /**
    * Hide tooltip
    * @private

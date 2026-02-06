@@ -35,8 +35,7 @@
     this.isPlacementMode = true;
     console.log(`🎯 ${this.EMOJIS[type]} SELECTED! ${this.DESCRIPTIONS[type]}`);
 
-    // Update UI to show selection
-    this.updateDisplay();
+    this._dispatchSelectionChanged();
 
     // Show placement instructions
     this._showTooltip(
@@ -77,8 +76,7 @@
     document.documentElement.style.pointerEvents = "";
     document.body.style.pointerEvents = "";
 
-    // Update UI
-    this.updateDisplay();
+    this._dispatchSelectionChanged();
     this._hideTooltip();
   };
 
@@ -136,141 +134,21 @@
 
     // Deduct from inventory
     this.inventory[type]--;
+    this._dispatchInventoryChanged();
 
-    // Execute based on type
-    switch (type) {
-      case "chainLightning":
-        this._executeChainLightning(x, y, event);
-        break;
-      case "spider":
-        this._executeSpider(x, y);
-        break;
-      case "devil":
-        this._executeDevil(x, y);
-        break;
-      default:
-        console.error(`❌ Unknown power-up type: ${type}`);
-    }
+    document.dispatchEvent(
+      new CustomEvent("powerUpActivated", {
+        detail: {
+          system: this,
+          type,
+          x,
+          y,
+          originalEvent: event || null,
+        },
+      }),
+    );
 
     // Reset selection state
     this.deselectPowerUp();
-    this.updateDisplay();
-  };
-
-  /**
-   * Execute Chain Lightning at position
-   * @private
-   */
-  proto._executeChainLightning = function(x, y, event) {
-    // Find worm closest to click position
-    const clickedWorm = this._findWormAtPosition(x, y);
-
-    if (clickedWorm) {
-      this._chainLightningFromWorm(clickedWorm);
-    } else {
-      // No worm at click - find nearest worm to click position
-      const nearestWorm = this._findNearestWorm(x, y);
-      if (nearestWorm) {
-        this._chainLightningFromWorm(nearestWorm);
-      } else {
-        console.log(`⚠️ No worms to target!`);
-        // Refund the power-up
-        this.inventory.chainLightning++;
-        this._showTooltip("No worms to target!", "warning");
-      }
-    }
-  };
-
-  /**
-   * Execute Spider spawn at position
-   * @private
-   */
-  proto._executeSpider = function(x, y) {
-    this.spawnSpider(x, y);
-  };
-
-  /**
-   * Execute Devil spawn at position
-   * @private
-   */
-  proto._executeDevil = function(x, y) {
-    this.spawnDevil(x, y);
-  };
-
-  /**
-   * Find worm at or near click position
-   * @param {number} x - X coordinate
-   * @param {number} y - Y coordinate
-   * @returns {Object|null} Worm data or null
-   * @private
-   */
-  proto._findWormAtPosition = function(x, y) {
-    const threshold = 50; // Click tolerance in pixels
-    // REFACTORED: Use shared calculateDistance utility from utils.js
-    return this.wormSystem.worms.find((w) => {
-      if (!w.active) return false;
-      const dist = calculateDistance(w.x, w.y, x, y);
-      return dist < threshold;
-    });
-  };
-
-  /**
-   * Find nearest active worm to position
-   * @param {number} x - X coordinate
-   * @param {number} y - Y coordinate
-   * @returns {Object|null} Worm data or null
-   * @private
-   */
-  proto._findNearestWorm = function(x, y) {
-    const activeWorms = this.wormSystem.worms.filter((w) => w.active);
-    if (activeWorms.length === 0) return null;
-
-    // REFACTORED: Use shared calculateDistance utility from utils.js
-    return activeWorms.reduce((nearest, worm) => {
-      const distCurrent = calculateDistance(worm.x, worm.y, x, y);
-      const distNearest = nearest
-        ? calculateDistance(nearest.x, nearest.y, x, y)
-        : Infinity;
-      return distCurrent < distNearest ? worm : nearest;
-    }, null);
-  };
-
-  /**
-   * Execute chain lightning from a specific worm
-   * @param {Object} worm - Starting worm
-   * @private
-   */
-  proto._chainLightningFromWorm = function(worm) {
-    const killCount = this.chainLightningKillCount;
-    console.log(
-      `⚡ Chain Lightning targeting worm ${worm.id}! Will kill ${killCount} worms`,
-    );
-
-    // Find closest worms
-    // REFACTORED: Use shared calculateDistance utility from utils.js
-    const sortedWorms = this.wormSystem.worms
-      .filter((w) => w.active)
-      .sort((a, b) => {
-        const distA = calculateDistance(a.x, a.y, worm.x, worm.y);
-        const distB = calculateDistance(b.x, b.y, worm.x, worm.y);
-        return distA - distB;
-      })
-      .slice(0, killCount);
-
-    console.log(`⚡ Killing ${sortedWorms.length} worms with chain lightning!`);
-
-    // Kill with delay for visual effect
-    sortedWorms.forEach((targetWorm, index) => {
-      setTimeout(() => {
-        if (targetWorm.active) {
-          this.createLightningBolt(worm.x, worm.y, targetWorm.x, targetWorm.y);
-          this.wormSystem.createExplosionFlash("#00ffff");
-          this.wormSystem.explodeWorm(targetWorm, false, true);
-        }
-      }, index * 100);
-    });
-
-    // Reset kill count back to 5
-    this.chainLightningKillCount = 5;
   };
 })();

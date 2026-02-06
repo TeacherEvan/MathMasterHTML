@@ -168,19 +168,13 @@
     // Calculate urgency level (closer = more urgent)
     const urgencyLevel = Math.max(0, 1 - distance / 80);
 
-    // Add visual warning to target symbol
-    targetElement.classList.add("near-miss-target");
-    targetElement.style.setProperty("--urgency", urgencyLevel);
-
-    // Add screen border warning
-    document.body.classList.add("near-miss-active");
-
     // Dispatch event for other systems to react
     document.dispatchEvent(
       new CustomEvent("nearMissWarning", {
         detail: {
           wormId: worm.id,
           targetSymbol: worm.targetSymbol,
+          targetElement: targetElement || null,
           distance: distance,
           urgencyLevel: urgencyLevel,
         },
@@ -204,14 +198,11 @@
     this._nearMissActive = false;
     this._nearMissWorm = null;
 
-    // Remove visual warnings
-    document.body.classList.remove("near-miss-active");
-
-    // Remove target highlights
-    const nearMissTargets = document.querySelectorAll(".near-miss-target");
-    nearMissTargets.forEach((el) => {
-      el.classList.remove("near-miss-target");
-    });
+    document.dispatchEvent(
+      new CustomEvent("nearMissCleared", {
+        detail: {},
+      }),
+    );
   };
 
   proto.createSlimeSplat = function(x, y) {
