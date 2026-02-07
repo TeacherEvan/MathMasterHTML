@@ -175,62 +175,14 @@ const ComboSystem = {
 
   /**
    * Update combo display
+   * Delegates to ComboUI (loaded from utils-combo.ui.js)
    * @private
    */
   _updateDisplay() {
-    // Create display if doesn't exist
-    if (!this._displayElement) {
-      this._createDisplay();
+    const feedback = this._getFeedback();
+    if (window.ComboUI) {
+      window.ComboUI.updateDisplay(this._combo, feedback);
     }
-
-    if (this._combo > 0) {
-      const feedback = this._getFeedback();
-      this._displayElement.innerHTML = `
-                <div class="combo-count" style="color: ${feedback.color}">${
-        this._combo
-      }x</div>
-                ${
-                  feedback.message
-                    ? `<div class="combo-message">${feedback.message}</div>`
-                    : ""
-                }
-            `;
-      this._displayElement.style.display = "block";
-      this._displayElement.style.transform = "scale(1.2)";
-      setTimeout(() => {
-        if (this._displayElement) {
-          this._displayElement.style.transform = "scale(1)";
-        }
-      }, 100);
-    } else {
-      this._displayElement.style.display = "none";
-    }
-  },
-
-  /**
-   * Create combo display element
-   * @private
-   */
-  _createDisplay() {
-    const display = document.createElement("div");
-    display.id = "combo-display";
-    display.style.cssText = `
-            position: fixed;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: 'Orbitron', monospace;
-            font-size: 2em;
-            font-weight: bold;
-            text-align: center;
-            z-index: 10002;
-            pointer-events: none;
-            transition: transform 0.1s ease-out;
-            text-shadow: 0 0 20px currentColor;
-            display: none;
-        `;
-    document.body.appendChild(display);
-    this._displayElement = display;
   },
 
   /**

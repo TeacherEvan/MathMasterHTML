@@ -1,0 +1,19 @@
+File,Lines,Category,Primary Responsibility,Dependencies,SRP Violation,Refactoring Action,Status,Risk,Effort
+worm-system.behavior.js,353→218,Worm AI,"Steal logic + target resolution + game-over","WormSystem proto, solutionContainer, consoleManager",YES: steal behavior mixed with game-over UI,"Split: game-over to worm-system.gameover.js (119 lines)",DONE,Low,Low
+worm-system.powerups.effects.js,346,Worm AI,"Chain lightning + spider + devil power-up effects","WormSystem proto, DOM creation",Moderate: 3 distinct effect types in one file,"Future: split per effect type (chain/spider/devil)",PLANNED,Medium,Medium
+worm.js,339,Worm AI,"Core WormSystem class + constructor + init","Global window, URL params, difficultySettings",Low: single class definition,"OK as-is - reduced by extracting behavior/gameover helpers",SKIP,N/A,N/A
+lazy-component-loader.js,326→186,Infrastructure,"Lazy component loading with cache + preload","fetch API, requestIdleCallback",YES: 2 classes + init in one file,"Split: LazyLockManager to lazy-lock-manager.js (75) init to lazy-component-loader.init.js (37)",DONE,Low,Low
+quality-tier-manager.js,316,Rendering,"Device capability detection + quality tier settings",None - standalone,Moderate: tier config + detection + CSS application,"Future: split config data from detection logic",PLANNED,Low,Low
+worm-powerups.ui.js,307→188,Worm AI / UI,"Power-up display creation + tooltips + draggable + events","WormPowerUpSystem proto, UIBoundaryManager",YES: UI creation + drag behavior + event binding,"Split: draggable to worm-powerups.ui.draggable.js (88)",DONE,Low,Low
+ui-boundary-manager.core.js,301,UI System,"Collision detection + zone layout + element registry",None - standalone,Moderate: registration + detection + logging mixed,"Future: split zone config from collision engine",PLANNED,Medium,Medium
+utils-achievements.js,282→170,State/Data,"Achievement tracking + checking + persistence + UI popup","localStorage, DOM events, DOM creation",YES: data definitions + logic + UI all mixed,"Split: definitions to definitions.js (68) UI to ui.js (58)",DONE,Low,Low
+constants.js,276,Config,"Centralized game constants and configuration",None - data only,Low: pure configuration object,"OK as-is - intentionally centralized config",SKIP,N/A,N/A
+utils-combo.js,270→190,State/Data,"Combo tracking + decay + feedback + display","DOM creation, custom events",YES: combo logic mixed with DOM rendering,"Split: display to utils-combo.ui.js (69)",DONE,Low,Low
+worm-renderer.js,265,Worm AI / Rendering,"Near-miss warnings + visual effects","WormConstants (ES module import) DOM",Low: focused on rendering,"OK but uses ES module import (inconsistent)",SKIP,N/A,N/A
+lock-responsive.js,264,Rendering,"Resolution detection + lock scaling","DOM, window events",Moderate: duplicates display-manager.js detection,"Future: share resolution detection with display-manager",PLANNED,Medium,High
+symbol-validator.js,262,Game Mechanics,"Symbol normalization + matching + scoring","DOM queries, data attributes",Low: focused on validation,"OK as-is - well-scoped module",SKIP,N/A,N/A
+worm-system.spawn.js,257,Worm AI,"Worm spawn logic from console + border","WormSystem proto",Low: focused on spawning,"OK as-is",SKIP,N/A,N/A
+display-manager.js,277,Rendering,"Resolution detection + inline font sizing","DOM, window events",Moderate: detection + application mixed,"Future: extract detection to shared module",PLANNED,Medium,High
+dynamic-quality-adjuster.js,253,Performance,"FPS monitoring + quality tier adjustment","window.qualityManager, rAF",Low: focused,OK as-is,SKIP,N/A,N/A
+performance-monitor.js,244,Performance,"FPS overlay + DOM query counting","DOM, rAF",Low: diagnostic tool,OK as-is,SKIP,N/A,N/A
+problem-loader.js,249,Game Mechanics,"Markdown parsing + problem file loading","fetch API, regex",Low: focused loader,OK as-is,SKIP,N/A,N/A

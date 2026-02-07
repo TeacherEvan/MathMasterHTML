@@ -1,61 +1,15 @@
-// utils-achievements.js - Achievement tracking system
+// utils-achievements.js - Achievement tracking system (Logic Only)
+// Definitions extracted to utils-achievements.definitions.js
+// UI rendering extracted to utils-achievements.ui.js
 
 /**
  * Achievement System - Track player milestones and provide rewards
+ * Uses ACHIEVEMENT_DEFINITIONS from utils-achievements.definitions.js
+ * Uses AchievementUI from utils-achievements.ui.js for popup rendering
  */
 const AchievementSystem = {
-  // Achievement definitions
-  ACHIEVEMENTS: {
-    FIRST_BLOOD: {
-      id: "first_blood",
-      name: "First Blood",
-      description: "Complete your first problem",
-      icon: "🎯",
-      requirement: { type: "problems", count: 1 },
-    },
-    COMBO_STARTER: {
-      id: "combo_starter",
-      name: "Combo Starter",
-      description: "Achieve a 3x combo",
-      icon: "🔗",
-      requirement: { type: "combo", count: 3 },
-    },
-    COMBO_MASTER: {
-      id: "combo_master",
-      name: "Combo Master",
-      description: "Achieve a 10x combo",
-      icon: "⚡",
-      requirement: { type: "combo", count: 10 },
-    },
-    WORM_SLAYER: {
-      id: "worm_slayer",
-      name: "Worm Slayer",
-      description: "Destroy 10 worms",
-      icon: "💀",
-      requirement: { type: "wormsKilled", count: 10 },
-    },
-    SPEEDSTER: {
-      id: "speedster",
-      name: "Speedster",
-      description: "Complete a problem in under 30 seconds",
-      icon: "🏃",
-      requirement: { type: "fastComplete", time: 30000 },
-    },
-    PERFECT_LINE: {
-      id: "perfect_line",
-      name: "Perfect Line",
-      description: "Complete a line without any wrong clicks",
-      icon: "✨",
-      requirement: { type: "perfectLine", count: 1 },
-    },
-    LEVEL_MASTER: {
-      id: "level_master",
-      name: "Level Master",
-      description: "Complete all problems in a level",
-      icon: "👑",
-      requirement: { type: "levelComplete", count: 1 },
-    },
-  },
+  // Achievement definitions (loaded from separate definitions file)
+  ACHIEVEMENTS: window.ACHIEVEMENT_DEFINITIONS || {},
 
   // Unlocked achievements (loaded from localStorage)
   _unlocked: new Set(),
@@ -194,56 +148,14 @@ const AchievementSystem = {
 
   /**
    * Show achievement unlock popup
+   * Delegates to AchievementUI (loaded from utils-achievements.ui.js)
    * @private
    * @param {Object} achievement - Achievement object
    */
   _showAchievementPopup(achievement) {
-    const popup = document.createElement("div");
-    popup.className = "achievement-popup";
-    popup.innerHTML = `
-            <div class="achievement-icon">${achievement.icon}</div>
-            <div class="achievement-info">
-                <div class="achievement-title">Achievement Unlocked!</div>
-                <div class="achievement-name">${achievement.name}</div>
-                <div class="achievement-desc">${achievement.description}</div>
-            </div>
-        `;
-    popup.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, rgba(0,0,0,0.95), rgba(30,30,30,0.95));
-            border: 2px solid gold;
-            border-radius: 12px;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-family: 'Orbitron', monospace;
-            z-index: 10003;
-            animation: achievement-slide-in 0.5s ease-out, achievement-slide-out 0.5s ease-in 3.5s forwards;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-        `;
-
-    // Add achievement icon styling
-    const iconStyle = popup.querySelector(".achievement-icon");
-    iconStyle.style.cssText = "font-size: 2.5em;";
-
-    const titleStyle = popup.querySelector(".achievement-title");
-    titleStyle.style.cssText =
-      "color: gold; font-size: 0.8em; text-transform: uppercase;";
-
-    const nameStyle = popup.querySelector(".achievement-name");
-    nameStyle.style.cssText =
-      "color: #fff; font-size: 1.1em; font-weight: bold;";
-
-    const descStyle = popup.querySelector(".achievement-desc");
-    descStyle.style.cssText = "color: #aaa; font-size: 0.75em;";
-
-    document.body.appendChild(popup);
-
-    // Remove after animation
-    setTimeout(() => popup.remove(), 4000);
+    if (window.AchievementUI) {
+      window.AchievementUI.showAchievementPopup(achievement);
+    }
   },
 
   /**

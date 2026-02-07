@@ -56,12 +56,15 @@ Panel C: Falling symbols (Matrix rain)        → js/3rdDISPLAY.js
 |--------|---------|
 | `game.js` | Core loop, problem validation, symbol revelation |
 | `worm.js` | Worm core class (constructor + initialization only) |
-| `worm-system.*.js` | Worm AI modules: events, spawn, behavior, movement, interactions, effects, cleanup |
-| `worm-powerups.*.js` | Two-click power-up system: core, selection, UI, effects |
+| `worm-system.*.js` | Worm AI modules: events, spawn, behavior, gameover, movement, interactions, effects, cleanup |
+| `worm-powerups.*.js` | Two-click power-up system: core, selection, UI, UI.draggable, effects |
 | `3rdDISPLAY.js` | Symbol rain with spatial hash collision detection |
 | `lock-manager.js` | Progressive lock via HTML injection from `lock-components/` |
 | `display-manager.js` | Responsive font sizing (**applies inline styles!**) |
 | `constants.js` | Centralized game constants (use instead of magic numbers) |
+| `utils-achievements.*.js` | Achievement system: definitions (data), logic, UI (popup rendering) |
+| `utils-combo.*.js` | Combo system: tracking logic + UI display (separated) |
+| `lazy-component-loader.*.js` | Lazy loading: core loader, lock manager integration, initialization |
 
 ## Data Flow: Problem Loading
 
@@ -76,7 +79,7 @@ Problems in `Assets/{Level}_Lvl/*.md` are parsed with regex:
 
 ## Worm System (`js/worm.js`)
 
-**Split Files:** Worm logic is now partitioned into `worm-system.*.js` helpers. Keep changes within the correct helper file and preserve the event-driven flow.
+**Split Files:** Worm logic is now partitioned into `worm-system.*.js` helpers (behavior, gameover, spawn, movement, effects, etc.). Keep changes within the correct helper file and preserve the event-driven flow. Game-over detection/UI is in `worm-system.gameover.js`.
 
 **Lifecycle:** Spawn → Roaming (5-10s) → Targeting → Stealing → Destruction
 
@@ -89,6 +92,7 @@ Problems in `Assets/{Level}_Lvl/*.md` are parsed with regex:
 **Purple Worms** (boss enemies): Spawn after 4+ wrong answers. Can ONLY be killed via Panel C rain symbol - clicking directly spawns green clone as punishment.
 
 **Power-ups** (10% drop rate): Chain Lightning (⚡), Spider (🕷️), Devil (👹)
+**Power-up Events:** Use `powerUpActivated` for placement activation and register handlers in `window.WormPowerUpEffectsRegistry` to keep effects decoupled.
 
 ## Symbol Matching & Console
 
@@ -138,8 +142,21 @@ Problems in `Assets/{Level}_Lvl/*.md` are parsed with regex:
 - [ ] Lock animation progresses through 6 levels
 - [ ] No console errors
 
+## Module Split Convention
+
+Large files are split by concern using dot-notation: `<module>.<concern>.js`
+
+- **Data/definitions** → `utils-achievements.definitions.js`
+- **UI/rendering** → `utils-achievements.ui.js`, `utils-combo.ui.js`
+- **Drag/interaction** → `worm-powerups.ui.draggable.js`
+- **Game-over logic** → `worm-system.gameover.js`
+- **Initialization** → `lazy-component-loader.init.js`
+
+When splitting, keep `window.*` exports intact and load new files in `game.html` before any module that depends on them.
+
 ## Key Documentation
 
 - `Docs/ARCHITECTURE.md` - Worm system design and state machine
 - `Docs/DEVELOPMENT_GUIDE.md` - Coding standards, recent changes
 - `Docs/PERFORMANCE.md` - Optimization patterns and results
+- `REFACTORING_PLAN.csv` - Full catalog of large files with split status and recommendations

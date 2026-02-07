@@ -198,89 +198,8 @@ class LazyComponentLoader {
 }
 
 // ============================================
-// LOCK COMPONENT INTEGRATION
-// ============================================
-
-/**
- * Enhanced lock manager integration for lazy loading
- * @class LazyLockManager
- * NOTE: This class is exported for potential future use by lock-manager.js
- */
-class LazyLockManager {
-  constructor(lockManager, componentLoader) {
-    this.lockManager = lockManager;
-    this.componentLoader = componentLoader;
-  }
-
-  /**
-   * Load lock component with loading state
-   * @param {number} level - Lock level to load
-   * @param {HTMLElement} container - Container element
-   * @returns {Promise<void>}
-   */
-  async loadLockWithFeedback(level, container) {
-    // Show loading skeleton
-    if (window.UXEnhancements && window.UXEnhancements.loading) {
-      window.UXEnhancements.loading.showLoadingSkeleton(container, "custom");
-    }
-
-    try {
-      // Determine component path using shared utility
-      const fileName = this.componentLoader.getLockComponentFilename(level);
-      const componentPath = `/src/assets/components/lock-components/${fileName}`;
-
-      // Load component
-      const lockHtml = await this.componentLoader.loadComponent(componentPath);
-
-      // Hide loading skeleton and inject content
-      if (window.UXEnhancements && window.UXEnhancements.loading) {
-        window.UXEnhancements.loading.hideLoadingSkeleton(container);
-      }
-
-      container.innerHTML = lockHtml;
-
-      // Preload next components
-      this.componentLoader.preloadNextLockComponents(level);
-
-      // Show success toast
-      if (window.UXEnhancements && window.UXEnhancements.toast) {
-        window.UXEnhancements.toast.success(
-          `Lock level ${level} activated!`,
-          2000,
-        );
-      }
-    } catch (error) {
-      console.error(`❌ Failed to load lock level ${level}`, error);
-
-      // Hide loading skeleton
-      if (window.UXEnhancements && window.UXEnhancements.loading) {
-        window.UXEnhancements.loading.hideLoadingSkeleton(container);
-      }
-
-      // Show error toast
-      if (window.UXEnhancements && window.UXEnhancements.toast) {
-        window.UXEnhancements.toast.error(
-          "Failed to load lock animation",
-          3000,
-        );
-      }
-
-      // Fallback to basic display
-      container.innerHTML = `<div class="lock-error">Lock Level ${level}</div>`;
-    }
-  }
-
-  /**
-   * Preload all lock components during game initialization
-   */
-  preloadAllLockComponents() {
-    const allPaths = this.componentLoader.getAllLockComponentPaths();
-    this.componentLoader.preloadComponents(allPaths);
-  }
-}
-
-// ============================================
-// INITIALIZE AND EXPORT
+// EXPORT (LazyLockManager moved to lazy-lock-manager.js)
+// (Initialization moved to lazy-component-loader.init.js)
 // ============================================
 
 // Create global instance
@@ -288,38 +207,5 @@ const lazyComponentLoader = new LazyComponentLoader();
 
 // Export to window for global access
 window.LazyComponentLoader = lazyComponentLoader;
-window.LazyLockManager = LazyLockManager; // Export class for future integration
-
-// Integrate with existing lock manager if available
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    initializeLazyLoading();
-  });
-} else {
-  initializeLazyLoading();
-}
-
-function initializeLazyLoading() {
-  console.log("🚀 Lazy Component Loader initialized");
-
-  // Preload lock components during idle time
-  // Start preloading after a short delay to not block initial render
-  if ("requestIdleCallback" in window) {
-    requestIdleCallback(
-      () => {
-        lazyComponentLoader.preloadComponents(
-          lazyComponentLoader.getAllLockComponentPaths(),
-        );
-      },
-      { timeout: 3000 },
-    );
-  } else {
-    setTimeout(() => {
-      lazyComponentLoader.preloadComponents(
-        lazyComponentLoader.getAllLockComponentPaths(),
-      );
-    }, 2000);
-  }
-}
 
 console.log("✨ Lazy Component Loader module loaded successfully");
