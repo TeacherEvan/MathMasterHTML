@@ -226,18 +226,4 @@ class PerformanceMonitor {
     }
 }
 
-// Auto-initialize
-document.addEventListener('DOMContentLoaded', () => {
-    window.performanceMonitor = new PerformanceMonitor();
-    window.performanceMonitor.init();
-
-    // Keyboard shortcut: Press P to toggle overlay
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'p' || e.key === 'P') {
-            window.performanceMonitor.toggle();
-            console.log('📊 Performance overlay toggled');
-        }
-    });
-
-    console.log('📊 Performance Monitor ready - Press P to toggle');
-});
+// Bootstrap moved to performance-monitor.bootstrap.js

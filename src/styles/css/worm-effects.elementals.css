@@ -1,0 +1,90 @@
+@keyframes lightning-fade {
+  0% {
+    opacity: 1;
+    box-shadow: 0 0 10px cyan, 0 0 20px cyan;
+  }
+
+  100% {
+    opacity: 0;
+    box-shadow: 0 0 5px cyan;
+  }
+}
+
+@keyframes lightning-flash {
+  0% {
+    opacity: 1;
+    filter: brightness(2);
+  }
+
+  50% {
+    opacity: 1;
+    filter: brightness(1.5);
+  }
+
+  100% {
+    opacity: 0;
+    filter: brightness(1);
+  }
+}
+
+@keyframes sparkle-burst {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(var(--angle-x), var(--angle-y)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+@keyframes devil-pulsate {
+  0%,
+  100% {
+    text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.6);
+    transform: scale(1);
+  }
+
+  50% {
+    text-shadow: 0 0 30px rgba(255, 0, 0, 1), 0 0 60px rgba(255, 0, 0, 0.8),
+      0 0 90px rgba(255, 0, 0, 0.6);
+    transform: scale(1.1);
+  }
+}
+
+@media (max-width: 768px) {
+  .worm-segment {
+    width: 7px;
+    height: 7px;
+  }
+
+  .worm-segment:first-child {
+    width: 10px;
+    height: 10px;
+  }
+
+  .slime-splat {
+    width: 40px;
+    height: 40px;
+  }
+
+  .explosion-particle {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+@keyframes devil-pulsate {
+  0%,
+  100% {
+    text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.6);
+    transform: scale(1);
+  }
+
+  50% {
+    text-shadow: 0 0 40px rgba(255, 0, 0, 1), 0 0 80px rgba(255, 50, 0, 0.8),
+      0 0 120px rgba(255, 0, 0, 0.6);
+    transform: scale(1.1);
+  }
+}

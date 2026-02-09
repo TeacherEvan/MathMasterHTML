@@ -1,0 +1,103 @@
+.power-up {
+  position: fixed;
+  pointer-events: auto;
+  z-index: 10001;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  transition: transform 0.2s ease;
+}
+
+.power-up:hover {
+  transform: scale(1.2);
+}
+
+@keyframes power-up-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.3) rotate(180deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(360deg);
+  }
+}
+
+@keyframes power-up-collect {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(2) translateY(-50px);
+  }
+}
+
+@keyframes power-up-fade {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes symbol-return {
+  from {
+    opacity: 0.3;
+    color: #666;
+  }
+
+  to {
+    opacity: 1;
+    color: inherit;
+  }
+}
+
+@keyframes symbol-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+  }
+
+  50% {
+    text-shadow: 0 0 20px rgba(255, 0, 0, 1), 0 0 30px rgba(255, 100, 0, 0.8);
+  }
+}
+
+.console-slot.worm-spawning {
+  animation: slot-open 0.5s ease-out;
+  background: radial-gradient(
+    circle,
+    rgba(0, 255, 0, 0.3),
+    rgba(0, 200, 0, 0.1)
+  );
+  box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.5), 0 0 30px rgba(0, 255, 0, 0.6);
+}
+
+@keyframes slot-open {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+    box-shadow: inset 0 0 30px rgba(0, 255, 0, 0.8), 0 0 50px rgba(0, 255, 0, 1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.console-slot.locked {
+  opacity: 0.5;
+  pointer-events: none;
+}
