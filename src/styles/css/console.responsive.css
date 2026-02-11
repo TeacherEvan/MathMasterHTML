@@ -1,0 +1,84 @@
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #symbol-console {
+    /* Mobile: Span full viewport width, not confined to Panel B */
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    transform: none;
+
+    /* Change from 3×3 grid to horizontal 2×1 pairs */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+
+    /* Ensure it spans across all panels */
+    z-index: 10000;
+  }
+
+  .console-slot {
+    /* Make slots slightly larger for touch on mobile */
+    width: 45px;
+    height: 45px;
+    font-size: 22px;
+    flex: 0 0 auto;
+  }
+
+  /* Group slots in pairs visually with spacing */
+  .console-slot:nth-child(2),
+  .console-slot:nth-child(4),
+  .console-slot:nth-child(6) {
+    margin-right: 15px;
+    /* Space after every 2nd, 4th, 6th slot to create pairs */
+  }
+
+  .modal-content {
+    padding: 20px;
+    max-width: 90%;
+  }
+
+  .symbol-choice {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+
+  .position-choice {
+    width: 60px;
+    height: 60px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .console-slot {
+    /* Slightly smaller on very small screens */
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  /* Reduce pair spacing on very small screens */
+  .console-slot:nth-child(2),
+  .console-slot:nth-child(4),
+  .console-slot:nth-child(6) {
+    margin-right: 10px;
+  }
+
+  .symbol-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Mobile-specific console adjustments for horizontal layout */
+.res-mobile #symbol-console {
+  /* Override grid to flexbox on mobile */
+  display: flex !important;
+  flex-direction: row !important;
+  grid-template-columns: none;
+  grid-template-rows: none;
+}

@@ -1,0 +1,42 @@
+/* ======================================== */
+/* ACHIEVEMENT POPUP ANIMATIONS             */
+/* ======================================== */
+
+@keyframes achievement-slide-in {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes achievement-slide-out {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Achievement icon shimmer */
+@keyframes achievement-shimmer {
+  0% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.5) drop-shadow(0 0 10px gold);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+.achievement-popup .achievement-icon {
+  animation: achievement-shimmer 1s ease-in-out infinite;
+}

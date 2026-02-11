@@ -1,0 +1,19 @@
+/* ======================================== */
+/* NEAR-MISS EXCITEMENT ANIMATION           */
+/* ======================================== */
+
+@keyframes near-miss-warning {
+  0%,
+  100% {
+    border-color: rgba(255, 0, 0, 0.3);
+    box-shadow: inset 0 0 20px rgba(255, 0, 0, 0.1);
+  }
+  50% {
+    border-color: rgba(255, 0, 0, 0.8);
+    box-shadow: inset 0 0 50px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.near-miss-active {
+  animation: near-miss-warning 0.5s ease-in-out infinite;
+}

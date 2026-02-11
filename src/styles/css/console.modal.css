@@ -1,0 +1,158 @@
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: linear-gradient(145deg, #0a0a0a, #1a1a1a);
+  border: 3px solid #00ff00;
+  border-radius: 15px;
+  padding: 40px;
+  max-width: 600px;
+  box-shadow: 0 0 40px rgba(0, 255, 0, 0.5);
+  animation: modalSlideIn 0.4s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-content h2 {
+  font-family: "Orbitron", monospace;
+  font-size: 28px;
+  color: #00ff00;
+  text-align: center;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.modal-instruction {
+  font-family: "Orbitron", monospace;
+  font-size: 16px;
+  color: #0ff;
+  text-align: center;
+  margin: 15px 0;
+}
+
+/* Symbol choice grid */
+.symbol-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.symbol-choice {
+  width: 60px;
+  height: 60px;
+  background: rgba(0, 20, 0, 0.6);
+  border: 2px solid #00ff00;
+  border-radius: 8px;
+  font-family: "Orbitron", monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: #00ff00;
+  cursor: pointer;
+  /* PERFORMANCE: Only transition specific properties, not 'all' */
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    transform 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+}
+
+.symbol-choice:hover {
+  background: rgba(0, 40, 0, 0.9);
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+  transform: scale(1.1);
+  color: #0ff;
+}
+
+.symbol-choice.selected {
+  background: rgba(0, 60, 0, 1);
+  border-color: #0ff;
+  color: #0ff;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+}
+
+/* Position choice grid */
+.position-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 20px auto;
+  max-width: 250px;
+}
+
+.position-choice {
+  width: 70px;
+  height: 70px;
+  background: rgba(0, 20, 0, 0.6);
+  border: 2px solid #00ff00;
+  border-radius: 8px;
+  font-family: "Orbitron", monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: #00ff00;
+  cursor: pointer;
+  /* PERFORMANCE: Only transition specific properties, not 'all' */
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+}
+
+.position-choice:hover {
+  background: rgba(0, 40, 0, 0.9);
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+  transform: scale(1.1);
+}
+
+.position-choice.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: rgba(50, 0, 0, 0.6);
+  border-color: #ff0000;
+}
+
+.position-choice.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Skip button */
+.modal-skip {
+  display: block;
+  margin: 20px auto 0;
+  padding: 12px 30px;
+  background: rgba(40, 40, 40, 0.8);
+  border: 2px solid #888;
+  border-radius: 8px;
+  font-family: "Orbitron", monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: #888;
+  cursor: pointer;
+  /* PERFORMANCE: Only transition specific properties, not 'all' */
+  transition: border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  text-transform: uppercase;
+}
+
+.modal-skip:hover {
+  border-color: #ff9900;
+  color: #ff9900;
+  box-shadow: 0 0 15px rgba(255, 153, 0, 0.5);
+}

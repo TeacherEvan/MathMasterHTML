@@ -1,0 +1,71 @@
+/* Console Worm Spawn Styles */
+.console-slot.worm-spawning {
+  animation: slideOpenHole 0.8s ease-out forwards;
+  background: rgba(0, 0, 0, 0.95);
+  box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.4);
+}
+
+@keyframes slideOpenHole {
+  0% {
+    transform: scale(1);
+    border-color: #00ff00;
+  }
+
+  50% {
+    transform: scale(1.3);
+    border-color: #00ff00;
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.8),
+      inset 0 0 30px rgba(0, 255, 0, 0.6);
+  }
+
+  100% {
+    transform: scale(1.1);
+    border-color: #00ff00;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5),
+      inset 0 0 25px rgba(0, 255, 0, 0.5);
+  }
+}
+
+.console-slot.locked {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+  border-color: #ff0000;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.console-slot.locked::after {
+  content: "🚫";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  opacity: 0.7;
+}
+
+/* Console worm special styling */
+.worm-container.console-worm {
+  z-index: 1000 !important;
+  /* Front of all displays */
+  animation: wormCrawlOut 1s ease-out;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+@keyframes wormCrawlOut {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
