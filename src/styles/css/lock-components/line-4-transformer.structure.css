@@ -1,0 +1,181 @@
+/* Core Element */
+.core {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, #ffff44, #ff4444);
+  border-radius: 50%;
+  border: 2px solid #ffaa44;
+  transition: all 2s ease-in-out;
+  box-shadow: 0 0 15px rgba(255, 255, 68, 0.8),
+    inset 0 0 10px rgba(255, 170, 68, 0.5);
+}
+
+.core.active {
+  animation: core-pulse 2s infinite ease-in-out;
+}
+
+/* Cross Pattern Extensions */
+.expansion-arm {
+  position: absolute;
+  background: linear-gradient(90deg, #ff4444, #ff6666, #ff4444);
+  border: 2px solid #ff8888;
+  border-radius: 8px;
+  transform-origin: center;
+  opacity: 0;
+  transition: all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 0 20px rgba(255, 68, 68, 0.6);
+}
+
+.expansion-arm.north {
+  width: 20px;
+  height: 80px;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%) scaleY(0);
+}
+
+.expansion-arm.south {
+  width: 20px;
+  height: 80px;
+  bottom: -80px;
+  left: 50%;
+  transform: translateX(-50%) scaleY(0);
+}
+
+.expansion-arm.east {
+  width: 80px;
+  height: 20px;
+  right: -80px;
+  top: 50%;
+  transform: translateY(-50%) scaleX(0);
+}
+
+.expansion-arm.west {
+  width: 80px;
+  height: 20px;
+  left: -80px;
+  top: 50%;
+  transform: translateY(-50%) scaleX(0);
+}
+
+.expansion-arm.active {
+  opacity: 1;
+  animation: arm-extend 2s ease-out forwards;
+}
+
+/* Horizontal Arms from Level 3 - Starting State */
+.horizontal-arm {
+  position: absolute;
+  top: 50%;
+  width: 80px;
+  height: 25px;
+  background: linear-gradient(
+    90deg,
+    #8a2be2,
+    #ba55d3,
+    #fff,
+    #ba55d3,
+    #8a2be2
+  ); /* Purple from Level 3 */
+  border: 3px solid #8a2be2;
+  border-radius: 12px;
+  transform: translateY(-50%);
+  transition: all 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  overflow: visible;
+  box-shadow: 0 0 25px rgba(138, 43, 226, 0.9),
+    inset 0 2px 10px rgba(255, 255, 255, 0.4);
+  opacity: 1; /* Already visible from Level 3 */
+}
+
+.horizontal-arm.left {
+  left: -85px;
+  transform: translateY(-50%) translateX(0) rotate(0deg); /* Already extended from Level 3 */
+}
+
+.horizontal-arm.right {
+  right: -85px;
+  transform: translateY(-50%) translateX(0) rotate(0deg); /* Already extended from Level 3 */
+}
+
+.lock-body.active .horizontal-arm {
+  background: linear-gradient(
+    90deg,
+    #ff4444,
+    #ff6666,
+    #fff,
+    #ff6666,
+    #ff4444
+  ); /* Red for Level 4 */
+  border-color: #ff4444;
+  box-shadow: 0 0 30px rgba(255, 68, 68, 1),
+    inset 0 2px 12px rgba(255, 255, 255, 0.5);
+  animation: arm-energy-pulse-red 2s ease-in-out infinite;
+}
+
+/* Rotating Chambers from Level 3 - Starting State */
+.rotating-chamber {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(
+    45deg,
+    #8a2be2,
+    #ba55d3,
+    #8a2be2
+  ); /* Purple from Level 3 */
+  border: 2px solid #8a2be2;
+  border-radius: 50%;
+  transition: all 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform-origin: center center;
+  opacity: 1; /* Already visible from Level 3 */
+  animation: chamber-spin 2s linear infinite; /* Already spinning from Level 3 */
+  box-shadow: 0 0 20px rgba(138, 43, 226, 0.8),
+    inset 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.rotating-chamber.chamber-1 {
+  top: 20px;
+  left: 20px;
+  animation-delay: 0s;
+}
+
+.rotating-chamber.chamber-2 {
+  top: 20px;
+  right: 20px;
+  animation-delay: 0.5s;
+}
+
+.rotating-chamber.chamber-3 {
+  bottom: 20px;
+  left: 20px;
+  animation-delay: 1s;
+}
+
+.rotating-chamber.chamber-4 {
+  bottom: 20px;
+  right: 20px;
+  animation-delay: 1.5s;
+}
+
+.lock-body.active .rotating-chamber {
+  background: linear-gradient(
+    45deg,
+    #ff4444,
+    #ff6666,
+    #ff4444
+  ); /* Red for Level 4 */
+  border-color: #ff4444;
+  box-shadow: 0 0 25px rgba(255, 68, 68, 1),
+    inset 0 0 12px rgba(255, 255, 255, 0.3);
+  animation: chamber-spin-red 2s linear infinite;
+}
+
+/* Remove all text elements and status indicators */
+.status-indicator,
+.status-display,
+.level-display,
+.btn,
+.controls {
+  display: none !important;
+}

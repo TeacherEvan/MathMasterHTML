@@ -1,0 +1,158 @@
+/* Hydraulic Pistons - Enhanced */
+.hydraulic-piston {
+  position: absolute;
+  width: 10px;
+  height: 30px;
+  background: linear-gradient(180deg, #555, #333);
+  border-radius: 5px;
+  border: 1px solid #333;
+  top: 50%;
+  transition: all 1.2s ease;
+  transform-origin: bottom center;
+}
+
+.hydraulic-piston.left {
+  left: -35px;
+  transform: translateY(-50%) scaleY(0) rotate(-5deg);
+}
+
+.hydraulic-piston.right {
+  right: -35px;
+  transform: translateY(-50%) scaleY(0) rotate(5deg);
+}
+
+.lock-body.level-2-active .hydraulic-piston {
+  transform: translateY(-50%) scaleY(1.2) rotate(0deg);
+  background: linear-gradient(180deg, #ffa500, #777, #555);
+  box-shadow: 0 0 10px rgba(255, 165, 0, 0.7),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  animation: piston-pulse 1.5s ease-in-out infinite;
+}
+
+/* Mechanical Bolts */
+.bolt {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, #666, #333);
+  border: 2px solid #444;
+  border-radius: 50%;
+  transition: all 1.2s ease;
+}
+
+.bolt.top-left {
+  top: 15px;
+  left: 15px;
+}
+
+.bolt.top-right {
+  top: 15px;
+  right: 15px;
+}
+
+.bolt.bottom-left {
+  bottom: 15px;
+  left: 15px;
+}
+
+.bolt.bottom-right {
+  bottom: 15px;
+  right: 15px;
+}
+
+.lock-body.level-2-active .bolt {
+  background: radial-gradient(circle, #ffa500, #666);
+  border-color: #ffa500;
+  box-shadow: 0 0 6px rgba(255, 165, 0, 0.8);
+  transform: rotate(45deg);
+}
+
+/* Mechanical Gears - Enhanced */
+.gear {
+  position: absolute;
+  width: 35px;
+  height: 35px;
+  border: 3px solid #666;
+  border-radius: 50%;
+  background: radial-gradient(circle, #444, #222);
+  transition: all 1.2s ease;
+}
+
+.gear::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: #333;
+  border-radius: 50%;
+}
+
+.gear::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 6px;
+  background: #555;
+  border-radius: 2px;
+  box-shadow: 0 8px 0 #555, 0 16px 0 #555, 0 24px 0 #555;
+}
+
+.gear.left {
+  top: 30px;
+  left: -50px;
+  animation: rotate-clockwise 4s linear infinite;
+}
+
+.gear.right {
+  top: 30px;
+  right: -50px;
+  animation: rotate-counter-clockwise 4s linear infinite;
+}
+
+.lock-body.level-2-active .gear {
+  border-color: #ffa500;
+  box-shadow: 0 0 15px rgba(255, 165, 0, 0.7);
+  animation-duration: 2s;
+}
+
+/* Central Keyhole - Enhanced */
+.keyhole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 25px;
+  height: 25px;
+  background: #000;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  border: 3px solid #333;
+  transition: all 1.2s ease;
+}
+
+.keyhole::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 15px;
+  background: #000;
+  border: 3px solid #333;
+  border-top: none;
+}
+
+.lock-body.level-2-active .keyhole {
+  box-shadow: 0 0 20px rgba(255, 165, 0, 0.9);
+  border-color: #ffa500;
+}
+
+.lock-body.level-2-active .keyhole::after {
+  border-color: #ffa500;
+}

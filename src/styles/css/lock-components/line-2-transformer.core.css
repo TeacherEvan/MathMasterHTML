@@ -1,0 +1,75 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent; /* Make transparent for game integration */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  font-family: "Orbitron", monospace;
+  overflow: hidden;
+}
+
+.lock-container {
+  position: relative;
+  width: 120px; /* Optimized for game display */
+  height: 100px; /* Optimized for game display */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: scale(0.7); /* Better scale for game integration */
+  transform-origin: center;
+  margin: 10px auto; /* Center in game display */
+}
+
+.lock-body {
+  /* Starting from Level 1's final state - Vertical Extension */
+  width: 60px; /* Optimized for game display */
+  height: 80px; /* Optimized for game display */
+  background: linear-gradient(
+    145deg,
+    #1a4a1a,
+    #2a6a2a,
+    #1a4a1a
+  ); /* Green from Level 1 */
+  border-radius: 10px; /* Reduced by 35% from 15px */
+  position: relative;
+  border: 2px solid #0f0; /* Reduced by 35% from 3px */
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.6),
+    /* Reduced by 35% from 30px */ inset 0 0 10px rgba(0, 255, 0, 0.2),
+    /* Reduced by 35% from 15px */ 0 0 0 3px rgba(0, 255, 0, 0.3); /* Reduced by 35% from 5px */
+  transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform: scaleY(1.5); /* Maintains Level 1 vertical extension */
+  transform-origin: center center;
+}
+
+.lock-body.level-2-active {
+  width: 100px; /* Optimized for game display */
+  height: 163px; /* Reduced by 35% from 250px */
+  background: linear-gradient(145deg, #4a2a1a, #6a4a2a, #4a2a1a);
+  border-color: #ffa500;
+  transform: scaleY(1.5) scaleX(1.6); /* Maintains vertical + adds horizontal */
+  box-shadow: 0 0 50px rgba(255, 165, 0, 0.9), inset 0 0 20px rgba(0, 0, 0, 0.6),
+    0 0 0 10px rgba(255, 165, 0, 0.3), 0 0 0 20px rgba(255, 165, 0, 0.15);
+  animation: level2-expansion 2.5s ease-in-out infinite;
+}
+
+/* Shackle */
+.shackle {
+  width: 52px; /* Reduced by 35% from 80px */
+  height: 39px; /* Reduced by 35% from 60px */
+  border: 5px solid #555; /* Reduced by 35% from 8px */
+  border-bottom: none;
+  border-radius: 40px 40px 0 0;
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: transparent;
+  transition: all 1.2s ease;
+}
+
+.lock-body.level-2-active .shackle {
+  border-color: #888;
+  box-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
+}
