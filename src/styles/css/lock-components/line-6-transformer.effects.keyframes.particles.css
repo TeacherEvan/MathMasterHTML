@@ -1,0 +1,127 @@
+/* line-6-transformer.effects.keyframes.particles.css - Effects/particles keyframes */
+
+@keyframes segment-cosmic-exit {
+  0% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  25% {
+    transform: translate(var(--exit-x, -200px), var(--exit-y, -200px))
+      rotate(180deg) scale(1.5);
+    opacity: 0.8;
+    filter: brightness(1.5);
+  }
+  50% {
+    transform: translate(var(--exit-x, -400px), var(--exit-y, -400px))
+      rotate(360deg) scale(2);
+    opacity: 0.4;
+    filter: brightness(2);
+  }
+  75% {
+    transform: translate(var(--exit-x, -600px), var(--exit-y, -600px))
+      rotate(540deg) scale(0.5);
+    opacity: 0.1;
+    filter: brightness(0.5);
+  }
+  100% {
+    transform: translate(var(--exit-x, -800px), var(--exit-y, -800px))
+      rotate(720deg) scale(0);
+    opacity: 0;
+    filter: brightness(0);
+  }
+}
+
+@keyframes black-hole-pulse {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    box-shadow: 0 0 80px rgba(34, 0, 68, 0.8), inset 0 0 60px rgba(0, 0, 0, 1);
+  }
+  50% {
+    transform: scale(1.1) rotate(180deg);
+    box-shadow: 0 0 120px rgba(68, 0, 136, 1.2), inset 0 0 80px rgba(0, 0, 0, 1);
+  }
+}
+
+@keyframes electric-field-discharge {
+  0%,
+  100% {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      #8844ff 20%,
+      #4488ff 40%,
+      #ffffff 50%,
+      #4488ff 60%,
+      #8844ff 80%,
+      transparent
+    );
+    opacity: 1;
+  }
+  50% {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      #ffffff 20%,
+      #aaccff 40%,
+      #ffffff 50%,
+      #aaccff 60%,
+      #ffffff 80%,
+      transparent
+    );
+    opacity: 0.7;
+  }
+}
+
+@keyframes particle-shoot-out-in {
+  0% {
+    transform: scale(1) translate(0, 0);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.5)
+      translate(var(--shoot-x, 150px), var(--shoot-y, 150px));
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(2) translate(var(--shoot-x, 200px), var(--shoot-y, 200px));
+    opacity: 0.4;
+  }
+  75% {
+    transform: scale(1.5)
+      translate(var(--shoot-x, 150px), var(--shoot-y, 150px));
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes cosmic-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes status-cosmic-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    color: #ffffff;
+  }
+  33% {
+    text-shadow: 0 0 30px rgba(255, 128, 255, 1);
+    color: #ff80ff;
+  }
+  66% {
+    text-shadow: 0 0 30px rgba(128, 255, 255, 1);
+    color: #80ffff;
+  }
+}

@@ -1,0 +1,48 @@
+/* Responsive Design */
+@media (max-width: 768px) {
+  .levels-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .level-card {
+    padding: 25px;
+  }
+
+  .level-icon {
+    font-size: 3rem;
+  }
+
+  .level-stats {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .stat-value {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 30px 15px 15px;
+  }
+
+  .level-container {
+    padding: 30px 15px;
+  }
+
+  .level-card {
+    padding: 20px;
+  }
+
+  .navigation {
+    padding: 25px 15px 40px;
+  }
+}

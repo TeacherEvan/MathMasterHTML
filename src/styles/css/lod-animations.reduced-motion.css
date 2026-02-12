@@ -1,0 +1,61 @@
+/*
+  ENHANCED REDUCED-MOTION SUPPORT
+  Comprehensive accessibility compliance
+*/
+
+@media (prefers-reduced-motion: reduce) {
+  /* Disable all keyframe animations */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Keep essential visual feedback - static versions */
+  .falling-symbol {
+    opacity: 1;
+    text-shadow: 0 0 3px currentColor;
+  }
+
+  .revealed-symbol {
+    color: #ff0000;
+    background: rgba(255, 0, 0, 0.2);
+  }
+
+  .completed-row-symbol {
+    color: #00ffff;
+    background: rgba(0, 255, 255, 0.2);
+  }
+
+  /* Disable all particle effects */
+  .explosion-particle,
+  .explosion-flash,
+  .slime-splat,
+  .worm-crack {
+    display: none !important;
+  }
+
+  /* Static lock display */
+  .lock-container * {
+    animation: none !important;
+  }
+
+  /* Worms move linearly without bounce */
+  .worm-entity {
+    transition: transform 0.2s linear !important;
+  }
+
+  /* No screen shake */
+  .screen-shake {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  /* Modal appears instantly */
+  .game-modal,
+  .modal-overlay {
+    animation: none !important;
+  }
+}

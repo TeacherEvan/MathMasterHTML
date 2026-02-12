@@ -1,0 +1,165 @@
+/* Core Element - Enhanced for Level 6 */
+.core {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle, #4488ff, #6699ff, #4488ff);
+  border-radius: 50%;
+  border: 3px solid #88aaff;
+  transition: all 2s ease-in-out;
+  box-shadow: 0 0 25px rgba(68, 136, 255, 1),
+    inset 0 0 15px rgba(136, 170, 255, 0.8);
+  z-index: 10;
+  animation: core-ultimate-pulse 2s infinite ease-in-out;
+}
+
+/* Black Hole Event Horizon */
+.black-hole {
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  background: radial-gradient(
+    circle,
+    #000000 30%,
+    #111122 60%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  border: 2px solid #220044;
+  opacity: 0;
+  transition: all 3s ease-in-out;
+  z-index: 5;
+}
+
+/* Electric Field Lines */
+.electric-field {
+  position: absolute;
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #8844ff 20%,
+    #4488ff 40%,
+    #ffffff 50%,
+    #4488ff 60%,
+    #8844ff 80%,
+    transparent
+  );
+  opacity: 0;
+  transform-origin: center;
+  animation: electric-field-discharge 0.8s infinite ease-in-out;
+}
+
+/* Multiple electric field orientations */
+.field-1 {
+  transform: rotate(0deg);
+}
+.field-2 {
+  transform: rotate(30deg);
+}
+.field-3 {
+  transform: rotate(60deg);
+}
+.field-4 {
+  transform: rotate(90deg);
+}
+.field-5 {
+  transform: rotate(120deg);
+}
+.field-6 {
+  transform: rotate(150deg);
+}
+
+/* Shooting Particles - Enhanced for Level 6 */
+.shooting-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, #ffffff, #4488ff, #8844ff);
+  border-radius: 50%;
+  opacity: 0;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+  z-index: 15;
+}
+
+/* Colorful Orb - Final State with Enhanced 3D Effect */
+.colorful-orb {
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  background: conic-gradient(
+    from 0deg,
+    #ff0080 0deg,
+    #ff8000 60deg,
+    #80ff00 120deg,
+    #00ff80 180deg,
+    #0080ff 240deg,
+    #8000ff 300deg,
+    #ff0080 360deg
+  );
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 4s cubic-bezier(0.23, 1, 0.32, 1);
+  z-index: 20;
+  filter: blur(0px);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+/* 3D Orb Inner Core */
+.orb-inner-core {
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.7) 20%,
+    rgba(255, 255, 255, 0.3) 40%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 4s ease-in-out;
+  z-index: 21;
+  transform-style: preserve-3d;
+}
+
+/* 3D Orb Reflection */
+.orb-reflection {
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.4) 30%,
+    transparent 60%
+  );
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 4s ease-in-out;
+  z-index: 22;
+  transform: translate(-20%, -20%);
+}
+
+/* Orb Aura - Enhanced 3D */
+.orb-aura {
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 128, 255, 0.3) 25%,
+    rgba(128, 255, 255, 0.2) 50%,
+    rgba(255, 255, 128, 0.1) 75%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 4s ease-in-out;
+  z-index: 18;
+  transform-style: preserve-3d;
+}

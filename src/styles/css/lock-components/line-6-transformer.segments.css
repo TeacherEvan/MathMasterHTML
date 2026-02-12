@@ -1,0 +1,38 @@
+/* Detached Segments from Level 5 - Now with dramatic exit */
+.detachable-segment {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(45deg, #4488ff, #6699ff);
+  border: 2px solid #88aaff;
+  border-radius: 8px;
+  transition: all 3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 0 20px rgba(68, 136, 255, 0.8);
+  opacity: 1;
+  z-index: 12;
+}
+
+/* Starting positions from Level 5 final state */
+.segment-nw {
+  top: 20px;
+  left: 20px;
+  transform: translate(-60px, -60px) rotate(45deg) scale(1.2);
+}
+
+.segment-ne {
+  top: 20px;
+  right: 20px;
+  transform: translate(60px, -60px) rotate(-45deg) scale(1.2);
+}
+
+.segment-sw {
+  bottom: 20px;
+  left: 20px;
+  transform: translate(-60px, 60px) rotate(-45deg) scale(1.2);
+}
+
+.segment-se {
+  bottom: 20px;
+  right: 20px;
+  transform: translate(60px, 60px) rotate(45deg) scale(1.2);
+}

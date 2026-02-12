@@ -1,0 +1,162 @@
+/* Keep the same 3-column grid as desktop, just scaled down */
+.res-mobile .grid-container {
+  grid-template-columns: 1fr 3px 1fr 3px 1fr;
+  /* Thinner walls for mobile */
+  grid-template-rows: 100vh;
+  /* Full viewport height */
+}
+
+.res-mobile .wall {
+  width: 3px;
+  /* Thinner walls on mobile */
+  background: linear-gradient(180deg, #0f0, #060);
+}
+
+/* Scale down all panels proportionally for small landscape screen */
+.res-mobile .display-panel {
+  font-size: 12px;
+  /* Smaller base font */
+  padding: 10px;
+  /* Less padding */
+}
+
+/* Panel A - Lock and Problem (scaled) */
+.res-mobile #panel-a {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.res-mobile #problem-container {
+  font-size: 8px;
+  /* Reduced by 20% from 10px for better fit */
+  top: 90px;
+  /* Adjust position - below mobile HUD (fix overlap: score ends at ~80px) */
+  white-space: nowrap;
+  /* Keep symbols on same line */
+  overflow: visible;
+  /* Allow overflow if needed */
+  letter-spacing: 0.5px;
+  /* REDUCED from 1px to 0.5px (50% reduction) - tighter spacing for mobile */
+  /* Boundary constraints for mobile */
+  max-width: 95%;
+  padding: 4px 8px;
+}
+
+.res-mobile #lock-display {
+  position: absolute;
+  top: calc(50% + 30px); /* Shifted down to avoid problem container */
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.7);
+  /* Center AND scale down lock for mobile */
+  transform-origin: center center;
+  max-height: calc(100vh - 160px); /* Ensure clearance from HUD and problem */
+}
+
+/* Panel B - Solution and Console (scaled) */
+.res-mobile #panel-b {
+  display: flex;
+  flex-direction: column;
+}
+
+.res-mobile #solution-container {
+  font-size: 9px;
+  /* Reduced by 20% from 11px for better fit */
+  line-height: 1.2;
+  /* Tighter line spacing for mobile */
+  letter-spacing: 0.5px;
+  /* ADDED: 50% reduction for tighter symbol spacing on mobile */
+  margin-bottom: 50px;
+  /* Space for horizontal console */
+  padding: 90px 5px 5px 5px;
+  /* Reduced padding on mobile */
+  max-height: calc(100vh - 100px);
+  /* Ensure content doesn't overflow */
+  overflow-y: auto;
+  /* Allow scrolling if needed */
+}
+
+.res-mobile #symbol-console {
+  bottom: 5px;
+  /* Closer to bottom */
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  /* Horizontal padding */
+  gap: 4px;
+  /* Tight horizontal spacing */
+  display: flex;
+  /* Change to horizontal flexbox */
+  flex-direction: row;
+  /* Single row layout */
+  flex-wrap: nowrap;
+  /* Keep all in one row */
+  overflow-x: auto;
+  /* Allow horizontal scroll if needed */
+  max-width: 95%;
+  /* Don't overflow panel width */
+}
+
+.res-mobile .console-slot {
+  width: 32px;
+  /* Smaller console buttons for horizontal layout */
+  height: 32px;
+  font-size: 16px;
+  flex-shrink: 0;
+  /* Prevent shrinking */
+}
+
+/* Panel C - Symbol Rain (scaled) */
+.res-mobile #panel-c {
+  /* Keep full height for vertical falling symbols */
+  height: 100vh;
+}
+
+.res-mobile .falling-symbol {
+  font-size: 18px;
+  /* Smaller symbols for mobile */
+}
+
+/* Rotation overlay - shown only in portrait mode */
+#rotation-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  z-index: 999999;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #00ff00;
+  font-family: "Orbitron", monospace;
+  text-align: center;
+  padding: 20px;
+}
+
+#rotation-overlay .rotate-icon {
+  font-size: 80px;
+  margin-bottom: 20px;
+  animation: rotatePhone 2s ease-in-out infinite;
+}
+
+#rotation-overlay .rotate-text {
+  font-size: 24px;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+/* Automation override: keep game visible for Playwright runs */
+body.automation #rotation-overlay {
+  display: none !important;
+}
+
+body.automation .grid-container {
+  display: grid !important;
+}
+
+body.automation #back-button {
+  display: block !important;
+}

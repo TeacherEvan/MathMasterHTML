@@ -1,0 +1,29 @@
+/* Show overlay ONLY on mobile in portrait mode */
+@media (max-width: 768px) and (orientation: portrait) {
+  #rotation-overlay {
+    display: flex !important;
+  }
+
+  /* Hide game content in portrait mode */
+  .grid-container {
+    display: none !important;
+  }
+
+  #back-button {
+    display: none !important;
+  }
+}
+
+/* Landscape mode on mobile - ensure full visibility */
+@media (max-width: 768px) and (orientation: landscape) {
+  .res-mobile #panel-a {
+    min-height: 80px;
+    /* Shorter in landscape */
+    max-height: 20vh;
+  }
+
+  .res-mobile #panel-b {
+    min-height: 120px;
+    /* More space for solution */
+  }
+}

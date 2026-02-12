@@ -1,0 +1,19 @@
+/* Mobile and touch device optimizations */
+@media (max-width: 768px) {
+  .falling-symbol {
+    /* Even larger touch targets on mobile (no ::before needed) */
+    padding: 25px;
+    margin: -25px;
+    font-size: 28px;
+    /* Slightly larger symbols */
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .falling-symbol {
+    padding: 30px;
+    margin: -30px;
+    font-size: 30px;
+  }
+}

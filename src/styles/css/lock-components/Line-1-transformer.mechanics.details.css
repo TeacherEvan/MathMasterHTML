@@ -1,0 +1,101 @@
+/* Central Keyhole */
+.keyhole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 15px; /* Reduced from 20px */
+  height: 15px; /* Reduced from 20px */
+  background: #000;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  border: 2px solid #333;
+  transition: all 0.8s ease;
+}
+
+.keyhole::after {
+  content: "";
+  position: absolute;
+  bottom: -6px; /* Reduced from -8px */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px; /* Reduced from 8px */
+  height: 9px; /* Reduced from 12px */
+  background: #000;
+  border: 2px solid #333;
+  border-top: none;
+}
+
+.lock-body.level-1-active .keyhole {
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+  border-color: #0f0;
+}
+
+/* Mechanical Gears */
+.gear {
+  position: absolute;
+  width: 20px; /* Reduced from 30px */
+  height: 20px; /* Reduced from 30px */
+  border: 2px solid #666; /* Reduced from 3px */
+  border-radius: 50%;
+  background: radial-gradient(circle, #444, #222);
+  transition: all 0.8s ease;
+}
+
+.gear::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 5px; /* Reduced from 8px */
+  height: 5px; /* Reduced from 8px */
+  background: #333;
+  border-radius: 50%;
+}
+
+.gear.left {
+  top: 15px; /* Reduced from 20px */
+  left: -15px; /* Reduced from -20px */
+  animation: rotate-clockwise 3s linear infinite;
+}
+
+.gear.right {
+  top: 15px; /* Reduced from 20px */
+  right: -15px; /* Reduced from -20px */
+  animation: rotate-counter-clockwise 3s linear infinite;
+}
+
+.lock-body.level-1-active .gear {
+  border-color: #0f0;
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+}
+
+.lock-body.level-2-active .gear {
+  border-color: #1f1;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.lock-body.level-3-active .gear {
+  border-color: #2f2;
+  box-shadow: 0 0 12px rgba(0, 255, 0, 0.6);
+}
+
+/* Shackle */
+.shackle {
+  width: 36px; /* Reduced by 35% from 55px */
+  height: 26px; /* Reduced by 35% from 40px */
+  border: 3px solid #555; /* Reduced by 35% from 5px */
+  border-bottom: none;
+  border-radius: 18px 18px 0 0; /* Reduced by 35% from 28px */
+  position: absolute;
+  top: -23px; /* Reduced by 35% from -35px */
+  left: 50%;
+  transform: translateX(-50%);
+  background: transparent;
+  transition: all 0.8s ease;
+}
+
+.lock-body.level-1-active .shackle {
+  border-color: #888;
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+}

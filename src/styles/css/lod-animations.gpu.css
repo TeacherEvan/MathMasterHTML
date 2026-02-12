@@ -1,0 +1,17 @@
+/*
+  GPU ACCELERATION HINTS
+  Force compositor layer for animated elements
+*/
+
+.falling-symbol,
+.worm-entity,
+.lock-container,
+.explosion-particle {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Remove will-change after animation completes */
+.animation-complete {
+  will-change: auto;
+}

@@ -1,0 +1,49 @@
+/* Status Indicator - Hidden in game mode */
+.status-indicator {
+  display: none !important;
+}
+
+.lock-body.level-3-active .status-indicator {
+  display: none !important;
+}
+
+/* Remove all text elements and status indicators */
+.status-indicator,
+.status-display,
+.level-display,
+.btn {
+  display: none !important;
+}
+
+/* Control Panel */
+.control-panel {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 15px;
+}
+
+.btn {
+  padding: 12px 25px;
+  background: linear-gradient(145deg, #333, #555);
+  color: #8a2be2;
+  border: 3px solid #666;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: "Orbitron", monospace;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
+}
+
+.btn:hover {
+  background: linear-gradient(145deg, #555, #777);
+  box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}

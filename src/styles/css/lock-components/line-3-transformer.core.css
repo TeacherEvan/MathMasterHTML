@@ -1,0 +1,82 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent; /* Make transparent for game integration */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  font-family: "Orbitron", monospace;
+  overflow: hidden;
+}
+
+.lock-container {
+  position: relative;
+  width: 200px; /* Optimized for game display */
+  height: 160px; /* Optimized for game display */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  perspective: 500px; /* Adjusted for game display */
+  transform: scale(0.45); /* Reduced from 0.65 to prevent overflow */
+  transform-origin: center;
+  margin: 15px auto; /* Center in game display */
+  overflow: hidden; /* Prevent overflow from affecting layout */
+}
+
+.lock-body {
+  /* Starting from Level 2's final state - Vertical + Horizontal Extension */
+  width: 130px; /* Reduced by 35% from 200px */
+  height: 163px; /* Reduced by 35% from 250px */
+  background: linear-gradient(
+    145deg,
+    #4a2a1a,
+    #6a4a2a,
+    #4a2a1a
+  ); /* Orange from Level 2 */
+  border-radius: 10px; /* Reduced by 35% from 15px */
+  position: relative;
+  border: 3px solid #ffa500; /* Reduced by 35% from 4px */
+  box-shadow: 0 0 26px rgba(255, 165, 0, 0.7),
+    /* Reduced by 35% from 40px */ inset 0 0 10px rgba(255, 165, 0, 0.3); /* Reduced by 35% from 15px */
+  transition: all 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform: scaleY(1) scaleX(1); /* Reduced from 1.2x1.2 to prevent overflow */
+  transform-origin: center center;
+  transform-style: preserve-3d;
+  overflow: hidden; /* Contain all child elements */
+  will-change: transform; /* Performance optimization */
+}
+
+/* Horizontal Arms from Level 2 - Starting State */
+.horizontal-arm {
+  position: absolute;
+  top: 50%;
+  width: 80px;
+  height: 25px;
+  background: linear-gradient(
+    90deg,
+    #ffa500,
+    #ffcc00,
+    #fff,
+    #ffcc00,
+    #ffa500
+  ); /* Orange from Level 2 */
+  border: 3px solid #ffa500;
+  border-radius: 12px;
+  transform: translateY(-50%);
+  transition: all 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  overflow: hidden; /* Changed from visible to hidden to prevent layout issues */
+  box-shadow: 0 0 20px rgba(255, 165, 0, 0.8),
+    inset 0 2px 8px rgba(255, 255, 255, 0.3);
+  opacity: 1; /* Already visible from Level 2 */
+}
+
+.horizontal-arm.left {
+  left: -85px;
+  transform: translateY(-50%) translateX(0) rotate(0deg); /* Already extended from Level 2 */
+}
+
+.horizontal-arm.right {
+  right: -85px;
+  transform: translateY(-50%) translateX(0) rotate(0deg); /* Already extended from Level 2 */
+}

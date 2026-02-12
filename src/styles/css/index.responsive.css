@@ -1,0 +1,26 @@
+/* Responsive Design */
+@media (max-width: 768px) {
+  .button-container {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .action-button {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .logo-circle {
+    width: 80px;
+    height: 80px;
+  }
+
+  .logo-circle::before {
+    width: 40px;
+    height: 40px;
+  }
+
+  .logo-circle::after {
+    font-size: 2rem;
+  }
+}

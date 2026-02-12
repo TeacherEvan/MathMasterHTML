@@ -1,0 +1,27 @@
+/* Matrix Rain Background */
+.matrix-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.matrix-column {
+  position: absolute;
+  top: -100px;
+  color: #00ff00;
+  font-family: "Courier New", monospace;
+  font-size: 18px;
+  text-shadow: 0 0 5px #00ff00;
+  animation: fall linear infinite;
+  opacity: 0.7;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(calc(100vh + 100px));
+  }
+}

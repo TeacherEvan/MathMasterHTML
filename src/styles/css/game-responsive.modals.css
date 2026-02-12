@@ -1,0 +1,22 @@
+/* Mobile adjustments for How to Play */
+@media (max-width: 768px) {
+  .how-to-play-modal {
+    width: 95%;
+    max-width: 95%;
+    max-height: 90vh;
+    padding: 15px;
+  }
+
+  .how-to-play-title {
+    font-size: 24px;
+  }
+
+  .how-to-play-section h2 {
+    font-size: 18px;
+  }
+
+  .how-to-play-section p,
+  .how-to-play-section li {
+    font-size: 12px;
+  }
+}

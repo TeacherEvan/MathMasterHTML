@@ -1,0 +1,126 @@
+/* Evan's Title */
+.teacher-title {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: #ffd700;
+  text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700,
+    2px 2px 0px #000, 4px 4px 0px rgba(0, 0, 0, 0.5);
+  margin-bottom: 15px;
+  letter-spacing: 4px;
+  animation: gold-pulse 2s ease-in-out infinite;
+  text-transform: uppercase;
+}
+
+@keyframes gold-pulse {
+  0%,
+  100% {
+    color: #ffd700;
+    text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700,
+      2px 2px 0px #000, 4px 4px 0px rgba(0, 0, 0, 0.5);
+    transform: scale(1);
+  }
+
+  50% {
+    color: #ffed4e;
+    text-shadow: 0 0 15px #ffd700, 0 0 30px #ffd700, 0 0 40px #ffed4e,
+      0 0 50px #ffed4e, 2px 2px 0px #000, 4px 4px 0px rgba(0, 0, 0, 0.5);
+    transform: scale(1.05);
+  }
+}
+
+/* Main Title */
+.main-title {
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 900;
+  color: #00ff00;
+  text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 15px #00ff00,
+    3px 3px 0px #000, 6px 6px 0px rgba(0, 0, 0, 0.5);
+  margin-bottom: 10px;
+  letter-spacing: 3px;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 15px #00ff00,
+      3px 3px 0px #000, 6px 6px 0px rgba(0, 0, 0, 0.5);
+  }
+
+  to {
+    text-shadow: 0 0 8px #00ff00, 0 0 15px #00ff00, 0 0 20px #00ff00,
+      0 0 25px #00ff00, 3px 3px 0px #000, 6px 6px 0px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Subtitle */
+.subtitle {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: #ffd700;
+  text-shadow: 0 0 10px #ffd700, 2px 2px 0px #000,
+    4px 4px 0px rgba(0, 0, 0, 0.5);
+  margin-bottom: 30px;
+  animation: pulse 3s ease-in-out infinite;
+  letter-spacing: 2px;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+/* Logo Container */
+.logo-container {
+  margin: 30px 0;
+  position: relative;
+}
+
+.logo-circle {
+  width: 120px;
+  height: 120px;
+  border: 4px solid #00ff00;
+  border-radius: 50%;
+  position: relative;
+  animation: rotate 4s linear infinite;
+}
+
+.logo-circle::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border: 3px solid #ffd700;
+  border-radius: 50%;
+}
+
+.logo-circle::after {
+  content: "M";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3rem;
+  color: #00ff00;
+  font-weight: 900;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

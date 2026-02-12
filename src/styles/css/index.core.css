@@ -1,0 +1,91 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Orbitron", monospace;
+  background: #000;
+  overflow: hidden;
+  cursor: pointer;
+  height: 100vh;
+  position: relative;
+}
+
+/* Main Container */
+.welcome-container {
+  position: relative;
+  z-index: 10;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Description */
+.description {
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  color: #aaffaa;
+  line-height: 1.6;
+  margin-bottom: 40px;
+  max-width: 600px;
+  text-shadow: 1px 1px 0px #000;
+}
+
+/* Action Buttons */
+.button-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.action-button {
+  padding: 15px 40px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: "Orbitron", monospace;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.start-button {
+  background: linear-gradient(145deg, #00ff00, #00aa00);
+  color: #000;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+}
+
+.start-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(0, 255, 0, 0.8);
+}
+
+.level-button {
+  background: linear-gradient(145deg, #ffd700, #ccaa00);
+  color: #000;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.level-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+}
+
+/* Footer */
+.footer {
+  position: absolute;
+  bottom: 20px;
+  color: #00ff00;
+  font-size: 0.9rem;
+  text-shadow: 1px 1px 0px #000;
+}

@@ -1,0 +1,75 @@
+/* line-6-transformer.effects.states.css - Active states */
+
+.lock-body.active {
+  animation: level6-cosmic-transformation 6s ease-in-out forwards;
+}
+
+.core.active {
+  animation: core-cosmic-transformation 6s ease-in-out forwards;
+}
+
+.black-hole.active {
+  width: 300px;
+  height: 300px;
+  opacity: 1;
+  animation: black-hole-pulse 3s ease-in-out infinite;
+  box-shadow: 0 0 80px rgba(34, 0, 68, 0.8), inset 0 0 60px rgba(0, 0, 0, 1);
+}
+
+.electric-field.active {
+  opacity: 1;
+}
+
+.shooting-particle.active {
+  opacity: 1;
+  animation: particle-shoot-out-in 4s ease-in-out infinite;
+}
+
+.colorful-orb.active {
+  width: 150px;
+  height: 150px;
+  opacity: 1;
+  animation: orb-3d-rotation 4s linear infinite;
+  box-shadow: 0 0 80px rgba(255, 255, 255, 1),
+    0 0 160px rgba(255, 128, 255, 0.8), 0 0 240px rgba(128, 255, 255, 0.6),
+    inset 0 0 50px rgba(255, 255, 255, 0.4),
+    inset 20px 0 40px rgba(255, 0, 128, 0.3),
+    inset -20px 0 40px rgba(0, 128, 255, 0.3),
+    inset 0 20px 40px rgba(128, 255, 0, 0.3),
+    inset 0 -20px 40px rgba(255, 128, 0, 0.3);
+}
+
+.orb-inner-core.active {
+  width: 80px;
+  height: 80px;
+  opacity: 1;
+  animation: inner-core-pulse 2s ease-in-out infinite;
+}
+
+.orb-reflection.active {
+  width: 40px;
+  height: 40px;
+  opacity: 1;
+  animation: reflection-shimmer 3s ease-in-out infinite;
+}
+
+.orb-aura.active {
+  width: 300px;
+  height: 300px;
+  opacity: 1;
+  animation: aura-3d-pulse 3s ease-in-out infinite;
+}
+
+.detachable-segment.cosmic-exit {
+  animation: segment-cosmic-exit 4s ease-in-out forwards;
+}
+
+.status-display.active {
+  opacity: 1;
+  animation: status-cosmic-glow 3s infinite ease-in-out;
+}
+
+.cosmic-background.active {
+  opacity: 1;
+  animation: cosmic-pulse 4s ease-in-out infinite;
+}

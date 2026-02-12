@@ -1,0 +1,178 @@
+/* Rotating Chambers */
+.rotating-chamber {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(45deg, #333, #666, #333);
+  border: 2px solid #555;
+  border-radius: 50%;
+  transition: all 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform-origin: center center;
+  opacity: 0;
+}
+
+.rotating-chamber.chamber-1 {
+  top: 20px;
+  left: 20px;
+  transform: rotate(0deg) scale(0);
+}
+
+.rotating-chamber.chamber-2 {
+  top: 20px;
+  right: 20px;
+  transform: rotate(0deg) scale(0);
+}
+
+.rotating-chamber.chamber-3 {
+  bottom: 20px;
+  left: 20px;
+  transform: rotate(0deg) scale(0);
+}
+
+.rotating-chamber.chamber-4 {
+  bottom: 20px;
+  right: 20px;
+  transform: rotate(0deg) scale(0);
+}
+
+/* Inner Rotating Ring */
+.inner-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80px;
+  height: 80px;
+  border: 6px solid #666;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(0deg);
+  transition: all 2s ease;
+  background: transparent;
+  opacity: 0;
+}
+
+.inner-ring::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: #666;
+  border-radius: 50%;
+  transform: translateX(-50%);
+}
+
+.inner-ring::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: #666;
+  border-radius: 50%;
+  transform: translateX(-50%);
+}
+
+/* Complex Gear System */
+.gear-complex {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #666;
+  border-radius: 50%;
+  background: radial-gradient(circle, #444, #222);
+  transition: all 2s ease;
+  opacity: 0;
+}
+
+.gear-complex::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  background: #333;
+  border-radius: 50%;
+}
+
+.gear-complex::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 8px;
+  background: #555;
+  border-radius: 3px;
+  box-shadow: 0 10px 0 #555, 0 20px 0 #555, 0 30px 0 #555;
+}
+
+.gear-complex.gear-1 {
+  top: -30px;
+  left: -30px;
+  transform: rotate(0deg) scale(0);
+}
+
+.gear-complex.gear-2 {
+  top: -30px;
+  right: -30px;
+  transform: rotate(0deg) scale(0);
+}
+
+.gear-complex.gear-3 {
+  bottom: -30px;
+  left: -30px;
+  transform: rotate(0deg) scale(0);
+}
+
+.gear-complex.gear-4 {
+  bottom: -30px;
+  right: -30px;
+  transform: rotate(0deg) scale(0);
+}
+
+/* Central Transformer Core */
+.transformer-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(45deg, #333, #666, #333);
+  border: 3px solid #555;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  transition: all 2s ease;
+  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.1);
+}
+
+.transformer-core::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, #222, #000);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Shackle */
+.shackle {
+  width: 59px; /* Reduced by 35% from 90px */
+  height: 70px;
+  border: 10px solid #555;
+  border-bottom: none;
+  border-radius: 45px 45px 0 0;
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: transparent;
+  transition: all 2s ease;
+}

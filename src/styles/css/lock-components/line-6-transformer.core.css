@@ -1,0 +1,50 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent; /* Make transparent for game integration */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  font-family: "Orbitron", monospace;
+  overflow: hidden;
+}
+
+.lock-container {
+  position: relative;
+  width: 200px; /* Optimized for game display */
+  height: 200px; /* Optimized for game display */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-style: preserve-3d;
+  perspective: 500px; /* Adjusted for game display */
+  transform: scale(0.8); /* Better scale for game integration */
+  transform-origin: center;
+  margin: 15px auto; /* Center in game display */
+}
+
+.lock-body {
+  /* Starting from Level 5's final state - All previous transformations */
+  position: relative;
+  width: 180px; /* Level 3's final circular width */
+  height: 180px; /* Level 3's final circular height */
+  background: linear-gradient(
+    145deg,
+    #1a1a4a,
+    #2a2a6a,
+    #1a1a4a
+  ); /* Blue from Level 5 */
+  border-radius: 50%; /* Circular from Level 3 */
+  border: 4px solid #4488ff; /* Blue border from Level 5 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: scaleY(1.5) scaleX(1.6) rotateY(1440deg) rotateZ(1080deg)
+    scale(1.4); /* All Level 5 transformations */
+  transform-style: preserve-3d;
+  transition: all 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 0 120px rgba(68, 136, 255, 1),
+    /* Blue glow from Level 5 */ inset 0 0 40px rgba(68, 136, 255, 0.5),
+    0 0 0 15px rgba(68, 136, 255, 0.3);
+}

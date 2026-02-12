@@ -1,0 +1,12 @@
+/* Control Panel - Hidden in game mode */
+.control-panel {
+  display: none; /* Hide control panel in game */
+}
+
+/* Remove all text elements and status indicators */
+.status-indicator,
+.status-display,
+.level-display,
+.btn {
+  display: none !important;
+}

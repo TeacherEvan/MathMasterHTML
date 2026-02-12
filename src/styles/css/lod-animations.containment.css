@@ -1,0 +1,42 @@
+/*
+  CSS CONTAINMENT - Layout Isolation
+  Prevents layout thrashing between panels
+*/
+
+/* Panel containers - layout and paint isolation */
+.panel-a,
+#problem-display {
+  contain: layout paint;
+}
+
+.panel-b,
+#solution-steps-container {
+  contain: layout paint style;
+}
+
+/* Symbol rain - strict containment for maximum isolation */
+#symbol-rain-container {
+  contain: strict;
+}
+
+/* Individual elements */
+.worm-entity {
+  contain: layout paint;
+}
+
+.falling-symbol {
+  contain: paint;
+}
+
+/* Lock animation - deferred rendering */
+.lock-container {
+  contain: layout paint;
+  content-visibility: auto;
+  contain-intrinsic-size: 200px 300px;
+}
+
+/* Modal overlays - full isolation */
+.modal-overlay,
+.game-modal {
+  contain: strict;
+}

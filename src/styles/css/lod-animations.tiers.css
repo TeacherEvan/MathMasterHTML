@@ -1,0 +1,168 @@
+/*
+  LOD ANIMATION SYSTEM
+  Level-of-Detail graphics scaling by quality tier
+
+  Usage: Quality tier is set via data-quality-tier on body
+  Controlled by: quality-tier-manager.js
+
+  CSS CUSTOM PROPERTIES (set by JS)
+  --quality-particle-count
+  --quality-glow-intensity
+  --quality-shadow-enabled
+  --quality-blur-enabled
+  --quality-rain-density
+*/
+
+/* HIGH TIER - Full Visual Effects */
+[data-quality-tier="high"] .falling-symbol {
+  text-shadow: 0 0 5px currentColor, 0 0 10px currentColor,
+    0 0 20px currentColor;
+}
+
+[data-quality-tier="high"] .worm-entity {
+  filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+}
+
+[data-quality-tier="high"] .revealed-symbol {
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.8), 0 0 16px rgba(255, 0, 0, 0.4);
+}
+
+[data-quality-tier="high"] .completed-row-symbol {
+  text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00d4ff;
+}
+
+[data-quality-tier="high"] .lock-container {
+  filter: drop-shadow(0 0 15px rgba(0, 255, 0, 0.6));
+}
+
+[data-quality-tier="high"] .explosion-flash {
+  display: block;
+}
+
+/* MEDIUM TIER - Reduced Glow Layers */
+[data-quality-tier="medium"] .falling-symbol {
+  text-shadow: 0 0 8px currentColor;
+}
+
+[data-quality-tier="medium"] .worm-entity {
+  filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.6));
+}
+
+[data-quality-tier="medium"] .revealed-symbol {
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+}
+
+[data-quality-tier="medium"] .completed-row-symbol {
+  text-shadow: 0 0 10px #00ffff, 0 0 15px #00d4ff;
+}
+
+[data-quality-tier="medium"] .lock-container {
+  filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.4));
+}
+
+[data-quality-tier="medium"] .explosion-flash {
+  display: block;
+  opacity: 0.7;
+}
+
+/* LOW TIER - Minimal Effects */
+[data-quality-tier="low"] .falling-symbol {
+  text-shadow: 0 0 3px currentColor;
+}
+
+[data-quality-tier="low"] .worm-entity {
+  filter: none;
+}
+
+[data-quality-tier="low"] .revealed-symbol {
+  text-shadow: 0 0 4px rgba(255, 0, 0, 0.4);
+  background: rgba(255, 0, 0, 0.15);
+}
+
+[data-quality-tier="low"] .completed-row-symbol {
+  text-shadow: 0 0 5px #00ffff;
+}
+
+[data-quality-tier="low"] .lock-container {
+  filter: none;
+}
+
+/* Skip particle effects on low tier */
+[data-quality-tier="low"] .explosion-particle {
+  display: none !important;
+}
+
+[data-quality-tier="low"] .explosion-flash {
+  display: none !important;
+}
+
+[data-quality-tier="low"] .slime-splat {
+  opacity: 0.5;
+}
+
+/* Simplified animations */
+[data-quality-tier="low"] .worm-exploding {
+  animation-duration: 0.3s !important;
+}
+
+/* ULTRA-LOW TIER - Essential Only */
+[data-quality-tier="ultra-low"] .falling-symbol {
+  text-shadow: none;
+  /* Keep falling animation but simplify */
+}
+
+[data-quality-tier="ultra-low"] .worm-entity {
+  filter: none;
+  /* Static appearance, position updates only */
+}
+
+[data-quality-tier="ultra-low"] .revealed-symbol {
+  text-shadow: none;
+  background: rgba(255, 0, 0, 0.2);
+  color: #ff0000;
+}
+
+[data-quality-tier="ultra-low"] .completed-row-symbol {
+  text-shadow: none;
+  color: #00ffff;
+  background: rgba(0, 255, 255, 0.15);
+}
+
+[data-quality-tier="ultra-low"] .lock-container {
+  filter: none;
+}
+
+/* Disable all particle effects */
+[data-quality-tier="ultra-low"] .explosion-particle,
+[data-quality-tier="ultra-low"] .explosion-flash,
+[data-quality-tier="ultra-low"] .slime-splat,
+[data-quality-tier="ultra-low"] .worm-crack {
+  display: none !important;
+}
+
+/* Disable screen shake */
+[data-quality-tier="ultra-low"] .screen-shake {
+  animation: none !important;
+}
+
+/* Simplify worm death animation */
+[data-quality-tier="ultra-low"] .worm-exploding {
+  animation: ultra-low-fade 0.2s ease-out forwards !important;
+}
+
+@keyframes ultra-low-fade {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+/* Reduce animation complexity */
+[data-quality-tier="ultra-low"] .pulsating-red,
+[data-quality-tier="ultra-low"] .pulsating-cyan {
+  animation: none !important;
+}
