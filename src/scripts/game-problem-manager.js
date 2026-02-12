@@ -94,8 +94,11 @@ console.log("📚 Game problem manager module loading...");
       lockManager.showBasicLock();
     }
 
-    // Display the problem with enhanced styling
-    problemContainer.innerHTML = `<div class="problem-text">${currentProblem.problem}</div>`;
+    // Display the problem with enhanced styling (safe text render)
+    const problemText = document.createElement("div");
+    problemText.className = "problem-text";
+    problemText.textContent = currentProblem.problem;
+    problemContainer.replaceChildren(problemText);
 
     // Setup the step-by-step solution display
     setupStepDisplay();

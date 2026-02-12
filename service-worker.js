@@ -4,122 +4,137 @@
  * Version: 1.0.0
  */
 
-const CACHE_NAME = 'math-master-v1.0.0';
-const RUNTIME_CACHE = 'math-master-runtime-v1.0.0';
+const CACHE_NAME = "math-master-v1.0.0";
+const RUNTIME_CACHE = "math-master-runtime-v1.0.0";
 
 // Assets to cache immediately on install
 const STATIC_ASSETS = [
-    '/',
-    '/index.html',
-    '/level-select.html',
-    '/game.html',
-    '/style.css',
-    '/css/game.css',
-    '/css/game-animations.css',
-    '/css/game-responsive.css',
-    '/css/game-modals.css',
-    '/css/console.css',
-    '/css/worm-base.css',
-    '/css/worm-effects.css',
-    '/css/lock-responsive.css',
-    '/css/level-select.css',
-    '/css/modern-ux-enhancements.css',
-    '/js/utils.js',
-    '/js/constants.js',
-    '/js/ux-enhancements.js',
-    '/js/lazy-component-loader.js',
-    '/js/display-manager.js',
-    '/js/performance-monitor.js',
-    '/js/3rdDISPLAY.js',
-    '/js/problem-loader.js',
-    '/js/symbol-validator.js',
-    '/js/worm-factory.js',
-    '/js/worm-movement.js',
-    '/js/worm-spawn-manager.js',
-    '/js/worm-powerups.js',
-    '/js/worm.js',
-    '/js/lock-responsive.js',
-    '/js/lock-manager.js',
-    '/js/console-manager.js',
-    '/js/game.js'
+  "/",
+  "/index.html",
+  "/level-select.html",
+  "/game.html",
+  "/manifest.json",
+  "/src/pages/index.html",
+  "/src/pages/level-select.html",
+  "/src/pages/game.html",
+  "/src/styles/css/index.css",
+  "/src/styles/css/level-select.css",
+  "/src/styles/css/game.css",
+  "/src/styles/css/game-animations.css",
+  "/src/styles/css/game-responsive.css",
+  "/src/styles/css/game-modals.css",
+  "/src/styles/css/console.css",
+  "/src/styles/css/worm-base.css",
+  "/src/styles/css/worm-effects.css",
+  "/src/styles/css/lock-responsive.css",
+  "/src/styles/css/modern-ux-enhancements.css",
+  "/src/scripts/service-worker-register.js",
+  "/src/scripts/utils.js",
+  "/src/scripts/constants.js",
+  "/src/scripts/ux-enhancements.js",
+  "/src/scripts/lazy-component-loader.js",
+  "/src/scripts/display-manager.js",
+  "/src/scripts/performance-monitor.js",
+  "/src/scripts/3rdDISPLAY.js",
+  "/src/scripts/problem-loader.js",
+  "/src/scripts/symbol-validator.js",
+  "/src/scripts/worm-factory.js",
+  "/src/scripts/worm-movement.js",
+  "/src/scripts/worm-spawn-manager.js",
+  "/src/scripts/worm-powerups.js",
+  "/src/scripts/worm.js",
+  "/src/scripts/lock-responsive.js",
+  "/src/scripts/lock-manager.js",
+  "/src/scripts/console-manager.js",
+  "/src/scripts/game.js",
 ];
 
 // Assets to cache on first use (lazy cache)
 const LAZY_CACHE_PATTERNS = [
-    /\/Assets\/.+\.md$/,
-    /\/lock-components\/.+\.html$/,
-    /\/Images\/.+\.(jpg|png|gif|svg)$/
+  /\/src\/assets\/problems\/Assets\/.+\.md$/,
+  /\/lock-components\/.+\.html$/,
+  /\/(src\/assets\/images\/Images|Images)\/.+\.(jpg|png|gif|svg)$/,
 ];
 
 // ============================================
 // INSTALL EVENT - Cache static assets
 // ============================================
-self.addEventListener('install', (event) => {
-    console.log('[ServiceWorker] Installing...');
-    
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => {
-                console.log('[ServiceWorker] Caching static assets');
-                return cache.addAll(STATIC_ASSETS);
-            })
-            .then(() => {
-                console.log('[ServiceWorker] Install complete - skip waiting');
-                return self.skipWaiting(); // Activate immediately
-            })
-            .catch((error) => {
-                console.error('[ServiceWorker] Install failed:', error);
-            })
-    );
+self.addEventListener("install", (event) => {
+  console.log("[ServiceWorker] Installing...");
+
+  event.waitUntil(
+    caches
+      .open(CACHE_NAME)
+      .then(async (cache) => {
+        console.log("[ServiceWorker] Caching static assets");
+        const results = await Promise.allSettled(
+          STATIC_ASSETS.map((assetPath) => cache.add(assetPath)),
+        );
+        const failed = results.filter((result) => result.status === "rejected");
+        if (failed.length > 0) {
+          console.warn(
+            `[ServiceWorker] ${failed.length} static assets failed to cache during install`,
+          );
+        }
+      })
+      .then(() => {
+        console.log("[ServiceWorker] Install complete - skip waiting");
+        return self.skipWaiting(); // Activate immediately
+      })
+      .catch((error) => {
+        console.error("[ServiceWorker] Install failed:", error);
+      }),
+  );
 });
 
 // ============================================
 // ACTIVATE EVENT - Clean old caches
 // ============================================
-self.addEventListener('activate', (event) => {
-    console.log('[ServiceWorker] Activating...');
-    
-    event.waitUntil(
-        caches.keys()
-            .then((cacheNames) => {
-                return Promise.all(
-                    cacheNames.map((cacheName) => {
-                        if (cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE) {
-                            console.log('[ServiceWorker] Deleting old cache:', cacheName);
-                            return caches.delete(cacheName);
-                        }
-                    })
-                );
-            })
-            .then(() => {
-                console.log('[ServiceWorker] Claiming clients');
-                return self.clients.claim(); // Take control immediately
-            })
-    );
+self.addEventListener("activate", (event) => {
+  console.log("[ServiceWorker] Activating...");
+
+  event.waitUntil(
+    caches
+      .keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE) {
+              console.log("[ServiceWorker] Deleting old cache:", cacheName);
+              return caches.delete(cacheName);
+            }
+          }),
+        );
+      })
+      .then(() => {
+        console.log("[ServiceWorker] Claiming clients");
+        return self.clients.claim(); // Take control immediately
+      }),
+  );
 });
 
 // ============================================
 // FETCH EVENT - Serve from cache, fallback to network
 // ============================================
-self.addEventListener('fetch', (event) => {
-    const { request } = event;
-    const url = new URL(request.url);
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
 
-    // Skip non-GET requests
-    if (request.method !== 'GET') {
-        return;
-    }
+  // Skip non-GET requests
+  if (request.method !== "GET") {
+    return;
+  }
 
-    // Skip cross-origin requests (like Google Fonts)
-    if (url.origin !== location.origin) {
-        return;
-    }
+  // Skip cross-origin requests (like Google Fonts)
+  if (url.origin !== location.origin) {
+    return;
+  }
 
-    event.respondWith(
-        cacheFirst(request)
-            .catch(() => networkFirst(request))
-            .catch(() => fallbackResponse(request))
-    );
+  event.respondWith(
+    cacheFirst(request)
+      .catch(() => networkFirst(request))
+      .catch(() => fallbackResponse(request)),
+  );
 });
 
 // ============================================
@@ -131,15 +146,15 @@ self.addEventListener('fetch', (event) => {
  * Best for static assets that rarely change
  */
 async function cacheFirst(request) {
-    const cache = await caches.open(CACHE_NAME);
-    const cached = await cache.match(request);
-    
-    if (cached) {
-        console.log('[ServiceWorker] Serving from cache:', request.url);
-        return cached;
-    }
-    
-    throw new Error('Not in cache');
+  const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match(request);
+
+  if (cached) {
+    console.log("[ServiceWorker] Serving from cache:", request.url);
+    return cached;
+  }
+
+  throw new Error("Not in cache");
 }
 
 /**
@@ -147,54 +162,54 @@ async function cacheFirst(request) {
  * Best for dynamic content that needs to be fresh
  */
 async function networkFirst(request) {
-    try {
-        const response = await fetch(request);
-        
-        // Cache successful responses
-        if (response && response.status === 200) {
-            const cache = await caches.open(RUNTIME_CACHE);
-            
-            // Check if this URL matches lazy cache patterns
-            let shouldCache = false;
-            for (const pattern of LAZY_CACHE_PATTERNS) {
-                if (pattern.test(request.url)) {
-                    shouldCache = true;
-                    break;
-                }
-            }
-            
-            if (shouldCache) {
-                console.log('[ServiceWorker] Caching new resource:', request.url);
-                cache.put(request, response.clone());
-            }
+  try {
+    const response = await fetch(request);
+
+    // Cache successful responses
+    if (response && response.status === 200) {
+      const cache = await caches.open(RUNTIME_CACHE);
+
+      // Check if this URL matches lazy cache patterns
+      let shouldCache = false;
+      for (const pattern of LAZY_CACHE_PATTERNS) {
+        if (pattern.test(request.url)) {
+          shouldCache = true;
+          break;
         }
-        
-        return response;
-    } catch (error) {
-        console.log('[ServiceWorker] Network failed, trying cache:', request.url);
-        
-        // Try runtime cache
-        const cache = await caches.open(RUNTIME_CACHE);
-        const cached = await cache.match(request);
-        
-        if (cached) {
-            return cached;
-        }
-        
-        throw error;
+      }
+
+      if (shouldCache) {
+        console.log("[ServiceWorker] Caching new resource:", request.url);
+        cache.put(request, response.clone());
+      }
     }
+
+    return response;
+  } catch (error) {
+    console.log("[ServiceWorker] Network failed, trying cache:", request.url);
+
+    // Try runtime cache
+    const cache = await caches.open(RUNTIME_CACHE);
+    const cached = await cache.match(request);
+
+    if (cached) {
+      return cached;
+    }
+
+    throw error;
+  }
 }
 
 /**
  * Fallback Response - Return offline page or error
  */
 function fallbackResponse(request) {
-    console.log('[ServiceWorker] All strategies failed for:', request.url);
-    
-    // Return a basic offline response
-    if (request.destination === 'document') {
-        return new Response(
-            `<!DOCTYPE html>
+  console.log("[ServiceWorker] All strategies failed for:", request.url);
+
+  // Return a basic offline response
+  if (request.destination === "document") {
+    return new Response(
+      `<!DOCTYPE html>
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
@@ -250,95 +265,94 @@ function fallbackResponse(request) {
                 </div>
             </body>
             </html>`,
-            {
-                headers: {
-                    'Content-Type': 'text/html',
-                    'Cache-Control': 'no-store'
-                }
-            }
-        );
-    }
-    
-    return new Response('Offline', {
-        status: 503,
-        statusText: 'Service Unavailable'
-    });
+      {
+        headers: {
+          "Content-Type": "text/html",
+          "Cache-Control": "no-store",
+        },
+      },
+    );
+  }
+
+  return new Response("Offline", {
+    status: 503,
+    statusText: "Service Unavailable",
+  });
 }
 
 // ============================================
 // MESSAGE EVENT - Handle commands from app
 // ============================================
-self.addEventListener('message', (event) => {
-    console.log('[ServiceWorker] Message received:', event.data);
-    
-    if (event.data && event.data.type === 'SKIP_WAITING') {
-        self.skipWaiting();
-    }
-    
-    if (event.data && event.data.type === 'CLEAR_CACHE') {
-        event.waitUntil(
-            caches.keys().then((cacheNames) => {
-                return Promise.all(
-                    cacheNames.map((cacheName) => caches.delete(cacheName))
-                );
-            }).then(() => {
-                console.log('[ServiceWorker] All caches cleared');
-                event.ports[0].postMessage({ success: true });
-            })
-        );
-    }
+self.addEventListener("message", (event) => {
+  console.log("[ServiceWorker] Message received:", event.data);
+
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+
+  if (event.data && event.data.type === "CLEAR_CACHE") {
+    event.waitUntil(
+      caches
+        .keys()
+        .then((cacheNames) => {
+          return Promise.all(
+            cacheNames.map((cacheName) => caches.delete(cacheName)),
+          );
+        })
+        .then(() => {
+          console.log("[ServiceWorker] All caches cleared");
+          event.ports[0].postMessage({ success: true });
+        }),
+    );
+  }
 });
 
 // ============================================
 // BACKGROUND SYNC - Retry failed requests
 // ============================================
-self.addEventListener('sync', (event) => {
-    console.log('[ServiceWorker] Background sync:', event.tag);
-    
-    if (event.tag === 'sync-gameplay-data') {
-        event.waitUntil(
-            syncGameplayData()
-        );
-    }
+self.addEventListener("sync", (event) => {
+  console.log("[ServiceWorker] Background sync:", event.tag);
+
+  if (event.tag === "sync-gameplay-data") {
+    event.waitUntil(syncGameplayData());
+  }
 });
 
 async function syncGameplayData() {
-    // Gameplay data sync will be implemented when backend API is available
-    // Planned features:
-    // - Sync progress across devices
-    // - Save high scores to cloud
-    // - Track problem completion stats
-    console.log('[ServiceWorker] Gameplay data sync queued for backend integration');
+  // Gameplay data sync will be implemented when backend API is available
+  // Planned features:
+  // - Sync progress across devices
+  // - Save high scores to cloud
+  // - Track problem completion stats
+  console.log(
+    "[ServiceWorker] Gameplay data sync queued for backend integration",
+  );
 }
 
 // ============================================
 // PUSH NOTIFICATIONS - Future enhancement
 // ============================================
-self.addEventListener('push', (event) => {
-    console.log('[ServiceWorker] Push notification received');
-    
-    const data = event.data ? event.data.json() : {};
-    const title = data.title || 'Math Master';
-    const options = {
-        body: data.body || 'You have a new notification',
-        icon: '/Images/icon-192.png',
-        badge: '/Images/badge-72.png',
-        vibrate: [200, 100, 200],
-        data: data.data || {}
-    };
-    
-    event.waitUntil(
-        self.registration.showNotification(title, options)
-    );
+self.addEventListener("push", (event) => {
+  console.log("[ServiceWorker] Push notification received");
+
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || "Math Master";
+  const options = {
+    body: data.body || "You have a new notification",
+    icon: "/Images/icon-192.png",
+    badge: "/Images/badge-72.png",
+    vibrate: [200, 100, 200],
+    data: data.data || {},
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
-self.addEventListener('notificationclick', (event) => {
-    console.log('[ServiceWorker] Notification clicked');
-    event.notification.close();
-    
-    event.waitUntil(
-        clients.openWindow(event.notification.data.url || '/')
-    );
+self.addEventListener("notificationclick", (event) => {
+  console.log("[ServiceWorker] Notification clicked");
+  event.notification.close();
+
+  event.waitUntil(clients.openWindow(event.notification.data.url || "/"));
 });
 
-console.log('[ServiceWorker] Service Worker loaded');
+console.log("[ServiceWorker] Service Worker loaded");

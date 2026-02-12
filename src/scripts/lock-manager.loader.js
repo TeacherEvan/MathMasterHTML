@@ -7,12 +7,51 @@ console.log("🔒 LockManager loader helpers loading...");
     return;
   }
 
+  const ALLOWED_LOCK_COMPONENTS = new Set([
+    "Line-1-transformer.html",
+    "line-2-transformer.html",
+    "line-3-transformer.html",
+    "line-4-transformer.html",
+    "Line-5-transformer.html",
+    "line-6-transformer.html",
+  ]);
+
+  function sanitizeComponentDocument(doc) {
+    doc.querySelectorAll("script").forEach((scriptNode) => scriptNode.remove());
+
+    doc.querySelectorAll("*").forEach((node) => {
+      Array.from(node.attributes).forEach((attr) => {
+        const attrName = attr.name.toLowerCase();
+        const attrValue = String(attr.value || "")
+          .trim()
+          .toLowerCase();
+
+        if (attrName.startsWith("on")) {
+          node.removeAttribute(attr.name);
+          return;
+        }
+
+        if (
+          (attrName === "href" || attrName === "src") &&
+          attrValue.startsWith("javascript:")
+        ) {
+          node.removeAttribute(attr.name);
+        }
+      });
+    });
+  }
+
   const proto = window.LockManager.prototype;
 
   proto.loadLockComponent = function loadLockComponent(componentName) {
     return new Promise((resolve, reject) => {
       if (!this.container) {
         reject(new Error("Lock container not found"));
+        return;
+      }
+
+      if (!ALLOWED_LOCK_COMPONENTS.has(componentName)) {
+        reject(new Error(`Lock component not allowed: ${componentName}`));
         return;
       }
 
@@ -38,6 +77,7 @@ console.log("🔒 LockManager loader helpers loading...");
           // Parse the HTML and extract content
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, "text/html");
+          sanitizeComponentDocument(doc);
 
           // Extract styles from head
           const styleElements = doc.head.querySelectorAll("style");

@@ -43,7 +43,7 @@
     <div class="level-container">
         <div class="levels-grid">
             <!-- Easy Level - Addition/Subtraction -->
-            <div class="level-card level-easy" onclick="selectLevel('easy', this)">
+            <div class="level-card level-easy" onclick="selectLevel('easy', this, event)">
                 <div class="level-icon">🌱</div>
                 <h3 class="level-title">EASY</h3>
                 <p class="level-description">
@@ -74,7 +74,7 @@
             </div>
 
             <!-- Medium Level - Multiplication -->
-            <div class="level-card level-medium" onclick="selectLevel('medium', this)">
+            <div class="level-card level-medium" onclick="selectLevel('medium', this, event)">
                 <div class="level-icon">🔥</div>
                 <h3 class="level-title">MEDIUM</h3>
                 <p class="level-description">
@@ -105,7 +105,7 @@
             </div>
 
             <!-- Hard Level - Division -->
-            <div class="level-card level-hard" onclick="selectLevel('medium-too', this)">
+            <div class="level-card level-hard" onclick="selectLevel('medium-too', this, event)">
                 <div class="level-icon">⚡</div>
                 <h3 class="level-title">MEDIUM TOO</h3>
                 <p class="level-description">
@@ -139,7 +139,7 @@
 
     <!-- Navigation Footer -->
     <div class="navigation">
-        <button class="back-button" onclick="goBack()">← Return to Welcome</button>
+        <button class="back-button" onclick="goBack(event)">← Return to Welcome</button>
         <div class="creator-credit">Created by Teacher Evan</div>
     </div>
 
@@ -206,9 +206,11 @@
         }
 
         // Level Selection Handler
-        function selectLevel(difficulty, cardElement) {
+        function selectLevel(difficulty, cardElement, interactionEvent) {
             // Create ripple effect
-            createRipple(event, cardElement);
+            if (interactionEvent) {
+                createRipple(interactionEvent, cardElement);
+            }
 
             // Add selection animation
             cardElement.style.transform = 'scale(0.95)';
@@ -233,8 +235,10 @@
         }
 
         // Navigation Functions
-        function goBack() {
-            createRipple(event, event.target);
+        function goBack(interactionEvent) {
+            if (interactionEvent?.target) {
+                createRipple(interactionEvent, interactionEvent.target);
+            }
             setTimeout(() => {
                 window.location.href = '/src/pages/index.html';
             }, 300);
@@ -264,10 +268,17 @@
                     if (!completionStat) {
                         completionStat = document.createElement('div');
                         completionStat.className = 'stat completion-stat';
-                        completionStat.innerHTML = `
-                            <span class="stat-value">${problemsCompleted}</span>
-                            <span class="stat-label">Completed</span>
-                        `;
+
+                        const valueSpan = document.createElement('span');
+                        valueSpan.className = 'stat-value';
+                        valueSpan.textContent = String(problemsCompleted);
+
+                        const labelSpan = document.createElement('span');
+                        labelSpan.className = 'stat-label';
+                        labelSpan.textContent = 'Completed';
+
+                        completionStat.appendChild(valueSpan);
+                        completionStat.appendChild(labelSpan);
                         statsSection.appendChild(completionStat);
                     } else {
                         completionStat.querySelector('.stat-value').textContent = problemsCompleted;
@@ -352,19 +363,19 @@
             switch (event.key) {
                 case '1':
                     selectedCard = cards[0];
-                    selectLevel('easy', selectedCard);
+                    selectLevel('easy', selectedCard, event);
                     break;
                 case '2':
                     selectedCard = cards[1];
-                    selectLevel('medium', selectedCard);
+                    selectLevel('medium', selectedCard, event);
                     break;
                 case '3':
                     selectedCard = cards[2];
-                    selectLevel('hard', selectedCard);
+                    selectLevel('medium-too', selectedCard, event);
                     break;
                 case 'Escape':
                 case 'Backspace':
-                    goBack();
+                    goBack(event);
                     break;
             }
 
