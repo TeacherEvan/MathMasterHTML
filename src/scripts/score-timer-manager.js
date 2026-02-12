@@ -3,13 +3,13 @@ console.log("⏱️ ScoreTimerManager loading...");
 
 (function() {
   const DEFAULTS = {
-    stepDurationSeconds: 60,
-    initialScore: 1000,
-    stepBonus: 1000,
+    stepDurationSeconds: 600,
+    initialScore: 10000,
+    stepBonus: 10000,
     thresholds: {
-      blueToGreen: 50,
-      greenToYellow: 30,
-      yellowToRed: 10,
+      blueToGreen: 500,
+      greenToYellow: 300,
+      yellowToRed: 100,
     },
   };
 
@@ -24,13 +24,13 @@ console.log("⏱️ ScoreTimerManager loading...");
 
     _intervalId: null,
     _stepStartMs: 0,
-    _stepDurationMs: 60000,
-    _scoreAtStepStart: 1000,
+    _stepDurationMs: 600000,
+    _scoreAtStepStart: 10000,
 
     // Banked total for the current problem ("level" == entire problem)
     _bankedProblemScore: 0,
     // Live step score counts down from 1000 -> 0 each step
-    _currentStepScore: 1000,
+    _currentStepScore: 10000,
     _paused: false,
     _gameStarted: false,
     _zeroLocked: false,
@@ -45,6 +45,20 @@ console.log("⏱️ ScoreTimerManager loading...");
       }
       if (window.GameConstants?.SCORING?.STEP_BONUS) {
         this._cfg.stepBonus = window.GameConstants.SCORING.STEP_BONUS;
+      }
+
+      // Keep phase thresholds proportional when STEP_DURATION is customized.
+      if (window.GameConstants?.TIMER) {
+        const t = window.GameConstants.TIMER;
+        if (typeof t.PHASE_BLUE_END === "number") {
+          this._cfg.thresholds.blueToGreen = t.PHASE_BLUE_END;
+        }
+        if (typeof t.PHASE_GREEN_END === "number") {
+          this._cfg.thresholds.greenToYellow = t.PHASE_GREEN_END;
+        }
+        if (typeof t.PHASE_YELLOW_END === "number") {
+          this._cfg.thresholds.yellowToRed = t.PHASE_YELLOW_END;
+        }
       }
 
       this._stepDurationMs = this._cfg.stepDurationSeconds * 1000;

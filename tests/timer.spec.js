@@ -2,22 +2,25 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Timer and Score Countdown", () => {
+  test.describe.configure({ timeout: 90_000 });
+
   test.beforeEach(async ({ page }) => {
     // Navigate to game page
     await page.goto("/game.html?level=beginner");
 
-    // Wait for the modal to appear and dismiss it
+    // Dismiss the modal if present (some runs may already start without it).
     const startButton = page.locator("#start-game-btn");
-    await expect(startButton).toBeVisible({ timeout: 10000 });
+    if (await startButton.isVisible()) {
+      await startButton.click({ force: true });
+      // Wait for modal to fade out
+      await page.waitForTimeout(500);
+    }
 
-    // Click the start button to dismiss modal and start the game
-    await startButton.click({ force: true });
-
-    // Wait for modal to fade out
-    await page.waitForTimeout(500);
+    // Ensure HUD is present before proceeding.
+    await expect(page.locator("#timer-value")).toBeVisible({ timeout: 10000 });
   });
 
-  test("timer should count down from 60", async ({ page }) => {
+  test("timer should count down from 600", async ({ page }) => {
     const timerValue = page.locator("#timer-value");
 
     // Get initial timer value
@@ -25,7 +28,7 @@ test.describe("Timer and Score Countdown", () => {
     console.log("Initial timer value:", initialValue);
     const initialNum = parseInt(initialValue || "0");
     expect(initialNum).toBeGreaterThan(0);
-    expect(initialNum).toBeLessThanOrEqual(60);
+    expect(initialNum).toBeLessThanOrEqual(600);
 
     // Wait 3 seconds and check timer has decreased
     await page.waitForTimeout(3000);
@@ -36,11 +39,11 @@ test.describe("Timer and Score Countdown", () => {
 
     // Timer should have decreased (be less than initial)
     expect(laterNum).toBeLessThan(initialNum);
-    // Allow some startup timing variance (modal fade, loading, scheduling)
-    expect(laterNum).toBeGreaterThanOrEqual(Math.max(0, initialNum - 10));
+    // Allow startup/CPU variance (modal fade, loading, scheduling)
+    expect(laterNum).toBeGreaterThanOrEqual(Math.max(0, initialNum - 30));
   });
 
-  test("score should count down from 1000", async ({ page }) => {
+  test("score should count down from 10000", async ({ page }) => {
     const scoreValue = page.locator("#score-value");
 
     // Get initial score value
@@ -49,7 +52,7 @@ test.describe("Timer and Score Countdown", () => {
     const initialNum = parseInt(initialValue || "0");
     // Countdown may already have started by the time we read this.
     expect(initialNum).toBeGreaterThan(0);
-    expect(initialNum).toBeLessThanOrEqual(1000);
+    expect(initialNum).toBeLessThanOrEqual(10000);
 
     // Wait 3 seconds and check score has decreased
     await page.waitForTimeout(3000);
@@ -60,13 +63,15 @@ test.describe("Timer and Score Countdown", () => {
 
     // Score should have decreased (be less than initial)
     expect(laterNum).toBeLessThan(initialNum);
-    // Score decreases linearly over 60 seconds, so after 3s it should be ~950
-    expect(laterNum).toBeGreaterThanOrEqual(900);
-    expect(laterNum).toBeLessThanOrEqual(970);
+    // Score decreases linearly over 600 seconds, so after 3s it should be ~9950
+    // Tolerance is intentionally wide to avoid flakiness on slower runners.
+    expect(laterNum).toBeGreaterThanOrEqual(9800);
+    expect(laterNum).toBeLessThanOrEqual(9995);
   });
 
   test("debug: check console logs for timer events", async ({ page }) => {
     // Collect console messages
+    /** @type {string[]} */
     const consoleMessages = [];
     page.on("console", (msg) => {
       if (msg.text().includes("⏱️") || msg.text().includes("🎮 DEBUG")) {

@@ -165,11 +165,11 @@
     <div id="game-hud" class="game-hud" aria-label="Game HUD">
         <div id="score-display" class="hud-block score-display">
             <div class="hud-label">SCORE</div>
-            <div id="score-value" class="hud-value">1000</div>
+            <div id="score-value" class="hud-value">10000</div>
         </div>
         <div id="timer-display" class="hud-block timer-display timer-pulse-slow">
             <div class="hud-label">TIME</div>
-            <div id="timer-value" class="hud-value">60</div>
+            <div id="timer-value" class="hud-value">600</div>
         </div>
     </div>
 
@@ -185,9 +185,11 @@
 
         <!-- Panel B: Solution and Worms -->
         <div id="panel-b" class="display-panel">
-            <button id="help-button" data-ripple aria-label="Get help with current problem">HELP</button>
-            <button id="clarify-button" data-ripple
-                aria-label="Ask for clarifications about ambiguous problem aspects">CLARIFY</button>
+            <div class="panel-b-controls" aria-label="Panel B controls">
+                <button id="help-button" data-ripple aria-label="Get help with current problem">HELP</button>
+                <button id="clarify-button" data-ripple
+                    aria-label="Ask for clarifications about ambiguous problem aspects">CLARIFY</button>
+            </div>
             <div id="solution-container" class="custom-scrollbar"></div>
             <div id="worm-container"></div>
             <!-- Symbol Console (moved from Panel A) -->

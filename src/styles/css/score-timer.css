@@ -162,11 +162,7 @@
   }
 }
 
-/* Match HELP button styling without introducing a new component system */
+/* Panel B buttons are laid out by .panel-b-controls (see game.css) */
 #clarify-button {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 100;
   pointer-events: auto;
 }

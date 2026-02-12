@@ -1,0 +1,42 @@
+LINE LIMIT 200 AUDIT SUMMARY (policy exclusions applied)
+Root: C:\Users\eboth\Documents\MathMaster\MathMasterHTML
+Included file count: 288
+Violations (>200 lines): 48
+
+Exclusions (generated/3rd-party): package-lock.json, test-results.json
+
+Violations by category:
+js-runtime        26
+tests             10
+css                5
+assets-source      3
+pages              3
+misc               1
+
+Top 20 largest violators:
+   647  tests\integration\worm-movement-system.spec.js
+   607  tests\integration\worm-movement-navigation.spec.js
+   562  tests\integration\worm-movement-behaviors.spec.js
+   495  tests\unit\worm-movement.spec.js
+   428  src\pages\game.html
+   395  src\pages\level-select.html
+   390  tests\performance\worm-movement-bench.spec.js
+   379  tests\unit\worm-evasion.spec.js
+   364  src\assets\components\lock-components\line-6-transformer.html
+   358  tests\powerups.spec.js
+   345  service-worker.js
+   339  src\scripts\worm.js
+   301  src\scripts\ui-boundary-manager.core.js
+   300  src\scripts\worm-system.spawn.js
+   277  src\assets\components\lock-components\Line-5-transformer.html
+   277  src\scripts\display-manager.js
+   267  src\scripts\worm-movement.js
+   266  src\pages\index.html
+   265  src\scripts\worm-factory.js
+   265  src\scripts\worm-renderer.js
+
+CSV (all): 
+C:\Users\eboth\Documents\MathMaster\MathMasterHTML\Docs\LINE_LIMIT_200_AUDIT.policy.all.csv
+CSV (violations): 
+C:\Users\eboth\Documents\MathMaster\MathMasterHTML\Docs\LINE_LIMIT_200_AUDIT.policy.violations.csv
+

@@ -99,6 +99,27 @@ body.automation {
     padding-top: 80px;
 }
 
+/* ============================================
+   PANEL B - Solution / Controls safe zone
+   Reserve top space for HUD + centered power-up display
+   ============================================ */
+
+#panel-b {
+    /* Match Panel A HUD safe zone so fixed HUD/powerups don't overlap controls */
+    padding-top: 80px;
+}
+
+.panel-b-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    /* Ensure buttons remain above worms/overlays inside Panel B */
+    position: relative;
+    z-index: 10010;
+}
+
 #problem-container {
     position: absolute;
     /* Positioned below the HUD safe zone to prevent overlap */
@@ -126,7 +147,7 @@ body.automation {
     font-family: 'Orbitron', monospace;
     color: #00ffff;
     text-align: center;
-    padding: 60px 10px 10px 10px;
+    padding: 12px 10px 10px 10px;
     line-height: 1.4;
     overflow-y: auto;
     max-height: calc(100vh - 120px);
