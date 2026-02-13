@@ -29,6 +29,9 @@ const STATIC_ASSETS = [
   "/src/styles/css/lock-responsive.css",
   "/src/styles/css/modern-ux-enhancements.css",
   "/src/scripts/service-worker-register.js",
+  "/src/scripts/index-page.js",
+  "/src/scripts/level-select-page.js",
+  "/src/scripts/game-page.js",
   "/src/scripts/utils.js",
   "/src/scripts/constants.js",
   "/src/scripts/ux-enhancements.js",
@@ -130,9 +133,18 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  if (request.destination === "document") {
+    event.respondWith(
+      networkFirst(request)
+        .catch(() => cacheFirst(request))
+        .catch(() => fallbackResponse(request)),
+    );
+    return;
+  }
+
   event.respondWith(
-    cacheFirst(request)
-      .catch(() => networkFirst(request))
+    staleWhileRevalidate(request)
+      .catch(() => cacheFirst(request))
       .catch(() => fallbackResponse(request)),
   );
 });
@@ -198,6 +210,33 @@ async function networkFirst(request) {
 
     throw error;
   }
+}
+
+/**
+ * Stale-While-Revalidate Strategy - Return cache, update in background
+ * Best for static assets where speed matters
+ */
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(RUNTIME_CACHE);
+  const cached = await cache.match(request);
+
+  const networkPromise = fetch(request)
+    .then((response) => {
+      if (response && response.status === 200) {
+        cache.put(request, response.clone());
+      }
+      return response;
+    })
+    .catch(() => null);
+
+  if (cached) {
+    networkPromise.catch(() => null);
+    return cached;
+  }
+
+  const networkResponse = await networkPromise;
+  if (networkResponse) return networkResponse;
+  throw new Error("Network failed and no cache available");
 }
 
 /**

@@ -7,6 +7,8 @@
     <meta name="description"
         content="Play Math Master - Solve algebra equations by clicking falling symbols in this Matrix-themed educational game.">
     <meta name="theme-color" content="#000000">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self';">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -159,7 +161,7 @@
         <div class="rotate-text">Please rotate your device to landscape mode</div>
     </div>
 
-    <button id="back-button" onclick="goBack()" data-ripple aria-label="Go back to level selection">← Back</button>
+    <button id="back-button" data-ripple aria-label="Go back to level selection">← Back</button>
 
     <!-- Score + Timer HUD -->
     <div id="game-hud" class="game-hud" aria-label="Game HUD">
@@ -374,53 +376,7 @@
     <script src="/src/scripts/game-effects.js"></script>
     <!-- Main game logic -->
     <script src="/src/scripts/game.js"></script>
-    <script>
-        function goBack() {
-            window.location.href = '/src/pages/level-select.html';
-        }
-
-        // Auto-trigger fullscreen on page load
-        function enterFullscreen() {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(err => {
-                    console.log('⚠️ Fullscreen request failed (user may need to interact first):', err);
-                });
-            } else if (elem.webkitRequestFullscreen) { // Safari
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) { // IE11
-                elem.msRequestFullscreen();
-            }
-        }
-
-        // How to Play Modal Control
-        document.addEventListener('DOMContentLoaded', function () {
-            const modal = document.getElementById('how-to-play-modal');
-            const startButton = document.getElementById('start-game-btn');
-
-            if (modal && startButton) {
-                // Show modal on page load
-                modal.style.display = 'flex';
-
-                // Hide modal when NEXT button clicked and trigger fullscreen
-                startButton.addEventListener('click', function () {
-                    modal.style.animation = 'modalFadeOut 0.3s ease-out';
-                    setTimeout(() => {
-                        modal.style.display = 'none';
-                        console.log('🎮 How to Play modal dismissed - game ready to start');
-                        // Start countdown + score decrement AFTER the modal is gone
-                        // (idempotent; game.js may also call this)
-                        window.ScoreTimerManager?.setGameStarted?.();
-                        // Trigger fullscreen after user interaction (required by browsers)
-                        enterFullscreen();
-                    }, 300);
-                });
-            }
-
-            // Also try to enter fullscreen immediately (may not work on all browsers without user interaction)
-            enterFullscreen();
-        });
-    </script>
+    <script src="/src/scripts/game-page.js" defer></script>
 
     <!-- Service Worker Registration -->
     <script src="/src/scripts/service-worker-register.js"></script>

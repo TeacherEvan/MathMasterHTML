@@ -14,8 +14,23 @@ console.log("🎮 Game initialization module loading...");
     // Parse URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const level = urlParams.get("level") || "beginner";
+    const allowedLockComponents = new Set([
+      "Line-1-transformer.html",
+      "line-2-transformer.html",
+      "line-3-transformer.html",
+      "line-4-transformer.html",
+      "Line-5-transformer.html",
+      "line-6-transformer.html",
+    ]);
+    const requestedLockComponent = urlParams.get("lockComponent");
+    const defaultLockComponent =
+      window.LazyComponentLoader?.getLockComponentFilename?.(1) ||
+      "Line-1-transformer.html";
     const _lockComponent =
-      urlParams.get("lockComponent") || "level-1-transformer.html";
+      requestedLockComponent &&
+      allowedLockComponents.has(requestedLockComponent)
+        ? requestedLockComponent
+        : defaultLockComponent;
     // Init persistence + timer/score HUD
     if (window.PlayerStorage) {
       window.PlayerStorage.init();

@@ -104,25 +104,7 @@
     if (!powerUpDisplay) {
       powerUpDisplay = document.createElement("div");
       powerUpDisplay.id = "power-up-display";
-      powerUpDisplay.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: rgba(0, 0, 0, 0.9);
-                color: white;
-                padding: 8px;
-                border-radius: 8px;
-                font-family: 'Orbitron', monospace;
-                font-size: 16px;
-                z-index: 9999;
-                display: flex;
-                justify-content: center;
-                gap: 12px;
-                border: 2px solid #0f0;
-                box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-                cursor: move;
-                user-select: none;
-            `;
+      powerUpDisplay.className = "power-up-display";
 
       // Append to body for fixed positioning
       document.body.appendChild(powerUpDisplay);
@@ -134,29 +116,29 @@
     }
 
     powerUpDisplay.innerHTML = `
-            <div class="power-up-item" data-type="chainLightning" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s; position: relative;">
-                ⚡ ${this.powerUps.chainLightning}
-                ${
-                  this.powerUps.chainLightning > 0
-                    ? `<div style="position: absolute; top: -10px; right: -10px; font-size: 12px; color: #0ff;">${this.chainLightningKillCount}</div>`
-                    : ""
-                }
-            </div>
-            <div class="power-up-item" data-type="spider" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s;">
-                🕷️ ${this.powerUps.spider}
-            </div>
-            <div class="power-up-item" data-type="devil" style="cursor: pointer; padding: 5px; border-radius: 5px; transition: all 0.2s;">
-                👹 ${this.powerUps.devil}
-            </div>
-        `;
+        <div class="power-up-item" data-type="chainLightning">
+          ⚡ ${this.powerUps.chainLightning}
+          ${
+            this.powerUps.chainLightning > 0
+              ? `<div class="power-up-count-badge">${this.chainLightningKillCount}</div>`
+              : ""
+          }
+        </div>
+        <div class="power-up-item" data-type="spider">
+          🕷️ ${this.powerUps.spider}
+        </div>
+        <div class="power-up-item" data-type="devil">
+          👹 ${this.powerUps.devil}
+        </div>
+      `;
 
     // Add click handlers
     powerUpDisplay.querySelectorAll(".power-up-item").forEach((item) => {
       item.addEventListener("mouseenter", () => {
-        item.style.background = "rgba(0, 255, 0, 0.3)";
+        item.classList.add("is-hovered");
       });
       item.addEventListener("mouseleave", () => {
-        item.style.background = "transparent";
+        item.classList.remove("is-hovered");
       });
       item.addEventListener("click", () => {
         const type = item.dataset.type;

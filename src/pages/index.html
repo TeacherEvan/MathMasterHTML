@@ -7,6 +7,8 @@
     <meta name="description"
         content="Math Master - An educational algebra game with Matrix-themed interface. Unlock your mind through interactive problem-solving.">
     <meta name="theme-color" content="#000000">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self';">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -108,7 +110,7 @@
     </style>
 </head>
 
-<body onclick="createRipple(event)">
+<body>
     <!-- Matrix Rain Background -->
     <div class="matrix-bg" id="matrixBg"></div>
 
@@ -147,114 +149,7 @@
     <div class="math-symbol" style="top: 40%; left: 85%; animation-delay: 4s;">±</div>
     <div class="math-symbol" style="top: 80%; left: 75%; animation-delay: 5s;">∆</div>
 
-    <script>
-        // Matrix Rain Effect
-        function createMatrixRain() {
-            const matrixBg = document.getElementById('matrixBg');
-            const symbols = '0123456789+-×÷=XxΣπ∞√±∆αβγ';
-            const columns = Math.floor(window.innerWidth / 20);
-
-            for (let i = 0; i < columns; i++) {
-                const column = document.createElement('div');
-                column.className = 'matrix-column';
-                column.style.left = i * 20 + 'px';
-                column.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                column.style.animationDelay = Math.random() * 2 + 's';
-
-                // Create falling text
-                let text = '';
-                const length = Math.floor(Math.random() * 20) + 10;
-                for (let j = 0; j < length; j++) {
-                    text += symbols[Math.floor(Math.random() * symbols.length)] + '<br>';
-                }
-                column.innerHTML = text;
-
-                matrixBg.appendChild(column);
-            }
-        }
-
-        // Click Ripple Effect
-        function createRipple(event) {
-            const ripple = document.createElement('div');
-            ripple.className = 'ripple';
-
-            const rect = document.body.getBoundingClientRect();
-            const size = 60;
-            const x = event.clientX - rect.left - size / 2;
-            const y = event.clientY - rect.top - size / 2;
-
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = x + 'px';
-            ripple.style.top = y + 'px';
-
-            document.body.appendChild(ripple);
-
-            setTimeout(() => {
-                document.body.removeChild(ripple);
-            }, 600);
-
-            // Navigate to next screen after animation
-            setTimeout(() => {
-                window.location.href = '/src/pages/level-select.html';
-            }, 300);
-        }
-
-        // Dynamic Background Music Visualization (CSS animations)
-        function addDynamicEffects() {
-            const title = document.querySelector('.main-title');
-            const subtitle = document.querySelector('.subtitle');
-
-            // Add random glow intensity variations
-            setInterval(() => {
-                const intensity = Math.random() * 0.5 + 0.5;
-                title.style.filter = `brightness(${intensity})`;
-            }, 2000);
-
-            // Subtitle color variations
-            const colors = ['#ffd700', '#ffcc00', '#ffaa00', '#ff9900'];
-            let colorIndex = 0;
-            setInterval(() => {
-                subtitle.style.color = colors[colorIndex];
-                colorIndex = (colorIndex + 1) % colors.length;
-            }, 4000);
-        }
-
-        // Initialize everything when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
-            createMatrixRain();
-            addDynamicEffects();
-        });
-
-        // Recreate matrix rain on window resize
-        window.addEventListener('resize', () => {
-            const matrixBg = document.getElementById('matrixBg');
-            matrixBg.innerHTML = '';
-            createMatrixRain();
-        });
-
-        // Keyboard support
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-                // Create ripple effect at center of screen
-                const ripple = document.createElement('div');
-                ripple.className = 'ripple';
-                const size = 60;
-                ripple.style.width = ripple.style.height = size + 'px';
-                ripple.style.left = window.innerWidth / 2 - size / 2 + 'px';
-                ripple.style.top = window.innerHeight / 2 - size / 2 + 'px';
-                document.body.appendChild(ripple);
-
-                setTimeout(() => {
-                    document.body.removeChild(ripple);
-                }, 600);
-
-                // Navigate to level select
-                setTimeout(() => {
-                    window.location.href = '/src/pages/level-select.html';
-                }, 300);
-            }
-        });
-    </script>
+    <script src="/src/scripts/index-page.js" defer></script>
 
     <!-- Service Worker Registration -->
     <script src="/src/scripts/service-worker-register.js"></script>

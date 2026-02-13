@@ -1,7 +1,7 @@
 // js/player-storage.js - Local player name + level score persistence
 console.log("💾 PlayerStorage loading...");
 
-(function () {
+(function() {
   const STORAGE_KEY = "mathmaster_player_profile_v1";
 
   function safeParse(json) {
@@ -63,11 +63,20 @@ console.log("💾 PlayerStorage loading...");
     },
 
     _read() {
-      return safeParse(localStorage.getItem(STORAGE_KEY));
+      try {
+        return safeParse(localStorage.getItem(STORAGE_KEY));
+      } catch (error) {
+        console.warn("⚠️ Failed to read player profile from storage:", error);
+        return null;
+      }
     },
 
     _write(profile) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+      } catch (error) {
+        console.warn("⚠️ Failed to write player profile to storage:", error);
+      }
     },
   };
 

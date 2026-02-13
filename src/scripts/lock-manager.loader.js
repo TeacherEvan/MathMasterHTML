@@ -16,8 +16,22 @@ console.log("🔒 LockManager loader helpers loading...");
     "line-6-transformer.html",
   ]);
 
+  function isUnsafeStyleContent(styleText) {
+    if (!styleText) return false;
+    return (
+      /@import\s+/i.test(styleText) ||
+      /url\(\s*['"]?\s*https?:/i.test(styleText)
+    );
+  }
+
   function sanitizeComponentDocument(doc) {
     doc.querySelectorAll("script").forEach((scriptNode) => scriptNode.remove());
+
+    doc.querySelectorAll("style").forEach((styleNode) => {
+      if (isUnsafeStyleContent(styleNode.textContent)) {
+        styleNode.remove();
+      }
+    });
 
     doc.querySelectorAll("*").forEach((node) => {
       Array.from(node.attributes).forEach((attr) => {
@@ -31,11 +45,13 @@ console.log("🔒 LockManager loader helpers loading...");
           return;
         }
 
-        if (
-          (attrName === "href" || attrName === "src") &&
-          attrValue.startsWith("javascript:")
-        ) {
-          node.removeAttribute(attr.name);
+        if (attrName === "href" || attrName === "src") {
+          if (
+            attrValue.startsWith("javascript:") ||
+            attrValue.startsWith("data:text/html")
+          ) {
+            node.removeAttribute(attr.name);
+          }
         }
       });
     });
@@ -93,13 +109,22 @@ console.log("🔒 LockManager loader helpers loading...");
           linkElements.forEach((link) => {
             const href = link.getAttribute("href");
             if (!href) return;
+            let hrefUrl;
+            try {
+              hrefUrl = new URL(href, window.location.origin);
+            } catch {
+              return;
+            }
+            if (hrefUrl.origin !== window.location.origin) {
+              return;
+            }
             const existing = document.head.querySelector(
               `link[rel="stylesheet"][href="${href}"]`,
             );
             if (!existing) {
               const newLink = document.createElement("link");
               newLink.rel = "stylesheet";
-              newLink.href = href;
+              newLink.href = hrefUrl.toString();
               document.head.appendChild(newLink);
             }
           });
