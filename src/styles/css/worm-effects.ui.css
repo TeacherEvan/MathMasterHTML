@@ -43,6 +43,12 @@ body.power-up-placement-mode {
   position: relative;
 }
 
+.power-up-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .power-up-item.is-hovered {
   background: rgba(0, 255, 0, 0.3);
 }

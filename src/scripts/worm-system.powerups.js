@@ -6,13 +6,26 @@
   }
 
   const proto = window.WormSystem.prototype;
+  const POWER_UP_TYPES = ["chainLightning", "spider", "devil"];
+  const POWER_UP_EMOJIS = {
+    chainLightning: "⚡",
+    spider: "🕷️",
+    devil: "👹",
+  };
+  const POWER_UP_DROP_STYLE = {
+    position: "fixed",
+    fontSize: "30px",
+    zIndex: "10001",
+    cursor: "pointer",
+    animation: "power-up-appear 0.5s ease-out",
+    pointerEvents: "auto",
+  };
 
   // Drop power-up at worm location
   proto.dropPowerUp = function(x, y, type = null) {
     // Random power-up type if not specified
     if (!type) {
-      const types = ["chainLightning", "spider", "devil"];
-      type = types[Math.floor(Math.random() * types.length)];
+      type = POWER_UP_TYPES[Math.floor(Math.random() * POWER_UP_TYPES.length)];
     }
 
     const powerUp = document.createElement("div");
@@ -20,21 +33,11 @@
     powerUp.dataset.type = type;
 
     // Set emoji based on type
-    const emojis = {
-      chainLightning: "⚡",
-      spider: "🕷️",
-      devil: "👹",
-    };
-    powerUp.textContent = emojis[type] || "⭐";
+    powerUp.textContent = POWER_UP_EMOJIS[type] || "⭐";
 
     powerUp.style.left = `${x}px`;
     powerUp.style.top = `${y}px`;
-    powerUp.style.position = "fixed";
-    powerUp.style.fontSize = "30px";
-    powerUp.style.zIndex = "10001";
-    powerUp.style.cursor = "pointer";
-    powerUp.style.animation = "power-up-appear 0.5s ease-out";
-    powerUp.style.pointerEvents = "auto";
+    Object.assign(powerUp.style, POWER_UP_DROP_STYLE);
 
     // Click to collect
     powerUp.addEventListener("click", (e) => {
@@ -42,7 +45,9 @@
       this.collectPowerUp(type, powerUp);
     });
 
-    this.crossPanelContainer.appendChild(powerUp);
+    if (this.crossPanelContainer) {
+      this.crossPanelContainer.appendChild(powerUp);
+    }
     console.log(
       `✨ Power-up "${type}" dropped at (${x.toFixed(0)}, ${y.toFixed(0)})`,
     );
@@ -113,27 +118,17 @@
       this._makePowerUpDisplayDraggable(powerUpDisplay);
 
       this.cachedPowerUpDisplay = powerUpDisplay; // Cache the newly created display
+      this.cachedPowerUpItems = createPowerUpItems.call(this, powerUpDisplay);
     }
+    updatePowerUpItems.call(this);
+  };
 
-    powerUpDisplay.innerHTML = `
-        <div class="power-up-item" data-type="chainLightning">
-          ⚡ ${this.powerUps.chainLightning}
-          ${
-            this.powerUps.chainLightning > 0
-              ? `<div class="power-up-count-badge">${this.chainLightningKillCount}</div>`
-              : ""
-          }
-        </div>
-        <div class="power-up-item" data-type="spider">
-          🕷️ ${this.powerUps.spider}
-        </div>
-        <div class="power-up-item" data-type="devil">
-          👹 ${this.powerUps.devil}
-        </div>
-      `;
-
-    // Add click handlers
-    powerUpDisplay.querySelectorAll(".power-up-item").forEach((item) => {
+  function createPowerUpItems(container) {
+    const items = {};
+    POWER_UP_TYPES.forEach((type) => {
+      const item = document.createElement("div");
+      item.className = "power-up-item";
+      item.dataset.type = type;
       item.addEventListener("mouseenter", () => {
         item.classList.add("is-hovered");
       });
@@ -141,11 +136,49 @@
         item.classList.remove("is-hovered");
       });
       item.addEventListener("click", () => {
-        const type = item.dataset.type;
         this.usePowerUp(type);
       });
+
+      const countSpan = document.createElement("span");
+      countSpan.className = "power-up-count";
+      item.appendChild(countSpan);
+
+      if (type === "chainLightning") {
+        const badge = document.createElement("div");
+        badge.className = "power-up-count-badge";
+        badge.hidden = true;
+        item.appendChild(badge);
+        items.chainLightningBadge = badge;
+      }
+
+      items[type] = { item, countSpan };
+      container.appendChild(item);
     });
-  };
+
+    return items;
+  }
+
+  function updatePowerUpItems() {
+    const items = this.cachedPowerUpItems;
+    if (!items) return;
+
+    POWER_UP_TYPES.forEach((type) => {
+      const entry = items[type];
+      if (!entry) return;
+      entry.countSpan.textContent = `${POWER_UP_EMOJIS[type] || "⭐"} ${this
+        .powerUps[type] ?? 0}`;
+    });
+
+    if (items.chainLightningBadge) {
+      if (this.powerUps.chainLightning > 0) {
+        items.chainLightningBadge.hidden = false;
+        items.chainLightningBadge.textContent = `${this.chainLightningKillCount}`;
+      } else {
+        items.chainLightningBadge.hidden = true;
+        items.chainLightningBadge.textContent = "";
+      }
+    }
+  }
 
   // Make power-up display draggable
   proto._makePowerUpDisplayDraggable = function(element) {
