@@ -57,10 +57,31 @@ test.describe("Power-Up Two-Click System", () => {
 
     // Check all three power-ups are shown
     await expect(
-      page.locator('[data-testid="powerup-chainLightning"]')
+      page.locator('[data-testid="powerup-chainLightning"]'),
     ).toBeVisible();
     await expect(page.locator('[data-testid="powerup-spider"]')).toBeVisible();
     await expect(page.locator('[data-testid="powerup-devil"]')).toBeVisible();
+  });
+
+  test("should update power-up counts in display", async ({ page }) => {
+    await page.evaluate(() => {
+      if (window.wormSystem && window.wormSystem.powerUpSystem) {
+        window.wormSystem.powerUpSystem.inventory.chainLightning = 5;
+        window.wormSystem.powerUpSystem.inventory.spider = 4;
+        window.wormSystem.powerUpSystem.inventory.devil = 1;
+        window.wormSystem.powerUpSystem.updateDisplay();
+      }
+    });
+
+    await expect(
+      page.locator('[data-testid="powerup-chainLightning"]'),
+    ).toContainText("5");
+    await expect(page.locator('[data-testid="powerup-spider"]')).toContainText(
+      "4",
+    );
+    await expect(page.locator('[data-testid="powerup-devil"]')).toContainText(
+      "1",
+    );
   });
 
   test("should select power-up on first click", async ({ page }) => {
@@ -290,7 +311,7 @@ test.describe("Game Flow Integration", () => {
 
     // Check level buttons exist
     await expect(
-      page.locator(".level-button, .level-card, [data-level]").first()
+      page.locator(".level-button, .level-card, [data-level]").first(),
     ).toBeVisible({ timeout: 5000 });
   });
 

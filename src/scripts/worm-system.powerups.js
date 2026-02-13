@@ -129,6 +129,7 @@
       const item = document.createElement("div");
       item.className = "power-up-item";
       item.dataset.type = type;
+      item.setAttribute("data-testid", `powerup-${type}`);
       item.addEventListener("mouseenter", () => {
         item.classList.add("is-hovered");
       });
