@@ -117,8 +117,10 @@
 
     this.worms.push(wormData);
 
-    // Add click handler
-    wormElement.addEventListener("click", (e) => {
+    // Add interaction handler – use pointerdown for instant response and to
+    // ensure the splat animation fires even when the worm element is moving
+    // rapidly (a full click requires press+release on the same element).
+    wormElement.addEventListener("pointerdown", (e) => {
       e.stopPropagation();
       this.handleWormInteraction(wormData, e);
     });

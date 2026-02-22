@@ -19,7 +19,16 @@ console.log("🐛 Worm movement animate loading...");
    * over every worm and delegates to the appropriate behaviour handler.
    */
   proto.animate = function() {
-    this.animationFrameId = requestAnimationFrame(() => this.animate());
+    // Re-schedule next frame. The explicit guard handles the edge case where
+    // the worm-system.movement.js IIFE ran before WormSystem was fully defined
+    // (its own guard would have returned early, leaving animate undefined on
+    // the prototype), which would otherwise cause this.animate() to throw and
+    // silently kill the loop.
+    this.animationFrameId = requestAnimationFrame(() => {
+      if (this && typeof this.animate === "function") {
+        this.animate();
+      }
+    });
 
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
@@ -43,14 +52,19 @@ console.log("🐛 Worm movement animate loading...");
         worm.isRushingToTarget = true;
       }
 
-      // Priority-ordered behaviour chain – first handler that returns true wins
-      this._updateWormRushingToDevil(worm) ||
-        this._updateWormEvadingCursor(worm, viewportWidth, viewportHeight) ||
-        this._updateWormEscapeBurst(worm, viewportWidth, viewportHeight) ||
-        this._updateWormReturningToConsole(worm) ||
-        this._updateWormCarryingSymbol(worm) ||
-        this._updateWormRushingToTarget(worm) ||
-        this._updateWormRoaming(worm, viewportWidth, viewportHeight);
+      // Priority-ordered behaviour chain – first handler that returns true wins.
+      // Wrapped in try/catch so a single worm error cannot crash the whole loop.
+      try {
+        this._updateWormRushingToDevil(worm) ||
+          this._updateWormEvadingCursor(worm, viewportWidth, viewportHeight) ||
+          this._updateWormEscapeBurst(worm, viewportWidth, viewportHeight) ||
+          this._updateWormReturningToConsole(worm) ||
+          this._updateWormCarryingSymbol(worm) ||
+          this._updateWormRushingToTarget(worm) ||
+          this._updateWormRoaming(worm, viewportWidth, viewportHeight);
+      } catch (err) {
+        console.error(`🐛 Worm ${worm.id} behavior error:`, err);
+      }
 
       // Apply updated position to DOM (skip if worm was removed during this tick)
       if (worm.active && worm.element && worm.element.parentNode) {
