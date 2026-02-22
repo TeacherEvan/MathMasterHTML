@@ -31,9 +31,7 @@
       return;
     }
 
-    const symbolsSource = worm.isPurple
-      ? this.getCachedAllSymbols()
-      : this.getCachedRevealedSymbols();
+    const symbolsSource = this.getCachedRevealedSymbols();
 
     // Get all available symbols (not stolen, not spaces, not completed)
     const allAvailableSymbols = Array.from(symbolsSource).filter(
@@ -53,7 +51,7 @@
         `🟣 PURPLE WORM - ${availableSymbols.length} revealed symbols available`,
       );
     } else {
-      // Normal worms only steal symbols that are currently revealed to the user
+      // All non-purple steal attempts are restricted to currently revealed symbols
       availableSymbols = allAvailableSymbols.filter((el) =>
         el.classList.contains("revealed-symbol"),
       );
