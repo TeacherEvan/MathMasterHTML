@@ -208,9 +208,11 @@
   proto.createSlimeSplat = function(x, y) {
     const splat = document.createElement("div");
     splat.className = "slime-splat";
+    splat.textContent = "🫟";
     splat.style.left = `${x}px`;
     splat.style.top = `${y}px`;
     splat.style.position = "fixed"; // Use fixed positioning to place at exact coordinates
+    splat.style.zIndex = "10002";
 
     // Random rotation for variation
     splat.style.transform = `translate(-50%, -50%) rotate(${Math.random() *

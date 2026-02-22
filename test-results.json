@@ -1,17 +1,39 @@
 {
   "config": {
-    "configFile": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\playwright.config.js",
-    "rootDir": "C:/Users/eboth/Documents/MathMaster/MathMasterHTML/tests",
-    "forbidOnly": false,
+    "configFile": "/home/runner/work/MathMasterHTML/MathMasterHTML/playwright.config.js",
+    "rootDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests",
+    "forbidOnly": true,
     "fullyParallel": true,
-    "globalSetup": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\global-setup.js",
+    "globalSetup": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/global-setup.js",
     "globalTeardown": null,
     "globalTimeout": 0,
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 3
+      "ci": {
+        "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/8c315b1ceec19d0a0ed4c298bce0f092204785be",
+        "commitHash": "8c315b1ceec19d0a0ed4c298bce0f092204785be",
+        "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22277726043"
+      },
+      "gitCommit": {
+        "shortHash": "8c315b1",
+        "hash": "8c315b1ceec19d0a0ed4c298bce0f092204785be",
+        "subject": "Initial plan",
+        "body": "Initial plan\n",
+        "author": {
+          "name": "copilot-swe-agent[bot]",
+          "email": "198982749+Copilot@users.noreply.github.com",
+          "time": 1771765556000
+        },
+        "committer": {
+          "name": "copilot-swe-agent[bot]",
+          "email": "198982749+Copilot@users.noreply.github.com",
+          "time": 1771765556000
+        },
+        "branch": "copilot/fix-worms-symbols-issues"
+      },
+      "actualWorkers": 1
     },
     "preserveOutput": "always",
     "reporter": [
@@ -35,15 +57,37 @@
     "quiet": false,
     "projects": [
       {
-        "outputDir": "C:/Users/eboth/Documents/MathMaster/MathMasterHTML/test-results",
+        "outputDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results",
         "repeatEach": 1,
-        "retries": 0,
+        "retries": 2,
         "metadata": {
-          "actualWorkers": 3
+          "ci": {
+            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "commitHash": "8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22277726043"
+          },
+          "gitCommit": {
+            "shortHash": "8c315b1",
+            "hash": "8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "subject": "Initial plan",
+            "body": "Initial plan\n",
+            "author": {
+              "name": "copilot-swe-agent[bot]",
+              "email": "198982749+Copilot@users.noreply.github.com",
+              "time": 1771765556000
+            },
+            "committer": {
+              "name": "copilot-swe-agent[bot]",
+              "email": "198982749+Copilot@users.noreply.github.com",
+              "time": 1771765556000
+            },
+            "branch": "copilot/fix-worms-symbols-issues"
+          },
+          "actualWorkers": 1
         },
         "id": "chromium",
         "name": "chromium",
-        "testDir": "C:/Users/eboth/Documents/MathMaster/MathMasterHTML/tests",
+        "testDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests",
         "testIgnore": [
           "**/unit/**",
           "**/integration/**",
@@ -55,15 +99,37 @@
         "timeout": 30000
       },
       {
-        "outputDir": "C:/Users/eboth/Documents/MathMaster/MathMasterHTML/test-results",
+        "outputDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results",
         "repeatEach": 1,
-        "retries": 0,
+        "retries": 2,
         "metadata": {
-          "actualWorkers": 3
+          "ci": {
+            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "commitHash": "8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22277726043"
+          },
+          "gitCommit": {
+            "shortHash": "8c315b1",
+            "hash": "8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "subject": "Initial plan",
+            "body": "Initial plan\n",
+            "author": {
+              "name": "copilot-swe-agent[bot]",
+              "email": "198982749+Copilot@users.noreply.github.com",
+              "time": 1771765556000
+            },
+            "committer": {
+              "name": "copilot-swe-agent[bot]",
+              "email": "198982749+Copilot@users.noreply.github.com",
+              "time": 1771765556000
+            },
+            "branch": "copilot/fix-worms-symbols-issues"
+          },
+          "actualWorkers": 1
         },
         "id": "firefox",
         "name": "firefox",
-        "testDir": "C:/Users/eboth/Documents/MathMaster/MathMasterHTML/tests",
+        "testDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests",
         "testIgnore": [
           "**/unit/**",
           "**/integration/**",
@@ -75,15 +141,37 @@
         "timeout": 30000
       },
       {
-        "outputDir": "C:/Users/eboth/Documents/MathMaster/MathMasterHTML/test-results",
+        "outputDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results",
         "repeatEach": 1,
-        "retries": 0,
+        "retries": 2,
         "metadata": {
-          "actualWorkers": 3
+          "ci": {
+            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "commitHash": "8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22277726043"
+          },
+          "gitCommit": {
+            "shortHash": "8c315b1",
+            "hash": "8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "subject": "Initial plan",
+            "body": "Initial plan\n",
+            "author": {
+              "name": "copilot-swe-agent[bot]",
+              "email": "198982749+Copilot@users.noreply.github.com",
+              "time": 1771765556000
+            },
+            "committer": {
+              "name": "copilot-swe-agent[bot]",
+              "email": "198982749+Copilot@users.noreply.github.com",
+              "time": 1771765556000
+            },
+            "branch": "copilot/fix-worms-symbols-issues"
+          },
+          "actualWorkers": 1
         },
         "id": "webkit",
         "name": "webkit",
-        "testDir": "C:/Users/eboth/Documents/MathMaster/MathMasterHTML/tests",
+        "testDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests",
         "testIgnore": [
           "**/unit/**",
           "**/integration/**",
@@ -95,15 +183,37 @@
         "timeout": 30000
       },
       {
-        "outputDir": "C:/Users/eboth/Documents/MathMaster/MathMasterHTML/test-results",
+        "outputDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results",
         "repeatEach": 1,
-        "retries": 0,
+        "retries": 2,
         "metadata": {
-          "actualWorkers": 3
+          "ci": {
+            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "commitHash": "8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22277726043"
+          },
+          "gitCommit": {
+            "shortHash": "8c315b1",
+            "hash": "8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "subject": "Initial plan",
+            "body": "Initial plan\n",
+            "author": {
+              "name": "copilot-swe-agent[bot]",
+              "email": "198982749+Copilot@users.noreply.github.com",
+              "time": 1771765556000
+            },
+            "committer": {
+              "name": "copilot-swe-agent[bot]",
+              "email": "198982749+Copilot@users.noreply.github.com",
+              "time": 1771765556000
+            },
+            "branch": "copilot/fix-worms-symbols-issues"
+          },
+          "actualWorkers": 1
         },
         "id": "iphone-13",
         "name": "iphone-13",
-        "testDir": "C:/Users/eboth/Documents/MathMaster/MathMasterHTML/tests",
+        "testDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests",
         "testIgnore": [
           "**/unit/**",
           "**/integration/**",
@@ -115,15 +225,37 @@
         "timeout": 30000
       },
       {
-        "outputDir": "C:/Users/eboth/Documents/MathMaster/MathMasterHTML/test-results",
+        "outputDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results",
         "repeatEach": 1,
-        "retries": 0,
+        "retries": 2,
         "metadata": {
-          "actualWorkers": 3
+          "ci": {
+            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "commitHash": "8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22277726043"
+          },
+          "gitCommit": {
+            "shortHash": "8c315b1",
+            "hash": "8c315b1ceec19d0a0ed4c298bce0f092204785be",
+            "subject": "Initial plan",
+            "body": "Initial plan\n",
+            "author": {
+              "name": "copilot-swe-agent[bot]",
+              "email": "198982749+Copilot@users.noreply.github.com",
+              "time": 1771765556000
+            },
+            "committer": {
+              "name": "copilot-swe-agent[bot]",
+              "email": "198982749+Copilot@users.noreply.github.com",
+              "time": 1771765556000
+            },
+            "branch": "copilot/fix-worms-symbols-issues"
+          },
+          "actualWorkers": 1
         },
         "id": "pixel-7",
         "name": "pixel-7",
-        "testDir": "C:/Users/eboth/Documents/MathMaster/MathMasterHTML/tests",
+        "testDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests",
         "testIgnore": [
           "**/unit/**",
           "**/integration/**",
@@ -138,32 +270,32 @@
     "shard": null,
     "tags": [],
     "updateSnapshots": "missing",
-    "updateSourceMethod": "3way",
+    "updateSourceMethod": "patch",
     "version": "1.57.0",
-    "workers": 3,
+    "workers": 1,
     "webServer": {
       "command": "npm run start",
       "url": "http://localhost:8000",
-      "reuseExistingServer": true,
+      "reuseExistingServer": false,
       "timeout": 120000
     }
   },
   "suites": [
     {
-      "title": "lock-components.spec.js",
-      "file": "lock-components.spec.js",
+      "title": "worm-behavior.spec.js",
+      "file": "worm-behavior.spec.js",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "Lock Component Styles",
-          "file": "lock-components.spec.js",
-          "line": 4,
+          "title": "Worm behavior: aggression, targeting, and click rules",
+          "file": "worm-behavior.spec.js",
+          "line": 3,
           "column": 6,
           "specs": [
             {
-              "title": "Line 3 lock loads split styles and activates",
+              "title": "purple worm click clones instead of dying",
               "ok": true,
               "tags": [],
               "tests": [
@@ -178,2573 +310,22 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 17484,
+                      "duration": 2004,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-02-15T09:53:02.712Z",
+                      "startTime": "2026-02-22T13:13:38.047Z",
                       "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\lock-components-Lock-Compo-52638--split-styles-and-activates-chromium\\trace.zip"
-                        }
-                      ]
+                      "attachments": []
                     }
                   ],
                   "status": "expected"
                 }
               ],
-              "id": "0cf19d201f40770a6234-c51d8e47b595f61407ae",
-              "file": "lock-components.spec.js",
-              "line": 5,
-              "column": 3
-            },
-            {
-              "title": "Line 6 lock loads split styles and activates core phases",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 20000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 24558,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T09:53:03.062Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\lock-components-Lock-Compo-12819-s-and-activates-core-phases-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "0cf19d201f40770a6234-b2ed5bb87c28c1159867",
-              "file": "lock-components.spec.js",
-              "line": 30,
-              "column": 3
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "managers.spec.js",
-      "file": "managers.spec.js",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "ProblemManager and SymbolManager Integration",
-          "file": "managers.spec.js",
-          "line": 4,
-          "column": 6,
-          "specs": [],
-          "suites": [
-            {
-              "title": "ProblemManager",
-              "file": "managers.spec.js",
-              "line": 20,
-              "column": 8,
-              "specs": [
-                {
-                  "title": "should load problems from markdown file",
-                  "ok": true,
-                  "tags": [],
-                  "tests": [
-                    {
-                      "timeout": 30000,
-                      "annotations": [],
-                      "expectedStatus": "passed",
-                      "projectId": "chromium",
-                      "projectName": "chromium",
-                      "results": [
-                        {
-                          "workerIndex": 2,
-                          "parallelIndex": 2,
-                          "status": "passed",
-                          "duration": 24472,
-                          "errors": [],
-                          "stdout": [],
-                          "stderr": [],
-                          "retry": 0,
-                          "startTime": "2026-02-15T09:53:02.770Z",
-                          "annotations": [],
-                          "attachments": [
-                            {
-                              "name": "trace",
-                              "contentType": "application/zip",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-7d901-problems-from-markdown-file-chromium\\trace.zip"
-                            }
-                          ]
-                        }
-                      ],
-                      "status": "expected"
-                    }
-                  ],
-                  "id": "fe15e1e80a4b6ef523a3-e4399c87ba362af1ccd9",
-                  "file": "managers.spec.js",
-                  "line": 21,
-                  "column": 5
-                },
-                {
-                  "title": "should display problem with correct structure",
-                  "ok": true,
-                  "tags": [],
-                  "tests": [
-                    {
-                      "timeout": 30000,
-                      "annotations": [],
-                      "expectedStatus": "passed",
-                      "projectId": "chromium",
-                      "projectName": "chromium",
-                      "results": [
-                        {
-                          "workerIndex": 0,
-                          "parallelIndex": 0,
-                          "status": "passed",
-                          "duration": 7287,
-                          "errors": [],
-                          "stdout": [],
-                          "stderr": [],
-                          "retry": 0,
-                          "startTime": "2026-02-15T09:53:23.231Z",
-                          "annotations": [],
-                          "attachments": [
-                            {
-                              "name": "trace",
-                              "contentType": "application/zip",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-c5573-blem-with-correct-structure-chromium\\trace.zip"
-                            }
-                          ]
-                        }
-                      ],
-                      "status": "expected"
-                    }
-                  ],
-                  "id": "fe15e1e80a4b6ef523a3-f500d8be692ef3fd8739",
-                  "file": "managers.spec.js",
-                  "line": 31,
-                  "column": 5
-                },
-                {
-                  "title": "should setup solution steps container",
-                  "ok": false,
-                  "tags": [],
-                  "tests": [
-                    {
-                      "timeout": 30000,
-                      "annotations": [],
-                      "expectedStatus": "passed",
-                      "projectId": "chromium",
-                      "projectName": "chromium",
-                      "results": [
-                        {
-                          "workerIndex": 1,
-                          "parallelIndex": 1,
-                          "status": "timedOut",
-                          "duration": 35853,
-                          "error": {
-                            "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
-                            "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js:5:8",
-                            "location": {
-                              "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js",
-                              "column": 8,
-                              "line": 5
-                            },
-                            "snippet": "\u001b[0m \u001b[90m 3 |\u001b[39m\n \u001b[90m 4 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"ProblemManager and SymbolManager Integration\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 5 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 6 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 7 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 8 |\u001b[39m\u001b[0m"
-                          },
-                          "errors": [
-                            {
-                              "location": {
-                                "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js",
-                                "column": 8,
-                                "line": 5
-                              },
-                              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 3 |\u001b[39m\n \u001b[90m 4 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"ProblemManager and SymbolManager Integration\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 5 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 6 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 7 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 8 |\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js:5:8\u001b[22m"
-                            },
-                            {
-                              "message": "Error: browserContext.newPage: Test timeout of 30000ms exceeded."
-                            }
-                          ],
-                          "stdout": [],
-                          "stderr": [],
-                          "retry": 0,
-                          "startTime": "2026-02-15T09:53:29.998Z",
-                          "annotations": [],
-                          "attachments": [
-                            {
-                              "name": "trace",
-                              "contentType": "application/zip",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-334f2-up-solution-steps-container-chromium\\trace.zip"
-                            }
-                          ],
-                          "errorLocation": {
-                            "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js",
-                            "column": 8,
-                            "line": 5
-                          }
-                        }
-                      ],
-                      "status": "unexpected"
-                    }
-                  ],
-                  "id": "fe15e1e80a4b6ef523a3-0a95824e656ccbd38153",
-                  "file": "managers.spec.js",
-                  "line": 41,
-                  "column": 5
-                },
-                {
-                  "title": "should create hidden symbols for each step",
-                  "ok": false,
-                  "tags": [],
-                  "tests": [
-                    {
-                      "timeout": 30000,
-                      "annotations": [],
-                      "expectedStatus": "passed",
-                      "projectId": "chromium",
-                      "projectName": "chromium",
-                      "results": [
-                        {
-                          "workerIndex": 2,
-                          "parallelIndex": 2,
-                          "status": "timedOut",
-                          "duration": 49987,
-                          "error": {
-                            "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
-                            "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js:5:8",
-                            "location": {
-                              "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js",
-                              "column": 8,
-                              "line": 5
-                            },
-                            "snippet": "\u001b[0m \u001b[90m 3 |\u001b[39m\n \u001b[90m 4 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"ProblemManager and SymbolManager Integration\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 5 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 6 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 7 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 8 |\u001b[39m\u001b[0m"
-                          },
-                          "errors": [
-                            {
-                              "location": {
-                                "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js",
-                                "column": 8,
-                                "line": 5
-                              },
-                              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 3 |\u001b[39m\n \u001b[90m 4 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"ProblemManager and SymbolManager Integration\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 5 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 6 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 7 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 8 |\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js:5:8\u001b[22m"
-                            }
-                          ],
-                          "stdout": [],
-                          "stderr": [],
-                          "retry": 0,
-                          "startTime": "2026-02-15T09:53:31.225Z",
-                          "annotations": [],
-                          "attachments": [
-                            {
-                              "name": "screenshot",
-                              "contentType": "image/png",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-a4345-idden-symbols-for-each-step-chromium\\test-failed-1.png"
-                            },
-                            {
-                              "name": "error-context",
-                              "contentType": "text/markdown",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-a4345-idden-symbols-for-each-step-chromium\\error-context.md"
-                            },
-                            {
-                              "name": "trace",
-                              "contentType": "application/zip",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-a4345-idden-symbols-for-each-step-chromium\\trace.zip"
-                            }
-                          ],
-                          "errorLocation": {
-                            "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js",
-                            "column": 8,
-                            "line": 5
-                          }
-                        }
-                      ],
-                      "status": "unexpected"
-                    }
-                  ],
-                  "id": "fe15e1e80a4b6ef523a3-c334c5531b5ca8a81e35",
-                  "file": "managers.spec.js",
-                  "line": 52,
-                  "column": 5
-                }
-              ]
-            },
-            {
-              "title": "SymbolManager",
-              "file": "managers.spec.js",
-              "line": 60,
-              "column": 8,
-              "specs": [
-                {
-                  "title": "should reveal symbol when correct symbol clicked",
-                  "ok": false,
-                  "tags": [],
-                  "tests": [
-                    {
-                      "timeout": 30000,
-                      "annotations": [],
-                      "expectedStatus": "passed",
-                      "projectId": "chromium",
-                      "projectName": "chromium",
-                      "results": [
-                        {
-                          "workerIndex": 0,
-                          "parallelIndex": 0,
-                          "status": "timedOut",
-                          "duration": 47372,
-                          "error": {
-                            "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
-                            "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js:5:8",
-                            "location": {
-                              "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js",
-                              "column": 8,
-                              "line": 5
-                            },
-                            "snippet": "\u001b[0m \u001b[90m 3 |\u001b[39m\n \u001b[90m 4 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"ProblemManager and SymbolManager Integration\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 5 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 6 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 7 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 8 |\u001b[39m\u001b[0m"
-                          },
-                          "errors": [
-                            {
-                              "location": {
-                                "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js",
-                                "column": 8,
-                                "line": 5
-                              },
-                              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 3 |\u001b[39m\n \u001b[90m 4 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"ProblemManager and SymbolManager Integration\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 5 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 6 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 7 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 8 |\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js:5:8\u001b[22m"
-                            }
-                          ],
-                          "stdout": [],
-                          "stderr": [],
-                          "retry": 0,
-                          "startTime": "2026-02-15T09:53:32.148Z",
-                          "annotations": [],
-                          "attachments": [
-                            {
-                              "name": "screenshot",
-                              "contentType": "image/png",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-cd7df-when-correct-symbol-clicked-chromium\\test-failed-1.png"
-                            },
-                            {
-                              "name": "error-context",
-                              "contentType": "text/markdown",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-cd7df-when-correct-symbol-clicked-chromium\\error-context.md"
-                            },
-                            {
-                              "name": "trace",
-                              "contentType": "application/zip",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-cd7df-when-correct-symbol-clicked-chromium\\trace.zip"
-                            }
-                          ],
-                          "errorLocation": {
-                            "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js",
-                            "column": 8,
-                            "line": 5
-                          }
-                        }
-                      ],
-                      "status": "unexpected"
-                    }
-                  ],
-                  "id": "fe15e1e80a4b6ef523a3-2b646ae51c2dc2b1dee0",
-                  "file": "managers.spec.js",
-                  "line": 61,
-                  "column": 5
-                },
-                {
-                  "title": "should track revealed symbols with correct class",
-                  "ok": true,
-                  "tags": [],
-                  "tests": [
-                    {
-                      "timeout": 30000,
-                      "annotations": [],
-                      "expectedStatus": "passed",
-                      "projectId": "chromium",
-                      "projectName": "chromium",
-                      "results": [
-                        {
-                          "workerIndex": 3,
-                          "parallelIndex": 1,
-                          "status": "passed",
-                          "duration": 20645,
-                          "errors": [],
-                          "stdout": [],
-                          "stderr": [],
-                          "retry": 0,
-                          "startTime": "2026-02-15T09:54:35.660Z",
-                          "annotations": [],
-                          "attachments": [
-                            {
-                              "name": "trace",
-                              "contentType": "application/zip",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-2eb55--symbols-with-correct-class-chromium\\trace.zip"
-                            }
-                          ]
-                        }
-                      ],
-                      "status": "expected"
-                    }
-                  ],
-                  "id": "fe15e1e80a4b6ef523a3-4e4300a3f6057f7fb916",
-                  "file": "managers.spec.js",
-                  "line": 81,
-                  "column": 5
-                },
-                {
-                  "title": "should mark completed rows with cyan styling",
-                  "ok": true,
-                  "tags": [],
-                  "tests": [
-                    {
-                      "timeout": 30000,
-                      "annotations": [],
-                      "expectedStatus": "passed",
-                      "projectId": "chromium",
-                      "projectName": "chromium",
-                      "results": [
-                        {
-                          "workerIndex": 4,
-                          "parallelIndex": 2,
-                          "status": "passed",
-                          "duration": 27008,
-                          "errors": [],
-                          "stdout": [],
-                          "stderr": [],
-                          "retry": 0,
-                          "startTime": "2026-02-15T09:54:37.066Z",
-                          "annotations": [],
-                          "attachments": [
-                            {
-                              "name": "trace",
-                              "contentType": "application/zip",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-b1070-eted-rows-with-cyan-styling-chromium\\trace.zip"
-                            }
-                          ]
-                        }
-                      ],
-                      "status": "expected"
-                    }
-                  ],
-                  "id": "fe15e1e80a4b6ef523a3-f970c6350ce85c381c43",
-                  "file": "managers.spec.js",
-                  "line": 99,
-                  "column": 5
-                }
-              ]
-            },
-            {
-              "title": "Symbol Validation",
-              "file": "managers.spec.js",
-              "line": 126,
-              "column": 8,
-              "specs": [
-                {
-                  "title": "should normalize symbols for comparison",
-                  "ok": false,
-                  "tags": [],
-                  "tests": [
-                    {
-                      "timeout": 30000,
-                      "annotations": [],
-                      "expectedStatus": "passed",
-                      "projectId": "chromium",
-                      "projectName": "chromium",
-                      "results": [
-                        {
-                          "workerIndex": 3,
-                          "parallelIndex": 1,
-                          "status": "timedOut",
-                          "duration": 31067,
-                          "error": {
-                            "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
-                            "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js:5:8",
-                            "location": {
-                              "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js",
-                              "column": 8,
-                              "line": 5
-                            },
-                            "snippet": "\u001b[0m \u001b[90m 3 |\u001b[39m\n \u001b[90m 4 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"ProblemManager and SymbolManager Integration\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 5 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 6 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 7 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 8 |\u001b[39m\u001b[0m"
-                          },
-                          "errors": [
-                            {
-                              "location": {
-                                "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js",
-                                "column": 8,
-                                "line": 5
-                              },
-                              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 3 |\u001b[39m\n \u001b[90m 4 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"ProblemManager and SymbolManager Integration\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 5 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 6 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 7 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 8 |\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js:5:8\u001b[22m"
-                            },
-                            {
-                              "message": "Error: browserContext.newPage: Test timeout of 30000ms exceeded."
-                            }
-                          ],
-                          "stdout": [],
-                          "stderr": [],
-                          "retry": 0,
-                          "startTime": "2026-02-15T09:55:02.359Z",
-                          "annotations": [],
-                          "attachments": [
-                            {
-                              "name": "trace",
-                              "contentType": "application/zip",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-9a473-lize-symbols-for-comparison-chromium\\trace.zip"
-                            }
-                          ],
-                          "errorLocation": {
-                            "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\managers.spec.js",
-                            "column": 8,
-                            "line": 5
-                          }
-                        }
-                      ],
-                      "status": "unexpected"
-                    }
-                  ],
-                  "id": "fe15e1e80a4b6ef523a3-c3e3b96307d3108e39d9",
-                  "file": "managers.spec.js",
-                  "line": 127,
-                  "column": 5
-                }
-              ]
-            },
-            {
-              "title": "Step Progression",
-              "file": "managers.spec.js",
-              "line": 152,
-              "column": 8,
-              "specs": [
-                {
-                  "title": "should advance to next step after completing current",
-                  "ok": false,
-                  "tags": [],
-                  "tests": [
-                    {
-                      "timeout": 30000,
-                      "annotations": [],
-                      "expectedStatus": "passed",
-                      "projectId": "chromium",
-                      "projectName": "chromium",
-                      "results": [
-                        {
-                          "workerIndex": 4,
-                          "parallelIndex": 2,
-                          "status": "timedOut",
-                          "duration": 49756,
-                          "error": {
-                            "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 30000ms.\u001b[39m",
-                            "stack": "\u001b[31mTearing down \"context\" exceeded the test timeout of 30000ms.\u001b[39m"
-                          },
-                          "errors": [
-                            {
-                              "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 30000ms.\u001b[39m"
-                            },
-                            {
-                              "message": "Error: browserContext.close: Target page, context or browser has been closed"
-                            }
-                          ],
-                          "stdout": [],
-                          "stderr": [],
-                          "retry": 0,
-                          "startTime": "2026-02-15T09:55:19.489Z",
-                          "annotations": [],
-                          "attachments": [
-                            {
-                              "name": "screenshot",
-                              "contentType": "image/png",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-e4ffb-ep-after-completing-current-chromium\\test-failed-1.png"
-                            },
-                            {
-                              "name": "error-context",
-                              "contentType": "text/markdown",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-e4ffb-ep-after-completing-current-chromium\\error-context.md"
-                            },
-                            {
-                              "name": "trace",
-                              "contentType": "application/zip",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-e4ffb-ep-after-completing-current-chromium\\trace.zip"
-                            }
-                          ]
-                        }
-                      ],
-                      "status": "unexpected"
-                    }
-                  ],
-                  "id": "fe15e1e80a4b6ef523a3-facc7c8ff679ba04f35b",
-                  "file": "managers.spec.js",
-                  "line": 153,
-                  "column": 5
-                }
-              ]
-            },
-            {
-              "title": "Cache Performance",
-              "file": "managers.spec.js",
-              "line": 188,
-              "column": 8,
-              "specs": [
-                {
-                  "title": "should handle rapid symbol clicks without errors",
-                  "ok": false,
-                  "tags": [],
-                  "tests": [
-                    {
-                      "timeout": 30000,
-                      "annotations": [],
-                      "expectedStatus": "passed",
-                      "projectId": "chromium",
-                      "projectName": "chromium",
-                      "results": [
-                        {
-                          "workerIndex": 5,
-                          "parallelIndex": 0,
-                          "status": "timedOut",
-                          "duration": 54693,
-                          "error": {
-                            "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                            "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                          },
-                          "errors": [
-                            {
-                              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                            },
-                            {
-                              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                            }
-                          ],
-                          "stdout": [],
-                          "stderr": [],
-                          "retry": 0,
-                          "startTime": "2026-02-15T09:55:44.237Z",
-                          "annotations": [],
-                          "attachments": [
-                            {
-                              "name": "screenshot",
-                              "contentType": "image/png",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-e3062-ymbol-clicks-without-errors-chromium\\test-failed-1.png"
-                            },
-                            {
-                              "name": "error-context",
-                              "contentType": "text/markdown",
-                              "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\managers-ProblemManager-an-e3062-ymbol-clicks-without-errors-chromium\\error-context.md"
-                            }
-                          ]
-                        }
-                      ],
-                      "status": "unexpected"
-                    }
-                  ],
-                  "id": "fe15e1e80a4b6ef523a3-aaabff46070d1339a2aa",
-                  "file": "managers.spec.js",
-                  "line": 189,
-                  "column": 5
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "performance-bench.spec.js",
-      "file": "performance-bench.spec.js",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "Performance benchmarks",
-          "file": "performance-bench.spec.js",
-          "line": 4,
-          "column": 6,
-          "specs": [
-            {
-              "title": "maintains acceptable FPS and memory usage",
-              "ok": false,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 6,
-                      "parallelIndex": 1,
-                      "status": "timedOut",
-                      "duration": 60408,
-                      "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\performance-bench.spec.js:5:8",
-                        "location": {
-                          "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\performance-bench.spec.js",
-                          "column": 8,
-                          "line": 5
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 3 |\u001b[39m\n \u001b[90m 4 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"Performance benchmarks\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 5 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 7 |\u001b[39m\n \u001b[90m 8 |\u001b[39m     \u001b[36mconst\u001b[39m startButton \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m\"#start-game-btn\"\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\performance-bench.spec.js",
-                            "column": 8,
-                            "line": 5
-                          },
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 3 |\u001b[39m\n \u001b[90m 4 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"Performance benchmarks\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 5 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 7 |\u001b[39m\n \u001b[90m 8 |\u001b[39m     \u001b[36mconst\u001b[39m startButton \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m\"#start-game-btn\"\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\performance-bench.spec.js:5:8\u001b[22m"
-                        },
-                        {
-                          "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 30000ms.\u001b[39m"
-                        },
-                        {
-                          "message": "Error: browserContext.close: Target page, context or browser has been closed"
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T09:56:48.687Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\performance-bench-Performa-f5f90-ptable-FPS-and-memory-usage-chromium\\test-failed-1.png"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\performance-bench-Performa-f5f90-ptable-FPS-and-memory-usage-chromium\\error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\performance-bench-Performa-f5f90-ptable-FPS-and-memory-usage-chromium\\trace.zip"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\performance-bench.spec.js",
-                        "column": 8,
-                        "line": 5
-                      }
-                    }
-                  ],
-                  "status": "unexpected"
-                }
-              ],
-              "id": "40a7264466cbc60f1fb7-b481b8d78e916288deda",
-              "file": "performance-bench.spec.js",
-              "line": 14,
-              "column": 3
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "powerups.spec.js",
-      "file": "powerups.spec.js",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "Power-Up Two-Click System",
-          "file": "powerups.spec.js",
-          "line": 24,
-          "column": 6,
-          "specs": [
-            {
-              "title": "should display power-up inventory",
-              "ok": false,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 7,
-                      "parallelIndex": 2,
-                      "status": "timedOut",
-                      "duration": 60510,
-                      "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js:25:8",
-                        "location": {
-                          "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                          "column": 8,
-                          "line": 25
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 23 |\u001b[39m\n \u001b[90m 24 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"Power-Up Two-Click System\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m    |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 27 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m\u001b[0m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                            "column": 8,
-                            "line": 25
-                          },
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 23 |\u001b[39m\n \u001b[90m 24 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"Power-Up Two-Click System\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m    |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 27 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js:25:8\u001b[22m"
-                        },
-                        {
-                          "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 30000ms.\u001b[39m"
-                        },
-                        {
-                          "message": "Error: apiRequestContext._wrapApiCall: Test ended."
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T09:58:48.092Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-e4e75--display-power-up-inventory-chromium\\test-failed-1.png"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-e4e75--display-power-up-inventory-chromium\\error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-e4e75--display-power-up-inventory-chromium\\trace.zip"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                        "column": 8,
-                        "line": 25
-                      }
-                    }
-                  ],
-                  "status": "unexpected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-e29257271ce7acf3b5f5",
-              "file": "powerups.spec.js",
-              "line": 54,
-              "column": 3
-            },
-            {
-              "title": "should update power-up counts in display",
-              "ok": false,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 8,
-                      "parallelIndex": 1,
-                      "status": "timedOut",
-                      "duration": 60341,
-                      "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js:25:8",
-                        "location": {
-                          "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                          "column": 8,
-                          "line": 25
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 23 |\u001b[39m\n \u001b[90m 24 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"Power-Up Two-Click System\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m    |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 27 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m\u001b[0m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                            "column": 8,
-                            "line": 25
-                          },
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 23 |\u001b[39m\n \u001b[90m 24 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"Power-Up Two-Click System\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m    |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 27 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js:25:8\u001b[22m"
-                        },
-                        {
-                          "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 30000ms.\u001b[39m"
-                        },
-                        {
-                          "location": {
-                            "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                            "column": 16,
-                            "line": 27
-                          },
-                          "message": "Error: page.goto: Test ended.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8000/game.html?level=beginner\", waiting until \"load\"\u001b[22m\n\n\n\u001b[0m \u001b[90m 25 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m 26 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 27 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 28 |\u001b[39m\n \u001b[90m 29 |\u001b[39m     \u001b[90m// Dismiss the How-To-Play modal (blocks visibility for some elements)\u001b[39m\n \u001b[90m 30 |\u001b[39m     \u001b[36mawait\u001b[39m dismissHowToPlayModal(page)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js:27:16\u001b[22m"
-                        },
-                        {
-                          "message": "Error: apiRequestContext._wrapApiCall: Test ended."
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:00:08.905Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-a4b90--power-up-counts-in-display-chromium\\error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-a4b90--power-up-counts-in-display-chromium\\trace.zip"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                        "column": 8,
-                        "line": 25
-                      }
-                    }
-                  ],
-                  "status": "unexpected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-e94f6a0e9a2c93891ebc",
-              "file": "powerups.spec.js",
-              "line": 66,
-              "column": 3
-            },
-            {
-              "title": "should select power-up on first click",
-              "ok": false,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 9,
-                      "parallelIndex": 0,
-                      "status": "timedOut",
-                      "duration": 61035,
-                      "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js:25:8",
-                        "location": {
-                          "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                          "column": 8,
-                          "line": 25
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 23 |\u001b[39m\n \u001b[90m 24 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"Power-Up Two-Click System\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m    |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 27 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m\u001b[0m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                            "column": 8,
-                            "line": 25
-                          },
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 23 |\u001b[39m\n \u001b[90m 24 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"Power-Up Two-Click System\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m    |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 27 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js:25:8\u001b[22m"
-                        },
-                        {
-                          "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 30000ms.\u001b[39m"
-                        },
-                        {
-                          "location": {
-                            "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                            "column": 16,
-                            "line": 27
-                          },
-                          "message": "Error: page.goto: Test ended.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8000/game.html?level=beginner\", waiting until \"load\"\u001b[22m\n\n\n\u001b[0m \u001b[90m 25 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m 26 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 27 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 28 |\u001b[39m\n \u001b[90m 29 |\u001b[39m     \u001b[90m// Dismiss the How-To-Play modal (blocks visibility for some elements)\u001b[39m\n \u001b[90m 30 |\u001b[39m     \u001b[36mawait\u001b[39m dismissHowToPlayModal(page)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js:27:16\u001b[22m"
-                        },
-                        {
-                          "message": "Error: apiRequestContext._wrapApiCall: Test ended."
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:00:30.416Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-fcbf0-ect-power-up-on-first-click-chromium\\error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-fcbf0-ect-power-up-on-first-click-chromium\\trace.zip"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                        "column": 8,
-                        "line": 25
-                      }
-                    }
-                  ],
-                  "status": "unexpected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-5a6eb4f00474bc8723d6",
-              "file": "powerups.spec.js",
-              "line": 87,
-              "column": 3
-            },
-            {
-              "title": "should deselect power-up when clicking same one again",
-              "ok": false,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 10,
-                      "parallelIndex": 2,
-                      "status": "timedOut",
-                      "duration": 60563,
-                      "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js:25:8",
-                        "location": {
-                          "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                          "column": 8,
-                          "line": 25
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 23 |\u001b[39m\n \u001b[90m 24 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"Power-Up Two-Click System\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m    |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 27 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m\u001b[0m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                            "column": 8,
-                            "line": 25
-                          },
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 23 |\u001b[39m\n \u001b[90m 24 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"Power-Up Two-Click System\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m    |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m     \u001b[90m// Navigate to game page\u001b[39m\n \u001b[90m 27 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js:25:8\u001b[22m"
-                        },
-                        {
-                          "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 30000ms.\u001b[39m"
-                        },
-                        {
-                          "message": "Error: apiRequestContext._wrapApiCall: Test ended."
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:01:45.476Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-e99f9-hen-clicking-same-one-again-chromium\\test-failed-1.png"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-e99f9-hen-clicking-same-one-again-chromium\\error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-e99f9-hen-clicking-same-one-again-chromium\\trace.zip"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                        "column": 8,
-                        "line": 25
-                      }
-                    }
-                  ],
-                  "status": "unexpected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-4d4bafc19584816d7348",
-              "file": "powerups.spec.js",
-              "line": 108,
-              "column": 3
-            },
-            {
-              "title": "should deselect power-up on ESC key",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 11,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 43477,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:03:04.383Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-6e817-eselect-power-up-on-ESC-key-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-64b18e10c14b3fd0f154",
-              "file": "powerups.spec.js",
-              "line": 136,
-              "column": 3
-            },
-            {
-              "title": "should place devil power-up on second click",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 11,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 10575,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:04:09.751Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-c4fff-il-power-up-on-second-click-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-9ec975090526cccc8882",
-              "file": "powerups.spec.js",
-              "line": 156,
-              "column": 3
-            },
-            {
-              "title": "should spawn spider at click location",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 11,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 15716,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:04:25.438Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-0cd8e-wn-spider-at-click-location-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-4168984238eedf59c540",
-              "file": "powerups.spec.js",
-              "line": 181,
-              "column": 3
-            },
-            {
-              "title": "should not allow selection when inventory is 0",
-              "ok": false,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 12,
-                      "parallelIndex": 1,
-                      "status": "timedOut",
-                      "duration": 50701,
-                      "error": {
-                        "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 30000ms.\u001b[39m",
-                        "stack": "\u001b[31mTearing down \"context\" exceeded the test timeout of 30000ms.\u001b[39m"
-                      },
-                      "errors": [
-                        {
-                          "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 30000ms.\u001b[39m"
-                        },
-                        {
-                          "message": "Error: browserContext.close: Target page, context or browser has been closed"
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:04:46.252Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-7bfea-lection-when-inventory-is-0-chromium\\test-failed-1.png"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-7bfea-lection-when-inventory-is-0-chromium\\error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-7bfea-lection-when-inventory-is-0-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "unexpected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-6245eb3baee3ec5654fb",
-              "file": "powerups.spec.js",
-              "line": 198,
-              "column": 3
-            },
-            {
-              "title": "should switch selection when clicking different power-up",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 11,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 30567,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:04:46.017Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Two-Clic-739b0-clicking-different-power-up-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-fe38c28e3db773bc8329",
-              "file": "powerups.spec.js",
-              "line": 221,
-              "column": 3
-            }
-          ]
-        },
-        {
-          "title": "Power-Up Chain Lightning",
-          "file": "powerups.spec.js",
-          "line": 242,
-          "column": 6,
-          "specs": [
-            {
-              "title": "should refund chain lightning if no worms to target",
-              "ok": false,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 13,
-                      "parallelIndex": 2,
-                      "status": "timedOut",
-                      "duration": 40915,
-                      "error": {
-                        "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 30000ms.\u001b[39m",
-                        "stack": "\u001b[31mTearing down \"context\" exceeded the test timeout of 30000ms.\u001b[39m"
-                      },
-                      "errors": [
-                        {
-                          "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 30000ms.\u001b[39m"
-                        },
-                        {
-                          "message": "Error: browserContext.close: Target page, context or browser has been closed"
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:05:26.199Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Chain-Li-4071a-tning-if-no-worms-to-target-chromium\\test-failed-1.png"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Chain-Li-4071a-tning-if-no-worms-to-target-chromium\\error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Power-Up-Chain-Li-4071a-tning-if-no-worms-to-target-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "unexpected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-259ec027823abb6e1535",
-              "file": "powerups.spec.js",
-              "line": 264,
-              "column": 3
-            }
-          ]
-        },
-        {
-          "title": "Game Flow Integration",
-          "file": "powerups.spec.js",
-          "line": 297,
-          "column": 6,
-          "specs": [
-            {
-              "title": "game page loads successfully",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 11,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 39660,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:05:42.057Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Game-Flow-Integration-game-page-loads-successfully-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-63c59d37823bf1a17468",
-              "file": "powerups.spec.js",
-              "line": 298,
-              "column": 3
-            },
-            {
-              "title": "level select page works",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 11,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 9509,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:06:33.145Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Game-Flow-Integration-level-select-page-works-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-80fc67b342897f897115",
-              "file": "powerups.spec.js",
-              "line": 309,
-              "column": 3
-            },
-            {
-              "title": "index page has navigation",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 14,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 17261,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:06:50.296Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Game-Flow-Integration-index-page-has-navigation-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-a24dee8fda31f25d8a93",
-              "file": "powerups.spec.js",
-              "line": 318,
-              "column": 3
-            }
-          ]
-        },
-        {
-          "title": "Worm System Basic Tests",
-          "file": "powerups.spec.js",
-          "line": 326,
-          "column": 6,
-          "specs": [
-            {
-              "title": "worm system initializes",
-              "ok": false,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 11,
-                      "parallelIndex": 0,
-                      "status": "timedOut",
-                      "duration": 30620,
-                      "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js:327:8",
-                        "location": {
-                          "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                          "column": 8,
-                          "line": 327
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 325 |\u001b[39m\n \u001b[90m 326 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"Worm System Basic Tests\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 327 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 328 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 329 |\u001b[39m\n \u001b[90m 330 |\u001b[39m     \u001b[36mawait\u001b[39m dismissHowToPlayModal(page)\u001b[33m;\u001b[39m\u001b[0m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                            "column": 8,
-                            "line": 327
-                          },
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 325 |\u001b[39m\n \u001b[90m 326 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"Worm System Basic Tests\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 327 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 328 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 329 |\u001b[39m\n \u001b[90m 330 |\u001b[39m     \u001b[36mawait\u001b[39m dismissHowToPlayModal(page)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js:327:8\u001b[22m"
-                        },
-                        {
-                          "message": "Error: browserContext.newPage: Test timeout of 30000ms exceeded."
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:06:44.714Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Worm-System-Basic-Tests-worm-system-initializes-chromium\\trace.zip"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js",
-                        "column": 8,
-                        "line": 327
-                      }
-                    }
-                  ],
-                  "status": "unexpected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-ddc8fbd61c6472c05c72",
-              "file": "powerups.spec.js",
-              "line": 338,
-              "column": 3
-            },
-            {
-              "title": "can spawn worm from console",
-              "ok": false,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 14,
-                      "parallelIndex": 1,
-                      "status": "failed",
-                      "duration": 22457,
-                      "error": {
-                        "message": "Error: page.evaluate: TypeError: this.animate is not a function\n    at proto._spawnWormWithConfig (http://localhost:8000/src/scripts/worm-system.spawn.js:135:12)\n    at proto.spawnWormFromConsole (http://localhost:8000/src/scripts/worm-system.spawn.js:166:17)\n    at eval (eval at evaluate (:290:30), <anonymous>:2:26)\n    at UtilityScript.evaluate (<anonymous>:292:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
-                        "stack": "Error: page.evaluate: TypeError: this.animate is not a function\n    at proto._spawnWormWithConfig (http://localhost:8000/src/scripts/worm-system.spawn.js:135:12)\n    at proto.spawnWormFromConsole (http://localhost:8000/src/scripts/worm-system.spawn.js:166:17)\n    at eval (eval at evaluate (:290:30), <anonymous>:2:26)\n    at UtilityScript.evaluate (<anonymous>:292:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at proto._spawnWormWithConfig (http://localhost:8000/src/scripts/worm-system.spawn.js:135:12)\n    at proto.spawnWormFromConsole (http://localhost:8000/src/scripts/worm-system.spawn.js:166:17)\n    at eval (eval at evaluate (:290:30), <anonymous>:2:26)\n    at UtilityScript.evaluate (<anonymous>:292:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js:347:16",
-                        "location": {
-                          "file": "http://localhost:8000/src/scripts/worm-system.spawn.js",
-                          "column": 12,
-                          "line": 135
-                        }
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "http://localhost:8000/src/scripts/worm-system.spawn.js",
-                            "column": 12,
-                            "line": 135
-                          },
-                          "message": "Error: page.evaluate: TypeError: this.animate is not a function\n\u001b[2m    at proto._spawnWormWithConfig (http://localhost:8000/src/scripts/worm-system.spawn.js:135:12)\u001b[22m\n\u001b[2m    at proto.spawnWormFromConsole (http://localhost:8000/src/scripts/worm-system.spawn.js:166:17)\u001b[22m\n\u001b[2m    at eval (eval at evaluate (:290:30), <anonymous>:2:26)\u001b[22m\n\u001b[2m    at UtilityScript.evaluate (<anonymous>:292:16)\u001b[22m\n\u001b[2m    at UtilityScript.<anonymous> (<anonymous>:1:44)\u001b[22m\n\u001b[2m    at proto._spawnWormWithConfig (http://localhost:8000/src/scripts/worm-system.spawn.js:135:12)\u001b[22m\n\u001b[2m    at proto.spawnWormFromConsole (http://localhost:8000/src/scripts/worm-system.spawn.js:166:17)\u001b[22m\n\u001b[2m    at eval (eval at evaluate (:290:30), <anonymous>:2:26)\u001b[22m\n\u001b[2m    at UtilityScript.evaluate (<anonymous>:292:16)\u001b[22m\n\u001b[2m    at UtilityScript.<anonymous> (<anonymous>:1:44)\u001b[22m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\powerups.spec.js:347:16\u001b[22m"
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:07:11.765Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Worm-System-Basic-Tests-can-spawn-worm-from-console-chromium\\test-failed-1.png"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Worm-System-Basic-Tests-can-spawn-worm-from-console-chromium\\error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Worm-System-Basic-Tests-can-spawn-worm-from-console-chromium\\trace.zip"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "http://localhost:8000/src/scripts/worm-system.spawn.js",
-                        "column": 12,
-                        "line": 135
-                      }
-                    }
-                  ],
-                  "status": "unexpected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-a416d479d7094eaeeaca",
-              "file": "powerups.spec.js",
-              "line": 345,
-              "column": 3
-            },
-            {
-              "title": "can trigger purple worm",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 15,
-                      "parallelIndex": 2,
-                      "status": "passed",
-                      "duration": 30060,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:07:36.404Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\powerups-Worm-System-Basic-Tests-can-trigger-purple-worm-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7e1fa2f8fa6a13b34442-b94ab0fbca766c7cd228",
-              "file": "powerups.spec.js",
-              "line": 361,
-              "column": 3
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "timer.spec.js",
-      "file": "timer.spec.js",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "Timer and Score Countdown",
-          "file": "timer.spec.js",
-          "line": 4,
-          "column": 6,
-          "specs": [
-            {
-              "title": "timer should count down from 600",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 90000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 16,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 39689,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "Initial timer value: 598\n"
-                        },
-                        {
-                          "text": "Timer value after 3s: 594\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:08:09.509Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\timer-Timer-and-Score-Coun-3ea87--should-count-down-from-600-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "67880e45c1a90d19a1bf-5f7dbb1c4dcbf1e1881d",
-              "file": "timer.spec.js",
-              "line": 23,
-              "column": 3
-            },
-            {
-              "title": "score should count down from 10000",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 90000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 15,
-                      "parallelIndex": 2,
-                      "status": "passed",
-                      "duration": 43582,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "Initial score value: 9995\n"
-                        },
-                        {
-                          "text": "Score value after 3s: 9942\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:08:35.089Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\timer-Timer-and-Score-Coun-b7231-hould-count-down-from-10000-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "67880e45c1a90d19a1bf-e0b944013d40e6d150e5",
-              "file": "timer.spec.js",
-              "line": 46,
-              "column": 3
-            },
-            {
-              "title": "debug: check console logs for timer events",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 90000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 16,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 48386,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "Timer console messages: [\n  \u001b[32m'⏱️ startStep() called - _paused: false _zeroLocked: false _gameStarted: true timestamp: 1771150177893'\u001b[39m,\n  \u001b[32m'⏱️ Interval created via ResourceManager, ID: 18'\u001b[39m,\n  \u001b[32m'⏱️ Timer tick: 600 s, score: 10000'\u001b[39m,\n  \u001b[32m'⏱️ Timer tick: 600 s, score: 9987'\u001b[39m\n]\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:09:01.822Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\timer-Timer-and-Score-Coun-4f9ee-nsole-logs-for-timer-events-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "67880e45c1a90d19a1bf-d5b9bc3a53bb86427eb9",
-              "file": "timer.spec.js",
-              "line": 72,
-              "column": 3
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "ui-boundary.spec.js",
-      "file": "ui-boundary.spec.js",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "UI Boundary Management",
-          "file": "ui-boundary.spec.js",
-          "line": 9,
-          "column": 6,
-          "specs": [
-            {
-              "title": "HUD elements should not overlap",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 60000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 15,
-                      "parallelIndex": 2,
-                      "status": "passed",
-                      "duration": 66846,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "✅ HUD elements properly spaced: Score ends at 136.578125px, Timer starts at 1147.3709716796875px\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:09:28.490Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\ui-boundary-UI-Boundary-Ma-219a9-elements-should-not-overlap-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "78197c13f9ff45df12c3-4995c0f7d7d68d220eff",
-              "file": "ui-boundary.spec.js",
-              "line": 28,
-              "column": 3
-            },
-            {
-              "title": "Powerup display should not overlap with timer",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 60000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 17,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 17598,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "✅ Powerup display does not overlap with timer: Powerup ends at 763.9375px, Timer starts at 1146.801513671875px\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:09:34.936Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\ui-boundary-UI-Boundary-Ma-45485-ould-not-overlap-with-timer-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "78197c13f9ff45df12c3-b1b0960ca4300585cf69",
-              "file": "ui-boundary.spec.js",
-              "line": 49,
-              "column": 3
-            },
-            {
-              "title": "Problem container should not overlap with score display",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 60000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 16,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 44279,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "✅ Problem container below score: Score ends at Y=80.390625px, Problem starts at Y=90px\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:09:51.502Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\ui-boundary-UI-Boundary-Ma-0ece0--overlap-with-score-display-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "78197c13f9ff45df12c3-8e04e0cc8079a99d4051",
-              "file": "ui-boundary.spec.js",
-              "line": 82,
-              "column": 3
-            },
-            {
-              "title": "Lock display should not overlap with problem container",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 60000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 17,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 43044,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "✅ Lock display positioned correctly: Problem ends at Y=149.1875px, Lock starts at Y=242.5px\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:09:54.365Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\ui-boundary-UI-Boundary-Ma-b8b4e-rlap-with-problem-container-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "78197c13f9ff45df12c3-7df3aeb5a69d8bd17e81",
-              "file": "ui-boundary.spec.js",
-              "line": 101,
-              "column": 3
-            },
-            {
-              "title": "UIBoundaryManager should be initialized",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 60000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 15,
-                      "parallelIndex": 2,
-                      "status": "passed",
-                      "duration": 49951,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "✅ UIBoundaryManager is initialized\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:10:37.875Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\ui-boundary-UI-Boundary-Ma-8bfee-nager-should-be-initialized-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "78197c13f9ff45df12c3-5412a0ed239098863fdf",
-              "file": "ui-boundary.spec.js",
-              "line": 121,
-              "column": 3
-            },
-            {
-              "title": "UIBoundaryManager should detect overlaps",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 60000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 16,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 52727,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "✅ No UI overlaps detected (0 overlaps)\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:10:38.585Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\ui-boundary-UI-Boundary-Ma-d1e98-ager-should-detect-overlaps-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "78197c13f9ff45df12c3-14deda0ede40d45e26dc",
-              "file": "ui-boundary.spec.js",
-              "line": 133,
-              "column": 3
-            },
-            {
-              "title": "UIBoundaryManager should log overlap attempts",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 60000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 17,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 12405,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "✅ Validation system functional: {\n  valid: \u001b[33mfalse\u001b[39m,\n  adjustedPosition: { x: \u001b[33m0\u001b[39m, y: \u001b[33m0\u001b[39m },\n  violations: [ \u001b[32m'Overlaps with \"score-display\"'\u001b[39m ]\n}\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:10:40.130Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\ui-boundary-UI-Boundary-Ma-4d824-should-log-overlap-attempts-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "78197c13f9ff45df12c3-306b7f8d100755d1f778",
-              "file": "ui-boundary.spec.js",
-              "line": 146,
-              "column": 3
-            },
-            {
-              "title": "UI elements should reposition on window resize",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 60000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 17,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 61095,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "✅ UI elements properly positioned after resize\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:10:53.969Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\ui-boundary-UI-Boundary-Ma-be607-reposition-on-window-resize-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "78197c13f9ff45df12c3-f49b6eec76194b817f09",
-              "file": "ui-boundary.spec.js",
-              "line": 182,
-              "column": 3
-            },
-            {
-              "title": "Mobile layout should maintain separation",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 60000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 15,
-                      "parallelIndex": 2,
-                      "status": "passed",
-                      "duration": 50750,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "✅ Mobile layout maintains HUD separation\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:11:30.472Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\ui-boundary-UI-Boundary-Ma-f49b5--should-maintain-separation-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "78197c13f9ff45df12c3-9a14ed3dda0588de8a6b",
-              "file": "ui-boundary.spec.js",
-              "line": 207,
-              "column": 3
-            }
-          ]
-        },
-        {
-          "title": "Panel A Layout",
-          "file": "ui-boundary.spec.js",
-          "line": 225,
-          "column": 6,
-          "specs": [
-            {
-              "title": "Problem and lock should have vertical separation",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 60000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 16,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 18630,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "✅ Panel A vertical layout: Problem bottom=149.1875px, Lock top=242.5px, Gap=93.3125px\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:11:35.375Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\ui-boundary-Panel-A-Layout-05c5f-ld-have-vertical-separation-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "78197c13f9ff45df12c3-7ac7e848d13399491283",
-              "file": "ui-boundary.spec.js",
-              "line": 239,
-              "column": 3
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "worm-behavior.spec.js",
-      "file": "worm-behavior.spec.js",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "Worm behavior: aggression, targeting, and click rules",
-          "file": "worm-behavior.spec.js",
-          "line": 4,
-          "column": 6,
-          "specs": [
-            {
-              "title": "worms immediately target revealed symbols",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 16,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 21332,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:11:56.240Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\worm-behavior-Worm-behavio-63cba-ely-target-revealed-symbols-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "e45dd070a89c9a32f92d-8511243417e75fb0ebf7",
+              "id": "e45dd070a89c9a32f92d-141977b0d7faf68acf65",
               "file": "worm-behavior.spec.js",
-              "line": 18,
-              "column": 3
-            },
-            {
-              "title": "green worms require double click to kill",
-              "ok": false,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 17,
-                      "parallelIndex": 1,
-                      "status": "timedOut",
-                      "duration": 56187,
-                      "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\worm-behavior.spec.js:5:8",
-                        "location": {
-                          "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\worm-behavior.spec.js",
-                          "column": 8,
-                          "line": 5
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 3 |\u001b[39m\n \u001b[90m 4 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"Worm behavior: aggression, targeting, and click rules\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 5 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 7 |\u001b[39m\n \u001b[90m 8 |\u001b[39m     \u001b[36mconst\u001b[39m startButton \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m\"#start-game-btn\"\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\worm-behavior.spec.js",
-                            "column": 8,
-                            "line": 5
-                          },
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 3 |\u001b[39m\n \u001b[90m 4 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m\"Worm behavior: aggression, targeting, and click rules\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 5 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m\"/game.html?level=beginner\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 7 |\u001b[39m\n \u001b[90m 8 |\u001b[39m     \u001b[36mconst\u001b[39m startButton \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m\"#start-game-btn\"\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\worm-behavior.spec.js:5:8\u001b[22m"
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:11:56.832Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium\\test-failed-1.png"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium\\error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium\\trace.zip"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\worm-behavior.spec.js",
-                        "column": 8,
-                        "line": 5
-                      }
-                    }
-                  ],
-                  "status": "unexpected"
-                }
-              ],
-              "id": "e45dd070a89c9a32f92d-9137722123dc0e80ba5c",
-              "file": "worm-behavior.spec.js",
-              "line": 48,
-              "column": 3
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "worm-cursor-evasion.spec.js",
-      "file": "worm-cursor-evasion.spec.js",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "Worm cursor evasion",
-          "file": "worm-cursor-evasion.spec.js",
-          "line": 4,
-          "column": 6,
-          "specs": [
-            {
-              "title": "worms move away from cursor threat",
-              "ok": false,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 16,
-                      "parallelIndex": 0,
-                      "status": "failed",
-                      "duration": 31839,
-                      "error": {
-                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m14.142135623730951\u001b[39m\nReceived:   \u001b[31m14.142135623730951\u001b[39m",
-                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m14.142135623730951\u001b[39m\nReceived:   \u001b[31m14.142135623730951\u001b[39m\n    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\worm-cursor-evasion.spec.js:67:25",
-                        "location": {
-                          "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\worm-cursor-evasion.spec.js",
-                          "column": 25,
-                          "line": 67
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 65 |\u001b[39m     )\u001b[33m;\u001b[39m\n \u001b[90m 66 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 67 |\u001b[39m     expect(newDistance)\u001b[33m.\u001b[39mtoBeGreaterThan(initialDistance)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 68 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 69 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 70 |\u001b[39m\u001b[0m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\worm-cursor-evasion.spec.js",
-                            "column": 25,
-                            "line": 67
-                          },
-                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m14.142135623730951\u001b[39m\nReceived:   \u001b[31m14.142135623730951\u001b[39m\n\n\u001b[0m \u001b[90m 65 |\u001b[39m     )\u001b[33m;\u001b[39m\n \u001b[90m 66 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 67 |\u001b[39m     expect(newDistance)\u001b[33m.\u001b[39mtoBeGreaterThan(initialDistance)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 68 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 69 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 70 |\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\worm-cursor-evasion.spec.js:67:25\u001b[22m"
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-02-15T10:12:22.084Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\worm-cursor-evasion-Worm-c-f29cc-ove-away-from-cursor-threat-chromium\\test-failed-1.png"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\worm-cursor-evasion-Worm-c-f29cc-ove-away-from-cursor-threat-chromium\\error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\test-results\\worm-cursor-evasion-Worm-c-f29cc-ove-away-from-cursor-threat-chromium\\trace.zip"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "C:\\Users\\eboth\\Documents\\MathMaster\\MathMasterHTML\\tests\\worm-cursor-evasion.spec.js",
-                        "column": 25,
-                        "line": 67
-                      }
-                    }
-                  ],
-                  "status": "unexpected"
-                }
-              ],
-              "id": "fd499b432d8a358ad87e-832588f07fcdcad04396",
-              "file": "worm-cursor-evasion.spec.js",
-              "line": 18,
+              "line": 79,
               "column": 3
             }
           ]
@@ -2754,11 +335,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-02-15T09:52:58.311Z",
-    "duration": 1198938.0139999986,
-    "expected": 28,
+    "startTime": "2026-02-22T13:13:36.272Z",
+    "duration": 3943.2290000000003,
+    "expected": 1,
     "skipped": 0,
-    "unexpected": 17,
+    "unexpected": 0,
     "flaky": 0
   }
 }
