@@ -14,18 +14,6 @@
       this.handlePurpleWormClick(worm);
       return;
     }
-
-    const now = Date.now();
-    if (
-      !worm.lastHitTime ||
-      now - worm.lastHitTime > this.WORM_CLICK_GRACE_WINDOW
-    ) {
-      worm.lastHitTime = now;
-      this._triggerWormEscape(worm, event);
-      return;
-    }
-
-    worm.lastHitTime = 0;
     this.handleWormClick(worm);
   };
 
@@ -106,22 +94,6 @@
 
     // Create purple clone near parent
     const newWormId = `purple-clone-${Date.now()}-${Math.random()}`;
-    const newWormElement = document.createElement("div");
-    newWormElement.className = "worm-container purple-worm";
-    newWormElement.id = newWormId;
-
-    // Worm body with segments
-    const wormBody = document.createElement("div");
-    wormBody.className = "worm-body";
-
-    for (let i = 0; i < 5; i++) {
-      const segment = document.createElement("div");
-      segment.className = "worm-segment";
-      segment.style.setProperty("--segment-index", String(i));
-      wormBody.appendChild(segment);
-    }
-
-    newWormElement.appendChild(wormBody);
 
     // Position clone near parent with random offset - USE VIEWPORT COORDINATES
     const offset = this.CLONE_POSITION_OFFSET;
@@ -140,47 +112,29 @@
       ),
     );
 
-    newWormElement.style.left = `${newX}px`;
-    newWormElement.style.top = `${newY}px`;
-    newWormElement.style.position = "fixed"; // Use fixed for viewport positioning
-    newWormElement.style.zIndex = "10000";
-    newWormElement.style.opacity = "1";
-    newWormElement.style.visibility = "visible";
-    newWormElement.style.pointerEvents = "auto"; // Allow clicks
+    const newWormElement = this.factory.createWormElement({
+      id: newWormId,
+      classNames: ["purple-worm"],
+      segmentCount: this.WORM_SEGMENT_COUNT,
+      x: newX,
+      y: newY,
+    });
 
     this.crossPanelContainer.appendChild(newWormElement); // Use cross-panel container
 
-    // Create purple clone data
-    const cloneData = {
+    // Create purple clone data through factory to keep properties consistent
+    const cloneData = this.factory.createWormData({
       id: newWormId,
       element: newWormElement,
-      stolenSymbol: null,
-      targetElement: null,
-      targetSymbol: parentWorm.targetSymbol,
       x: newX,
       y: newY,
-      velocityX: (Math.random() - 0.5) * 2.0,
-      velocityY: (Math.random() - 0.5) * 1.0,
-      active: true,
-      hasStolen: false,
-      isRushingToTarget: parentWorm.isRushingToTarget,
-      roamingEndTime: Date.now() + this.PURPLE_CLONE_ROAM_TIME,
-      isFlickering: false,
-      baseSpeed: 2.0,
-      currentSpeed: 2.0,
-      isPurple: true, // Maintain purple status
-      canStealBlue: true, // Can steal blue symbols
+      baseSpeed: this.SPEED_PURPLE_WORM,
+      roamDuration: this.PURPLE_CLONE_ROAM_TIME,
+      isPurple: true,
       fromConsole: false,
-      crawlPhase: Math.random() * Math.PI * 2,
-      direction: Math.random() * Math.PI * 2,
-      aggressionLevel: 0,
-      path: null,
-      pathIndex: 0,
-      lastPathUpdate: 0,
-      lastHitTime: 0,
-      escapeUntil: 0,
-      escapeVector: null,
-    };
+      targetSymbol: parentWorm.targetSymbol,
+    });
+    cloneData.isRushingToTarget = parentWorm.isRushingToTarget;
 
     this.worms.push(cloneData);
 

@@ -13,9 +13,9 @@
   left: 12px;
   right: 12px;
   display: grid;
-  /* 3-zone layout: score (left) | spacer (center for powerups) | timer (right) */
-  grid-template-columns: auto 1fr auto;
-  grid-template-areas: "score powerup-zone timer";
+  /* 3-zone layout: score + timer (left) | spacer (center for powerups) */
+  grid-template-columns: auto auto 1fr;
+  grid-template-areas: "score timer powerup-zone";
   align-items: flex-start;
   gap: 20px; /* Minimum spacing between HUD elements */
   z-index: 10005;
@@ -53,7 +53,7 @@
 
 .timer-display {
   grid-area: timer;
-  justify-self: end;
+  justify-self: start;
 }
 
 .hud-label {
