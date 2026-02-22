@@ -44,7 +44,11 @@
       !this.cachedContainerRect ||
       now - this.containerRectCacheTime > this.CACHE_DURATION_RECT
     ) {
-      this.cachedContainerRect = this.wormContainer.getBoundingClientRect();
+      const container =
+        this.solutionContainer ||
+        document.getElementById("panel-b") ||
+        this.wormContainer;
+      this.cachedContainerRect = container.getBoundingClientRect();
       this.containerRectCacheTime = now;
     }
     return this.cachedContainerRect;

@@ -32,9 +32,7 @@
     }
 
     // FIX: Purple worms need access to ALL symbols (including hidden), not just revealed
-    const symbolsSource = worm.isPurple
-      ? this.getCachedAllSymbols()
-      : this.getCachedRevealedSymbols();
+    const symbolsSource = this.getCachedAllSymbols();
 
     // Get all available symbols (not stolen, not spaces, not completed)
     const allAvailableSymbols = Array.from(symbolsSource).filter(

@@ -14,18 +14,6 @@
       this.handlePurpleWormClick(worm);
       return;
     }
-
-    const now = Date.now();
-    if (
-      !worm.lastHitTime ||
-      now - worm.lastHitTime > this.WORM_CLICK_GRACE_WINDOW
-    ) {
-      worm.lastHitTime = now;
-      this._triggerWormEscape(worm, event);
-      return;
-    }
-
-    worm.lastHitTime = 0;
     this.handleWormClick(worm);
   };
 
