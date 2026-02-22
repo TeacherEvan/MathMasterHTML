@@ -117,8 +117,10 @@
 
     this.worms.push(wormData);
 
-    // Add click handler
-    wormElement.addEventListener("click", (e) => {
+    // Add interaction handler – use pointerdown for instant response and to
+    // ensure the splat animation fires even when the worm element is moving
+    // rapidly (a full click requires press+release on the same element).
+    wormElement.addEventListener("pointerdown", (e) => {
       e.stopPropagation();
       this.handleWormInteraction(wormData, e);
     });
@@ -275,12 +277,15 @@
 
     this.worms.push(wormData);
 
-    // PURPLE WORM CLICK: Always clones
+    // PURPLE WORM CLICK: Always clones.
+    // Use pointerdown so the handler fires immediately on contact — a "click"
+    // requires press+release on the same element, which a moving worm makes
+    // nearly impossible to achieve.
     wormData.clickHandler = (e) => {
       e.stopPropagation();
       this.handlePurpleWormClick(wormData);
     };
-    wormElement.addEventListener("click", wormData.clickHandler);
+    wormElement.addEventListener("pointerdown", wormData.clickHandler);
 
     console.log(
       `🟣 Purple worm ${wormId} spawned from help button at (${startX.toFixed(

@@ -319,6 +319,13 @@ class WormSystem {
     }
 
     this.isInitialized = true;
+
+    // Pre-bind animate for stable RAF scheduling. All prototype methods
+    // (including animate from worm-system.movement.js) are already defined by
+    // the time initialize() runs, because all <script> tags are synchronous
+    // and execute before DOMContentLoaded fires.
+    this._boundAnimate = this.animate.bind(this);
+
     console.log("✅ Worm System initialized successfully");
   }
 }
