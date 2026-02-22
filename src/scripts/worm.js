@@ -324,9 +324,7 @@ class WormSystem {
     // (including animate from worm-system.movement.js) are already defined by
     // the time initialize() runs, because all <script> tags are synchronous
     // and execute before DOMContentLoaded fires.
-    this._boundAnimate = typeof this.animate === "function"
-      ? this.animate.bind(this)
-      : null;
+    this._boundAnimate = this.animate.bind(this);
 
     console.log("✅ Worm System initialized successfully");
   }
