@@ -277,12 +277,15 @@
 
     this.worms.push(wormData);
 
-    // PURPLE WORM CLICK: Always clones
+    // PURPLE WORM CLICK: Always clones.
+    // Use pointerdown so the handler fires immediately on contact — a "click"
+    // requires press+release on the same element, which a moving worm makes
+    // nearly impossible to achieve.
     wormData.clickHandler = (e) => {
       e.stopPropagation();
       this.handlePurpleWormClick(wormData);
     };
-    wormElement.addEventListener("click", wormData.clickHandler);
+    wormElement.addEventListener("pointerdown", wormData.clickHandler);
 
     console.log(
       `🟣 Purple worm ${wormId} spawned from help button at (${startX.toFixed(

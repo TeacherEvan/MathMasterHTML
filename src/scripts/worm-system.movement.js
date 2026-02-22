@@ -19,16 +19,9 @@ console.log("🐛 Worm movement animate loading...");
    * over every worm and delegates to the appropriate behaviour handler.
    */
   proto.animate = function() {
-    // Re-schedule next frame. The explicit guard handles the edge case where
-    // the worm-system.movement.js IIFE ran before WormSystem was fully defined
-    // (its own guard would have returned early, leaving animate undefined on
-    // the prototype), which would otherwise cause this.animate() to throw and
-    // silently kill the loop.
-    this.animationFrameId = requestAnimationFrame(() => {
-      if (this && typeof this.animate === "function") {
-        this.animate();
-      }
-    });
+    // Use the pre-bound reference created in initialize() so RAF always holds
+    // a stable function with `this` guaranteed to be the WormSystem instance.
+    this.animationFrameId = requestAnimationFrame(this._boundAnimate);
 
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;

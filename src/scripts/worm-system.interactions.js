@@ -187,8 +187,9 @@
 
     this.worms.push(cloneData);
 
-    // Purple worm click handler (50% clone chance)
-    newWormElement.addEventListener("click", (e) => {
+    // Purple worm click handler – use pointerdown for immediate response on
+    // a moving element (same reasoning as _spawnWormWithConfig).
+    newWormElement.addEventListener("pointerdown", (e) => {
       e.stopPropagation();
       this.handlePurpleWormClick(cloneData);
     });
