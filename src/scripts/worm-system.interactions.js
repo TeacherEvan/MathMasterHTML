@@ -72,7 +72,7 @@
   proto.handlePurpleWormClick = function(worm) {
     if (!worm.active) return;
 
-    console.log(`🟣 Purple worm ${worm.id} clicked - CREATING CLONE!`);
+    console.log(`🪲 Purple worm ${worm.id} clicked - CREATING CLONE!`);
 
     // Visual feedback
     worm.element.style.animation = "worm-flash-purple 0.5s ease-out";
@@ -80,7 +80,8 @@
       worm.element.style.animation = "";
     }, 500);
 
-    // Clone the purple worm
+    // FIX: Explode original purple worm AND clone it
+    this.explodeWorm(worm, false); 
     this.clonePurpleWorm(worm);
   };
 
@@ -91,19 +92,15 @@
    * Purple worms can only be killed by clicking matching symbol in Panel C rain.
    */
   proto.clonePurpleWorm = function(parentWorm) {
-    if (!parentWorm.active) return;
-
+    // We removed the active check here because the parent worm might have just been "exploded" (deactivated)
+    
     console.log(
-      `🟣 Purple worm ${parentWorm.id} cloning! Creating purple clone...`,
+      `🪲 Purple worm ${parentWorm.id} cloning! Creating purple clone...`,
     );
 
     // Check if we can spawn more worms
     if (this.worms.length >= this.maxWorms) {
       console.log(`⚠️ Max worms (${this.maxWorms}) reached. Cannot clone.`);
-      parentWorm.element.style.animation = "worm-flash 0.3s ease-out";
-      setTimeout(() => {
-        parentWorm.element.style.animation = "";
-      }, 300);
       return;
     }
 
@@ -195,16 +192,14 @@
     });
 
     // Clone birth effect
-    parentWorm.element.classList.add("worm-multiply");
     newWormElement.classList.add("worm-multiply");
 
     setTimeout(() => {
-      parentWorm.element.classList.remove("worm-multiply");
       newWormElement.classList.remove("worm-multiply");
     }, this.CLONE_BIRTH_ANIMATION);
 
     console.log(
-      `🟣 Purple worm cloned! New clone ${newWormId}. Total worms: ${this.worms.length}`,
+      `🪲 Purple worm cloned! New clone ${newWormId}. Total worms: ${this.worms.length}`,
     );
 
     // Start animation loop if not already running

@@ -19,9 +19,17 @@ console.log("🐛 Worm movement animate loading...");
    * over every worm and delegates to the appropriate behaviour handler.
    */
   proto.animate = function() {
+    // Check if system is unmounted/destroyed
+    if (this.isDestroyed) {
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+      }
+      return; 
+    }
+  
     // Use the pre-bound reference created in initialize() so RAF always holds
     // a stable function with `this` guaranteed to be the WormSystem instance.
-    this.animationFrameId = requestAnimationFrame(this._boundAnimate);
+    this.animationFrameId = requestAnimationFrame(this._boundAnimate || this.animate.bind(this));
 
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
