@@ -293,7 +293,7 @@
       )}, ${startY.toFixed(0)}). Total worms: ${this.worms.length}`,
     );
     console.log(
-      `🟣 Purple worm moves slower, prioritizes RED symbols, and CLONES on click!`,
+      `🟣 Purple worm moves slower, steals visible symbols, and CLONES on click!`,
     );
 
     // Start animation loop if not already running

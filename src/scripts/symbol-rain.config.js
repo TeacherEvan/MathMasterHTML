@@ -27,7 +27,7 @@
     // Spawn rates
     spawnRate: 0.5,
     burstSpawnRate: 0.15,
-    symbolsPerWave: 7,
+    symbolsPerWave: 14,
     waveInterval: 80,
     guaranteedSpawnInterval: 5000,
     // Face reveal
@@ -37,7 +37,7 @@
     // Layout
     columnWidth: 50,
     gridCellSize: 100,
-    poolSize: 30,
+    poolSize: 60,
     // Desktop collision (pixels)
     desktopSymbolHeight: 30,
     desktopSymbolWidth: 30,

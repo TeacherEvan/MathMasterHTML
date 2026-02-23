@@ -108,41 +108,13 @@
 
       const normalizedWormSymbol = normalizeSymbol(worm.stolenSymbol);
 
-      if (normalizedWormSymbol === normalizedClicked) {
-        // PURPLE WORM: Turn green when matching symbol clicked (must click worm to destroy)
+        if (normalizedWormSymbol === normalizedClicked) {
+        // PURPLE WORM: matching rain symbol is the only valid kill path
         if (worm.isPurple) {
           console.log(
-            `🟣→🟢 User clicked rain symbol "${clickedSymbol}" - Purple worm ${worm.id} turns GREEN!`,
+            `💥 User clicked matching rain symbol "${clickedSymbol}" - EXPLODING purple worm ${worm.id}!`,
           );
-
-          // Turn worm green (damaged state)
-          worm.element.style.filter = "hue-rotate(120deg) brightness(1.2)"; // Purple → Green
-          worm.element.classList.remove("purple-worm");
-          worm.element.classList.add("worm-damaged", "purple-turned-green");
-          worm.isPurple = false; // No longer purple
-          worm.canBeClicked = true; // Now clickable for destruction
-
-          // Flash effect
-          worm.element.style.animation = "worm-flash-green 0.5s ease-out";
-          setTimeout(() => {
-            worm.element.style.animation = "";
-          }, 500);
-
-          // Update click handler to explode instead of clone
-          worm.element.removeEventListener("click", worm.clickHandler);
-          worm.clickHandler = (e) => {
-            e.stopPropagation();
-            console.log(
-              `💥 Green (was purple) worm ${worm.id} clicked - EXPLODING!`,
-            );
-
-            // Drop power-up when purple worm (now green) is destroyed
-            this.dropPowerUp(worm.x, worm.y);
-
-            this.explodeWorm(worm, false);
-          };
-          worm.element.addEventListener("click", worm.clickHandler);
-
+          this.explodeWorm(worm, true);
           return;
         }
 
