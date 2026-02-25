@@ -68,8 +68,7 @@
       worm.element.style.animation = "";
     }, 500);
 
-    // FIX: Explode original purple worm AND clone it
-    this.explodeWorm(worm, false); 
+    // Purple worms should not die on direct click; click is a clone penalty.
     this.clonePurpleWorm(worm);
   };
 

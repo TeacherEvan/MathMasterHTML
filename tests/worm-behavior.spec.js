@@ -81,4 +81,32 @@ test.describe("Worm behavior: aggression, targeting, and click rules", () => {
 
     expect(afterSecondClick).toBeFalsy();
   });
+
+  test("purple worm click clones instead of dying", async ({ page }) => {
+    await page.evaluate(() => {
+      document.dispatchEvent(new CustomEvent("purpleWormTriggered"));
+    });
+
+    await page.waitForFunction(
+      () => window.wormSystem?.worms.some((w) => w.active && w.isPurple),
+    );
+
+    const beforeClickCount = await page.evaluate(
+      () => window.wormSystem.worms.filter((w) => w.active && w.isPurple).length,
+    );
+
+    const purpleWorm = page.locator(".worm-container.purple-worm").first();
+    await purpleWorm.click({ force: true });
+
+    await page.waitForTimeout(400);
+
+    const afterClickState = await page.evaluate(() => ({
+      purpleCount: window.wormSystem.worms.filter((w) => w.active && w.isPurple)
+        .length,
+      totalActive: window.wormSystem.worms.filter((w) => w.active).length,
+    }));
+
+    expect(afterClickState.purpleCount).toBeGreaterThan(beforeClickCount);
+    expect(afterClickState.totalActive).toBeGreaterThanOrEqual(2);
+  });
 });

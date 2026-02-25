@@ -31,8 +31,7 @@
       return;
     }
 
-    // FIX: Purple worms need access to ALL symbols (including hidden), not just revealed
-    const symbolsSource = this.getCachedAllSymbols();
+    const symbolsSource = this.getCachedRevealedSymbols();
 
     // Get all available symbols (not stolen, not spaces, not completed)
     const allAvailableSymbols = Array.from(symbolsSource).filter(
@@ -42,37 +41,22 @@
         !el.classList.contains("completed-row-symbol"),
     );
 
-    // PURPLE WORM LOGIC: Only steal blue symbols when NO red symbols available
+    // PURPLE WORM LOGIC: can only steal symbols currently visible to the user
     let availableSymbols;
     if (worm.canStealBlue && worm.isPurple) {
-      // First, try to get red (hidden) symbols only
-      const redSymbols = allAvailableSymbols.filter((el) =>
-        el.classList.contains("hidden-symbol"),
-      );
-
-      if (redSymbols.length > 0) {
-        // Red symbols available - purple worm steals red symbols like normal
-        availableSymbols = redSymbols;
-        console.log(
-          `🟣 PURPLE WORM - ${redSymbols.length} red symbols available (preferring red)`,
-        );
-      } else {
-        // NO red symbols - now purple worm can steal blue symbols!
-        const blueSymbols = allAvailableSymbols.filter((el) =>
-          el.classList.contains("revealed-symbol"),
-        );
-        availableSymbols = blueSymbols;
-        console.log(
-          `🟣 PURPLE WORM - NO red symbols! Stealing blue symbols (${blueSymbols.length} available)`,
-        );
-      }
-    } else {
-      // Normal worm - only steal red (hidden) symbols
       availableSymbols = allAvailableSymbols.filter((el) =>
-        el.classList.contains("hidden-symbol"),
+        el.classList.contains("revealed-symbol"),
       );
       console.log(
-        `🐛 Normal worm - ${availableSymbols.length} red symbols available`,
+        `🟣 PURPLE WORM - ${availableSymbols.length} revealed symbols available`,
+      );
+    } else {
+      // All non-purple steal attempts are restricted to currently revealed symbols
+      availableSymbols = allAvailableSymbols.filter((el) =>
+        el.classList.contains("revealed-symbol"),
+      );
+      console.log(
+        `🐛 Normal worm - ${availableSymbols.length} revealed symbols available`,
       );
     }
 
@@ -178,18 +162,13 @@
     ));
 
     if (worm.isPurple && worm.canStealBlue) {
-      const redSymbols = allAvailableSymbols.filter((el) =>
-        el.classList.contains("hidden-symbol"),
-      );
-      if (redSymbols.length > 0) return redSymbols;
-
       return allAvailableSymbols.filter((el) =>
         el.classList.contains("revealed-symbol"),
       );
     }
 
     return allAvailableSymbols.filter((el) =>
-      el.classList.contains("hidden-symbol"),
+      el.classList.contains("revealed-symbol"),
     );
   };
 
