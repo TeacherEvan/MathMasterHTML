@@ -61,6 +61,7 @@ console.log("🐛 Worm movement behaviors loading...");
     viewportHeight,
   ) {
     if (worm.hasStolen || !this.evasion) return false;
+    if (worm.escapeUntil && Date.now() <= worm.escapeUntil) return false;
     if (!this.evasion.isCursorThreat(worm, this.cursorState)) return false;
 
     const escape = this.evasion.getCursorEscapeVector(

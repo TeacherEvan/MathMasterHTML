@@ -26,6 +26,11 @@
       wormData.element.parentNode.removeChild(wormData.element);
     }
 
+    if (this.worms.length === 0 && this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+
     console.log(
       `🐛 Worm ${wormData.id} removed. Active worms: ${this.worms.length}`,
     );

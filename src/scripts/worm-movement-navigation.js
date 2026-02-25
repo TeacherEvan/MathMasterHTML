@@ -110,7 +110,7 @@ console.log("🐛 Worm movement navigation loading...");
           obstacles,
         );
         worm.path = path.length > 0 ? path : null;
-        worm.pathIndex = 0;
+        worm.pathIndex = worm.path && worm.path.length > 1 ? 1 : 0;
         worm.lastPathUpdate = now;
       }
     } else {
