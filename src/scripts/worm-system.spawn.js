@@ -129,7 +129,7 @@
     );
 
     // Start animation loop if not already running
-    if (this.worms.length === 1) {
+    if (!this.animationFrameId) {
       this.animate();
     }
 
@@ -293,7 +293,7 @@
     );
 
     // Start animation loop if not already running
-    if (this.worms.length === 1) {
+    if (!this.animationFrameId) {
       this.animate();
     }
   };
