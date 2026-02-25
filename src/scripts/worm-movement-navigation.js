@@ -110,7 +110,8 @@ console.log("🐛 Worm movement navigation loading...");
           obstacles,
         );
         worm.path = path.length > 0 ? path : null;
-        worm.pathIndex = worm.path && worm.path.length > 1 ? 1 : 0;
+        // Skip index 0 because pathfinder includes the worm's current cell first.
+        worm.pathIndex = path.length > 1 ? 1 : 0;
         worm.lastPathUpdate = now;
       }
     } else {
