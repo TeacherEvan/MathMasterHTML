@@ -83,16 +83,12 @@
 
     this.crossPanelContainer.appendChild(wormElement);
 
-    // Seed target if a revealed symbol exists (helps late spawns rush immediately)
+    // Seed target only from currently revealed symbols
     let targetSymbol = null;
     const revealedSymbols = this.getCachedRevealedSymbols();
     if (revealedSymbols && revealedSymbols.length > 0) {
-      targetSymbol = revealedSymbols[0].textContent;
-    } else if (
-      this.latestRevealedSymbol &&
-      Date.now() - this.latestRevealedAt < this.LATEST_REVEALED_TTL
-    ) {
-      targetSymbol = this.latestRevealedSymbol;
+      const randomIndex = Math.floor(Math.random() * revealedSymbols.length);
+      targetSymbol = revealedSymbols[randomIndex].textContent;
     }
 
     // Create worm data
