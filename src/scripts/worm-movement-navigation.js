@@ -49,9 +49,7 @@ console.log("🐛 Worm movement navigation loading...");
       return false;
     }
 
-    const symbolsToSearch = worm.isPurple
-      ? this.getCachedAllSymbols()
-      : this.getCachedRevealedSymbols();
+    const symbolsToSearch = this.getCachedRevealedSymbols();
 
     const targetElement = this._resolveTargetElement(worm, symbolsToSearch);
 

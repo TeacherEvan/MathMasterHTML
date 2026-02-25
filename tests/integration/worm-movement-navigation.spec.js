@@ -355,9 +355,9 @@ describe("Worm Movement Navigation Integration", () => {
       expect(worm.velocityX).toBeCloseTo(4.5, 5);
     });
 
-    test("should handle purple worm targeting all symbols", () => {
+    test("should keep purple worm targeting restricted to revealed symbols", () => {
       const symbolElement = createSymbolMock("x", 300, 250);
-      mockWormSystem.getCachedAllSymbols = jest.fn(() => [symbolElement]);
+      mockWormSystem.getCachedRevealedSymbols = jest.fn(() => [symbolElement]);
       mockWormSystem._resolveTargetElement = jest.fn(() => symbolElement);
 
       const worm = createWormMock({
@@ -381,7 +381,7 @@ describe("Worm Movement Navigation Integration", () => {
       const result = mockWormSystem._updateWormRushingToTarget(worm);
 
       expect(result).toBe(true);
-      expect(mockWormSystem.getCachedAllSymbols).toHaveBeenCalled();
+      expect(mockWormSystem.getCachedRevealedSymbols).toHaveBeenCalled();
     });
   });
 
