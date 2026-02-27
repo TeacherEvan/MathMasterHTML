@@ -22,6 +22,8 @@
         this.spawnPurpleWorm();
       } else if (type === "border") {
         this.spawnWormFromBorder(data);
+      } else if (type === "panelB") {
+        this.spawnGreenWormInPanelB(data.targetSymbol);
       }
     });
   };
@@ -210,6 +212,43 @@
       roamDuration: this.difficultyRoamTimeBorder,
       fromConsole: false,
     });
+  };
+
+  // Spawn a single green worm inside Panel B that immediately rushes to steal a blue (revealed) symbol
+  proto.spawnGreenWormInPanelB = function(targetSymbol) {
+    this.initialize();
+
+    const container = this.solutionContainer || document.getElementById("panel-b");
+    if (!container) {
+      Logger.warn("⚠️", "spawnGreenWormInPanelB: no Panel B container found");
+      return null;
+    }
+
+    const rect = container.getBoundingClientRect();
+    const position = {
+      x: rect.left + rect.width / 2 + (Math.random() - 0.5) * (rect.width * 0.4),
+      y: rect.top + rect.height / 2 + (Math.random() - 0.5) * (rect.height * 0.4),
+    };
+
+    const wormData = this._spawnWormWithConfig({
+      logMessage: `🐛 spawnGreenWormInPanelB() - rushing for blue symbol "${targetSymbol}". Worms: ${this.worms.length}/${this.maxWorms}`,
+      position,
+      wormIdPrefix: "green-worm",
+      classNames: ["green-rush-worm"],
+      baseSpeed: this.SPEED_BORDER_WORM,
+      roamDuration: 0, // Rush immediately - no roaming
+      fromConsole: false,
+    });
+
+    if (wormData && targetSymbol) {
+      wormData.isRushingToTarget = true;
+      wormData.targetSymbol = targetSymbol;
+      // Keep rush mode active for the same duration as clone roam time
+      wormData.forceRushUntil = Date.now() + this.CLONE_WORM_ROAM_DURATION;
+      wormData.roamingEndTime = Date.now();
+    }
+
+    return wormData;
   };
 
   // PURPLE WORM: Spawn purple worm triggered by 2+ wrong answers

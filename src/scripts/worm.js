@@ -21,9 +21,9 @@ class WormSystem {
     const currentLevel = urlParams.get("level") || "beginner";
 
     const difficultySettings = {
-      beginner: { wormsPerRow: 3, speed: 1.0, roamTimeConsole: 8000, roamTimeBorder: 5000 },
-      warrior: { wormsPerRow: 5, speed: 1.5, roamTimeConsole: 6000, roamTimeBorder: 4000 },
-      master: { wormsPerRow: 8, speed: 2.0, roamTimeConsole: 4000, roamTimeBorder: 3000 },
+      beginner: { wormsPerRow: 1, speed: 1.0, roamTimeConsole: 8000, roamTimeBorder: 5000 },
+      warrior: { wormsPerRow: 1, speed: 1.5, roamTimeConsole: 6000, roamTimeBorder: 4000 },
+      master: { wormsPerRow: 1, speed: 2.0, roamTimeConsole: 4000, roamTimeBorder: 3000 },
     };
 
     const settings = difficultySettings[currentLevel] || difficultySettings.beginner;

@@ -113,6 +113,31 @@
   }
 }
 
+/* Refresh flash after a symbol is placed in a console slot */
+.console-slot.refreshing {
+  animation: slotRefresh 0.5s ease-out;
+}
+
+@keyframes slotRefresh {
+  0% {
+    background: rgba(0, 255, 255, 0.6);
+    border-color: #0ff;
+    transform: scale(1.15);
+  }
+
+  60% {
+    background: rgba(0, 40, 0, 0.9);
+    border-color: #00ff00;
+    transform: scale(1.05);
+  }
+
+  100% {
+    background: rgba(0, 40, 0, 0.9);
+    border-color: #00ff00;
+    transform: scale(1);
+  }
+}
+
 /* Disabled state for empty slots */
 .console-slot:empty {
   cursor: not-allowed;

@@ -56,10 +56,10 @@ function stealSymbol(behavior, worm) {
     }
   } else {
     availableSymbols = allAvailableSymbols.filter((el) =>
-      el.classList.contains("hidden-symbol"),
+      el.classList.contains("revealed-symbol"),
     );
     logger.log(
-      `🐛 Normal worm - ${availableSymbols.length} red symbols available`,
+      `🐛 Normal worm - ${availableSymbols.length} blue (revealed) symbols available`,
     );
   }
 
@@ -114,6 +114,34 @@ function stealSymbol(behavior, worm) {
   worm.path = null;
   worm.pathIndex = 0;
   worm.lastPathUpdate = 0;
+
+  // When a blue symbol is stolen, revert the entire row back to red
+  // TODO: When FSM integration is complete, consolidate with the same logic in
+  // worm-system.behavior.js (proto.stealSymbol) into a shared resetRowSymbols helper.
+  if (wasBlueSymbol) {
+    const stepIndex = targetSymbol.dataset.stepIndex;
+    if (stepIndex !== undefined) {
+      const solutionContainer = system.solutionContainer;
+      if (solutionContainer) {
+        const rowSymbols = solutionContainer.querySelectorAll(
+          `[data-step-index="${stepIndex}"].revealed-symbol`,
+        );
+        rowSymbols.forEach((el) => {
+          el.classList.remove("revealed-symbol");
+          el.classList.add("hidden-symbol");
+        });
+        logger.log(
+          `🔴 Worm stole blue symbol from row ${stepIndex} - reverted ${rowSymbols.length} more revealed symbol(s) to red`,
+        );
+        system.invalidateSymbolCache();
+        document.dispatchEvent(
+          new CustomEvent("rowResetByWorm", {
+            detail: { stepIndex: parseInt(stepIndex, 10) },
+          }),
+        );
+      }
+    }
+  }
 
   logger.log(
     `🌈 Worm ${worm.id} stole ${
