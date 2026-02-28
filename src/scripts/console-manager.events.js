@@ -77,6 +77,51 @@ console.log("🎮 Console Manager events loading");
       });
     }
 
+    // Close button
+    const closeBtn = document.getElementById("modal-close-btn");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => {
+        this.hideSymbolSelectionModal();
+      });
+    }
+
+    // Drag-to-reposition the floating modal panel
+    const dragHandle = document.getElementById("modal-drag-handle");
+    const modalOverlay = this.modal;
+    if (dragHandle && modalOverlay) {
+      let isDragging = false;
+      let dragStartX = 0;
+      let dragStartY = 0;
+      let originRight = 20;
+      let originBottom = 20;
+
+      dragHandle.addEventListener("pointerdown", (e) => {
+        if (e.target === closeBtn) return;
+        isDragging = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        const style = window.getComputedStyle(modalOverlay);
+        originRight = parseInt(style.right) || 20;
+        originBottom = parseInt(style.bottom) || 20;
+        dragHandle.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      });
+
+      dragHandle.addEventListener("pointermove", (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - dragStartX;
+        const dy = e.clientY - dragStartY;
+        const newRight = Math.max(0, originRight - dx);
+        const newBottom = Math.max(0, originBottom - dy);
+        modalOverlay.style.right = `${newRight}px`;
+        modalOverlay.style.bottom = `${newBottom}px`;
+      });
+
+      dragHandle.addEventListener("pointerup", () => {
+        isDragging = false;
+      });
+    }
+
     console.log("✅ Modal interaction handlers set up");
   };
 

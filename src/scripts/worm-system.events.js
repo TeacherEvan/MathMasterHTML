@@ -24,17 +24,22 @@
         detail,
       );
       this.rowsCompleted++;
-      const wormsToSpawn =
-        this.wormsPerRow +
-        (this.rowsCompleted - 1) * this.additionalWormsPerRow;
-      console.log(
-        `📊 Row ${this.rowsCompleted} completed. Spawning ${wormsToSpawn} worms!`,
-      );
+      this.initialize(); // Ensure containers are resolved before cache access
 
-      // Spawn multiple worms spread around borders
-      for (let i = 0; i < wormsToSpawn; i++) {
-        this.queueWormSpawn("border", { index: i, total: wormsToSpawn });
+      // Spawn 1 green worm inside Panel B that immediately rushes to steal a blue symbol.
+      // targetSymbol may be null when the row just completed (all symbols are now cyan/completed).
+      // The worm will roam in Panel B and auto-target revealed symbols once the player
+      // starts revealing symbols in the next row.
+      const revealedSymbols = this.getCachedRevealedSymbols();
+      let targetSymbol = null;
+      if (revealedSymbols && revealedSymbols.length > 0) {
+        const idx = Math.floor(Math.random() * revealedSymbols.length);
+        targetSymbol = revealedSymbols[idx].textContent;
       }
+      console.log(
+        `📊 Row ${this.rowsCompleted} completed. Spawning 1 green worm in Panel B targeting blue symbol "${targetSymbol}".`,
+      );
+      this.queueWormSpawn("panelB", { targetSymbol });
     });
 
     // CONSOLIDATED: Listen for problem completion (reset row counter + cleanup)

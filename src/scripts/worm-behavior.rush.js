@@ -53,7 +53,7 @@ function updateWormRushingToTarget(behavior, worm) {
       }
     } else {
       availableSymbols = allSymbols.filter((el) =>
-        el.classList.contains("hidden-symbol"),
+        el.classList.contains("revealed-symbol"),
       );
     }
 

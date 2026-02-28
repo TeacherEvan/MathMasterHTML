@@ -133,6 +133,19 @@ console.log("🎮 Console Manager UI loading");
     this.updateConsoleDisplay();
     this.saveProgress();
 
+    // Play refresh animation on the filled slot
+    const slotEl = this.consoleElement
+      ? this.consoleElement.querySelector(`[data-slot="${position}"]`)
+      : null;
+    if (slotEl) {
+      slotEl.classList.remove("refreshing");
+      // Force reflow so the animation restarts if called twice quickly
+      void slotEl.offsetWidth;
+      slotEl.classList.add("refreshing");
+      // Duration must match the @keyframes slotRefresh animation in console.core.css
+      setTimeout(() => slotEl.classList.remove("refreshing"), 500);
+    }
+
     console.log(`📦 Slot ${position + 1} filled with ${symbol}`);
     console.log("📊 Console state:", this.slots);
   };

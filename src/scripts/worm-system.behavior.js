@@ -120,6 +120,31 @@
     worm.pathIndex = 0;
     worm.lastPathUpdate = 0;
 
+    // When a blue symbol is stolen, revert the entire row back to red
+    if (wasBlueSymbol) {
+      const stepIndex = targetSymbol.dataset.stepIndex;
+      if (stepIndex !== undefined) {
+        const rowSymbols = this.solutionContainer
+          ? this.solutionContainer.querySelectorAll(
+            `[data-step-index="${stepIndex}"].revealed-symbol`,
+          )
+          : [];
+        Array.from(rowSymbols).forEach((el) => {
+          el.classList.remove("revealed-symbol");
+          el.classList.add("hidden-symbol");
+        });
+        console.log(
+          `🔴 Worm stole blue symbol from row ${stepIndex} - reverted ${rowSymbols.length} more revealed symbol(s) to red`,
+        );
+        this.invalidateSymbolCache();
+        document.dispatchEvent(
+          new CustomEvent("rowResetByWorm", {
+            detail: { stepIndex: parseInt(stepIndex, 10) },
+          }),
+        );
+      }
+    }
+
     // ACTIVATE LSD FLICKER when stealing symbol!
     console.log(
       `🌈 Worm ${worm.id} stole ${

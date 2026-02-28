@@ -8,7 +8,6 @@ console.log("🎯 SymbolRain helpers: face reveal loading...");
     symbolElement,
   ) {
     symbolElement.classList.remove("face-reveal");
-    symbolElement.style.transform = "";
     symbolElement.style.textShadow = "";
     symbolElement.style.filter = "";
   };
@@ -17,7 +16,6 @@ console.log("🎯 SymbolRain helpers: face reveal loading...");
     symbolElement,
   ) {
     symbolElement.classList.add("face-reveal");
-    symbolElement.style.transform = "scale(1.3)";
     symbolElement.style.textShadow =
       "0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff";
     symbolElement.style.filter = "brightness(1.5)";
