@@ -10,6 +10,7 @@ MathMasterHTML/
 │   ├── pages/                 # HTML pages
 │   ├── scripts/               # JavaScript modules
 │   ├── styles/                # CSS stylesheets
+│   │   └── css/               # Split CSS modules
 │   ├── assets/                # Static assets
 │   │   ├── problems/          # Math problem data
 │   │   ├── images/            # Image assets
@@ -17,7 +18,14 @@ MathMasterHTML/
 │   ├── tools/                 # Utility scripts
 │   └── types/                 # TypeScript definitions
 ├── tests/                     # Test files
+│   ├── integration/           # Integration tests (Jest-style, not run by Playwright)
+│   ├── unit/                  # Unit tests (Jest-style, not run by Playwright)
+│   ├── mocks/                 # Shared test mocks
+│   └── utils/                 # Test utilities
 ├── docs/                      # Documentation
+│   ├── ARCHITECTURE.md        # Worm system and module design
+│   ├── DEVELOPMENT_GUIDE.md   # Coding standards and recent changes
+│   └── WORM_DEVELOPER_GUIDE.md # Worm system deep-dive
 └── (root config files)
 ```
 
@@ -26,79 +34,133 @@ MathMasterHTML/
 ### Pages (src/pages/)
 | File | Purpose | Dependencies | Size |
 |------|---------|--------------|------|
-| index.html | Welcome screen with Matrix theme | CSS: game.css, modern-ux-enhancements.css | ~5KB |
-| level-select.html | Difficulty level selection | CSS: game.css, level-select.css | ~3KB |
-| game.html | Main game interface | Multiple JS modules, CSS files | ~15KB |
+| game.html | Main game interface (three-panel Matrix UI) | All JS/CSS modules | ~15KB |
+| index.html | Welcome / landing screen with Matrix rain | index.*.css, modern-ux-enhancements.css | ~5KB |
+| level-select.html | Difficulty level selection (Beginner / Warrior / Master) | level-select.*.css | ~3KB |
 
-### Scripts (src/scripts/)
-| File | Purpose | Dependencies | Size |
-|------|---------|--------------|------|
-| game.js | Main game logic, problem solving | utils.js, problem-loader.js | ~50KB |
-| lock-manager.js | Progressive lock animation system | None | ~25KB |
-| worm.js | Enemy mechanics system | worm-*.js modules | ~10KB |
-| console-manager.js | Quick access console | None | ~15KB |
-| 3rdDISPLAY.js | Symbol rain rendering | None | ~8KB |
-| utils.js | Shared utilities | None | ~5KB |
-| constants.js | Game constants | None | ~2KB |
-| ... (other modules) | Various game features | Related modules | Varies |
+### Core Game Scripts (src/scripts/)
+| File | Purpose | Key Exports |
+|------|---------|-------------|
+| game.js | Game bootstrap – initialises all subsystems | `window.GameInit` |
+| game-effects.js | Line-completion visual effects (flash, shake, cyan transform) | `window.GameEffects` |
+| game-problem-manager.js | Loads / tracks current algebra problem and step index | `window.GameProblemManager` |
+| game-symbol-handler.core.js | Handles correct/incorrect symbol clicks; dispatches `symbolRevealed` | `window.GameSymbolHandlerCore` |
+| game-symbol-handler.stolen.js | Restores stolen symbols when player re-clicks the right rain symbol | `window.GameSymbolHandlerStolen` |
+| game-symbol-helpers.js | `isSymbolInCurrentLine`, `revealSpecificSymbol` utilities | `window.GameSymbolHelpers` |
+| utils-logging.js | Global `Logger` with debug/warn/log levels | `window.Logger` |
+| utils.js | `normalizeSymbol` and other shared utilities | global functions |
+| constants.js | Centralised game constants – use instead of magic numbers | `window.GameConstants` |
 
-### Styles (src/styles/)
-| File | Purpose | Dependencies | Size |
-|------|---------|--------------|------|
-| game.css | Three-panel layout | None | ~10KB |
-| game-animations.css | CSS animations | None | ~5KB |
-| console.css | Console styling | None | ~3KB |
-| worm-base.css | Worm base styles | None | ~4KB |
-| ... | Other styles | None | Varies |
+### Symbol Rain (Window C) (src/scripts/)
+| File | Purpose | Key Exports |
+|------|---------|-------------|
+| symbol-rain.config.js | Fall speeds, spawn rates, `guaranteedSpawnInterval` (5000ms) | `window.SymbolRainConfig`, `window.SymbolRainSymbols` |
+| symbol-rain.helpers.js | Registry entry-point for all SymbolRainHelpers | `window.SymbolRainHelpers` |
+| symbol-rain.helpers.face-reveal.js | Glow/brightness face-reveal (no size scaling) | `SymbolRainHelpers.applyFaceRevealStyles` |
+| symbol-rain.helpers.pool.js | Object pool for DOM recycling; cleanup helpers | `SymbolRainHelpers.createSymbolPool` |
+| symbol-rain.helpers.spawn.js | `createFallingSymbol`, `populateInitialSymbols` | `SymbolRainHelpers.createFallingSymbol` |
+| symbol-rain.helpers.collision.js | Spatial hash collision detection | `SymbolRainHelpers.checkCollision` |
+| symbol-rain.animation.js | RAF animation loop; speed controller | `window.SymbolRainAnimation` |
+| symbol-rain.spawn.js | `handleRandomSpawns`, `startGuaranteedSpawnController` (every 5s) | `window.SymbolRainSpawn` |
+| symbol-rain.init.js | Initialises the rain, wires up event listeners | — |
 
-### Assets
-| Directory | Purpose | Contents |
-|-----------|---------|----------|
-| problems/ | Math problem data | Markdown files with algebra problems |
-| images/ | Game images | Screenshots, icons |
-| components/ | HTML components | Lock animation components |
+### Console Manager (src/scripts/)
+| File | Purpose | Key Exports |
+|------|---------|-------------|
+| console-manager.js | ConsoleManager class constructor + init | `window.ConsoleManager` |
+| console-manager.events.js | Button click handlers; drag-to-reposition modal; keyboard shortcuts 1–9 | prototype methods |
+| console-manager.ui.js | `fillSlot` (with refreshing animation), `updateConsoleDisplay`, `showSymbolSelectionModal` | prototype methods |
 
-### Tools (src/tools/)
-| File | Purpose | Dependencies | Size |
-|------|---------|--------------|------|
-| verify.js | Build verification script | None | ~2KB |
-| solver.js | Problem solving utility | None | ~3KB |
+### Worm System (src/scripts/)
+| File | Purpose | Key Notes |
+|------|---------|-----------|
+| worm.js | `WormSystem` constructor; all constants (speeds, timers, counts); `initialize()` | `wormsPerRow: 1` for all difficulties |
+| worm-system.cache.js | Cached symbol/rect queries (100–200ms TTL) | `getCachedRevealedSymbols`, `getCachedAllSymbols` |
+| worm-system.events.js | Event listeners: `problemLineCompleted` → spawn 1 green worm in Panel B; `symbolRevealed`, `problemCompleted` | dispatches `rowResetByWorm` |
+| worm-system.spawn.js | `_spawnWormWithConfig`, `spawnGreenWormInPanelB`, `spawnWormFromConsole`, `spawnPurpleWorm` | **`spawnGreenWormInPanelB`** spawns at random position inside Panel B |
+| worm-system.behavior.js | `stealSymbol` (active code path); row-reset logic; `_getAvailableSymbolsForWorm` | blue steal → resets whole row to red |
+| worm-system.movement.js | `animate()` RAF loop; delegates to behavior chain | pre-bound as `_boundAnimate` |
+| worm-system.gameover.js | Checks if all solution symbols are stolen → game over | — |
+| worm-system.interactions.js | Click/pointerdown handlers; purple worm clone vs. explode logic | uses `pointerdown` not `click` |
+| worm-system.effects.js | Explosion particles, slime splats, crack effects | — |
+| worm-system.cleanup.js | `removeWorm`, `killAllWorms`, crack cleanup; cancels RAF on last worm | — |
+| worm-system.powerups.js | Power-up drop and collection logic | — |
+| worm-movement-navigation.js | `_updateWormRushingToTarget`; pathfinding integration | skips waypoint index 0 after recalc |
+| worm-movement-core.js | Low-level velocity / distance math | — |
+| worm-movement-behaviors.js | Roaming, evasion, escape-burst, console-return behaviors | — |
+| worm-behavior.rush.js | FSM rush module – targets `revealed-symbol` (blue) only | non-purple worms only chase blue |
+| worm-behavior.steal.js | FSM steal module – steals blue symbol; resets full row on steal | dispatches `rowResetByWorm` |
+| worm-behavior.targeting.js | FSM target-assignment module | — |
+| worm-behavior-fsm.js | Finite-state machine coordinator for worm behavior modules | — |
 
-### Types (src/types/)
-| File | Purpose | Dependencies | Size |
-|------|---------|--------------|------|
-| global.d.ts | Global type definitions | None | ~1KB |
+### Console CSS (src/styles/css/)
+| File | Purpose |
+|------|---------|
+| console.core.css | 3×3 grid layout; slot styles; `@keyframes purplePulsate`; **`@keyframes slotRefresh`** (cyan flash on fill) |
+| console.modal.css | **Floating 340px panel** (bottom-right) instead of full-screen overlay; drag handle; close button |
+| console.worm.css | Worm-spawning slot animations |
+| console.responsive.css | Mobile adjustments |
 
 ### Tests (tests/)
-| File | Purpose | Dependencies | Size |
-|------|---------|--------------|------|
-| managers.spec.js | Manager class tests | Playwright | ~5KB |
-| ... | Other test files | Playwright | Varies |
+| File | Purpose |
+|------|---------|
+| gameplay-features.spec.js | **NEW** – E2E tests for all v2 gameplay features (stable symbols, 1× Panel B worm, blue targeting, row reset, floating modal, slot refresh) |
+| worm-behavior.spec.js | E2E: aggression, targeting rules, purple worm clone behaviour |
+| worm-stability.spec.js | E2E: cursor evasion guard, RAF cleanup on last worm |
+| worm-cursor-evasion.spec.js | E2E: cursor-escape burst system |
+| managers.spec.js | E2E: ProblemManager and SymbolManager integration |
+| lock-components.spec.js | E2E: Progressive lock animation |
+| powerups.spec.js | E2E: Power-up drop, selection, and effects |
+| timer.spec.js | E2E: Game timer |
+| ui-boundary.spec.js | E2E: UI boundary conditions |
+| performance-bench.spec.js | Performance: FPS benchmarks |
+| integration/ | Integration tests for worm movement and navigation (Jest-style) |
+| unit/ | Unit tests for WormMovement, evasion, near-miss UI (Jest-style) |
 
 ### Docs (docs/)
-| File | Purpose | Size |
-|------|---------|------|
-| README.md | Project documentation | ~20KB |
-| ... | Various docs | Varies |
+| File | Purpose |
+|------|---------|
+| ARCHITECTURE.md | Full worm system state machine, event flow, module map |
+| DEVELOPMENT_GUIDE.md | Coding standards, recent changes log, module conventions |
+| WORM_DEVELOPER_GUIDE.md | Deep-dive on worm behaviors, purple/green mechanics, FSM |
+| PERFORMANCE.md | Optimisation patterns, spatial hash, RAF best practices |
+| REFACTORING_PLAN.csv | Catalog of large files, split status, recommendations |
 
 ### Root Files
-| File | Purpose | Size |
-|------|---------|------|
-| package.json | NPM configuration | ~2KB |
-| manifest.json | PWA manifest | ~1KB |
-| service-worker.js | Service worker | ~3KB |
-| ... | Config files | Varies |
+| File | Purpose |
+|------|---------|
+| package.json | NPM scripts: `start`, `lint`, `lint:fix`, `verify`, `test` |
+| playwright.config.js | Playwright E2E test configuration (Chromium, Firefox, WebKit, mobile) |
+| eslint.config.js | ESLint rules for src/scripts, lock/, src/tools/ |
+| manifest.json | PWA manifest |
+| service-worker.js | Service worker (offline fallback) |
+| FILE_INDEX.md | **This file** – full project file index |
+
+## Event Flow (key cross-module events)
+
+```
+symbolClicked        → game.js checks answer → symbolRevealed / handleIncorrectAnswer
+symbolRevealed       → WormSystem.notifyWormsOfRedSymbol (worms rush)
+first-line-solved    → lock-manager.js starts lock progression
+problemLineCompleted → WormSystem: spawn 1 green worm in Panel B targeting blue symbols
+                     → GameEffects: cyan row transform
+rowResetByWorm       → (downstream) row reverts from blue to red; player must re-solve
+purpleWormTriggered  → WormSystem: spawnPurpleWorm (after 3+ wrong answers)
+problemCompleted     → WormSystem: killAllWorms; score update
+consoleSymbolAdded   → Game: console slot filled
+powerUpActivated     → WormPowerUpEffectsRegistry: chain lightning / spider / devil
+```
 
 ## Dependencies Overview
 
-- **Global Dependencies**: None (vanilla JS)
-- **Build Dependencies**: ESLint, TypeScript, Playwright
-- **Runtime Dependencies**: None
+- **Global Dependencies**: None (vanilla JS, no framework)
+- **Build / Dev Dependencies**: ESLint, Playwright
+- **Runtime Dependencies**: None (pure browser JS)
 - **Asset Dependencies**: Google Fonts (Orbitron)
 
 ## Notes
 
-- All paths updated for new structure
-- File sizes are approximate
-- Dependencies listed are direct imports/references
-- Structure follows vanilla JS best practices
+- All inter-module communication uses DOM events — never call functions across modules directly.
+- CSS for Panel A/B font sizes is controlled by inline styles in `display-manager.js` (lines 95-110) — editing the CSS alone has no effect.
+- `worm-behavior.*` files are the FSM path (future); `worm-system.behavior.js` is the active code path.
+- File sizes are approximate; structure follows vanilla JS / no-build-tool best practices.
