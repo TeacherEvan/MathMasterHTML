@@ -240,12 +240,12 @@
       fromConsole: false,
     });
 
-    if (wormData && targetSymbol) {
+    if (wormData) {
       wormData.isRushingToTarget = true;
-      wormData.targetSymbol = targetSymbol;
-      // Keep rush mode active for the same duration as clone roam time
-      wormData.forceRushUntil = Date.now() + this.CLONE_WORM_ROAM_DURATION;
       wormData.roamingEndTime = Date.now();
+      if (targetSymbol) {
+        wormData.targetSymbol = targetSymbol;
+      }
     }
 
     return wormData;

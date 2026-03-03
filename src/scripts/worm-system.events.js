@@ -26,20 +26,21 @@
       this.rowsCompleted++;
       this.initialize(); // Ensure containers are resolved before cache access
 
-      // Spawn 1 green worm inside Panel B that immediately rushes to steal a blue symbol.
-      // targetSymbol may be null when the row just completed (all symbols are now cyan/completed).
-      // The worm will roam in Panel B and auto-target revealed symbols once the player
-      // starts revealing symbols in the next row.
-      const revealedSymbols = this.getCachedRevealedSymbols();
-      let targetSymbol = null;
-      if (revealedSymbols && revealedSymbols.length > 0) {
-        const idx = Math.floor(Math.random() * revealedSymbols.length);
-        targetSymbol = revealedSymbols[idx].textContent;
-      }
+      // Scale green worm pressure by completed rows within the current level:
+      // row 1 => 1 worm, row 2 => 2 worms, row 3 => 3 worms, ...
+      const spawnCount = this.wormsPerRow + Math.max(0, this.rowsCompleted - 1);
       console.log(
-        `📊 Row ${this.rowsCompleted} completed. Spawning 1 green worm in Panel B targeting blue symbol "${targetSymbol}".`,
+        `📊 Row ${this.rowsCompleted} completed. Spawning ${spawnCount} green worm(s) in Panel B.`,
       );
-      this.queueWormSpawn("panelB", { targetSymbol });
+      for (let i = 0; i < spawnCount; i++) {
+        const revealedSymbols = this.getCachedRevealedSymbols();
+        let targetSymbol = null;
+        if (revealedSymbols && revealedSymbols.length > 0) {
+          const idx = Math.floor(Math.random() * revealedSymbols.length);
+          targetSymbol = revealedSymbols[idx].textContent;
+        }
+        this.queueWormSpawn("panelB", { targetSymbol });
+      }
     });
 
     // CONSOLIDATED: Listen for problem completion (reset row counter + cleanup)

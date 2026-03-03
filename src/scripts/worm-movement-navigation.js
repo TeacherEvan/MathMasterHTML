@@ -56,6 +56,7 @@ console.log("🐛 Worm movement navigation loading...");
     if (!targetElement) {
       const now = Date.now();
       if (worm.forceRushUntil && now < worm.forceRushUntil) {
+        worm.isRushingToTarget = false;
         return false;
       }
 

@@ -167,6 +167,62 @@ test.describe("Worm Spawn — 1× Panel B Green Worm", () => {
     // roamingEndTime should be at or before now, confirming no roam delay
     expect(wormState.roamingEndTime).toBeLessThanOrEqual(wormState.now + 100);
   });
+
+  test("second completed row spawns one additional green worm (+1 scaling)", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      window.wormSystem.killAllWorms();
+      document.dispatchEvent(
+        new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
+      );
+      // Keep row counter progression, but isolate count for row 2 spawn burst
+      window.wormSystem.killAllWorms();
+      document.dispatchEvent(
+        new CustomEvent("problemLineCompleted", { detail: { line: 2 } }),
+      );
+    });
+
+    await page.waitForFunction(
+      () => window.wormSystem.worms.filter((w) => w.active).length === 2,
+      { timeout: 5000 },
+    );
+
+    const wormCount = await page.evaluate(
+      () => window.wormSystem.worms.filter((w) => w.active).length,
+    );
+
+    expect(wormCount).toBe(2);
+  });
+
+  test("problem completion resets per-row spawn scaling for the next level", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      window.wormSystem.killAllWorms();
+      document.dispatchEvent(
+        new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
+      );
+      document.dispatchEvent(
+        new CustomEvent("problemLineCompleted", { detail: { line: 2 } }),
+      );
+      document.dispatchEvent(new CustomEvent("problemCompleted", { detail: {} }));
+      document.dispatchEvent(
+        new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
+      );
+    });
+
+    await page.waitForFunction(
+      () => window.wormSystem.worms.filter((w) => w.active).length === 1,
+      { timeout: 5000 },
+    );
+
+    const wormCount = await page.evaluate(
+      () => window.wormSystem.worms.filter((w) => w.active).length,
+    );
+
+    expect(wormCount).toBe(1);
+  });
 });
 
 test.describe("Green Worm — Blue Symbol Targeting", () => {
@@ -220,6 +276,29 @@ test.describe("Green Worm — Blue Symbol Targeting", () => {
       () => window.wormSystem.wormsPerRow,
     );
     expect(wormsPerRow).toBe(1);
+  });
+
+  test("worm explosion creates a visible slime splat element", async ({ page }) => {
+    const hasSplat = await page.evaluate(() => {
+      const ws = window.wormSystem;
+      const element = document.createElement("div");
+      ws.crossPanelContainer.appendChild(element);
+      const worm = {
+        id: "test-explode",
+        element,
+        x: 160,
+        y: 160,
+        active: true,
+        hasStolen: false,
+        isPurple: false,
+        stolenSymbol: null,
+      };
+      ws.worms.push(worm);
+      ws.explodeWorm(worm);
+      return !!document.querySelector(".slime-splat");
+    });
+
+    expect(hasSplat).toBe(true);
   });
 });
 
