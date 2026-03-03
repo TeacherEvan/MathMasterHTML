@@ -12,26 +12,26 @@
     "maxFailures": 0,
     "metadata": {
       "ci": {
-        "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/16a38f9e529dc309bfb261627ddcbeb5c196440e",
-        "commitHash": "16a38f9e529dc309bfb261627ddcbeb5c196440e",
-        "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22614915386"
+        "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+        "commitHash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+        "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22509265286"
       },
       "gitCommit": {
-        "shortHash": "7af858c",
-        "hash": "7af858c420ace61571a621f7b6105cc66e055190",
-        "subject": "Fix green worm rush, splat fallback, and per-row spawn scaling",
-        "body": "Fix green worm rush, splat fallback, and per-row spawn scaling\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
+        "shortHash": "70a9ae8",
+        "hash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+        "subject": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal",
+        "body": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
         "author": {
           "name": "copilot-swe-agent[bot]",
           "email": "198982749+Copilot@users.noreply.github.com",
-          "time": 1772527635000
+          "time": 1772230125000
         },
         "committer": {
           "name": "copilot-swe-agent[bot]",
           "email": "198982749+Copilot@users.noreply.github.com",
-          "time": 1772527635000
+          "time": 1772230125000
         },
-        "branch": "copilot/audit-gameplay-complexity"
+        "branch": "copilot/update-gameplay-feature-edits"
       },
       "actualWorkers": 1
     },
@@ -43,26 +43,26 @@
         "retries": 2,
         "metadata": {
           "ci": {
-            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/16a38f9e529dc309bfb261627ddcbeb5c196440e",
-            "commitHash": "16a38f9e529dc309bfb261627ddcbeb5c196440e",
-            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22614915386"
+            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "commitHash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22509265286"
           },
           "gitCommit": {
-            "shortHash": "7af858c",
-            "hash": "7af858c420ace61571a621f7b6105cc66e055190",
-            "subject": "Fix green worm rush, splat fallback, and per-row spawn scaling",
-            "body": "Fix green worm rush, splat fallback, and per-row spawn scaling\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
+            "shortHash": "70a9ae8",
+            "hash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "subject": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal",
+            "body": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
             "author": {
               "name": "copilot-swe-agent[bot]",
               "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772527635000
+              "time": 1772230125000
             },
             "committer": {
               "name": "copilot-swe-agent[bot]",
               "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772527635000
+              "time": 1772230125000
             },
-            "branch": "copilot/audit-gameplay-complexity"
+            "branch": "copilot/update-gameplay-feature-edits"
           },
           "actualWorkers": 1
         },
@@ -85,26 +85,26 @@
         "retries": 2,
         "metadata": {
           "ci": {
-            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/16a38f9e529dc309bfb261627ddcbeb5c196440e",
-            "commitHash": "16a38f9e529dc309bfb261627ddcbeb5c196440e",
-            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22614915386"
+            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "commitHash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22509265286"
           },
           "gitCommit": {
-            "shortHash": "7af858c",
-            "hash": "7af858c420ace61571a621f7b6105cc66e055190",
-            "subject": "Fix green worm rush, splat fallback, and per-row spawn scaling",
-            "body": "Fix green worm rush, splat fallback, and per-row spawn scaling\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
+            "shortHash": "70a9ae8",
+            "hash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "subject": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal",
+            "body": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
             "author": {
               "name": "copilot-swe-agent[bot]",
               "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772527635000
+              "time": 1772230125000
             },
             "committer": {
               "name": "copilot-swe-agent[bot]",
               "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772527635000
+              "time": 1772230125000
             },
-            "branch": "copilot/audit-gameplay-complexity"
+            "branch": "copilot/update-gameplay-feature-edits"
           },
           "actualWorkers": 1
         },
@@ -127,26 +127,26 @@
         "retries": 2,
         "metadata": {
           "ci": {
-            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/16a38f9e529dc309bfb261627ddcbeb5c196440e",
-            "commitHash": "16a38f9e529dc309bfb261627ddcbeb5c196440e",
-            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22614915386"
+            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "commitHash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22509265286"
           },
           "gitCommit": {
-            "shortHash": "7af858c",
-            "hash": "7af858c420ace61571a621f7b6105cc66e055190",
-            "subject": "Fix green worm rush, splat fallback, and per-row spawn scaling",
-            "body": "Fix green worm rush, splat fallback, and per-row spawn scaling\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
+            "shortHash": "70a9ae8",
+            "hash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "subject": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal",
+            "body": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
             "author": {
               "name": "copilot-swe-agent[bot]",
               "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772527635000
+              "time": 1772230125000
             },
             "committer": {
               "name": "copilot-swe-agent[bot]",
               "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772527635000
+              "time": 1772230125000
             },
-            "branch": "copilot/audit-gameplay-complexity"
+            "branch": "copilot/update-gameplay-feature-edits"
           },
           "actualWorkers": 1
         },
@@ -169,26 +169,26 @@
         "retries": 2,
         "metadata": {
           "ci": {
-            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/16a38f9e529dc309bfb261627ddcbeb5c196440e",
-            "commitHash": "16a38f9e529dc309bfb261627ddcbeb5c196440e",
-            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22614915386"
+            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "commitHash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22509265286"
           },
           "gitCommit": {
-            "shortHash": "7af858c",
-            "hash": "7af858c420ace61571a621f7b6105cc66e055190",
-            "subject": "Fix green worm rush, splat fallback, and per-row spawn scaling",
-            "body": "Fix green worm rush, splat fallback, and per-row spawn scaling\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
+            "shortHash": "70a9ae8",
+            "hash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "subject": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal",
+            "body": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
             "author": {
               "name": "copilot-swe-agent[bot]",
               "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772527635000
+              "time": 1772230125000
             },
             "committer": {
               "name": "copilot-swe-agent[bot]",
               "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772527635000
+              "time": 1772230125000
             },
-            "branch": "copilot/audit-gameplay-complexity"
+            "branch": "copilot/update-gameplay-feature-edits"
           },
           "actualWorkers": 1
         },
@@ -211,26 +211,26 @@
         "retries": 2,
         "metadata": {
           "ci": {
-            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/16a38f9e529dc309bfb261627ddcbeb5c196440e",
-            "commitHash": "16a38f9e529dc309bfb261627ddcbeb5c196440e",
-            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22614915386"
+            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "commitHash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22509265286"
           },
           "gitCommit": {
-            "shortHash": "7af858c",
-            "hash": "7af858c420ace61571a621f7b6105cc66e055190",
-            "subject": "Fix green worm rush, splat fallback, and per-row spawn scaling",
-            "body": "Fix green worm rush, splat fallback, and per-row spawn scaling\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
+            "shortHash": "70a9ae8",
+            "hash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
+            "subject": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal",
+            "body": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
             "author": {
               "name": "copilot-swe-agent[bot]",
               "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772527635000
+              "time": 1772230125000
             },
             "committer": {
               "name": "copilot-swe-agent[bot]",
               "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772527635000
+              "time": 1772230125000
             },
-            "branch": "copilot/audit-gameplay-complexity"
+            "branch": "copilot/update-gameplay-feature-edits"
           },
           "actualWorkers": 1
         },
@@ -283,20 +283,20 @@
   },
   "suites": [
     {
-      "title": "gameplay-features.spec.js",
-      "file": "gameplay-features.spec.js",
+      "title": "worm-behavior.spec.js",
+      "file": "worm-behavior.spec.js",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "Worm Spawn — 1× Panel B Green Worm",
-          "file": "gameplay-features.spec.js",
-          "line": 76,
+          "title": "Worm behavior: aggression, targeting, and click rules",
+          "file": "worm-behavior.spec.js",
+          "line": 4,
           "column": 6,
           "specs": [
             {
-              "title": "second completed row spawns one additional green worm (+1 scaling)",
+              "title": "worms immediately target revealed symbols",
               "ok": true,
               "tags": [],
               "tests": [
@@ -311,12 +311,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1919,
+                      "duration": 1880,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-03T08:51:43.751Z",
+                      "startTime": "2026-02-28T00:34:35.824Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -324,14 +324,14 @@
                   "status": "expected"
                 }
               ],
-              "id": "484ce1aab65b2924c8ab-d12bbf3e4102195d6613",
-              "file": "gameplay-features.spec.js",
-              "line": 171,
+              "id": "e45dd070a89c9a32f92d-8511243417e75fb0ebf7",
+              "file": "worm-behavior.spec.js",
+              "line": 18,
               "column": 3
             },
             {
-              "title": "problem completion resets per-row spawn scaling for the next level",
-              "ok": true,
+              "title": "green worms require double click to kill",
+              "ok": false,
               "tags": [],
               "tests": [
                 {
@@ -344,69 +344,163 @@
                     {
                       "workerIndex": 0,
                       "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1774,
-                      "errors": [],
+                      "status": "failed",
+                      "duration": 1584,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m\n    at /home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js:70:29",
+                        "location": {
+                          "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
+                          "column": 29,
+                          "line": 70
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 68 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 69 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 70 |\u001b[39m     expect(afterFirstClick)\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 71 |\u001b[39m     expect(afterFirstClick\u001b[33m?\u001b[39m\u001b[33m.\u001b[39mactive)\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m 72 |\u001b[39m     expect(afterFirstClick\u001b[33m?\u001b[39m\u001b[33m.\u001b[39mescapeUntil)\u001b[33m.\u001b[39mtoBeGreaterThan(\u001b[33mDate\u001b[39m\u001b[33m.\u001b[39mnow())\u001b[33m;\u001b[39m\n \u001b[90m 73 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
+                            "column": 29,
+                            "line": 70
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m\n\n  68 |     });\n  69 |\n> 70 |     expect(afterFirstClick).toBeTruthy();\n     |                             ^\n  71 |     expect(afterFirstClick?.active).toBeTruthy();\n  72 |     expect(afterFirstClick?.escapeUntil).toBeGreaterThan(Date.now());\n  73 |\n    at /home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js:70:29"
+                        }
+                      ],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-03T08:51:45.795Z",
+                      "startTime": "2026-02-28T00:34:37.955Z",
                       "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "484ce1aab65b2924c8ab-de6f6b958f05f26100fe",
-              "file": "gameplay-features.spec.js",
-              "line": 203,
-              "column": 3
-            }
-          ]
-        },
-        {
-          "title": "Green Worm — Blue Symbol Targeting",
-          "file": "gameplay-features.spec.js",
-          "line": 237,
-          "column": 6,
-          "specs": [
-            {
-              "title": "green worm immediately rushes to a revealed (blue) symbol",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results/worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results/worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
+                        "column": 29,
+                        "line": 70
+                      }
+                    },
                     {
-                      "workerIndex": 0,
+                      "workerIndex": 1,
                       "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1942,
-                      "errors": [],
+                      "status": "failed",
+                      "duration": 2099,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m\n    at /home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js:70:29",
+                        "location": {
+                          "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
+                          "column": 29,
+                          "line": 70
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 68 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 69 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 70 |\u001b[39m     expect(afterFirstClick)\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 71 |\u001b[39m     expect(afterFirstClick\u001b[33m?\u001b[39m\u001b[33m.\u001b[39mactive)\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m 72 |\u001b[39m     expect(afterFirstClick\u001b[33m?\u001b[39m\u001b[33m.\u001b[39mescapeUntil)\u001b[33m.\u001b[39mtoBeGreaterThan(\u001b[33mDate\u001b[39m\u001b[33m.\u001b[39mnow())\u001b[33m;\u001b[39m\n \u001b[90m 73 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
+                            "column": 29,
+                            "line": 70
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m\n\n  68 |     });\n  69 |\n> 70 |     expect(afterFirstClick).toBeTruthy();\n     |                             ^\n  71 |     expect(afterFirstClick?.active).toBeTruthy();\n  72 |     expect(afterFirstClick?.escapeUntil).toBeGreaterThan(Date.now());\n  73 |\n    at /home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js:70:29"
+                        }
+                      ],
                       "stdout": [],
                       "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-03T08:51:47.596Z",
+                      "retry": 1,
+                      "startTime": "2026-02-28T00:34:40.603Z",
                       "annotations": [],
-                      "attachments": []
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results/worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results/worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results/worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
+                        "column": 29,
+                        "line": 70
+                      }
+                    },
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1675,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m\n    at /home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js:70:29",
+                        "location": {
+                          "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
+                          "column": 29,
+                          "line": 70
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 68 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 69 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 70 |\u001b[39m     expect(afterFirstClick)\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 71 |\u001b[39m     expect(afterFirstClick\u001b[33m?\u001b[39m\u001b[33m.\u001b[39mactive)\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m 72 |\u001b[39m     expect(afterFirstClick\u001b[33m?\u001b[39m\u001b[33m.\u001b[39mescapeUntil)\u001b[33m.\u001b[39mtoBeGreaterThan(\u001b[33mDate\u001b[39m\u001b[33m.\u001b[39mnow())\u001b[33m;\u001b[39m\n \u001b[90m 73 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
+                            "column": 29,
+                            "line": 70
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m\n\n  68 |     });\n  69 |\n> 70 |     expect(afterFirstClick).toBeTruthy();\n     |                             ^\n  71 |     expect(afterFirstClick?.active).toBeTruthy();\n  72 |     expect(afterFirstClick?.escapeUntil).toBeGreaterThan(Date.now());\n  73 |\n    at /home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js:70:29"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 2,
+                      "startTime": "2026-02-28T00:34:44.004Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results/worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium-retry2/test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results/worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium-retry2/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
+                        "column": 29,
+                        "line": 70
+                      }
                     }
                   ],
-                  "status": "expected"
+                  "status": "unexpected"
                 }
               ],
-              "id": "484ce1aab65b2924c8ab-6558c39e9345a5c83b0b",
-              "file": "gameplay-features.spec.js",
-              "line": 240,
+              "id": "e45dd070a89c9a32f92d-9137722123dc0e80ba5c",
+              "file": "worm-behavior.spec.js",
+              "line": 48,
               "column": 3
             },
             {
-              "title": "worm explosion creates a visible slime splat element",
+              "title": "purple worm click clones instead of dying",
               "ok": true,
               "tags": [],
               "tests": [
@@ -418,15 +512,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 0,
+                      "workerIndex": 3,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1633,
+                      "duration": 1786,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-03T08:51:49.562Z",
+                      "startTime": "2026-02-28T00:34:46.849Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -434,9 +528,9 @@
                   "status": "expected"
                 }
               ],
-              "id": "484ce1aab65b2924c8ab-99c82379ac39a070a227",
-              "file": "gameplay-features.spec.js",
-              "line": 290,
+              "id": "e45dd070a89c9a32f92d-141977b0d7faf68acf65",
+              "file": "worm-behavior.spec.js",
+              "line": 85,
               "column": 3
             }
           ]
@@ -446,11 +540,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-03-03T08:51:41.318Z",
-    "duration": 9983.037999999999,
-    "expected": 4,
+    "startTime": "2026-02-28T00:34:33.671Z",
+    "duration": 15121.416,
+    "expected": 2,
     "skipped": 0,
-    "unexpected": 0,
+    "unexpected": 1,
     "flaky": 0
   }
 }
