@@ -240,12 +240,16 @@
       fromConsole: false,
     });
 
-    if (wormData && targetSymbol) {
-      wormData.isRushingToTarget = true;
-      wormData.targetSymbol = targetSymbol;
-      // Keep rush mode active for the same duration as clone roam time
-      wormData.forceRushUntil = Date.now() + this.CLONE_WORM_ROAM_DURATION;
+    if (wormData) {
+      // Start post-spawn movement immediately:
+      // - with a target symbol: enter forced rush mode
+      // - without a target symbol: roam now and reacquire when symbols are available
       wormData.roamingEndTime = Date.now();
+      if (targetSymbol) {
+        wormData.isRushingToTarget = true;
+        wormData.targetSymbol = targetSymbol;
+        wormData.forceRushUntil = Date.now() + this.CLONE_WORM_ROAM_DURATION;
+      }
     }
 
     return wormData;

@@ -219,7 +219,11 @@
       360}deg)`;
 
     // FIX: Append to cross-panel container so splat appears at worm's actual death location
-    this.crossPanelContainer.appendChild(splat);
+    const splatContainer = this.crossPanelContainer || document.body;
+    if (splatContainer === document.body) {
+      Logger.warn("⚠️", "createSlimeSplat fallback: crossPanelContainer unavailable");
+    }
+    splatContainer.appendChild(splat);
 
     console.log(`🟢 Slime splat created at (${x}, ${y})`);
 
