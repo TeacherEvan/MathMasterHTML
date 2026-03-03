@@ -241,6 +241,9 @@
     });
 
     if (wormData) {
+      // Start post-spawn movement immediately:
+      // - with a target symbol: enter forced rush mode
+      // - without a target symbol: roam now and reacquire when symbols are available
       wormData.roamingEndTime = Date.now();
       if (targetSymbol) {
         wormData.isRushingToTarget = true;
