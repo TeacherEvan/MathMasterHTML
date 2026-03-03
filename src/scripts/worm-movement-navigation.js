@@ -56,8 +56,17 @@ console.log("🐛 Worm movement navigation loading...");
     if (!targetElement) {
       const now = Date.now();
       if (worm.forceRushUntil && now < worm.forceRushUntil) {
+        // Abort forced rush and fully reset navigation state to avoid stale paths
         worm.isRushingToTarget = false;
         worm.forceRushUntil = 0;
+        worm.path = null;
+        worm.pathIndex = 0;
+        if (worm.targetElement) {
+          worm.targetElement = null;
+        }
+        if (worm.targetSymbol) {
+          worm.targetSymbol = null;
+        }
         return false;
       }
 
