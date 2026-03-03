@@ -241,10 +241,11 @@
     });
 
     if (wormData) {
-      wormData.isRushingToTarget = true;
       wormData.roamingEndTime = Date.now();
       if (targetSymbol) {
+        wormData.isRushingToTarget = true;
         wormData.targetSymbol = targetSymbol;
+        wormData.forceRushUntil = Date.now() + this.CLONE_WORM_ROAM_DURATION;
       }
     }
 

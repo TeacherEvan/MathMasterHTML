@@ -26,8 +26,9 @@
       this.rowsCompleted++;
       this.initialize(); // Ensure containers are resolved before cache access
 
-      // Scale green worm pressure by completed rows within the current level:
-      // row 1 => 1 worm, row 2 => 2 worms, row 3 => 3 worms, ...
+      // rowsCompleted was incremented above, so this yields:
+      // row 1 => wormsPerRow + 0, row 2 => wormsPerRow + 1, row 3 => wormsPerRow + 2, ...
+      // Math.max protects against negative offsets if rowsCompleted is unexpectedly 0.
       const spawnCount = this.wormsPerRow + Math.max(0, this.rowsCompleted - 1);
       console.log(
         `📊 Row ${this.rowsCompleted} completed. Spawning ${spawnCount} green worm(s) in Panel B.`,

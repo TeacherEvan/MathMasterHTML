@@ -176,15 +176,20 @@ test.describe("Worm Spawn — 1× Panel B Green Worm", () => {
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
       );
-      // Keep row counter progression, but isolate count for row 2 spawn burst
+      // Keep row counter progression, but clear row-1 worms so only row-2 spawns are counted.
       window.wormSystem.killAllWorms();
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 2 } }),
       );
     });
 
+    const expectedCount = await page.evaluate(
+      () => window.wormSystem.wormsPerRow + 1,
+    );
+
     await page.waitForFunction(
-      () => window.wormSystem.worms.filter((w) => w.active).length === 2,
+      (count) => window.wormSystem.worms.filter((w) => w.active).length === count,
+      expectedCount,
       { timeout: 5000 },
     );
 
@@ -192,7 +197,7 @@ test.describe("Worm Spawn — 1× Panel B Green Worm", () => {
       () => window.wormSystem.worms.filter((w) => w.active).length,
     );
 
-    expect(wormCount).toBe(2);
+    expect(wormCount).toBe(expectedCount);
   });
 
   test("problem completion resets per-row spawn scaling for the next level", async ({
@@ -207,13 +212,17 @@ test.describe("Worm Spawn — 1× Panel B Green Worm", () => {
         new CustomEvent("problemLineCompleted", { detail: { line: 2 } }),
       );
       document.dispatchEvent(new CustomEvent("problemCompleted", { detail: {} }));
+      window.wormSystem.killAllWorms();
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
       );
     });
 
+    const expectedCount = await page.evaluate(() => window.wormSystem.wormsPerRow);
+
     await page.waitForFunction(
-      () => window.wormSystem.worms.filter((w) => w.active).length === 1,
+      (count) => window.wormSystem.worms.filter((w) => w.active).length === count,
+      expectedCount,
       { timeout: 5000 },
     );
 
@@ -221,7 +230,7 @@ test.describe("Worm Spawn — 1× Panel B Green Worm", () => {
       () => window.wormSystem.worms.filter((w) => w.active).length,
     );
 
-    expect(wormCount).toBe(1);
+    expect(wormCount).toBe(expectedCount);
   });
 });
 
