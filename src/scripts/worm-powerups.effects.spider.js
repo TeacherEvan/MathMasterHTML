@@ -42,6 +42,9 @@
         y: y,
         type: "spider",
         active: true,
+        createdAt: Date.now(),
+        duration: 10000,
+        fading: false,
         isHeart: false,
       };
 
@@ -71,9 +74,28 @@
       const moveSpider = () => {
         if (!spiderData.active || spiderData.isHeart) return;
 
+        const now = Date.now();
+        const timeAlive = now - spiderData.createdAt;
+        if (timeAlive > spiderData.duration - 2000 && !spiderData.fading) {
+          spider.style.animation = "power-up-fade 2s ease-out";
+          spiderData.fading = true;
+        }
+        if (timeAlive > spiderData.duration) {
+          if (spider.parentNode) {
+            spider.parentNode.removeChild(spider);
+          }
+          spiderData.active = false;
+          console.log("🕷️ Spider removed - 10s timeout reached");
+          return;
+        }
+
         const activeWorms = this.wormSystem.worms.filter((w) => w.active);
         if (activeWorms.length === 0) {
           console.log("🕷️ No more worms to convert");
+          if (spider.parentNode) {
+            spider.parentNode.removeChild(spider);
+          }
+          spiderData.active = false;
           return;
         }
 

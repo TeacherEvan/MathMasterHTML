@@ -1,74 +1,30 @@
 {
   "config": {
-    "configFile": "/home/runner/work/MathMasterHTML/MathMasterHTML/playwright.config.js",
-    "rootDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests",
-    "forbidOnly": true,
+    "configFile": "/home/evan/Workspace/Games/MathMasterHTML/playwright.config.js",
+    "rootDir": "/home/evan/Workspace/Games/MathMasterHTML/tests",
+    "forbidOnly": false,
     "fullyParallel": true,
-    "globalSetup": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/global-setup.js",
+    "globalSetup": "/home/evan/Workspace/Games/MathMasterHTML/tests/global-setup.js",
     "globalTeardown": null,
     "globalTimeout": 0,
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "ci": {
-        "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-        "commitHash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-        "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22509265286"
-      },
-      "gitCommit": {
-        "shortHash": "70a9ae8",
-        "hash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-        "subject": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal",
-        "body": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
-        "author": {
-          "name": "copilot-swe-agent[bot]",
-          "email": "198982749+Copilot@users.noreply.github.com",
-          "time": 1772230125000
-        },
-        "committer": {
-          "name": "copilot-swe-agent[bot]",
-          "email": "198982749+Copilot@users.noreply.github.com",
-          "time": 1772230125000
-        },
-        "branch": "copilot/update-gameplay-feature-edits"
-      },
-      "actualWorkers": 1
+      "actualWorkers": 2
     },
     "preserveOutput": "always",
     "projects": [
       {
-        "outputDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results",
+        "outputDir": "/home/evan/Workspace/Games/MathMasterHTML/test-results",
         "repeatEach": 1,
-        "retries": 2,
+        "retries": 0,
         "metadata": {
-          "ci": {
-            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "commitHash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22509265286"
-          },
-          "gitCommit": {
-            "shortHash": "70a9ae8",
-            "hash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "subject": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal",
-            "body": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
-            "author": {
-              "name": "copilot-swe-agent[bot]",
-              "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772230125000
-            },
-            "committer": {
-              "name": "copilot-swe-agent[bot]",
-              "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772230125000
-            },
-            "branch": "copilot/update-gameplay-feature-edits"
-          },
-          "actualWorkers": 1
+          "actualWorkers": 2
         },
         "id": "chromium",
         "name": "chromium",
-        "testDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests",
+        "testDir": "/home/evan/Workspace/Games/MathMasterHTML/tests",
         "testIgnore": [
           "**/unit/**",
           "**/integration/**",
@@ -80,37 +36,15 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results",
+        "outputDir": "/home/evan/Workspace/Games/MathMasterHTML/test-results",
         "repeatEach": 1,
-        "retries": 2,
+        "retries": 0,
         "metadata": {
-          "ci": {
-            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "commitHash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22509265286"
-          },
-          "gitCommit": {
-            "shortHash": "70a9ae8",
-            "hash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "subject": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal",
-            "body": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
-            "author": {
-              "name": "copilot-swe-agent[bot]",
-              "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772230125000
-            },
-            "committer": {
-              "name": "copilot-swe-agent[bot]",
-              "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772230125000
-            },
-            "branch": "copilot/update-gameplay-feature-edits"
-          },
-          "actualWorkers": 1
+          "actualWorkers": 2
         },
         "id": "firefox",
         "name": "firefox",
-        "testDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests",
+        "testDir": "/home/evan/Workspace/Games/MathMasterHTML/tests",
         "testIgnore": [
           "**/unit/**",
           "**/integration/**",
@@ -122,37 +56,15 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results",
+        "outputDir": "/home/evan/Workspace/Games/MathMasterHTML/test-results",
         "repeatEach": 1,
-        "retries": 2,
+        "retries": 0,
         "metadata": {
-          "ci": {
-            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "commitHash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22509265286"
-          },
-          "gitCommit": {
-            "shortHash": "70a9ae8",
-            "hash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "subject": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal",
-            "body": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
-            "author": {
-              "name": "copilot-swe-agent[bot]",
-              "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772230125000
-            },
-            "committer": {
-              "name": "copilot-swe-agent[bot]",
-              "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772230125000
-            },
-            "branch": "copilot/update-gameplay-feature-edits"
-          },
-          "actualWorkers": 1
+          "actualWorkers": 2
         },
         "id": "webkit",
         "name": "webkit",
-        "testDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests",
+        "testDir": "/home/evan/Workspace/Games/MathMasterHTML/tests",
         "testIgnore": [
           "**/unit/**",
           "**/integration/**",
@@ -164,37 +76,15 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results",
+        "outputDir": "/home/evan/Workspace/Games/MathMasterHTML/test-results",
         "repeatEach": 1,
-        "retries": 2,
+        "retries": 0,
         "metadata": {
-          "ci": {
-            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "commitHash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22509265286"
-          },
-          "gitCommit": {
-            "shortHash": "70a9ae8",
-            "hash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "subject": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal",
-            "body": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
-            "author": {
-              "name": "copilot-swe-agent[bot]",
-              "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772230125000
-            },
-            "committer": {
-              "name": "copilot-swe-agent[bot]",
-              "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772230125000
-            },
-            "branch": "copilot/update-gameplay-feature-edits"
-          },
-          "actualWorkers": 1
+          "actualWorkers": 2
         },
         "id": "iphone-13",
         "name": "iphone-13",
-        "testDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests",
+        "testDir": "/home/evan/Workspace/Games/MathMasterHTML/tests",
         "testIgnore": [
           "**/unit/**",
           "**/integration/**",
@@ -206,37 +96,15 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results",
+        "outputDir": "/home/evan/Workspace/Games/MathMasterHTML/test-results",
         "repeatEach": 1,
-        "retries": 2,
+        "retries": 0,
         "metadata": {
-          "ci": {
-            "commitHref": "https://github.com/TeacherEvan/MathMasterHTML/commit/70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "commitHash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "buildHref": "https://github.com/TeacherEvan/MathMasterHTML/actions/runs/22509265286"
-          },
-          "gitCommit": {
-            "shortHash": "70a9ae8",
-            "hash": "70a9ae8ae9aefdf9794f2a03a27563def48c6977",
-            "subject": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal",
-            "body": "feat: gameplay feature edits - stable symbols, 1x green worm, blue symbol targeting, row reset, floating console modal\n\nCo-authored-by: TeacherEvan <189960447+TeacherEvan@users.noreply.github.com>\n",
-            "author": {
-              "name": "copilot-swe-agent[bot]",
-              "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772230125000
-            },
-            "committer": {
-              "name": "copilot-swe-agent[bot]",
-              "email": "198982749+Copilot@users.noreply.github.com",
-              "time": 1772230125000
-            },
-            "branch": "copilot/update-gameplay-feature-edits"
-          },
-          "actualWorkers": 1
+          "actualWorkers": 2
         },
         "id": "pixel-7",
         "name": "pixel-7",
-        "testDir": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests",
+        "testDir": "/home/evan/Workspace/Games/MathMasterHTML/tests",
         "testIgnore": [
           "**/unit/**",
           "**/integration/**",
@@ -273,30 +141,30 @@
     "updateSnapshots": "missing",
     "updateSourceMethod": "patch",
     "version": "1.58.2",
-    "workers": 1,
+    "workers": 2,
     "webServer": {
       "command": "npm run start",
       "url": "http://localhost:8000",
-      "reuseExistingServer": false,
+      "reuseExistingServer": true,
       "timeout": 120000
     }
   },
   "suites": [
     {
-      "title": "worm-behavior.spec.js",
-      "file": "worm-behavior.spec.js",
+      "title": "powerups.spec.js",
+      "file": "powerups.spec.js",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "Worm behavior: aggression, targeting, and click rules",
-          "file": "worm-behavior.spec.js",
-          "line": 4,
+          "title": "Power-Up Two-Click System",
+          "file": "powerups.spec.js",
+          "line": 24,
           "column": 6,
           "specs": [
             {
-              "title": "worms immediately target revealed symbols",
+              "title": "should display power-up inventory",
               "ok": true,
               "tags": [],
               "tests": [
@@ -311,12 +179,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1880,
+                      "duration": 5311,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-02-28T00:34:35.824Z",
+                      "startTime": "2026-03-05T10:39:05.253Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -324,13 +192,183 @@
                   "status": "expected"
                 }
               ],
-              "id": "e45dd070a89c9a32f92d-8511243417e75fb0ebf7",
-              "file": "worm-behavior.spec.js",
-              "line": 18,
+              "id": "7e1fa2f8fa6a13b34442-e29257271ce7acf3b5f5",
+              "file": "powerups.spec.js",
+              "line": 54,
               "column": 3
             },
             {
-              "title": "green worms require double click to kill",
+              "title": "should update power-up counts in display",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 5171,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T10:39:05.267Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7e1fa2f8fa6a13b34442-e94f6a0e9a2c93891ebc",
+              "file": "powerups.spec.js",
+              "line": 66,
+              "column": 3
+            },
+            {
+              "title": "should select power-up on first click",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 5407,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T10:39:10.673Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7e1fa2f8fa6a13b34442-5a6eb4f00474bc8723d6",
+              "file": "powerups.spec.js",
+              "line": 87,
+              "column": 3
+            },
+            {
+              "title": "should deselect power-up when clicking same one again",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5789,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T10:39:10.747Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7e1fa2f8fa6a13b34442-4d4bafc19584816d7348",
+              "file": "powerups.spec.js",
+              "line": 108,
+              "column": 3
+            },
+            {
+              "title": "should deselect power-up on ESC key",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 4788,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T10:39:16.118Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7e1fa2f8fa6a13b34442-64b18e10c14b3fd0f154",
+              "file": "powerups.spec.js",
+              "line": 136,
+              "column": 3
+            },
+            {
+              "title": "should place devil power-up on second click",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4896,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T10:39:16.590Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7e1fa2f8fa6a13b34442-9ec975090526cccc8882",
+              "file": "powerups.spec.js",
+              "line": 156,
+              "column": 3
+            },
+            {
+              "title": "should spawn spider at click location",
               "ok": false,
               "tags": [],
               "tests": [
@@ -342,165 +380,64 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
                       "status": "failed",
-                      "duration": 1584,
+                      "duration": 6151,
                       "error": {
-                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m",
-                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m\n    at /home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js:70:29",
+                        "message": "TimeoutError: page.waitForSelector: Timeout 2000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.spider-entity') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 2000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.spider-entity') to be visible\u001b[22m\n\n    at /home/evan/Workspace/Games/MathMasterHTML/tests/powerups.spec.js:189:16",
                         "location": {
-                          "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
-                          "column": 29,
-                          "line": 70
+                          "file": "/home/evan/Workspace/Games/MathMasterHTML/tests/powerups.spec.js",
+                          "column": 16,
+                          "line": 189
                         },
-                        "snippet": "\u001b[0m \u001b[90m 68 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 69 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 70 |\u001b[39m     expect(afterFirstClick)\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 71 |\u001b[39m     expect(afterFirstClick\u001b[33m?\u001b[39m\u001b[33m.\u001b[39mactive)\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m 72 |\u001b[39m     expect(afterFirstClick\u001b[33m?\u001b[39m\u001b[33m.\u001b[39mescapeUntil)\u001b[33m.\u001b[39mtoBeGreaterThan(\u001b[33mDate\u001b[39m\u001b[33m.\u001b[39mnow())\u001b[33m;\u001b[39m\n \u001b[90m 73 |\u001b[39m\u001b[0m"
+                        "snippet": "\u001b[0m \u001b[90m 187 |\u001b[39m\n \u001b[90m 188 |\u001b[39m     \u001b[90m// Wait for spider to appear\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 189 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m\".spider-entity\"\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m2000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 190 |\u001b[39m\n \u001b[90m 191 |\u001b[39m     \u001b[90m// Verify spider exists\u001b[39m\n \u001b[90m 192 |\u001b[39m     \u001b[36mconst\u001b[39m spiderExists \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\u001b[0m"
                       },
                       "errors": [
                         {
                           "location": {
-                            "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
-                            "column": 29,
-                            "line": 70
+                            "file": "/home/evan/Workspace/Games/MathMasterHTML/tests/powerups.spec.js",
+                            "column": 16,
+                            "line": 189
                           },
-                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m\n\n  68 |     });\n  69 |\n> 70 |     expect(afterFirstClick).toBeTruthy();\n     |                             ^\n  71 |     expect(afterFirstClick?.active).toBeTruthy();\n  72 |     expect(afterFirstClick?.escapeUntil).toBeGreaterThan(Date.now());\n  73 |\n    at /home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js:70:29"
+                          "message": "TimeoutError: page.waitForSelector: Timeout 2000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.spider-entity') to be visible\u001b[22m\n\n\n\u001b[0m \u001b[90m 187 |\u001b[39m\n \u001b[90m 188 |\u001b[39m     \u001b[90m// Wait for spider to appear\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 189 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m\".spider-entity\"\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m2000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 190 |\u001b[39m\n \u001b[90m 191 |\u001b[39m     \u001b[90m// Verify spider exists\u001b[39m\n \u001b[90m 192 |\u001b[39m     \u001b[36mconst\u001b[39m spiderExists \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[2m    at /home/evan/Workspace/Games/MathMasterHTML/tests/powerups.spec.js:189:16\u001b[22m"
                         }
                       ],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-02-28T00:34:37.955Z",
+                      "startTime": "2026-03-05T10:39:20.940Z",
                       "annotations": [],
                       "attachments": [
                         {
                           "name": "screenshot",
                           "contentType": "image/png",
-                          "path": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results/worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium/test-failed-1.png"
+                          "path": "/home/evan/Workspace/Games/MathMasterHTML/test-results/powerups-Power-Up-Two-Clic-0cd8e-wn-spider-at-click-location-chromium/test-failed-1.png"
                         },
                         {
                           "name": "error-context",
                           "contentType": "text/markdown",
-                          "path": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results/worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium/error-context.md"
+                          "path": "/home/evan/Workspace/Games/MathMasterHTML/test-results/powerups-Power-Up-Two-Clic-0cd8e-wn-spider-at-click-location-chromium/error-context.md"
                         }
                       ],
                       "errorLocation": {
-                        "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
-                        "column": 29,
-                        "line": 70
-                      }
-                    },
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 0,
-                      "status": "failed",
-                      "duration": 2099,
-                      "error": {
-                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m",
-                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m\n    at /home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js:70:29",
-                        "location": {
-                          "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
-                          "column": 29,
-                          "line": 70
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 68 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 69 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 70 |\u001b[39m     expect(afterFirstClick)\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 71 |\u001b[39m     expect(afterFirstClick\u001b[33m?\u001b[39m\u001b[33m.\u001b[39mactive)\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m 72 |\u001b[39m     expect(afterFirstClick\u001b[33m?\u001b[39m\u001b[33m.\u001b[39mescapeUntil)\u001b[33m.\u001b[39mtoBeGreaterThan(\u001b[33mDate\u001b[39m\u001b[33m.\u001b[39mnow())\u001b[33m;\u001b[39m\n \u001b[90m 73 |\u001b[39m\u001b[0m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
-                            "column": 29,
-                            "line": 70
-                          },
-                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m\n\n  68 |     });\n  69 |\n> 70 |     expect(afterFirstClick).toBeTruthy();\n     |                             ^\n  71 |     expect(afterFirstClick?.active).toBeTruthy();\n  72 |     expect(afterFirstClick?.escapeUntil).toBeGreaterThan(Date.now());\n  73 |\n    at /home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js:70:29"
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 1,
-                      "startTime": "2026-02-28T00:34:40.603Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results/worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium-retry1/test-failed-1.png"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results/worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium-retry1/error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results/worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium-retry1/trace.zip"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
-                        "column": 29,
-                        "line": 70
-                      }
-                    },
-                    {
-                      "workerIndex": 2,
-                      "parallelIndex": 0,
-                      "status": "failed",
-                      "duration": 1675,
-                      "error": {
-                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m",
-                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m\n    at /home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js:70:29",
-                        "location": {
-                          "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
-                          "column": 29,
-                          "line": 70
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 68 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 69 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 70 |\u001b[39m     expect(afterFirstClick)\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 71 |\u001b[39m     expect(afterFirstClick\u001b[33m?\u001b[39m\u001b[33m.\u001b[39mactive)\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m 72 |\u001b[39m     expect(afterFirstClick\u001b[33m?\u001b[39m\u001b[33m.\u001b[39mescapeUntil)\u001b[33m.\u001b[39mtoBeGreaterThan(\u001b[33mDate\u001b[39m\u001b[33m.\u001b[39mnow())\u001b[33m;\u001b[39m\n \u001b[90m 73 |\u001b[39m\u001b[0m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
-                            "column": 29,
-                            "line": 70
-                          },
-                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m\n\n  68 |     });\n  69 |\n> 70 |     expect(afterFirstClick).toBeTruthy();\n     |                             ^\n  71 |     expect(afterFirstClick?.active).toBeTruthy();\n  72 |     expect(afterFirstClick?.escapeUntil).toBeGreaterThan(Date.now());\n  73 |\n    at /home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js:70:29"
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 2,
-                      "startTime": "2026-02-28T00:34:44.004Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results/worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium-retry2/test-failed-1.png"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "/home/runner/work/MathMasterHTML/MathMasterHTML/test-results/worm-behavior-Worm-behavio-8a429-equire-double-click-to-kill-chromium-retry2/error-context.md"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "/home/runner/work/MathMasterHTML/MathMasterHTML/tests/worm-behavior.spec.js",
-                        "column": 29,
-                        "line": 70
+                        "file": "/home/evan/Workspace/Games/MathMasterHTML/tests/powerups.spec.js",
+                        "column": 16,
+                        "line": 189
                       }
                     }
                   ],
                   "status": "unexpected"
                 }
               ],
-              "id": "e45dd070a89c9a32f92d-9137722123dc0e80ba5c",
-              "file": "worm-behavior.spec.js",
-              "line": 48,
+              "id": "7e1fa2f8fa6a13b34442-4168984238eedf59c540",
+              "file": "powerups.spec.js",
+              "line": 181,
               "column": 3
             },
             {
-              "title": "purple worm click clones instead of dying",
+              "title": "should not allow selection when inventory is 0",
               "ok": true,
               "tags": [],
               "tests": [
@@ -512,15 +449,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 3,
+                      "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1786,
+                      "duration": 4591,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-02-28T00:34:46.849Z",
+                      "startTime": "2026-03-05T10:39:21.511Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -528,9 +465,305 @@
                   "status": "expected"
                 }
               ],
-              "id": "e45dd070a89c9a32f92d-141977b0d7faf68acf65",
-              "file": "worm-behavior.spec.js",
-              "line": 85,
+              "id": "7e1fa2f8fa6a13b34442-6245eb3baee3ec5654fb",
+              "file": "powerups.spec.js",
+              "line": 198,
+              "column": 3
+            },
+            {
+              "title": "should switch selection when clicking different power-up",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3385,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T10:39:26.122Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7e1fa2f8fa6a13b34442-fe38c28e3db773bc8329",
+              "file": "powerups.spec.js",
+              "line": 221,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Power-Up Chain Lightning",
+          "file": "powerups.spec.js",
+          "line": 242,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should refund chain lightning if no worms to target",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 5234,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T10:39:29.514Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7e1fa2f8fa6a13b34442-259ec027823abb6e1535",
+              "file": "powerups.spec.js",
+              "line": 264,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Game Flow Integration",
+          "file": "powerups.spec.js",
+          "line": 297,
+          "column": 6,
+          "specs": [
+            {
+              "title": "game page loads successfully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4176,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T10:39:29.540Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7e1fa2f8fa6a13b34442-63c59d37823bf1a17468",
+              "file": "powerups.spec.js",
+              "line": 298,
+              "column": 3
+            },
+            {
+              "title": "level select page works",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 931,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T10:39:33.746Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7e1fa2f8fa6a13b34442-80fc67b342897f897115",
+              "file": "powerups.spec.js",
+              "line": 309,
+              "column": 3
+            },
+            {
+              "title": "index page has navigation",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1502,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T10:39:34.710Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7e1fa2f8fa6a13b34442-a24dee8fda31f25d8a93",
+              "file": "powerups.spec.js",
+              "line": 318,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Worm System Basic Tests",
+          "file": "powerups.spec.js",
+          "line": 326,
+          "column": 6,
+          "specs": [
+            {
+              "title": "worm system initializes",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 4403,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T10:39:34.957Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7e1fa2f8fa6a13b34442-ddc8fbd61c6472c05c72",
+              "file": "powerups.spec.js",
+              "line": 338,
+              "column": 3
+            },
+            {
+              "title": "can spawn worm from console",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4567,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T10:39:36.262Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7e1fa2f8fa6a13b34442-a416d479d7094eaeeaca",
+              "file": "powerups.spec.js",
+              "line": 345,
+              "column": 3
+            },
+            {
+              "title": "can trigger purple worm",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 3694,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T10:39:39.403Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7e1fa2f8fa6a13b34442-b94ab0fbca766c7cd228",
+              "file": "powerups.spec.js",
+              "line": 361,
               "column": 3
             }
           ]
@@ -540,9 +773,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-02-28T00:34:33.671Z",
-    "duration": 15121.416,
-    "expected": 2,
+    "startTime": "2026-03-05T10:39:02.350Z",
+    "duration": 40856.114,
+    "expected": 15,
     "skipped": 0,
     "unexpected": 1,
     "flaky": 0

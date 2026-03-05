@@ -70,8 +70,11 @@ console.log("🎮 Console Manager UI loading");
 
   proto.selectPosition = function(position) {
     if (this.slots[position] !== null) {
-      console.log(`⚠️ Position ${position + 1} is already filled`);
-      return;
+      console.log(
+        `⚠️ Overwriting position ${position + 1} which was ${
+          this.slots[position]
+        }`,
+      );
     }
 
     if (!this.selectedSymbol) {
@@ -169,9 +172,9 @@ console.log("🎮 Console Manager UI loading");
 
     positionButtons.forEach((btn, index) => {
       if (this.slots[index] !== null) {
-        btn.classList.add("disabled");
-        btn.disabled = true;
-        btn.textContent = this.slots[index];
+        btn.classList.remove("disabled");
+        btn.disabled = false;
+        btn.textContent = `Swap ${this.slots[index]}`;
       } else {
         btn.classList.remove("disabled");
         btn.disabled = false;

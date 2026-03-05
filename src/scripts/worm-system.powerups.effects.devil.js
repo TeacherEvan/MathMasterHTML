@@ -49,9 +49,28 @@
       x: x,
       y: y,
       wormProximity: new Map(), // Track how long each worm has been near
+      createdAt: Date.now(),
+      duration: 10000,
+      fading: false,
     };
 
     const checkProximity = () => {
+      const now = Date.now();
+      const timeAlive = now - devilData.createdAt;
+
+      if (timeAlive > devilData.duration) {
+        if (devil.parentNode) {
+          devil.parentNode.removeChild(devil);
+        }
+        console.log("👹 Devil removed - 10s timeout reached");
+        return;
+      }
+
+      if (timeAlive > devilData.duration - 2000 && !devilData.fading) {
+        devil.style.animation = "power-up-fade 2s ease-out";
+        devilData.fading = true;
+      }
+
       const activeWorms = this.worms.filter((w) => w.active);
 
       activeWorms.forEach((worm) => {
@@ -106,7 +125,7 @@
         }
       });
 
-      if (activeWorms.length > 0) {
+      if (activeWorms.length > 0 || timeAlive <= devilData.duration) {
         requestAnimationFrame(checkProximity);
       } else {
         // No more worms, remove devil
