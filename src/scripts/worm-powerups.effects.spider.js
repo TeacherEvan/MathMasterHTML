@@ -32,7 +32,7 @@
             font-size: 40px;
             z-index: 10001;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: opacity 0.3s ease, transform 0.3s ease;
         `;
 
       const spiderData = {
@@ -92,10 +92,7 @@
         const activeWorms = this.wormSystem.worms.filter((w) => w.active);
         if (activeWorms.length === 0) {
           console.log("🕷️ No more worms to convert");
-          if (spider.parentNode) {
-            spider.parentNode.removeChild(spider);
-          }
-          spiderData.active = false;
+          // Spider will auto-expire via duration timer; no early cleanup needed
           return;
         }
 

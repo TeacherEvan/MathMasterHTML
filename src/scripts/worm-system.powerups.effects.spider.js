@@ -36,7 +36,7 @@
             font-size: 40px;
             z-index: 10001;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: opacity 0.3s ease, transform 0.3s ease;
         `;
 
     const spiderData = {
@@ -47,6 +47,8 @@
       type: "spider",
       active: true,
       createdAt: Date.now(),
+      duration: 10000,
+      fading: false,
       isHeart: false,
     };
 
@@ -80,11 +82,11 @@
 
       const now = Date.now();
       const timeAlive = now - spiderData.createdAt;
-      if (timeAlive > 8000 && !spiderData.fading) {
+      if (timeAlive > spiderData.duration - 2000 && !spiderData.fading) {
         spider.style.animation = "power-up-fade 2s ease-out";
         spiderData.fading = true;
       }
-      if (timeAlive > 10000) {
+      if (timeAlive > spiderData.duration) {
         if (spider.parentNode) {
           spider.parentNode.removeChild(spider);
         }
@@ -96,10 +98,7 @@
       const activeWorms = this.worms.filter((w) => w.active);
       if (activeWorms.length === 0) {
         console.log("🕷️ No more worms to convert");
-        if (spider.parentNode) {
-          spider.parentNode.removeChild(spider);
-        }
-        spiderData.active = false;
+        // Spider will auto-expire via duration timer; no early cleanup needed
         return;
       }
 
