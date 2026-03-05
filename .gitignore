@@ -45,9 +45,8 @@ build/
 # Playwright test artifacts
 test-results/
 playwright-report/
+test-results.json
 
 # Snapshots (if not needed in repo)
 # .snapshots/
 
-# Test results
-test-results/
