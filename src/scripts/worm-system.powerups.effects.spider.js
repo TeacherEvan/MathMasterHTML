@@ -5,6 +5,8 @@
     return;
   }
 
+  const SPIDER_IDLE_POLL_INTERVAL_MS = 150;
+
   const proto = window.WormSystem.prototype;
 
   // Spider: Spawns spider that converts worms to spiders, which convert more worms
@@ -76,6 +78,22 @@
 
     this.crossPanelContainer.appendChild(spider);
 
+    let isIdleWaitingForWorms = false;
+
+    const scheduleNextMove = (delayMs = 0) => {
+      if (!spiderData.active || spiderData.isHeart) return;
+
+      if (delayMs > 0) {
+        setTimeout(() => {
+          if (!spiderData.active || spiderData.isHeart) return;
+          moveSpider();
+        }, delayMs);
+        return;
+      }
+
+      requestAnimationFrame(moveSpider);
+    };
+
     // Move spider toward closest worm
     const moveSpider = () => {
       if (!spiderData.active || spiderData.isHeart) return;
@@ -97,10 +115,15 @@
 
       const activeWorms = this.worms.filter((w) => w.active);
       if (activeWorms.length === 0) {
-        console.log("🕷️ No more worms to convert");
-        // Spider will auto-expire via duration timer; no early cleanup needed
+        if (!isIdleWaitingForWorms) {
+          console.log("🕷️ No more worms to convert (idle wait)");
+          isIdleWaitingForWorms = true;
+        }
+        scheduleNextMove(SPIDER_IDLE_POLL_INTERVAL_MS);
         return;
       }
+
+      isIdleWaitingForWorms = false;
 
       // Find closest worm
       const closest = activeWorms.reduce((prev, curr) => {
@@ -146,7 +169,7 @@
         spider.style.left = `${spiderData.x}px`;
         spider.style.top = `${spiderData.y}px`;
 
-        requestAnimationFrame(moveSpider);
+        scheduleNextMove();
       }
     };
 
