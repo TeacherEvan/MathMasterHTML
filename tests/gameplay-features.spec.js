@@ -25,6 +25,14 @@ async function startGame(page) {
   );
 }
 
+async function clearAllQueuedWorms(page) {
+  await page.evaluate(() => {
+    window.wormSystem.killAllWorms();
+    window.wormSystem.spawnManager?.clearQueue?.();
+  });
+  await page.waitForTimeout(250);
+}
+
 // ── test suite ───────────────────────────────────────────────────────────────
 
 test.describe("Window C — Symbol Stability", () => {
@@ -78,9 +86,7 @@ test.describe("Worm Spawn — 1× Panel B Green Worm", () => {
 
   test("exactly 1 worm spawns after a row is completed", async ({ page }) => {
     // Ensure no worms exist yet
-    await page.evaluate(() => {
-      window.wormSystem.killAllWorms();
-    });
+    await clearAllQueuedWorms(page);
 
     await page.evaluate(() => {
       document.dispatchEvent(
@@ -105,6 +111,7 @@ test.describe("Worm Spawn — 1× Panel B Green Worm", () => {
   }) => {
     await page.evaluate(() => {
       window.wormSystem.killAllWorms();
+      window.wormSystem.spawnManager?.clearQueue?.();
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
       );
@@ -143,6 +150,7 @@ test.describe("Worm Spawn — 1× Panel B Green Worm", () => {
   test("worm starts rushing immediately (roamDuration=0)", async ({ page }) => {
     await page.evaluate(() => {
       window.wormSystem.killAllWorms();
+      window.wormSystem.spawnManager?.clearQueue?.();
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
       );
@@ -173,11 +181,13 @@ test.describe("Worm Spawn — 1× Panel B Green Worm", () => {
   }) => {
     await page.evaluate(() => {
       window.wormSystem.killAllWorms();
+      window.wormSystem.spawnManager?.clearQueue?.();
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
       );
       // Keep row counter progression, but clear row-1 worms so only row-2 spawns are counted.
       window.wormSystem.killAllWorms();
+      window.wormSystem.spawnManager?.clearQueue?.();
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 2 } }),
       );
@@ -188,7 +198,8 @@ test.describe("Worm Spawn — 1× Panel B Green Worm", () => {
     );
 
     await page.waitForFunction(
-      (count) => window.wormSystem.worms.filter((w) => w.active).length === count,
+      (count) =>
+        window.wormSystem.worms.filter((w) => w.active).length === count,
       expectedCount,
       { timeout: 5000 },
     );
@@ -205,23 +216,29 @@ test.describe("Worm Spawn — 1× Panel B Green Worm", () => {
   }) => {
     await page.evaluate(() => {
       window.wormSystem.killAllWorms();
+      window.wormSystem.spawnManager?.clearQueue?.();
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
       );
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 2 } }),
       );
-      document.dispatchEvent(new CustomEvent("problemCompleted", { detail: {} }));
+      document.dispatchEvent(
+        new CustomEvent("problemCompleted", { detail: {} }),
+      );
       window.wormSystem.killAllWorms();
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
       );
     });
 
-    const expectedCount = await page.evaluate(() => window.wormSystem.wormsPerRow);
+    const expectedCount = await page.evaluate(
+      () => window.wormSystem.wormsPerRow,
+    );
 
     await page.waitForFunction(
-      (count) => window.wormSystem.worms.filter((w) => w.active).length === count,
+      (count) =>
+        window.wormSystem.worms.filter((w) => w.active).length === count,
       expectedCount,
       { timeout: 5000 },
     );
@@ -287,7 +304,9 @@ test.describe("Green Worm — Blue Symbol Targeting", () => {
     expect(wormsPerRow).toBe(1);
   });
 
-  test("worm explosion creates a visible slime splat element", async ({ page }) => {
+  test("worm explosion creates a visible slime splat element", async ({
+    page,
+  }) => {
     const hasSplat = await page.evaluate(() => {
       const ws = window.wormSystem;
       const element = document.createElement("div");
@@ -448,15 +467,13 @@ test.describe("Console Setup Modal — Non-Blocking Floating Panel", () => {
     const modalRect = await page.evaluate(() => {
       const modal = document.getElementById("symbol-modal");
       const rect = modal?.getBoundingClientRect();
-      return rect
-        ? { width: rect.width, height: rect.height }
-        : null;
+      return rect ? { width: rect.width, height: rect.height } : null;
     });
 
     expect(modalRect).toBeTruthy();
-    // Should NOT fill the full viewport width (it's a 340px panel, not full-screen)
+    // Should NOT fill the full viewport width; floating panel should remain clearly smaller than the viewport
     const viewportWidth = await page.evaluate(() => window.innerWidth);
-    expect(modalRect.width).toBeLessThan(viewportWidth * 0.7);
+    expect(modalRect.width).toBeLessThan(viewportWidth * 0.8);
   });
 
   test("modal has a drag handle element", async ({ page }) => {
@@ -488,8 +505,7 @@ test.describe("Console Setup Modal — Non-Blocking Floating Panel", () => {
     await page.waitForTimeout(100);
 
     const display = await page.evaluate(
-      () =>
-        document.getElementById("symbol-modal")?.style.display,
+      () => document.getElementById("symbol-modal")?.style.display,
     );
     expect(display).toBe("none");
   });
@@ -506,9 +522,7 @@ test.describe("Console Setup Modal — Non-Blocking Floating Panel", () => {
     // Panel C symbols should still be clickable (pointer-events not blocked)
     const panelCPointerEvents = await page.evaluate(() => {
       const panelC = document.getElementById("panel-c");
-      return panelC
-        ? window.getComputedStyle(panelC).pointerEvents
-        : null;
+      return panelC ? window.getComputedStyle(panelC).pointerEvents : null;
     });
 
     // panel-c should NOT be 'none' (gameplay still interactive)

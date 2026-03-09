@@ -9,6 +9,7 @@ console.log("📋 Worm Spawn Queue Manager loading...");
 
       this.spawnQueue = [];
       this.isProcessingQueue = false;
+      this.queueGeneration = 0;
 
       console.log(
         `📋 WormSpawnManager initialized (max: ${this.maxWorms}, delay: ${this.SPAWN_QUEUE_DELAY}ms)`,
@@ -20,6 +21,7 @@ console.log("📋 Worm Spawn Queue Manager loading...");
         type,
         data,
         timestamp: Date.now(),
+        generation: this.queueGeneration,
       });
 
       console.log(
@@ -37,12 +39,20 @@ console.log("📋 Worm Spawn Queue Manager loading...");
       requestAnimationFrame(() => {
         const spawn = this.spawnQueue.shift();
 
-        if (spawn && typeof spawnCallback === "function") {
+        if (
+          spawn &&
+          spawn.generation === this.queueGeneration &&
+          typeof spawnCallback === "function"
+        ) {
           try {
             spawnCallback(spawn.type, spawn.data);
           } catch (error) {
             console.error(`❌ Error spawning ${spawn.type} worm:`, error);
           }
+        } else if (spawn) {
+          console.log(
+            `🧹 Skipped stale ${spawn.type} worm spawn from cleared queue generation`,
+          );
         }
 
         this.isProcessingQueue = false;
@@ -70,6 +80,7 @@ console.log("📋 Worm Spawn Queue Manager loading...");
       const cleared = this.spawnQueue.length;
       this.spawnQueue = [];
       this.isProcessingQueue = false;
+      this.queueGeneration += 1;
 
       if (cleared > 0) {
         console.log(`🧹 Cleared ${cleared} queued spawn(s)`);

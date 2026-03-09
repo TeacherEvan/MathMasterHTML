@@ -23,7 +23,11 @@ export const LINE_LIMIT_POLICY = {
   ],
 
   // Excluded by filename (generated/third-party artifacts).
-  excludeFileNames: ["package-lock.json", "test-results.json"],
+  excludeFileNames: [
+    "package-lock.json",
+    "test-results.json",
+    "test-results.competition.json",
+  ],
 
   // Excluded by path segment (third-party / generated output).
   excludeDirNames: [

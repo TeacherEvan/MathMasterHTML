@@ -41,6 +41,10 @@
       `💀 KILLING ALL WORMS! Total worms to kill: ${this.worms.length}`,
     );
 
+    if (this.spawnManager?.clearQueue) {
+      this.spawnManager.clearQueue();
+    }
+
     // Create a copy of the worms array to iterate over
     const wormsToKill = [...this.worms];
 
@@ -59,6 +63,10 @@
 
   proto.reset = function() {
     console.log("🐛 Resetting worm system");
+
+    if (this.spawnManager?.clearQueue) {
+      this.spawnManager.clearQueue();
+    }
 
     // Clear spawn timer
     if (this.spawnTimer) {

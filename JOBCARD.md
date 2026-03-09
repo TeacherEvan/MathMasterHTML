@@ -18,6 +18,13 @@
   - workspace task drift (`mvn` tasks do not match this Node/Playwright repo)
   - documentation drift between legacy `js/...` paths and current `src/scripts/...` structure
 - Updated `.github/copilot-instructions.md` to reflect the real toolchain and current repository conventions.
+- Follow-up stabilization pass completed:
+  - fixed Linux line-limit baseline matching by normalizing leading path separators in the scan pipeline
+  - excluded generated `test-results.competition.json` from line-limit enforcement and refreshed the accepted baseline artifacts
+  - cleared stale queued worm spawns during `killAllWorms()` / `reset()` to stabilize row-scaling gameplay tests
+  - made the power-up display and HUD spacing more resilient on narrow/mobile viewports
+  - stabilized `tests/ui-boundary.spec.js` and `tests/gameplay-features.spec.js` for Pixel/mobile and headless resize behavior
+  - revalidated `npm run verify`, `npm run test:competition:smoke`, targeted Pixel UI/gameplay coverage, and targeted Chromium UI/gameplay coverage
 
 ## Current planning status
 
@@ -35,8 +42,9 @@
 - This repo uses `npm` scripts for local run/test/verify workflows.
 - Playwright is the active browser QA stack.
 - The competition QA lane now has dedicated smoke and matrix commands in `package.json`.
-- `npm run verify` is currently blocked by the pre-existing line-limit baseline audit, not by this tooling slice.
+- `npm run verify` now passes after fixing Linux baseline path normalization and refreshing the accepted line-limit audit artifacts.
 - Full `npm test` is still known to have pre-existing Playwright/ESM issues from earlier work; roadmap now treats QA cleanup as an explicit prerequisite.
+- Browser-system dependency installation for WebKit/iPhone profiles still requires a privileged `sudo npx playwright install-deps` step on this Linux machine.
 
 ## Recommended next implementation tasks
 

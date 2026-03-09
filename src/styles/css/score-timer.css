@@ -148,17 +148,17 @@
   }
 
   .game-hud {
-    gap: 10px;
+    gap: 16px;
   }
 
   .hud-block {
-    min-width: 90px;
-    max-width: 120px;
-    padding: 6px 10px;
+    min-width: 82px;
+    max-width: 108px;
+    padding: 6px 8px;
   }
 
   .hud-value {
-    font-size: 15px;
+    font-size: 14px;
   }
 }
 

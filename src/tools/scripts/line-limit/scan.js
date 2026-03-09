@@ -42,7 +42,7 @@ function walkFiles(rootDir, policy) {
       if (!entry.isFile()) continue;
 
       const relPath = normalizeRelPath(
-        fullPath.substring(rootDir.length).replace(/^\\/, ""),
+        fullPath.substring(rootDir.length).replace(/^[/\\]/, ""),
       );
       const name = entry.name;
       const dot = name.lastIndexOf(".");
