@@ -1,13 +1,43 @@
-# JOBCARD (2026-02-12)
+# JOBCARD (2026-03-09)
 
-- Enforced 200-line policy tooling: `line-limit-check.js` + integrated into `npm run verify` (baseline: no new violations).
-- Refactored verifier into modules under `src/tools/scripts/verify/`.
-- Refreshed audit artifacts: `Docs/LINE_LIMIT_200_AUDIT.policy.{summary,all,violations}.*`.
-- Updated game mechanics: score cap `1000 → 10000`, timer `60s → 600s`, synchronized linear countdowns (score hits 0 when time hits 0).
-- Updated HUD defaults + constants: `src/pages/game.html`, `src/scripts/constants.part.system.js`, `src/scripts/score-timer-manager.js`.
-- Window B fix: added `.panel-b-controls`, reserved top safe-zone, removed absolute CLARIFY positioning (prevents HELP overlapping powerups display).
+## Completed today
 
-Notes: `npm run verify` passes; focused `tests/timer.spec.js` passes.
-Notes: full `npm test` still fails due to pre-existing Playwright/ESM import-export issues (e.g., `describe` / `WormEvasion`).
-Recs: move `power-up-display` inline CSS (in `worm-system.powerups.js`) into stylesheet; consider docking/clamping to avoid user-drag overlaps.
-Recs: fix Playwright suite module export errors so full CI runs clean.
+- Reviewed and strengthened the Phase 1 competition roadmap in `Docs/COMPETITION_PHASE1_ARCHITECTURAL_ROADMAP.md`.
+- Added a concrete execution plan in `Docs/COMPETITION_PHASE1_EXECUTION_MATRIX.md`.
+- Documented repo reality issues that must be resolved before deeper implementation:
+  - duplicate `devDependencies` keys in `package.json` were identified and corrected
+  - workspace task drift (`mvn` tasks do not match this Node/Playwright repo)
+  - documentation drift between legacy `js/...` paths and current `src/scripts/...` structure
+- Updated `.github/copilot-instructions.md` to reflect the real toolchain and current repository conventions.
+
+## Current planning status
+
+- Phase 1 roadmap exists and is now paired with a file-by-file execution matrix.
+- Netcode remains behind a decision gate: do not build synchronized multiplayer unless the competition brief explicitly requires it.
+- Highest-priority implementation order is now:
+  1. tooling truth pass
+  2. deterministic QA lane setup
+  3. startup/event contract hardening
+  4. loading-state resilience
+  5. UX/accessibility P0 work
+
+## Verified context
+
+- This repo uses `npm` scripts for local run/test/verify workflows.
+- Playwright is the active browser QA stack.
+- Full `npm test` is still known to have pre-existing Playwright/ESM issues from earlier work; roadmap now treats QA cleanup as an explicit prerequisite.
+
+## Recommended next implementation tasks
+
+- Fix tooling truth first:
+  - normalize `package.json`
+  - replace stale Maven workspace tasks with Node/Playwright equivalents
+  - align docs with `src/scripts/...` paths
+- Add the competition Playwright profile and deterministic fixtures.
+- Inventory event contracts before changing gameplay internals.
+
+## Notes carried forward
+
+- Keep event-driven architecture intact: no direct module-to-module calls.
+- Do not change Panel A/B font sizing in CSS; use the display manager path.
+- Be careful with worm visual stylesheet edits due to historical corruption risk.

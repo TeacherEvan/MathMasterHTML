@@ -1,11 +1,18 @@
 # Math Master Algebra - AI Agent Instructions
 
-Educational math game with Matrix-themed UI where players solve algebra equations by clicking falling symbols. **Pure HTML/CSS/JS - no build tools, no npm, no dependencies.**
+Educational math game with Matrix-themed UI where players solve algebra equations by clicking falling symbols. **Pure HTML/CSS/JS at runtime with no framework or bundler in the game itself.**
+
+## Repo Reality Check
+
+- The game runtime is browser-native and script-tag driven.
+- `npm` **is used in this repository** for local serving, linting, verification, type-checking, and Playwright test workflows.
+- Playwright is the active browser automation stack.
+- If workspace tasks mention Maven or other non-Node commands for this repo, treat them as stale until corrected.
 
 ## Quick Start
 
 ```powershell
-# Install dependencies (optional - for linting)
+# Install tooling dependencies
 npm install
 
 # Start local server (REQUIRED - file:// causes CORS errors)
@@ -16,6 +23,9 @@ npm start  # or: python -m http.server 8000
 
 # Verify code quality before committing
 npm run verify
+
+# Browser tests
+npm test
 ```
 
 ## ⚠️ Critical Rules
@@ -36,25 +46,25 @@ game.handleSymbolClick('X');
 
 ### 2. CSS Override Warning
 
-**Panel A & B font sizes CANNOT be changed via CSS** - `js/display-manager.js` applies inline styles that override everything (including `!important`). Edit lines 95-110 in JS, not CSS.
+**Panel A & B font sizes CANNOT be changed via CSS** - `src/scripts/display-manager.js` applies inline styles that override everything (including `!important`). Edit the JS sizing logic, not CSS.
 
 ### 3. File Corruption Risk
 
-`css/worm-styles.css` has corruption history. Always backup before editing. Check for malformed `@keyframes`, unclosed braces.
+`src/styles/worm-styles.css` / legacy worm style surfaces have corruption history. Always backup before editing. Check for malformed `@keyframes`, unclosed braces.
 
 ## Architecture: Three-Panel System
 
 ```
-Panel A: Problem display + Lock animation     → js/game.js, js/lock-manager.js
-Panel B: Solution steps + Worms + Console     → js/worm.js, js/console-manager.js  
-Panel C: Falling symbols (Matrix rain)        → js/3rdDISPLAY.js
+Panel A: Problem display + Lock animation     → `src/scripts/game*.js`, `src/scripts/lock-manager*.js`
+Panel B: Solution steps + Worms + Console     → `src/scripts/worm.js`, `src/scripts/worm-system.*.js`, `src/scripts/console-manager*.js`
+Panel C: Falling symbols (Matrix rain)        → `src/scripts/3rdDISPLAY.js`, symbol-rain helpers
 ```
 
 **Key Modules:**
 
 | Module | Purpose |
 |--------|---------|
-| `game.js` | Core loop, problem validation, symbol revelation |
+| `game.js` + `game-*.js` | Core loop, problem validation, symbol revelation |
 | `worm.js` | Worm core class (constructor + initialization only) |
 | `worm-system.*.js` | Worm AI modules: events, spawn, behavior, gameover, movement, interactions, effects, cleanup |
 | `worm-powerups.*.js` | Two-click power-up system: core, selection, UI, UI.draggable, effects |
@@ -68,7 +78,7 @@ Panel C: Falling symbols (Matrix rain)        → js/3rdDISPLAY.js
 
 ## Data Flow: Problem Loading
 
-Problems in `Assets/{Level}_Lvl/*.md` are parsed with regex:
+Problems in `Assets/{Level}_Lvl/*.md` are parsed with regex and fed into the game loaders.
 
 ```markdown
 1. `2x + 5 = 15`
@@ -77,9 +87,11 @@ Problems in `Assets/{Level}_Lvl/*.md` are parsed with regex:
    - x = 5
 ```
 
-## Worm System (`js/worm.js`)
+## Worm System (`src/scripts/worm.js`)
 
 **Split Files:** Worm logic is now partitioned into `worm-system.*.js` helpers (behavior, gameover, spawn, movement, effects, etc.). Keep changes within the correct helper file and preserve the event-driven flow. Game-over detection/UI is in `worm-system.gameover.js`.
+
+Do not collapse helper responsibilities back into large monolith files unless there is a very strong reason.
 
 **Lifecycle:** Spawn → Roaming (5-10s) → Targeting → Stealing → Destruction
 
@@ -113,6 +125,12 @@ Problems in `Assets/{Level}_Lvl/*.md` are parsed with regex:
 - Use `pointerdown` instead of `click` for touch (~200ms improvement)
 - Defer heavy init with `requestIdleCallback` or `setTimeout(cb, 1)`
 
+**ALSO DO:**
+
+- Prefer fixing repo/tooling truth before deep refactors.
+- Keep Playwright and documentation aligned with actual runtime entrypoints.
+- Treat event payloads as contracts when changing cross-module behavior.
+
 **DON'T:**
 
 - Use `transition: all` (GPU thrashing)
@@ -135,12 +153,18 @@ Problems in `Assets/{Level}_Lvl/*.md` are parsed with regex:
 
 ## Testing Checklist
 
+- [ ] `npm run verify` passes
 - [ ] All 3 levels: `?level=beginner|warrior|master`
 - [ ] Press 'P' - FPS should be 55-60, DOM queries < 150/sec
 - [ ] Worm spawning on line completion
 - [ ] Purple worm after 4+ wrong answers
 - [ ] Lock animation progresses through 6 levels
 - [ ] No console errors
+
+## Competition Planning Docs
+
+- `Docs/COMPETITION_PHASE1_ARCHITECTURAL_ROADMAP.md` - approved planning roadmap
+- `Docs/COMPETITION_PHASE1_EXECUTION_MATRIX.md` - file-targeted implementation matrix
 
 ## Module Split Convention
 
@@ -159,4 +183,6 @@ When splitting, keep `window.*` exports intact and load new files in `game.html`
 - `Docs/ARCHITECTURE.md` - Worm system design and state machine
 - `Docs/DEVELOPMENT_GUIDE.md` - Coding standards, recent changes
 - `Docs/PERFORMANCE.md` - Optimization patterns and results
+- `Docs/COMPETITION_PHASE1_ARCHITECTURAL_ROADMAP.md` - competition productionization roadmap
+- `Docs/COMPETITION_PHASE1_EXECUTION_MATRIX.md` - execution order, validation, rollback plan
 - `REFACTORING_PLAN.csv` - Full catalog of large files with split status and recommendations
