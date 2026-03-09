@@ -12,7 +12,7 @@
   - added seed-aware logging in `tests/global-setup.js`
   - updated high-traffic docs to reflect `src/pages`, `src/scripts`, and `src/styles`
   - validated the refined competition smoke lane (`qa-smoke-chromium` + `qa-smoke-pixel-7`) with 24/24 passing tests
-  - validated the full competition matrix lane with 179 passing Playwright tests across Chromium, Firefox, WebKit, iPhone 13, and Pixel 7 profiles
+  - exercised the full competition matrix lane and captured current blockers: missing Playwright system deps for iPhone/WebKit plus pre-existing cross-browser gameplay/layout failures outside this tooling slice
 - Documented repo reality issues that must be resolved before deeper implementation:
   - duplicate `devDependencies` keys in `package.json` were identified and corrected
   - workspace task drift (`mvn` tasks do not match this Node/Playwright repo)

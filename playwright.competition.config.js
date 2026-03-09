@@ -11,7 +11,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : 1,
   reporter: [
-    ["html", { outputFolder: "playwright-report/competition" }],
+    ["html", { outputFolder: "playwright-report/competition", open: "never" }],
     ["json", { outputFile: "test-results.competition.json" }],
   ],
   metadata: {
