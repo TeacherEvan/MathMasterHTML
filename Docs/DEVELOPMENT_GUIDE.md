@@ -9,6 +9,8 @@
 
 This guide covers development best practices, recent changes, and coding standards for Math Master Algebra. Read this before making significant changes to the codebase.
 
+> **Path note (2026):** current runtime source lives under `src/scripts/`, `src/styles/`, and `src/pages/`. Older historical notes in this document may still reference legacy `js/` or `css/` paths; map those to the corresponding `src/...` locations when working in the current repo.
+
 ---
 
 ## Table of Contents
@@ -30,7 +32,7 @@ This guide covers development best practices, recent changes, and coding standar
 
 Successfully removed deprecated cloning curse system:
 
-- **81 lines removed** from `js/worm.js` (2282 → 2201 lines, -3.5%)
+- **81 lines removed** from `src/scripts/worm.js` (2282 → 2201 lines, -3.5%)
 - Eliminated `cloningCurseActive` flag and all related tracking
 - Removed `checkCurseReset()` and `createCurseResetEffect()` methods
 - Cleaned up all conditional branches (6 locations)
@@ -38,7 +40,7 @@ Successfully removed deprecated cloning curse system:
 
 **Files Deleted:**
 
-- `js/problem-manager.js` (empty file)
+- legacy `js/problem-manager.js` (empty file)
 - `Docs/Cloning_Curse_Implementation.md` (deprecated feature)
 - `Docs/Snake_Weapon_Implementation.md` (non-existent feature)
 
@@ -52,12 +54,12 @@ Updated all documentation to reflect current codebase state:
 
 **Phase 4: Code Quality Improvements** - COMPLETE
 
-Extracted magic numbers to named constants in `js/worm.js`:
+Extracted magic numbers to named constants in `src/scripts/worm.js`:
 
 ```javascript
 // Power-up system
-this.POWER_UP_DROP_RATE = 0.10;
-this.POWER_UP_TYPES = ['chainLightning', 'spider', 'devil'];
+this.POWER_UP_DROP_RATE = 0.1;
+this.POWER_UP_TYPES = ["chainLightning", "spider", "devil"];
 
 // Animation timing (milliseconds)
 this.EXPLOSION_CLEANUP_DELAY = 600;
@@ -87,13 +89,15 @@ this.DEVIL_KILL_TIME = 5000;
 
 ```javascript
 // Dispatch event
-document.dispatchEvent(new CustomEvent('symbolClicked', { 
-    detail: { symbol: 'X' } 
-}));
+document.dispatchEvent(
+  new CustomEvent("symbolClicked", {
+    detail: { symbol: "X" },
+  }),
+);
 
 // Listen for event
-document.addEventListener('symbolClicked', (event) => {
-    console.log('Symbol clicked:', event.detail.symbol);
+document.addEventListener("symbolClicked", (event) => {
+  console.log("Symbol clicked:", event.detail.symbol);
 });
 ```
 
@@ -101,7 +105,7 @@ document.addEventListener('symbolClicked', (event) => {
 
 ```javascript
 // Direct function call between modules
-game.handleSymbolClick('X');  // NEVER DO THIS!
+game.handleSymbolClick("X"); // NEVER DO THIS!
 ```
 
 **Key Events:**
@@ -125,21 +129,25 @@ Hard-coded numerical values without explanatory variable names. They make code h
 **❌ Bad Example:**
 
 ```javascript
-const hasPowerUp = Math.random() < 0.10;  // What is 0.10?
-setTimeout(() => cleanup(), 600);          // Why 600?
-if (dist < 50) { killWorm(); }            // 50 what? pixels? units?
+const hasPowerUp = Math.random() < 0.1; // What is 0.10?
+setTimeout(() => cleanup(), 600); // Why 600?
+if (dist < 50) {
+  killWorm();
+} // 50 what? pixels? units?
 ```
 
 **✅ Good Example:**
 
 ```javascript
-const POWER_UP_DROP_RATE = 0.10;              // 10% chance per worm
-const EXPLOSION_ANIMATION_DURATION = 600;     // ms - Must match CSS animation
-const DEVIL_PROXIMITY_DISTANCE = 50;          // px - Kill radius around devil
+const POWER_UP_DROP_RATE = 0.1; // 10% chance per worm
+const EXPLOSION_ANIMATION_DURATION = 600; // ms - Must match CSS animation
+const DEVIL_PROXIMITY_DISTANCE = 50; // px - Kill radius around devil
 
 const hasPowerUp = Math.random() < POWER_UP_DROP_RATE;
 setTimeout(() => cleanup(), EXPLOSION_ANIMATION_DURATION);
-if (dist < DEVIL_PROXIMITY_DISTANCE) { killWorm(); }
+if (dist < DEVIL_PROXIMITY_DISTANCE) {
+  killWorm();
+}
 ```
 
 ### Benefits of Named Constants
@@ -155,18 +163,20 @@ if (dist < DEVIL_PROXIMITY_DISTANCE) { killWorm(); }
 
 ```javascript
 // Must search entire file for these values:
-Math.random() < 0.10  // Find all instances
-+= 2                  // Which += 2 is the right one?
-< 50                  // Which < 50 is for devil radius?
+Math.random() < 0.1; // Find all instances
+chainKills += 2; // Which += 2 is the right one?
+if (dist < 50) {
+  killWorm();
+} // Which < 50 is for devil radius?
 ```
 
 **With Named Constants** (Easy):
 
 ```javascript
 // Just change values at top of file:
-this.POWER_UP_DROP_RATE = 0.15;           // Changed from 0.10
+this.POWER_UP_DROP_RATE = 0.15; // Changed from 0.10
 this.CHAIN_LIGHTNING_BONUS_PER_PICKUP = 3; // Changed from 2
-this.DEVIL_PROXIMITY_DISTANCE = 60;        // Changed from 50
+this.DEVIL_PROXIMITY_DISTANCE = 60; // Changed from 50
 ```
 
 ### Recommended Constants Section
@@ -175,29 +185,29 @@ Place at top of class constructor:
 
 ```javascript
 class WormSystem {
-    constructor() {
-        // ===== GAME BALANCE CONSTANTS =====
-        
-        // Power-Up System
-        this.POWER_UP_DROP_RATE = 0.10;              // 10% chance per worm
-        this.CHAIN_LIGHTNING_BASE_KILLS = 5;         // Initial worms killed
-        this.CHAIN_LIGHTNING_BONUS_PER_PICKUP = 2;   // +2 kills per pickup
-        
-        // Distance Thresholds (pixels)
-        this.AOE_EXPLOSION_RADIUS = 18;              // One worm height
-        this.SPIDER_CONVERSION_DISTANCE = 30;        // Spider touch radius
-        this.DEVIL_PROXIMITY_DISTANCE = 50;          // Devil kill radius
-        
-        // Timing Constants (milliseconds)
-        this.CHAIN_EXPLOSION_DELAY = 150;            // Visual delay
-        this.EXPLOSION_ANIMATION_DURATION = 600;     // Must match CSS
-        this.CLEANUP_DELAY = 2000;                   // Allow animations
-        this.SKULL_DISPLAY_DURATION = 10000;         // 10 seconds
-        this.SPIDER_HEART_DURATION = 60000;          // 1 minute
-        this.DEVIL_KILL_TIME = 5000;                 // 5 seconds
-        
-        // Existing code continues...
-    }
+  constructor() {
+    // ===== GAME BALANCE CONSTANTS =====
+
+    // Power-Up System
+    this.POWER_UP_DROP_RATE = 0.1; // 10% chance per worm
+    this.CHAIN_LIGHTNING_BASE_KILLS = 5; // Initial worms killed
+    this.CHAIN_LIGHTNING_BONUS_PER_PICKUP = 2; // +2 kills per pickup
+
+    // Distance Thresholds (pixels)
+    this.AOE_EXPLOSION_RADIUS = 18; // One worm height
+    this.SPIDER_CONVERSION_DISTANCE = 30; // Spider touch radius
+    this.DEVIL_PROXIMITY_DISTANCE = 50; // Devil kill radius
+
+    // Timing Constants (milliseconds)
+    this.CHAIN_EXPLOSION_DELAY = 150; // Visual delay
+    this.EXPLOSION_ANIMATION_DURATION = 600; // Must match CSS
+    this.CLEANUP_DELAY = 2000; // Allow animations
+    this.SKULL_DISPLAY_DURATION = 10000; // 10 seconds
+    this.SPIDER_HEART_DURATION = 60000; // 1 minute
+    this.DEVIL_KILL_TIME = 5000; // 5 seconds
+
+    // Existing code continues...
+  }
 }
 ```
 
@@ -207,32 +217,32 @@ class WormSystem {
 
 ### ✅ All Power-Ups Fully Implemented
 
-**1. Chain Lightning ⚡**
+### 1. Chain Lightning ⚡
 
 - Drop rate: 10%
 - Activation: Click icon in help tooltip
 - Behavior: Click worm → kills 5 worms initially, +2 per subsequent pickup
-- Location: `js/worm.js` lines 1802-1881
+- Location: `src/scripts/worm-powerups*.js` and related worm helpers
 
-**2. Spider 🕷️**
+### 2. Spider 🕷️
 
 - Drop rate: 10%
 - Activation: Click icon (auto-spawns)
 - Behavior: Hunts worms, converts them to spiders (chain reaction)
 - Lifecycle: Spider → ❤️ (on click) → 💀 (after 1 min) → disappears (10s)
-- Location: `js/worm.js` lines 1883-1996
+- Location: `src/scripts/worm-powerups*.js` and related worm helpers
 
-**3. Devil 👹**
+### 3. Devil 👹
 
 - Drop rate: 10%
 - Activation: Click icon → click map to place
 - Behavior: Worms rush to devil, die after 5s proximity
-- Location: `js/worm.js` lines 1998-2105
+- Location: `src/scripts/worm-powerups*.js` and related worm helpers
 
 **UI/UX Details:**
 
 - NO keyboard shortcuts (user requirement)
-- Help tooltip shows current counts: `⚡ 2  🕷️ 1  👹  0`
+- Help tooltip shows current counts: `⚡ 2 🕷️ 1 👹 0`
 - Cursor changes to crosshair for targeting
 - Visual feedback on activation
 
@@ -245,17 +255,25 @@ class WormSystem {
 **REQUIRED**: Always use local HTTP server (never `file://` protocol)
 
 ```powershell
+# Install tooling once
+npm install
+
 # Start server
-python -m http.server 8000
+npm start
 
 # Access game
 http://localhost:8000/game.html?level=beginner
 ```
 
+**Competition QA lanes:**
+
+- `npm run test:competition:smoke` - seed-tagged smoke coverage for the competition profile
+- `npm run test:competition:matrix` - seed-tagged cross-browser/device competition matrix
+
 ### URL Parameters
 
 - `?level=beginner` - Beginner difficulty
-- `?level=warrior` - Warrior difficulty  
+- `?level=warrior` - Warrior difficulty
 - `?level=master` - Master difficulty
 - `?lockComponent=level-1-transformer.html` - Debug lock (testing only)
 
@@ -283,12 +301,12 @@ http://localhost:8000/game.html?level=beginner
 
 ### Performance Metrics Targets
 
-| Metric | Desktop Target | Mobile Target |
-|--------|---------------|---------------|
-| FPS | 58-60 | 45-50 |
-| Frame Time | <16ms | <22ms |
-| DOM Queries/sec | <150 | <150 |
-| Memory Growth | <5MB/min | <5MB/min |
+| Metric          | Desktop Target | Mobile Target |
+| --------------- | -------------- | ------------- |
+| FPS             | 58-60          | 45-50         |
+| Frame Time      | <16ms          | <22ms         |
+| DOM Queries/sec | <150           | <150          |
+| Memory Growth   | <5MB/min       | <5MB/min      |
 
 ---
 
@@ -298,7 +316,7 @@ http://localhost:8000/game.html?level=beginner
 
 **Problem**: Panel A & B font sizes CANNOT be changed via CSS - JS applies inline styles that override everything.
 
-**Solution**: Edit `js/display-manager.js` lines 95-110 (NOT `css/game.css`)
+**Solution**: Edit `src/scripts/display-manager.js` (NOT the CSS files)
 
 See `Docs/CSS_Override_Investigation.md` for full explanation.
 
@@ -316,9 +334,9 @@ See `Docs/CSS_Override_Investigation.md` for full explanation.
 
 ### 4. File Integrity
 
-**Problem**: `css/worm-styles.css` has had syntax errors in the past.
+**Problem**: `src/styles/worm-styles.css` has had syntax errors in the past.
 
-**Solution**: Backup files exist: `worm-styles.css.backup`, `worm-styles.css.corrupted`. Always validate CSS syntax after editing.
+**Solution**: Backup files exist around the worm style surface; always validate CSS syntax after editing.
 
 ### 5. CORS Issues
 
@@ -330,7 +348,7 @@ See `Docs/CSS_Override_Investigation.md` for full explanation.
 
 **Problem**: Standard `click` events have ~200ms delay on mobile.
 
-**Solution**: Use `pointerdown` for all interactive elements (already implemented in `js/console-manager.js`).
+**Solution**: Use `pointerdown` for all interactive elements (already implemented in `src/scripts/console-manager.js`).
 
 ---
 
@@ -343,7 +361,7 @@ See `Docs/CSS_Override_Investigation.md` for full explanation.
 Three spawn methods have 85% code duplication (~360 lines):
 
 - `spawnWormFromConsole()` - 150 lines
-- `spawnWorm()` - 145 lines  
+- `spawnWorm()` - 145 lines
 - `spawnWormFromBorder()` - 150 lines
 
 **Reason for Deferral**:
@@ -388,18 +406,18 @@ Use emoji prefixes matching console logs for easy tracking:
 
 ### Current Codebase Metrics
 
-| Metric | Value |
-|--------|-------|
-| Total JS Lines | 4,499 |
-| Largest File | `worm.js` (2,201 lines, 42% of total) |
-| Dead Code Removed | 250+ lines (October 2025) |
-| Magic Numbers Converted | 11 constants |
-| Code Duplication | ~360 lines (spawn methods - deferred) |
+| Metric                  | Value                                 |
+| ----------------------- | ------------------------------------- |
+| Total JS Lines          | 4,499                                 |
+| Largest File            | `worm.js` (2,201 lines, 42% of total) |
+| Dead Code Removed       | 250+ lines (October 2025)             |
+| Magic Numbers Converted | 11 constants                          |
+| Code Duplication        | ~360 lines (spawn methods - deferred) |
 
 ### Code Quality Achievements
 
 - ✅ All cloning curse dead code removed
-- ✅ Magic numbers extracted to constants  
+- ✅ Magic numbers extracted to constants
 - ✅ Documentation updated and accurate
 - ✅ Event-driven architecture maintained
 - ✅ Zero syntax errors
@@ -417,4 +435,4 @@ Use emoji prefixes matching console logs for easy tracking:
 
 ---
 
-**End of Development Guide**
+End of Development Guide

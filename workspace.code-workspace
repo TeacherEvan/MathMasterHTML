@@ -4,6 +4,71 @@
 			"path": "."
 		}
 	],
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "start",
+				"type": "shell",
+				"command": "npm",
+				"args": [
+					"run",
+					"start"
+				],
+				"isBackground": true,
+				"group": "build"
+			},
+			{
+				"label": "verify",
+				"type": "shell",
+				"command": "npm",
+				"args": [
+					"run",
+					"verify"
+				],
+				"group": "build"
+			},
+			{
+				"label": "typecheck",
+				"type": "shell",
+				"command": "npm",
+				"args": [
+					"run",
+					"typecheck"
+				],
+				"group": "build"
+			},
+			{
+				"label": "test",
+				"type": "shell",
+				"command": "npm",
+				"args": [
+					"test"
+				],
+				"group": "test"
+			},
+			{
+				"label": "competition smoke",
+				"type": "shell",
+				"command": "npm",
+				"args": [
+					"run",
+					"test:competition:smoke"
+				],
+				"group": "test"
+			},
+			{
+				"label": "competition matrix",
+				"type": "shell",
+				"command": "npm",
+				"args": [
+					"run",
+					"test:competition:matrix"
+				],
+				"group": "test"
+			}
+		]
+	},
 	"settings": {
 		"javascript.validate.enable": true,
 		"javascript.implicitProjectConfig.checkJs": false,

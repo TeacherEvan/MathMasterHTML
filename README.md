@@ -18,9 +18,9 @@
 - [Installation](#-installation)
 - [How to Play](#-how-to-play)
 - [Game Mechanics](#-game-mechanics)
-- [Technical Architecture](#-technical-architecture)
+- [Technical Architecture](#technical-architecture)
 - [Project Structure](#-project-structure)
-- [Development](#-development)
+- [Development](#development)
 - [Contributing](#-contributing)
 - [License](#-license)
 
@@ -80,12 +80,23 @@
    cd MathMasterHTML
    ```
 
-2. **Open in browser**
+2. **Install tooling dependencies**
 
    ```bash
-   # Simply open index.html in your browser
-   # No build process required!
+   npm install
    ```
+
+3. **Start the local server**
+
+   ```bash
+   npm start
+   ```
+
+4. **Open the game**
+
+- Browse to `http://localhost:8000/game.html?level=beginner`
+- Root HTML entrypoints redirect to the active pages under `src/pages/`
+- Do **not** use `file://` directly; problem loading will fail because of browser CORS rules
 
 ### Alternative: GitHub Pages
 
@@ -98,29 +109,35 @@ Visit the live version at: `https://teachereven.github.io/MathMasterHTML/`
 ### Step-by-Step Guide
 
 1. **Start the Game**
-   - Open `index.html` in your browser
+
+   - Open `http://localhost:8000/` in your browser
    - Click through the Matrix-themed welcome screen
 
 2. **Select Your Level**
+
    - **Beginner**: Master addition and subtraction
    - **Warrior**: Tackle multiplication challenges
    - **Master**: Conquer division problems
 
 3. **Solve the Problem**
+
    - Read the algebra problem displayed in **Panel A** (left)
    - Watch symbols fall in **Panel C** (right)
    - Click the correct symbols to reveal the solution in **Panel B** (middle)
 
 4. **Watch Your Progress**
+
    - The lock animation in Panel A evolves every 2 completed solution lines
    - Complete all steps to solve the problem and move to the next one
 
 5. **Battle the Worms**
+
    - Worms spawn after each completed line (max 4)
    - They steal hidden symbols from your solution
    - **Click worms** to destroy them and save the symbols!
 
 6. **Use the Help Button**
+
    - Stuck? Click the **HELP** button in Panel B
    - It reveals one random symbol from the current line
 
@@ -176,7 +193,7 @@ The game uses custom DOM events for communication:
 
 ---
 
-## 🏗️ Technical Architecture
+## Technical Architecture
 
 ### Technology Stack
 
@@ -187,7 +204,7 @@ The game uses custom DOM events for communication:
 
 ### Three-Panel Layout
 
-```
+```text
 ┌─────────────┬──────────────────┬─────────────┐
 │   Panel A   │     Panel B      │   Panel C   │
 ├─────────────┼──────────────────┼─────────────┤
@@ -201,13 +218,13 @@ The game uses custom DOM events for communication:
 
 ### Core Components
 
-| File | Purpose | Lines |
-|------|---------|-------|
-| `js/game.js` | Main game logic, problem parsing, symbol validation | 515 |
-| `js/lock-manager.js` | Progressive lock animation system (LockManager class) | 634 |
-| `js/worm.js` | Enemy mechanics system (WormSystem class) | 230 |
-| `js/3rdDISPLAY.js` | Symbol rain rendering and click detection | ~200 |
-| `js/console-manager.js` | Quick access console system (ConsoleManager class) | ~340 |
+| File                             | Purpose                                               | Lines          |
+| -------------------------------- | ----------------------------------------------------- | -------------- |
+| `src/scripts/game.js`            | Main game loader/orchestrator for game modules        | Aggregated     |
+| `src/scripts/lock-manager.js`    | Progressive lock animation system (LockManager class) | Active runtime |
+| `src/scripts/worm.js`            | Enemy mechanics system bootstrap (WormSystem class)   | Active runtime |
+| `src/scripts/3rdDISPLAY.js`      | Symbol rain rendering and click detection             | Active runtime |
+| `src/scripts/console-manager.js` | Quick access console system (ConsoleManager class)    | Active runtime |
 
 ### Problem Format
 
@@ -229,8 +246,11 @@ Problems are stored in Markdown files:
 
 ## 📁 Project Structure
 
-```
+```text
 MathMasterHTML/
+├── game.html                  # Root redirect to src/pages/game.html
+├── index.html                 # Root redirect to src/pages/index.html
+├── level-select.html          # Root redirect to src/pages/level-select.html
 ├── src/
 │   ├── pages/                 # HTML pages
 │   │   ├── index.html         # Welcome screen
@@ -258,19 +278,19 @@ MathMasterHTML/
 │   ├── tools/                 # Utility scripts
 │   └── types/                 # TypeScript definitions
 ├── tests/                     # Test files
-├── docs/                      # Documentation
+├── Docs/                      # Documentation
 └── (root config files)
 ```
 
 ---
 
-## 🛠️ Development
+## Development
 
 ### Prerequisites
 
 - Modern web browser (Chrome, Firefox, Edge, Safari)
 - Text editor (VS Code recommended)
-- No build tools or package managers required!
+- Node.js 18+ and npm for local serving, verification, and Playwright workflows
 
 ### Local Development
 
@@ -280,11 +300,18 @@ MathMasterHTML/
    code .
    ```
 
-2. **Start testing**
-   - Open `index.html` in browser
-   - Or use Live Server extension in VS Code
+2. **Start the local server**
 
-3. **Debug with Console**
+   ```bash
+   npm start
+   ```
+
+3. **Open the app in a browser**
+
+   - Open `http://localhost:8000/`
+   - Root entrypoints will redirect into `src/pages/`
+
+4. **Debug with Console**
    - Extensive emoji-prefixed logging:
      - 🎮 Game state
      - 🔒 Lock manager
@@ -294,34 +321,39 @@ MathMasterHTML/
 
 ### Testing Workflow
 
-**Testing Path**: `index.html` → `level-select.html` → `game.html?level=beginner`
+**Testing Path**: `/` → `/level-select.html` → `/game.html?level=beginner`
+
+**Competition QA shortcuts:**
+
+- `npm run test:competition:smoke` - seed-tagged smoke checks for the competition profile
+- `npm run test:competition:matrix` - broader seed-tagged browser/device matrix
 
 **Lock Animation Testing**:
 
 ```javascript
 // In browser console:
-lockManager.forceLockLevel(3);  // Jump to level 3
-lockManager.getDebugInfo();      // Inspect state
+lockManager.forceLockLevel(3); // Jump to level 3
+lockManager.getDebugInfo(); // Inspect state
 ```
 
 **Worm Spawn Testing**:
 
 ```javascript
 // Manually trigger:
-document.dispatchEvent(new CustomEvent('problemLineCompleted'));
+document.dispatchEvent(new CustomEvent("problemLineCompleted"));
 ```
 
 ### Common Issues
 
-| Issue | Solution |
-|-------|----------|
-| Lock not appearing | Check `first-line-solved` event dispatch |
-| Lock stuck at level 1 | Verify `completedLinesCount++` |
-| Symbols not revealing | Check X/x normalization |
-| Worms not spawning | Check event listener in WormSystem |
-| Multiple clicks needed | Symbol detection missing normalization |
-| Console not appearing | Ensure `problemCompleted` event fires after all symbols revealed |
-| Keyboard shortcuts not working | Console slot must be filled, game window must have focus |
+| Issue                          | Solution                                                         |
+| ------------------------------ | ---------------------------------------------------------------- |
+| Lock not appearing             | Check `first-line-solved` event dispatch                         |
+| Lock stuck at level 1          | Verify `completedLinesCount++`                                   |
+| Symbols not revealing          | Check X/x normalization                                          |
+| Worms not spawning             | Check event listener in WormSystem                               |
+| Multiple clicks needed         | Symbol detection missing normalization                           |
+| Console not appearing          | Ensure `problemCompleted` event fires after all symbols revealed |
+| Keyboard shortcuts not working | Console slot must be filled, game window must have focus         |
 
 ---
 
@@ -404,10 +436,6 @@ For questions, suggestions, or collaboration:
 
 ---
 
-<div align="center">
-
-**Made with ❤️ for math education**
+Made with ❤️ for math education
 
 [⬆ Back to Top](#-math-master---unlock-your-mind)
-
-</div>

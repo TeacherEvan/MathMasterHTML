@@ -26,6 +26,10 @@ npm run verify
 
 # Browser tests
 npm test
+
+# Competition QA lanes
+npm run test:competition:smoke
+npm run test:competition:matrix
 ```
 
 ## ⚠️ Critical Rules
@@ -95,11 +99,13 @@ Do not collapse helper responsibilities back into large monolith files unless th
 
 **Lifecycle:** Spawn → Roaming (5-10s) → Targeting → Stealing → Destruction
 
-**Difficulty Scaling** (in `difficultySettings` object):
+**Difficulty Scaling** (current `difficultySettings` object in `src/scripts/worm.js`):
 
-- Beginner: 3 worms/row, 1.0x speed
-- Warrior: 5 worms/row, 1.5x speed  
-- Master: 8 worms/row, 2.0x speed
+- Beginner: 1 worm/row, 1.0x speed, 8000ms console roam, 5000ms border roam
+- Warrior: 1 worm/row, 1.5x speed, 6000ms console roam, 4000ms border roam
+- Master: 1 worm/row, 2.0x speed, 4000ms console roam, 3000ms border roam
+
+**Automation Note:** when `navigator.webdriver === true`, `maxWorms` is capped to 8 to keep browser automation stable.
 
 **Purple Worms** (boss enemies): Spawn after 4+ wrong answers. Can ONLY be killed via Panel C rain symbol - clicking directly spawns green clone as punishment.
 
@@ -154,6 +160,8 @@ Do not collapse helper responsibilities back into large monolith files unless th
 ## Testing Checklist
 
 - [ ] `npm run verify` passes
+- [ ] `npm run typecheck` passes
+- [ ] `npm run test:competition:smoke` passes
 - [ ] All 3 levels: `?level=beginner|warrior|master`
 - [ ] Press 'P' - FPS should be 55-60, DOM queries < 150/sec
 - [ ] Worm spawning on line completion

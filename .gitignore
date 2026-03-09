@@ -46,6 +46,7 @@ build/
 test-results/
 playwright-report/
 test-results.json
+test-results.competition.json
 
 # Snapshots (if not needed in repo)
 # .snapshots/

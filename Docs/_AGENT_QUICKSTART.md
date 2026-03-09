@@ -1,5 +1,5 @@
 # 🤖 Agent Quickstart Guide
->
+
 > **Read this first!** Fast-track onboarding for AI coding agents
 
 ## ⚡ 30-Second Overview
@@ -13,18 +13,20 @@
 
 **Tech Stack**: Vanilla HTML/CSS/JS, no framework, ES2022
 
+**Path note**: Current runtime code lives under `src/scripts/` and `src/styles/`. Older docs/comments may still reference historical `js/` and `css/` paths.
+
 ---
 
 ## 🎯 Common Tasks & Where to Look
 
-| Task | Primary File(s) | Key Function/Class |
-|------|-----------------|-------------------|
-| Fix worm behavior | `js/worm.js` | `WormSystem` class |
-| Modify worm animation | `css/worm-base.css` | `.worm-container` |
-| Change game constants | `js/constants.js` | `GameConstants` |
-| Debug with console | `js/console-manager.js` | Browser console |
-| Add power-up | `js/worm-powerups.js` | `WormPowerUpSystem` |
-| Fix symbol display | `js/display-manager.js` | `DisplayManager` |
+| Task                  | Primary File(s)                  | Key Function/Class  |
+| --------------------- | -------------------------------- | ------------------- |
+| Fix worm behavior     | `src/scripts/worm.js`            | `WormSystem` class  |
+| Modify worm animation | `src/styles/worm-base.css`       | `.worm-container`   |
+| Change game constants | `src/scripts/constants.js`       | `GameConstants`     |
+| Debug with console    | `src/scripts/console-manager.js` | Browser console     |
+| Add power-up          | `src/scripts/worm-powerups.js`   | `WormPowerUpSystem` |
+| Fix symbol display    | `src/scripts/display-manager.js` | `DisplayManager`    |
 
 ---
 
@@ -71,35 +73,38 @@
 window.wormSystem.spawnWormFromConsole();
 
 // Spawn purple worm
-document.dispatchEvent(new CustomEvent('purpleWormTriggered'));
+document.dispatchEvent(new CustomEvent("purpleWormTriggered"));
 
 // Give power-ups
 window.wormSystem.powerUps.chainLightning = 5;
 window.wormSystem.updatePowerUpDisplay();
 
 // Check worm state
-window.wormSystem.worms.forEach(w => console.log(w.id, w.isPurple, w.hasStolen));
+window.wormSystem.worms.forEach((w) =>
+  console.log(w.id, w.isPurple, w.hasStolen),
+);
 
 // Kill all worms
-window.wormSystem.worms.forEach(w => window.wormSystem.removeWorm(w));
+window.wormSystem.worms.forEach((w) => window.wormSystem.removeWorm(w));
 ```
 
 ---
 
 ## 📁 File Map (Most Important)
 
-```
-js/
-├── worm.js           ← MAIN: 2200 lines, WormSystem class
-├── worm-factory.js   ← Creates worm data/elements
-├── worm-movement.js  ← Movement calculations
-├── worm-powerups.js  ← Power-up logic
-├── worm-spawn-manager.js ← Spawn queue/coordination
-├── constants.js      ← ALL magic numbers here
-├── game.js           ← Game flow, problem loading
-└── utils.js          ← normalizeSymbol(), calculateDistance()
+```text
+src/scripts/
+├── worm.js                ← WormSystem bootstrap + constructor
+├── worm-system.*.js       ← Worm lifecycle/helpers by concern
+├── worm-factory.js        ← Creates worm data/elements
+├── worm-movement*.js      ← Movement calculations + navigation
+├── worm-powerups*.js      ← Power-up logic/UI/effects
+├── worm-spawn-manager*.js ← Spawn queue/coordination
+├── constants.js           ← Shared gameplay constants
+├── game.js                ← Game flow/module aggregation
+└── utils*.js              ← Shared utilities and UI helpers
 
-css/
+src/styles/
 ├── worm-base.css     ← Worm appearance, segments
 ├── worm-effects.css  ← Explosions, flickers, particles
 └── game.css          ← Layout, panels
@@ -109,7 +114,7 @@ css/
 
 ## 🔄 State Machine: Worm Lifecycle
 
-```
+```text
 [SPAWN] → [ROAMING] → [RUSHING_TO_TARGET] → [STEALING] → [CARRYING] → [RETURNING/EXIT]
                 ↑                                              ↓
                 └──────────── (if target lost) ←───────────────┘
@@ -146,15 +151,15 @@ npm start           # Start dev server at :8000
 
 ## 📚 Need More Detail?
 
-| Topic | Go To |
-|-------|-------|
-| Full architecture | [ARCHITECTURE.md](./ARCHITECTURE.md) |
+| Topic                 | Go To                                                |
+| --------------------- | ---------------------------------------------------- |
+| Full architecture     | [ARCHITECTURE.md](./ARCHITECTURE.md)                 |
 | Worm system deep dive | [WORM_DEVELOPER_GUIDE.md](./WORM_DEVELOPER_GUIDE.md) |
-| Testing scenarios | [WORM_TESTING_GUIDE.md](./WORM_TESTING_GUIDE.md) |
-| Performance tuning | [PERFORMANCE.md](./PERFORMANCE.md) |
-| All docs index | [_INDEX.md](./_INDEX.md) |
+| Testing scenarios     | [WORM_TESTING_GUIDE.md](./WORM_TESTING_GUIDE.md)     |
+| Performance tuning    | [PERFORMANCE.md](./PERFORMANCE.md)                   |
+| All docs index        | [\_INDEX.md](./_INDEX.md)                            |
 
 ---
 
-*This file optimized for AI agent consumption*
-*Last updated: 2025-11-26*
+_This file optimized for AI agent consumption_
+_Last updated: 2025-11-26_

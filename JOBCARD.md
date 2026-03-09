@@ -4,6 +4,15 @@
 
 - Reviewed and strengthened the Phase 1 competition roadmap in `Docs/COMPETITION_PHASE1_ARCHITECTURAL_ROADMAP.md`.
 - Added a concrete execution plan in `Docs/COMPETITION_PHASE1_EXECUTION_MATRIX.md`.
+- Completed the first implementation slice of the tooling truth pass:
+  - fixed `npm run typecheck` path drift in `tsconfig.typecheck.json`
+  - added committed Node/Playwright workspace tasks to `workspace.code-workspace`
+  - scaffolded competition Playwright commands in `package.json`
+  - added a dedicated `playwright.competition.config.js` with smoke and matrix projects
+  - added seed-aware logging in `tests/global-setup.js`
+  - updated high-traffic docs to reflect `src/pages`, `src/scripts`, and `src/styles`
+  - validated the refined competition smoke lane (`qa-smoke-chromium` + `qa-smoke-pixel-7`) with 24/24 passing tests
+  - validated the full competition matrix lane with 179 passing Playwright tests across Chromium, Firefox, WebKit, iPhone 13, and Pixel 7 profiles
 - Documented repo reality issues that must be resolved before deeper implementation:
   - duplicate `devDependencies` keys in `package.json` were identified and corrected
   - workspace task drift (`mvn` tasks do not match this Node/Playwright repo)
@@ -16,7 +25,7 @@
 - Netcode remains behind a decision gate: do not build synchronized multiplayer unless the competition brief explicitly requires it.
 - Highest-priority implementation order is now:
   1. tooling truth pass
-  2. deterministic QA lane setup
+  2. competition QA lane setup
   3. startup/event contract hardening
   4. loading-state resilience
   5. UX/accessibility P0 work
@@ -25,16 +34,15 @@
 
 - This repo uses `npm` scripts for local run/test/verify workflows.
 - Playwright is the active browser QA stack.
+- The competition QA lane now has dedicated smoke and matrix commands in `package.json`.
+- `npm run verify` is currently blocked by the pre-existing line-limit baseline audit, not by this tooling slice.
 - Full `npm test` is still known to have pre-existing Playwright/ESM issues from earlier work; roadmap now treats QA cleanup as an explicit prerequisite.
 
 ## Recommended next implementation tasks
 
-- Fix tooling truth first:
-  - normalize `package.json`
-  - replace stale Maven workspace tasks with Node/Playwright equivalents
-  - align docs with `src/scripts/...` paths
-- Add the competition Playwright profile and deterministic fixtures.
-- Inventory event contracts before changing gameplay internals.
+- Expand validation across the remaining competition smoke project(s) and the full matrix lane.
+- Inventory canonical event contracts before changing gameplay internals.
+- Harden startup ordering and loading resilience once the event contract inventory is complete.
 
 ## Notes carried forward
 

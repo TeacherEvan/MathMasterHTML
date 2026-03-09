@@ -5,12 +5,18 @@
 /**
  * Global setup function for Playwright tests
  */
-export default async function globalSetup() {
+export default async function globalSetup(config) {
   // Set default test timeout
   process.env.PLAYWRIGHT_TEST_TIMEOUT = "30000";
+  process.env.MM_TEST_SEED ??= "mathmaster-default-seed";
+
+  const configuredProjects = config.projects
+    .map((project) => project.name)
+    .join(", ");
 
   // Set up global test utilities
   global.__TEST_UTILS__ = {
+    seed: process.env.MM_TEST_SEED,
     // Common test helpers
     generateWormData: (overrides = {}) => ({
       id: `worm-${Date.now()}`,
@@ -50,5 +56,7 @@ export default async function globalSetup() {
     },
   };
 
-  console.log("Test global setup complete");
+  console.log(
+    `Test global setup complete (seed: ${process.env.MM_TEST_SEED}; configured projects: ${configuredProjects})`,
+  );
 }

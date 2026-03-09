@@ -15,6 +15,7 @@ declare global {
     WormSpawnManager?: any;
     WormSpawnCoordinator?: any;
     WormPowerUpSystem?: any;
+    WormSystem?: any;
     WormCursorTracker?: any;
     WormAggressionModel?: any;
     WormPathfinder?: any;

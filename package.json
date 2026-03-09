@@ -11,6 +11,10 @@
     "verify:quick": "npm run lint && echo '✅ Lint passed!'",
     "typecheck": "npx tsc --noEmit --project tsconfig.typecheck.json",
     "test": "npx playwright test",
+    "test:competition": "npm run test:competition:matrix",
+    "test:competition:smoke": "cross-env MM_TEST_SEED=competition-smoke npx playwright test --config=playwright.competition.config.js --project=qa-smoke-chromium --project=qa-smoke-pixel-7",
+    "test:competition:matrix": "cross-env MM_TEST_SEED=competition-matrix npx playwright test --config=playwright.competition.config.js --project=qa-matrix-chromium --project=qa-matrix-firefox --project=qa-matrix-webkit --project=qa-matrix-iphone-13 --project=qa-matrix-pixel-7",
+    "test:competition:soak": "cross-env MM_TEST_SEED=competition-soak npx playwright test --config=playwright.competition.config.js --project=qa-matrix-chromium --repeat-each=3 tests/gameplay-features.spec.js tests/powerups.spec.js",
     "test:ui": "npx playwright test --ui",
     "test:headed": "npx playwright test --headed",
     "test:report": "npx playwright show-report",
@@ -32,6 +36,7 @@
   "devDependencies": {
     "@eslint/js": "^9.15.0",
     "@playwright/test": "^1.58.2",
+    "cross-env": "^10.1.0",
     "eslint": "^9.15.0",
     "globals": "^16.5.0",
     "playwright": "^1.58.2",
