@@ -183,6 +183,51 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       // Either all revealed or marked as completed
       expect(step0Hidden === 0 || step0Completed > 0).toBeTruthy();
     });
+
+    test("should proceed to the next level after the final problem", async ({
+      page,
+    }) => {
+      const expectedTotalProblems = await page.evaluate(
+        () => window.GameProblemManager.problems.length
+      );
+
+      await page.evaluate(() => {
+        const manager = window.GameProblemManager;
+        const totalProblems = manager.problems.length;
+        sessionStorage.removeItem("lastLevelCompleted");
+        document.addEventListener(
+          "levelCompleted",
+          (event) => {
+            sessionStorage.setItem(
+              "lastLevelCompleted",
+              JSON.stringify(event.detail || {}),
+            );
+          },
+          { once: true }
+        );
+
+        for (let callCount = 1; callCount < totalProblems; callCount++) {
+          manager.nextProblem();
+        }
+
+        // The production flow is event-driven: after the last problem resolves,
+        // consoleSymbolAdded is the follow-up event that triggers progression.
+        document.dispatchEvent(
+          new CustomEvent("consoleSymbolAdded", {
+            detail: { symbol: "1", position: 0 },
+          })
+        );
+      });
+
+      await page.waitForURL("**/game.html?level=warrior", { timeout: 5000 });
+      const completionDetail = await page.evaluate(() =>
+        JSON.parse(sessionStorage.getItem("lastLevelCompleted") || "{}")
+      );
+      expect(completionDetail).toMatchObject({
+        level: "beginner",
+        totalProblems: expectedTotalProblems,
+      });
+    });
   });
 
   test.describe("Cache Performance", () => {
