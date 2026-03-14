@@ -1,13 +1,17 @@
 // src/scripts/game-page.js
 (function() {
   const backButton = document.getElementById("back-button");
+  const navigation = Object.freeze({
+    game: "game.html?level=",
+    levelSelect: "level-select.html",
+  });
   const nextLevelByCurrentLevel = Object.freeze({
     beginner: "warrior",
     warrior: "master",
   });
 
   function goBack() {
-    window.location.href = "/src/pages/level-select.html";
+    window.location.assign(navigation.levelSelect);
   }
 
   function handleLevelCompleted(event) {
@@ -17,9 +21,9 @@
         ? window.getLevelFromURL()
         : "beginner");
     const nextLevel = nextLevelByCurrentLevel[currentLevel];
-    window.location.href = nextLevel
-      ? `/game.html?level=${nextLevel}`
-      : "/level-select.html";
+    window.location.assign(
+      nextLevel ? `${navigation.game}${nextLevel}` : navigation.levelSelect
+    );
   }
 
   function enterFullscreen() {
