@@ -183,6 +183,27 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       // Either all revealed or marked as completed
       expect(step0Hidden === 0 || step0Completed > 0).toBeTruthy();
     });
+
+    test("should proceed to the next level after the final problem", async ({
+      page,
+    }) => {
+      await page.evaluate(() => {
+        const manager = window.GameProblemManager;
+        const totalProblems = 50;
+
+        for (let index = 1; index < totalProblems; index++) {
+          manager.nextProblem();
+        }
+
+        document.dispatchEvent(
+          new CustomEvent("consoleSymbolAdded", {
+            detail: { symbol: "1", position: 0 },
+          })
+        );
+      });
+
+      await page.waitForURL("**/game.html?level=warrior", { timeout: 5000 });
+    });
   });
 
   test.describe("Cache Performance", () => {
