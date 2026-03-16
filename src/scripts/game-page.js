@@ -1,29 +1,9 @@
 // src/scripts/game-page.js
 (function() {
   const backButton = document.getElementById("back-button");
-  const navigation = Object.freeze({
-    game: "game.html?level=",
-    levelSelect: "level-select.html",
-  });
-  const nextLevelByCurrentLevel = Object.freeze({
-    beginner: "warrior",
-    warrior: "master",
-  });
 
   function goBack() {
-    window.location.assign(navigation.levelSelect);
-  }
-
-  function handleLevelCompleted(event) {
-    const currentLevel =
-      event.detail?.level ||
-      (typeof window.getLevelFromURL === "function"
-        ? window.getLevelFromURL()
-        : "beginner");
-    const nextLevel = nextLevelByCurrentLevel[currentLevel];
-    window.location.assign(
-      nextLevel ? `${navigation.game}${nextLevel}` : navigation.levelSelect
-    );
+    window.location.href = "/src/pages/level-select.html";
   }
 
   function enterFullscreen() {
@@ -66,8 +46,6 @@
   if (backButton) {
     backButton.addEventListener("click", goBack);
   }
-
-  document.addEventListener("levelCompleted", handleLevelCompleted);
 
   document.addEventListener("DOMContentLoaded", () => {
     setupHowToPlayModal();

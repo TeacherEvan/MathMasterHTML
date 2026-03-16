@@ -151,15 +151,8 @@ console.log("📚 Game problem manager module loading...");
   function nextProblem() {
     currentProblemIndex++;
     if (currentProblemIndex >= problems.length) {
-      document.dispatchEvent(
-        new CustomEvent("levelCompleted", {
-          detail: {
-            level,
-            totalProblems: problems.length,
-          },
-        }),
-      );
-      return;
+      // Loop back to first problem
+      currentProblemIndex = 0;
     }
     currentProblem = problems[currentProblemIndex];
 

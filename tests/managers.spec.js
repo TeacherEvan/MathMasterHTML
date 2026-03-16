@@ -15,6 +15,9 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
 
     // Wait for modal to fade out and game to initialize
     await page.waitForTimeout(600);
+    await page.waitForFunction(
+      () => window.GameProblemManager?.problems?.length > 0
+    );
   });
 
   test.describe("ProblemManager", () => {
@@ -184,49 +187,73 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       expect(step0Hidden === 0 || step0Completed > 0).toBeTruthy();
     });
 
-    test("should proceed to the next level after the final problem", async ({
+    test("should open the console selector without blocking prompts and then advance to the next problem", async ({
       page,
     }) => {
-      const expectedTotalProblems = await page.evaluate(
-        () => window.GameProblemManager.problems.length
+      const dialogs = [];
+      page.on("dialog", async (dialog) => {
+        dialogs.push(dialog.message());
+        await dialog.dismiss();
+      });
+
+      const initialState = await page.evaluate(() => ({
+        problemCount: window.GameProblemManager.problems.length,
+        currentProblemIndex: window.GameProblemManager.currentProblemIndex,
+        currentProblem: window.GameProblemManager.currentProblem.problem,
+      }));
+
+      expect(initialState.problemCount).toBeGreaterThan(0);
+
+      await page.evaluate(() => {
+        localStorage.removeItem("mathmaster_player_profile_v1");
+        document.dispatchEvent(new CustomEvent("problemCompleted"));
+      });
+
+      const symbolModal = page.locator("#symbol-modal");
+      await page.waitForFunction(
+        () => document.getElementById("symbol-modal")?.style.display === "flex"
+      );
+      await page.waitForFunction(
+        () =>
+          document.getElementById("position-instruction")?.style.display ===
+          "none"
       );
 
       await page.evaluate(() => {
-        const manager = window.GameProblemManager;
-        const totalProblems = manager.problems.length;
-        sessionStorage.removeItem("lastLevelCompleted");
-        document.addEventListener(
-          "levelCompleted",
-          (event) => {
-            sessionStorage.setItem(
-              "lastLevelCompleted",
-              JSON.stringify(event.detail || {}),
-            );
-          },
-          { once: true }
-        );
-
-        for (let callCount = 1; callCount < totalProblems; callCount++) {
-          manager.nextProblem();
-        }
-
-        // The production flow is event-driven: after the last problem resolves,
-        // consoleSymbolAdded is the follow-up event that triggers progression.
-        document.dispatchEvent(
-          new CustomEvent("consoleSymbolAdded", {
-            detail: { symbol: "1", position: 0 },
-          })
-        );
+        document.querySelector('.symbol-choice[data-symbol="1"]')?.click();
       });
-
-      await page.waitForURL("**/game.html?level=warrior", { timeout: 5000 });
-      const completionDetail = await page.evaluate(() =>
-        JSON.parse(sessionStorage.getItem("lastLevelCompleted") || "{}")
+      await page.waitForFunction(
+        () =>
+          document.getElementById("position-instruction")?.style.display ===
+          "block"
       );
-      expect(completionDetail).toMatchObject({
-        level: "beginner",
-        totalProblems: expectedTotalProblems,
+      await page.evaluate(() => {
+        document.querySelector('.position-choice[data-position="0"]')?.click();
       });
+
+      await page.waitForFunction(
+        () => document.getElementById("symbol-modal")?.style.display === "none"
+      );
+      await page.waitForFunction(
+        (expectedIndex) =>
+          window.GameProblemManager.currentProblemIndex === expectedIndex,
+        initialState.currentProblemIndex + 1
+      );
+
+      const nextState = await page.evaluate(() => ({
+        currentProblemIndex: window.GameProblemManager.currentProblemIndex,
+        currentProblem: window.GameProblemManager.currentProblem.problem,
+        storedProfile: JSON.parse(
+          localStorage.getItem("mathmaster_player_profile_v1") || "{}"
+        ),
+      }));
+
+      expect(nextState.currentProblemIndex).toBe(
+        initialState.currentProblemIndex + 1
+      );
+      expect(nextState.currentProblem).not.toBe(initialState.currentProblem);
+      expect(nextState.storedProfile.name).toBe("Player");
+      expect(dialogs).toHaveLength(0);
     });
   });
 
