@@ -18,7 +18,9 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
     // Wait for modal to fade out and game to initialize
     await page.waitForTimeout(600);
     await page.waitForFunction(
-      () => window.GameProblemManager?.problems?.length > 0
+      () => window.GameProblemManager?.problems?.length > 0,
+      null,
+      { timeout: 5000 }
     );
   });
 
@@ -189,12 +191,12 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       expect(step0Hidden === 0 || step0Completed > 0).toBeTruthy();
     });
 
-    test("should open the console selector without blocking prompts and then advance to the next problem", async ({
+    test("should open console selector and advance to next problem without blocking", async ({
       page,
     }) => {
-      const dialogs = [];
-      page.on("dialog", async (dialog) => {
-        dialogs.push(dialog.message());
+      let unexpectedDialog = null;
+      page.once("dialog", async (dialog) => {
+        unexpectedDialog = dialog.message();
         await dialog.dismiss();
       });
 
@@ -207,18 +209,24 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       expect(initialState.problemCount).toBeGreaterThan(0);
 
       await page.evaluate((storageKey) => {
+        // evaluate() runs in the browser context, so pass test constants explicitly.
         localStorage.removeItem(storageKey);
         document.dispatchEvent(new CustomEvent("problemCompleted"));
       }, PLAYER_PROFILE_STORAGE_KEY);
 
       const symbolModal = page.locator("#symbol-modal");
       await page.waitForFunction(
-        () => document.getElementById("symbol-modal")?.style.display === "flex"
+        () => document.getElementById("symbol-modal")?.style.display === "flex",
+        null,
+        { timeout: 5000 }
       );
+      expect(unexpectedDialog).toBeNull();
       await page.waitForFunction(
         () =>
           document.getElementById("position-instruction")?.style.display ===
-          "none"
+          "none",
+        null,
+        { timeout: 5000 }
       );
 
       await page.evaluate(() => {
@@ -227,20 +235,25 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       await page.waitForFunction(
         () =>
           document.getElementById("position-instruction")?.style.display ===
-          "block"
+          "block",
+        null,
+        { timeout: 5000 }
       );
       await page.evaluate(() => {
         document.querySelector('.position-choice[data-position="0"]')?.click();
       });
-      expect(dialogs).toHaveLength(0);
+      expect(unexpectedDialog).toBeNull();
 
       await page.waitForFunction(
-        () => document.getElementById("symbol-modal")?.style.display === "none"
+        () => document.getElementById("symbol-modal")?.style.display === "none",
+        null,
+        { timeout: 5000 }
       );
       await page.waitForFunction(
         (expectedIndex) =>
           window.GameProblemManager.currentProblemIndex === expectedIndex,
-        initialState.currentProblemIndex + 1
+        initialState.currentProblemIndex + 1,
+        { timeout: 5000 }
       );
 
       const nextState = await page.evaluate((storageKey) => ({
@@ -256,7 +269,6 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       );
       expect(nextState.currentProblem).not.toBe(initialState.currentProblem);
       expect(nextState.storedProfile.name).toBe("Player");
-      expect(dialogs).toHaveLength(0);
     });
   });
 
