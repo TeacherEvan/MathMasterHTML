@@ -1,6 +1,8 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
 
+const PLAYER_PROFILE_STORAGE_KEY = "mathmaster_player_profile_v1";
+
 test.describe("ProblemManager and SymbolManager Integration", () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to game page
@@ -204,10 +206,10 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
 
       expect(initialState.problemCount).toBeGreaterThan(0);
 
-      await page.evaluate(() => {
-        localStorage.removeItem("mathmaster_player_profile_v1");
+      await page.evaluate((storageKey) => {
+        localStorage.removeItem(storageKey);
         document.dispatchEvent(new CustomEvent("problemCompleted"));
-      });
+      }, PLAYER_PROFILE_STORAGE_KEY);
 
       const symbolModal = page.locator("#symbol-modal");
       await page.waitForFunction(
@@ -230,6 +232,7 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       await page.evaluate(() => {
         document.querySelector('.position-choice[data-position="0"]')?.click();
       });
+      expect(dialogs).toHaveLength(0);
 
       await page.waitForFunction(
         () => document.getElementById("symbol-modal")?.style.display === "none"
@@ -240,13 +243,13 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
         initialState.currentProblemIndex + 1
       );
 
-      const nextState = await page.evaluate(() => ({
+      const nextState = await page.evaluate((storageKey) => ({
         currentProblemIndex: window.GameProblemManager.currentProblemIndex,
         currentProblem: window.GameProblemManager.currentProblem.problem,
         storedProfile: JSON.parse(
-          localStorage.getItem("mathmaster_player_profile_v1") || "{}"
+          localStorage.getItem(storageKey) || "{}"
         ),
-      }));
+      }), PLAYER_PROFILE_STORAGE_KEY);
 
       expect(nextState.currentProblemIndex).toBe(
         initialState.currentProblemIndex + 1

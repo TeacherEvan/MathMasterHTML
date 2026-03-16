@@ -34,7 +34,7 @@ console.log("💾 PlayerStorage loading...");
       profile.name = "Player";
       profile.updatedAt = Date.now();
       this._write(profile);
-      console.log("💾 No player name found - defaulting to Player");
+      console.log("💾 Player name empty or missing - defaulting to Player");
       return profile.name;
     },
 
