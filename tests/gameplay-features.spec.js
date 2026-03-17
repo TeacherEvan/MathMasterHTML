@@ -17,9 +17,22 @@ import { expect, test } from "@playwright/test";
 async function startGame(page) {
   await page.goto("/game.html?level=beginner");
   const startBtn = page.locator("#start-game-btn");
+  const howToPlayModal = page.locator("#how-to-play-modal");
   await expect(startBtn).toBeVisible({ timeout: 10000 });
-  await startBtn.click({ force: true });
-  await page.waitForTimeout(600);
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await startBtn.click({ force: true });
+
+    try {
+      await expect(howToPlayModal).toBeHidden({ timeout: 1500 });
+      break;
+    } catch (error) {
+      if (attempt === 2) {
+        throw error;
+      }
+    }
+  }
+
   await page.waitForFunction(
     () => window.wormSystem && window.wormSystem.isInitialized === true,
   );
@@ -31,6 +44,36 @@ async function clearAllQueuedWorms(page) {
     window.wormSystem.spawnManager?.clearQueue?.();
   });
   await page.waitForTimeout(250);
+}
+
+async function openConsoleSelectionModal(page) {
+  await page.waitForFunction(
+    () =>
+      !!window.consoleManager &&
+      !!window.consoleManager.modal &&
+      window.consoleManager.isPendingSelection === false,
+  );
+
+  await page.evaluate(() => {
+    document.dispatchEvent(new CustomEvent("problemCompleted"));
+  });
+
+  await page.waitForFunction(() => {
+    const modal = document.getElementById("symbol-modal");
+    return !!modal && window.getComputedStyle(modal).display !== "none";
+  });
+
+  await expect(page.locator(".modal-content")).toBeVisible();
+  await expect(page.locator(".symbol-choice[data-symbol='1']")).toBeVisible();
+}
+
+async function chooseConsoleReward(page, { symbol = "1", position = 0 } = {}) {
+  await page.locator(`.symbol-choice[data-symbol="${symbol}"]`).click();
+  await expect(page.locator("#position-choices")).toBeVisible();
+  await page.locator(`.position-choice[data-position="${position}"]`).click();
+  await page.waitForFunction(
+    () => window.consoleManager?.isPendingSelection === false,
+  );
 }
 
 // ── test suite ───────────────────────────────────────────────────────────────
@@ -257,10 +300,11 @@ test.describe("Green Worm — Blue Symbol Targeting", () => {
   test("green worm immediately rushes to a revealed (blue) symbol", async ({
     page,
   }) => {
-    // Reveal a symbol first using the help button
     const helpButton = page.locator("#help-button");
     await helpButton.click();
-    await page.waitForTimeout(300);
+    await page.waitForFunction(
+      () => document.querySelectorAll(".revealed-symbol").length > 0,
+    );
 
     await page.evaluate(() => {
       window.wormSystem.killAllWorms();
@@ -270,7 +314,14 @@ test.describe("Green Worm — Blue Symbol Targeting", () => {
     });
 
     await page.waitForFunction(
-      () => window.wormSystem.worms.filter((w) => w.active).length >= 1,
+      () =>
+        window.wormSystem.worms.some(
+          (w) =>
+            w.active &&
+            !w.isPurple &&
+            w.isRushingToTarget &&
+            Boolean(w.targetSymbol),
+        ),
       { timeout: 5000 },
     );
 
@@ -457,12 +508,7 @@ test.describe("Console Setup Modal — Non-Blocking Floating Panel", () => {
   test.beforeEach(async ({ page }) => startGame(page));
 
   test("modal overlay does not cover the full viewport", async ({ page }) => {
-    // Open the modal by clicking an empty console slot - first we need to fill
-    // a slot programmatically then open the modal to ensure it's present
-    await page.evaluate(() => {
-      const modal = document.getElementById("symbol-modal");
-      if (modal) modal.style.display = "flex";
-    });
+    await openConsoleSelectionModal(page);
 
     const modalRect = await page.evaluate(() => {
       const modal = document.getElementById("symbol-modal");
@@ -490,43 +536,67 @@ test.describe("Console Setup Modal — Non-Blocking Floating Panel", () => {
     expect(hasCloseBtn).toBe(true);
   });
 
-  test("close button hides the modal", async ({ page }) => {
-    await page.evaluate(() => {
-      const modal = document.getElementById("symbol-modal");
-      if (modal) modal.style.display = "flex";
-    });
+  test("symbol buttons stay clickable above gameplay layers", async ({ page }) => {
+    await openConsoleSelectionModal(page);
 
-    // Use evaluate to trigger the close directly, as pointer-events:none on the overlay
-    // could intercept browser-level click routing
-    await page.evaluate(() => {
-      const btn = document.getElementById("modal-close-btn");
-      if (btn) btn.click();
-    });
-    await page.waitForTimeout(100);
+    await page.locator(".symbol-choice[data-symbol='1']").click();
 
-    const display = await page.evaluate(
-      () => document.getElementById("symbol-modal")?.style.display,
+    await expect(page.locator(".symbol-choice[data-symbol='1']")).toHaveClass(
+      /selected/,
     );
-    expect(display).toBe("none");
+    await expect(page.locator("#position-choices")).toBeVisible();
   });
 
-  test("gameplay elements remain interactive while modal is open", async ({
+  test("selecting a symbol advances to the next problem", async ({ page }) => {
+    const beforeIndex = await page.evaluate(
+      () => window.GameProblemManager?.currentProblemIndex ?? -1,
+    );
+
+    await openConsoleSelectionModal(page);
+    await chooseConsoleReward(page, { symbol: "1", position: 0 });
+
+    await page.waitForFunction(
+      (previousIndex) =>
+        (window.GameProblemManager?.currentProblemIndex ?? -1) !== previousIndex,
+      beforeIndex,
+    );
+
+    const state = await page.evaluate(() => ({
+      index: window.GameProblemManager?.currentProblemIndex ?? -1,
+      slotValue: window.consoleManager?.slots?.[0] ?? null,
+    }));
+
+    expect(state.index).not.toBe(beforeIndex);
+    expect(state.slotValue).toBe("1");
+  });
+
+  test("close button auto-fills and resumes progression", async ({
     page,
   }) => {
-    // Show the modal
-    await page.evaluate(() => {
-      const modal = document.getElementById("symbol-modal");
-      if (modal) modal.style.display = "flex";
+    const beforeIndex = await page.evaluate(
+      () => window.GameProblemManager?.currentProblemIndex ?? -1,
+    );
+
+    await openConsoleSelectionModal(page);
+    await page.locator("#modal-close-btn").click();
+    await expect(page.locator("#symbol-modal")).toBeHidden();
+
+    await page.waitForFunction(
+      (previousIndex) =>
+        (window.GameProblemManager?.currentProblemIndex ?? -1) !== previousIndex,
+      beforeIndex,
+    );
+
+    const state = await page.evaluate(() => {
+      const slots = window.consoleManager?.slots ?? [];
+      return {
+        index: window.GameProblemManager?.currentProblemIndex ?? -1,
+        filledSlots: slots.filter((slot) => slot !== null).length,
+      };
     });
 
-    // Panel C symbols should still be clickable (pointer-events not blocked)
-    const panelCPointerEvents = await page.evaluate(() => {
-      const panelC = document.getElementById("panel-c");
-      return panelC ? window.getComputedStyle(panelC).pointerEvents : null;
-    });
-
-    // panel-c should NOT be 'none' (gameplay still interactive)
-    expect(panelCPointerEvents).not.toBe("none");
+    expect(state.index).not.toBe(beforeIndex);
+    expect(state.filledSlots).toBeGreaterThan(0);
   });
 });
 

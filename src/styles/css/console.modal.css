@@ -9,16 +9,18 @@
    clicks to Panel C symbols pass through */
 .modal-overlay {
   position: fixed;
+  top: 20px;
   bottom: 20px;
   right: 20px;
   width: 320px;
-  height: auto;
   background: transparent;
-  z-index: 200;
+  z-index: 10020;
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
   pointer-events: none;
+  isolation: isolate;
+  overflow: visible;
 }
 
 /* The visible panel itself */
@@ -223,6 +225,13 @@
   box-shadow: 0 0 10px rgba(255, 153, 0, 0.3);
 }
 
+body.console-modal-open #symbol-rain-container,
+body.console-modal-open .falling-symbol,
+body.console-modal-open #worm-container,
+body.console-modal-open #panel-c {
+  pointer-events: none !important;
+}
+
 /* ── Slide-in animation ───────────────────────────────────── */
 @keyframes modalSlideIn {
   from {
@@ -235,4 +244,3 @@
     transform: translateY(0) scale(1);
   }
 }
-

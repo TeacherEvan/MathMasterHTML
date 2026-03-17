@@ -81,7 +81,7 @@ console.log("🎮 Console Manager events loading");
     const closeBtn = document.getElementById("modal-close-btn");
     if (closeBtn) {
       closeBtn.addEventListener("click", () => {
-        this.hideSymbolSelectionModal();
+        this.skipSelection();
       });
     }
 
