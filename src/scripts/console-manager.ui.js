@@ -34,12 +34,14 @@ console.log("🎮 Console Manager UI loading");
 
     this.updatePositionButtons();
 
+    document.body.classList.add("console-modal-open");
     this.modal.style.display = "flex";
 
     console.log("📋 Symbol selection modal opened");
   };
 
   proto.hideSymbolSelectionModal = function() {
+    document.body.classList.remove("console-modal-open");
     this.modal.style.display = "none";
     this.isPendingSelection = false;
     console.log("📋 Symbol selection modal closed");
