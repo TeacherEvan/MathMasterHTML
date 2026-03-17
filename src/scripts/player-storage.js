@@ -31,11 +31,10 @@ console.log("💾 PlayerStorage loading...");
       if (profile.name && String(profile.name).trim().length > 0)
         return profile.name;
 
-      const name = window.prompt("Enter your name to save scores:", "");
-      const cleaned = (name || "").trim();
-      profile.name = cleaned.length > 0 ? cleaned : "Player";
+      profile.name = "Player";
       profile.updatedAt = Date.now();
       this._write(profile);
+      console.log('💾 No player name stored - using default name "Player"');
       return profile.name;
     },
 

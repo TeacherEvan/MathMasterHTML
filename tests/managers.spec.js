@@ -1,6 +1,8 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
 
+const PLAYER_PROFILE_STORAGE_KEY = "mathmaster_player_profile_v1";
+
 test.describe("ProblemManager and SymbolManager Integration", () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to game page
@@ -15,6 +17,11 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
 
     // Wait for modal to fade out and game to initialize
     await page.waitForTimeout(600);
+    await page.waitForFunction(
+      () => window.GameProblemManager?.problems?.length > 0,
+      null,
+      { timeout: 5000 }
+    );
   });
 
   test.describe("ProblemManager", () => {
@@ -182,6 +189,86 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
 
       // Either all revealed or marked as completed
       expect(step0Hidden === 0 || step0Completed > 0).toBeTruthy();
+    });
+
+    test("should open console selector and advance to next problem without blocking", async ({
+      page,
+    }) => {
+      let unexpectedDialog = null;
+      page.once("dialog", async (dialog) => {
+        unexpectedDialog = dialog.message();
+        await dialog.dismiss();
+      });
+
+      const initialState = await page.evaluate(() => ({
+        problemCount: window.GameProblemManager.problems.length,
+        currentProblemIndex: window.GameProblemManager.currentProblemIndex,
+        currentProblem: window.GameProblemManager.currentProblem.problem,
+      }));
+
+      expect(initialState.problemCount).toBeGreaterThan(0);
+
+      await page.evaluate((storageKey) => {
+        // evaluate() runs in the browser context, so pass test constants explicitly.
+        localStorage.removeItem(storageKey);
+        document.dispatchEvent(new CustomEvent("problemCompleted"));
+      }, PLAYER_PROFILE_STORAGE_KEY);
+
+      const symbolModal = page.locator("#symbol-modal");
+      await page.waitForFunction(
+        () => document.getElementById("symbol-modal")?.style.display === "flex",
+        null,
+        { timeout: 5000 }
+      );
+      expect(unexpectedDialog).toBeNull();
+      await page.waitForFunction(
+        () =>
+          document.getElementById("position-instruction")?.style.display ===
+          "none",
+        null,
+        { timeout: 5000 }
+      );
+
+      await page.evaluate(() => {
+        document.querySelector('.symbol-choice[data-symbol="1"]')?.click();
+      });
+      await page.waitForFunction(
+        () =>
+          document.getElementById("position-instruction")?.style.display ===
+          "block",
+        null,
+        { timeout: 5000 }
+      );
+      await page.evaluate(() => {
+        document.querySelector('.position-choice[data-position="0"]')?.click();
+      });
+      expect(unexpectedDialog).toBeNull();
+
+      await page.waitForFunction(
+        () => document.getElementById("symbol-modal")?.style.display === "none",
+        null,
+        { timeout: 5000 }
+      );
+      await page.waitForFunction(
+        (expectedIndex) =>
+          window.GameProblemManager.currentProblemIndex === expectedIndex,
+        initialState.currentProblemIndex + 1,
+        { timeout: 5000 }
+      );
+
+      const nextState = await page.evaluate((storageKey) => ({
+        currentProblemIndex: window.GameProblemManager.currentProblemIndex,
+        currentProblem: window.GameProblemManager.currentProblem.problem,
+        storedProfile: JSON.parse(
+          localStorage.getItem(storageKey) || "{}"
+        ),
+      }), PLAYER_PROFILE_STORAGE_KEY);
+
+      expect(nextState.currentProblemIndex).toBe(
+        initialState.currentProblemIndex + 1
+      );
+      expect(nextState.currentProblem).not.toBe(initialState.currentProblem);
+      expect(nextState.storedProfile.name).toBe("Player");
     });
   });
 

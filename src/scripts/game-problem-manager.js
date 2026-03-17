@@ -197,7 +197,9 @@ console.log("📚 Game problem manager module loading...");
 
   // Export problem manager functions
   window.GameProblemManager = {
-    problems,
+    get problems() {
+      return problems;
+    },
     get currentProblemIndex() {
       return currentProblemIndex;
     },

@@ -3,7 +3,7 @@
   const backButton = document.getElementById("back-button");
 
   function goBack() {
-    window.location.href = "/src/pages/level-select.html";
+    window.location.assign("level-select.html");
   }
 
   function enterFullscreen() {
