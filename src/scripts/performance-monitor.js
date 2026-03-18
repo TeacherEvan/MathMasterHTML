@@ -229,4 +229,6 @@ class PerformanceMonitor {
   }
 }
 
+window.PerformanceMonitor = PerformanceMonitor;
+
 // Bootstrap moved to performance-monitor.bootstrap.js

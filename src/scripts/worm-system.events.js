@@ -90,6 +90,20 @@
     document.addEventListener("wormCursorUpdate", (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       this.cursorState = detail;
+
+      if (!this.isAutomation || !detail?.isActive) {
+        return;
+      }
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      for (const worm of this.worms) {
+        if (!worm?.active) continue;
+        this._updateWormEvadingCursor(worm, viewportWidth, viewportHeight);
+        if (worm.active && worm.element && worm.element.parentNode) {
+          this._applyWormPosition(worm);
+        }
+      }
     });
     document.addEventListener("wormCursorTap", (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;

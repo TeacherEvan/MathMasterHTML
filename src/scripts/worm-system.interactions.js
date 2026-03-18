@@ -14,7 +14,7 @@
       this.handlePurpleWormClick(worm);
       return;
     }
-    this.handleWormClick(worm);
+    this.handleWormClick(worm, event);
   };
 
   proto._triggerWormEscape = function(worm, event) {
@@ -42,11 +42,24 @@
     console.log(`🐛 Worm ${worm.id} escaped click - first strike used`);
   };
 
-  proto.handleWormClick = function(worm) {
+  proto.handleWormClick = function(worm, event) {
     if (!worm.active) return;
 
-    // GREEN WORMS: Always explode on click (no cloning)
-    console.log(`💥 Green worm ${worm.id} clicked - EXPLODING!`);
+    const now = Date.now();
+    const withinGraceWindow =
+      worm.lastHitTime && now - worm.lastHitTime <= this.WORM_CLICK_GRACE_WINDOW;
+
+    if (!withinGraceWindow) {
+      worm.lastHitTime = now;
+      this._triggerWormEscape(worm, event);
+      return;
+    }
+
+    worm.lastHitTime = now;
+    worm.escapeUntil = 0;
+    worm.escapeVector = null;
+
+    console.log(`💥 Green worm ${worm.id} clicked twice - EXPLODING!`);
 
     // Drop power-up if this worm has one
     if (worm.hasPowerUp) {

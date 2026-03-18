@@ -12,11 +12,43 @@
    * @private
    */
   proto._setupKeyboardHandler = function() {
-    document.addEventListener("keydown", (e) => {
+    if (this._keyboardHandler) {
+      return;
+    }
+
+    this._keyboardHandler = (e) => {
       if (e.key === "Escape" && this.selectedPowerUp) {
         this.deselectPowerUp();
       }
-    });
+    };
+
+    document.addEventListener("keydown", this._keyboardHandler, true);
+    window.addEventListener("keydown", this._keyboardHandler, true);
+  };
+
+  proto._ensureKeyboardCaptureTarget = function() {
+    if (this._keyboardCaptureTarget?.isConnected) {
+      return this._keyboardCaptureTarget;
+    }
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.setAttribute("aria-hidden", "true");
+    input.tabIndex = -1;
+    input.autocomplete = "off";
+    input.style.cssText = `
+      position: fixed;
+      top: -1000px;
+      left: -1000px;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    `;
+    input.addEventListener("keydown", this._keyboardHandler, true);
+    document.body.appendChild(input);
+    this._keyboardCaptureTarget = input;
+    return input;
   };
 
   /**

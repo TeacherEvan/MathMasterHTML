@@ -49,6 +49,19 @@
     document.documentElement.classList.add("power-up-placement-mode");
     document.documentElement.style.pointerEvents = "none";
     document.body.style.pointerEvents = "auto";
+    const keyboardCaptureTarget = this._ensureKeyboardCaptureTarget?.();
+    requestAnimationFrame(() => {
+      if (!this.selectedPowerUp) return;
+
+      if (keyboardCaptureTarget?.isConnected) {
+        keyboardCaptureTarget.value = "";
+        keyboardCaptureTarget.focus({ preventScroll: true });
+        return;
+      }
+
+      document.body.tabIndex = -1;
+      document.body.focus({ preventScroll: true });
+    });
 
     // Setup placement click handler
     this._setupPlacementHandler(type);
@@ -75,6 +88,10 @@
     document.documentElement.classList.remove("power-up-placement-mode");
     document.documentElement.style.pointerEvents = "";
     document.body.style.pointerEvents = "";
+
+    if (this._keyboardCaptureTarget?.isConnected) {
+      this._keyboardCaptureTarget.blur();
+    }
 
     this._dispatchSelectionChanged();
     this._hideTooltip();
