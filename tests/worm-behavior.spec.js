@@ -1,6 +1,60 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
 
+async function revealCurrentStepSymbol(page) {
+  const result = await page.evaluate(() => {
+    const stepIndex = window.GameProblemManager?.currentSolutionStepIndex ?? 0;
+    const nextHiddenSymbol = document.querySelector(
+      `[data-step-index="${stepIndex}"].hidden-symbol`,
+    );
+    if (!nextHiddenSymbol?.textContent) {
+      return { symbol: null, revealedCount: 0 };
+    }
+
+    document.dispatchEvent(
+      new CustomEvent("symbolClicked", {
+        detail: { symbol: nextHiddenSymbol.textContent },
+      }),
+    );
+
+    return {
+      symbol: nextHiddenSymbol.textContent,
+      revealedCount: document.querySelectorAll(".revealed-symbol").length,
+    };
+  });
+
+  expect(result.symbol).toBeTruthy();
+  expect(result.revealedCount).toBeGreaterThan(0);
+}
+
+async function dispatchPointerDownOnActiveWorm(page, predicateSource) {
+  const dispatched = await page.evaluate((predicateBody) => {
+    const predicate = new Function("worm", `return (${predicateBody})(worm);`);
+    const worm = window.wormSystem?.worms.find(
+      (candidate) => candidate.active && predicate(candidate),
+    );
+    if (!worm?.element) {
+      return null;
+    }
+
+    const eventInit = { bubbles: true, cancelable: true };
+    const event =
+      typeof PointerEvent === "function"
+        ? new PointerEvent("pointerdown", eventInit)
+        : new Event("pointerdown", eventInit);
+    worm.element.dispatchEvent(event);
+
+    return {
+      id: worm.id,
+      active: worm.active,
+      escapeUntil: worm.escapeUntil ?? 0,
+    };
+  }, predicateSource);
+
+  expect(dispatched).toBeTruthy();
+  return dispatched;
+}
+
 test.describe("Worm behavior: aggression, targeting, and click rules", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/game.html?level=beginner");
@@ -13,22 +67,31 @@ test.describe("Worm behavior: aggression, targeting, and click rules", () => {
     await page.waitForFunction(
       () => window.wormSystem && window.wormSystem.isInitialized === true,
     );
+    await page.waitForFunction(
+      () => document.querySelectorAll(".hidden-symbol").length > 0,
+    );
   });
 
   test("worms immediately target revealed symbols", async ({ page }) => {
+    await revealCurrentStepSymbol(page);
+
     await page.evaluate(() => {
+      window.wormSystem.killAllWorms();
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
       );
     });
 
     await page.waitForFunction(
-      () => window.wormSystem && window.wormSystem.worms.length > 0,
+      () =>
+        window.wormSystem?.worms.some(
+          (w) =>
+            w.active &&
+            !w.isPurple &&
+            w.isRushingToTarget &&
+            Boolean(w.targetSymbol),
+        ),
     );
-
-    const helpButton = page.locator("#help-button");
-    await helpButton.click();
-    await page.waitForTimeout(400);
 
     const wormState = await page.evaluate(() => {
       const worm = window.wormSystem.worms.find((w) => w.active && !w.isPurple);
@@ -56,30 +119,29 @@ test.describe("Worm behavior: aggression, targeting, and click rules", () => {
       () => document.querySelectorAll(".worm-container").length > 0,
     );
 
-    const wormElement = page.locator(".worm-container").first();
-    await wormElement.click({ force: true });
-    await page.waitForTimeout(200);
-
-    const afterFirstClick = await page.evaluate(() => {
-      const worm = window.wormSystem.worms.find((w) => w.active && !w.isPurple);
-      return worm
-        ? { active: worm.active, escapeUntil: worm.escapeUntil }
-        : null;
-    });
+    const afterFirstClick = await dispatchPointerDownOnActiveWorm(
+      page,
+      "(worm) => !worm.isPurple",
+    );
 
     expect(afterFirstClick).toBeTruthy();
     expect(afterFirstClick?.active).toBeTruthy();
     expect(afterFirstClick?.escapeUntil).toBeGreaterThan(Date.now());
 
-    await wormElement.click({ force: true });
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(50);
 
-    const afterSecondClick = await page.evaluate(() => {
-      const worm = window.wormSystem.worms.find((w) => !w.isPurple);
-      return worm ? worm.active : false;
-    });
-
-    expect(afterSecondClick).toBeFalsy();
+    await dispatchPointerDownOnActiveWorm(
+      page,
+      `(worm) => worm.id === ${JSON.stringify(afterFirstClick.id)}`,
+    );
+    await page.waitForFunction(
+      (wormId) => {
+        const worm = window.wormSystem?.worms.find((candidate) => candidate.id === wormId);
+        return !worm || worm.active === false;
+      },
+      afterFirstClick.id,
+      { timeout: 5000 },
+    );
   });
 
   test("purple worm click clones instead of dying", async ({ page }) => {
@@ -95,10 +157,14 @@ test.describe("Worm behavior: aggression, targeting, and click rules", () => {
       () => window.wormSystem.worms.filter((w) => w.active && w.isPurple).length,
     );
 
-    const purpleWorm = page.locator(".worm-container.purple-worm").first();
-    await purpleWorm.click({ force: true });
-
-    await page.waitForTimeout(400);
+    await dispatchPointerDownOnActiveWorm(page, "(worm) => worm.isPurple");
+    await page.waitForFunction(
+      (countBefore) =>
+        window.wormSystem.worms.filter((w) => w.active && w.isPurple).length >
+        countBefore,
+      beforeClickCount,
+      { timeout: 5000 },
+    );
 
     const afterClickState = await page.evaluate(() => ({
       purpleCount: window.wormSystem.worms.filter((w) => w.active && w.isPurple)

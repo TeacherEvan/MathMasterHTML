@@ -36,6 +36,9 @@ async function startGame(page) {
   await page.waitForFunction(
     () => window.wormSystem && window.wormSystem.isInitialized === true,
   );
+  await page.waitForFunction(
+    () => document.querySelectorAll(".hidden-symbol").length > 0,
+  );
 }
 
 async function clearAllQueuedWorms(page) {
@@ -74,6 +77,37 @@ async function chooseConsoleReward(page, { symbol = "1", position = 0 } = {}) {
   await page.waitForFunction(
     () => window.consoleManager?.isPendingSelection === false,
   );
+}
+
+async function revealSymbols(page, count = 1) {
+  const revealResult = await page.evaluate((times) => {
+    const revealedBefore = document.querySelectorAll(".revealed-symbol").length;
+    let dispatches = 0;
+
+    for (let i = 0; i < times; i++) {
+      const stepIndex = window.GameProblemManager?.currentSolutionStepIndex ?? 0;
+      const nextHiddenSymbol = document.querySelector(
+        `[data-step-index="${stepIndex}"].hidden-symbol`,
+      );
+      if (!nextHiddenSymbol?.textContent) continue;
+
+      document.dispatchEvent(
+        new CustomEvent("symbolClicked", {
+          detail: { symbol: nextHiddenSymbol.textContent },
+        }),
+      );
+      dispatches++;
+    }
+
+    return {
+      dispatches,
+      revealedBefore,
+      revealedAfter: document.querySelectorAll(".revealed-symbol").length,
+    };
+  }, count);
+
+  expect(revealResult.dispatches).toBeGreaterThan(0);
+  expect(revealResult.revealedAfter).toBeGreaterThan(revealResult.revealedBefore);
 }
 
 // ── test suite ───────────────────────────────────────────────────────────────
@@ -300,11 +334,7 @@ test.describe("Green Worm — Blue Symbol Targeting", () => {
   test("green worm immediately rushes to a revealed (blue) symbol", async ({
     page,
   }) => {
-    const helpButton = page.locator("#help-button");
-    await helpButton.click();
-    await page.waitForFunction(
-      () => document.querySelectorAll(".revealed-symbol").length > 0,
-    );
+    await revealSymbols(page);
 
     await page.evaluate(() => {
       window.wormSystem.killAllWorms();
@@ -387,10 +417,7 @@ test.describe("Row Reset — Worm Steals Blue Symbol", () => {
   test("rowResetByWorm event fires when a revealed symbol is stolen", async ({
     page,
   }) => {
-    // Reveal a symbol
-    const helpButton = page.locator("#help-button");
-    await helpButton.click();
-    await page.waitForTimeout(300);
+    await revealSymbols(page);
 
     // Listen for the row reset event
     const gotEvent = await page.evaluate(() => {
@@ -452,11 +479,7 @@ test.describe("Row Reset — Worm Steals Blue Symbol", () => {
   test("after a blue steal, revealed symbols in the row become hidden again", async ({
     page,
   }) => {
-    // Reveal symbols by using help
-    const helpButton = page.locator("#help-button");
-    await helpButton.click();
-    await helpButton.click();
-    await page.waitForTimeout(400);
+    await revealSymbols(page, 2);
 
     const result = await page.evaluate(() => {
       const revealedBefore = document.querySelectorAll(".revealed-symbol");

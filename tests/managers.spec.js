@@ -3,6 +3,23 @@ import { expect, test } from "@playwright/test";
 
 const PLAYER_PROFILE_STORAGE_KEY = "mathmaster_player_profile_v1";
 
+async function clickHelpButton(page, count = 1) {
+  const clicked = await page.evaluate((times) => {
+    const helpButton = document.getElementById("help-button");
+    if (!helpButton) {
+      return false;
+    }
+
+    for (let i = 0; i < times; i++) {
+      helpButton.click();
+    }
+
+    return true;
+  }, count);
+
+  expect(clicked).toBe(true);
+}
+
 test.describe("ProblemManager and SymbolManager Integration", () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to game page
@@ -19,6 +36,11 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
     await page.waitForTimeout(600);
     await page.waitForFunction(
       () => window.GameProblemManager?.problems?.length > 0,
+      null,
+      { timeout: 5000 }
+    );
+    await page.waitForFunction(
+      () => document.querySelectorAll(".hidden-symbol").length > 0,
       null,
       { timeout: 5000 }
     );
@@ -73,8 +95,7 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       expect(initialHidden).toBeGreaterThan(0);
 
       // Click the help button to reveal a symbol
-      const helpButton = page.locator("#help-button");
-      await helpButton.click();
+      await clickHelpButton(page);
 
       // Wait for reveal animation
       await page.waitForTimeout(400);
@@ -89,8 +110,7 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       page,
     }) => {
       // Click help button to reveal a symbol
-      const helpButton = page.locator("#help-button");
-      await helpButton.click();
+      await clickHelpButton(page);
 
       // Wait for reveal
       await page.waitForTimeout(400);
@@ -111,11 +131,7 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       const initialCount = await firstStepHidden.count();
 
       // Click help button repeatedly to complete first line
-      const helpButton = page.locator("#help-button");
-      for (let i = 0; i < initialCount + 2; i++) {
-        await helpButton.click();
-        await page.waitForTimeout(200);
-      }
+      await clickHelpButton(page, initialCount + 2);
 
       // Wait for completion animation
       await page.waitForTimeout(1000);
@@ -144,8 +160,7 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       });
 
       // Interact with the game
-      const helpButton = page.locator("#help-button");
-      await helpButton.click();
+      await clickHelpButton(page);
       await page.waitForTimeout(500);
 
       // Filter out non-critical errors
@@ -171,10 +186,7 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       );
       const hiddenCount = await firstStepHidden.count();
 
-      for (let i = 0; i < hiddenCount + 1; i++) {
-        await helpButton.click({ force: true });
-        await page.waitForTimeout(150);
-      }
+      await clickHelpButton(page, hiddenCount + 1);
 
       // Wait for step transition
       await page.waitForTimeout(1500);
@@ -282,10 +294,12 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       });
 
       // Rapid clicking on help button to stress test caching
-      const helpButton = page.locator("#help-button");
-      for (let i = 0; i < 10; i++) {
-        await helpButton.click({ delay: 50 });
-      }
+      await page.evaluate(() => {
+        const helpButton = document.getElementById("help-button");
+        for (let i = 0; i < 10; i++) {
+          helpButton?.click();
+        }
+      });
 
       await page.waitForTimeout(500);
 
