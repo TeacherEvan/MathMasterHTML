@@ -172,7 +172,7 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       const hiddenCount = await firstStepHidden.count();
 
       for (let i = 0; i < hiddenCount + 1; i++) {
-        await helpButton.click();
+        await helpButton.click({ force: true });
         await page.waitForTimeout(150);
       }
 

@@ -138,13 +138,16 @@
   max-width: calc(100vw - 360px); /* Leave room for score and timer */
 }
 
-/* Mobile adjustments for powerup display */
-@media (max-width: 768px) {
+/* Compact layouts need the power-up tray out of the top interaction band so it
+   does not collide with the HUD, help button, or purple worm spawn point. */
+@media (max-width: 768px), (max-height: 500px) {
   #power-up-display {
-    top: 86px !important; /* Below HUD on mobile with extra clearance */
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    max-width: calc(100vw - 40px);
+    top: auto !important;
+    bottom: 12px !important;
+    left: auto !important;
+    right: 12px !important;
+    transform: none !important;
+    max-width: min(320px, calc(100vw - 24px));
   }
 
   .game-hud {
@@ -158,6 +161,12 @@
   }
 
   .hud-value {
+    font-size: 14px;
+  }
+
+  .power-up-display {
+    gap: 8px;
+    padding: 6px;
     font-size: 14px;
   }
 }

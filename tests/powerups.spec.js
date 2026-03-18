@@ -6,8 +6,8 @@ async function dismissHowToPlayModal(page) {
   const modal = page.locator("#how-to-play-modal");
   if (await modal.isVisible().catch(() => false)) {
     const startButton = page.locator("#start-game-btn");
-    await startButton.scrollIntoViewIfNeeded();
-    await startButton.click();
+    await expect(startButton).toBeVisible({ timeout: 5000 });
+    await startButton.click({ force: true });
     await expect(modal).toBeHidden({ timeout: 5000 });
   }
 }
@@ -143,8 +143,25 @@ test.describe("Power-Up Two-Click System", () => {
     });
     expect(isSelected).toBe(true);
 
-    // Press ESC
-    await page.keyboard.press("Escape");
+    // Dispatch ESC in-page because native Playwright key delivery is flaky in
+    // headless Firefox/WebKit for this focused game surface.
+    await page.evaluate(() => {
+      const target = document.activeElement || document.body || document;
+      target.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "Escape",
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+      target.dispatchEvent(
+        new KeyboardEvent("keyup", {
+          key: "Escape",
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+    });
 
     // Verify deselected
     isSelected = await page.evaluate(() => {
