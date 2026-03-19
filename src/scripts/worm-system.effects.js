@@ -206,6 +206,9 @@
   };
 
   proto.createSlimeSplat = function(x, y) {
+    const lifetime = this.SLIME_SPLAT_DURATION || 10000;
+    const fadeDuration = 900;
+    const fadeStartDelay = Math.max(1200, lifetime - fadeDuration);
     const splat = document.createElement("div");
     splat.className = "slime-splat";
     splat.textContent = "🫟";
@@ -227,16 +230,16 @@
 
     console.log(`🟢 Slime splat created at (${x}, ${y})`);
 
-    // Fade out and remove after 15 seconds
+    // Keep the splat visible immediately, then fade near the end of its lifetime.
     setTimeout(() => {
       splat.classList.add("slime-fading");
-    }, 14000); // Start fade at 14s
+    }, fadeStartDelay);
 
     setTimeout(() => {
       if (splat.parentNode) {
         splat.parentNode.removeChild(splat);
       }
-    }, 15000); // Remove at 15s
+    }, lifetime);
   };
 
   proto.createCrack = function(x, y) {

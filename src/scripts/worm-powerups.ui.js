@@ -64,6 +64,59 @@
       if (event.detail?.system && event.detail.system !== this) return;
       this.updateDisplay();
     });
+
+    if (!this._displayLayoutHandler) {
+      this._displayLayoutHandler = () => this.syncDisplayLayout();
+      window.addEventListener("resize", this._displayLayoutHandler);
+      window.addEventListener("orientationchange", this._displayLayoutHandler);
+    }
+  };
+
+  proto.getDisplayLayoutMetrics = function() {
+    const isCompactViewport =
+      window.innerWidth <= 768 || window.innerHeight <= 500;
+    const compactWidth = Math.max(220, Math.floor(window.innerWidth * 0.68));
+    return {
+      isCompactViewport,
+      displayWidth: isCompactViewport ? Math.min(280, compactWidth) : 320,
+    };
+  };
+
+  proto.getDisplayBoundaryConstraints = function() {
+    const { isCompactViewport } = this.getDisplayLayoutMetrics();
+    const horizontalInset = isCompactViewport ? 12 : 180;
+    return {
+      minX: horizontalInset,
+      maxX: window.innerWidth - horizontalInset,
+      minY: 0,
+      maxY: isCompactViewport ? 160 : 100,
+    };
+  };
+
+  proto.syncDisplayLayout = function() {
+    if (!this.displayElement) return;
+
+    const { isCompactViewport, displayWidth } = this.getDisplayLayoutMetrics();
+    this.displayElement.dataset.viewport = isCompactViewport ? "compact" : "full";
+    this.displayElement.style.width = `${displayWidth}px`;
+    this.displayElement.style.maxWidth = `${displayWidth}px`;
+
+    if (this.displayElement.dataset.dragged !== "true") {
+      this.displayElement.style.removeProperty("top");
+      this.displayElement.style.removeProperty("right");
+      this.displayElement.style.removeProperty("bottom");
+      this.displayElement.style.removeProperty("left");
+      this.displayElement.style.removeProperty("transform");
+    }
+
+    if (
+      window.uiBoundaryManager &&
+      window.uiBoundaryManager.elements instanceof Map &&
+      window.uiBoundaryManager.elements.has("power-up-display")
+    ) {
+      const entry = window.uiBoundaryManager.elements.get("power-up-display");
+      entry.constraints = this.getDisplayBoundaryConstraints();
+    }
   };
 
   /**
@@ -167,38 +220,29 @@
     const display = document.createElement("div");
     display.id = "power-up-display";
     display.dataset.testid = "power-up-display";
-    const isCompactViewport = window.innerWidth <= 768;
-    const compactWidth = Math.max(220, Math.floor(window.innerWidth * 0.68));
-    const displayWidth = isCompactViewport ? Math.min(280, compactWidth) : 320;
-    const displayTop = isCompactViewport ? 86 : 12;
     display.style.cssText = `
-        position: fixed;
-      top: ${displayTop}px;
-      right: auto;
-      left: 50%;
-      transform: translateX(-50%);
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 10px;
-        border-radius: 10px;
-        font-family: 'Orbitron', monospace;
-        font-size: 18px;
-        z-index: 10004;
-        display: flex;
-        gap: 15px;
-        border: 2px solid #0f0;
-        cursor: move;
-        user-select: none;
-        width: ${displayWidth}px;
-        max-width: ${displayWidth}px;
-        box-sizing: border-box;
-      `;
+      position: fixed;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      z-index: 10004;
+      display: flex;
+      gap: 15px;
+      border: 2px solid #0f0;
+      cursor: move;
+      user-select: none;
+      box-sizing: border-box;
+    `;
 
     // Make it draggable with boundary validation
     this.makeDraggable(display);
 
     document.body.appendChild(display);
-    console.log("📊 Power-up display created (centered in top bar zone)");
+    this.displayElement = display;
+    this.syncDisplayLayout();
 
     // Register with UIBoundaryManager if available
     if (window.uiBoundaryManager) {
@@ -206,14 +250,10 @@
         zone: "top-center",
         priority: 1, // Lower priority than score/timer
         fixed: false,
-        constraints: {
-          minX: 180, // Leave room for score on left
-          maxX: window.innerWidth - 180, // Leave room for timer on right
-          minY: 0,
-          maxY: 100,
-        },
+        constraints: this.getDisplayBoundaryConstraints(),
       });
     }
+    console.log("📊 Power-up display created (centered in top bar zone)");
 
     return display;
   };

@@ -409,6 +409,44 @@ test.describe("Green Worm — Blue Symbol Targeting", () => {
 
     expect(hasSplat).toBe(true);
   });
+
+  test("worm explosion shows slime splat immediately instead of delaying visibility", async ({
+    page,
+  }) => {
+    const splatState = await page.evaluate(() => {
+      const ws = window.wormSystem;
+      const element = document.createElement("div");
+      ws.crossPanelContainer.appendChild(element);
+      const worm = {
+        id: "test-immediate-splat",
+        element,
+        x: 180,
+        y: 180,
+        active: true,
+        hasStolen: false,
+        isPurple: false,
+        stolenSymbol: null,
+      };
+
+      ws.worms.push(worm);
+      ws.explodeWorm(worm);
+
+      const splat = document.querySelector(".slime-splat");
+      if (!splat) return null;
+
+      const styles = window.getComputedStyle(splat);
+      return {
+        opacity: Number.parseFloat(styles.opacity || "0"),
+        animationDuration: styles.animationDuration,
+        fading: splat.classList.contains("slime-fading"),
+      };
+    });
+
+    expect(splatState).not.toBeNull();
+    expect(splatState.opacity).toBeGreaterThan(0.45);
+    expect(splatState.animationDuration).toBe("0.18s");
+    expect(splatState.fading).toBe(false);
+  });
 });
 
 test.describe("Row Reset — Worm Steals Blue Symbol", () => {

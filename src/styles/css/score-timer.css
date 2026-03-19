@@ -138,16 +138,16 @@
   max-width: calc(100vw - 360px); /* Leave room for score and timer */
 }
 
-/* Compact layouts need the power-up tray out of the top interaction band so it
-   does not collide with the HUD, help button, or purple worm spawn point. */
+/* Compact layouts still keep the power-up tray anchored with the Window B top band,
+   but tighten spacing so it does not drift into Window C or overlap the HUD. */
 @media (max-width: 768px), (max-height: 500px) {
   #power-up-display {
-    top: auto !important;
-    bottom: 12px !important;
-    left: auto !important;
-    right: 12px !important;
-    transform: none !important;
-    max-width: min(320px, calc(100vw - 24px));
+    top: 86px !important;
+    bottom: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    max-width: min(280px, calc(100vw - 24px));
   }
 
   .game-hud {

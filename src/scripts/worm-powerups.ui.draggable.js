@@ -58,6 +58,7 @@
 
         let boundedX = Math.max(0, Math.min(currentX, maxX));
         let boundedY = Math.max(0, Math.min(currentY, maxY));
+        element.dataset.dragged = "true";
 
         // Validate position through UIBoundaryManager if available
         if (window.uiBoundaryManager) {

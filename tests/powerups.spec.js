@@ -12,6 +12,28 @@ async function dismissHowToPlayModal(page) {
   }
 }
 
+async function setupPowerUpPage(page) {
+  await page.goto("/game.html?level=beginner");
+
+  await dismissHowToPlayModal(page);
+
+  await page.waitForSelector("#solution-container", { timeout: 10000 });
+  await page.waitForFunction(() => !!window.wormSystem?.powerUpSystem, null, {
+    timeout: 10000,
+  });
+
+  await page.evaluate(() => {
+    if (window.wormSystem && window.wormSystem.powerUpSystem) {
+      window.wormSystem.powerUpSystem.inventory.chainLightning = 3;
+      window.wormSystem.powerUpSystem.inventory.spider = 2;
+      window.wormSystem.powerUpSystem.inventory.devil = 2;
+      window.wormSystem.powerUpSystem.updateDisplay();
+    }
+  });
+
+  await page.waitForSelector("#power-up-display", { timeout: 5000 });
+}
+
 /**
  * Test suite for the Two-Click Power-Up System
  *
@@ -23,32 +45,7 @@ async function dismissHowToPlayModal(page) {
 
 test.describe("Power-Up Two-Click System", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to game page
-    await page.goto("/game.html?level=beginner");
-
-    // Dismiss the How-To-Play modal (blocks visibility for some elements)
-    await dismissHowToPlayModal(page);
-
-    // Wait for game to initialize
-    await page.waitForSelector("#solution-container", { timeout: 10000 });
-
-    // Wait for worm system + power-up system to be ready
-    await page.waitForFunction(() => !!window.wormSystem?.powerUpSystem, null, {
-      timeout: 10000,
-    });
-
-    // Give power-ups for testing via console
-    await page.evaluate(() => {
-      if (window.wormSystem && window.wormSystem.powerUpSystem) {
-        window.wormSystem.powerUpSystem.inventory.chainLightning = 3;
-        window.wormSystem.powerUpSystem.inventory.spider = 2;
-        window.wormSystem.powerUpSystem.inventory.devil = 2;
-        window.wormSystem.powerUpSystem.updateDisplay();
-      }
-    });
-
-    // Wait for power-up display to appear
-    await page.waitForSelector("#power-up-display", { timeout: 5000 });
+    await setupPowerUpPage(page);
   });
 
   test("should display power-up inventory", async ({ page }) => {
@@ -253,6 +250,44 @@ test.describe("Power-Up Two-Click System", () => {
       return window.wormSystem?.powerUpSystem?.selectedPowerUp;
     });
     expect(selected).toBe("devil");
+  });
+});
+
+test.describe("Power-Up Compact Layout", () => {
+  test.use({ viewport: { width: 844, height: 390 } });
+
+  test.beforeEach(async ({ page }) => {
+    await setupPowerUpPage(page);
+  });
+
+  test("keeps the power-up tray anchored near the top-center on compact layouts", async ({
+    page,
+  }) => {
+    const layout = await page.evaluate(() => {
+      const display = document.getElementById("power-up-display");
+      const rect = display?.getBoundingClientRect();
+      const styles = display ? window.getComputedStyle(display) : null;
+
+      return rect && styles
+        ? {
+            top: rect.top,
+            bottom: rect.bottom,
+            distanceToTop: rect.top,
+            distanceToBottom: window.innerHeight - rect.bottom,
+            centerOffset: Math.abs(
+              rect.left + rect.width / 2 - window.innerWidth / 2,
+            ),
+            computedTop: styles.top,
+          }
+        : null;
+    });
+
+    expect(layout).not.toBeNull();
+    expect(layout.top).toBeLessThan(140);
+    expect(layout.bottom).toBeLessThan(220);
+    expect(layout.centerOffset).toBeLessThan(32);
+    expect(layout.computedTop).not.toBe("auto");
+    expect(layout.distanceToTop).toBeLessThan(layout.distanceToBottom);
   });
 });
 
