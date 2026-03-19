@@ -106,7 +106,7 @@ body.automation {
 
 #panel-b {
     /* Match Panel A HUD safe zone so fixed HUD/powerups don't overlap controls */
-    padding-top: 80px;
+    padding-top: var(--panel-b-top-safe-zone, 80px);
 }
 
 .panel-b-controls {
@@ -246,4 +246,3 @@ body.automation {
 #worm-container .worm-container {
     pointer-events: auto;
 }
-

@@ -9,6 +9,8 @@
   const DEFAULT_UI_CONFIG = Object.freeze({
     COMPACT_MAX_WIDTH: 768,
     COMPACT_MAX_HEIGHT: 500,
+    PANEL_B_BASE_SAFE_ZONE: 80,
+    PANEL_B_CONTROLS_CLEARANCE: 12,
     DESKTOP_WIDTH: 320,
     COMPACT_MIN_WIDTH: 220,
     COMPACT_WIDTH_RATIO: 0.68,
@@ -148,6 +150,7 @@
     if (!this.displayElement) return;
 
     const {
+      config,
       isCompactViewport,
       displayWidth,
       topOffset,
@@ -172,6 +175,18 @@
       `${displayFontSize}px`,
     );
     this.displayElement.style.setProperty("--power-up-display-max-width", maxWidth);
+
+    const displayHeight = this.displayElement.offsetHeight || 0;
+    const panelBSafeZone = isCompactViewport
+      ? Math.max(
+          config.PANEL_B_BASE_SAFE_ZONE,
+          topOffset + displayHeight + config.PANEL_B_CONTROLS_CLEARANCE,
+        )
+      : config.PANEL_B_BASE_SAFE_ZONE;
+    document.documentElement.style.setProperty(
+      "--panel-b-top-safe-zone",
+      `${panelBSafeZone}px`,
+    );
 
     if (this.displayElement.dataset.dragged !== "true") {
       this.displayElement.style.removeProperty("top");
@@ -264,6 +279,7 @@
     this.displayElement.innerHTML = this.TYPES.map((type) =>
       createItem(type, this.EMOJIS[type], this.inventory[type]),
     ).join("");
+    this.syncDisplayLayout();
   };
 
   /**

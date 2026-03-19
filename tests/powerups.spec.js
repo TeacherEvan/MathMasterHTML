@@ -298,6 +298,42 @@ test.describe("Power-Up Compact Layout", () => {
   });
 });
 
+test.describe("Power-Up Mobile Control Separation", () => {
+  test.use({ viewport: { width: 412, height: 915 } });
+
+  test.beforeEach(async ({ page }) => {
+    await setupPowerUpPage(page);
+  });
+
+  test("keeps the tray above the Help and Clarify controls on portrait mobile", async ({
+    page,
+  }) => {
+    const layout = await page.evaluate(() => {
+      const display = document.getElementById("power-up-display");
+      const controls = document.querySelector(".panel-b-controls");
+      const displayRect = display?.getBoundingClientRect();
+      const controlsRect = controls?.getBoundingClientRect();
+
+      if (!displayRect || !controlsRect) {
+        return null;
+      }
+
+      return {
+        displayTop: displayRect.top,
+        displayBottom: displayRect.bottom,
+        controlsTop: controlsRect.top,
+        controlsBottom: controlsRect.bottom,
+        gap: controlsRect.top - displayRect.bottom,
+      };
+    });
+
+    expect(layout).not.toBeNull();
+    expect(layout.displayTop).toBeLessThan(120);
+    expect(layout.displayBottom).toBeLessThanOrEqual(layout.controlsTop);
+    expect(layout.gap).toBeGreaterThanOrEqual(0);
+  });
+});
+
 test.describe("Power-Up Chain Lightning", () => {
   test.beforeEach(async ({ page }) => {
     await setupPowerUpPage(page, {
