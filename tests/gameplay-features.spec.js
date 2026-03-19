@@ -442,6 +442,10 @@ test.describe("Green Worm — Blue Symbol Targeting", () => {
         ),
         animationName: styles.animationName,
         fading: splat.classList.contains("slime-fading"),
+        width: Number.parseFloat(styles.width || "0"),
+        height: Number.parseFloat(styles.height || "0"),
+        backgroundImage: styles.backgroundImage,
+        borderRadius: styles.borderRadius,
       };
     });
 
@@ -451,6 +455,10 @@ test.describe("Green Worm — Blue Symbol Targeting", () => {
     expect(splatState.animationDurationSeconds).toBeLessThan(0.3);
     expect(splatState.animationName).toBe("splat-appear");
     expect(splatState.fading).toBe(false);
+    expect(splatState.width).toBeGreaterThan(30);
+    expect(splatState.height).toBeGreaterThan(20);
+    expect(splatState.backgroundImage).toContain("radial-gradient");
+    expect(splatState.borderRadius).not.toBe("0px");
   });
 });
 

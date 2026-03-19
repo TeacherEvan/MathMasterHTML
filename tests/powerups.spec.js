@@ -272,27 +272,44 @@ test.describe("Power-Up Compact Layout", () => {
   }) => {
     const layout = await page.evaluate(() => {
       const display = document.getElementById("power-up-display");
+      const panelB = document.getElementById("panel-b");
+      const panelC = document.getElementById("panel-c");
+      const controls = document.querySelector(".panel-b-controls");
       const rect = display?.getBoundingClientRect();
+      const panelBRect = panelB?.getBoundingClientRect();
+      const panelCRect = panelC?.getBoundingClientRect();
+      const controlsRect = controls?.getBoundingClientRect();
       const styles = display ? window.getComputedStyle(display) : null;
 
-      return rect && styles
+      return rect && styles && panelBRect && panelCRect && controlsRect
         ? {
             top: rect.top,
             bottom: rect.bottom,
             distanceToTop: rect.top,
             distanceToBottom: window.innerHeight - rect.bottom,
             centerOffset: Math.abs(
-              rect.left + rect.width / 2 - window.innerWidth / 2,
+              rect.left + rect.width / 2 - (panelBRect.left + panelBRect.width / 2),
             ),
             computedTop: styles.top,
+            left: rect.left,
+            right: rect.right,
+            panelBLeft: panelBRect.left,
+            panelBRight: panelBRect.right,
+            panelCLeft: panelCRect.left,
+            controlsTop: controlsRect.top,
+            gapToControls: controlsRect.top - rect.bottom,
           }
         : null;
     });
 
     expect(layout).not.toBeNull();
-    expect(layout.top).toBeLessThan(140);
-    expect(layout.bottom).toBeLessThan(220);
-    expect(layout.centerOffset).toBeLessThan(32);
+    expect(layout.left).toBeGreaterThanOrEqual(layout.panelBLeft);
+    expect(layout.right).toBeLessThanOrEqual(layout.panelBRight);
+    expect(layout.right).toBeLessThanOrEqual(layout.panelCLeft);
+    expect(layout.top).toBeLessThan(60);
+    expect(layout.bottom).toBeLessThanOrEqual(layout.controlsTop);
+    expect(layout.gapToControls).toBeGreaterThanOrEqual(0);
+    expect(layout.centerOffset).toBeLessThan(20);
     expect(layout.computedTop).not.toBe("auto");
     expect(layout.distanceToTop).toBeLessThan(layout.distanceToBottom);
   });

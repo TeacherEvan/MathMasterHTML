@@ -57,12 +57,48 @@ console.log("📐 UIBoundaryManager debug loading...");
       adjustedPosition.y = viewport.height - box.height;
     }
 
+    if (entry.constraints) {
+      const { minX, maxX, minY, maxY } = entry.constraints;
+
+      if (minX !== undefined && adjustedPosition.x < minX) {
+        violations.push("Left edge out of constraints");
+        adjustedPosition.x = minX;
+      }
+      if (minY !== undefined && adjustedPosition.y < minY) {
+        violations.push("Top edge out of constraints");
+        adjustedPosition.y = minY;
+      }
+      if (
+        maxX !== undefined &&
+        adjustedPosition.x + box.width > maxX
+      ) {
+        violations.push("Right edge out of constraints");
+        adjustedPosition.x = maxX - box.width;
+      }
+      if (
+        maxY !== undefined &&
+        adjustedPosition.y + box.height > maxY
+      ) {
+        violations.push("Bottom edge out of constraints");
+        adjustedPosition.y = maxY - box.height;
+      }
+    }
+
+    const adjustedBox = {
+      x: adjustedPosition.x,
+      y: adjustedPosition.y,
+      width: box.width,
+      height: box.height,
+      right: adjustedPosition.x + box.width,
+      bottom: adjustedPosition.y + box.height,
+    };
+
     // Check for overlaps with other elements
     for (const [otherId, otherEntry] of this.elements) {
       if (otherId === id) continue;
 
       const otherBox = this.getBoundingBox(otherEntry.element);
-      if (this.checkOverlap(testBox, otherBox, this.config.minSpacing)) {
+      if (this.checkOverlap(adjustedBox, otherBox, this.config.minSpacing)) {
         violations.push(`Overlaps with "${otherId}"`);
       }
     }

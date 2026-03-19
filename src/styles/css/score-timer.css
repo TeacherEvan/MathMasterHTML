@@ -129,14 +129,34 @@
 /* Override powerup display positioning to fit in center zone */
 #power-up-display {
   position: fixed !important;
-  top: var(--power-up-display-top, 12px) !important;
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) !important;
   z-index: 10004 !important; /* Below HUD elements but above game */
-  /* Boundary constraints */
-  max-width: var(--power-up-display-max-width, calc(100vw - 360px));
   bottom: auto !important;
+}
+
+#power-up-display[data-layout="stacked"] {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding: 4px;
+  font-size: 12px;
+}
+
+#power-up-display[data-layout="stacked"] .power-up-item {
+  padding: 4px 6px;
+}
+
+#power-up-display[data-layout="stacked"] .power-up-item-value {
+  width: 100%;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+#power-up-display[data-layout="stacked"] .power-up-item-selected-label {
+  left: auto;
+  right: 6px;
+  bottom: 2px;
+  transform: none;
+  font-size: 8px;
 }
 
 @media (max-width: 768px), (max-height: 500px) {

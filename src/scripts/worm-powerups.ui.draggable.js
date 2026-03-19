@@ -15,12 +15,8 @@
    */
   proto.makeDraggable = function(element) {
     let isDragging = false;
-    let currentX;
-    let currentY;
-    let initialX;
-    let initialY;
-    let xOffset = 0;
-    let yOffset = 0;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
 
     element.addEventListener("pointerdown", dragStart);
     document.addEventListener("pointermove", drag);
@@ -32,11 +28,17 @@
         return;
       }
 
-      initialX = e.clientX - xOffset;
-      initialY = e.clientY - yOffset;
-
       if (e.target === element || e.target.parentElement === element) {
+        const rect = element.getBoundingClientRect();
+        dragOffsetX = e.clientX - rect.left;
+        dragOffsetY = e.clientY - rect.top;
         isDragging = true;
+        element.dataset.dragged = "true";
+        element.style.left = `${rect.left}px`;
+        element.style.top = `${rect.top}px`;
+        element.style.right = "auto";
+        element.style.bottom = "auto";
+        element.style.transform = "none";
         element.style.cursor = "grabbing";
       }
     }
@@ -45,11 +47,8 @@
       if (isDragging) {
         e.preventDefault();
 
-        currentX = e.clientX - initialX;
-        currentY = e.clientY - initialY;
-
-        xOffset = currentX;
-        yOffset = currentY;
+        const currentX = e.clientX - dragOffsetX;
+        const currentY = e.clientY - dragOffsetY;
 
         // Keep within viewport bounds
         const rect = element.getBoundingClientRect();
@@ -58,7 +57,6 @@
 
         let boundedX = Math.max(0, Math.min(currentX, maxX));
         let boundedY = Math.max(0, Math.min(currentY, maxY));
-        element.dataset.dragged = "true";
 
         // Validate position through UIBoundaryManager if available
         if (window.uiBoundaryManager) {
@@ -76,21 +74,23 @@
           }
         }
 
-        setTranslate(boundedX, boundedY, element);
+        setPosition(boundedX, boundedY, element);
       }
     }
 
-    function dragEnd(e) {
+    function dragEnd() {
       if (isDragging) {
-        initialX = currentX;
-        initialY = currentY;
         isDragging = false;
         element.style.cursor = "move";
       }
     }
 
-    function setTranslate(xPos, yPos, el) {
-      el.style.transform = `translate(${xPos}px, ${yPos}px)`;
+    function setPosition(xPos, yPos, el) {
+      el.style.left = `${xPos}px`;
+      el.style.top = `${yPos}px`;
+      el.style.right = "auto";
+      el.style.bottom = "auto";
+      el.style.transform = "none";
     }
   };
 

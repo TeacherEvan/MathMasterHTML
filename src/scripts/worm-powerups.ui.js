@@ -127,22 +127,130 @@
       displayFontSize: isCompactViewport
         ? config.COMPACT_FONT_SIZE
         : config.DESKTOP_FONT_SIZE,
-      maxWidth: isCompactViewport
-        ? `min(${config.COMPACT_WIDTH_CAP}px, calc(100vw - ${config.COMPACT_HORIZONTAL_INSET * 2}px))`
-        : `calc(100vw - ${config.DESKTOP_HORIZONTAL_INSET * 2}px)`,
     };
   };
 
-  proto.getDisplayBoundaryConstraints = function() {
+  proto.getDisplayPanelContext = function(displayRect = null) {
     const { config, isCompactViewport } = this.getDisplayLayoutMetrics();
-    const horizontalInset = isCompactViewport
-      ? config.COMPACT_HORIZONTAL_INSET
-      : config.DESKTOP_HORIZONTAL_INSET;
+    const panelB = document.getElementById("panel-b");
+    const controls = panelB?.querySelector(".panel-b-controls");
+    const timerDisplay = document.getElementById("timer-display");
+    const panelRect = panelB?.getBoundingClientRect() || null;
+    const controlsRect = controls?.getBoundingClientRect() || null;
+    const timerRect = timerDisplay?.getBoundingClientRect() || null;
+    const trayHeight =
+      displayRect?.height || this.displayElement?.offsetHeight || 0;
+    const trayWidth =
+      displayRect?.width || this.displayElement?.offsetWidth || 0;
+
+    if (!panelRect) {
+      return {
+        panelRect: null,
+        controlsRect,
+        timerRect,
+        minX: isCompactViewport
+          ? config.COMPACT_HORIZONTAL_INSET
+          : config.DESKTOP_HORIZONTAL_INSET,
+        maxX:
+          window.innerWidth -
+          (isCompactViewport
+            ? config.COMPACT_HORIZONTAL_INSET
+            : config.DESKTOP_HORIZONTAL_INSET),
+        minY: 0,
+        maxY: isCompactViewport ? config.COMPACT_MAX_Y : config.DESKTOP_MAX_Y,
+        availableWidth: window.innerWidth,
+      };
+    }
+
+    const compactInset = isCompactViewport ? 4 : config.COMPACT_HORIZONTAL_INSET;
+    const panelInset = Math.max(
+      compactInset,
+      Math.floor(panelRect.width * (isCompactViewport ? 0.02 : 0.04)),
+    );
+    const minXBase = panelRect.left + panelInset;
+    const maxXBase = panelRect.right - panelInset;
+    const timerOverlapPadding = isCompactViewport
+      ? (window.uiBoundaryManager?.config?.minSpacing || 10) + 2
+      : 0;
+    const minX =
+      timerRect && timerRect.right > panelRect.left
+        ? Math.max(minXBase, timerRect.right + timerOverlapPadding)
+        : minXBase;
+    const minTop = panelRect.top + config.DESKTOP_TOP_OFFSET;
+    const controlsBottomLimit =
+      controlsRect?.top !== undefined
+        ? controlsRect.top - config.PANEL_B_CONTROLS_CLEARANCE
+        : panelRect.top +
+          (isCompactViewport ? config.COMPACT_MAX_Y : config.DESKTOP_MAX_Y);
+    const fallbackBottomLimit =
+      panelRect.top +
+      (isCompactViewport ? config.COMPACT_MAX_Y : config.DESKTOP_MAX_Y);
+    const maxY = Math.max(
+      minTop + trayHeight,
+      Math.min(controlsBottomLimit, fallbackBottomLimit),
+    );
+
     return {
-      minX: horizontalInset,
-      maxX: window.innerWidth - horizontalInset,
-      minY: 0,
-      maxY: isCompactViewport ? config.COMPACT_MAX_Y : config.DESKTOP_MAX_Y,
+      panelRect,
+      controlsRect,
+      timerRect,
+      minX,
+      maxX: maxXBase,
+      minY: minTop,
+      maxY,
+      availableWidth: Math.max(0, maxXBase - minX),
+      trayWidth,
+      trayHeight,
+    };
+  };
+
+  proto.getDisplayBoundaryConstraints = function(displayRect = null) {
+    const context = this.getDisplayPanelContext(displayRect);
+    return {
+      minX: context.minX,
+      maxX: context.maxX,
+      minY: context.minY,
+      maxY: context.maxY,
+    };
+  };
+
+  proto.getDisplayAnchorPosition = function(displayWidth, displayHeight) {
+    const { config } = this.getDisplayLayoutMetrics();
+    const context = this.getDisplayPanelContext({
+      width: displayWidth,
+      height: displayHeight,
+    });
+    const { panelRect, controlsRect } = context;
+
+    if (!panelRect) {
+      return {
+        left: Math.round((window.innerWidth - displayWidth) / 2),
+        top: config.DESKTOP_TOP_OFFSET,
+      };
+    }
+
+    const availableWidth = Math.max(0, context.maxX - context.minX - displayWidth);
+    const centeredLeft = context.minX + availableWidth / 2;
+    const maxTopFromControls =
+      controlsRect?.top !== undefined
+        ? controlsRect.top -
+          config.PANEL_B_CONTROLS_CLEARANCE -
+          displayHeight
+        : context.minY;
+
+    return {
+      left: Math.round(
+        Math.max(
+          context.minX,
+          Math.min(centeredLeft, context.maxX - displayWidth),
+        ),
+      ),
+      top: Math.round(
+        Math.max(
+          context.minY,
+          Math.min(context.minY, maxTopFromControls),
+        ),
+      ),
     };
   };
 
@@ -153,18 +261,15 @@
       config,
       isCompactViewport,
       displayWidth,
-      topOffset,
       displayGap,
       displayPadding,
       displayFontSize,
-      maxWidth,
     } = this.getDisplayLayoutMetrics();
     this.displayElement.dataset.viewport = isCompactViewport ? "compact" : "full";
     this.displayElement.style.setProperty(
       "--power-up-display-width",
       `${displayWidth}px`,
     );
-    this.displayElement.style.setProperty("--power-up-display-top", `${topOffset}px`);
     this.displayElement.style.setProperty("--power-up-display-gap", `${displayGap}px`);
     this.displayElement.style.setProperty(
       "--power-up-display-padding",
@@ -174,13 +279,44 @@
       "--power-up-display-font-size",
       `${displayFontSize}px`,
     );
-    this.displayElement.style.setProperty("--power-up-display-max-width", maxWidth);
 
+    const panelContext = this.getDisplayPanelContext();
+    const panelRect = panelContext.panelRect;
+    const narrowPanel = panelRect && panelContext.availableWidth < 120;
+    const resolvedDisplayWidth =
+      panelRect && narrowPanel
+        ? Math.max(52, Math.floor(panelContext.availableWidth))
+        : displayWidth;
+    const panelMaxWidth = panelRect
+      ? `${Math.max(52, Math.floor(panelContext.maxX - panelContext.minX))}px`
+      : isCompactViewport
+        ? `min(${config.COMPACT_WIDTH_CAP}px, calc(100vw - ${config.COMPACT_HORIZONTAL_INSET * 2}px))`
+        : `calc(100vw - ${config.DESKTOP_HORIZONTAL_INSET * 2}px)`;
+    this.displayElement.dataset.layout = narrowPanel ? "stacked" : "row";
+    this.displayElement.style.setProperty(
+      "--power-up-display-width",
+      `${resolvedDisplayWidth}px`,
+    );
+    this.displayElement.style.setProperty(
+      "--power-up-display-max-width",
+      panelMaxWidth,
+    );
+
+    const displayRect = this.displayElement.getBoundingClientRect();
     const displayHeight = this.displayElement.offsetHeight || 0;
+    const displayWidthActual = this.displayElement.offsetWidth || resolvedDisplayWidth;
+    const constraints = this.getDisplayBoundaryConstraints(displayRect);
+    const anchoredPosition = this.getDisplayAnchorPosition(
+      displayWidthActual,
+      displayHeight,
+    );
     const panelBSafeZone = isCompactViewport
       ? Math.max(
           config.PANEL_B_BASE_SAFE_ZONE,
-          topOffset + displayHeight + config.PANEL_B_CONTROLS_CLEARANCE,
+          anchoredPosition.top +
+            displayHeight -
+            (panelRect?.top || 0) +
+            config.PANEL_B_CONTROLS_CLEARANCE,
         )
       : config.PANEL_B_BASE_SAFE_ZONE;
     document.documentElement.style.setProperty(
@@ -189,17 +325,30 @@
     );
 
     if (this.displayElement.dataset.dragged !== "true") {
-      this.displayElement.style.removeProperty("top");
-      this.displayElement.style.removeProperty("right");
-      this.displayElement.style.removeProperty("bottom");
-      this.displayElement.style.removeProperty("left");
-      this.displayElement.style.removeProperty("transform");
+      this.displayElement.style.top = `${anchoredPosition.top}px`;
+      this.displayElement.style.left = `${anchoredPosition.left}px`;
+      this.displayElement.style.right = "auto";
+      this.displayElement.style.bottom = "auto";
+      this.displayElement.style.transform = "none";
+    } else if (window.uiBoundaryManager?.validatePosition) {
+      const currentRect = this.displayElement.getBoundingClientRect();
+      const validation = window.uiBoundaryManager.validatePosition(
+        "power-up-display",
+        { x: currentRect.left, y: currentRect.top },
+      );
+      if (!validation.valid) {
+        this.displayElement.style.left = `${validation.adjustedPosition.x}px`;
+        this.displayElement.style.top = `${validation.adjustedPosition.y}px`;
+        this.displayElement.style.right = "auto";
+        this.displayElement.style.bottom = "auto";
+        this.displayElement.style.transform = "none";
+      }
     }
 
     if (window.uiBoundaryManager?.setConstraints) {
       window.uiBoundaryManager.setConstraints(
         "power-up-display",
-        this.getDisplayBoundaryConstraints(),
+        constraints,
       );
     }
   };
@@ -312,7 +461,7 @@
     // Register with UIBoundaryManager if available
     if (window.uiBoundaryManager) {
       window.uiBoundaryManager.register("power-up-display", display, {
-        zone: "top-center",
+        zone: null,
         priority: 1, // Lower priority than score/timer
         fixed: false,
         constraints: this.getDisplayBoundaryConstraints(),

@@ -17,13 +17,22 @@
     const fadeStartDelay = Math.max(1200, lifetime - fadeDuration);
     const splat = document.createElement("div");
     splat.className = "slime-splat";
-    splat.textContent = "🫟";
+    const width = Math.round(52 + Math.random() * 18);
+    const height = Math.round(34 + Math.random() * 14);
+    const rotation = `${Math.round(-22 + Math.random() * 44)}deg`;
+    const scaleX = (0.92 + Math.random() * 0.24).toFixed(2);
+    const scaleY = (0.9 + Math.random() * 0.28).toFixed(2);
     splat.style.left = `${x}px`;
     splat.style.top = `${y}px`;
     splat.style.position = "fixed";
     splat.style.zIndex = "10002";
-    splat.style.transform = `translate(-50%, -50%) rotate(${Math.random() *
-      360}deg)`;
+    splat.style.setProperty("--splat-width", `${width}px`);
+    splat.style.setProperty("--splat-height", `${height}px`);
+    splat.style.setProperty("--splat-rotation", rotation);
+    splat.style.setProperty("--splat-scale-x", scaleX);
+    splat.style.setProperty("--splat-scale-y", scaleY);
+    splat.style.setProperty("--splat-fade-duration", `${fadeDuration}ms`);
+    splat.setAttribute("aria-hidden", "true");
 
     container.appendChild(splat);
     logger.log(`🟢 Slime splat created at (${x}, ${y})`);
