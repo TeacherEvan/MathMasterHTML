@@ -5,6 +5,40 @@
     return;
   }
 
+  window.WormEffectHelpers = window.WormEffectHelpers || {};
+  window.WormEffectHelpers.createSlimeSplat = function createSlimeSplat({
+    x,
+    y,
+    lifetime = 10000,
+    fadeDuration = 900,
+    container = document.body,
+    logger = console,
+  }) {
+    const fadeStartDelay = Math.max(1200, lifetime - fadeDuration);
+    const splat = document.createElement("div");
+    splat.className = "slime-splat";
+    splat.textContent = "🫟";
+    splat.style.left = `${x}px`;
+    splat.style.top = `${y}px`;
+    splat.style.position = "fixed";
+    splat.style.zIndex = "10002";
+    splat.style.transform = `translate(-50%, -50%) rotate(${Math.random() *
+      360}deg)`;
+
+    container.appendChild(splat);
+    logger.log(`🟢 Slime splat created at (${x}, ${y})`);
+
+    setTimeout(() => {
+      splat.classList.add("slime-fading");
+    }, fadeStartDelay);
+
+    setTimeout(() => {
+      if (splat.parentNode) {
+        splat.parentNode.removeChild(splat);
+      }
+    }, lifetime);
+  };
+
   const proto = window.WormSystem.prototype;
 
   proto.explodeWorm = function(
@@ -93,7 +127,7 @@
     // Create persistent crack at worm's location
     this.createCrack(worm.x, worm.y);
 
-    // Create slime splat that lasts 15 seconds
+    // Create slime splat using the configured lifetime/fade constants
     this.createSlimeSplat(worm.x, worm.y);
 
     // Drop power-up if this worm has one (and not killed by chain reaction to avoid spam)
@@ -206,40 +240,19 @@
   };
 
   proto.createSlimeSplat = function(x, y) {
-    const lifetime = this.SLIME_SPLAT_DURATION || 10000;
-    const fadeDuration = 900;
-    const fadeStartDelay = Math.max(1200, lifetime - fadeDuration);
-    const splat = document.createElement("div");
-    splat.className = "slime-splat";
-    splat.textContent = "🫟";
-    splat.style.left = `${x}px`;
-    splat.style.top = `${y}px`;
-    splat.style.position = "fixed"; // Use fixed positioning to place at exact coordinates
-    splat.style.zIndex = "10002";
-
-    // Random rotation for variation
-    splat.style.transform = `translate(-50%, -50%) rotate(${Math.random() *
-      360}deg)`;
-
-    // FIX: Append to cross-panel container so splat appears at worm's actual death location
     const splatContainer = this.crossPanelContainer || document.body;
     if (splatContainer === document.body) {
       Logger.warn("⚠️", "createSlimeSplat fallback: crossPanelContainer unavailable");
     }
-    splatContainer.appendChild(splat);
 
-    console.log(`🟢 Slime splat created at (${x}, ${y})`);
-
-    // Keep the splat visible immediately, then fade near the end of its lifetime.
-    setTimeout(() => {
-      splat.classList.add("slime-fading");
-    }, fadeStartDelay);
-
-    setTimeout(() => {
-      if (splat.parentNode) {
-        splat.parentNode.removeChild(splat);
-      }
-    }, lifetime);
+    window.WormEffectHelpers.createSlimeSplat({
+      x,
+      y,
+      lifetime: this.SLIME_SPLAT_DURATION || 10000,
+      fadeDuration: this.SLIME_SPLAT_FADE_DURATION || 900,
+      container: splatContainer,
+      logger: console,
+    });
   };
 
   proto.createCrack = function(x, y) {

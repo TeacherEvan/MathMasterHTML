@@ -129,27 +129,17 @@
 /* Override powerup display positioning to fit in center zone */
 #power-up-display {
   position: fixed !important;
-  top: 12px !important;
+  top: var(--power-up-display-top, 12px) !important;
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) !important;
   z-index: 10004 !important; /* Below HUD elements but above game */
   /* Boundary constraints */
-  max-width: calc(100vw - 360px); /* Leave room for score and timer */
+  max-width: var(--power-up-display-max-width, calc(100vw - 360px));
+  bottom: auto !important;
 }
 
-/* Compact layouts still keep the power-up tray anchored with the Window B top band,
-   but tighten spacing so it does not drift into Window C or overlap the HUD. */
 @media (max-width: 768px), (max-height: 500px) {
-  #power-up-display {
-    top: 86px !important;
-    bottom: auto !important;
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%) !important;
-    max-width: min(280px, calc(100vw - 24px));
-  }
-
   .game-hud {
     gap: 16px;
   }
@@ -161,12 +151,6 @@
   }
 
   .hud-value {
-    font-size: 14px;
-  }
-
-  #power-up-display {
-    gap: 8px;
-    padding: 6px;
     font-size: 14px;
   }
 }

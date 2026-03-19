@@ -100,6 +100,7 @@
 
       // Durations
       SLIME_SPLAT_DURATION: 10000, // ms - 10 seconds
+      SLIME_SPLAT_FADE_DURATION: 900, // ms - fade window near splat expiry
       SPIDER_HEART_DURATION: 60000, // ms - 1 minute
       SKULL_DISPLAY_DURATION: 10000, // ms - 10 seconds
 

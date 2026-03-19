@@ -6,6 +6,26 @@
   }
 
   const proto = window.WormPowerUpSystem.prototype;
+  const DEFAULT_UI_CONFIG = Object.freeze({
+    COMPACT_MAX_WIDTH: 768,
+    COMPACT_MAX_HEIGHT: 500,
+    DESKTOP_WIDTH: 320,
+    COMPACT_MIN_WIDTH: 220,
+    COMPACT_WIDTH_RATIO: 0.68,
+    COMPACT_WIDTH_CAP: 280,
+    DESKTOP_TOP_OFFSET: 12,
+    COMPACT_TOP_OFFSET: 86,
+    DESKTOP_HORIZONTAL_INSET: 180,
+    COMPACT_HORIZONTAL_INSET: 12,
+    DESKTOP_MAX_Y: 100,
+    COMPACT_MAX_Y: 160,
+    DESKTOP_GAP: 15,
+    COMPACT_GAP: 8,
+    DESKTOP_PADDING: 10,
+    COMPACT_PADDING: 6,
+    DESKTOP_FONT_SIZE: 18,
+    COMPACT_FONT_SIZE: 14,
+  });
 
   /**
    * Show tooltip notification
@@ -72,34 +92,86 @@
     }
   };
 
-  proto.getDisplayLayoutMetrics = function() {
-    const isCompactViewport =
-      window.innerWidth <= 768 || window.innerHeight <= 500;
-    const compactWidth = Math.max(220, Math.floor(window.innerWidth * 0.68));
+  proto.getDisplayUIConfig = function() {
     return {
+      ...DEFAULT_UI_CONFIG,
+      ...(window.GameConstants?.POWER_UP_UI || {}),
+    };
+  };
+
+  proto.getDisplayLayoutMetrics = function() {
+    const config = this.getDisplayUIConfig();
+    const isCompactViewport =
+      window.innerWidth <= config.COMPACT_MAX_WIDTH ||
+      window.innerHeight <= config.COMPACT_MAX_HEIGHT;
+    const compactWidth = Math.max(
+      config.COMPACT_MIN_WIDTH,
+      Math.floor(window.innerWidth * config.COMPACT_WIDTH_RATIO),
+    );
+    const displayWidth = isCompactViewport
+      ? Math.min(config.COMPACT_WIDTH_CAP, compactWidth)
+      : config.DESKTOP_WIDTH;
+    return {
+      config,
       isCompactViewport,
-      displayWidth: isCompactViewport ? Math.min(280, compactWidth) : 320,
+      displayWidth,
+      topOffset: isCompactViewport
+        ? config.COMPACT_TOP_OFFSET
+        : config.DESKTOP_TOP_OFFSET,
+      displayGap: isCompactViewport ? config.COMPACT_GAP : config.DESKTOP_GAP,
+      displayPadding: isCompactViewport
+        ? config.COMPACT_PADDING
+        : config.DESKTOP_PADDING,
+      displayFontSize: isCompactViewport
+        ? config.COMPACT_FONT_SIZE
+        : config.DESKTOP_FONT_SIZE,
+      maxWidth: isCompactViewport
+        ? `min(${config.COMPACT_WIDTH_CAP}px, calc(100vw - ${config.COMPACT_HORIZONTAL_INSET * 2}px))`
+        : `calc(100vw - ${config.DESKTOP_HORIZONTAL_INSET * 2}px)`,
     };
   };
 
   proto.getDisplayBoundaryConstraints = function() {
-    const { isCompactViewport } = this.getDisplayLayoutMetrics();
-    const horizontalInset = isCompactViewport ? 12 : 180;
+    const { config, isCompactViewport } = this.getDisplayLayoutMetrics();
+    const horizontalInset = isCompactViewport
+      ? config.COMPACT_HORIZONTAL_INSET
+      : config.DESKTOP_HORIZONTAL_INSET;
     return {
       minX: horizontalInset,
       maxX: window.innerWidth - horizontalInset,
       minY: 0,
-      maxY: isCompactViewport ? 160 : 100,
+      maxY: isCompactViewport ? config.COMPACT_MAX_Y : config.DESKTOP_MAX_Y,
     };
   };
 
   proto.syncDisplayLayout = function() {
     if (!this.displayElement) return;
 
-    const { isCompactViewport, displayWidth } = this.getDisplayLayoutMetrics();
+    const {
+      isCompactViewport,
+      displayWidth,
+      topOffset,
+      displayGap,
+      displayPadding,
+      displayFontSize,
+      maxWidth,
+    } = this.getDisplayLayoutMetrics();
     this.displayElement.dataset.viewport = isCompactViewport ? "compact" : "full";
-    this.displayElement.style.width = `${displayWidth}px`;
-    this.displayElement.style.maxWidth = `${displayWidth}px`;
+    this.displayElement.style.setProperty(
+      "--power-up-display-width",
+      `${displayWidth}px`,
+    );
+    this.displayElement.style.setProperty("--power-up-display-top", `${topOffset}px`);
+    this.displayElement.style.setProperty("--power-up-display-gap", `${displayGap}px`);
+    this.displayElement.style.setProperty(
+      "--power-up-display-padding",
+      `${displayPadding}px`,
+    );
+    this.displayElement.style.setProperty(
+      "--power-up-display-font-size",
+      `${displayFontSize}px`,
+    );
+    this.displayElement.style.setProperty("--power-up-display-max-width", maxWidth);
 
     if (this.displayElement.dataset.dragged !== "true") {
       this.displayElement.style.removeProperty("top");
@@ -109,13 +181,11 @@
       this.displayElement.style.removeProperty("transform");
     }
 
-    if (
-      window.uiBoundaryManager &&
-      window.uiBoundaryManager.elements instanceof Map &&
-      window.uiBoundaryManager.elements.has("power-up-display")
-    ) {
-      const entry = window.uiBoundaryManager.elements.get("power-up-display");
-      entry.constraints = this.getDisplayBoundaryConstraints();
+    if (window.uiBoundaryManager?.setConstraints) {
+      window.uiBoundaryManager.setConstraints(
+        "power-up-display",
+        this.getDisplayBoundaryConstraints(),
+      );
     }
   };
 
@@ -159,57 +229,41 @@
     const createItem = (type, emoji, count) => {
       const isSelected = this.selectedPowerUp === type;
       const hasStock = count > 0;
-      const selectedStyle = isSelected
-        ? "background: rgba(0, 255, 255, 0.4); border: 2px solid #0ff; box-shadow: 0 0 10px #0ff;"
-        : "border: 2px solid transparent;";
-      const availableStyle = hasStock ? "opacity: 1;" : "opacity: 0.5;";
-      const cursorStyle = hasStock
-        ? "cursor: pointer;"
-        : "cursor: not-allowed;";
+      const classNames = ["power-up-item"];
+      if (isSelected) {
+        classNames.push("is-selected");
+      }
+      if (!hasStock) {
+        classNames.push("is-empty");
+      }
 
       let extraInfo = "";
       if (type === "chainLightning" && count > 0) {
-        extraInfo = `<div style="position: absolute; top: -10px; right: -10px; font-size: 12px; color: #0ff;">${this.chainLightningKillCount}</div>`;
+        extraInfo = `<span class="power-up-count-badge">${this.chainLightningKillCount}</span>`;
       }
       if (isSelected) {
-        extraInfo += `<div style="position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #0ff; white-space: nowrap;">SELECTED</div>`;
+        extraInfo += `<span class="power-up-item-selected-label">SELECTED</span>`;
       }
 
       return `
-                <div class="power-up-item" data-type="${type}" data-testid="powerup-${type}" 
-                     style="${cursorStyle} padding: 8px; border-radius: 8px; transition: all 0.2s; position: relative; ${selectedStyle} ${availableStyle}">
-                    ${emoji} ${count}
-                    ${extraInfo}
-                </div>
-            `;
+        <button
+          type="button"
+          class="${classNames.join(" ")}"
+          data-type="${type}"
+          data-testid="powerup-${type}"
+          data-has-stock="${hasStock}"
+          aria-pressed="${isSelected}"
+          title="${this.DESCRIPTIONS[type]}"
+        >
+          <span class="power-up-item-value">${emoji} ${count}</span>
+          ${extraInfo}
+        </button>
+      `;
     };
 
-    this.displayElement.innerHTML = `
-            ${createItem("chainLightning", "⚡", this.inventory.chainLightning)}
-            ${createItem("spider", "🕷️", this.inventory.spider)}
-            ${createItem("devil", "👹", this.inventory.devil)}
-        `;
-
-    // Re-add click handlers and hover effects
-    this.displayElement.querySelectorAll(".power-up-item").forEach((item) => {
-      const type = item.dataset.type;
-      const hasStock = this.inventory[type] > 0;
-
-      item.addEventListener("mouseenter", () => {
-        if (hasStock && this.selectedPowerUp !== type) {
-          item.style.background = "rgba(0, 255, 0, 0.3)";
-        }
-      });
-      item.addEventListener("mouseleave", () => {
-        if (this.selectedPowerUp !== type) {
-          item.style.background = "transparent";
-        }
-      });
-      item.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.selectPowerUp(type);
-      });
-    });
+    this.displayElement.innerHTML = this.TYPES.map((type) =>
+      createItem(type, this.EMOJIS[type], this.inventory[type]),
+    ).join("");
   };
 
   /**
@@ -219,26 +273,21 @@
   proto.createDisplayElement = function() {
     const display = document.createElement("div");
     display.id = "power-up-display";
+    display.className = "power-up-display";
     display.dataset.testid = "power-up-display";
-    display.style.cssText = `
-      position: fixed;
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 10px;
-      border-radius: 10px;
-      font-family: 'Orbitron', monospace;
-      font-size: 18px;
-      z-index: 10004;
-      display: flex;
-      gap: 15px;
-      border: 2px solid #0f0;
-      cursor: move;
-      user-select: none;
-      box-sizing: border-box;
-    `;
+    display.setAttribute("aria-label", "Power-up inventory");
 
     // Make it draggable with boundary validation
     this.makeDraggable(display);
+    display.addEventListener("click", (event) => {
+      const item = event.target.closest(".power-up-item");
+      if (!item || !display.contains(item)) {
+        return;
+      }
+
+      event.stopPropagation();
+      this.selectPowerUp(item.dataset.type);
+    });
 
     document.body.appendChild(display);
     this.displayElement = display;

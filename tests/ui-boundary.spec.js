@@ -189,6 +189,41 @@ test.describe("UI Boundary Management", () => {
     console.log("✅ Validation system functional:", validationResult);
   });
 
+  test("UIBoundaryManager should expose public constraint updates", async ({
+    page,
+  }) => {
+    const updateResult = await page.evaluate(() => {
+      const manager = window.uiBoundaryManager;
+      const display = document.getElementById("power-up-display");
+      if (!manager || !display) {
+        return null;
+      }
+
+      const nextConstraints = {
+        minX: 24,
+        maxX: window.innerWidth - 24,
+        minY: 0,
+        maxY: 140,
+      };
+
+      const updated = manager.setConstraints("power-up-display", nextConstraints);
+      const registration = manager.elements.get("power-up-display");
+
+      return {
+        updated,
+        constraints: registration?.constraints || null,
+      };
+    });
+
+    expect(updateResult).not.toBeNull();
+    expect(updateResult.updated).toBe(true);
+    expect(updateResult.constraints).toMatchObject({
+      minX: 24,
+      minY: 0,
+      maxY: 140,
+    });
+  });
+
   test("UI elements should reposition on window resize", async ({
     page,
   }, testInfo) => {

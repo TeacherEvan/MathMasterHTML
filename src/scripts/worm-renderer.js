@@ -182,26 +182,24 @@ class WormRenderer {
   }
 
   createSlimeSplat(x, y) {
-    const splat = document.createElement("div");
-    splat.className = "slime-splat";
-    splat.style.left = `${x}px`;
-    splat.style.top = `${y}px`;
-    splat.style.position = "fixed";
-    splat.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 360}deg)`;
+    if (window.WormEffectHelpers?.createSlimeSplat) {
+      window.WormEffectHelpers.createSlimeSplat({
+        x,
+        y,
+        lifetime:
+          this.system.SLIME_SPLAT_DURATION || WormConstants.SLIME_SPLAT_DURATION,
+        fadeDuration:
+          this.system.SLIME_SPLAT_FADE_DURATION ||
+          WormConstants.SLIME_SPLAT_FADE_DURATION,
+        container: this.system.crossPanelContainer,
+        logger: this.logger,
+      });
+      return;
+    }
 
-    this.system.crossPanelContainer.appendChild(splat);
-
-    this.logger.log(`🟢 Slime splat created at (${x}, ${y})`);
-
-    setTimeout(() => {
-      splat.classList.add("slime-fading");
-    }, WormConstants.SLIME_SPLAT_DURATION - 1000);
-
-    setTimeout(() => {
-      if (splat.parentNode) {
-        splat.parentNode.removeChild(splat);
-      }
-    }, WormConstants.SLIME_SPLAT_DURATION);
+    this.logger.warn(
+      "⚠️ WormEffectHelpers.createSlimeSplat unavailable; skipping splat creation fallback",
+    );
   }
 
   createCrack(x, y) {

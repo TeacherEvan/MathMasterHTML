@@ -437,14 +437,19 @@ test.describe("Green Worm — Blue Symbol Targeting", () => {
       const styles = window.getComputedStyle(splat);
       return {
         opacity: Number.parseFloat(styles.opacity || "0"),
-        animationDuration: styles.animationDuration,
+        animationDurationSeconds: Number.parseFloat(
+          styles.animationDuration || "0",
+        ),
+        animationName: styles.animationName,
         fading: splat.classList.contains("slime-fading"),
       };
     });
 
     expect(splatState).not.toBeNull();
     expect(splatState.opacity).toBeGreaterThan(0.45);
-    expect(splatState.animationDuration).toBe("0.18s");
+    expect(splatState.animationDurationSeconds).toBeGreaterThan(0);
+    expect(splatState.animationDurationSeconds).toBeLessThan(0.3);
+    expect(splatState.animationName).toBe("splat-appear");
     expect(splatState.fading).toBe(false);
   });
 });

@@ -17,30 +17,42 @@ body.power-up-placement-mode {
 
 .power-up-display {
   position: fixed;
-  top: 20px;
-  right: 20px;
   background: rgba(0, 0, 0, 0.9);
   color: #ffffff;
-  padding: 8px;
+  width: var(--power-up-display-width, 320px);
+  max-width: var(--power-up-display-max-width, calc(100vw - 360px));
+  padding: var(--power-up-display-padding, 10px);
   border-radius: 8px;
   font-family: "Orbitron", monospace;
-  font-size: 16px;
+  font-size: var(--power-up-display-font-size, 18px);
   z-index: 9999;
   display: flex;
   justify-content: center;
-  gap: 12px;
+  align-items: center;
+  gap: var(--power-up-display-gap, 15px);
   border: 2px solid #00ff00;
   box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
   cursor: move;
   user-select: none;
+  box-sizing: border-box;
 }
 
 .power-up-item {
+  appearance: none;
+  background: transparent;
+  color: inherit;
+  border: 2px solid transparent;
   cursor: pointer;
-  padding: 5px;
+  padding: 8px;
   border-radius: 5px;
-  transition: all 0.2s;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
   position: relative;
+  font: inherit;
+  text-align: center;
 }
 
 .power-up-count {
@@ -49,8 +61,14 @@ body.power-up-placement-mode {
   gap: 6px;
 }
 
-.power-up-item.is-hovered {
+.power-up-item.is-hovered,
+.power-up-item:not(.is-selected):not(.is-empty):hover {
   background: rgba(0, 255, 0, 0.3);
+}
+
+.power-up-item.is-empty {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .power-up-count-badge {
@@ -61,11 +79,29 @@ body.power-up-placement-mode {
   color: #00ffff;
 }
 
-.power-up-item.selected {
+.power-up-item.selected,
+.power-up-item.is-selected {
   background: rgba(0, 255, 255, 0.4) !important;
   border: 2px solid #0ff !important;
   box-shadow: 0 0 15px #0ff !important;
   animation: power-up-selected-pulse 1s ease-in-out infinite;
+}
+
+.power-up-item-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.power-up-item-selected-label {
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #00ffff;
+  white-space: nowrap;
 }
 
 @keyframes power-up-selected-pulse {

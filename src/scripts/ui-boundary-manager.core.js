@@ -117,6 +117,65 @@ class UIBoundaryManager {
   }
 
   /**
+   * Update an existing registration without mutating manager internals directly.
+   * @param {string} id - Element identifier
+   * @param {Object} updates - Registration fields to update
+   * @returns {boolean} True when the registration was updated
+   */
+  updateRegistration(id, updates = {}) {
+    const entry = this.elements.get(id);
+    if (!entry) {
+      console.warn(`📐 Cannot update "${id}": element not registered`);
+      return false;
+    }
+
+    if (
+      updates.element !== undefined &&
+      !(updates.element instanceof HTMLElement)
+    ) {
+      console.warn(`📐 Cannot update "${id}": invalid replacement element`);
+      return false;
+    }
+
+    if (updates.element !== undefined) {
+      entry.element = updates.element;
+    }
+    if (updates.zone !== undefined) {
+      entry.zone = updates.zone;
+    }
+    if (updates.priority !== undefined) {
+      entry.priority = updates.priority;
+    }
+    if (updates.fixed !== undefined) {
+      entry.fixed = updates.fixed;
+    }
+    if (updates.constraints !== undefined) {
+      entry.constraints = updates.constraints;
+    }
+    if (updates.resetOriginalPosition === true) {
+      entry.originalPosition = this._getPosition(entry.element);
+    }
+
+    console.log(`📐 Updated UI element registration: "${id}"`, updates);
+
+    if (this.config.autoReposition) {
+      this._checkAndReposition(id);
+    }
+
+    return true;
+  }
+
+  /**
+   * Update only the constraint box for a registered element.
+   * @param {string} id - Element identifier
+   * @param {Object|null} constraints - Position constraints
+   * @returns {boolean} True when the constraints were updated
+   */
+  setConstraints(id, constraints) {
+    return this.updateRegistration(id, { constraints });
+  }
+
+  /**
    * Unregister a UI element
    * @param {string} id - Element identifier
    */

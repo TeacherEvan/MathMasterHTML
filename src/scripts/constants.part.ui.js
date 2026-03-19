@@ -44,6 +44,27 @@
       DESKTOP_MIN_WIDTH: 1025,
     },
 
+    POWER_UP_UI: {
+      COMPACT_MAX_WIDTH: 768,
+      COMPACT_MAX_HEIGHT: 500,
+      DESKTOP_WIDTH: 320,
+      COMPACT_MIN_WIDTH: 220,
+      COMPACT_WIDTH_RATIO: 0.68,
+      COMPACT_WIDTH_CAP: 280,
+      DESKTOP_TOP_OFFSET: 12,
+      COMPACT_TOP_OFFSET: 86,
+      DESKTOP_HORIZONTAL_INSET: 180,
+      COMPACT_HORIZONTAL_INSET: 12,
+      DESKTOP_MAX_Y: 100,
+      COMPACT_MAX_Y: 160,
+      DESKTOP_GAP: 15,
+      COMPACT_GAP: 8,
+      DESKTOP_PADDING: 10,
+      COMPACT_PADDING: 6,
+      DESKTOP_FONT_SIZE: 18,
+      COMPACT_FONT_SIZE: 14,
+    },
+
     // ========================================
     // ANIMATION TIMING
     // ========================================

@@ -60,7 +60,8 @@ export const BORDER_MARGIN = 20; // px
 export const POWER_UP_DROP_RATE = 0.3; // 30% chance
 export const POWER_UP_TYPES = ["chainLightning", "spider", "devil"];
 export const CHAIN_LIGHTNING_KILL_COUNT_BASE = 5;
-export const SLIME_SPLAT_DURATION = 15000; // ms
+export const SLIME_SPLAT_DURATION = 10000; // ms
+export const SLIME_SPLAT_FADE_DURATION = 900; // ms
 export const SKULL_DISPLAY_DURATION = 10000; // ms
 export const SPIDER_HEART_DURATION = 60000; // ms - 1 minute
 
@@ -133,6 +134,7 @@ if (typeof window !== "undefined") {
     POWER_UP_TYPES,
     CHAIN_LIGHTNING_KILL_COUNT_BASE,
     SLIME_SPLAT_DURATION,
+    SLIME_SPLAT_FADE_DURATION,
     SKULL_DISPLAY_DURATION,
     SPIDER_HEART_DURATION,
     SPEED_CONSOLE_WORM,

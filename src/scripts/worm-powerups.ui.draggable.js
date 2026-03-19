@@ -28,7 +28,7 @@
 
     function dragStart(e) {
       // Only allow dragging from the display itself, not from power-up items
-      if (e.target.classList.contains("power-up-item")) {
+      if (e.target.closest(".power-up-item")) {
         return;
       }
 

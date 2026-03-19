@@ -12,7 +12,7 @@ async function dismissHowToPlayModal(page) {
   }
 }
 
-async function setupPowerUpPage(page) {
+async function setupPowerUpPage(page, inventory = null) {
   await page.goto("/game.html?level=beginner");
 
   await dismissHowToPlayModal(page);
@@ -22,14 +22,21 @@ async function setupPowerUpPage(page) {
     timeout: 10000,
   });
 
-  await page.evaluate(() => {
+  await page.evaluate((seedInventory) => {
+    const defaultInventory = {
+      chainLightning: 3,
+      spider: 2,
+      devil: 2,
+    };
+    const nextInventory = seedInventory || defaultInventory;
     if (window.wormSystem && window.wormSystem.powerUpSystem) {
-      window.wormSystem.powerUpSystem.inventory.chainLightning = 3;
-      window.wormSystem.powerUpSystem.inventory.spider = 2;
-      window.wormSystem.powerUpSystem.inventory.devil = 2;
+      window.wormSystem.powerUpSystem.inventory.chainLightning =
+        nextInventory.chainLightning;
+      window.wormSystem.powerUpSystem.inventory.spider = nextInventory.spider;
+      window.wormSystem.powerUpSystem.inventory.devil = nextInventory.devil;
       window.wormSystem.powerUpSystem.updateDisplay();
     }
-  });
+  }, inventory);
 
   await page.waitForSelector("#power-up-display", { timeout: 5000 });
 }
@@ -293,24 +300,11 @@ test.describe("Power-Up Compact Layout", () => {
 
 test.describe("Power-Up Chain Lightning", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/game.html?level=beginner");
-
-    await dismissHowToPlayModal(page);
-    await page.waitForSelector("#solution-container", { timeout: 10000 });
-
-    await page.waitForFunction(() => !!window.wormSystem?.powerUpSystem, null, {
-      timeout: 10000,
+    await setupPowerUpPage(page, {
+      chainLightning: 3,
+      spider: 0,
+      devil: 0,
     });
-
-    // Give chain lightning power-ups
-    await page.evaluate(() => {
-      if (window.wormSystem && window.wormSystem.powerUpSystem) {
-        window.wormSystem.powerUpSystem.inventory.chainLightning = 3;
-        window.wormSystem.powerUpSystem.updateDisplay();
-      }
-    });
-
-    await page.waitForSelector("#power-up-display", { timeout: 5000 });
   });
 
   test("should refund chain lightning if no worms to target", async ({
