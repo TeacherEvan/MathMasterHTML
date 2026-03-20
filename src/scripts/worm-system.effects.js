@@ -87,6 +87,8 @@
       new CustomEvent("wormExploded", {
         detail: {
           wormId: worm.id,
+          x: worm.x,
+          y: worm.y,
           isRainKill: isRainKill,
           isChainReaction: isChainReaction,
           wasPurple: worm.isPurple || false,

@@ -47,5 +47,5 @@ export const LINE_LIMIT_POLICY = {
   excludeExtensions: [".md"],
 
   // Baseline violations file (used for "no new violations" mode).
-  baselineViolationsCsv: "Docs/LINE_LIMIT_200_AUDIT.policy.violations.csv",
+  baselineViolationsCsv: "Docs/SystemDocs/LINE_LIMIT_200_AUDIT.policy.violations.csv",
 };

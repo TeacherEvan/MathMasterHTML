@@ -427,8 +427,8 @@ Use emoji prefixes matching console logs for easy tracking:
 
 ## Resources
 
-- **Performance Guide**: `Docs/PERFORMANCE.md`
-- **Architecture Guide**: `Docs/ARCHITECTURE.md`
+- **Performance Guide**: `Docs/SystemDocs/PERFORMANCE.md`
+- **Architecture Guide**: `Docs/SystemDocs/ARCHITECTURE.md`
 - **CSS Override Details**: `Docs/CSS_Override_Investigation.md`
 - **Audit Report**: `Docs/CODEBASE_AUDIT_REPORT_V2.md`
 - **Deployment Guide**: `DEPLOYMENT_GUIDE.md`

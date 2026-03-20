@@ -17,54 +17,10 @@
     this.handleWormClick(worm, event);
   };
 
-  proto._triggerWormEscape = function(worm, event) {
-    const now = Date.now();
-    worm.escapeUntil = now + this.CURSOR_ESCAPE_DURATION;
-
-    const cursor = this.cursorState;
-    let dx = Math.random() - 0.5;
-    let dy = Math.random() - 0.5;
-
-    if (cursor && cursor.isActive) {
-      dx = worm.x - cursor.x;
-      dy = worm.y - cursor.y;
-    } else if (event && typeof event.clientX === "number") {
-      dx = worm.x - event.clientX;
-      dy = worm.y - event.clientY;
-    }
-
-    const distance = Math.max(1, Math.sqrt(dx * dx + dy * dy));
-    worm.escapeVector = {
-      x: dx / distance,
-      y: dy / distance,
-    };
-
-    console.log(`🐛 Worm ${worm.id} escaped click - first strike used`);
-  };
-
   proto.handleWormClick = function(worm, event) {
     if (!worm.active) return;
-
-    const now = Date.now();
-    const withinGraceWindow =
-      worm.lastHitTime && now - worm.lastHitTime <= this.WORM_CLICK_GRACE_WINDOW;
-
-    if (!withinGraceWindow) {
-      worm.lastHitTime = now;
-      this._triggerWormEscape(worm, event);
-      return;
-    }
-
-    worm.lastHitTime = now;
-    worm.escapeUntil = 0;
-    worm.escapeVector = null;
-
-    console.log(`💥 Green worm ${worm.id} clicked twice - EXPLODING!`);
-
-    // Drop power-up if this worm has one
-    if (worm.hasPowerUp) {
-      this.dropPowerUp(worm.x, worm.y, worm.powerUpType);
-    }
+    event?.preventDefault?.();
+    console.log(`💥 Green worm ${worm.id} tapped - EXPLODING!`);
 
     this.explodeWorm(worm, false); // false = not a rain kill
   };

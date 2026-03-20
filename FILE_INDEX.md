@@ -23,9 +23,9 @@ MathMasterHTML/
 │   ├── mocks/                 # Shared test mocks
 │   └── utils/                 # Test utilities
 ├── Docs/                      # Documentation
-│   ├── ARCHITECTURE.md        # Worm system and module design
-│   ├── DEVELOPMENT_GUIDE.md   # Coding standards and recent changes
-│   └── WORM_DEVELOPER_GUIDE.md # Worm system deep-dive
+│   ├── SystemDocs/            # Core system and process docs
+│   ├── Worms/                 # Worm-focused docs and audits
+│   └── Copilot Docs/          # AI agent quickstart and review docs
 └── (root config files)
 ```
 
@@ -162,10 +162,10 @@ MathMasterHTML/
 
 | File                    | Purpose                                                  |
 | ----------------------- | -------------------------------------------------------- |
-| ARCHITECTURE.md         | Full worm system state machine, event flow, module map   |
-| DEVELOPMENT_GUIDE.md    | Coding standards, recent changes log, module conventions |
-| WORM_DEVELOPER_GUIDE.md | Deep-dive on worm behaviors, purple/green mechanics, FSM |
-| PERFORMANCE.md          | Optimisation patterns, spatial hash, RAF best practices  |
+| SystemDocs/ARCHITECTURE.md      | Full worm system state machine, event flow, module map   |
+| SystemDocs/DEVELOPMENT_GUIDE.md | Coding standards, recent changes log, module conventions |
+| Worms/WORM_DEVELOPER_GUIDE.md   | Deep-dive on worm behaviors, purple/green mechanics, FSM |
+| SystemDocs/PERFORMANCE.md       | Optimisation patterns, spatial hash, RAF best practices  |
 | REFACTORING_PLAN.csv    | Catalog of large files, split status, recommendations    |
 
 ### Root Files

@@ -188,9 +188,9 @@ When splitting, keep `window.*` exports intact and load new files in `game.html`
 
 ## Key Documentation
 
-- `Docs/ARCHITECTURE.md` - Worm system design and state machine
-- `Docs/DEVELOPMENT_GUIDE.md` - Coding standards, recent changes
-- `Docs/PERFORMANCE.md` - Optimization patterns and results
+- `Docs/SystemDocs/ARCHITECTURE.md` - Worm system design and state machine
+- `Docs/SystemDocs/DEVELOPMENT_GUIDE.md` - Coding standards, recent changes
+- `Docs/SystemDocs/PERFORMANCE.md` - Optimization patterns and results
 - `Docs/COMPETITION_PHASE1_ARCHITECTURAL_ROADMAP.md` - competition productionization roadmap
 - `Docs/COMPETITION_PHASE1_EXECUTION_MATRIX.md` - execution order, validation, rollback plan
 - `REFACTORING_PLAN.csv` - Full catalog of large files with split status and recommendations

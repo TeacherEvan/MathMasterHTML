@@ -94,6 +94,37 @@
     }, 300);
   };
 
+  proto.awardPowerUps = function(count = 1, source = "system") {
+    const amount = Math.max(0, Number(count) || 0);
+    if (!amount) return [];
+
+    const awarded = [];
+    for (let i = 0; i < amount; i++) {
+      const type = POWER_UP_TYPES[Math.floor(Math.random() * POWER_UP_TYPES.length)];
+      this.powerUps[type]++;
+      if (type === "chainLightning" && this.powerUps[type] > 1) {
+        this.chainLightningKillCount += 2;
+      }
+      awarded.push(type);
+    }
+
+    this.updatePowerUpDisplay();
+    document.dispatchEvent(
+      new CustomEvent("powerUpsAwarded", {
+        detail: {
+          count: amount,
+          source,
+          awarded,
+          totals: { ...this.powerUps },
+        },
+      }),
+    );
+    console.log(
+      `🎁 Awarded ${amount} power-up(s) from ${source}: ${awarded.join(", ")}`,
+    );
+    return awarded;
+  };
+
   // Update power-up display on console
   proto.updatePowerUpDisplay = function() {
     console.log(

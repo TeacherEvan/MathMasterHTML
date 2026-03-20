@@ -773,8 +773,8 @@ window.addEventListener('resize', debounce(updateLayout, 250));
 
 ## Resources
 
-- **Development Guide**: `Docs/DEVELOPMENT_GUIDE.md`
-- **Architecture Guide**: `Docs/ARCHITECTURE.md`
+- **Development Guide**: `Docs/SystemDocs/DEVELOPMENT_GUIDE.md`
+- **Architecture Guide**: `Docs/SystemDocs/ARCHITECTURE.md`
 - **Main Instructions**: `.github/copilot-instructions.md`
 - **Audit Report**: `Docs/CODEBASE_AUDIT_REPORT_V2.md`
 

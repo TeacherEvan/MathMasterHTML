@@ -24,13 +24,13 @@ export function checkDocumentation(rootDir) {
   const allDocs = readdirSync(docsPath).filter((f) => f.endsWith(".md"));
   log(`📚 Documentation files: ${allDocs.length}`, "cyan");
 
-  if (existsSync(join(docsPath, "_INDEX.md"))) {
+  if (existsSync(join(docsPath, "SystemDocs", "_INDEX.md"))) {
     log("✅ _INDEX.md exists (agent-friendly)", "green");
   } else {
     log("⚠️  _INDEX.md missing (recommended for agents)", "yellow");
   }
 
-  if (existsSync(join(docsPath, "_AGENT_QUICKSTART.md"))) {
+  if (existsSync(join(docsPath, "Copilot Docs", "_AGENT_QUICKSTART.md"))) {
     log("✅ _AGENT_QUICKSTART.md exists", "green");
   } else {
     log("⚠️  _AGENT_QUICKSTART.md missing", "yellow");

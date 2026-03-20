@@ -292,3 +292,127 @@
     text-decoration: line-through;
   }
 }
+
+.worm-muffin-reward {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(40px, 5vw, 46px);
+  height: clamp(40px, 5vw, 46px);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 215, 0, 0.72);
+  background: radial-gradient(circle at 35% 30%, rgba(44, 44, 44, 0.92), rgba(6, 6, 6, 0.92) 70%);
+  box-shadow:
+    0 0 0 1px rgba(255, 215, 0, 0.24) inset,
+    0 0 14px rgba(255, 215, 0, 0.26);
+  font-size: clamp(24px, 2.9vw, 28px);
+  line-height: 1;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.35);
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 10002;
+  animation: muffin-pop-in 180ms cubic-bezier(0.22, 0.9, 0.24, 1) both;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.worm-muffin-reward.muffin-hit {
+  transform: translate(-50%, -50%) scale(1.13);
+}
+
+@keyframes muffin-pop-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+  72% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.muffin-shoutout {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  color: #ffd84d;
+  font-family: "Orbitron", monospace;
+  font-size: clamp(14px, 2.5vw, 18px);
+  font-weight: 800;
+  letter-spacing: 0.35px;
+  line-height: 1.12;
+  padding: 3px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 215, 0, 0.28);
+  background: rgba(8, 12, 16, 0.42);
+  text-shadow:
+    0 0 8px rgba(255, 215, 0, 0.72),
+    0 1px 1px rgba(0, 0, 0, 0.65);
+  white-space: nowrap;
+  z-index: 10003;
+  pointer-events: none;
+  animation: muffin-shoutout-rise 1.15s cubic-bezier(0.22, 0.78, 0.3, 1) forwards;
+}
+
+@keyframes muffin-shoutout-rise {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -76%) scale(1.02);
+  }
+}
+
+.muffin-mini-firework {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 232, 118, 0.8) 0, rgba(255, 215, 0, 0.1) 72%);
+  box-shadow: 0 0 5px rgba(255, 215, 0, 0.22);
+  pointer-events: none;
+  z-index: 10003;
+  animation: muffin-mini-firework 620ms ease-out forwards;
+  animation-delay: var(--firework-delay, 0ms);
+}
+
+@keyframes muffin-mini-firework {
+  from {
+    opacity: 0.72;
+    transform: translate(0, 0) scale(0.92);
+  }
+  to {
+    opacity: 0;
+    transform: translate(calc(var(--firework-x, 0px) * 0.56), calc(var(--firework-y, 0px) * 0.56)) scale(0.42);
+  }
+}
+
+@media (max-width: 640px) {
+  .worm-muffin-reward {
+    width: clamp(42px, 11vw, 48px);
+    height: clamp(42px, 11vw, 48px);
+  }
+
+  .muffin-shoutout {
+    font-size: clamp(13px, 3.5vw, 16px);
+    padding: 3px 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .worm-muffin-reward,
+  .muffin-shoutout,
+  .muffin-mini-firework {
+    animation: none !important;
+    transform: translate(-50%, -50%);
+  }
+}

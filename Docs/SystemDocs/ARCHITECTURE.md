@@ -637,8 +637,8 @@ See `Docs/DEVELOPMENT_GUIDE.md` for full power-up details.
 
 ## Resources
 
-- **Development Guide**: `Docs/DEVELOPMENT_GUIDE.md`
-- **Performance Guide**: `Docs/PERFORMANCE.md`
+- **Development Guide**: `Docs/SystemDocs/DEVELOPMENT_GUIDE.md`
+- **Performance Guide**: `Docs/SystemDocs/PERFORMANCE.md`
 - **Main Instructions**: `.github/copilot-instructions.md`
 - **Audit Report**: `Docs/CODEBASE_AUDIT_REPORT_V2.md`
 

@@ -108,7 +108,7 @@ test.describe("Worm behavior: aggression, targeting, and click rules", () => {
     expect(wormState?.targetSymbol).toBeTruthy();
   });
 
-  test("green worms require double click to kill", async ({ page }) => {
+test("green worms die on single tap", async ({ page }) => {
     await page.evaluate(() => {
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
@@ -119,27 +119,18 @@ test.describe("Worm behavior: aggression, targeting, and click rules", () => {
       () => document.querySelectorAll(".worm-container").length > 0,
     );
 
-    const afterFirstClick = await dispatchPointerDownOnActiveWorm(
+    const afterFirstTap = await dispatchPointerDownOnActiveWorm(
       page,
       "(worm) => !worm.isPurple",
     );
 
-    expect(afterFirstClick).toBeTruthy();
-    expect(afterFirstClick?.active).toBeTruthy();
-    expect(afterFirstClick?.escapeUntil).toBeGreaterThan(Date.now());
-
-    await page.waitForTimeout(50);
-
-    await dispatchPointerDownOnActiveWorm(
-      page,
-      `(worm) => worm.id === ${JSON.stringify(afterFirstClick.id)}`,
-    );
+    expect(afterFirstTap).toBeTruthy();
     await page.waitForFunction(
       (wormId) => {
         const worm = window.wormSystem?.worms.find((candidate) => candidate.id === wormId);
         return !worm || worm.active === false;
       },
-      afterFirstClick.id,
+      afterFirstTap.id,
       { timeout: 5000 },
     );
   });
@@ -175,4 +166,5 @@ test.describe("Worm behavior: aggression, targeting, and click rules", () => {
     expect(afterClickState.purpleCount).toBeGreaterThan(beforeClickCount);
     expect(afterClickState.totalActive).toBeGreaterThanOrEqual(2);
   });
+
 });

@@ -225,6 +225,38 @@ console.log("⏱️ ScoreTimerManager loading...");
       );
     },
 
+    addBonusPoints(points, meta = {}) {
+      if (this._zeroLocked) return 0;
+      const amount = Math.max(0, Math.round(Number(points) || 0));
+      if (!amount) return this.getDisplayedScore();
+
+      this._bankedProblemScore += amount;
+      const newScore = this.getDisplayedScore();
+
+      if (modules.setDisplayedScore) {
+        modules.setDisplayedScore(this, newScore);
+      }
+
+      const scoreDisplay = document.getElementById("score-display");
+      if (scoreDisplay) {
+        scoreDisplay.classList.remove("score-increase");
+        void scoreDisplay.offsetWidth;
+        scoreDisplay.classList.add("score-increase");
+        setTimeout(() => scoreDisplay.classList.remove("score-increase"), 450);
+      }
+
+      document.dispatchEvent(
+        new CustomEvent("scoreBonusAdded", {
+          detail: {
+            points: amount,
+            newScore,
+            meta,
+          },
+        }),
+      );
+      return newScore;
+    },
+
     getDisplayedScore() {
       if (this._zeroLocked) return 0;
       return Math.max(
