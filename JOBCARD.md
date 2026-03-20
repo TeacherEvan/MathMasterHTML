@@ -2,6 +2,7 @@
 
 ## Completed today
 
+- Verified the worm reward path by running the targeted muffin specs and the full competition lane on current main; no code changes were required for the muffin regression search.
 - Reviewed and strengthened the Phase 1 competition roadmap in `Docs/COMPETITION_PHASE1_ARCHITECTURAL_ROADMAP.md`.
 - Added a concrete execution plan in `Docs/COMPETITION_PHASE1_EXECUTION_MATRIX.md`.
 - Completed the first implementation slice of the tooling truth pass:

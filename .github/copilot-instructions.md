@@ -30,6 +30,7 @@ npm test
 # Competition QA lanes
 npm run test:competition:smoke
 npm run test:competition:matrix
+npm run test:competition:full
 ```
 
 ## ⚠️ Critical Rules
