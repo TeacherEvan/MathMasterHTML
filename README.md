@@ -327,6 +327,8 @@ MathMasterHTML/
 
 - `npm run test:competition:smoke` - seed-tagged smoke checks for the competition profile
 - `npm run test:competition:matrix` - broader seed-tagged browser/device matrix
+- `npm run test:competition:stress` - bounded back-to-back rapid interaction stress lane (critical-path stress)
+- `npm run test:competition:full` - full critical-path + stress suite across the competition browser/device matrix
 
 **Lock Animation Testing**:
 
