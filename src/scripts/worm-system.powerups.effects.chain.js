@@ -18,9 +18,10 @@
     console.log(`⚡ Will kill ${killCount} worms in proximity`);
 
     // Set up one-time click listener on worms
-    const handleWormClickForLightning = (e, worm) => {
-      e.stopPropagation();
-      console.log(`⚡ Chain Lightning targeting worm ${worm.id}!`);
+      const handleWormClickForLightning = (e, worm) => {
+        e.preventDefault?.();
+        e.stopPropagation();
+        console.log(`⚡ Chain Lightning targeting worm ${worm.id}!`);
 
       // Find closest worms
       const sortedWorms = this.worms
@@ -82,7 +83,7 @@
       // Remove temporary listeners
       this.worms.forEach((w) => {
         if (w.element && w.tempLightningHandler) {
-          w.element.removeEventListener("click", w.tempLightningHandler);
+          w.element.removeEventListener("pointerdown", w.tempLightningHandler);
           delete w.tempLightningHandler;
         }
       });
@@ -95,7 +96,7 @@
     this.worms.forEach((w) => {
       if (w.active && w.element) {
         w.tempLightningHandler = (e) => handleWormClickForLightning(e, w);
-        w.element.addEventListener("click", w.tempLightningHandler);
+        w.element.addEventListener("pointerdown", w.tempLightningHandler);
       }
     });
 

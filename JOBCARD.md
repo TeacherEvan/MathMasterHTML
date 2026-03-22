@@ -1,4 +1,19 @@
-# JOBCARD (2026-03-09)
+# JOBCARD
+
+## Latest update (2026-03-22)
+
+- Investigated the failed local Playwright HTML report and found the visible `webkit` failures were not reproducing as current app assertion failures once the app server was reliably available.
+- Hardened Playwright startup by changing `package.json` `start` from `npx http-server -p 8000 -c-1 --cors` to `http-server -p 8000 -c-1 --cors`.
+- Revalidated the affected lane with `npx playwright test tests/gameplay-features.spec.js --project=webkit` (22/22 passed).
+- Re-ran `npm run verify` successfully after the startup-script change.
+- Committed and pushed the startup fix on `main` as `f69fa01` (`Harden Playwright web server startup`).
+- Clarification from git review: the pushed fix only included `package.json`. The working tree still contained separate unstaged local edits in:
+  - `src/scripts/score-timer-manager.js`
+  - `src/scripts/worm-powerups.effects.chain.js`
+  - `src/scripts/worm-system.powerups.effects.chain.js`
+  - `worm-reward-check.png`
+
+## Earlier notes (2026-03-09)
 
 ## Completed today
 

@@ -106,7 +106,6 @@ console.log("⏱️ ScoreTimerManager loading...");
       this._bankedProblemScore = 0;
       this._currentStepScore = this._cfg.initialScore;
       this._zeroLocked = false;
-      this._paused = false;
       if (modules.setDisplayedScore) {
         modules.setDisplayedScore(this, this.getDisplayedScore());
       }
