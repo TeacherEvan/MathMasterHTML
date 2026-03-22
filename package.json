@@ -4,7 +4,7 @@
   "description": "Educational math game with Matrix-themed UI where players solve algebra equations by clicking falling symbols",
   "type": "module",
   "scripts": {
-    "start": "npx http-server -p 8000 -c-1 --cors",
+    "start": "http-server -p 8000 -c-1 --cors",
     "lint": "eslint src/scripts lock src/tools/middle-screen",
     "lint:fix": "eslint src/scripts lock src/tools/middle-screen --fix",
     "verify": "node src/tools/scripts/verify.js",
