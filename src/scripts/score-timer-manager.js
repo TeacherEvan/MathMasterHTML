@@ -2,6 +2,11 @@
 console.log("⏱️ ScoreTimerManager loading...");
 
 (function() {
+  const GameEvents = window.GameEvents || {
+    PROBLEM_COMPLETED: "problemCompleted",
+    PROBLEM_LINE_COMPLETED: "problemLineCompleted",
+  };
+
   const DEFAULTS = {
     stepDurationSeconds: 600,
     initialScore: 10000,
@@ -29,8 +34,11 @@ console.log("⏱️ ScoreTimerManager loading...");
 
     // Banked total for the current problem ("level" == entire problem)
     _bankedProblemScore: 0,
+    _queuedBonusPoints: [],
+    _problemStarted: false,
     // Live step score counts down from 1000 -> 0 each step
     _currentStepScore: 10000,
+    _manualPause: false,
     _paused: false,
     _gameStarted: false,
     _zeroLocked: false,
@@ -63,7 +71,10 @@ console.log("⏱️ ScoreTimerManager loading...");
 
       this._stepDurationMs = this._cfg.stepDurationSeconds * 1000;
       this._bankedProblemScore = 0;
+      this._queuedBonusPoints = [];
+      this._problemStarted = false;
       this._currentStepScore = this._cfg.initialScore;
+      this._manualPause = false;
       this._scoreAtStepStart = this._cfg.initialScore;
 
       this._timerValueEl = document.getElementById("timer-value");
@@ -84,11 +95,11 @@ console.log("⏱️ ScoreTimerManager loading...");
         );
       }
 
-      document.addEventListener("problemLineCompleted", (e) => {
+      document.addEventListener(GameEvents.PROBLEM_LINE_COMPLETED, (e) => {
         this.completeStep(e?.detail);
       });
 
-      document.addEventListener("problemCompleted", () => {
+      document.addEventListener(GameEvents.PROBLEM_COMPLETED, () => {
         this.onProblemCompleted(level);
       });
 
@@ -105,24 +116,34 @@ console.log("⏱️ ScoreTimerManager loading...");
     onProblemStarted() {
       this._bankedProblemScore = 0;
       this._currentStepScore = this._cfg.initialScore;
+      this._scoreAtStepStart = this._cfg.initialScore;
+      this._paused = this._manualPause;
       this._zeroLocked = false;
+      this._problemStarted = true;
+
+      if (this._queuedBonusPoints.length > 0) {
+        const queuedBonusPoints = this._queuedBonusPoints.splice(0);
+        queuedBonusPoints.forEach(({ points, meta }) => {
+          this._applyBonusPoints(points, meta);
+        });
+      }
+
       if (modules.setDisplayedScore) {
         modules.setDisplayedScore(this, this.getDisplayedScore());
+      }
+      if (modules.setDisplayedTime) {
+        modules.setDisplayedTime(this, this._cfg.stepDurationSeconds);
+      }
+      if (modules.applyPhaseStyles) {
+        modules.applyPhaseStyles(
+          this._timerDisplayEl,
+          this._cfg.stepDurationSeconds,
+          this._cfg,
+        );
       }
 
       if (this._gameStarted) {
         this.startStep();
-      } else {
-        if (modules.setDisplayedTime) {
-          modules.setDisplayedTime(this, this._cfg.stepDurationSeconds);
-        }
-        if (modules.applyPhaseStyles) {
-          modules.applyPhaseStyles(
-            this._timerDisplayEl,
-            this._cfg.stepDurationSeconds,
-            this._cfg,
-          );
-        }
       }
     },
 
@@ -136,6 +157,7 @@ console.log("⏱️ ScoreTimerManager loading...");
 
     onProblemCompleted(levelKey) {
       this._paused = true;
+      this._problemStarted = false;
       if (modules.clearIntervalId) {
         modules.clearIntervalId(this);
       }
@@ -164,12 +186,14 @@ console.log("⏱️ ScoreTimerManager loading...");
     },
 
     pause() {
+      this._manualPause = true;
       if (modules.pause) {
         modules.pause(this);
       }
     },
 
     resume() {
+      this._manualPause = false;
       if (modules.resume) {
         modules.resume(this);
       }
@@ -228,6 +252,18 @@ console.log("⏱️ ScoreTimerManager loading...");
       if (this._zeroLocked) return 0;
       const amount = Math.max(0, Math.round(Number(points) || 0));
       if (!amount) return this.getDisplayedScore();
+
+      if (!this._problemStarted) {
+        this._queuedBonusPoints.push({ points: amount, meta });
+        return this.getDisplayedScore();
+      }
+
+      return this._applyBonusPoints(amount, meta);
+    },
+
+    _applyBonusPoints(points, meta = {}) {
+      const amount = Math.max(0, Math.round(Number(points) || 0));
+      if (!amount || this._zeroLocked) return this.getDisplayedScore();
 
       this._bankedProblemScore += amount;
       const newScore = this.getDisplayedScore();

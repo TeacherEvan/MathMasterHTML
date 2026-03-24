@@ -10,6 +10,9 @@ declare global {
   const WormSpawnManager: any;
 
   interface Window {
+    DomSanitizer?: {
+      escapeHTML: (value: unknown) => string;
+    };
     WormFactory?: any;
     WormMovement?: any;
     WormSpawnManager?: any;
@@ -21,6 +24,7 @@ declare global {
     WormPathfinder?: any;
     WormObstacleMap?: any;
     WormEvasion?: any;
+    GameEvents?: Record<string, string>;
     wormSystem?: any;
     consoleManager?: any;
     uiBoundaryManager?: any;

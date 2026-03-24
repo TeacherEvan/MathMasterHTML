@@ -72,7 +72,10 @@ class UIBoundaryManager {
     }
 
     // Listen for display resolution changes
-    document.addEventListener("displayResolutionChanged", () => {
+    const GameEvents = window.GameEvents || {
+      DISPLAY_RESOLUTION_CHANGED: "displayResolutionChanged",
+    };
+    document.addEventListener(GameEvents.DISPLAY_RESOLUTION_CHANGED, () => {
       this._onResize();
     });
 

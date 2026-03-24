@@ -6,6 +6,9 @@
   }
 
   const proto = window.WormSystem.prototype;
+  const GameEvents = window.GameEvents || {
+    ROW_RESET_BY_WORM: "rowResetByWorm",
+  };
 
   proto.stealSymbol = function(worm) {
     // ERROR HANDLING: Validate worm parameter
@@ -26,7 +29,7 @@
     if (!wormInPanelB) {
       console.log(`🐛 Worm ${worm.id} outside Panel B - cannot steal symbols`);
       // Continue roaming
-      worm.roamingEndTime = Date.now() + 5000;
+      worm.roamingEndTime = Date.now() + this.ROAM_RESUME_DURATION;
       worm.isRushingToTarget = false;
       return;
     }
@@ -63,7 +66,7 @@
     if (availableSymbols.length === 0) {
       console.log("🐛 No symbols available to steal");
       // Continue roaming
-      worm.roamingEndTime = Date.now() + 5000;
+      worm.roamingEndTime = Date.now() + this.ROAM_RESUME_DURATION;
       worm.isRushingToTarget = false;
       return;
     }
@@ -88,7 +91,7 @@
     // ERROR HANDLING: Verify targetSymbol exists and has required properties
     if (!targetSymbol || !targetSymbol.textContent) {
       Logger.warn("⚠️", `Worm ${worm.id} could not find valid target symbol`);
-      worm.roamingEndTime = Date.now() + 5000;
+      worm.roamingEndTime = Date.now() + this.ROAM_RESUME_DURATION;
       worm.isRushingToTarget = false;
       return;
     }
@@ -138,7 +141,7 @@
         );
         this.invalidateSymbolCache();
         document.dispatchEvent(
-          new CustomEvent("rowResetByWorm", {
+          new CustomEvent(GameEvents.ROW_RESET_BY_WORM, {
             detail: { stepIndex: parseInt(stepIndex, 10) },
           }),
         );
@@ -146,10 +149,11 @@
     }
 
     // ACTIVATE LSD FLICKER when stealing symbol!
+    const flickerBoostPercent = Math.round((this.FLICKER_SPEED_BOOST - 1) * 100);
     console.log(
       `🌈 Worm ${worm.id} stole ${
         wasBlueSymbol ? "blue" : "red"
-      } symbol - ACTIVATING LSD FLICKER with 20% SPEED BOOST!`,
+      } symbol - ACTIVATING LSD FLICKER with ${flickerBoostPercent}% SPEED BOOST!`,
     );
     worm.isFlickering = true;
     worm.element.classList.add("flickering");

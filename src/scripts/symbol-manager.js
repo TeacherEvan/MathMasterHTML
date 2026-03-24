@@ -3,6 +3,10 @@
 /**
  * Symbol Manager - Centralized symbol operations
  */
+const GameEvents = window.GameEvents || {
+  SYMBOL_REVEALED: "symbolRevealed",
+};
+
 const SymbolManager = {
   _solutionContainer: null,
   _currentStepIndex: 0,
@@ -99,7 +103,7 @@ const SymbolManager = {
 
         // Dispatch event
         document.dispatchEvent(
-          new CustomEvent("symbolRevealed", {
+          new CustomEvent(GameEvents.SYMBOL_REVEALED, {
             detail: { symbol: targetSymbol, element: span },
           })
         );

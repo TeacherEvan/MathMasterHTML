@@ -3,6 +3,9 @@ console.log("🎯 SymbolRain helpers: interactions loading...");
 
 (function attachSymbolRainInteractionHelpers() {
   const helpers = (window.SymbolRainHelpers = window.SymbolRainHelpers || {});
+  const GameEvents = window.GameEvents || {
+    SYMBOL_CLICKED: "symbolClicked",
+  };
 
   helpers.handleSymbolClick = function handleSymbolClick(
     { activeFallingSymbols, symbolPool, activeFaceReveals },
@@ -22,7 +25,9 @@ console.log("🎯 SymbolRain helpers: interactions loading...");
     symbolElement.classList.add("clicked");
 
     document.dispatchEvent(
-      new CustomEvent("symbolClicked", { detail: { symbol: clickedSymbol } }),
+      new CustomEvent(GameEvents.SYMBOL_CLICKED, {
+        detail: { symbol: clickedSymbol },
+      }),
     );
 
     setTimeout(() => {

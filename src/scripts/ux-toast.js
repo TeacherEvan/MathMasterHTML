@@ -37,9 +37,12 @@
       toast.setAttribute("aria-live", "polite");
 
       const icon = this.getIconForType(type);
+      const safeMessage = window.DomSanitizer
+        ? window.DomSanitizer.escapeHTML(message)
+        : this.escapeHtml(message);
       toast.innerHTML = `
             <span class="toast-icon">${icon}</span>
-            <span class="toast-message">${this.escapeHtml(message)}</span>
+            <span class="toast-message">${safeMessage}</span>
         `;
 
       toast.addEventListener("click", () => this.dismiss(toast));

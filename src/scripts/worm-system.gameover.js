@@ -118,15 +118,37 @@
       modal = document.createElement("div");
       modal.id = "game-over-modal";
       modal.className = "game-over-modal";
-      modal.innerHTML = `
-                <div class="game-over-content">
-                    <h1 class="game-over-title">💀 GAME OVER! 💀</h1>
-                    <p class="game-over-message">All symbols have been stolen by worms!</p>
-                    <p class="game-over-penalty">Penalty: Lost 1 console symbol</p>
-                    <button class="game-over-button" onclick="location.reload()">Try Again</button>
-                    <button class="game-over-button secondary" onclick="window.location.href='level-select.html'">Back to Levels</button>
-                </div>
-            `;
+      const content = document.createElement("div");
+      content.className = "game-over-content";
+
+      const title = document.createElement("h1");
+      title.className = "game-over-title";
+      title.textContent = "💀 GAME OVER! 💀";
+
+      const message = document.createElement("p");
+      message.className = "game-over-message";
+      message.textContent = "All symbols have been stolen by worms!";
+
+      const penalty = document.createElement("p");
+      penalty.className = "game-over-penalty";
+      penalty.textContent = "Penalty: Lost 1 console symbol";
+
+      const retryButton = document.createElement("button");
+      retryButton.className = "game-over-button";
+      retryButton.textContent = "Try Again";
+      retryButton.addEventListener("click", () => {
+        window.location.reload();
+      });
+
+      const backButton = document.createElement("button");
+      backButton.className = "game-over-button secondary";
+      backButton.textContent = "Back to Levels";
+      backButton.addEventListener("click", () => {
+        window.location.href = "level-select.html";
+      });
+
+      content.append(title, message, penalty, retryButton, backButton);
+      modal.appendChild(content);
       document.body.appendChild(modal);
       this.cachedGameOverModal = modal; // Cache the newly created modal
     }

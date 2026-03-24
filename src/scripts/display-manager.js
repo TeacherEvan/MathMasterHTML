@@ -3,6 +3,9 @@ console.log("🖥️ Loading Display Manager...");
 
 class DisplayManager {
   constructor() {
+    this.gameEvents = window.GameEvents || {
+      DISPLAY_RESOLUTION_CHANGED: "displayResolutionChanged",
+    };
     this.currentResolution = null;
     this.resolutions = {
       "4k": { width: 3840, minWidth: 2560, scale: 1.0, fontSize: "24px" },
@@ -112,7 +115,7 @@ class DisplayManager {
 
     // Dispatch event for other components
     document.dispatchEvent(
-      new CustomEvent("displayResolutionChanged", {
+      new CustomEvent(this.gameEvents.DISPLAY_RESOLUTION_CHANGED, {
         detail: detected,
       }),
     );

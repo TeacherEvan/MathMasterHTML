@@ -2,6 +2,10 @@
 
 function initSymbolRain() {
   try {
+    const GameEvents = window.GameEvents || {
+      DISPLAY_RESOLUTION_CHANGED: "displayResolutionChanged",
+      PROBLEM_COMPLETED: "problemCompleted",
+    };
     const symbolRainContainer = document.getElementById(
       "symbol-rain-container",
     );
@@ -94,7 +98,7 @@ function initSymbolRain() {
     SymbolRainAnimation.startSpeedController(state);
     SymbolRainSpawn.startGuaranteedSpawnController(state);
 
-    document.addEventListener("problemCompleted", () => {
+    document.addEventListener(GameEvents.PROBLEM_COMPLETED, () => {
       SymbolRainAnimation.resetSpeed(state);
     });
 
@@ -111,7 +115,7 @@ function initSymbolRain() {
 
     window.addEventListener("resize", debouncedResize);
 
-    document.addEventListener("displayResolutionChanged", (event) => {
+    document.addEventListener(GameEvents.DISPLAY_RESOLUTION_CHANGED, (event) => {
       state.isMobileMode = event.detail.name === "mobile";
     });
 

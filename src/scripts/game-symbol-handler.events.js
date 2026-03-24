@@ -15,6 +15,12 @@ console.log("🔤 Game symbol handler events loading...");
     revealHelpSymbol,
     getCurrentStepIndex,
   } = window.GameSymbolHandlerCore;
+  const GameEvents = window.GameEvents || {
+    CONSOLE_SYMBOL_ADDED: "consoleSymbolAdded",
+    SYMBOL_CLICKED: "symbolClicked",
+    WORM_SYMBOL_CORRECT: "wormSymbolCorrect",
+    WORM_SYMBOL_SAVED: "wormSymbolSaved",
+  };
 
   const getCachedStepSymbols = window.GameProblemManager?.getCachedStepSymbols;
   let pendingHelpReveal = false;
@@ -37,7 +43,7 @@ console.log("🔤 Game symbol handler events loading...");
     });
   }
 
-  document.addEventListener("symbolClicked", (e) => {
+  document.addEventListener(GameEvents.SYMBOL_CLICKED, (e) => {
     const clicked = e.detail.symbol;
     const currentSolutionStepIndex = getCurrentStepIndex();
 
@@ -65,7 +71,7 @@ console.log("🔤 Game symbol handler events loading...");
     }
   });
 
-  document.addEventListener("wormSymbolCorrect", (e) => {
+  document.addEventListener(GameEvents.WORM_SYMBOL_CORRECT, (e) => {
     const symbol = e.detail.symbol;
     const currentSolutionStepIndex = getCurrentStepIndex();
 
@@ -81,7 +87,7 @@ console.log("🔤 Game symbol handler events loading...");
     }
   });
 
-  document.addEventListener("wormSymbolSaved", (e) => {
+  document.addEventListener(GameEvents.WORM_SYMBOL_SAVED, (e) => {
     const { symbol: _symbol, wormId: _wormId } = e.detail;
 
     document.body.style.background =
@@ -91,7 +97,7 @@ console.log("🔤 Game symbol handler events loading...");
     }, 500);
   });
 
-  document.addEventListener("consoleSymbolAdded", () => {
+  document.addEventListener(GameEvents.CONSOLE_SYMBOL_ADDED, () => {
     setTimeout(() => {
       window.GameProblemManager?.nextProblem?.();
     }, 300);

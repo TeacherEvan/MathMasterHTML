@@ -89,7 +89,10 @@ console.log("🎯 GameEffects loading...");
   function showVictoryBanner(lineNumber) {
     const banner = document.createElement("div");
     banner.className = "victory-banner";
-    banner.innerHTML = `<span class="victory-text">LINE ${lineNumber} COMPLETE!</span>`;
+    const text = document.createElement("span");
+    text.className = "victory-text";
+    text.textContent = `LINE ${lineNumber} COMPLETE!`;
+    banner.appendChild(text);
     banner.style.cssText = `
       position: fixed;
       top: 50%;

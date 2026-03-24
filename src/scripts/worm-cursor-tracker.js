@@ -3,6 +3,10 @@ console.log("🧭 Worm Cursor Tracker Loading...");
 
 class WormCursorTracker {
   constructor(config = {}) {
+    this.gameEvents = window.GameEvents || {
+      WORM_CURSOR_TAP: "wormCursorTap",
+      WORM_CURSOR_UPDATE: "wormCursorUpdate",
+    };
     this.throttleMs = config.throttleMs ?? 16;
     this.emitTapEvents = config.emitTapEvents ?? true;
 
@@ -42,7 +46,7 @@ class WormCursorTracker {
 
   _emitUpdate() {
     document.dispatchEvent(
-      new CustomEvent("wormCursorUpdate", {
+      new CustomEvent(this.gameEvents.WORM_CURSOR_UPDATE, {
         detail: { ...this.cursorState },
       }),
     );
@@ -52,7 +56,7 @@ class WormCursorTracker {
     if (!this.emitTapEvents) return;
 
     document.dispatchEvent(
-      new CustomEvent("wormCursorTap", {
+      new CustomEvent(this.gameEvents.WORM_CURSOR_TAP, {
         detail: { ...this.cursorState },
       }),
     );

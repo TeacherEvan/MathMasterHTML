@@ -3,14 +3,19 @@ console.log("🔒 LockManager events loading...");
 
 (function attachLockManagerEvents() {
   const events = (window.LockManagerEvents = window.LockManagerEvents || {});
+  const GameEvents = window.GameEvents || {
+    FIRST_LINE_SOLVED: "first-line-solved",
+    PROBLEM_LINE_COMPLETED: "problemLineCompleted",
+    STEP_COMPLETED: "stepCompleted",
+  };
 
   events.bindCoreEvents = function bindCoreEvents(lockManager) {
-    document.addEventListener("first-line-solved", () => {
+    document.addEventListener(GameEvents.FIRST_LINE_SOLVED, () => {
       console.log("🔒 LockManager received first-line-solved event");
       lockManager.startLockAnimation();
     });
 
-    document.addEventListener("stepCompleted", (e) => {
+    document.addEventListener(GameEvents.STEP_COMPLETED, (e) => {
       console.log("🔒 LockManager received stepCompleted event:", e.detail);
       if (lockManager.lockAnimationActive) {
         const targetLevel = e.detail.stepIndex + 1;
@@ -20,7 +25,7 @@ console.log("🔒 LockManager events loading...");
       }
     });
 
-    document.addEventListener("problemLineCompleted", (e) => {
+    document.addEventListener(GameEvents.PROBLEM_LINE_COMPLETED, (e) => {
       console.log(
         "🔒 LockManager received problemLineCompleted event",
         e.detail ? e.detail : "(no details)",

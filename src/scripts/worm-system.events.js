@@ -6,6 +6,15 @@
   }
 
   const proto = window.WormSystem.prototype;
+  const GameEvents = window.GameEvents || {
+    PROBLEM_COMPLETED: "problemCompleted",
+    PROBLEM_LINE_COMPLETED: "problemLineCompleted",
+    PURPLE_WORM_TRIGGERED: "purpleWormTriggered",
+    SYMBOL_CLICKED: "symbolClicked",
+    SYMBOL_REVEALED: "symbolRevealed",
+    WORM_CURSOR_TAP: "wormCursorTap",
+    WORM_CURSOR_UPDATE: "wormCursorUpdate",
+  };
 
   // PERFORMANCE: Setup event listeners once (called from initialize)
   proto.setupEventListeners = function() {
@@ -17,7 +26,7 @@
     console.log("🎧 Setting up WormSystem event listeners...");
 
     // Listen for the custom event dispatched by game.js
-    document.addEventListener("problemLineCompleted", (event) => {
+    document.addEventListener(GameEvents.PROBLEM_LINE_COMPLETED, (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       console.log(
         "🐛 Worm System received problemLineCompleted event:",
@@ -45,7 +54,7 @@
     });
 
     // CONSOLIDATED: Listen for problem completion (reset row counter + cleanup)
-    document.addEventListener("problemCompleted", (event) => {
+    document.addEventListener(GameEvents.PROBLEM_COMPLETED, (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       console.log(
         "🎉 Problem completed! Resetting row counter and cleaning up.",
@@ -64,7 +73,7 @@
     });
 
     // PURPLE WORM: Listen for purple worm trigger (3 wrong answers)
-    document.addEventListener("purpleWormTriggered", (event) => {
+    document.addEventListener(GameEvents.PURPLE_WORM_TRIGGERED, (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       console.log(
         "🟣 Purple Worm System received purpleWormTriggered event:",
@@ -74,20 +83,20 @@
     });
 
     // Listen for symbol clicks in rain display to check if worm's target was clicked
-    document.addEventListener("symbolClicked", (event) => {
+    document.addEventListener(GameEvents.SYMBOL_CLICKED, (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       this.checkWormTargetClickForExplosion(detail.symbol);
     });
 
     // Listen for symbol reveals to trigger worm targeting
-    document.addEventListener("symbolRevealed", (event) => {
+    document.addEventListener(GameEvents.SYMBOL_REVEALED, (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       console.log("🎯 Symbol revealed event:", detail);
       this.notifyWormsOfRedSymbol(detail.symbol);
     });
 
     // Cursor tracking for evasion (event-driven)
-    document.addEventListener("wormCursorUpdate", (event) => {
+    document.addEventListener(GameEvents.WORM_CURSOR_UPDATE, (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       this.cursorState = detail;
 
@@ -105,7 +114,7 @@
         }
       }
     });
-    document.addEventListener("wormCursorTap", (event) => {
+    document.addEventListener(GameEvents.WORM_CURSOR_TAP, (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       this.cursorState = detail;
     });

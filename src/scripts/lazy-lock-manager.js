@@ -70,7 +70,10 @@ class LazyLockManager {
       }
 
       // Fallback to basic display
-      container.innerHTML = `<div class="lock-error">Lock Level ${level}</div>`;
+      const safeLevelLabel = window.DomSanitizer
+        ? window.DomSanitizer.escapeHTML(`Lock Level ${level}`)
+        : `Lock Level ${level}`;
+      container.innerHTML = `<div class="lock-error">${safeLevelLabel}</div>`;
     }
   }
 

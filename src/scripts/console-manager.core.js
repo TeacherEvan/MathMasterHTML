@@ -66,8 +66,11 @@ console.log("🎮 Console Manager core loading");
       this.setupConsoleButtons();
       this.setupModalInteractions();
       this.setupKeyboardShortcuts();
+      const GameEvents = window.GameEvents || {
+        PROBLEM_COMPLETED: "problemCompleted",
+      };
 
-      document.addEventListener("problemCompleted", () => {
+      document.addEventListener(GameEvents.PROBLEM_COMPLETED, () => {
         console.log("🎉 Problem completed! Showing symbol selection modal");
         this.incrementProblemsCompleted();
         this.showSymbolSelectionModal();

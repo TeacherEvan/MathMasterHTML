@@ -7,6 +7,10 @@ console.log("📚 Game problem manager module loading...");
     return;
   }
 
+  const GameEvents = window.GameEvents || {
+    PROBLEM_COMPLETED: "problemCompleted",
+  };
+
   const {
     problemContainer,
     solutionContainer,
@@ -187,7 +191,7 @@ console.log("📚 Game problem manager module loading...");
         solutionContainer.style.animation = "";
 
         // Dispatch problemCompleted event to trigger console modal
-        document.dispatchEvent(new CustomEvent("problemCompleted"));
+        document.dispatchEvent(new CustomEvent(GameEvents.PROBLEM_COMPLETED));
 
         // Wait for console symbol to be added before moving to next problem
         // The consoleSymbolAdded event will trigger nextProblem()

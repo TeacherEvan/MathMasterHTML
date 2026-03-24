@@ -13,6 +13,12 @@ console.log("🔤 Game symbol handler core loading...");
     invalidateStepCache,
     checkProblemCompletion,
   } = window.GameProblemManager;
+  const GameEvents = window.GameEvents || {
+    FIRST_LINE_SOLVED: "first-line-solved",
+    PROBLEM_LINE_COMPLETED: "problemLineCompleted",
+    PURPLE_WORM_TRIGGERED: "purpleWormTriggered",
+    SYMBOL_REVEALED: "symbolRevealed",
+  };
 
   let totalCorrectAnswers = 0;
   let consecutiveWrongAnswers = 0;
@@ -20,7 +26,7 @@ console.log("🔤 Game symbol handler core loading...");
 
   function notifySymbolRevealed(targetSymbol, span) {
     document.dispatchEvent(
-      new CustomEvent("symbolRevealed", {
+      new CustomEvent(GameEvents.SYMBOL_REVEALED, {
         detail: { symbol: targetSymbol, element: span },
       }),
     );
@@ -56,7 +62,7 @@ console.log("🔤 Game symbol handler core loading...");
     }
 
     if (totalCorrectAnswers === 1) {
-      document.dispatchEvent(new Event("first-line-solved"));
+      document.dispatchEvent(new Event(GameEvents.FIRST_LINE_SOLVED));
     }
 
     const intensity = Math.min(0.3 * comboFeedback.multiplier, 0.5);
@@ -93,7 +99,7 @@ console.log("🔤 Game symbol handler core loading...");
 
     if (consecutiveWrongAnswers >= PURPLE_WORM_THRESHOLD) {
       document.dispatchEvent(
-        new CustomEvent("purpleWormTriggered", {
+        new CustomEvent(GameEvents.PURPLE_WORM_TRIGGERED, {
           detail: { wrongAnswerCount: consecutiveWrongAnswers },
         }),
       );
@@ -123,7 +129,7 @@ console.log("🔤 Game symbol handler core loading...");
       );
 
       document.dispatchEvent(
-        new CustomEvent("problemLineCompleted", {
+        new CustomEvent(GameEvents.PROBLEM_LINE_COMPLETED, {
           detail: {
             lineNumber: currentSolutionStepIndex + 1,
             lineText: currentProblem.steps[currentSolutionStepIndex],

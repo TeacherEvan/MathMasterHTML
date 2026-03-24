@@ -8,6 +8,9 @@ console.log("🎮 Console Manager events loading");
   }
 
   const proto = window.ConsoleManager.prototype;
+  const GameEvents = window.GameEvents || {
+    SYMBOL_CLICKED: "symbolClicked",
+  };
 
   proto.setupConsoleButtons = function() {
     const slots = this.consoleElement.querySelectorAll(".console-slot");
@@ -25,7 +28,7 @@ console.log("🎮 Console Manager events loading");
           setTimeout(() => slot.classList.remove("clicked"), 600);
 
           document.dispatchEvent(
-            new CustomEvent("symbolClicked", {
+            new CustomEvent(GameEvents.SYMBOL_CLICKED, {
               detail: { symbol: symbol },
             }),
           );
