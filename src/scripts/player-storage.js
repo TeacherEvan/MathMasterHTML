@@ -12,9 +12,11 @@ console.log("💾 PlayerStorage loading...");
 
   const {
     PROFILE_VERSION,
+    RECENT_HISTORY_LIMIT,
     createEmptyLevelStats,
     createDefaultProfile,
     normalizeLevelStats,
+    normalizeRecentHistory,
     buildOverallSummary,
     migrateProfile,
   } = helpers;
@@ -77,6 +79,7 @@ console.log("💾 PlayerStorage loading...");
       return {
         profile,
         level: this.getLevelStats(levelKey),
+        recentHistory: normalizeRecentHistory(profile.recentHistory),
         overall:
           profile.overall && typeof profile.overall === "object"
             ? profile.overall
@@ -98,6 +101,14 @@ console.log("💾 PlayerStorage loading...");
       level.lastPlayed = Date.now();
 
       profile.levels[levelKey] = level;
+      profile.recentHistory = [
+        {
+          levelKey,
+          score: safeScore,
+          completedAt: level.lastPlayed,
+        },
+        ...normalizeRecentHistory(profile.recentHistory),
+      ].slice(0, RECENT_HISTORY_LIMIT);
       profile.overall = buildOverallSummary(profile.levels);
       profile.updatedAt = Date.now();
       this._write(profile);

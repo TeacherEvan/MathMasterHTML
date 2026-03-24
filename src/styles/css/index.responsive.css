@@ -23,4 +23,17 @@
   .logo-circle::after {
     font-size: 2rem;
   }
+
+  .scoreboard-summary-grid,
+  .scoreboard-level-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scoreboard-modal {
+    padding: 16px;
+  }
+
+  .scoreboard-modal-content {
+    padding: 20px;
+  }
 }

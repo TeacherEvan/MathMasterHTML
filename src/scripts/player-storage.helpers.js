@@ -2,8 +2,9 @@
 console.log("💾 PlayerStorage helpers loading...");
 
 (function() {
-  const PROFILE_VERSION = 2;
+  const PROFILE_VERSION = 3;
   const LEVEL_KEYS = ["beginner", "warrior", "master"];
+  const RECENT_HISTORY_LIMIT = 25;
 
   function createEmptyLevelStats() {
     return {
@@ -20,6 +21,7 @@ console.log("💾 PlayerStorage helpers loading...");
       version: PROFILE_VERSION,
       name: null,
       levels: {},
+      recentHistory: [],
       overall: {
         totalScore: 0,
         problemsCompleted: 0,
@@ -27,6 +29,40 @@ console.log("💾 PlayerStorage helpers loading...");
       },
       updatedAt: Date.now(),
     };
+  }
+
+  function normalizeRecentHistoryEntry(entry) {
+    const safeEntry = entry && typeof entry === "object" ? entry : {};
+    const levelKey =
+      typeof safeEntry.levelKey === "string" && safeEntry.levelKey.trim().length > 0
+        ? safeEntry.levelKey.trim()
+        : null;
+    const completedAt =
+      typeof safeEntry.completedAt === "number" && safeEntry.completedAt > 0
+        ? safeEntry.completedAt
+        : null;
+
+    if (!levelKey || completedAt === null) {
+      return null;
+    }
+
+    return {
+      levelKey,
+      score: Math.max(0, Number(safeEntry.score) || 0),
+      completedAt,
+    };
+  }
+
+  function normalizeRecentHistory(historyEntries) {
+    if (!Array.isArray(historyEntries)) {
+      return [];
+    }
+
+    return historyEntries
+      .map((entry) => normalizeRecentHistoryEntry(entry))
+      .filter(Boolean)
+      .sort((a, b) => b.completedAt - a.completedAt)
+      .slice(0, RECENT_HISTORY_LIMIT);
   }
 
   function normalizeLevelStats(levelStats) {
@@ -93,6 +129,7 @@ console.log("💾 PlayerStorage helpers loading...");
       }
     });
 
+    nextProfile.recentHistory = normalizeRecentHistory(sourceProfile.recentHistory);
     nextProfile.overall = buildOverallSummary(nextProfile.levels);
     nextProfile.updatedAt =
       typeof sourceProfile.updatedAt === "number"
@@ -104,9 +141,11 @@ console.log("💾 PlayerStorage helpers loading...");
 
   window.PlayerStorageHelpers = {
     PROFILE_VERSION,
+    RECENT_HISTORY_LIMIT,
     createEmptyLevelStats,
     createDefaultProfile,
     normalizeLevelStats,
+    normalizeRecentHistory,
     buildOverallSummary,
     migrateProfile,
   };

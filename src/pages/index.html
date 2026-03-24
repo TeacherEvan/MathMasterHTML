@@ -137,8 +137,39 @@
             <div class="quote-author">- Marcus Aurelius</div>
         </div>
 
+        <div class="button-container" data-no-nav="true">
+            <button id="scoreboard-button" class="action-button level-button scoreboard-button" type="button" data-no-nav="true" aria-haspopup="dialog" aria-controls="scoreboard-modal">View Scoreboard</button>
+        </div>
+
         <div class="continue-text">Click to continue</div>
         <div class="creator-credit">Created by Teacher Evan</div>
+    </div>
+
+    <div id="scoreboard-modal" class="scoreboard-modal" hidden data-no-nav="true" aria-hidden="true">
+        <div class="scoreboard-modal-content" role="dialog" aria-modal="true" aria-labelledby="scoreboard-title" data-no-nav="true">
+            <div class="scoreboard-modal-header" data-no-nav="true">
+                <div data-no-nav="true">
+                    <p class="scoreboard-kicker" data-no-nav="true">Local scoreboard cache</p>
+                    <h2 id="scoreboard-title" data-no-nav="true">Welcome back, <span id="scoreboard-player-name" data-no-nav="true">Player</span></h2>
+                </div>
+                <button id="scoreboard-close-button" class="scoreboard-close-button" type="button" data-no-nav="true" aria-label="Close scoreboard">✕</button>
+            </div>
+
+            <section class="scoreboard-section" data-no-nav="true">
+                <h3 data-no-nav="true">Overall progress</h3>
+                <dl id="scoreboard-overall-summary" class="scoreboard-summary-grid" data-no-nav="true"></dl>
+            </section>
+
+            <section class="scoreboard-section" data-no-nav="true">
+                <h3 data-no-nav="true">Level breakdown</h3>
+                <div id="scoreboard-level-stats" class="scoreboard-level-grid" data-no-nav="true"></div>
+            </section>
+
+            <section class="scoreboard-section" data-no-nav="true">
+                <h3 data-no-nav="true">Recent scores</h3>
+                <ul id="scoreboard-history-list" class="scoreboard-history-list" data-no-nav="true"></ul>
+            </section>
+        </div>
     </div>
 
     <!-- Floating Math Symbols -->
@@ -149,9 +180,13 @@
     <div class="math-symbol" style="top: 40%; left: 85%; animation-delay: 4s;">±</div>
     <div class="math-symbol" style="top: 80%; left: 75%; animation-delay: 5s;">∆</div>
 
+    <script src="/src/scripts/player-storage.helpers.js" defer></script>
+    <script src="/src/scripts/player-storage.js" defer></script>
     <script src="/src/scripts/index-page.matrix.js" defer></script>
     <script src="/src/scripts/index-page.effects.js" defer></script>
     <script src="/src/scripts/index-page.ripple.js" defer></script>
+    <script src="/src/scripts/index-page.scoreboard.render.js" defer></script>
+    <script src="/src/scripts/index-page.scoreboard.js" defer></script>
     <script src="/src/scripts/index-page.core.js" defer></script>
     <script src="/src/scripts/index-page.js" defer></script>
 

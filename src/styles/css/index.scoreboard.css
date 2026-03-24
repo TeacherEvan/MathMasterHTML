@@ -1,0 +1,192 @@
+.scoreboard-button {
+  min-width: 240px;
+  margin-top: 24px;
+}
+
+.scoreboard-modal[hidden] {
+  display: none;
+}
+
+.scoreboard-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(8px);
+  z-index: 50;
+}
+
+.scoreboard-modal-content {
+  width: min(960px, 100%);
+  max-height: min(88vh, 900px);
+  overflow: auto;
+  padding: 28px;
+  border: 1px solid rgba(0, 255, 0, 0.35);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(0, 40, 0, 0.95), rgba(0, 0, 0, 0.96)),
+    #000;
+  box-shadow:
+    0 0 32px rgba(0, 255, 0, 0.18),
+    inset 0 0 0 1px rgba(170, 255, 170, 0.08);
+  color: #d7ffd7;
+}
+
+.scoreboard-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.scoreboard-kicker {
+  margin-bottom: 8px;
+  color: #7cff7c;
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.scoreboard-modal-header h2 {
+  color: #fff;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.scoreboard-close-button {
+  border: 1px solid rgba(124, 255, 124, 0.5);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #d7ffd7;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  min-width: 42px;
+  min-height: 42px;
+}
+
+.scoreboard-section {
+  margin-top: 24px;
+}
+
+.scoreboard-section h3 {
+  margin-bottom: 14px;
+  color: #7cff7c;
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.scoreboard-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.scoreboard-level-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.scoreboard-level-card,
+.scoreboard-summary-grid,
+.scoreboard-history-list {
+  width: 100%;
+}
+
+.scoreboard-level-card,
+.scoreboard-summary-grid > .scoreboard-stat-row,
+.scoreboard-history-item,
+.scoreboard-empty-state {
+  border: 1px solid rgba(124, 255, 124, 0.2);
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(124, 255, 124, 0.04);
+}
+
+.scoreboard-level-card {
+  padding: 16px;
+}
+
+.scoreboard-level-card h3 {
+  margin-bottom: 12px;
+  color: #fff;
+}
+
+.scoreboard-stat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+}
+
+.scoreboard-level-card .scoreboard-stat-row {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(124, 255, 124, 0.12);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.scoreboard-level-card .scoreboard-stat-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.scoreboard-stat-row dt {
+  color: #9ddf9d;
+}
+
+.scoreboard-stat-row dd {
+  margin: 0;
+  color: #fff;
+  font-weight: 700;
+  text-align: right;
+}
+
+.scoreboard-history-list {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+}
+
+.scoreboard-history-item,
+.scoreboard-empty-state {
+  padding: 14px 16px;
+}
+
+.scoreboard-history-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.scoreboard-history-item strong {
+  display: block;
+  color: #fff;
+}
+
+.scoreboard-history-item span {
+  color: #b8d8b8;
+  font-size: 0.9rem;
+}
+
+.scoreboard-history-score {
+  color: #7cff7c !important;
+  font-size: 1.1rem !important;
+  font-weight: 700;
+}
+
+.scoreboard-empty-state {
+  color: #b8d8b8;
+  text-align: center;
+}
+
+body.scoreboard-modal-open {
+  cursor: default;
+}

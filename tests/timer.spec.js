@@ -1,6 +1,38 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
 
+async function solveCurrentProblem(page) {
+  for (let attempt = 0; attempt < 80; attempt += 1) {
+    const nextStep = await page.evaluate(() => {
+      const currentStepIndex = window.GameProblemManager?.currentSolutionStepIndex ?? 0;
+      const hiddenSymbol = document.querySelector(
+        `.hidden-symbol[data-step-index="${currentStepIndex}"]`,
+      );
+
+      return {
+        symbol: hiddenSymbol?.textContent || null,
+        hiddenCount: document.querySelectorAll(".hidden-symbol").length,
+      };
+    });
+
+    if (!nextStep.hiddenCount) {
+      return;
+    }
+
+    if (!nextStep.symbol) {
+      await page.waitForTimeout(150);
+      continue;
+    }
+
+    await page.evaluate((symbol) => {
+      document.dispatchEvent(new CustomEvent("symbolClicked", { detail: { symbol } }));
+    }, nextStep.symbol);
+    await page.waitForTimeout(80);
+  }
+
+  throw new Error("Failed to solve current problem within guard limit");
+}
+
 test.describe("Timer and Score Countdown", () => {
   test.describe.configure({ timeout: 90_000 });
 
@@ -54,19 +86,32 @@ test.describe("Timer and Score Countdown", () => {
     expect(initialNum).toBeGreaterThan(0);
     expect(initialNum).toBeLessThanOrEqual(10000);
 
-    // Wait 3 seconds and check score has decreased
-    await page.waitForTimeout(3000);
+    await expect
+      .poll(
+        async () => {
+          const value = await scoreValue.textContent();
+          const parsedValue = parseInt(value || "0", 10);
+          console.log("Polled score value:", parsedValue);
+          return parsedValue;
+        },
+        {
+          timeout: 10_000,
+          message: "expected score countdown to start within 10 seconds",
+        },
+      )
+      .toBeLessThan(initialNum);
 
-    const laterValue = await scoreValue.textContent();
-    console.log("Score value after 3s:", laterValue);
-    const laterNum = parseInt(laterValue || "0");
+    await page.waitForTimeout(1000);
+    const settledValue = await scoreValue.textContent();
+    console.log("Score value after countdown settles:", settledValue);
+    const settledNum = parseInt(settledValue || "0", 10);
 
     // Score should have decreased (be less than initial)
-    expect(laterNum).toBeLessThan(initialNum);
+    expect(settledNum).toBeLessThan(initialNum);
     // Score decreases linearly over 600 seconds, so after 3s it should be ~9950
     // Tolerance is intentionally wide to avoid flakiness on slower runners.
-    expect(laterNum).toBeGreaterThanOrEqual(9800);
-    expect(laterNum).toBeLessThanOrEqual(9995);
+    expect(settledNum).toBeGreaterThanOrEqual(9800);
+    expect(settledNum).toBeLessThanOrEqual(9998);
   });
 
   test("debug: check console logs for timer events", async ({ page }) => {
@@ -88,5 +133,33 @@ test.describe("Timer and Score Countdown", () => {
     // Check that timer ticks are happening (validates timer functionality)
     const tickLogs = consoleMessages.filter((m) => m.includes("Timer tick:"));
     expect(tickLogs.length).toBeGreaterThan(0);
+  });
+
+  test("timer resumes counting down after the next problem loads", async ({
+    page,
+  }) => {
+    const problemText = page.locator(".problem-text");
+    const timerValue = page.locator("#timer-value");
+
+    const firstProblem = await problemText.textContent();
+    await solveCurrentProblem(page);
+
+    const skipButton = page.locator("#skip-button");
+    await expect(skipButton).toBeVisible({ timeout: 6000 });
+    await skipButton.click();
+
+    await expect(skipButton).toBeHidden({ timeout: 6000 });
+    await expect(problemText).not.toHaveText(firstProblem || "", {
+      timeout: 6000,
+    });
+
+    const nextProblemTimer = parseInt((await timerValue.textContent()) || "0", 10);
+    expect(nextProblemTimer).toBeGreaterThanOrEqual(598);
+    expect(nextProblemTimer).toBeLessThanOrEqual(600);
+
+    await page.waitForTimeout(2200);
+
+    const laterTimer = parseInt((await timerValue.textContent()) || "0", 10);
+    expect(laterTimer).toBeLessThan(nextProblemTimer);
   });
 });

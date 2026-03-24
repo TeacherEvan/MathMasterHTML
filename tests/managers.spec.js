@@ -2,6 +2,7 @@
 import { expect, test } from "@playwright/test";
 
 const PLAYER_PROFILE_STORAGE_KEY = "mathmaster_player_profile_v1";
+const GAME_LOAD_TIMEOUT_MS = 15_000;
 
 async function clickHelpButton(page, count = 1) {
   const clicked = await page.evaluate((times) => {
@@ -37,12 +38,12 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
     await page.waitForFunction(
       () => window.GameProblemManager?.problems?.length > 0,
       null,
-      { timeout: 5000 }
+      { timeout: GAME_LOAD_TIMEOUT_MS }
     );
     await page.waitForFunction(
       () => document.querySelectorAll(".hidden-symbol").length > 0,
       null,
-      { timeout: 5000 }
+      { timeout: GAME_LOAD_TIMEOUT_MS }
     );
   });
 

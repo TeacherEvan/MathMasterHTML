@@ -114,10 +114,18 @@ console.log("⏱️ ScoreTimerManager loading...");
     },
 
     onProblemStarted() {
+      if (modules.clearIntervalId) {
+        modules.clearIntervalId(this);
+      }
+
       this._bankedProblemScore = 0;
       this._currentStepScore = this._cfg.initialScore;
       this._scoreAtStepStart = this._cfg.initialScore;
-      this._paused = this._manualPause;
+      this._stepStartMs = 0;
+      this._paused = false;
+      if (this._manualPause) {
+        this._paused = true;
+      }
       this._zeroLocked = false;
       this._problemStarted = true;
 
@@ -142,7 +150,7 @@ console.log("⏱️ ScoreTimerManager loading...");
         );
       }
 
-      if (this._gameStarted) {
+      if (this._gameStarted && !this._paused) {
         this.startStep();
       }
     },

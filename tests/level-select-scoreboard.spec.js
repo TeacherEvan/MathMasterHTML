@@ -12,7 +12,7 @@ test.describe("Level select scoreboard", () => {
         localStorage.setItem(
           storageKey,
           JSON.stringify({
-            version: 2,
+            version: 3,
             name: "Player",
             levels: {
               beginner: {
@@ -28,6 +28,13 @@ test.describe("Level select scoreboard", () => {
               problemsCompleted: 7,
               lastPlayed: Date.now(),
             },
+            recentHistory: [
+              {
+                levelKey: "beginner",
+                score: 12345,
+                completedAt: Date.now(),
+              },
+            ],
             updatedAt: Date.now(),
           }),
         );
@@ -102,7 +109,8 @@ test.describe("Level select scoreboard", () => {
 
     expect(storageState.consoleKey).toBeNull();
     expect(storageState.progressKey).toBeNull();
-    expect(storageState.profile?.version).toBe(2);
+    expect(storageState.profile?.version).toBe(3);
     expect(storageState.profile?.levels).toEqual({});
+    expect(storageState.profile?.recentHistory).toEqual([]);
   });
 });

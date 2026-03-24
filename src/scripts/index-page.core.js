@@ -11,6 +11,7 @@
   function handleDOMContentLoaded() {
     modules.matrix?.createMatrixRain?.();
     modules.effects?.startDynamicEffects?.();
+    modules.scoreboard?.init?.();
   }
 
   function handleVisibilityChange() {
@@ -30,6 +31,9 @@
 
   function handleKeydown(event) {
     if (event.repeat || state.isDestroyed) return;
+    if (modules.scoreboard?.handleKeydown?.(event)) {
+      return;
+    }
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       modules.ripple?.createCenteredRipple?.();
@@ -37,6 +41,9 @@
   }
 
   function handleClick(event) {
+    if (modules.scoreboard?.handlePageClick?.(event)) {
+      return;
+    }
     modules.ripple?.createRippleFromEvent?.(event);
   }
 
