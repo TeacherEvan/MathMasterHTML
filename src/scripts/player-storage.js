@@ -3,6 +3,21 @@ console.log("💾 PlayerStorage loading...");
 
 (function() {
   const STORAGE_KEY = "mathmaster_player_profile_v1";
+  const helpers = window.PlayerStorageHelpers;
+
+  if (!helpers) {
+    console.error("❌ PlayerStorage helpers not loaded");
+    return;
+  }
+
+  const {
+    PROFILE_VERSION,
+    createEmptyLevelStats,
+    createDefaultProfile,
+    normalizeLevelStats,
+    buildOverallSummary,
+    migrateProfile,
+  } = helpers;
 
   function safeParse(json) {
     if (!json) return null;
@@ -14,20 +29,28 @@ console.log("💾 PlayerStorage loading...");
   }
 
   const PlayerStorage = {
+    STORAGE_KEY,
+    PROFILE_VERSION,
+
     init() {
-      // Ensure baseline structure exists
-      const existing = this._read();
-      if (!existing) {
-        this._write({
-          name: null,
-          levels: {},
-          updatedAt: Date.now(),
-        });
+      try {
+        const rawProfile = safeParse(localStorage.getItem(STORAGE_KEY));
+        if (!rawProfile) {
+          this._write(createDefaultProfile());
+          return;
+        }
+
+        const migratedProfile = migrateProfile(rawProfile);
+        if (JSON.stringify(rawProfile) !== JSON.stringify(migratedProfile)) {
+          this._write(migratedProfile);
+        }
+      } catch (error) {
+        console.warn("⚠️ Failed to initialize player profile:", error);
       }
     },
 
     ensurePlayerName() {
-      const profile = this._read() || { name: null, levels: {} };
+      const profile = this._read() || createDefaultProfile();
       if (profile.name && String(profile.name).trim().length > 0)
         return profile.name;
 
@@ -42,28 +65,63 @@ console.log("💾 PlayerStorage loading...");
       return this._read();
     },
 
-    recordProblemResult(levelKey, problemScore) {
-      const profile = this._read() || { name: null, levels: {} };
-      const level = profile.levels[levelKey] || {
-        totalScore: 0,
-        problemsCompleted: 0,
-        lastPlayed: null,
-      };
+    getLevelStats(levelKey) {
+      const profile = this._read() || createDefaultProfile();
+      return profile.levels[levelKey]
+        ? normalizeLevelStats(profile.levels[levelKey])
+        : createEmptyLevelStats();
+    },
 
-      level.totalScore += Math.max(0, Number(problemScore) || 0);
+    getScoreboardSummary(levelKey) {
+      const profile = this._read() || createDefaultProfile();
+      return {
+        profile,
+        level: this.getLevelStats(levelKey),
+        overall:
+          profile.overall && typeof profile.overall === "object"
+            ? profile.overall
+            : buildOverallSummary(profile.levels || {}),
+      };
+    },
+
+    recordProblemResult(levelKey, problemScore) {
+      const profile = this._read() || createDefaultProfile();
+      const safeScore = Math.max(0, Number(problemScore) || 0);
+      const level = profile.levels[levelKey]
+        ? normalizeLevelStats(profile.levels[levelKey])
+        : createEmptyLevelStats();
+
+      level.totalScore += safeScore;
+      level.lastProblemScore = safeScore;
+      level.bestProblemScore = Math.max(level.bestProblemScore, safeScore);
       level.problemsCompleted += 1;
       level.lastPlayed = Date.now();
 
       profile.levels[levelKey] = level;
+      profile.overall = buildOverallSummary(profile.levels);
       profile.updatedAt = Date.now();
       this._write(profile);
 
       return level;
     },
 
+    resetProfile() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (error) {
+        console.warn("⚠️ Failed to reset player profile from storage:", error);
+        return;
+      }
+      this.init();
+    },
+
     _read() {
       try {
-        return safeParse(localStorage.getItem(STORAGE_KEY));
+        const storedProfile = safeParse(localStorage.getItem(STORAGE_KEY));
+        if (!storedProfile) {
+          return null;
+        }
+        return migrateProfile(storedProfile);
       } catch (error) {
         console.warn("⚠️ Failed to read player profile from storage:", error);
         return null;

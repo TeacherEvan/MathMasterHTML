@@ -281,6 +281,31 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       );
       expect(nextState.currentProblem).not.toBe(initialState.currentProblem);
       expect(nextState.storedProfile.name).toBe("Player");
+
+      const timerValue = page.locator("#timer-value");
+      const scoreValue = page.locator("#score-value");
+      const timerBeforeResume = parseInt(
+        (await timerValue.textContent()) || "0",
+        10
+      );
+      const scoreBeforeResume = parseInt(
+        (await scoreValue.textContent()) || "0",
+        10
+      );
+
+      await page.waitForTimeout(1500);
+
+      const timerAfterResume = parseInt(
+        (await timerValue.textContent()) || "0",
+        10
+      );
+      const scoreAfterResume = parseInt(
+        (await scoreValue.textContent()) || "0",
+        10
+      );
+
+      expect(timerAfterResume).toBeLessThan(timerBeforeResume);
+      expect(scoreAfterResume).toBeLessThan(scoreBeforeResume);
     });
   });
 

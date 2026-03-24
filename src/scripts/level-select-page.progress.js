@@ -6,6 +6,12 @@
     MAX_PROBLEMS: 50,
     ANIMATE_DELAY_MS: 1000,
   });
+  const LEVELS = ["beginner", "warrior", "master"];
+  const SCOREBOARD_STATS = [
+    { className: "completion-stat", label: "Completed", valueKey: "problemsCompleted" },
+    { className: "best-score-stat", label: "Best Score", valueKey: "bestProblemScore" },
+    { className: "total-score-stat", label: "Total Score", valueKey: "totalScore" },
+  ];
 
   const elements = {
     resetButton: document.querySelector(".reset-progress-btn"),
@@ -29,46 +35,81 @@
     }
   }
 
+  function formatScore(value) {
+    return new Intl.NumberFormat().format(Math.max(0, Number(value) || 0));
+  }
+
+  function getPlayerProfile() {
+    if (!window.PlayerStorage?.getProfile) {
+      return null;
+    }
+    return window.PlayerStorage.getProfile();
+  }
+
+  function getLevelSummary(levelName, problemsCompleted) {
+    const profile = getPlayerProfile();
+    const storedLevel = profile?.levels?.[levelName];
+
+    return {
+      problemsCompleted: Math.max(
+        problemsCompleted,
+        Number(storedLevel?.problemsCompleted) || 0,
+      ),
+      bestProblemScore: Math.max(0, Number(storedLevel?.bestProblemScore) || 0),
+      totalScore: Math.max(0, Number(storedLevel?.totalScore) || 0),
+    };
+  }
+
+  function upsertStat(statsSection, className, label, value) {
+    let stat = statsSection.querySelector(`.${className}`);
+    if (!stat) {
+      stat = document.createElement("div");
+      stat.className = `stat ${className}`;
+
+      const valueSpan = document.createElement("span");
+      valueSpan.className = "stat-value";
+
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "stat-label";
+      labelSpan.textContent = label;
+
+      stat.appendChild(valueSpan);
+      stat.appendChild(labelSpan);
+      statsSection.appendChild(stat);
+    }
+
+    const valueSpan = stat.querySelector(".stat-value");
+    if (valueSpan) {
+      valueSpan.textContent = value;
+    }
+  }
+
   function animateProgress() {
-    const levels = ["beginner", "warrior", "master"];
     const progressBars = document.querySelectorAll(".progress-fill");
 
     progressBars.forEach((bar, index) => {
-      const levelName = levels[index];
+      const levelName = LEVELS[index];
       const countKey = `mathmaster_problems_${levelName}`;
       const rawValue = safeGetLocalStorage(countKey);
       const problemsCompleted = parseInt(rawValue || "0", 10);
+      const levelSummary = getLevelSummary(levelName, problemsCompleted);
 
       const percentage = Math.min(
-        (problemsCompleted / CONFIG.MAX_PROBLEMS) * 100,
+        (levelSummary.problemsCompleted / CONFIG.MAX_PROBLEMS) * 100,
         100,
       );
 
       const card = elements.cards[index];
       const statsSection = card?.querySelector(".level-stats");
-      if (statsSection && problemsCompleted > 0) {
-        let completionStat = statsSection.querySelector(".completion-stat");
-        if (!completionStat) {
-          completionStat = document.createElement("div");
-          completionStat.className = "stat completion-stat";
-
-          const valueSpan = document.createElement("span");
-          valueSpan.className = "stat-value";
-          valueSpan.textContent = String(problemsCompleted);
-
-          const labelSpan = document.createElement("span");
-          labelSpan.className = "stat-label";
-          labelSpan.textContent = "Completed";
-
-          completionStat.appendChild(valueSpan);
-          completionStat.appendChild(labelSpan);
-          statsSection.appendChild(completionStat);
-        } else {
-          const valueSpan = completionStat.querySelector(".stat-value");
-          if (valueSpan) {
-            valueSpan.textContent = String(problemsCompleted);
-          }
-        }
+      if (statsSection) {
+        SCOREBOARD_STATS.forEach(({ className, label, valueKey }) => {
+          const rawValueForStat = levelSummary[valueKey];
+          const formattedValue =
+            valueKey === "problemsCompleted"
+              ? String(rawValueForStat)
+              : formatScore(rawValueForStat);
+          upsertStat(statsSection, className, label, formattedValue);
+        });
       }
 
       bar.style.width = "0%";
@@ -81,15 +122,16 @@
 
   function resetProgress() {
     const confirmReset = confirm(
-      "⚠️ Are you sure you want to reset ALL progress? This will clear your console slots and problem completion counts for all levels!",
+      "⚠️ Are you sure you want to reset ALL progress? This will clear your console slots, scoreboard data, and problem completion counts for all levels!",
     );
 
     if (!confirmReset) return;
 
-    ["beginner", "warrior", "master"].forEach((level) => {
+    LEVELS.forEach((level) => {
       safeRemoveLocalStorage(`mathmaster_console_${level}`);
       safeRemoveLocalStorage(`mathmaster_problems_${level}`);
     });
+    window.PlayerStorage?.resetProfile?.();
 
     console.log("🔄 All progress reset!");
     alert("✅ Progress reset successfully!");
@@ -109,6 +151,7 @@
   }
 
   function handleLoad() {
+    window.PlayerStorage?.init?.();
     animateCards();
     setTimeout(animateProgress, CONFIG.ANIMATE_DELAY_MS);
   }
