@@ -1,5 +1,5 @@
 // src/scripts/worm-powerups.selection.js
-(function() {
+(function () {
   if (!window.WormPowerUpSystem) {
     console.warn("✨ WormPowerUpSystem not found for selection helpers");
     return;
@@ -11,7 +11,7 @@
    * TWO-CLICK SYSTEM: Select a power-up (first click)
    * @param {string} type - Power-up type to select
    */
-  proto.selectPowerUp = function(type) {
+  proto.selectPowerUp = function (type) {
     // If already selected, deselect (toggle)
     if (this.selectedPowerUp === type) {
       this.deselectPowerUp();
@@ -70,7 +70,7 @@
   /**
    * TWO-CLICK SYSTEM: Deselect current power-up (cancel)
    */
-  proto.deselectPowerUp = function() {
+  proto.deselectPowerUp = function () {
     if (!this.selectedPowerUp) return;
 
     console.log(`❌ ${this.EMOJIS[this.selectedPowerUp]} deselected`);
@@ -102,7 +102,7 @@
    * @param {string} type - Power-up type being placed
    * @private
    */
-  proto._setupPlacementHandler = function(type) {
+  proto._setupPlacementHandler = function (type) {
     // Remove any existing handler
     this._cleanupPlacementHandler();
 
@@ -129,7 +129,7 @@
    * Cleanup placement click handler
    * @private
    */
-  proto._cleanupPlacementHandler = function() {
+  proto._cleanupPlacementHandler = function () {
     if (this.placementHandler) {
       document.removeEventListener("click", this.placementHandler, {
         capture: true,
@@ -146,26 +146,29 @@
    * @param {Event} event - Original click event
    * @private
    */
-  proto._executePlacement = function(type, x, y, event) {
+  proto._executePlacement = function (type, x, y, event) {
     console.log(`🎮 Placing ${this.EMOJIS[type]} at (${x}, ${y})`);
 
     // Deduct from inventory
     this.inventory[type]--;
     this._dispatchInventoryChanged();
 
-    document.dispatchEvent(
-      new CustomEvent("powerUpActivated", {
-        detail: {
-          system: this,
-          type,
-          x,
-          y,
-          originalEvent: event || null,
-        },
-      }),
-    );
-
-    // Reset selection state
-    this.deselectPowerUp();
+    try {
+      document.dispatchEvent(
+        new CustomEvent("powerUpActivated", {
+          detail: {
+            system: this,
+            type,
+            x,
+            y,
+            originalEvent: event || null,
+          },
+        }),
+      );
+    } finally {
+      // Always reset selection state, even if a handler throws, so
+      // the UI is never left stuck in placement mode.
+      this.deselectPowerUp();
+    }
   };
 })();

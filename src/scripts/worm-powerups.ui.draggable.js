@@ -1,6 +1,6 @@
 // src/scripts/worm-powerups.ui.draggable.js - Draggable Behavior for Power-Up UI
 // Extracted from worm-powerups.ui.js to isolate drag interaction logic
-(function() {
+(function () {
   if (!window.WormPowerUpSystem) {
     console.warn("✨ WormPowerUpSystem not found for draggable helpers");
     return;
@@ -13,14 +13,12 @@
    * Supports pointer events for touch/mouse, validates against UIBoundaryManager
    * @param {HTMLElement} element - Element to make draggable
    */
-  proto.makeDraggable = function(element) {
+  proto.makeDraggable = function (element) {
     let isDragging = false;
     let dragOffsetX = 0;
     let dragOffsetY = 0;
 
     element.addEventListener("pointerdown", dragStart);
-    document.addEventListener("pointermove", drag);
-    document.addEventListener("pointerup", dragEnd);
 
     function dragStart(e) {
       // Only allow dragging from the display itself, not from power-up items
@@ -40,6 +38,10 @@
         element.style.bottom = "auto";
         element.style.transform = "none";
         element.style.cursor = "grabbing";
+        // Attach document-level listeners only for the duration of the active
+        // drag so they do not accumulate on every makeDraggable() call.
+        document.addEventListener("pointermove", drag);
+        document.addEventListener("pointerup", dragEnd);
       }
     }
 
@@ -83,6 +85,10 @@
         isDragging = false;
         element.style.cursor = "move";
       }
+      // Always remove these, regardless of isDragging state, to avoid leaks
+      // when pointer events arrive out of order on some browsers.
+      document.removeEventListener("pointermove", drag);
+      document.removeEventListener("pointerup", dragEnd);
     }
 
     function setPosition(xPos, yPos, el) {
@@ -99,7 +105,7 @@
    * @param {string} str - String to capitalize
    * @returns {string} Capitalized string
    */
-  proto.capitalize = function(str) {
+  proto.capitalize = function (str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
 })();

@@ -1,5 +1,5 @@
 // src/scripts/worm-powerups.core.js
-(function() {
+(function () {
   if (!window.WormPowerUpSystem) {
     console.warn("✨ WormPowerUpSystem not found for core helpers");
     return;
@@ -11,7 +11,7 @@
    * Setup keyboard handler for ESC to cancel selection
    * @private
    */
-  proto._setupKeyboardHandler = function() {
+  proto._setupKeyboardHandler = function () {
     if (this._keyboardHandler) {
       return;
     }
@@ -26,7 +26,7 @@
     window.addEventListener("keydown", this._keyboardHandler, true);
   };
 
-  proto._ensureKeyboardCaptureTarget = function() {
+  proto._ensureKeyboardCaptureTarget = function () {
     if (this._keyboardCaptureTarget?.isConnected) {
       return this._keyboardCaptureTarget;
     }
@@ -36,6 +36,11 @@
     input.setAttribute("aria-hidden", "true");
     input.tabIndex = -1;
     input.autocomplete = "off";
+    // Prevent virtual keyboard on mobile when this hidden input is focused.
+    // `readonly` suppresses the keyboard on iOS Safari; `inputmode="none"` is
+    // the HTML5 standard approach and works on Android Chrome.
+    input.readOnly = true;
+    input.setAttribute("inputmode", "none");
     input.style.cssText = `
       position: fixed;
       top: -1000px;
@@ -55,7 +60,7 @@
    * Roll for power-up drop
    * @returns {boolean} Whether to drop a power-up
    */
-  proto.shouldDrop = function() {
+  proto.shouldDrop = function () {
     return Math.random() < this.DROP_RATE;
   };
 
@@ -65,7 +70,7 @@
    * @param {number} y - Y coordinate
    * @param {string} type - Optional type override
    */
-  proto.drop = function(x, y, type = null) {
+  proto.drop = function (x, y, type = null) {
     if (!type) {
       type = this.TYPES[Math.floor(Math.random() * this.TYPES.length)];
     }
@@ -82,8 +87,9 @@
       if (powerUp.parentNode) {
         powerUp.parentNode.removeChild(powerUp);
         console.log(
-          `⏱️ Power-up "${type}" expired after ${this.SLIME_SPLAT_DURATION /
-            1000}s`,
+          `⏱️ Power-up "${type}" expired after ${
+            this.SLIME_SPLAT_DURATION / 1000
+          }s`,
         );
       }
     }, this.SLIME_SPLAT_DURATION);
@@ -96,7 +102,7 @@
    * @param {string} type - Power-up type
    * @returns {HTMLElement} Power-up element
    */
-  proto.createPowerUpElement = function(x, y, type) {
+  proto.createPowerUpElement = function (x, y, type) {
     const powerUp = document.createElement("div");
     powerUp.className = "power-up";
     powerUp.dataset.type = type;
@@ -127,7 +133,7 @@
    * @param {string} type - Power-up type
    * @param {HTMLElement} element - Power-up DOM element
    */
-  proto.collect = function(type, element) {
+  proto.collect = function (type, element) {
     this.inventory[type]++;
     console.log(`🎁 Collected ${type}! Total: ${this.inventory[type]}`);
 
@@ -150,7 +156,7 @@
     }, 300);
   };
 
-  proto._dispatchInventoryChanged = function() {
+  proto._dispatchInventoryChanged = function () {
     document.dispatchEvent(
       new CustomEvent("powerUpInventoryChanged", {
         detail: {
@@ -162,7 +168,7 @@
     );
   };
 
-  proto._dispatchSelectionChanged = function() {
+  proto._dispatchSelectionChanged = function () {
     document.dispatchEvent(
       new CustomEvent("powerUpSelectionChanged", {
         detail: {
