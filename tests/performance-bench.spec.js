@@ -1,5 +1,9 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
+import {
+  collectPerfSnapshot,
+  enablePerfMetrics,
+} from "./utils/perf-metrics.js";
 
 test.describe("Performance benchmarks", () => {
   test.beforeEach(async ({ page }) => {
@@ -9,17 +13,26 @@ test.describe("Performance benchmarks", () => {
     await expect(startButton).toBeVisible({ timeout: 10000 });
     await startButton.click({ force: true });
     await page.waitForTimeout(600);
+
+    // Enable extended instrumentation for richer metrics
+    await enablePerfMetrics(page, { warmupMs: 1000 });
   });
 
   test("maintains acceptable FPS and memory usage", async ({ page }) => {
     await page.keyboard.press("P");
     await page.waitForTimeout(1200);
 
-    const fpsText = await page.locator("#perf-fps").textContent();
-    const fps = Number(fpsText);
+    const snapshot = await collectPerfSnapshot(page);
 
-    expect(Number.isFinite(fps)).toBeTruthy();
-    expect(fps).toBeGreaterThanOrEqual(30);
+    // Log structured snapshot for reporting
+    test.info().annotations.push({
+      type: "perf-snapshot",
+      description: JSON.stringify(snapshot, null, 2),
+    });
+
+    expect(Number.isFinite(snapshot.fps)).toBeTruthy();
+    expect(snapshot.fps).toBeGreaterThanOrEqual(30);
+    expect(snapshot.sampleCount).toBeGreaterThan(0);
 
     const memory = await page.evaluate(() => {
       const perf = window.performance;

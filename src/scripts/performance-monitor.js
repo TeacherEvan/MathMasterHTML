@@ -10,6 +10,15 @@ class PerformanceMonitor {
     this.lastReportTime = Date.now();
     this.overlay = null;
 
+    // Extended histogram: rolling buffer of last 300 frame deltas (~5s at 60fps)
+    this._histogramBuffer = [];
+    this._histogramSize = 300;
+
+    // Input-latency tracking
+    this._inputLatencyBuffer = [];
+    this._inputLatencySize = 50;
+    this._pendingClickTimestamp = null;
+
     console.log("📊 Performance Monitor initialized");
   }
 
@@ -23,7 +32,98 @@ class PerformanceMonitor {
     // Start FPS monitoring
     this.startFPSMonitoring();
 
+    // Input-latency tracking (only when extended instrumentation is on)
+    this._initInputLatencyTracking();
+
     console.log("✅ Performance Monitor active");
+  }
+
+  /** @private */
+  _isExtendedEnabled() {
+    return (
+      typeof window !== "undefined" && window.__PERF_INSTRUMENTATION === true
+    );
+  }
+
+  /** @private */
+  _initInputLatencyTracking() {
+    document.addEventListener("symbolClicked", (e) => {
+      if (!this._isExtendedEnabled()) return;
+      this._pendingClickTimestamp = e.timeStamp || performance.now();
+    });
+    document.addEventListener("symbolRevealed", () => {
+      if (!this._isExtendedEnabled()) return;
+      if (this._pendingClickTimestamp !== null) {
+        const latency = performance.now() - this._pendingClickTimestamp;
+        this._inputLatencyBuffer.push(latency);
+        if (this._inputLatencyBuffer.length > this._inputLatencySize) {
+          this._inputLatencyBuffer.shift();
+        }
+        this._pendingClickTimestamp = null;
+      }
+    });
+  }
+
+  /**
+   * Return a structured performance snapshot for programmatic consumption.
+   * Works in both lightweight and extended modes.
+   * @returns {object}
+   */
+  getSnapshot() {
+    const buf = this._isExtendedEnabled()
+      ? this._histogramBuffer
+      : this.frameTimings;
+    const sorted = buf.length > 0 ? [...buf].sort((a, b) => a - b) : [16.67];
+    const avg = sorted.reduce((a, b) => a + b, 0) / sorted.length;
+    const p95 = sorted[Math.floor(sorted.length * 0.95)] ?? avg;
+    const max = sorted[sorted.length - 1] ?? avg;
+    const jankCount = sorted.filter((d) => d > 50).length;
+    const jankPercent =
+      sorted.length > 0 ? (jankCount / sorted.length) * 100 : 0;
+
+    // Input latency stats
+    let inputLatencyAvg = null;
+    let inputLatencyP95 = null;
+    if (this._inputLatencyBuffer.length > 0) {
+      const ilSorted = [...this._inputLatencyBuffer].sort((a, b) => a - b);
+      inputLatencyAvg =
+        Math.round(
+          (ilSorted.reduce((a, b) => a + b, 0) / ilSorted.length) * 10,
+        ) / 10;
+      inputLatencyP95 =
+        Math.round(
+          (ilSorted[Math.floor(ilSorted.length * 0.95)] ?? inputLatencyAvg) *
+            10,
+        ) / 10;
+    }
+
+    // Entity counts
+    let activeWorms = 0;
+    if (window.wormSystem && window.wormSystem.worms) {
+      activeWorms = window.wormSystem.worms.filter((w) => w.active).length;
+    }
+    const rainSymbols =
+      typeof window.symbolRainActiveCount === "number"
+        ? window.symbolRainActiveCount
+        : 0;
+
+    // DOM queries per second (based on 500ms reporting interval)
+    const domQueriesPerSec = Math.round(this.domQueryCount / 0.5);
+
+    return {
+      fps: this.fps,
+      frameTimeAvg: Math.round(avg * 100) / 100,
+      frameTimeP95: Math.round(p95 * 100) / 100,
+      frameTimeMax: Math.round(max * 100) / 100,
+      jankPercent: Math.round(jankPercent * 100) / 100,
+      domQueriesPerSec,
+      activeWorms,
+      rainSymbols,
+      inputLatencyAvg,
+      inputLatencyP95,
+      sampleCount: sorted.length,
+      timestamp: Date.now(),
+    };
   }
 
   createOverlay() {
@@ -113,14 +213,14 @@ class PerformanceMonitor {
 
     // Wrap querySelectorAll
     const originalQSA = Document.prototype.querySelectorAll;
-    Document.prototype.querySelectorAll = function(...args) {
+    Document.prototype.querySelectorAll = function (...args) {
       self.domQueryCount++;
       return originalQSA.apply(this, args);
     };
 
     // Wrap querySelector
     const originalQS = Document.prototype.querySelector;
-    Document.prototype.querySelector = function(...args) {
+    Document.prototype.querySelector = function (...args) {
       self.domQueryCount++;
       return originalQS.apply(this, args);
     };
@@ -136,10 +236,18 @@ class PerformanceMonitor {
       const delta = now - self.lastFrameTime;
       self.lastFrameTime = now;
 
-      // Calculate FPS
+      // Calculate FPS (short window for overlay display)
       self.frameTimings.push(delta);
       if (self.frameTimings.length > 60) {
         self.frameTimings.shift();
+      }
+
+      // Extended histogram buffer (~5s at 60fps) for getSnapshot() P95/jank
+      if (self._isExtendedEnabled()) {
+        self._histogramBuffer.push(delta);
+        if (self._histogramBuffer.length > self._histogramSize) {
+          self._histogramBuffer.shift();
+        }
       }
 
       const avgDelta =
@@ -192,8 +300,9 @@ class PerformanceMonitor {
 
     // Update worm count
     if (window.wormSystem && window.wormSystem.worms) {
-      const activeWorms = window.wormSystem.worms.filter((w) => w.active)
-        .length;
+      const activeWorms = window.wormSystem.worms.filter(
+        (w) => w.active,
+      ).length;
       wormsElement.textContent = activeWorms;
       if (activeWorms <= 5) {
         wormsElement.style.color = "#0f0";
