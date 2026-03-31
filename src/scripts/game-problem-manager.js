@@ -1,7 +1,7 @@
 // js/game-problem-manager.js - Problem loading, setup, and completion
 console.log("📚 Game problem manager module loading...");
 
-(function() {
+(function () {
   if (!window.GameInit) {
     console.error("❌ GameInit not loaded");
     return;
@@ -11,12 +11,8 @@ console.log("📚 Game problem manager module loading...");
     PROBLEM_COMPLETED: "problemCompleted",
   };
 
-  const {
-    problemContainer,
-    solutionContainer,
-    lockDisplay,
-    level,
-  } = window.GameInit;
+  const { problemContainer, solutionContainer, lockDisplay, level } =
+    window.GameInit;
 
   // Problems array to store loaded problems
   let problems = [];
@@ -127,6 +123,7 @@ console.log("📚 Game problem manager module loading...");
       const stepDiv = document.createElement("div");
       stepDiv.className = "solution-step";
       stepDiv.dataset.stepIndex = stepIndex;
+      stepDiv.style.setProperty("--step-delay", `${stepIndex * 72}ms`);
 
       // Create spans for each symbol in the step
       step.split("").forEach((symbol, symbolIndex) => {

@@ -8,6 +8,9 @@
   --shell-line-soft: color-mix(in oklch, var(--shell-line) 40%, transparent);
   --shell-signal: oklch(0.84 0.12 82);
   --shell-alert: oklch(0.74 0.16 42);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --font-display: "Orbitron", sans-serif;
   --font-body: "Exo 2", "Segoe UI", sans-serif;
 }
@@ -112,6 +115,17 @@ body::before {
 .power-up-item:hover {
   transform: translateY(-2px);
   border-color: var(--shell-signal);
+}
+
+#back-button:active,
+#audio-toggle:active,
+#help-button:active,
+#clarify-button:active,
+.start-game-button:active {
+  transform: translateY(0) scale(0.985);
+  box-shadow:
+    0 0 0 1px rgba(194, 236, 102, 0.12),
+    0 10px 22px rgba(0, 0, 0, 0.3);
 }
 
 #back-button:focus-visible,

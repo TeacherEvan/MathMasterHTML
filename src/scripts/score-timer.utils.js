@@ -1,4 +1,4 @@
-(function() {
+(function () {
   const COLORS = {
     blue: [0, 191, 255],
     green: [0, 255, 0],
@@ -41,6 +41,17 @@
       pulseClass = "timer-pulse-medium";
     }
     timerDisplayEl.classList.add(pulseClass);
+
+    const previousPulseClass = timerDisplayEl.dataset.pulseClass;
+    if (previousPulseClass && previousPulseClass !== pulseClass) {
+      timerDisplayEl.classList.remove("timer-phase-pop");
+      void timerDisplayEl.offsetWidth;
+      timerDisplayEl.classList.add("timer-phase-pop");
+      setTimeout(() => {
+        timerDisplayEl.classList.remove("timer-phase-pop");
+      }, 320);
+    }
+    timerDisplayEl.dataset.pulseClass = pulseClass;
 
     const duration = cfg.stepDurationSeconds;
     let color = "rgb(0, 191, 255)";

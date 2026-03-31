@@ -125,9 +125,8 @@ console.log("🎯 GameEffects loading...");
       symbol.classList.remove("revealed-symbol");
       symbol.classList.add("completed-row-symbol");
 
-      symbol.style.setProperty("--stagger-delay", `${index * 30}ms`);
-      symbol.style.animation = `symbol-pop 0.3s ease-out ${index *
-        30}ms, pulsating-cyan 2s ease-in-out ${index * 30 + 300}ms infinite`;
+      symbol.style.removeProperty("animation");
+      symbol.style.setProperty("--symbol-delay", `${index * 30}ms`);
     });
   }
 
