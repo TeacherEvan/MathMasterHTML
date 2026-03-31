@@ -13,7 +13,7 @@ export const CRITICAL_FILES = [
   "src/styles/css/worm-base.css",
   "src/styles/css/game.css",
   "Docs/SystemDocs/_INDEX.md",
-  "Docs/Copilot Docs/_AGENT_QUICKSTART.md",
+  ".github/copilot-instructions.md",
 ];
 
 export const REQUIRED_DOCS = [
