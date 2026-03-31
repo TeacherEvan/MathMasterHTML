@@ -1,4 +1,4 @@
-(function() {
+(function () {
   const symbols = [
     "0",
     "1",
@@ -48,6 +48,17 @@
     mobileHorizontalBuffer: 80,
     mobileFaceRevealBuffer: 120,
   };
+
+  if (window.__PERF_SMOKE_MODE === true) {
+    config.initialFallSpeed = 0.4;
+    config.maxFallSpeed = 0.8;
+    config.spawnRate = 0.2;
+    config.burstSpawnRate = 0.08;
+    config.symbolsPerWave = 6;
+    config.waveInterval = 220;
+    config.guaranteedSpawnInterval = 12000;
+    config.faceRevealInterval = 9000;
+  }
 
   window.SymbolRainSymbols = symbols;
   window.SymbolRainConfig = config;
