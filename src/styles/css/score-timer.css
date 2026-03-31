@@ -52,22 +52,14 @@
   box-sizing: border-box;
 }
 
-/* Explicit grid placement to prevent overlap */
 .score-display {
   grid-area: score;
   justify-self: start;
-  transform-origin: left center;
 }
 
 .timer-display {
   grid-area: timer;
   justify-self: start;
-  transform-origin: left center;
-  transition:
-    transform 180ms var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1)),
-    box-shadow 180ms var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1)),
-    border-color 180ms var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1)),
-    color 180ms var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1));
 }
 
 .hud-label {
@@ -82,7 +74,6 @@
   line-height: 1.05;
 }
 
-/* Score display - positioned in left zone */
 .score-display {
   color: #00ff00;
 }
