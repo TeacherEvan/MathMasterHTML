@@ -151,6 +151,8 @@ body::before {
   body::before,
   .timer-display,
   .score-increase,
+  #timer-value.timer-second-snap,
+  #score-value.score-bonus-pop,
   .power-up-item.is-selected {
     animation: none !important;
   }

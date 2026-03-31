@@ -1,7 +1,7 @@
 // js/score-timer-manager.js - Countdown timer + step-based scoring
 console.log("⏱️ ScoreTimerManager loading...");
 
-(function() {
+(function () {
   const GameEvents = window.GameEvents || {
     PROBLEM_COMPLETED: "problemCompleted",
     PROBLEM_LINE_COMPLETED: "problemLineCompleted",
@@ -26,6 +26,8 @@ console.log("⏱️ ScoreTimerManager loading...");
     _timerValueEl: null,
     _timerDisplayEl: null,
     _scoreValueEl: null,
+    _scoreDisplayEl: null,
+    _lastDisplayedSeconds: null,
 
     _intervalId: null,
     _stepStartMs: 0,
@@ -80,6 +82,8 @@ console.log("⏱️ ScoreTimerManager loading...");
       this._timerValueEl = document.getElementById("timer-value");
       this._timerDisplayEl = document.getElementById("timer-display");
       this._scoreValueEl = document.getElementById("score-value");
+      this._scoreDisplayEl = document.getElementById("score-display");
+      this._lastDisplayedSeconds = this._cfg.stepDurationSeconds;
 
       if (modules.setDisplayedScore) {
         modules.setDisplayedScore(this, this.getDisplayedScore());
@@ -128,6 +132,7 @@ console.log("⏱️ ScoreTimerManager loading...");
       }
       this._zeroLocked = false;
       this._problemStarted = true;
+      this._lastDisplayedSeconds = this._cfg.stepDurationSeconds;
 
       if (this._queuedBonusPoints.length > 0) {
         const queuedBonusPoints = this._queuedBonusPoints.splice(0);
@@ -236,8 +241,13 @@ console.log("⏱️ ScoreTimerManager loading...");
         this.startStep();
       }
 
-      const scoreDisplay = document.getElementById("score-display");
-      if (scoreDisplay) {
+      this._lastDisplayedSeconds = this._cfg.stepDurationSeconds;
+
+      const scoreDisplay =
+        this._scoreDisplayEl || document.getElementById("score-display");
+      if (modules.restartClassPulse) {
+        modules.restartClassPulse(scoreDisplay, "score-increase", 450);
+      } else if (scoreDisplay) {
         scoreDisplay.classList.remove("score-increase");
         void scoreDisplay.offsetWidth;
         scoreDisplay.classList.add("score-increase");
@@ -280,12 +290,22 @@ console.log("⏱️ ScoreTimerManager loading...");
         modules.setDisplayedScore(this, newScore);
       }
 
-      const scoreDisplay = document.getElementById("score-display");
-      if (scoreDisplay) {
-        scoreDisplay.classList.remove("score-increase");
-        void scoreDisplay.offsetWidth;
-        scoreDisplay.classList.add("score-increase");
-        setTimeout(() => scoreDisplay.classList.remove("score-increase"), 450);
+      if (modules.pulseBonusScore) {
+        modules.pulseBonusScore(
+          this._scoreValueEl || document.getElementById("score-value"),
+        );
+      } else {
+        const scoreDisplay =
+          this._scoreDisplayEl || document.getElementById("score-display");
+        if (scoreDisplay) {
+          scoreDisplay.classList.remove("score-increase");
+          void scoreDisplay.offsetWidth;
+          scoreDisplay.classList.add("score-increase");
+          setTimeout(
+            () => scoreDisplay.classList.remove("score-increase"),
+            450,
+          );
+        }
       }
 
       document.dispatchEvent(

@@ -3,7 +3,12 @@ import { expect, test } from "@playwright/test";
 import { enablePerfMetrics } from "./utils/perf-metrics.js";
 
 test.describe("Performance benchmarks", () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    test.skip(
+      testInfo.project.use?.isMobile,
+      "Performance smoke benchmark is calibrated for desktop browsers only",
+    );
+
     await page.addInitScript(() => {
       window.__PERF_SMOKE_MODE = true;
     });
@@ -26,14 +31,7 @@ test.describe("Performance benchmarks", () => {
     await enablePerfMetrics(page, { warmupMs: 1000 });
   });
 
-  test("maintains acceptable FPS and memory usage", async ({
-    page,
-  }, testInfo) => {
-    test.skip(
-      testInfo.project.use?.isMobile,
-      "Performance smoke benchmark is calibrated for desktop browsers only",
-    );
-
+  test("captures a desktop perf smoke snapshot", async ({ page }) => {
     await page.waitForFunction(
       () =>
         !!window.performanceMonitor &&

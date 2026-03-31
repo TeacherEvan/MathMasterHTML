@@ -5,6 +5,7 @@
     yellow: [255, 215, 0],
     red: [255, 68, 68],
   };
+  const PULSE_TIMEOUT_KEY = "__scoreTimerPulseTimeoutId";
 
   function clamp01(value) {
     return Math.max(0, Math.min(1, value));
@@ -20,6 +21,33 @@
     const g = Math.round(lerp(from[1], to[1], tt));
     const b = Math.round(lerp(from[2], to[2], tt));
     return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  function restartClassPulse(element, className, durationMs) {
+    if (!element || !className) return;
+
+    const existingTimeout = element[PULSE_TIMEOUT_KEY];
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+      element[PULSE_TIMEOUT_KEY] = null;
+    }
+
+    element.classList.remove(className);
+    void element.offsetWidth;
+    element.classList.add(className);
+
+    element[PULSE_TIMEOUT_KEY] = setTimeout(() => {
+      element.classList.remove(className);
+      element[PULSE_TIMEOUT_KEY] = null;
+    }, durationMs);
+  }
+
+  function pulseTimerTick(timerValueEl) {
+    restartClassPulse(timerValueEl, "timer-second-snap", 240);
+  }
+
+  function pulseBonusScore(scoreValueEl) {
+    restartClassPulse(scoreValueEl, "score-bonus-pop", 560);
   }
 
   function applyPhaseStyles(timerDisplayEl, remainingSeconds, cfg) {
@@ -45,12 +73,7 @@
       timerDisplayEl.classList.add(pulseClass);
 
       if (previousPulseClass) {
-        timerDisplayEl.classList.remove("timer-phase-pop");
-        void timerDisplayEl.offsetWidth;
-        timerDisplayEl.classList.add("timer-phase-pop");
-        setTimeout(() => {
-          timerDisplayEl.classList.remove("timer-phase-pop");
-        }, 320);
+        restartClassPulse(timerDisplayEl, "timer-phase-pop", 320);
       }
 
       timerDisplayEl.dataset.pulseClass = pulseClass;
@@ -82,5 +105,8 @@
   }
 
   window.ScoreTimerModules = window.ScoreTimerModules || {};
+  window.ScoreTimerModules.restartClassPulse = restartClassPulse;
+  window.ScoreTimerModules.pulseTimerTick = pulseTimerTick;
+  window.ScoreTimerModules.pulseBonusScore = pulseBonusScore;
   window.ScoreTimerModules.applyPhaseStyles = applyPhaseStyles;
 })();

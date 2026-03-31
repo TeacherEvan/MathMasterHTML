@@ -156,7 +156,9 @@
 
 .modal-content-enhanced {
   animation: modal-slide-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 255, 0, 0.2);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.8),
+    0 0 40px rgba(0, 255, 0, 0.2);
   will-change: transform, opacity;
 }
 
@@ -220,5 +222,64 @@
   }
   100% {
     transform: translateX(100%);
+  }
+}
+
+/* ============================================
+   HUD VALUE MICRO-INTERACTIONS
+   ============================================ */
+
+#score-value.score-bonus-pop,
+#timer-value.timer-second-snap {
+  will-change: transform, text-shadow, color;
+}
+
+#score-value.score-bonus-pop {
+  animation: scoreBonusPop 560ms
+    var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+#timer-value.timer-second-snap {
+  animation: timerSecondSnap 240ms
+    var(--ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+@keyframes scoreBonusPop {
+  0% {
+    transform: translateY(0) scale(1);
+    color: inherit;
+    text-shadow: none;
+  }
+  32% {
+    transform: translateY(-2px) scale(1.12);
+    color: color-mix(in oklch, var(--shell-line) 58%, var(--shell-signal) 42%);
+    text-shadow:
+      0 0 10px color-mix(in oklch, var(--shell-signal) 38%, transparent),
+      0 0 22px color-mix(in oklch, var(--shell-signal) 20%, transparent);
+  }
+  68% {
+    transform: translateY(-1px) scale(1.04);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    color: inherit;
+    text-shadow: none;
+  }
+}
+
+@keyframes timerSecondSnap {
+  0% {
+    transform: translateY(0) scale(1);
+    text-shadow: none;
+  }
+  45% {
+    transform: translateY(-1px) scale(1.05);
+    text-shadow:
+      0 0 10px currentColor,
+      0 0 18px color-mix(in oklch, currentColor 56%, transparent);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    text-shadow: none;
   }
 }

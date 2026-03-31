@@ -1,4 +1,4 @@
-(function() {
+(function () {
   const modules = window.ScoreTimerModules || {};
 
   function getRemainingMs(manager) {
@@ -60,6 +60,15 @@
 
     setDisplayedTime(manager, remainingSeconds);
     setDisplayedScore(manager, manager.getDisplayedScore());
+    if (
+      manager._lastDisplayedSeconds !== null &&
+      manager._lastDisplayedSeconds !== remainingSeconds &&
+      modules.pulseTimerTick
+    ) {
+      modules.pulseTimerTick(manager._timerValueEl);
+    }
+    manager._lastDisplayedSeconds = remainingSeconds;
+
     if (modules.applyPhaseStyles) {
       modules.applyPhaseStyles(
         manager._timerDisplayEl,
@@ -113,6 +122,10 @@
         "⏱️ Interval created via native setInterval, ID:",
         manager._intervalId,
       );
+    }
+
+    if (manager._lastDisplayedSeconds === null) {
+      manager._lastDisplayedSeconds = manager._cfg.stepDurationSeconds;
     }
 
     update(manager);
