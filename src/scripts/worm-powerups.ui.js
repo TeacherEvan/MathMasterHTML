@@ -1,5 +1,5 @@
 // src/scripts/worm-powerups.ui.js
-(function() {
+(function () {
   if (!window.WormPowerUpSystem) {
     console.warn("✨ WormPowerUpSystem not found for UI helpers");
     return;
@@ -35,7 +35,7 @@
    * @param {string} type - 'info', 'warning', or 'success'
    * @private
    */
-  proto._showTooltip = function(message, type = "info") {
+  proto._showTooltip = function (message, type = "info") {
     // Remove existing tooltip
     this._hideTooltip();
 
@@ -72,7 +72,7 @@
     setTimeout(() => this._hideTooltip(), 3000);
   };
 
-  proto._bindUIEventHandlers = function() {
+  proto._bindUIEventHandlers = function () {
     if (this._uiEventsBound) return;
 
     this._uiEventsBound = true;
@@ -94,14 +94,14 @@
     }
   };
 
-  proto.getDisplayUIConfig = function() {
+  proto.getDisplayUIConfig = function () {
     return {
       ...DEFAULT_UI_CONFIG,
       ...(window.GameConstants?.POWER_UP_UI || {}),
     };
   };
 
-  proto.getDisplayLayoutMetrics = function() {
+  proto.getDisplayLayoutMetrics = function () {
     const config = this.getDisplayUIConfig();
     const isCompactViewport =
       window.innerWidth <= config.COMPACT_MAX_WIDTH ||
@@ -130,7 +130,7 @@
     };
   };
 
-  proto.getDisplayPanelContext = function(displayRect = null) {
+  proto.getDisplayPanelContext = function (displayRect = null) {
     const { config, isCompactViewport } = this.getDisplayLayoutMetrics();
     const panelB = document.getElementById("panel-b");
     const controls = panelB?.querySelector(".panel-b-controls");
@@ -162,7 +162,9 @@
       };
     }
 
-    const compactInset = isCompactViewport ? 4 : config.COMPACT_HORIZONTAL_INSET;
+    const compactInset = isCompactViewport
+      ? 4
+      : config.COMPACT_HORIZONTAL_INSET;
     const panelInset = Math.max(
       compactInset,
       Math.floor(panelRect.width * (isCompactViewport ? 0.02 : 0.04)),
@@ -172,10 +174,13 @@
     const timerOverlapPadding = isCompactViewport
       ? (window.uiBoundaryManager?.config?.minSpacing || 10) + 2
       : 0;
-    const minX =
-      timerRect && timerRect.right > panelRect.left
-        ? Math.max(minXBase, timerRect.right + timerOverlapPadding)
-        : minXBase;
+    const timerOverlapsPanel =
+      !!timerRect &&
+      timerRect.left < panelRect.right &&
+      timerRect.right > panelRect.left;
+    const minX = timerOverlapsPanel
+      ? Math.max(minXBase, timerRect.right + timerOverlapPadding)
+      : minXBase;
     const minTop = panelRect.top + config.DESKTOP_TOP_OFFSET;
     const controlsBottomLimit =
       controlsRect?.top !== undefined
@@ -204,7 +209,7 @@
     };
   };
 
-  proto.getDisplayBoundaryConstraints = function(displayRect = null) {
+  proto.getDisplayBoundaryConstraints = function (displayRect = null) {
     const context = this.getDisplayPanelContext(displayRect);
     return {
       minX: context.minX,
@@ -214,7 +219,7 @@
     };
   };
 
-  proto.getDisplayAnchorPosition = function(displayWidth, displayHeight) {
+  proto.getDisplayAnchorPosition = function (displayWidth, displayHeight) {
     const { config } = this.getDisplayLayoutMetrics();
     const context = this.getDisplayPanelContext({
       width: displayWidth,
@@ -229,13 +234,14 @@
       };
     }
 
-    const availableWidth = Math.max(0, context.maxX - context.minX - displayWidth);
+    const availableWidth = Math.max(
+      0,
+      context.maxX - context.minX - displayWidth,
+    );
     const centeredLeft = context.minX + availableWidth / 2;
     const maxTopFromControls =
       controlsRect?.top !== undefined
-        ? controlsRect.top -
-          config.PANEL_B_CONTROLS_CLEARANCE -
-          displayHeight
+        ? controlsRect.top - config.PANEL_B_CONTROLS_CLEARANCE - displayHeight
         : context.minY;
 
     return {
@@ -246,15 +252,12 @@
         ),
       ),
       top: Math.round(
-        Math.max(
-          context.minY,
-          Math.min(context.minY, maxTopFromControls),
-        ),
+        Math.max(context.minY, Math.min(context.minY, maxTopFromControls)),
       ),
     };
   };
 
-  proto.syncDisplayLayout = function() {
+  proto.syncDisplayLayout = function () {
     if (!this.displayElement) return;
 
     const {
@@ -265,12 +268,17 @@
       displayPadding,
       displayFontSize,
     } = this.getDisplayLayoutMetrics();
-    this.displayElement.dataset.viewport = isCompactViewport ? "compact" : "full";
+    this.displayElement.dataset.viewport = isCompactViewport
+      ? "compact"
+      : "full";
     this.displayElement.style.setProperty(
       "--power-up-display-width",
       `${displayWidth}px`,
     );
-    this.displayElement.style.setProperty("--power-up-display-gap", `${displayGap}px`);
+    this.displayElement.style.setProperty(
+      "--power-up-display-gap",
+      `${displayGap}px`,
+    );
     this.displayElement.style.setProperty(
       "--power-up-display-padding",
       `${displayPadding}px`,
@@ -304,7 +312,8 @@
 
     const displayRect = this.displayElement.getBoundingClientRect();
     const displayHeight = this.displayElement.offsetHeight || 0;
-    const displayWidthActual = this.displayElement.offsetWidth || resolvedDisplayWidth;
+    const displayWidthActual =
+      this.displayElement.offsetWidth || resolvedDisplayWidth;
     const constraints = this.getDisplayBoundaryConstraints(displayRect);
     const anchoredPosition = this.getDisplayAnchorPosition(
       displayWidthActual,
@@ -345,11 +354,11 @@
       }
     }
 
-    if (window.uiBoundaryManager?.setConstraints) {
-      window.uiBoundaryManager.setConstraints(
-        "power-up-display",
-        constraints,
-      );
+    if (
+      window.uiBoundaryManager?.setConstraints &&
+      window.uiBoundaryManager.elements?.has?.("power-up-display")
+    ) {
+      window.uiBoundaryManager.setConstraints("power-up-display", constraints);
     }
   };
 
@@ -357,7 +366,7 @@
    * Hide tooltip
    * @private
    */
-  proto._hideTooltip = function() {
+  proto._hideTooltip = function () {
     const existing = document.getElementById("power-up-tooltip");
     if (existing) {
       existing.remove();
@@ -368,7 +377,7 @@
    * Use a power-up (LEGACY - now redirects to selectPowerUp for two-click system)
    * @param {string} type - Power-up type to use
    */
-  proto.use = function(type) {
+  proto.use = function (type) {
     // Redirect to two-click selection system
     this.selectPowerUp(type);
   };
@@ -376,7 +385,7 @@
   /**
    * Update power-up display UI
    */
-  proto.updateDisplay = function() {
+  proto.updateDisplay = function () {
     console.log(
       `📊 Power-ups: ⚡${this.inventory.chainLightning} 🕷️${
         this.inventory.spider
@@ -435,7 +444,7 @@
    * Create power-up display UI element
    * @returns {HTMLElement} Display element
    */
-  proto.createDisplayElement = function() {
+  proto.createDisplayElement = function () {
     const display = document.createElement("div");
     display.id = "power-up-display";
     display.className = "power-up-display";
@@ -456,7 +465,6 @@
 
     document.body.appendChild(display);
     this.displayElement = display;
-    this.syncDisplayLayout();
 
     // Register with UIBoundaryManager if available
     if (window.uiBoundaryManager) {
@@ -467,6 +475,8 @@
         constraints: this.getDisplayBoundaryConstraints(),
       });
     }
+
+    this.syncDisplayLayout();
     console.log("📊 Power-up display created (centered in top bar zone)");
 
     return display;

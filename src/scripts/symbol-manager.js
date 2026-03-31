@@ -3,7 +3,7 @@
 /**
  * Symbol Manager - Centralized symbol operations
  */
-const GameEvents = window.GameEvents || {
+const SymbolEvents = window.GameEvents || {
   SYMBOL_REVEALED: "symbolRevealed",
 };
 
@@ -34,7 +34,7 @@ const SymbolManager = {
       !this._cachedStepSymbols
     ) {
       this._cachedStepSymbols = this._solutionContainer.querySelectorAll(
-        `.solution-symbol[data-step-index="${stepIndex}"]`
+        `.solution-symbol[data-step-index="${stepIndex}"]`,
       );
       this._cachedStepIndex = stepIndex;
       this._cacheInvalidated = false;
@@ -56,10 +56,10 @@ const SymbolManager = {
    */
   getNextSymbols() {
     const currentStepSymbols = this.getCachedStepSymbols(
-      this._currentStepIndex
+      this._currentStepIndex,
     );
     const hiddenSymbols = Array.from(currentStepSymbols).filter((el) =>
-      el.classList.contains("hidden-symbol")
+      el.classList.contains("hidden-symbol"),
     );
     return hiddenSymbols.map((span) => span.textContent);
   },
@@ -73,7 +73,7 @@ const SymbolManager = {
     const expectedSymbols = this.getNextSymbols();
     const normalizedClicked = window.normalizeSymbol(clickedSymbol);
     const normalizedExpected = expectedSymbols.map((s) =>
-      window.normalizeSymbol(s)
+      window.normalizeSymbol(s),
     );
     return normalizedExpected.includes(normalizedClicked);
   },
@@ -86,10 +86,10 @@ const SymbolManager = {
   revealSymbol(targetSymbol) {
     const normalizedTarget = window.normalizeSymbol(targetSymbol);
     const currentStepSymbols = this.getCachedStepSymbols(
-      this._currentStepIndex
+      this._currentStepIndex,
     );
     const hiddenSymbols = Array.from(currentStepSymbols).filter((el) =>
-      el.classList.contains("hidden-symbol")
+      el.classList.contains("hidden-symbol"),
     );
 
     for (const span of hiddenSymbols) {
@@ -103,9 +103,9 @@ const SymbolManager = {
 
         // Dispatch event
         document.dispatchEvent(
-          new CustomEvent(GameEvents.SYMBOL_REVEALED, {
+          new CustomEvent(SymbolEvents.SYMBOL_REVEALED, {
             detail: { symbol: targetSymbol, element: span },
-          })
+          }),
         );
         return true;
       }
@@ -128,7 +128,7 @@ const SymbolManager = {
    */
   isStepComplete() {
     const currentStepHiddenSymbols = this._solutionContainer.querySelectorAll(
-      `[data-step-index="${this._currentStepIndex}"].hidden-symbol`
+      `[data-step-index="${this._currentStepIndex}"].hidden-symbol`,
     );
     return currentStepHiddenSymbols.length === 0;
   },

@@ -25,9 +25,7 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
 
     init() {
       if (this.disabled) {
-        console.log(
-          "🔇 Cyberpunk Interaction Audio disabled (unsupported or automation)",
-        );
+        console.log("🔇 Cyberpunk Interaction Audio disabled (unsupported or automation)");
         return;
       }
 
@@ -35,9 +33,7 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
         capture: true,
         passive: true,
       });
-      document.addEventListener("keydown", this._boundUnlockAudio, {
-        passive: true,
-      });
+      document.addEventListener("keydown", this._boundUnlockAudio, { passive: true });
       document.addEventListener(GameEvents.SYMBOL_CLICKED, () =>
         this.playSymbolClick?.(),
       );
@@ -97,17 +93,14 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
         this.playStartButton?.();
         return;
       }
-
       if (target.closest(".worm-container")) {
         this.playWormTap?.(target.closest(".purple-worm") ? "purple" : "green");
         return;
       }
-
       if (target.closest(".power-up-item")) {
         this.playPowerUpSelect?.();
         return;
       }
-
       if (target.closest(".symbol-choice, .position-choice")) {
         this.playModalSelect?.();
         return;
@@ -125,7 +118,6 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
     _playCue(name, layers, minIntervalMs = 20) {
       const context = this._ensureContext();
       if (!context || context.state !== "running" || !this.masterGain) return;
-
       const nowMs = performance.now();
       const lastCueAt = this.lastCueTimes.get(name) ?? -Infinity;
       if (nowMs - lastCueAt < minIntervalMs) return;

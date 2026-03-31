@@ -7,7 +7,7 @@
  * Uses ACHIEVEMENT_DEFINITIONS from utils-achievements.definitions.js
  * Uses AchievementUI from utils-achievements.ui.js for popup rendering
  */
-const GameEvents = window.GameEvents || {
+const AchievementEvents = window.GameEvents || {
   COMBO_UPDATED: "comboUpdated",
   PROBLEM_COMPLETED: "problemCompleted",
 };
@@ -72,14 +72,14 @@ const AchievementSystem = {
    */
   _setupEventListeners() {
     // Track problem completion
-    document.addEventListener(GameEvents.PROBLEM_COMPLETED, () => {
+    document.addEventListener(AchievementEvents.PROBLEM_COMPLETED, () => {
       this._stats.problemsCompleted++;
       this._checkAchievement("FIRST_BLOOD");
       this._saveProgress();
     });
 
     // Track combo updates
-    document.addEventListener(GameEvents.COMBO_UPDATED, (e) => {
+    document.addEventListener(AchievementEvents.COMBO_UPDATED, (e) => {
       if (e.detail.combo > this._stats.maxCombo) {
         this._stats.maxCombo = e.detail.combo;
         this._checkAchievement("COMBO_STARTER");

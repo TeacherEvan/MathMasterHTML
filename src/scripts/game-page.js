@@ -1,5 +1,5 @@
 // src/scripts/game-page.js
-(function() {
+(function () {
   const backButton = document.getElementById("back-button");
 
   function goBack() {
@@ -49,6 +49,5 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     setupHowToPlayModal();
-    enterFullscreen();
   });
 })();
