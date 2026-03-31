@@ -1,0 +1,112 @@
+.how-to-play-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(14, 16, 13, 0.88),
+    rgba(10, 11, 10, 0.96)
+  );
+  backdrop-filter: blur(14px);
+}
+
+.how-to-play-content {
+  width: min(720px, calc(100vw - 2rem));
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  border-radius: 1.75rem;
+  border: 1px solid color-mix(in oklch, var(--shell-signal) 35%, transparent);
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklch, var(--shell-panel-strong) 92%, transparent),
+    color-mix(in oklch, var(--shell-bg) 88%, black 12%)
+  );
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 color-mix(in oklch, var(--shell-copy) 8%, transparent);
+}
+
+.how-to-play-kicker {
+  margin: 0 0 0.9rem;
+  color: var(--shell-signal);
+  font: 700 0.72rem/1.2 var(--font-body);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.how-to-play-content h2 {
+  margin-bottom: 1rem;
+  color: var(--shell-copy);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.7rem);
+  line-height: 0.95;
+  text-align: left;
+  text-shadow: 0 0 24px
+    color-mix(in oklch, var(--shell-signal) 18%, transparent);
+}
+
+.how-to-play-message {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  color: var(--shell-copy-muted);
+  font: 500 clamp(1rem, 1.3vw, 1.15rem)/1.65 var(--font-body);
+  text-align: left;
+}
+
+.how-to-play-message p,
+.how-to-play-message li {
+  max-width: 54ch;
+}
+
+.how-to-play-callout {
+  padding: 1rem 1.1rem;
+  border-radius: 1.1rem;
+  border: 1px solid color-mix(in oklch, var(--shell-line) 28%, transparent);
+  background: color-mix(in oklch, var(--shell-panel) 88%, black 12%);
+}
+
+.how-to-play-callout strong {
+  display: block;
+  margin-bottom: 0.7rem;
+  color: var(--shell-copy);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.how-to-play-callout ul {
+  margin: 0;
+  padding-left: 1.15rem;
+}
+
+.start-game-button,
+#help-button,
+#clarify-button {
+  min-height: 44px;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in oklch, var(--shell-signal) 34%, transparent);
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklch, var(--shell-signal) 30%, var(--shell-panel) 70%),
+    color-mix(in oklch, var(--shell-panel) 82%, black 18%)
+  );
+  color: var(--shell-copy);
+  font-family: var(--font-body);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26);
+}
+
+.start-game-button {
+  width: auto;
+  min-width: 15rem;
+  padding-inline: 1.25rem;
+}
+
+.panel-b-controls {
+  justify-content: flex-start;
+  gap: 0.8rem;
+  margin-bottom: 0.9rem;
+}
+
+@media (max-width: 900px) {
+  .how-to-play-content h2 {
+    font-size: clamp(1.8rem, 8vw, 3rem);
+  }
+}

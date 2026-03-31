@@ -1,0 +1,92 @@
+/* Preserve the default HUD geometry from `score-timer.css`.
+   This polish layer may restyle the shell, but it should not move
+   the score, timer, or reserved power-up zone. */
+
+.hud-block,
+.power-up-display {
+  border-radius: 1.2rem;
+  border: 1px solid color-mix(in oklch, var(--shell-line) 30%, transparent);
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklch, var(--shell-panel-strong) 84%, transparent),
+    color-mix(in oklch, var(--shell-bg) 92%, black 8%)
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklch, var(--shell-copy) 8%, transparent),
+    0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+.score-display {
+  color: var(--shell-line);
+}
+.timer-display {
+  color: var(--shell-signal);
+}
+.hud-label {
+  font: 700 0.62rem/1.2 var(--font-body);
+  color: var(--shell-copy-muted);
+}
+.hud-value {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+}
+
+#problem-container {
+  color: var(--shell-alert);
+  font-family: var(--font-display);
+  font-size: clamp(0.72rem, 1vw, 0.94rem);
+  letter-spacing: 0.22em;
+  background: color-mix(in oklch, var(--shell-panel) 86%, transparent);
+  border: 1px solid color-mix(in oklch, var(--shell-alert) 26%, transparent);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.24);
+}
+
+#solution-container {
+  color: color-mix(in oklch, var(--shell-copy) 88%, var(--shell-line) 12%);
+}
+
+.power-up-display {
+  color: var(--shell-copy);
+  cursor: default;
+}
+
+.power-up-item {
+  min-height: 44px;
+  border-radius: 0.9rem;
+}
+
+.power-up-item.is-selected {
+  border-color: var(--shell-signal) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--shell-signal) 40%, transparent),
+    0 0 18px color-mix(in oklch, var(--shell-signal) 22%, transparent) !important;
+}
+
+.power-up-item.is-empty {
+  opacity: 0.42;
+}
+
+.power-up-item-value,
+.power-up-item-selected-label,
+.power-up-count-badge {
+  font-family: var(--font-body);
+}
+
+#symbol-console {
+  border-radius: 1.4rem;
+  border: 1px solid color-mix(in oklch, var(--shell-line) 26%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--shell-panel) 88%, transparent),
+    color-mix(in oklch, var(--shell-bg) 92%, black 8%)
+  );
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+}
+
+.console-slot {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 0.85rem;
+  border: 1px solid color-mix(in oklch, var(--shell-line) 22%, transparent);
+  background: color-mix(in oklch, var(--shell-panel-strong) 80%, transparent);
+}

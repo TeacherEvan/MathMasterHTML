@@ -1,0 +1,153 @@
+:root {
+  --shell-bg: oklch(0.14 0.018 122);
+  --shell-panel: oklch(0.19 0.022 122);
+  --shell-panel-strong: oklch(0.24 0.03 122);
+  --shell-copy: oklch(0.95 0.018 105);
+  --shell-copy-muted: oklch(0.79 0.028 105);
+  --shell-line: oklch(0.84 0.17 132);
+  --shell-line-soft: color-mix(in oklch, var(--shell-line) 40%, transparent);
+  --shell-signal: oklch(0.84 0.12 82);
+  --shell-alert: oklch(0.74 0.16 42);
+  --font-display: "Orbitron", sans-serif;
+  --font-body: "Exo 2", "Segoe UI", sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--shell-copy);
+  background:
+    radial-gradient(
+      circle at top,
+      color-mix(in oklch, var(--shell-signal) 14%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(180deg, oklch(0.18 0.02 122), var(--shell-bg) 58%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--shell-line) 7%, transparent),
+    transparent 32%
+  );
+}
+
+.wall {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--shell-signal) 78%, var(--shell-line) 22%),
+    color-mix(in oklch, var(--shell-line) 82%, black 18%)
+  );
+}
+
+#back-button,
+#audio-toggle {
+  position: fixed;
+  z-index: 10020;
+  min-width: 10.5rem;
+  min-height: 3rem;
+  padding: 0.8rem 1rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklch, var(--shell-line) 78%, black 22%);
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklch, var(--shell-panel-strong) 88%, transparent),
+    color-mix(in oklch, var(--shell-bg) 90%, black 10%)
+  );
+  color: var(--shell-copy);
+  font: 700 0.88rem/1 var(--font-body);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  box-shadow:
+    0 0 0 1px rgba(194, 236, 102, 0.12),
+    0 14px 30px rgba(0, 0, 0, 0.35);
+  transition:
+    transform 180ms ease-out,
+    border-color 180ms ease-out,
+    background-color 180ms ease-out,
+    box-shadow 180ms ease-out;
+}
+
+#back-button {
+  left: clamp(14px, 2vw, 24px);
+  bottom: clamp(14px, 2vh, 24px);
+}
+#audio-toggle {
+  right: clamp(14px, 2vw, 24px);
+  bottom: clamp(14px, 2vh, 24px);
+}
+
+#audio-toggle[data-audio-state="muted"] {
+  color: var(--shell-copy-muted);
+  border-color: color-mix(in oklch, var(--shell-copy-muted) 60%, transparent);
+}
+
+#audio-toggle[data-audio-state="unavailable"] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.audio-toggle__eyebrow {
+  display: block;
+  margin-bottom: 0.28rem;
+  font-size: 0.58rem;
+  color: var(--shell-copy-muted);
+}
+
+.audio-toggle__label {
+  display: block;
+}
+
+#back-button:hover,
+#audio-toggle:hover,
+#help-button:hover,
+#clarify-button:hover,
+.start-game-button:hover,
+.console-slot:hover,
+.power-up-item:hover {
+  transform: translateY(-2px);
+  border-color: var(--shell-signal);
+}
+
+#back-button:focus-visible,
+#audio-toggle:focus-visible,
+#help-button:focus-visible,
+#clarify-button:focus-visible,
+.start-game-button:focus-visible,
+.console-slot:focus-visible,
+.power-up-item:focus-visible {
+  outline: 2px solid var(--shell-signal) !important;
+  outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  #audio-toggle,
+  #back-button {
+    min-width: auto;
+    padding-inline: 0.95rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  .timer-display,
+  .score-increase,
+  .power-up-item.is-selected {
+    animation: none !important;
+  }
+
+  #back-button,
+  #audio-toggle,
+  #help-button,
+  #clarify-button,
+  .start-game-button,
+  .console-slot,
+  .power-up-item {
+    transition: none !important;
+  }
+}

@@ -31,6 +31,12 @@ console.log("🔒 LockManager animation helpers loading...");
 
     // Update progress indicators
     this.updateProgressIndicators(level);
+
+    document.dispatchEvent(
+      new CustomEvent("lockLevelUpdated", {
+        detail: { level },
+      }),
+    );
   };
 
   proto.progressLockLevel = function progressLockLevel() {
@@ -76,12 +82,6 @@ console.log("🔒 LockManager animation helpers loading...");
           setTimeout(() => {
             this.activateLockLevel(newLevel);
             this.isLoadingComponent = false;
-            // Dispatch an event to notify that the lock level has been updated
-            document.dispatchEvent(
-              new CustomEvent("lockLevelUpdated", {
-                detail: { level: newLevel },
-              }),
-            );
           }, 300);
         })
         .catch((error) => {
@@ -156,8 +156,9 @@ console.log("🔒 LockManager animation helpers loading...");
     const goldIntensity = Math.min(255, 150 + level * 30);
     lockBody.style.background = `linear-gradient(145deg, #4a4a1a, rgb(${goldIntensity}, ${goldIntensity}, 42), #4a4a1a)`;
     lockBody.style.borderColor = `rgb(${goldIntensity}, ${goldIntensity}, 0)`;
-    lockBody.style.boxShadow = `0 0 ${25 +
-      level * 15}px rgba(255, 215, 0, 0.5)`;
+    lockBody.style.boxShadow = `0 0 ${
+      25 + level * 15
+    }px rgba(255, 215, 0, 0.5)`;
   };
 
   proto.triggerMasterAnimation = function triggerMasterAnimation(

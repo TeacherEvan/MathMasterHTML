@@ -8,7 +8,7 @@
         content="Play Math Master - Solve algebra equations by clicking falling symbols in this Matrix-themed educational game.">
     <meta name="theme-color" content="#000000">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self';">
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self';">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -19,8 +19,6 @@
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap"
-        as="style">
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="/src/styles/css/game.css?v=20251007-mobile-fix">
@@ -35,7 +33,9 @@
     <link rel="stylesheet" href="/src/styles/css/lock-responsive.css?v=20251007-mobile-fix">
     <link rel="stylesheet" href="/src/styles/css/modern-ux-enhancements.css">
     <link rel="stylesheet" href="/src/styles/css/lod-animations.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;700&family=Orbitron:wght@400;700;900&display=swap"
+        rel="stylesheet">
     <style>
         #back-button {
             position: fixed;
@@ -132,26 +132,29 @@
             z-index: 10;
         }
     </style>
+    <link rel="stylesheet" href="/src/styles/css/game-polish.chrome.css?v=20260331-hud-default">
 </head>
 
 <body>
     <!-- How to Play Modal -->
     <div id="how-to-play-modal" class="how-to-play-overlay">
         <div class="how-to-play-content">
-            <h2>Math Master - Unlock Your Mind</h2>
-            <p class="how-to-play-message">
-                Math stimulates your brain's problem-solving capabilities, allowing you to see vastly different
-                solutions to everyday problems. Once you finish the game, remember to always use your powers for good 😉
-                <br><br>
-                <strong>Important Notes:</strong>
-                <br>
-                1. When your muscles train, they burn. Frustration is the brain's way of expressing the "burn". Take a
-                break if necessary, but allow your brain time to let it do its thing without you interrupting it by
-                overthinking everything.
-                <br><br>
-                2. The help button has no limit. No one will know you used it.
-            </p>
-            <button id="start-game-btn" class="start-game-button">NEXT ➔</button>
+            <p class="how-to-play-kicker">Field briefing // algebra calibration</p>
+            <h2>Unlock Your Mind</h2>
+            <div class="how-to-play-message">
+                <p>
+                    Math Master turns each equation into a live reaction drill. Read the line, harvest the right
+                    symbols, and keep the lock moving before the clock strips away your score.
+                </p>
+                <div class="how-to-play-callout">
+                    <strong>Before you drop in</strong>
+                    <ul>
+                        <li>Friction is part of training. Pause, breathe, then let the pattern settle.</li>
+                        <li>The Help button is unlimited. Use it whenever you need momentum.</li>
+                    </ul>
+                </div>
+            </div>
+            <button id="start-game-btn" class="start-game-button">Begin calibration</button>
         </div>
     </div>
 
@@ -162,6 +165,10 @@
     </div>
 
     <button id="back-button" data-ripple aria-label="Go back to level selection">← Back</button>
+    <button id="audio-toggle" type="button" aria-label="Toggle interaction sound effects" aria-pressed="true">
+        <span class="audio-toggle__eyebrow">Audio</span>
+        <span class="audio-toggle__label">Sound on</span>
+    </button>
 
     <!-- Score + Timer HUD -->
     <div id="game-hud" class="game-hud" aria-label="Game HUD">
@@ -281,6 +288,13 @@
     <script src="/src/scripts/constants.part.ui.js"></script>
     <script src="/src/scripts/constants.js"></script>
     <script src="/src/scripts/constants.events.js"></script>
+    <script src="/src/scripts/interaction-audio.cyberpunk.js"></script>
+    <script src="/src/scripts/interaction-audio.cyberpunk.state.js"></script>
+    <script src="/src/scripts/interaction-audio.cyberpunk.ui.js"></script>
+    <script src="/src/scripts/interaction-audio.cyberpunk.gameplay.js"></script>
+    <script src="/src/scripts/interaction-audio.cyberpunk.encounters.js"></script>
+    <script src="/src/scripts/interaction-audio.cyberpunk.bootstrap.js"></script>
+    <script src="/src/scripts/interaction-audio.cyberpunk.controls.js"></script>
     <!-- New modular managers -->
     <script src="/src/scripts/problem-manager.js"></script>
     <script src="/src/scripts/symbol-manager.js"></script>
