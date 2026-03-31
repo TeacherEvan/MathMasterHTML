@@ -175,3 +175,22 @@
   font-style: italic;
   animation: pulse 2s ease-in-out infinite;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .problem-text,
+  .solution-step,
+  .solution-symbol,
+  .revealed-symbol,
+  .completed-row-symbol,
+  .lock-waiting {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+  .solution-step {
+    opacity: 1 !important;
+  }
+  .solution-symbol {
+    will-change: auto;
+  }
+}
