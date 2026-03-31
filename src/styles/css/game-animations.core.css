@@ -38,6 +38,75 @@
   }
 }
 
+/* Problem statement entrance on new problem load */
+@keyframes problemEntrance {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0.65rem, 0) scale(0.985);
+  }
+
+  65% {
+    opacity: 1;
+    transform: translate3d(0, -0.06rem, 0) scale(1.012);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Solution rows stagger in like a calibrated readout */
+@keyframes solutionRowEntrance {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0.5rem, 0);
+  }
+
+  72% {
+    opacity: 1;
+    transform: translate3d(0, -0.04rem, 0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Symbol reveal feedback for correct clicks and help reveals */
+@keyframes symbolRevealPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.78);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Subtle urgency pop when the timer crosses a phase threshold */
+@keyframes timerPhasePop {
+  0% {
+    transform: scale(1);
+  }
+
+  45% {
+    transform: scale(1.065);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
 /* Symbol click effect */
 @keyframes symbolClick {
   0% {
@@ -116,12 +185,18 @@
 @keyframes pulseRed {
   0%,
   100% {
-    text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000,
+    text-shadow:
+      0 0 10px #ff0000,
+      0 0 20px #ff0000,
+      0 0 30px #ff0000,
       3px 3px 0px #000;
   }
 
   50% {
-    text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000,
+    text-shadow:
+      0 0 20px #ff0000,
+      0 0 40px #ff0000,
+      0 0 60px #ff0000,
       3px 3px 0px #000;
   }
 }
