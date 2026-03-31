@@ -186,11 +186,19 @@
   function handleLoad() {
     window.PlayerStorage?.init?.();
     animateCards();
-    setTimeout(animateProgress, CONFIG.ANIMATE_DELAY_MS);
+    setTimeout(
+      animateProgress,
+      prefersReducedMotion ? 0 : CONFIG.ANIMATE_DELAY_MS,
+    );
   }
 
   function initProgress() {
-    window.addEventListener("load", handleLoad);
+    if (document.readyState === "loading") {
+      window.addEventListener("load", handleLoad, { once: true });
+    } else {
+      handleLoad();
+    }
+
     if (elements.resetButton) {
       elements.resetButton.addEventListener("click", resetProgress);
     }

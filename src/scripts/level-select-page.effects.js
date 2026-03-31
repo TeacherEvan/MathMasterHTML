@@ -87,10 +87,11 @@
   }
 
   function initEffects() {
-    window.addEventListener("load", handleLoad);
     window.addEventListener("resize", handleResize);
 
-    if (document.readyState !== "loading") {
+    if (document.readyState === "loading") {
+      window.addEventListener("load", handleLoad, { once: true });
+    } else {
       handleLoad();
     }
   }
