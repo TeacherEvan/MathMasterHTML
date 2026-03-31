@@ -1,9 +1,6 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
-import {
-  collectPerfSnapshot,
-  enablePerfMetrics,
-} from "./utils/perf-metrics.js";
+import { enablePerfMetrics } from "./utils/perf-metrics.js";
 
 test.describe("Performance benchmarks", () => {
   test.beforeEach(async ({ page }) => {
@@ -20,29 +17,54 @@ test.describe("Performance benchmarks", () => {
 
   test("maintains acceptable FPS and memory usage", async ({ page }) => {
     await page.keyboard.press("P");
-    await page.waitForTimeout(1200);
+    await page.waitForFunction(
+      () =>
+        !!window.performanceMonitor &&
+        typeof window.performanceMonitor.getSnapshot === "function" &&
+        window.performanceMonitor.getSnapshot().sampleCount >= 30,
+      undefined,
+      { timeout: 5000 },
+    );
 
-    const snapshot = await collectPerfSnapshot(page);
+    const snapshot = await page.evaluate(() => {
+      if (
+        !window.performanceMonitor ||
+        !window.performanceMonitor.getSnapshot
+      ) {
+        throw new Error(
+          "PerformanceMonitor not available or getSnapshot not found",
+        );
+      }
 
-    // Log structured snapshot for reporting
-    test.info().annotations.push({
-      type: "perf-snapshot",
-      description: JSON.stringify(snapshot, null, 2),
+      const perfSnapshot = window.performanceMonitor.getSnapshot();
+      const perf =
+        /** @type {Performance & { memory?: { usedJSHeapSize?: number } }} */ (
+          window.performance
+        );
+      const heapUsed = perf.memory?.usedJSHeapSize ?? null;
+
+      return {
+        ...perfSnapshot,
+        heapUsed,
+      };
+    });
+
+    // Attach structured snapshot for reporting as JSON instead of a large annotation string
+    await test.info().attach("perf-snapshot", {
+      contentType: "application/json",
+      body: Buffer.from(JSON.stringify(snapshot, null, 2)),
     });
 
     expect(Number.isFinite(snapshot.fps)).toBeTruthy();
     expect(snapshot.fps).toBeGreaterThanOrEqual(30);
     expect(snapshot.sampleCount).toBeGreaterThan(0);
+    expect(snapshot.frameTimeP95).toBeLessThan(50);
+    expect(snapshot.jankPercent).toBeLessThan(15);
+    expect(snapshot.domQueriesPerSec).toBeLessThan(500);
 
-    const memory = await page.evaluate(() => {
-      const perf = window.performance;
-      if (!perf || !perf.memory) return null;
-      return perf.memory.usedJSHeapSize;
-    });
-
-    if (memory !== null) {
-      expect(memory).toBeGreaterThan(0);
-      expect(memory).toBeLessThan(600 * 1024 * 1024);
+    if (snapshot.heapUsed !== null) {
+      expect(snapshot.heapUsed).toBeGreaterThan(0);
+      expect(snapshot.heapUsed).toBeLessThan(600 * 1024 * 1024);
     }
   });
 });

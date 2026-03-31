@@ -7,7 +7,8 @@ class PerformanceMonitor {
     this.lastFrameTime = performance.now();
     this.fps = 60;
     this.domQueryCount = 0;
-    this.lastReportTime = Date.now();
+    this.lastReportTime = performance.now();
+    this.lastDomQueriesPerSec = 0;
     this.overlay = null;
 
     // Extended histogram: rolling buffer of last 300 frame deltas (~5s at 60fps)
@@ -49,7 +50,7 @@ class PerformanceMonitor {
   _initInputLatencyTracking() {
     document.addEventListener("symbolClicked", (e) => {
       if (!this._isExtendedEnabled()) return;
-      this._pendingClickTimestamp = e.timeStamp || performance.now();
+      this._pendingClickTimestamp = e.timeStamp ?? performance.now();
     });
     document.addEventListener("symbolRevealed", () => {
       if (!this._isExtendedEnabled()) return;
@@ -102,13 +103,25 @@ class PerformanceMonitor {
     if (window.wormSystem && window.wormSystem.worms) {
       activeWorms = window.wormSystem.worms.filter((w) => w.active).length;
     }
-    const rainSymbols =
-      typeof window.symbolRainActiveCount === "number"
-        ? window.symbolRainActiveCount
-        : 0;
+    let rainSymbols = 0;
+    if (typeof window.symbolRainActiveCount === "number") {
+      rainSymbols = window.symbolRainActiveCount;
+    } else if (typeof window.getActiveSymbolCount === "function") {
+      const count = window.getActiveSymbolCount();
+      if (typeof count === "number" && Number.isFinite(count)) {
+        rainSymbols = count;
+      }
+    }
 
-    // DOM queries per second (based on 500ms reporting interval)
-    const domQueriesPerSec = Math.round(this.domQueryCount / 0.5);
+    const elapsedSinceLastReport = Math.max(
+      1,
+      performance.now() - this.lastReportTime,
+    );
+    const currentDomQueryRate = Math.round(
+      (this.domQueryCount / elapsedSinceLastReport) * 1000,
+    );
+    const domQueriesPerSec =
+      currentDomQueryRate > 0 ? currentDomQueryRate : this.lastDomQueriesPerSec;
 
     return {
       fps: this.fps,
@@ -256,7 +269,7 @@ class PerformanceMonitor {
 
       // Update overlay every 500ms
       if (now - self.lastReportTime > 500) {
-        self.updateOverlay(avgDelta);
+        self.updateOverlay(avgDelta, now - self.lastReportTime);
         self.lastReportTime = now;
       }
 
@@ -266,7 +279,7 @@ class PerformanceMonitor {
     measureFrame();
   }
 
-  updateOverlay(frameTime) {
+  updateOverlay(frameTime, elapsedMs = 500) {
     const fpsElement = document.getElementById("perf-fps");
     const domElement = document.getElementById("perf-dom");
     const wormsElement = document.getElementById("perf-worms");
@@ -287,7 +300,10 @@ class PerformanceMonitor {
     }
 
     // Update DOM queries per second
-    const queriesPerSec = Math.round(this.domQueryCount / 0.5);
+    const queriesPerSec = Math.round(
+      (this.domQueryCount / Math.max(elapsedMs, 1)) * 1000,
+    );
+    this.lastDomQueriesPerSec = queriesPerSec;
     domElement.textContent = queriesPerSec;
     if (queriesPerSec < 200) {
       domElement.style.color = "#0f0";
@@ -314,8 +330,13 @@ class PerformanceMonitor {
     }
 
     // Update symbol count (if accessible)
-    if (window.symbolRainActiveCount !== undefined) {
+    if (typeof window.symbolRainActiveCount === "number") {
       symbolsElement.textContent = window.symbolRainActiveCount;
+    } else if (typeof window.getActiveSymbolCount === "function") {
+      const activeSymbolCount = window.getActiveSymbolCount();
+      if (typeof activeSymbolCount === "number") {
+        symbolsElement.textContent = activeSymbolCount;
+      }
     }
 
     // Update frame time
