@@ -30,10 +30,10 @@ export function checkDocumentation(rootDir) {
     log("⚠️  _INDEX.md missing (recommended for agents)", "yellow");
   }
 
-  if (existsSync(join(docsPath, "Copilot Docs", "_AGENT_QUICKSTART.md"))) {
-    log("✅ _AGENT_QUICKSTART.md exists", "green");
+  if (existsSync(join(rootDir, ".github", "copilot-instructions.md"))) {
+    log("✅ copilot-instructions.md exists", "green");
   } else {
-    log("⚠️  _AGENT_QUICKSTART.md missing", "yellow");
+    log("⚠️  .github/copilot-instructions.md missing", "yellow");
   }
 
   return true;
