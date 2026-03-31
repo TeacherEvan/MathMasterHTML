@@ -92,11 +92,6 @@
     var(--ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
-.timer-phase-pop {
-  animation: timerPhasePop 320ms
-    var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1));
-}
-
 @keyframes scorePop {
   0% {
     transform: scale(1);
@@ -112,9 +107,17 @@
 .timer-display {
   color: #00bfff;
   transition:
+    transform 180ms var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1)),
+    box-shadow 180ms var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1)),
     color 350ms linear,
     border-color 350ms linear;
+  will-change: transform, box-shadow, border-color, color;
   animation: timerPulse 1500ms ease-in-out infinite;
+}
+
+#timer-display.timer-phase-pop {
+  animation: timerPhasePop 320ms
+    var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 .timer-pulse-slow {
