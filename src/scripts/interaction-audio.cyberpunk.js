@@ -25,7 +25,9 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
 
     init() {
       if (this.disabled) {
-        console.log("🔇 Cyberpunk Interaction Audio disabled (unsupported or automation)");
+        console.log(
+          "🔇 Cyberpunk Interaction Audio disabled (unsupported or automation)",
+        );
         return;
       }
 
@@ -33,7 +35,9 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
         capture: true,
         passive: true,
       });
-      document.addEventListener("keydown", this._boundUnlockAudio, { passive: true });
+      document.addEventListener("keydown", this._boundUnlockAudio, {
+        passive: true,
+      });
       document.addEventListener(GameEvents.SYMBOL_CLICKED, () =>
         this.playSymbolClick?.(),
       );

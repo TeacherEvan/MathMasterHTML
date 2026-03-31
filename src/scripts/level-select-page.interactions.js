@@ -1,5 +1,5 @@
 // src/scripts/level-select-page.interactions.js
-(function() {
+(function () {
   "use strict";
 
   const CONFIG = Object.freeze({
@@ -28,8 +28,14 @@
 
     const rect = target.getBoundingClientRect();
     const size = CONFIG.RIPPLE.SIZE_PX;
-    const x = event.clientX - rect.left - size / 2;
-    const y = event.clientY - rect.top - size / 2;
+    const hasPointerPosition =
+      typeof event.clientX === "number" && typeof event.clientY === "number";
+    const x = hasPointerPosition
+      ? event.clientX - rect.left - size / 2
+      : rect.width / 2 - size / 2;
+    const y = hasPointerPosition
+      ? event.clientY - rect.top - size / 2
+      : rect.height / 2 - size / 2;
 
     ripple.style.width = ripple.style.height = `${size}px`;
     ripple.style.left = `${x}px`;
@@ -49,10 +55,10 @@
       createRipple(interactionEvent, cardElement);
     }
 
-    cardElement.style.transform = "scale(0.95)";
+    cardElement.style.transform = "scale(0.98)";
     setTimeout(() => {
       cardElement.style.transform = "";
-    }, 150);
+    }, 180);
 
     setTimeout(() => {
       window.location.href = `${CONFIG.NAVIGATION.LEVEL_SELECT}${levelKey}`;
@@ -60,8 +66,13 @@
   }
 
   function goBack(interactionEvent) {
-    if (interactionEvent?.target) {
-      createRipple(interactionEvent, interactionEvent.target);
+    const rippleTarget =
+      interactionEvent?.currentTarget ||
+      interactionEvent?.target?.closest?.("button") ||
+      elements.backButton;
+
+    if (rippleTarget) {
+      createRipple(interactionEvent || {}, rippleTarget);
     }
     setTimeout(() => {
       window.location.href = CONFIG.NAVIGATION.BACK;
@@ -85,14 +96,13 @@
     if (selectedCard) {
       const levelKey = selectedCard.dataset.level || "beginner";
       selectLevel(levelKey, selectedCard, event);
-      selectedCard.style.animation = "bounce-easy 0.3s ease-in-out";
-      setTimeout(() => {
-        selectedCard.style.animation = "";
-      }, 300);
       return;
     }
 
     if (event.key === "Escape" || event.key === "Backspace") {
+      if (event.key === "Backspace") {
+        event.preventDefault();
+      }
       goBack(event);
     }
   }

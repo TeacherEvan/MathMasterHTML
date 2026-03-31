@@ -1,22 +1,38 @@
 // src/scripts/level-select-page.progress.js
-(function() {
+(function () {
   "use strict";
 
   const CONFIG = Object.freeze({
     MAX_PROBLEMS: 50,
-    ANIMATE_DELAY_MS: 1000,
+    ANIMATE_DELAY_MS: 850,
   });
   const LEVELS = ["beginner", "warrior", "master"];
   const SCOREBOARD_STATS = [
-    { className: "completion-stat", label: "Completed", valueKey: "problemsCompleted" },
-    { className: "best-score-stat", label: "Best Score", valueKey: "bestProblemScore" },
-    { className: "total-score-stat", label: "Total Score", valueKey: "totalScore" },
+    {
+      className: "completion-stat",
+      label: "Completed",
+      valueKey: "problemsCompleted",
+    },
+    {
+      className: "best-score-stat",
+      label: "Best Score",
+      valueKey: "bestProblemScore",
+    },
+    {
+      className: "total-score-stat",
+      label: "Total Score",
+      valueKey: "totalScore",
+    },
   ];
 
   const elements = {
     resetButton: document.querySelector(".reset-progress-btn"),
     cards: Array.from(document.querySelectorAll(".level-card")),
   };
+
+  const prefersReducedMotion = Boolean(
+    window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches,
+  );
 
   function safeGetLocalStorage(key) {
     try {
@@ -36,7 +52,9 @@
   }
 
   function formatScore(value) {
-    return new Intl.NumberFormat().format(Math.max(0, Number(value) || 0));
+    return new Intl.NumberFormat("en-US").format(
+      Math.max(0, Number(value) || 0),
+    );
   }
 
   function getPlayerProfile() {
@@ -112,17 +130,22 @@
         });
       }
 
-      bar.style.width = "0%";
-      setTimeout(() => {
-        bar.style.transition = "width 2s ease-in-out";
-        bar.style.width = `${percentage}%`;
-      }, index * 200);
+      bar.style.transition = prefersReducedMotion
+        ? "none"
+        : "width 900ms cubic-bezier(0.16, 1, 0.3, 1)";
+      bar.style.width = prefersReducedMotion ? `${percentage}%` : "0%";
+
+      if (!prefersReducedMotion) {
+        setTimeout(() => {
+          bar.style.width = `${percentage}%`;
+        }, index * 140);
+      }
     });
   }
 
   function resetProgress() {
     const confirmReset = confirm(
-      "⚠️ Are you sure you want to reset ALL progress? This will clear your console slots, scoreboard data, and problem completion counts for all levels!",
+      "Reset all local progress? This clears console slots, scoreboard data, and problem completion counts on this device.",
     );
 
     if (!confirmReset) return;
@@ -133,20 +156,30 @@
     });
     window.PlayerStorage?.resetProfile?.();
 
-    console.log("🔄 All progress reset!");
-    alert("✅ Progress reset successfully!");
     window.location.reload();
   }
 
   function animateCards() {
     elements.cards.forEach((card, index) => {
-      card.style.opacity = "0";
-      card.style.transform = "translateY(50px)";
-      setTimeout(() => {
-        card.style.transition = "all 0.6s ease-out";
+      if (prefersReducedMotion) {
         card.style.opacity = "1";
-        card.style.transform = "translateY(0)";
-      }, index * 200 + 500);
+        card.style.transform = "none";
+        return;
+      }
+
+      card.style.opacity = "0";
+      card.style.transform = "translateY(24px)";
+      card.style.transition = "none";
+
+      setTimeout(
+        () => {
+          card.style.transition =
+            "transform 700ms cubic-bezier(0.16, 1, 0.3, 1), opacity 700ms cubic-bezier(0.16, 1, 0.3, 1)";
+          card.style.opacity = "1";
+          card.style.transform = "translateY(0)";
+        },
+        index * 150 + 150,
+      );
     });
   }
 

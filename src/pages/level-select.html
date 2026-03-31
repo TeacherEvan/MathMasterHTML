@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Choose your difficulty level in Math Master - Educational algebra game with three challenging levels.">
-    <meta name="theme-color" content="#000000">
+        content="Choose a route in Math Master's operator console—three algebra tracks with local progress saved on this device.">
+    <meta name="theme-color" content="#111714">
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self';">
 
@@ -14,17 +14,12 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/Images/icon-192.png">
 
-    <title>Math Master - Unlock Your Mind - Level Select</title>
+    <title>Math Master — Level Select</title>
 
-    <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link rel="stylesheet" href="/src/styles/css/level-select.css">
-    <link rel="stylesheet" href="/src/styles/css/modern-ux-enhancements.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-    </style>
 </head>
 
 <body>
@@ -33,24 +28,29 @@
 
     <!-- Header Section -->
     <div class="header">
+        <p class="page-kicker">Training dossier</p>
         <h1 class="main-title">MATH MASTER</h1>
-        <h2 class="subtitle">Unlock Your Mind</h2>
-        <p class="level-select-subtitle">Choose Your Mathematical Challenge</p>
+        <h2 class="subtitle">Choose a route</h2>
+        <p class="level-select-subtitle">
+            Three tracks. One keyboard. Choose a route and keep the scorebook local.
+        </p>
+        <div class="header-hint">
+            <span>Press 1 / 2 / 3 to launch</span>
+            <span>Progress stays on this device</span>
+        </div>
     </div>
-
-    <!-- Reset Progress Button -->
-    <button class="reset-progress-btn">🔄 Reset Progress</button>
 
     <!-- Main Level Selection Container -->
     <div class="level-container">
         <div class="levels-grid">
             <!-- Easy Level - Addition/Subtraction -->
             <div class="level-card level-easy" data-level="beginner">
-                <div class="level-icon">🌱</div>
-                <h3 class="level-title">EASY</h3>
+                <p class="level-ordinal">Route 01 · Beginner</p>
+                <div class="level-icon" aria-hidden="true">01</div>
+                <h3 class="level-title">Foundations</h3>
                 <p class="level-description">
-                    Master the foundations with addition and subtraction algebra.
-                    Each problem contains BOTH + and - operations for complete practice.
+                    Build the habit. Read the equation, isolate the pattern, and settle into
+                    addition and subtraction with control.
                 </p>
                 <div class="level-stats">
                     <div class="stat">
@@ -58,30 +58,31 @@
                         <span class="stat-label">Problems</span>
                     </div>
                     <div class="stat">
-                        <span class="stat-value">+ & −</span>
+                        <span class="stat-value">+ / −</span>
                         <span class="stat-label">Both Operations</span>
                     </div>
                     <div class="stat">
-                        <span class="stat-value">⭐</span>
-                        <span class="stat-label">Difficulty</span>
+                        <span class="stat-value">1x</span>
+                        <span class="stat-label">Pace</span>
                     </div>
                 </div>
                 <div class="progress-container">
-                    <div class="progress-label">Your Progress</div>
+                    <div class="progress-label">Local progress</div>
                     <div class="progress-bar">
                         <div class="progress-fill"></div>
                     </div>
                 </div>
-                <button class="level-button">Start Journey</button>
+                <button class="level-button" type="button">Launch route</button>
             </div>
 
             <!-- Medium Level - Multiplication -->
             <div class="level-card level-medium" data-level="warrior">
-                <div class="level-icon">🔥</div>
-                <h3 class="level-title">MEDIUM</h3>
+                <p class="level-ordinal">Route 02 · Warrior</p>
+                <div class="level-icon" aria-hidden="true">02</div>
+                <h3 class="level-title">Mixed Ops</h3>
                 <p class="level-description">
-                    Rise to the challenge with multi-operation algebra.
-                    Each problem contains addition, subtraction, AND multiplication.
+                    Shift into blended arithmetic. Keep the line clean while addition,
+                    subtraction, and multiplication trade places.
                 </p>
                 <div class="level-stats">
                     <div class="stat">
@@ -89,30 +90,31 @@
                         <span class="stat-label">Problems</span>
                     </div>
                     <div class="stat">
-                        <span class="stat-value">+/−/×</span>
-                        <span class="stat-label">All Three Ops</span>
+                        <span class="stat-value">+ / − / ×</span>
+                        <span class="stat-label">Operations</span>
                     </div>
                     <div class="stat">
-                        <span class="stat-value">⭐⭐</span>
-                        <span class="stat-label">Difficulty</span>
+                        <span class="stat-value">1.5x</span>
+                        <span class="stat-label">Pace</span>
                     </div>
                 </div>
                 <div class="progress-container">
-                    <div class="progress-label">Your Progress</div>
+                    <div class="progress-label">Local progress</div>
                     <div class="progress-bar">
                         <div class="progress-fill"></div>
                     </div>
                 </div>
-                <button class="level-button">Accept Challenge</button>
+                <button class="level-button" type="button">Launch route</button>
             </div>
 
             <!-- Hard Level - Division -->
             <div class="level-card level-hard" data-level="master">
-                <div class="level-icon">⚡</div>
-                <h3 class="level-title">MEDIUM TOO</h3>
+                <p class="level-ordinal">Route 03 · Master</p>
+                <div class="level-icon" aria-hidden="true">03</div>
+                <h3 class="level-title">Division</h3>
                 <p class="level-description">
-                    Conquer the test with division algebra.
-                    Achieve mastery and become closer to unlocking your full potential.
+                    The final drill. Solve division-first equations with calm timing and exact
+                    symbol work.
                 </p>
                 <div class="level-stats">
                     <div class="stat">
@@ -121,28 +123,31 @@
                     </div>
                     <div class="stat">
                         <span class="stat-value">÷</span>
-                        <span class="stat-label">Operations</span>
+                        <span class="stat-label">Operation</span>
                     </div>
                     <div class="stat">
-                        <span class="stat-value">⭐⭐⭐</span>
-                        <span class="stat-label">Difficulty</span>
+                        <span class="stat-value">2x</span>
+                        <span class="stat-label">Pace</span>
                     </div>
                 </div>
                 <div class="progress-container">
-                    <div class="progress-label">Your Progress</div>
+                    <div class="progress-label">Local progress</div>
                     <div class="progress-bar">
                         <div class="progress-fill"></div>
                     </div>
                 </div>
-                <button class="level-button">Prove Mastery</button>
+                <button class="level-button" type="button">Launch route</button>
             </div>
         </div>
     </div>
 
     <!-- Navigation Footer -->
     <div class="navigation">
-        <button class="back-button">← Return to Welcome</button>
-        <div class="creator-credit">Created by Teacher Evan</div>
+        <button class="back-button" type="button">← Return to Welcome</button>
+        <div class="navigation-meta">
+            <div class="creator-credit">Created by Teacher Evan</div>
+            <button class="reset-progress-btn" type="button">Reset local progress</button>
+        </div>
     </div>
 
     <!-- Floating Math Symbols -->
