@@ -38,6 +38,7 @@
     columnWidth: 50,
     gridCellSize: 100,
     poolSize: 60,
+    maxActiveSymbols: 200,
     // Desktop collision (pixels)
     desktopSymbolHeight: 30,
     desktopSymbolWidth: 30,

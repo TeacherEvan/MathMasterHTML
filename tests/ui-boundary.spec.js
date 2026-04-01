@@ -49,8 +49,9 @@ test.describe("UI Boundary Management", () => {
 
     expect(boxesOverlap(scoreBox, timerBox, 0)).toBe(false);
     console.log(
-      `✅ HUD elements properly spaced: Score ends at ${scoreBox.x +
-        scoreBox.width}px, Timer starts at ${timerBox.x}px`,
+      `✅ HUD elements properly spaced: Score ends at ${
+        scoreBox.x + scoreBox.width
+      }px, Timer starts at ${timerBox.x}px`,
     );
   });
 
@@ -206,7 +207,10 @@ test.describe("UI Boundary Management", () => {
         maxY: 140,
       };
 
-      const updated = manager.setConstraints("power-up-display", nextConstraints);
+      const updated = manager.setConstraints(
+        "power-up-display",
+        nextConstraints,
+      );
       const registration = manager.elements.get("power-up-display");
 
       return {
@@ -267,15 +271,26 @@ test.describe("UI Boundary Management", () => {
       "Mobile layout assertions run on mobile-emulated projects only",
     );
 
+    const viewport = page.viewportSize();
+    expect(viewport).not.toBeNull();
+
     const scoreBox = await page.locator("#score-display").boundingBox();
     const timerBox = await page.locator("#timer-display").boundingBox();
+    const hudBox = await page.locator("#game-hud").boundingBox();
+    const spacerDisplay = await page.evaluate(() => {
+      const hud = document.getElementById("game-hud");
+      return hud ? window.getComputedStyle(hud, "::after").display : null;
+    });
 
     expect(scoreBox).toBeTruthy();
     expect(timerBox).toBeTruthy();
+    expect(hudBox).toBeTruthy();
 
     // Should still maintain left/right separation
     expect(scoreBox.x).toBeLessThan(timerBox.x);
     expect(boxesOverlap(scoreBox, timerBox, 0)).toBe(false);
+    expect(spacerDisplay).toBe("none");
+    expect(hudBox.width).toBeLessThanOrEqual(viewport.width - 16);
 
     console.log("✅ Mobile layout maintains HUD separation");
   });

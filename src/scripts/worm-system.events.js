@@ -1,5 +1,5 @@
 // src/scripts/worm-system.events.js
-(function() {
+(function () {
   if (!window.WormSystem) {
     console.warn("🐛 WormSystem not found for event helpers");
     return;
@@ -17,7 +17,7 @@
   };
 
   // PERFORMANCE: Setup event listeners once (called from initialize)
-  proto.setupEventListeners = function() {
+  proto.setupEventListeners = function () {
     if (this.eventListenersInitialized) {
       console.log("⚠️ Event listeners already initialized, skipping...");
       return;
@@ -25,8 +25,10 @@
 
     console.log("🎧 Setting up WormSystem event listeners...");
 
+    this._eventHandlers = {};
+
     // Listen for the custom event dispatched by game.js
-    document.addEventListener(GameEvents.PROBLEM_LINE_COMPLETED, (event) => {
+    this._eventHandlers[GameEvents.PROBLEM_LINE_COMPLETED] = (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       console.log(
         "🐛 Worm System received problemLineCompleted event:",
@@ -51,10 +53,10 @@
         }
         this.queueWormSpawn("panelB", { targetSymbol });
       }
-    });
+    };
 
     // CONSOLIDATED: Listen for problem completion (reset row counter + cleanup)
-    document.addEventListener(GameEvents.PROBLEM_COMPLETED, (event) => {
+    this._eventHandlers[GameEvents.PROBLEM_COMPLETED] = (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       console.log(
         "🎉 Problem completed! Resetting row counter and cleaning up.",
@@ -70,33 +72,33 @@
       setTimeout(() => {
         this.cleanupCracks();
       }, this.PROBLEM_COMPLETION_CLEANUP_DELAY); // Wait for explosions to finish
-    });
+    };
 
     // PURPLE WORM: Listen for purple worm trigger (3 wrong answers)
-    document.addEventListener(GameEvents.PURPLE_WORM_TRIGGERED, (event) => {
+    this._eventHandlers[GameEvents.PURPLE_WORM_TRIGGERED] = (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       console.log(
         "🟣 Purple Worm System received purpleWormTriggered event:",
         detail,
       );
       this.queueWormSpawn("purple");
-    });
+    };
 
     // Listen for symbol clicks in rain display to check if worm's target was clicked
-    document.addEventListener(GameEvents.SYMBOL_CLICKED, (event) => {
+    this._eventHandlers[GameEvents.SYMBOL_CLICKED] = (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       this.checkWormTargetClickForExplosion(detail.symbol);
-    });
+    };
 
     // Listen for symbol reveals to trigger worm targeting
-    document.addEventListener(GameEvents.SYMBOL_REVEALED, (event) => {
+    this._eventHandlers[GameEvents.SYMBOL_REVEALED] = (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       console.log("🎯 Symbol revealed event:", detail);
       this.notifyWormsOfRedSymbol(detail.symbol);
-    });
+    };
 
     // Cursor tracking for evasion (event-driven)
-    document.addEventListener(GameEvents.WORM_CURSOR_UPDATE, (event) => {
+    this._eventHandlers[GameEvents.WORM_CURSOR_UPDATE] = (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       this.cursorState = detail;
 
@@ -113,11 +115,16 @@
           this._applyWormPosition(worm);
         }
       }
-    });
-    document.addEventListener(GameEvents.WORM_CURSOR_TAP, (event) => {
+    };
+
+    this._eventHandlers[GameEvents.WORM_CURSOR_TAP] = (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       this.cursorState = detail;
-    });
+    };
+
+    for (const [eventName, handler] of Object.entries(this._eventHandlers)) {
+      document.addEventListener(eventName, handler);
+    }
 
     if (this.cursorTracker) {
       this.cursorTracker.start();
@@ -127,8 +134,24 @@
     console.log("✅ WormSystem event listeners initialized");
   };
 
+  proto.removeEventListeners = function () {
+    if (!this._eventHandlers) return;
+
+    for (const [eventName, handler] of Object.entries(this._eventHandlers)) {
+      document.removeEventListener(eventName, handler);
+    }
+
+    if (this.cursorTracker) {
+      this.cursorTracker.stop();
+    }
+
+    this._eventHandlers = null;
+    this.eventListenersInitialized = false;
+    console.log("🧹 WormSystem event listeners removed");
+  };
+
   // Check if rain symbol clicked matches worm's stolen symbol - EXPLODE WORM or TURN GREEN
-  proto.checkWormTargetClickForExplosion = function(clickedSymbol) {
+  proto.checkWormTargetClickForExplosion = function (clickedSymbol) {
     // REFACTORED: Use utility function for normalization
     const normalizedClicked = normalizeSymbol(clickedSymbol);
 
@@ -138,7 +161,7 @@
 
       const normalizedWormSymbol = normalizeSymbol(worm.stolenSymbol);
 
-        if (normalizedWormSymbol === normalizedClicked) {
+      if (normalizedWormSymbol === normalizedClicked) {
         // PURPLE WORM: matching rain symbol is the only valid kill path
         if (worm.isPurple) {
           console.log(
@@ -159,7 +182,7 @@
   };
 
   // Notify roaming worms that a red symbol has appeared
-  proto.notifyWormsOfRedSymbol = function(symbolValue) {
+  proto.notifyWormsOfRedSymbol = function (symbolValue) {
     console.log(`🎯 Notifying worms of revealed red symbol: "${symbolValue}"`);
 
     // Cache the latest revealed symbol and refresh symbol caches

@@ -1,7 +1,7 @@
 // js/game-init.js - Game initialization and setup
 console.log("🎮 Game initialization module loading...");
 
-(function() {
+(function () {
   // Simple error boundary for game initialization
   try {
     const problemContainer = document.getElementById("problem-container");
@@ -77,6 +77,17 @@ console.log("🎮 Game initialization module loading...");
     };
 
     console.log("✅ Game initialization complete");
+
+    // Fail-fast: verify critical globals exist after a short delay (scripts load async)
+    setTimeout(() => {
+      const requiredGlobals = ["WormSystem", "GameProblemManager"];
+      const missing = requiredGlobals.filter((name) => !window[name]);
+      if (missing.length > 0) {
+        console.error(
+          `🎮 BOOT_FAIL: Missing required globals: ${missing.join(", ")}`,
+        );
+      }
+    }, 2000);
   } catch (error) {
     console.error("❌ Game initialization failed:", error);
     // Show user-friendly error message

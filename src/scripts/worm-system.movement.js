@@ -3,7 +3,7 @@
 // before this file in game.html.
 console.log("🐛 Worm movement animate loading...");
 
-(function() {
+(function () {
   if (!window.WormSystem) {
     console.warn("🐛 WormSystem not found for animate");
     return;
@@ -13,23 +13,53 @@ console.log("🐛 Worm movement animate loading...");
 
   const TWO_PI = Math.PI * 2;
 
+  proto._setupVisibilityThrottle = function () {
+    if (this._visibilityHandler) return;
+    this._visibilityHandler = () => {
+      if (document.hidden) {
+        if (this.animationFrameId) {
+          cancelAnimationFrame(this.animationFrameId);
+          this.animationFrameId = null;
+          console.log("🐛 Worm animation paused (tab hidden)");
+        }
+      } else {
+        if (
+          !this.animationFrameId &&
+          !this.isDestroyed &&
+          this.worms.length > 0
+        ) {
+          this.animate();
+          console.log("🐛 Worm animation resumed (tab visible)");
+        }
+      }
+    };
+    document.addEventListener("visibilitychange", this._visibilityHandler);
+  };
+
   /**
    * Main animation loop - moves all active worms each frame.
    * Calls requestAnimationFrame to schedule the next tick, then iterates
    * over every worm and delegates to the appropriate behaviour handler.
    */
-  proto.animate = function() {
+  proto.animate = function () {
+    // Setup visibility throttle on first animate call
+    if (!this._visibilityHandler) {
+      this._setupVisibilityThrottle();
+    }
+
     // Check if system is unmounted/destroyed
     if (this.isDestroyed) {
       if (this.animationFrameId) {
         cancelAnimationFrame(this.animationFrameId);
       }
-      return; 
+      return;
     }
-  
+
     // Use the pre-bound reference created in initialize() so RAF always holds
     // a stable function with `this` guaranteed to be the WormSystem instance.
-    this.animationFrameId = requestAnimationFrame(this._boundAnimate || this.animate.bind(this));
+    this.animationFrameId = requestAnimationFrame(
+      this._boundAnimate || this.animate.bind(this),
+    );
 
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
@@ -41,8 +71,7 @@ console.log("🐛 Worm movement animate loading...");
       if (!worm || !worm.active) continue;
 
       // Advance crawl phase each frame for the inchworm animation
-      worm.crawlPhase =
-        (worm.crawlPhase + this.CRAWL_PHASE_INCREMENT) % TWO_PI;
+      worm.crawlPhase = (worm.crawlPhase + this.CRAWL_PHASE_INCREMENT) % TWO_PI;
 
       // Transition from roaming to rushing once the roam timer expires
       if (

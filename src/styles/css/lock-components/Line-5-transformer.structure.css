@@ -6,8 +6,17 @@
   background: radial-gradient(circle, #4488ff, #6699ff, #4488ff);
   border-radius: 50%;
   border: 3px solid #88aaff;
-  transition: all 3s ease-in-out;
-  box-shadow: 0 0 25px rgba(68, 136, 255, 1),
+  transition:
+    transform 3s ease-in-out,
+    opacity 3s ease-in-out,
+    box-shadow 3s ease-in-out,
+    border-color 3s ease-in-out,
+    background 3s ease-in-out,
+    filter 3s ease-in-out,
+    width 3s ease-in-out,
+    height 3s ease-in-out;
+  box-shadow:
+    0 0 25px rgba(68, 136, 255, 1),
     inset 0 0 15px rgba(136, 170, 255, 0.8);
   z-index: 10;
 }
@@ -24,7 +33,15 @@
   background: linear-gradient(45deg, #4488ff, #6699ff);
   border: 2px solid #88aaff;
   border-radius: 8px;
-  transition: all 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition:
+    transform 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    opacity 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    box-shadow 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    border-color 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    background 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    filter 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    width 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    height 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   box-shadow: 0 0 20px rgba(68, 136, 255, 0.8);
   opacity: 0;
 }
@@ -141,14 +158,23 @@
   border: 3px solid transparent;
   border-radius: 50%;
   opacity: 0;
-  transition: all 2s ease-in-out;
+  transition:
+    transform 2s ease-in-out,
+    opacity 2s ease-in-out,
+    box-shadow 2s ease-in-out,
+    border-color 2s ease-in-out,
+    background 2s ease-in-out,
+    filter 2s ease-in-out,
+    width 2s ease-in-out,
+    height 2s ease-in-out;
 }
 
 .energy-arc.active {
   opacity: 1;
   border-color: #4488ff;
   animation: arc-discharge-blue 2s infinite ease-in-out;
-  box-shadow: 0 0 30px rgba(68, 136, 255, 0.8),
+  box-shadow:
+    0 0 30px rgba(68, 136, 255, 0.8),
     inset 0 0 20px rgba(68, 136, 255, 0.4);
 }
 

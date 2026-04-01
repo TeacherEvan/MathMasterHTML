@@ -1,13 +1,15 @@
 // js/worm-spawn-manager.queue.js - Worm spawn queue management
 console.log("📋 Worm Spawn Queue Manager loading...");
 
-(function() {
+(function () {
   class WormSpawnManager {
     constructor(config = {}) {
       this.SPAWN_QUEUE_DELAY = config.queueDelay || 50;
       this.maxWorms = config.maxWorms || 999;
+      this.maxQueueLength = config.maxQueueLength || 20;
 
       this.spawnQueue = [];
+      this._queue = this.spawnQueue;
       this.isProcessingQueue = false;
       this.queueGeneration = 0;
 
@@ -17,6 +19,15 @@ console.log("📋 Worm Spawn Queue Manager loading...");
     }
 
     queueSpawn(type, data = {}) {
+      if (this.spawnQueue.length >= this.maxQueueLength) {
+        const droppedSpawn = this.spawnQueue.shift();
+        console.log(
+          `🧹 Spawn queue capped at ${this.maxQueueLength}; dropped oldest ${
+            droppedSpawn?.type || "unknown"
+          } spawn`,
+        );
+      }
+
       this.spawnQueue.push({
         type,
         data,
@@ -73,12 +84,14 @@ console.log("📋 Worm Spawn Queue Manager loading...");
       return {
         length: this.spawnQueue.length,
         isProcessing: this.isProcessingQueue,
+        maxLength: this.maxQueueLength,
       };
     }
 
     clearQueue() {
       const cleared = this.spawnQueue.length;
       this.spawnQueue = [];
+      this._queue = this.spawnQueue;
       this.isProcessingQueue = false;
       this.queueGeneration += 1;
 

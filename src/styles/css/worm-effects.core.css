@@ -45,14 +45,19 @@
 
 .explosion-particle {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 8px;
   height: 8px;
   background: radial-gradient(circle, #ffff00, #ff6600, #ff0000);
   border-radius: 50%;
   pointer-events: none;
   animation: particle-burst 0.6s ease-out forwards;
-  box-shadow: 0 0 10px rgba(255, 255, 0, 1), 0 0 20px rgba(255, 100, 0, 0.8);
+  box-shadow:
+    0 0 10px rgba(255, 255, 0, 1),
+    0 0 20px rgba(255, 100, 0, 0.8);
   z-index: 10001;
+  will-change: translate, transform, opacity;
 }
 
 @keyframes particle-burst {
@@ -107,6 +112,8 @@
 
 .slime-splat {
   position: absolute;
+  top: 0;
+  left: 0;
   width: var(--splat-width, 62px);
   height: var(--splat-height, 42px);
   pointer-events: none;
@@ -229,12 +236,24 @@
 
 .worm-crack {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 40px;
   height: 40px;
   pointer-events: none;
   z-index: 1;
   opacity: 0;
   animation: crack-appear 0.3s ease-out forwards;
+  will-change: translate, transform, opacity;
+}
+
+.power-up,
+.spider-entity,
+.devil-entity,
+.devil-skull {
+  top: 0;
+  left: 0;
+  will-change: translate, transform, opacity;
 }
 
 .worm-crack::before {
@@ -303,7 +322,11 @@
   height: clamp(40px, 5vw, 46px);
   border-radius: 999px;
   border: 1px solid rgba(255, 215, 0, 0.72);
-  background: radial-gradient(circle at 35% 30%, rgba(44, 44, 44, 0.92), rgba(6, 6, 6, 0.92) 70%);
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(44, 44, 44, 0.92),
+    rgba(6, 6, 6, 0.92) 70%
+  );
   box-shadow:
     0 0 0 1px rgba(255, 215, 0, 0.24) inset,
     0 0 14px rgba(255, 215, 0, 0.26);
@@ -355,7 +378,8 @@
   white-space: nowrap;
   z-index: 10003;
   pointer-events: none;
-  animation: muffin-shoutout-rise 1.15s cubic-bezier(0.22, 0.78, 0.3, 1) forwards;
+  animation: muffin-shoutout-rise 1.15s cubic-bezier(0.22, 0.78, 0.3, 1)
+    forwards;
 }
 
 @keyframes muffin-shoutout-rise {
@@ -377,7 +401,11 @@
   width: 4px;
   height: 4px;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(255, 232, 118, 0.8) 0, rgba(255, 215, 0, 0.1) 72%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 232, 118, 0.8) 0,
+    rgba(255, 215, 0, 0.1) 72%
+  );
   box-shadow: 0 0 5px rgba(255, 215, 0, 0.22);
   pointer-events: none;
   z-index: 10003;
@@ -392,7 +420,11 @@
   }
   to {
     opacity: 0;
-    transform: translate(calc(var(--firework-x, 0px) * 0.56), calc(var(--firework-y, 0px) * 0.56)) scale(0.42);
+    transform: translate(
+        calc(var(--firework-x, 0px) * 0.56),
+        calc(var(--firework-y, 0px) * 0.56)
+      )
+      scale(0.42);
   }
 }
 

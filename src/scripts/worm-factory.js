@@ -90,9 +90,8 @@ class WormFactory {
     wormElement.appendChild(wormBody);
 
     // Apply consistent positioning and styling
-    wormElement.style.left = `${x}px`;
-    wormElement.style.top = `${y}px`;
     wormElement.style.position = "fixed";
+    wormElement.style.translate = `${x}px ${y}px`;
     wormElement.style.zIndex = String(this.WORM_Z_INDEX);
     wormElement.style.opacity = "1";
     wormElement.style.visibility = "visible";

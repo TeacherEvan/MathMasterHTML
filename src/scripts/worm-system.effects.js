@@ -1,5 +1,5 @@
 // src/scripts/worm-system.effects.js
-(function() {
+(function () {
   if (!window.WormSystem) {
     console.warn("🐛 WormSystem not found for effects helpers");
     return;
@@ -22,8 +22,7 @@
     const rotation = `${Math.round(-22 + Math.random() * 44)}deg`;
     const scaleX = (0.92 + Math.random() * 0.24).toFixed(2);
     const scaleY = (0.9 + Math.random() * 0.28).toFixed(2);
-    splat.style.left = `${x}px`;
-    splat.style.top = `${y}px`;
+    splat.style.translate = `${x}px ${y}px`;
     splat.style.position = "fixed";
     splat.style.zIndex = "10002";
     splat.style.setProperty("--splat-width", `${width}px`);
@@ -50,7 +49,7 @@
 
   const proto = window.WormSystem.prototype;
 
-  proto.explodeWorm = function(
+  proto.explodeWorm = function (
     worm,
     isRainKill = false,
     isChainReaction = false,
@@ -151,7 +150,7 @@
     }, this.WORM_REMOVAL_DELAY);
   };
 
-  proto.createExplosionParticles = function(x, y) {
+  proto.createExplosionParticles = function (x, y) {
     // Create particle fragments flying outward
     for (let i = 0; i < this.EXPLOSION_PARTICLE_COUNT; i++) {
       const particle = document.createElement("div");
@@ -161,8 +160,7 @@
       const _speed = 100 + Math.random() * 100; // Reserved for particle speed animation
       const distance = 80 + Math.random() * 40;
 
-      particle.style.left = `${x}px`;
-      particle.style.top = `${y}px`;
+      particle.style.translate = `${x}px ${y}px`;
       particle.style.setProperty(
         "--angle-x",
         String(Math.cos(angle) * distance),
@@ -183,7 +181,7 @@
     }
   };
 
-  proto.createExplosionFlash = function(color = null) {
+  proto.createExplosionFlash = function (color = null) {
     const flash = document.createElement("div");
     flash.className = "explosion-flash";
     if (color) {
@@ -203,7 +201,7 @@
    * Creates urgency and excitement for player
    * @private
    */
-  proto._triggerNearMissWarning = function(worm, targetElement, distance) {
+  proto._triggerNearMissWarning = function (worm, targetElement, distance) {
     // Only trigger if not already in near-miss state
     if (this._nearMissActive) return;
 
@@ -237,7 +235,7 @@
    * Clear near-miss warning state
    * @private
    */
-  proto._clearNearMissWarning = function() {
+  proto._clearNearMissWarning = function () {
     if (!this._nearMissActive) return;
 
     this._nearMissActive = false;
@@ -250,10 +248,13 @@
     );
   };
 
-  proto.createSlimeSplat = function(x, y) {
+  proto.createSlimeSplat = function (x, y) {
     const splatContainer = this.crossPanelContainer || document.body;
     if (splatContainer === document.body) {
-      Logger.warn("⚠️", "createSlimeSplat fallback: crossPanelContainer unavailable");
+      Logger.warn(
+        "⚠️",
+        "createSlimeSplat fallback: crossPanelContainer unavailable",
+      );
     }
 
     window.WormEffectHelpers.createSlimeSplat({
@@ -266,11 +267,10 @@
     });
   };
 
-  proto.createCrack = function(x, y) {
+  proto.createCrack = function (x, y) {
     const crack = document.createElement("div");
     crack.className = "worm-crack";
-    crack.style.left = `${x}px`;
-    crack.style.top = `${y}px`;
+    crack.style.translate = `${x}px ${y}px`;
 
     // Append to panel C (third display)
     // PERFORMANCE: Use cached element
@@ -282,7 +282,7 @@
     }
   };
 
-  proto.cleanupCracks = function() {
+  proto.cleanupCracks = function () {
     // PERFORMANCE: Use cached element
     const panelC =
       this.cachedPanelC || document.getElementById("third-display");

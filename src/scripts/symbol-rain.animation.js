@@ -1,4 +1,4 @@
-(function() {
+(function () {
   const SymbolRainHelpers = window.SymbolRainHelpers;
   const SymbolRainSpawn = window.SymbolRainSpawn;
 
@@ -84,11 +84,11 @@
         )
       ) {
         symbolObj.y += state.symbolFallSpeed;
-        symbolObj.element.style.top = `${symbolObj.y}px`;
+        symbolObj.element.style.translate = `${symbolObj.x}px ${symbolObj.y}px`;
       } else {
         symbolObj.y +=
           state.symbolFallSpeed * state.config.collisionSpeedFactor;
-        symbolObj.element.style.top = `${symbolObj.y}px`;
+        symbolObj.element.style.translate = `${symbolObj.x}px ${symbolObj.y}px`;
       }
 
       state.activeFallingSymbols[writeIndex++] = symbolObj;
@@ -118,6 +118,20 @@
     loop();
   }
 
+  function stopAnimation(state) {
+    state.isAnimationRunning = false;
+
+    for (let i = 0; i < state.activeFallingSymbols.length; i++) {
+      const symbolObj = state.activeFallingSymbols[i];
+      SymbolRainHelpers.cleanupSymbolObject({
+        symbolObj,
+        activeFaceReveals: state.activeFaceReveals,
+        symbolPool: state.symbolPool,
+      });
+    }
+    state.activeFallingSymbols.length = 0;
+  }
+
   function startSpeedController(state) {
     setInterval(() => {
       if (
@@ -136,6 +150,7 @@
   window.SymbolRainAnimation = {
     animateSymbols,
     startAnimation,
+    stopAnimation,
     startSpeedController,
     resetSpeed,
   };

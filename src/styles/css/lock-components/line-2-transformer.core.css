@@ -35,10 +35,19 @@ body {
   border-radius: 10px; /* Reduced by 35% from 15px */
   position: relative;
   border: 2px solid #0f0; /* Reduced by 35% from 3px */
-  box-shadow: 0 0 20px rgba(0, 255, 0, 0.6),
+  box-shadow:
+    0 0 20px rgba(0, 255, 0, 0.6),
     /* Reduced by 35% from 30px */ inset 0 0 10px rgba(0, 255, 0, 0.2),
     /* Reduced by 35% from 15px */ 0 0 0 3px rgba(0, 255, 0, 0.3); /* Reduced by 35% from 5px */
-  transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition:
+    transform 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    opacity 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    box-shadow 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    border-color 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    background 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    filter 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    width 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    height 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   transform: scaleY(1.5); /* Maintains Level 1 vertical extension */
   transform-origin: center center;
 }
@@ -49,8 +58,11 @@ body {
   background: linear-gradient(145deg, #4a2a1a, #6a4a2a, #4a2a1a);
   border-color: #ffa500;
   transform: scaleY(1.5) scaleX(1.6); /* Maintains vertical + adds horizontal */
-  box-shadow: 0 0 50px rgba(255, 165, 0, 0.9), inset 0 0 20px rgba(0, 0, 0, 0.6),
-    0 0 0 10px rgba(255, 165, 0, 0.3), 0 0 0 20px rgba(255, 165, 0, 0.15);
+  box-shadow:
+    0 0 50px rgba(255, 165, 0, 0.9),
+    inset 0 0 20px rgba(0, 0, 0, 0.6),
+    0 0 0 10px rgba(255, 165, 0, 0.3),
+    0 0 0 20px rgba(255, 165, 0, 0.15);
   animation: level2-expansion 2.5s ease-in-out infinite;
 }
 
@@ -66,7 +78,15 @@ body {
   left: 50%;
   transform: translateX(-50%);
   background: transparent;
-  transition: all 1.2s ease;
+  transition:
+    transform 1.2s ease,
+    opacity 1.2s ease,
+    box-shadow 1.2s ease,
+    border-color 1.2s ease,
+    background 1.2s ease,
+    filter 1.2s ease,
+    width 1.2s ease,
+    height 1.2s ease;
 }
 
 .lock-body.level-2-active .shackle {

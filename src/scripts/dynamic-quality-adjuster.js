@@ -48,6 +48,8 @@ class DynamicQualityAdjuster {
     let lastFrameTime = performance.now();
 
     const measureFrame = () => {
+      if (this._destroyed) return;
+
       if (!this.isActive) {
         requestAnimationFrame(measureFrame);
         return;
@@ -222,6 +224,16 @@ class DynamicQualityAdjuster {
     this.isActive = true;
     this.fpsHistory = [];
     console.log("▶️ Dynamic quality adjustment resumed");
+  }
+
+  /**
+   * Destroy the adjuster and stop the rAF monitoring loop
+   */
+  destroy() {
+    this.isActive = false;
+    this._destroyed = true;
+    this.fpsHistory = [];
+    console.log("📈 Dynamic Quality Adjuster destroyed");
   }
 
   /**

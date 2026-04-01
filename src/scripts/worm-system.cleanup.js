@@ -1,5 +1,5 @@
 // src/scripts/worm-system.cleanup.js
-(function() {
+(function () {
   if (!window.WormSystem) {
     console.warn("🐛 WormSystem not found for cleanup helpers");
     return;
@@ -7,7 +7,7 @@
 
   const proto = window.WormSystem.prototype;
 
-  proto.removeWorm = function(wormData) {
+  proto.removeWorm = function (wormData) {
     const index = this.worms.indexOf(wormData);
     if (index > -1) {
       this.worms.splice(index, 1);
@@ -26,6 +26,9 @@
       wormData.element.parentNode.removeChild(wormData.element);
     }
 
+    wormData.element = null;
+    wormData.consoleSlotElement = null;
+
     if (this.worms.length === 0 && this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
@@ -36,7 +39,7 @@
     );
   };
 
-  proto.killAllWorms = function() {
+  proto.killAllWorms = function () {
     console.log(
       `💀 KILLING ALL WORMS! Total worms to kill: ${this.worms.length}`,
     );
@@ -61,7 +64,7 @@
     console.log(`✅ All worms scheduled for extermination!`);
   };
 
-  proto.reset = function() {
+  proto.reset = function () {
     console.log("🐛 Resetting worm system");
 
     if (this.spawnManager?.clearQueue) {
@@ -92,11 +95,18 @@
 
     this.worms = [];
 
+    // Remove event listeners to prevent leaks
+    const cleanupSelf = /** @type {{ removeEventListeners?: (() => void) }} */ (
+      this
+    );
+    if (typeof cleanupSelf.removeEventListeners === "function") {
+      cleanupSelf.removeEventListeners();
+    }
+
     // Clear stolen flags from symbols
     if (this.solutionContainer) {
-      const stolenSymbols = this.solutionContainer.querySelectorAll(
-        "[data-stolen]",
-      );
+      const stolenSymbols =
+        this.solutionContainer.querySelectorAll("[data-stolen]");
       stolenSymbols.forEach((el) => {
         el.style.visibility = "visible";
         el.classList.remove("stolen");

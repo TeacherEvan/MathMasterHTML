@@ -70,6 +70,11 @@ class PerformanceMonitor {
    * Works in both lightweight and extended modes.
    * @returns {object}
    */
+  destroy() {
+    this._destroyed = true;
+    console.log("📊 PerformanceMonitor destroyed");
+  }
+
   getSnapshot() {
     const buf = this._isExtendedEnabled()
       ? this._histogramBuffer
@@ -81,6 +86,16 @@ class PerformanceMonitor {
     const jankCount = sorted.filter((d) => d > 50).length;
     const jankPercent =
       sorted.length > 0 ? (jankCount / sorted.length) * 100 : 0;
+
+    // Frame budget violation: frames exceeding 16.67ms (60fps budget)
+    const budgetViolations = sorted.filter((d) => d > 16.67).length;
+    const frameBudgetViolationPercent =
+      sorted.length > 0
+        ? Math.round((budgetViolations / sorted.length) * 100 * 100) / 100
+        : 0;
+
+    // DOM node count
+    const domNodeCount = document.querySelectorAll("*").length;
 
     // Input latency stats
     let inputLatencyAvg = null;
@@ -129,11 +144,21 @@ class PerformanceMonitor {
       frameTimeP95: Math.round(p95 * 100) / 100,
       frameTimeMax: Math.round(max * 100) / 100,
       jankPercent: Math.round(jankPercent * 100) / 100,
+      frameBudgetViolationPercent,
+      domNodeCount,
       domQueriesPerSec,
       activeWorms,
       rainSymbols,
       inputLatencyAvg,
       inputLatencyP95,
+      resourceManagerStats: window.ResourceManager?.getStats?.() ?? null,
+      wormCacheStats: window.wormSystem?.getCacheStats?.() ?? {
+        totalHits: 0,
+        totalMisses: 0,
+        totalRequests: 0,
+        overallHitRate: 0,
+        caches: {},
+      },
       sampleCount: sorted.length,
       timestamp: Date.now(),
     };
@@ -222,21 +247,28 @@ class PerformanceMonitor {
   }
 
   wrapDOMQueries() {
-    const self = this;
+    const wrapMethod = (prototype, methodName) => {
+      const original = prototype?.[methodName];
+      // Only wrap if this is a function and hasn't already been wrapped
+      if (typeof original !== "function" || original.__perfWrapped) {
+        return;
+      }
 
-    // Wrap querySelectorAll
-    const originalQSA = Document.prototype.querySelectorAll;
-    Document.prototype.querySelectorAll = function (...args) {
-      self.domQueryCount++;
-      return originalQSA.apply(this, args);
+      const wrapped = function (...args) {
+        if (window.performanceMonitor?.domQueryCount !== undefined) {
+          window.performanceMonitor.domQueryCount++;
+        }
+        return original.apply(this, args);
+      };
+
+      wrapped.__perfWrapped = true;
+      prototype[methodName] = wrapped;
     };
 
-    // Wrap querySelector
-    const originalQS = Document.prototype.querySelector;
-    Document.prototype.querySelector = function (...args) {
-      self.domQueryCount++;
-      return originalQS.apply(this, args);
-    };
+    wrapMethod(Document.prototype, "querySelectorAll");
+    wrapMethod(Document.prototype, "querySelector");
+    wrapMethod(Element.prototype, "querySelectorAll");
+    wrapMethod(Element.prototype, "querySelector");
 
     console.log("🔍 DOM query tracking enabled");
   }
@@ -245,6 +277,7 @@ class PerformanceMonitor {
     const self = this;
 
     function measureFrame() {
+      if (self._destroyed) return;
       const now = performance.now();
       const delta = now - self.lastFrameTime;
       self.lastFrameTime = now;

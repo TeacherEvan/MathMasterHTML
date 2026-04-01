@@ -41,8 +41,17 @@ body {
   align-items: center;
   transform: scaleY(1.5) scaleX(1.6) rotateY(720deg) rotateZ(360deg) scale(1.2); /* All Level 3 transformations */
   transform-style: preserve-3d;
-  transition: all 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 0 0 60px rgba(138, 43, 226, 0.8),
+  transition:
+    transform 2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    border-color 2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    background 2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    filter 2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    width 2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    height 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow:
+    0 0 60px rgba(138, 43, 226, 0.8),
     /* Purple glow from Level 3 */ inset 0 0 25px rgba(138, 43, 226, 0.3),
     0 0 0 10px rgba(138, 43, 226, 0.2);
 }

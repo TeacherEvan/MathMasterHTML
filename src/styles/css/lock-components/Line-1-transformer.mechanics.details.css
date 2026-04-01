@@ -9,7 +9,15 @@
   background: #000;
   border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
   border: 2px solid #333;
-  transition: all 0.8s ease;
+  transition:
+    transform 0.8s ease,
+    opacity 0.8s ease,
+    box-shadow 0.8s ease,
+    border-color 0.8s ease,
+    background 0.8s ease,
+    filter 0.8s ease,
+    width 0.8s ease,
+    height 0.8s ease;
 }
 
 .keyhole::after {
@@ -38,7 +46,15 @@
   border: 2px solid #666; /* Reduced from 3px */
   border-radius: 50%;
   background: radial-gradient(circle, #444, #222);
-  transition: all 0.8s ease;
+  transition:
+    transform 0.8s ease,
+    opacity 0.8s ease,
+    box-shadow 0.8s ease,
+    border-color 0.8s ease,
+    background 0.8s ease,
+    filter 0.8s ease,
+    width 0.8s ease,
+    height 0.8s ease;
 }
 
 .gear::before {
@@ -92,7 +108,15 @@
   left: 50%;
   transform: translateX(-50%);
   background: transparent;
-  transition: all 0.8s ease;
+  transition:
+    transform 0.8s ease,
+    opacity 0.8s ease,
+    box-shadow 0.8s ease,
+    border-color 0.8s ease,
+    background 0.8s ease,
+    filter 0.8s ease,
+    width 0.8s ease,
+    height 0.8s ease;
 }
 
 .lock-body.level-1-active .shackle {

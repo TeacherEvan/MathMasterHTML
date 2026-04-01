@@ -185,6 +185,8 @@ body.automation {
 
 .falling-symbol {
     position: absolute;
+    top: 0;
+    left: 0;
     font-size: 24px;
     font-family: 'Orbitron', monospace;
     color: #0f0;
@@ -201,6 +203,7 @@ body.automation {
     /* TOUCH FIX: Prevent 300ms click delay on mobile */
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(0, 255, 255, 0.3);
+    will-change: translate, transform, color, text-shadow;
 }
 
 /* PERFORMANCE: ::before pseudo-element removed - was creating double render layers */
