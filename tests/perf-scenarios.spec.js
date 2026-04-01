@@ -31,7 +31,6 @@ async function runScenario(page, testInfo, { scenarioName, level, action }) {
   expect(Number.isFinite(after.fps)).toBe(true);
   expect(after.sampleCount).toBeGreaterThan(0);
 }
-
 test.describe("Performance scenarios", () => {
   test("idle scenario captures a stable baseline", async ({
     page,
@@ -45,19 +44,24 @@ test.describe("Performance scenarios", () => {
   test("normal play scenario captures symbol reveal load", async ({
     page,
   }, testInfo) => {
-    await runScenario(page, testInfo, {
+    const snapshot = await runScenario(page, testInfo, {
       scenarioName: "normalPlay",
       action: () => normalPlayScenario(page),
     });
+
+    expect(snapshot.after.domQueriesPerSec).toBeLessThan(150);
   });
 
   test("worm burst scenario captures purple worm pressure", async ({
     page,
   }, testInfo) => {
-    await runScenario(page, testInfo, {
+    const snapshot = await runScenario(page, testInfo, {
       scenarioName: "wormBurst",
       action: () => wormBurstScenario(page),
     });
+
+    expect(snapshot.after.wormCacheStats).toBeTruthy();
+    expect(typeof snapshot.after.wormCacheStats.overallHitRate).toBe("number");
   });
 
   test("dense rain scenario captures master-level activity", async ({

@@ -84,11 +84,11 @@
         )
       ) {
         symbolObj.y += state.symbolFallSpeed;
-        symbolObj.element.style.top = `${symbolObj.y}px`;
+        symbolObj.element.style.translate = `${symbolObj.x}px ${symbolObj.y}px`;
       } else {
         symbolObj.y +=
           state.symbolFallSpeed * state.config.collisionSpeedFactor;
-        symbolObj.element.style.top = `${symbolObj.y}px`;
+        symbolObj.element.style.translate = `${symbolObj.x}px ${symbolObj.y}px`;
       }
 
       state.activeFallingSymbols[writeIndex++] = symbolObj;

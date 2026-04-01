@@ -1,5 +1,5 @@
 // src/scripts/worm-system.powerups.effects.spider.js
-(function() {
+(function () {
   if (!window.WormSystem) {
     console.warn("🐛 WormSystem not found for spider effects");
     return;
@@ -10,7 +10,7 @@
   const proto = window.WormSystem.prototype;
 
   // Spider: Spawns spider that converts worms to spiders, which convert more worms
-  proto.activateSpider = function() {
+  proto.activateSpider = function () {
     console.log("🕷️ SPIDER ACTIVATED! Spawning conversion spider...");
 
     // Find closest worm
@@ -27,19 +27,19 @@
     this.spawnSpider(startX, startY);
   };
 
-  proto.spawnSpider = function(x, y) {
+  proto.spawnSpider = function (x, y) {
     const spider = document.createElement("div");
     spider.className = "spider-entity";
     spider.textContent = "🕷️";
     spider.style.cssText = `
             position: fixed;
-            left: ${x}px;
-            top: ${y}px;
             font-size: 40px;
             z-index: 10001;
             cursor: pointer;
             transition: opacity 0.3s ease, transform 0.3s ease;
+          will-change: translate, transform, opacity;
         `;
+    spider.style.translate = `${x}px ${y}px`;
 
     const spiderData = {
       id: `spider-${Date.now()}`,
@@ -166,8 +166,7 @@
         const speed = 5;
         spiderData.x += (dx / dist) * speed;
         spiderData.y += (dy / dist) * speed;
-        spider.style.left = `${spiderData.x}px`;
-        spider.style.top = `${spiderData.y}px`;
+        spider.style.translate = `${spiderData.x}px ${spiderData.y}px`;
 
         scheduleNextMove();
       }

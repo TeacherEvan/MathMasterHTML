@@ -6,7 +6,15 @@
   background: linear-gradient(45deg, #333, #666, #333);
   border: 2px solid #555;
   border-radius: 50%;
-  transition: all 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition:
+    transform 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    opacity 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    box-shadow 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    border-color 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    background 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    filter 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    width 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    height 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   transform-origin: center center;
   opacity: 0;
 }
@@ -45,7 +53,15 @@
   border: 6px solid #666;
   border-radius: 50%;
   transform: translate(-50%, -50%) rotate(0deg);
-  transition: all 2s ease;
+  transition:
+    transform 2s ease,
+    opacity 2s ease,
+    box-shadow 2s ease,
+    border-color 2s ease,
+    background 2s ease,
+    filter 2s ease,
+    width 2s ease,
+    height 2s ease;
   background: transparent;
   opacity: 0;
 }
@@ -82,7 +98,15 @@
   border: 4px solid #666;
   border-radius: 50%;
   background: radial-gradient(circle, #444, #222);
-  transition: all 2s ease;
+  transition:
+    transform 2s ease,
+    opacity 2s ease,
+    box-shadow 2s ease,
+    border-color 2s ease,
+    background 2s ease,
+    filter 2s ease,
+    width 2s ease,
+    height 2s ease;
   opacity: 0;
 }
 
@@ -108,7 +132,10 @@
   height: 8px;
   background: #555;
   border-radius: 3px;
-  box-shadow: 0 10px 0 #555, 0 20px 0 #555, 0 30px 0 #555;
+  box-shadow:
+    0 10px 0 #555,
+    0 20px 0 #555,
+    0 30px 0 #555;
 }
 
 .gear-complex.gear-1 {
@@ -146,7 +173,15 @@
   border: 3px solid #555;
   border-radius: 50%;
   transform: translate(-50%, -50%) rotate(0deg) scale(1);
-  transition: all 2s ease;
+  transition:
+    transform 2s ease,
+    opacity 2s ease,
+    box-shadow 2s ease,
+    border-color 2s ease,
+    background 2s ease,
+    filter 2s ease,
+    width 2s ease,
+    height 2s ease;
   box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.1);
 }
 
@@ -174,5 +209,13 @@
   left: 50%;
   transform: translateX(-50%);
   background: transparent;
-  transition: all 2s ease;
+  transition:
+    transform 2s ease,
+    opacity 2s ease,
+    box-shadow 2s ease,
+    border-color 2s ease,
+    background 2s ease,
+    filter 2s ease,
+    width 2s ease,
+    height 2s ease;
 }

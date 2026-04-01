@@ -1,7 +1,7 @@
 // js/worm-renderer.js - Worm visual rendering and effects module
 console.log("🎨 Worm Renderer Loading...");
 
-import * as WormConstants from './worm-constants.js';
+import * as WormConstants from "./worm-constants.js";
 
 class WormRenderer {
   constructor(system) {
@@ -21,7 +21,10 @@ class WormRenderer {
     this._nearMissActive = true;
     this._nearMissWorm = worm.id;
 
-    const urgencyLevel = Math.max(0, 1 - distance / WormConstants.NEAR_MISS_THRESHOLD);
+    const urgencyLevel = Math.max(
+      0,
+      1 - distance / WormConstants.NEAR_MISS_THRESHOLD,
+    );
 
     targetElement.classList.add("near-miss-target");
     targetElement.style.setProperty("--urgency", urgencyLevel);
@@ -36,13 +39,13 @@ class WormRenderer {
           distance: distance,
           urgencyLevel: urgencyLevel,
         },
-      })
+      }),
     );
 
     this.logger.log(
       `⚠️ NEAR MISS! Worm ${worm.id} is ${distance.toFixed(
-        0
-      )}px from stealing "${worm.targetSymbol}"!`
+        0,
+      )}px from stealing "${worm.targetSymbol}"!`,
     );
   }
 
@@ -73,7 +76,7 @@ class WormRenderer {
       this.logger.warn(
         "⚠️",
         "explodeWorm called with worm missing element",
-        worm.id
+        worm.id,
       );
       this.system.worms = this.system.worms.filter((w) => w.id !== worm.id);
       return;
@@ -84,7 +87,7 @@ class WormRenderer {
         isRainKill ? "RAIN KILL" : "direct click"
       }${isChainReaction ? " - CHAIN REACTION" : ""}) and returning symbol "${
         worm.stolenSymbol
-      }"!`
+      }"!`,
     );
 
     worm.active = false;
@@ -98,18 +101,23 @@ class WormRenderer {
           wasPurple: worm.isPurple || false,
           stolenSymbol: worm.stolenSymbol || null,
         },
-      })
+      }),
     );
 
     const nearbyWorms = this.system.worms.filter((w) => {
       if (w.id === worm.id || !w.active) return false;
-      const distance = this.system.movement.calculateDistance(worm.x, worm.y, w.x, w.y);
+      const distance = this.system.movement.calculateDistance(
+        worm.x,
+        worm.y,
+        w.x,
+        w.y,
+      );
       return distance <= WormConstants.EXPLOSION_AOE_RADIUS;
     });
 
     if (nearbyWorms.length > 0) {
       this.logger.log(
-        `💥 CHAIN REACTION! ${nearbyWorms.length} worms caught in blast radius!`
+        `💥 CHAIN REACTION! ${nearbyWorms.length} worms caught in blast radius!`,
       );
       setTimeout(() => {
         nearbyWorms.forEach((nearbyWorm) => {
@@ -151,8 +159,7 @@ class WormRenderer {
       const angle = (i / WormConstants.EXPLOSION_PARTICLE_COUNT) * Math.PI * 2;
       const distance = 80 + Math.random() * 40;
 
-      particle.style.left = `${x}px`;
-      particle.style.top = `${y}px`;
+      particle.style.translate = `${x}px ${y}px`;
       particle.style.setProperty("--angle-x", Math.cos(angle) * distance);
       particle.style.setProperty("--angle-y", Math.sin(angle) * distance);
 
@@ -187,7 +194,8 @@ class WormRenderer {
         x,
         y,
         lifetime:
-          this.system.SLIME_SPLAT_DURATION || WormConstants.SLIME_SPLAT_DURATION,
+          this.system.SLIME_SPLAT_DURATION ||
+          WormConstants.SLIME_SPLAT_DURATION,
         fadeDuration:
           this.system.SLIME_SPLAT_FADE_DURATION ||
           WormConstants.SLIME_SPLAT_FADE_DURATION,
@@ -205,10 +213,10 @@ class WormRenderer {
   createCrack(x, y) {
     const crack = document.createElement("div");
     crack.className = "worm-crack";
-    crack.style.left = `${x}px`;
-    crack.style.top = `${y}px`;
+    crack.style.translate = `${x}px ${y}px`;
 
-    const panelC = this.system.cachedPanelC || document.getElementById("third-display");
+    const panelC =
+      this.system.cachedPanelC || document.getElementById("third-display");
     if (panelC) {
       panelC.appendChild(crack);
       this.logger.log(`💥 Crack created at (${x}, ${y})`);
@@ -221,12 +229,11 @@ class WormRenderer {
 
   updateWormRotation(worm) {
     const rotation = Math.PI; // Flip worm so head faces forward
-    worm.element.style.transform = `rotate(${worm.direction + rotation}rad)`;
+    worm.element.style.rotate = `${worm.direction + rotation}rad`;
   }
 
   applyWormPosition(worm) {
-    worm.element.style.left = `${worm.x}px`;
-    worm.element.style.top = `${worm.y}px`;
+    worm.element.style.translate = `${worm.x}px ${worm.y}px`;
   }
 
   // ========================================

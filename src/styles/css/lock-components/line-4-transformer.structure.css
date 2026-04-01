@@ -6,8 +6,17 @@
   background: radial-gradient(circle, #ffff44, #ff4444);
   border-radius: 50%;
   border: 2px solid #ffaa44;
-  transition: all 2s ease-in-out;
-  box-shadow: 0 0 15px rgba(255, 255, 68, 0.8),
+  transition:
+    transform 2s ease-in-out,
+    opacity 2s ease-in-out,
+    box-shadow 2s ease-in-out,
+    border-color 2s ease-in-out,
+    background 2s ease-in-out,
+    filter 2s ease-in-out,
+    width 2s ease-in-out,
+    height 2s ease-in-out;
+  box-shadow:
+    0 0 15px rgba(255, 255, 68, 0.8),
     inset 0 0 10px rgba(255, 170, 68, 0.5);
 }
 
@@ -23,7 +32,15 @@
   border-radius: 8px;
   transform-origin: center;
   opacity: 0;
-  transition: all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition:
+    transform 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    opacity 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    box-shadow 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    border-color 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    background 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    filter 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    width 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    height 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   box-shadow: 0 0 20px rgba(255, 68, 68, 0.6);
 }
 
@@ -81,9 +98,18 @@
   border: 3px solid #8a2be2;
   border-radius: 12px;
   transform: translateY(-50%);
-  transition: all 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition:
+    transform 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    opacity 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    box-shadow 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    border-color 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    background 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    filter 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    width 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    height 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   overflow: visible;
-  box-shadow: 0 0 25px rgba(138, 43, 226, 0.9),
+  box-shadow:
+    0 0 25px rgba(138, 43, 226, 0.9),
     inset 0 2px 10px rgba(255, 255, 255, 0.4);
   opacity: 1; /* Already visible from Level 3 */
 }
@@ -108,7 +134,8 @@
     #ff4444
   ); /* Red for Level 4 */
   border-color: #ff4444;
-  box-shadow: 0 0 30px rgba(255, 68, 68, 1),
+  box-shadow:
+    0 0 30px rgba(255, 68, 68, 1),
     inset 0 2px 12px rgba(255, 255, 255, 0.5);
   animation: arm-energy-pulse-red 2s ease-in-out infinite;
 }
@@ -126,11 +153,20 @@
   ); /* Purple from Level 3 */
   border: 2px solid #8a2be2;
   border-radius: 50%;
-  transition: all 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition:
+    transform 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    opacity 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    box-shadow 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    border-color 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    background 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    filter 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    width 2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    height 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   transform-origin: center center;
   opacity: 1; /* Already visible from Level 3 */
   animation: chamber-spin 2s linear infinite; /* Already spinning from Level 3 */
-  box-shadow: 0 0 20px rgba(138, 43, 226, 0.8),
+  box-shadow:
+    0 0 20px rgba(138, 43, 226, 0.8),
     inset 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
@@ -166,7 +202,8 @@
     #ff4444
   ); /* Red for Level 4 */
   border-color: #ff4444;
-  box-shadow: 0 0 25px rgba(255, 68, 68, 1),
+  box-shadow:
+    0 0 25px rgba(255, 68, 68, 1),
     inset 0 0 12px rgba(255, 255, 255, 0.3);
   animation: chamber-spin-red 2s linear infinite;
 }

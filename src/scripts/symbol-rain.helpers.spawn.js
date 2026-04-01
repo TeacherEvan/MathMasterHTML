@@ -25,27 +25,21 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
       forcedSymbol || symbols[Math.floor(Math.random() * symbols.length)];
 
     const horizontalOffset = (Math.random() - 0.5) * 40;
-    symbol.style.left =
-      column * config.columnWidth +
-      config.columnWidth / 2 +
-      horizontalOffset +
-      "px";
+    const x =
+      column * config.columnWidth + config.columnWidth / 2 + horizontalOffset;
+    const y = isInitialPopulation
+      ? Math.random() * symbolRainContainer.offsetHeight
+      : -50;
 
-    if (isInitialPopulation) {
-      symbol.style.top = `${
-        Math.random() * symbolRainContainer.offsetHeight
-      }px`;
-    } else {
-      symbol.style.top = "-50px";
-    }
+    symbol.style.translate = `${x}px ${y}px`;
 
     symbolRainContainer.appendChild(symbol);
 
     activeFallingSymbols.push({
       element: symbol,
       column: column,
-      y: isInitialPopulation ? parseFloat(symbol.style.top) : -50,
-      x: parseFloat(symbol.style.left),
+      y,
+      x,
       symbol: symbol.textContent,
       isInFaceReveal: false,
       faceRevealStartTime: 0,

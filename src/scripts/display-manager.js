@@ -1,6 +1,91 @@
 // js/display-manager.js - Auto Display Resolution Manager
 console.log("🖥️ Loading Display Manager...");
 
+function ensureSharedResizeObserverHub() {
+  if (window.SharedResizeObserver) {
+    return window.SharedResizeObserver;
+  }
+
+  const subscribers = new Set();
+  const sources =
+    window.__sharedResizeObserverSources ||
+    (window.__sharedResizeObserverSources = new Set());
+  let frameId = null;
+  let lastReason = "init";
+
+  const notify = (reason = "resize") => {
+    lastReason = reason;
+    if (frameId !== null) {
+      return;
+    }
+
+    frameId = requestAnimationFrame(() => {
+      frameId = null;
+      const payload = {
+        reason: lastReason,
+        width: window.innerWidth,
+        height: window.innerHeight,
+      };
+
+      subscribers.forEach((callback) => {
+        try {
+          callback(payload);
+        } catch (error) {
+          console.error("🖥️ Shared resize subscriber failed", error);
+        }
+      });
+    });
+  };
+
+  const resizeObserver =
+    typeof ResizeObserver === "function"
+      ? new ResizeObserver(() => notify("resize-observer"))
+      : null;
+
+  if (resizeObserver && document.documentElement) {
+    resizeObserver.observe(document.documentElement);
+  }
+
+  window.addEventListener("resize", () => notify("window-resize"), {
+    passive: true,
+  });
+  window.addEventListener(
+    "orientationchange",
+    () => notify("orientationchange"),
+    { passive: true },
+  );
+  document.addEventListener("fullscreenchange", () => {
+    notify("fullscreenchange");
+  });
+
+  window.SharedResizeObserver = {
+    observer: resizeObserver,
+    subscribe(callback, { immediate = false, source = "anonymous" } = {}) {
+      subscribers.add(callback);
+      sources.add(source);
+      if (immediate) {
+        callback({
+          reason: "subscribe",
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+      }
+      return () => subscribers.delete(callback);
+    },
+    notify,
+    getSubscriberCount() {
+      return Math.max(subscribers.size, sources.size);
+    },
+    getSources() {
+      return Array.from(sources);
+    },
+  };
+
+  return window.SharedResizeObserver;
+}
+
+window.__ensureSharedResizeObserver = ensureSharedResizeObserverHub;
+
 class DisplayManager {
   constructor() {
     this.gameEvents = window.GameEvents || {
@@ -29,22 +114,19 @@ class DisplayManager {
 
     this.detectAndApply();
 
-    // Listen for window resize
-    window.addEventListener(
-      "resize",
-      this.debounce(() => {
-        console.log("🔄 Window resized, re-detecting resolution");
-        this.detectAndApply();
-      }, 300),
-    );
-
-    // Listen for orientation change
-    window.addEventListener("orientationchange", () => {
-      setTimeout(() => {
+    const handleViewportChange = this.debounce((event) => {
+      if (event?.reason === "orientationchange") {
         console.log("📱 Orientation changed, re-detecting resolution");
-        this.detectAndApply();
-      }, 100);
-    });
+      } else {
+        console.log("🔄 Viewport changed, re-detecting resolution");
+      }
+      this.detectAndApply();
+    }, 300);
+
+    this._unsubscribeResizeHub = ensureSharedResizeObserverHub().subscribe(
+      handleViewportChange,
+      { source: "display-manager" },
+    );
 
     // Show resolution indicator
     this.showResolutionIndicator();

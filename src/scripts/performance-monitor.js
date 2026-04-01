@@ -152,6 +152,13 @@ class PerformanceMonitor {
       inputLatencyAvg,
       inputLatencyP95,
       resourceManagerStats: window.ResourceManager?.getStats?.() ?? null,
+      wormCacheStats: window.wormSystem?.getCacheStats?.() ?? {
+        totalHits: 0,
+        totalMisses: 0,
+        totalRequests: 0,
+        overallHitRate: 0,
+        caches: {},
+      },
       sampleCount: sorted.length,
       timestamp: Date.now(),
     };
@@ -240,21 +247,28 @@ class PerformanceMonitor {
   }
 
   wrapDOMQueries() {
-    const self = this;
+    const wrapMethod = (prototype, methodName) => {
+      const original = prototype?.[methodName];
+      // Only wrap if this is a function and hasn't already been wrapped
+      if (typeof original !== "function" || original.__perfWrapped) {
+        return;
+      }
 
-    // Wrap querySelectorAll
-    const originalQSA = Document.prototype.querySelectorAll;
-    Document.prototype.querySelectorAll = function (...args) {
-      self.domQueryCount++;
-      return originalQSA.apply(this, args);
+      const wrapped = function (...args) {
+        if (window.performanceMonitor?.domQueryCount !== undefined) {
+          window.performanceMonitor.domQueryCount++;
+        }
+        return original.apply(this, args);
+      };
+
+      wrapped.__perfWrapped = true;
+      prototype[methodName] = wrapped;
     };
 
-    // Wrap querySelector
-    const originalQS = Document.prototype.querySelector;
-    Document.prototype.querySelector = function (...args) {
-      self.domQueryCount++;
-      return originalQS.apply(this, args);
-    };
+    wrapMethod(Document.prototype, "querySelectorAll");
+    wrapMethod(Document.prototype, "querySelector");
+    wrapMethod(Element.prototype, "querySelectorAll");
+    wrapMethod(Element.prototype, "querySelector");
 
     console.log("🔍 DOM query tracking enabled");
   }

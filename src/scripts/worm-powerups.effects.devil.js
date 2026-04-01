@@ -1,12 +1,12 @@
-(function() {
+(function () {
   window.WormPowerUpEffects = window.WormPowerUpEffects || {};
 
-  window.WormPowerUpEffects.applyDevilEffects = function(proto) {
-    proto._executeDevil = function(x, y) {
+  window.WormPowerUpEffects.applyDevilEffects = function (proto) {
+    proto._executeDevil = function (x, y) {
       this.spawnDevil(x, y);
     };
 
-    proto.activateDevil = function() {
+    proto.activateDevil = function () {
       console.log("👹 DEVIL ACTIVATED! Click location to spawn devil...");
 
       const handleClick = (e) => {
@@ -19,18 +19,19 @@
       document.body.style.cursor = "crosshair";
     };
 
-    proto.spawnDevil = function(x, y) {
+    proto.spawnDevil = function (x, y) {
       const devil = document.createElement("div");
+      devil.className = "devil-entity";
       devil.textContent = "👹";
       devil.style.cssText = `
             position: fixed;
-            left: ${x}px;
-            top: ${y}px;
             font-size: 60px;
             z-index: 10001;
             pointer-events: none;
             text-shadow: 0 0 20px red;
+        will-change: translate, transform, opacity;
         `;
+      devil.style.translate = `${x}px ${y}px`;
 
       this.wormSystem.crossPanelContainer.appendChild(devil);
 
@@ -80,8 +81,9 @@
                 Date.now() - devilData.wormProximity.get(worm.id);
               if (timeNear >= this.DEVIL_KILL_TIME) {
                 console.log(
-                  `👹 Devil killed worm ${worm.id} after ${this
-                    .DEVIL_KILL_TIME / 1000}s proximity!`,
+                  `👹 Devil killed worm ${worm.id} after ${
+                    this.DEVIL_KILL_TIME / 1000
+                  }s proximity!`,
                 );
                 this.wormSystem.explodeWorm(worm, false, false);
                 devilData.wormProximity.delete(worm.id);
@@ -118,7 +120,7 @@
     window.WormPowerUpEffectsRegistry = {};
   }
 
-  window.WormPowerUpEffectsRegistry.devil = function(system, payload) {
+  window.WormPowerUpEffectsRegistry.devil = function (system, payload) {
     system._executeDevil(payload.x, payload.y);
   };
 })();

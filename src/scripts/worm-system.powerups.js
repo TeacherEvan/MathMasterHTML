@@ -1,5 +1,5 @@
 // src/scripts/worm-system.powerups.js
-(function() {
+(function () {
   if (!window.WormSystem) {
     console.warn("🐛 WormSystem not found for power-up helpers");
     return;
@@ -22,7 +22,7 @@
   };
 
   // Drop power-up at worm location
-  proto.dropPowerUp = function(x, y, type = null) {
+  proto.dropPowerUp = function (x, y, type = null) {
     // Random power-up type if not specified
     if (!type) {
       type = POWER_UP_TYPES[Math.floor(Math.random() * POWER_UP_TYPES.length)];
@@ -35,9 +35,8 @@
     // Set emoji based on type
     powerUp.textContent = POWER_UP_EMOJIS[type] || "⭐";
 
-    powerUp.style.left = `${x}px`;
-    powerUp.style.top = `${y}px`;
     Object.assign(powerUp.style, POWER_UP_DROP_STYLE);
+    powerUp.style.translate = `${x}px ${y}px`;
 
     // Click to collect
     powerUp.addEventListener("click", (e) => {
@@ -66,7 +65,7 @@
   };
 
   // Collect power-up
-  proto.collectPowerUp = function(type, element) {
+  proto.collectPowerUp = function (type, element) {
     this.powerUps[type]++;
     console.log(`🎁 Collected ${type} power-up! Total: ${this.powerUps[type]}`);
 
@@ -94,13 +93,14 @@
     }, 300);
   };
 
-  proto.awardPowerUps = function(count = 1, source = "system") {
+  proto.awardPowerUps = function (count = 1, source = "system") {
     const amount = Math.max(0, Number(count) || 0);
     if (!amount) return [];
 
     const awarded = [];
     for (let i = 0; i < amount; i++) {
-      const type = POWER_UP_TYPES[Math.floor(Math.random() * POWER_UP_TYPES.length)];
+      const type =
+        POWER_UP_TYPES[Math.floor(Math.random() * POWER_UP_TYPES.length)];
       this.powerUps[type]++;
       if (type === "chainLightning" && this.powerUps[type] > 1) {
         this.chainLightningKillCount += 2;
@@ -126,7 +126,7 @@
   };
 
   // Update power-up display on console
-  proto.updatePowerUpDisplay = function() {
+  proto.updatePowerUpDisplay = function () {
     console.log(
       `📊 Power-ups: ⚡${this.powerUps.chainLightning} 🕷️${this.powerUps.spider} 👹${this.powerUps.devil}`,
     );
@@ -197,8 +197,9 @@
     POWER_UP_TYPES.forEach((type) => {
       const entry = items[type];
       if (!entry) return;
-      entry.countSpan.textContent = `${POWER_UP_EMOJIS[type] || "⭐"} ${this
-        .powerUps[type] ?? 0}`;
+      entry.countSpan.textContent = `${POWER_UP_EMOJIS[type] || "⭐"} ${
+        this.powerUps[type] ?? 0
+      }`;
     });
 
     if (items.chainLightningBadge) {
@@ -213,7 +214,7 @@
   }
 
   // Make power-up display draggable
-  proto._makePowerUpDisplayDraggable = function(element) {
+  proto._makePowerUpDisplayDraggable = function (element) {
     let isDragging = false;
     let currentX;
     let currentY;
@@ -278,7 +279,7 @@
   };
 
   // Use a power-up
-  proto.usePowerUp = function(type) {
+  proto.usePowerUp = function (type) {
     if (this.powerUps[type] <= 0) {
       console.log(`⚠️ No ${type} power-ups available!`);
       return;

@@ -109,8 +109,6 @@
     powerUp.textContent = this.EMOJIS[type] || "⭐";
 
     Object.assign(powerUp.style, {
-      left: `${x}px`,
-      top: `${y}px`,
       position: "fixed",
       fontSize: "30px",
       zIndex: "10001",
@@ -118,6 +116,7 @@
       animation: "power-up-appear 0.5s ease-out",
       pointerEvents: "auto",
     });
+    powerUp.style.translate = `${x}px ${y}px`;
 
     // Click to collect
     powerUp.addEventListener("click", (e) => {

@@ -43,8 +43,17 @@ body {
   transform: scaleY(1.5) scaleX(1.6) rotateY(1440deg) rotateZ(1080deg)
     scale(1.4); /* All Level 5 transformations */
   transform-style: preserve-3d;
-  transition: all 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 0 0 120px rgba(68, 136, 255, 1),
+  transition:
+    transform 2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    border-color 2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    background 2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    filter 2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    width 2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    height 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow:
+    0 0 120px rgba(68, 136, 255, 1),
     /* Blue glow from Level 5 */ inset 0 0 40px rgba(68, 136, 255, 0.5),
     0 0 0 15px rgba(68, 136, 255, 0.3);
 }

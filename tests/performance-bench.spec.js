@@ -80,6 +80,9 @@ test.describe("Performance benchmarks", () => {
     expect(snapshot).toHaveProperty("domNodeCount");
     expect(snapshot.domNodeCount).toBeGreaterThan(0);
     expect(snapshot).toHaveProperty("resourceManagerStats");
+    expect(snapshot).toHaveProperty("wormCacheStats");
+    expect(snapshot.wormCacheStats).not.toBeNull();
+    expect(typeof snapshot.wormCacheStats.overallHitRate).toBe("number");
 
     if (snapshot.heapUsed !== null) {
       expect(snapshot.heapUsed).toBeGreaterThan(0);

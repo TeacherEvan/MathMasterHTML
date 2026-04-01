@@ -31,7 +31,15 @@ body {
   position: relative;
   border: 2px solid #555;
   box-shadow: 0 0 0 0 rgba(0, 255, 0, 0);
-  transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition:
+    transform 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    opacity 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    box-shadow 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    border-color 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    background 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    filter 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    width 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    height 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   transform-origin: top center;
   overflow: visible;
 }

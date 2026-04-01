@@ -168,13 +168,8 @@ class WormMovement {
 
     const { x, y } = this.applyCrawlEffect(worm);
 
-    // Calculate rotation angle in degrees
-    const rotationDeg = (worm.direction * 180) / Math.PI + 90;
-
-    // Apply transform (position + rotation)
-    worm.element.style.left = `${x}px`;
-    worm.element.style.top = `${y}px`;
-    worm.element.style.transform = `rotate(${rotationDeg}deg)`;
+    worm.element.style.translate = `${x}px ${y}px`;
+    worm.element.style.rotate = `${worm.direction + Math.PI / 2}rad`;
   }
 
   /**

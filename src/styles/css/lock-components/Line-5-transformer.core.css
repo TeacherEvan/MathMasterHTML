@@ -42,8 +42,17 @@ body {
   align-items: center;
   transform: scaleY(1.5) scaleX(1.6) rotateY(720deg) rotateZ(360deg) scale(1.2); /* All Level 4 transformations */
   transform-style: preserve-3d;
-  transition: all 3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 0 0 80px rgba(255, 68, 68, 0.8),
+  transition:
+    transform 3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    border-color 3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    background 3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    filter 3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    width 3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    height 3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow:
+    0 0 80px rgba(255, 68, 68, 0.8),
     /* Red glow from Level 4 */ inset 0 0 25px rgba(255, 68, 68, 0.3),
     0 0 0 10px rgba(255, 68, 68, 0.2);
 }
@@ -57,6 +66,8 @@ body {
     #1a1a4a
   ); /* Transition to blue */
   border-color: #4488ff;
-  box-shadow: 0 0 120px rgba(68, 136, 255, 1),
-    inset 0 0 40px rgba(68, 136, 255, 0.5), 0 0 0 15px rgba(68, 136, 255, 0.3);
+  box-shadow:
+    0 0 120px rgba(68, 136, 255, 1),
+    inset 0 0 40px rgba(68, 136, 255, 0.5),
+    0 0 0 15px rgba(68, 136, 255, 0.3);
 }

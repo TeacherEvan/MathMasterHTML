@@ -8,7 +8,15 @@
   border: 3px solid #555;
   border-radius: 12px;
   transform: translateY(-50%);
-  transition: all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition:
+    transform 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    opacity 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    box-shadow 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    border-color 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    background 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    filter 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    width 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    height 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   overflow: visible;
   box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.1);
 }
@@ -30,7 +38,8 @@
   opacity: 1;
   background: linear-gradient(90deg, #ffa500, #ffcc00, #fff, #ffcc00, #ffa500);
   border-color: #ffa500;
-  box-shadow: 0 0 20px rgba(255, 165, 0, 0.8),
+  box-shadow:
+    0 0 20px rgba(255, 165, 0, 0.8),
     inset 0 2px 8px rgba(255, 255, 255, 0.3);
   animation: arm-energy-pulse 2s ease-in-out infinite;
 }
@@ -40,7 +49,8 @@
   opacity: 1;
   background: linear-gradient(90deg, #ffa500, #ffcc00, #fff, #ffcc00, #ffa500);
   border-color: #ffa500;
-  box-shadow: 0 0 20px rgba(255, 165, 0, 0.8),
+  box-shadow:
+    0 0 20px rgba(255, 165, 0, 0.8),
     inset 0 2px 8px rgba(255, 255, 255, 0.3);
   animation: arm-energy-pulse 2s ease-in-out infinite reverse;
 }
@@ -53,7 +63,12 @@
   background: #ffa500;
   border-radius: 50%;
   opacity: 0;
-  transition: all 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease,
+    background 0.3s ease;
 }
 
 .energy-spark.spark-1 {
@@ -92,7 +107,15 @@
   border-radius: 50%;
   top: 50%;
   transform: translateY(-50%);
-  transition: all 1.2s ease;
+  transition:
+    transform 1.2s ease,
+    opacity 1.2s ease,
+    box-shadow 1.2s ease,
+    border-color 1.2s ease,
+    background 1.2s ease,
+    filter 1.2s ease,
+    width 1.2s ease,
+    height 1.2s ease;
 }
 
 .joint.left {

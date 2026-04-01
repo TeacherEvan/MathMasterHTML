@@ -1,14 +1,14 @@
-(function() {
+(function () {
   window.WormPowerUpEffects = window.WormPowerUpEffects || {};
 
   const SPIDER_IDLE_POLL_INTERVAL_MS = 150;
 
-  window.WormPowerUpEffects.applySpiderEffects = function(proto) {
-    proto._executeSpider = function(x, y) {
+  window.WormPowerUpEffects.applySpiderEffects = function (proto) {
+    proto._executeSpider = function (x, y) {
       this.spawnSpider(x, y);
     };
 
-    proto.activateSpider = function() {
+    proto.activateSpider = function () {
       console.log("🕷️ SPIDER ACTIVATED! Spawning conversion spider...");
 
       const activeWorms = this.wormSystem.worms.filter((w) => w.active);
@@ -23,19 +23,19 @@
       this.spawnSpider(startX, startY);
     };
 
-    proto.spawnSpider = function(x, y) {
+    proto.spawnSpider = function (x, y) {
       const spider = document.createElement("div");
       spider.className = "spider-entity";
       spider.textContent = "🕷️";
       spider.style.cssText = `
             position: fixed;
-            left: ${x}px;
-            top: ${y}px;
             font-size: 40px;
             z-index: 10001;
             cursor: pointer;
             transition: opacity 0.3s ease, transform 0.3s ease;
+            will-change: translate, transform, opacity;
         `;
+      spider.style.translate = `${x}px ${y}px`;
 
       const spiderData = {
         id: `spider-${Date.now()}`,
@@ -159,8 +159,7 @@
           const dy = closest.y - spiderData.y;
           spiderData.x += (dx / dist) * speed;
           spiderData.y += (dy / dist) * speed;
-          spider.style.left = `${spiderData.x}px`;
-          spider.style.top = `${spiderData.y}px`;
+          spider.style.translate = `${spiderData.x}px ${spiderData.y}px`;
 
           scheduleNextMove();
         }
@@ -174,7 +173,7 @@
     window.WormPowerUpEffectsRegistry = {};
   }
 
-  window.WormPowerUpEffectsRegistry.spider = function(system, payload) {
+  window.WormPowerUpEffectsRegistry.spider = function (system, payload) {
     system._executeSpider(payload.x, payload.y);
   };
 })();

@@ -1,5 +1,5 @@
 // src/scripts/worm-system.powerups.effects.devil.js
-(function() {
+(function () {
   if (!window.WormSystem) {
     console.warn("🐛 WormSystem not found for devil effects");
     return;
@@ -8,7 +8,7 @@
   const proto = window.WormSystem.prototype;
 
   // Devil: Click location to spawn devil, worms rush to it and die after 5s proximity
-  proto.activateDevil = function() {
+  proto.activateDevil = function () {
     console.log("👹 DEVIL ACTIVATED! Click location to spawn devil...");
 
     // One-time click listener
@@ -29,18 +29,19 @@
     document.body.style.cursor = "crosshair";
   };
 
-  proto.spawnDevil = function(x, y) {
+  proto.spawnDevil = function (x, y) {
     const devil = document.createElement("div");
+    devil.className = "devil-entity";
     devil.textContent = "👹";
     devil.style.cssText = `
             position: fixed;
-            left: ${x}px;
-            top: ${y}px;
             font-size: 60px;
             z-index: 10001;
             pointer-events: none;
             animation: devil-pulsate 1.5s ease-in-out infinite;
+        will-change: translate, transform, opacity;
         `;
+    devil.style.translate = `${x}px ${y}px`;
 
     this.crossPanelContainer.appendChild(devil);
 
@@ -90,15 +91,15 @@
 
               // Create skull emoji
               const skull = document.createElement("div");
+              skull.className = "devil-skull";
               skull.textContent = "💀";
               skull.style.cssText = `
                                 position: fixed;
-                                left: ${worm.x}px;
-                                top: ${worm.y}px;
                                 font-size: 30px;
                                 z-index: 10002;
                                 pointer-events: none;
                             `;
+              skull.style.translate = `${worm.x}px ${worm.y}px`;
               this.crossPanelContainer.appendChild(skull);
 
               setTimeout(() => {

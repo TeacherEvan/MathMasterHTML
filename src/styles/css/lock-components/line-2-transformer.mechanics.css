@@ -7,7 +7,15 @@
   border-radius: 5px;
   border: 1px solid #333;
   top: 50%;
-  transition: all 1.2s ease;
+  transition:
+    transform 1.2s ease,
+    opacity 1.2s ease,
+    box-shadow 1.2s ease,
+    border-color 1.2s ease,
+    background 1.2s ease,
+    filter 1.2s ease,
+    width 1.2s ease,
+    height 1.2s ease;
   transform-origin: bottom center;
 }
 
@@ -24,7 +32,8 @@
 .lock-body.level-2-active .hydraulic-piston {
   transform: translateY(-50%) scaleY(1.2) rotate(0deg);
   background: linear-gradient(180deg, #ffa500, #777, #555);
-  box-shadow: 0 0 10px rgba(255, 165, 0, 0.7),
+  box-shadow:
+    0 0 10px rgba(255, 165, 0, 0.7),
     inset 0 2px 4px rgba(255, 255, 255, 0.3);
   animation: piston-pulse 1.5s ease-in-out infinite;
 }
@@ -37,7 +46,15 @@
   background: radial-gradient(circle, #666, #333);
   border: 2px solid #444;
   border-radius: 50%;
-  transition: all 1.2s ease;
+  transition:
+    transform 1.2s ease,
+    opacity 1.2s ease,
+    box-shadow 1.2s ease,
+    border-color 1.2s ease,
+    background 1.2s ease,
+    filter 1.2s ease,
+    width 1.2s ease,
+    height 1.2s ease;
 }
 
 .bolt.top-left {
@@ -75,7 +92,15 @@
   border: 3px solid #666;
   border-radius: 50%;
   background: radial-gradient(circle, #444, #222);
-  transition: all 1.2s ease;
+  transition:
+    transform 1.2s ease,
+    opacity 1.2s ease,
+    box-shadow 1.2s ease,
+    border-color 1.2s ease,
+    background 1.2s ease,
+    filter 1.2s ease,
+    width 1.2s ease,
+    height 1.2s ease;
 }
 
 .gear::before {
@@ -100,7 +125,10 @@
   height: 6px;
   background: #555;
   border-radius: 2px;
-  box-shadow: 0 8px 0 #555, 0 16px 0 #555, 0 24px 0 #555;
+  box-shadow:
+    0 8px 0 #555,
+    0 16px 0 #555,
+    0 24px 0 #555;
 }
 
 .gear.left {
@@ -132,7 +160,15 @@
   background: #000;
   border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
   border: 3px solid #333;
-  transition: all 1.2s ease;
+  transition:
+    transform 1.2s ease,
+    opacity 1.2s ease,
+    box-shadow 1.2s ease,
+    border-color 1.2s ease,
+    background 1.2s ease,
+    filter 1.2s ease,
+    width 1.2s ease,
+    height 1.2s ease;
 }
 
 .keyhole::after {
