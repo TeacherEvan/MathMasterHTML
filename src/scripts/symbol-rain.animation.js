@@ -1,4 +1,4 @@
-(function() {
+(function () {
   const SymbolRainHelpers = window.SymbolRainHelpers;
   const SymbolRainSpawn = window.SymbolRainSpawn;
 
@@ -118,6 +118,20 @@
     loop();
   }
 
+  function stopAnimation(state) {
+    state.isAnimationRunning = false;
+
+    for (let i = 0; i < state.activeFallingSymbols.length; i++) {
+      const symbolObj = state.activeFallingSymbols[i];
+      SymbolRainHelpers.cleanupSymbolObject({
+        symbolObj,
+        activeFaceReveals: state.activeFaceReveals,
+        symbolPool: state.symbolPool,
+      });
+    }
+    state.activeFallingSymbols.length = 0;
+  }
+
   function startSpeedController(state) {
     setInterval(() => {
       if (
@@ -136,6 +150,7 @@
   window.SymbolRainAnimation = {
     animateSymbols,
     startAnimation,
+    stopAnimation,
     startSpeedController,
     resetSpeed,
   };

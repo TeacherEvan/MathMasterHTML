@@ -15,6 +15,10 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
     },
     { column, isInitialPopulation = false, forcedSymbol = null },
   ) {
+    if (activeFallingSymbols.length >= (config.maxActiveSymbols || 200)) {
+      return null;
+    }
+
     const symbol = symbolPool.get();
     symbol.className = "falling-symbol";
     symbol.textContent =
@@ -28,8 +32,9 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
       "px";
 
     if (isInitialPopulation) {
-      symbol.style.top = `${Math.random() *
-        symbolRainContainer.offsetHeight}px`;
+      symbol.style.top = `${
+        Math.random() * symbolRainContainer.offsetHeight
+      }px`;
     } else {
       symbol.style.top = "-50px";
     }
@@ -49,6 +54,8 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
     if (forcedSymbol) {
       lastSymbolSpawnTimestamp[forcedSymbol] = Date.now();
     }
+
+    return symbol;
   };
 
   helpers.populateInitialSymbols = function populateInitialSymbols(

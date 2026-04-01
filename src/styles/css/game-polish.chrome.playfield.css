@@ -90,3 +90,40 @@
   border: 1px solid color-mix(in oklch, var(--shell-line) 22%, transparent);
   background: color-mix(in oklch, var(--shell-panel-strong) 80%, transparent);
 }
+
+@media (max-width: 900px),
+  (max-height: 560px),
+  (hover: none) and (pointer: coarse) {
+  .game-hud {
+    top: clamp(8px, 1.25vh, 12px);
+    left: clamp(8px, 1.6vw, 14px);
+    right: clamp(8px, 1.6vw, 14px);
+    gap: clamp(10px, 1.4vw, 16px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "score timer";
+  }
+
+  .game-hud::after {
+    display: none;
+  }
+
+  .hud-block {
+    min-width: 0;
+    max-width: none;
+    padding: clamp(0.5rem, 1.2vw, 0.72rem) clamp(0.65rem, 1.8vw, 0.9rem);
+  }
+
+  .score-display,
+  .timer-display {
+    justify-self: stretch;
+  }
+
+  .hud-label {
+    font-size: clamp(0.48rem, 1.65vw, 0.62rem);
+    letter-spacing: 0.16em;
+  }
+
+  .hud-value {
+    font-size: clamp(1rem, 3.8vw, 1.35rem);
+  }
+}

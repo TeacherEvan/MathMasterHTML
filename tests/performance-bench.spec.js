@@ -74,6 +74,13 @@ test.describe("Performance benchmarks", () => {
     expect(snapshot.sampleCount).toBeGreaterThan(0);
     expect(snapshot.domQueriesPerSec).toBeLessThan(500);
 
+    // Task 0.1: frame budget violation and DOM node count metrics
+    expect(snapshot).toHaveProperty("frameBudgetViolationPercent");
+    expect(snapshot.frameBudgetViolationPercent).toBeGreaterThanOrEqual(0);
+    expect(snapshot).toHaveProperty("domNodeCount");
+    expect(snapshot.domNodeCount).toBeGreaterThan(0);
+    expect(snapshot).toHaveProperty("resourceManagerStats");
+
     if (snapshot.heapUsed !== null) {
       expect(snapshot.heapUsed).toBeGreaterThan(0);
       expect(snapshot.heapUsed).toBeLessThan(600 * 1024 * 1024);

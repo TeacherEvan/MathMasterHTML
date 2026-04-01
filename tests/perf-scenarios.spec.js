@@ -78,4 +78,51 @@ test.describe("Performance scenarios", () => {
       action: () => lockTransitionScenario(page),
     });
   });
+
+  test("long session scenario captures 30s stability", async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(90000);
+    await runScenario(page, testInfo, {
+      scenarioName: "longSession",
+      level: "beginner",
+      action: async () => {
+        for (let i = 0; i < 6; i++) {
+          await normalPlayScenario(page, { reveals: 2 });
+          await page.waitForTimeout(2000);
+          await idleScenario(page, { durationMs: 3000 });
+        }
+      },
+    });
+  });
+
+  test("symbol rain pool never exceeds ceiling", async ({ page }, testInfo) => {
+    await preparePerfGame(page, { level: "master" });
+    await page.waitForTimeout(10000);
+
+    const counts = await page.evaluate(() => {
+      const container = document.getElementById("symbol-rain-container");
+      const childCount = container ? container.children.length : 0;
+      const activeCount =
+        typeof window.getActiveSymbolCount === "function"
+          ? window.getActiveSymbolCount()
+          : childCount;
+      const configuredCeiling =
+        window.SymbolRainConfig?.maxActiveSymbols ?? 200;
+
+      return {
+        activeCount,
+        childCount,
+        configuredCeiling,
+      };
+    });
+
+    await testInfo.attach("rain-pool-count", {
+      contentType: "application/json",
+      body: Buffer.from(JSON.stringify(counts, null, 2)),
+    });
+
+    expect(counts.activeCount).toBeLessThanOrEqual(counts.configuredCeiling);
+    expect(counts.childCount).toBeLessThanOrEqual(counts.configuredCeiling);
+  });
 });

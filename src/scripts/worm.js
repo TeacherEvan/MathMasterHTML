@@ -168,6 +168,7 @@ class WormSystem {
       this.spawnManager = new WormSpawnManager({
         queueDelay: this.SPAWN_QUEUE_DELAY,
         maxWorms: this.maxWorms,
+        maxQueueLength: 20,
       });
     if (window.WormCursorTracker)
       this.cursorTracker = new WormCursorTracker({ throttleMs: 16 });
@@ -242,7 +243,8 @@ class WormSystem {
     this.cachedPanelC = document.getElementById("third-display");
     this.cachedGameOverModal = document.getElementById("game-over-modal");
 
-    const eventCapableSelf = /** @type {{ setupEventListeners?: (() => void) }} */ (this);
+    const eventCapableSelf =
+      /** @type {{ setupEventListeners?: (() => void) }} */ (this);
     if (typeof eventCapableSelf.setupEventListeners === "function") {
       eventCapableSelf.setupEventListeners();
     }
@@ -251,7 +253,8 @@ class WormSystem {
       try {
         this.powerUpSystem = new window.WormPowerUpSystem(this);
         this.powerUpSystem.inventory = this.powerUps;
-        this.powerUpSystem.chainLightningKillCount = this.chainLightningKillCount;
+        this.powerUpSystem.chainLightningKillCount =
+          this.chainLightningKillCount;
         this.powerUpSystem.updateDisplay();
       } catch (e) {
         console.warn("⚠️ Failed to initialize WormPowerUpSystem:", e);
@@ -261,7 +264,10 @@ class WormSystem {
     this.isInitialized = true;
 
     // VERY IMPORTANT: Bind animate to preserve scope context
-    const animatingSelf = /** @type {{ animate?: (() => void), _boundAnimate?: (() => void) }} */ (this);
+    const animatingSelf =
+      /** @type {{ animate?: (() => void), _boundAnimate?: (() => void) }} */ (
+        this
+      );
     animatingSelf._boundAnimate =
       typeof animatingSelf.animate === "function"
         ? animatingSelf.animate.bind(this)
@@ -275,6 +281,17 @@ class WormSystem {
     this.isDestroyed = true;
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+    if (this._visibilityHandler) {
+      document.removeEventListener("visibilitychange", this._visibilityHandler);
+      this._visibilityHandler = null;
+    }
+    const cleanupSelf = /** @type {{ removeEventListeners?: (() => void) }} */ (
+      this
+    );
+    if (typeof cleanupSelf.removeEventListeners === "function") {
+      cleanupSelf.removeEventListeners();
     }
   }
 }

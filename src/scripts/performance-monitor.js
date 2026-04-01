@@ -70,6 +70,11 @@ class PerformanceMonitor {
    * Works in both lightweight and extended modes.
    * @returns {object}
    */
+  destroy() {
+    this._destroyed = true;
+    console.log("📊 PerformanceMonitor destroyed");
+  }
+
   getSnapshot() {
     const buf = this._isExtendedEnabled()
       ? this._histogramBuffer
@@ -81,6 +86,16 @@ class PerformanceMonitor {
     const jankCount = sorted.filter((d) => d > 50).length;
     const jankPercent =
       sorted.length > 0 ? (jankCount / sorted.length) * 100 : 0;
+
+    // Frame budget violation: frames exceeding 16.67ms (60fps budget)
+    const budgetViolations = sorted.filter((d) => d > 16.67).length;
+    const frameBudgetViolationPercent =
+      sorted.length > 0
+        ? Math.round((budgetViolations / sorted.length) * 100 * 100) / 100
+        : 0;
+
+    // DOM node count
+    const domNodeCount = document.querySelectorAll("*").length;
 
     // Input latency stats
     let inputLatencyAvg = null;
@@ -129,11 +144,14 @@ class PerformanceMonitor {
       frameTimeP95: Math.round(p95 * 100) / 100,
       frameTimeMax: Math.round(max * 100) / 100,
       jankPercent: Math.round(jankPercent * 100) / 100,
+      frameBudgetViolationPercent,
+      domNodeCount,
       domQueriesPerSec,
       activeWorms,
       rainSymbols,
       inputLatencyAvg,
       inputLatencyP95,
+      resourceManagerStats: window.ResourceManager?.getStats?.() ?? null,
       sampleCount: sorted.length,
       timestamp: Date.now(),
     };
@@ -245,6 +263,7 @@ class PerformanceMonitor {
     const self = this;
 
     function measureFrame() {
+      if (self._destroyed) return;
       const now = performance.now();
       const delta = now - self.lastFrameTime;
       self.lastFrameTime = now;
