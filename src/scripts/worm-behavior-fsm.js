@@ -233,7 +233,7 @@ class WormBehaviorFSM {
    * @param {string} newState - Target state
    * @param {Object} [data] - Additional transition data
    */
-  forceState(newState, data = {}) {
+  forceState(newState, _data = {}) {
     const fromState = this._currentState;
     this._currentState = newState;
     this._logTransition(fromState, newState, "forced", true);

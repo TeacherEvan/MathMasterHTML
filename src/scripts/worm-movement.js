@@ -168,8 +168,16 @@ class WormMovement {
 
     const { x, y } = this.applyCrawlEffect(worm);
 
-    worm.element.style.translate = `${x}px ${y}px`;
-    worm.element.style.rotate = `${worm.direction + Math.PI / 2}rad`;
+    worm.element.style.setProperty("--worm-x", `${x}px`);
+    worm.element.style.setProperty("--worm-y", `${y}px`);
+    worm.element.style.setProperty(
+      "--worm-rotation",
+      `${worm.direction + Math.PI / 2}rad`,
+    );
+    if (!worm.element.style.transform.includes("translate")) {
+      worm.element.style.transform =
+        "translate(var(--worm-x), var(--worm-y)) rotate(var(--worm-rotation)) scale(var(--worm-scale, 1))";
+    }
   }
 
   /**

@@ -1,7 +1,7 @@
 // js/worm-movement-behaviors.js - Worm behavior handlers
 console.log("🐛 Worm movement behaviors loading...");
 
-(function() {
+(function () {
   if (!window.WormSystem) {
     console.warn("🐛 WormSystem not found for movement behaviors");
     return;
@@ -14,7 +14,7 @@ console.log("🐛 Worm movement behaviors loading...");
    * @private
    * @returns {boolean} True if this state handled the worm update
    */
-  proto._updateWormRushingToDevil = function(worm) {
+  proto._updateWormRushingToDevil = function (worm) {
     if (
       !worm.isRushingToDevil ||
       worm.devilX === undefined ||
@@ -37,13 +37,12 @@ console.log("🐛 Worm movement behaviors loading...");
       const rushSpeed = worm.baseSpeed * 2;
       worm.velocityX = (dx / distance) * rushSpeed;
       worm.velocityY = (dy / distance) * rushSpeed;
+      worm.direction = Math.atan2(dy, dx);
 
       worm.x += worm.velocityX;
       worm.y += worm.velocityY;
 
-      // Rotate towards devil
-      worm.element.style.transform = `rotate(${Math.atan2(dy, dx) +
-        Math.PI}rad)`;
+      this._updateWormRotation(worm);
     }
 
     // Apply position
@@ -55,7 +54,7 @@ console.log("🐛 Worm movement behaviors loading...");
    * Handle cursor evasion (highest priority during targeting)
    * @private
    */
-  proto._updateWormEvadingCursor = function(
+  proto._updateWormEvadingCursor = function (
     worm,
     viewportWidth,
     viewportHeight,
@@ -89,7 +88,11 @@ console.log("🐛 Worm movement behaviors loading...");
    * Apply escape burst after first click (double-click kill)
    * @private
    */
-  proto._updateWormEscapeBurst = function(worm, viewportWidth, viewportHeight) {
+  proto._updateWormEscapeBurst = function (
+    worm,
+    viewportWidth,
+    viewportHeight,
+  ) {
     const now = Date.now();
     if (!worm.escapeUntil || now > worm.escapeUntil || !worm.escapeVector) {
       return false;
@@ -116,7 +119,7 @@ console.log("🐛 Worm movement behaviors loading...");
    * @private
    * @returns {boolean} True if this state handled the worm update
    */
-  proto._updateWormCarryingSymbol = function(worm) {
+  proto._updateWormCarryingSymbol = function (worm) {
     if (!worm.hasStolen || worm.fromConsole) {
       return false;
     }
@@ -190,7 +193,7 @@ console.log("🐛 Worm movement behaviors loading...");
    * @private
    * @returns {boolean} True if this state handled the worm update
    */
-  proto._updateWormReturningToConsole = function(worm) {
+  proto._updateWormReturningToConsole = function (worm) {
     if (!worm.hasStolen || !worm.fromConsole || !worm.consoleSlotElement) {
       return false;
     }

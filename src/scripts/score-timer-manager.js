@@ -163,7 +163,7 @@ console.log("⏱️ ScoreTimerManager loading...");
     setGameStarted() {
       if (this._gameStarted) return;
       this._gameStarted = true;
-      if (!this._paused) {
+      if (this._problemStarted && !this._paused) {
         this.startStep();
       }
     },
@@ -209,6 +209,16 @@ console.log("⏱️ ScoreTimerManager loading...");
       this._manualPause = false;
       if (modules.resume) {
         modules.resume(this);
+      }
+    },
+
+    destroy() {
+      this._paused = true;
+      this._manualPause = true;
+      this._problemStarted = false;
+      this._gameStarted = false;
+      if (modules.clearIntervalId) {
+        modules.clearIntervalId(this);
       }
     },
 

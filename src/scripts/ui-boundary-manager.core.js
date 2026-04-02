@@ -308,10 +308,15 @@ class UIBoundaryManager {
 
         const otherBox = this.getBoundingBox(otherEntry.element);
         if (this.checkOverlap(box, otherBox, this.config.minSpacing)) {
+          const overlapArea = this.getOverlapArea(box, otherBox);
+          if (overlapArea <= 0) {
+            continue;
+          }
+
           overlaps.push({
             elementA: { id, entry, box },
             elementB: { id: otherId, entry: otherEntry, box: otherBox },
-            overlapArea: this.getOverlapArea(box, otherBox),
+            overlapArea,
           });
         }
       }

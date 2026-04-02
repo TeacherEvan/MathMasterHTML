@@ -5,6 +5,10 @@
 
 /* === BASE WORM CONTAINER === */
 .worm-container {
+  --worm-x: 0px;
+  --worm-y: 0px;
+  --worm-rotation: 0rad;
+  --worm-scale: 1;
   position: absolute;
   top: 0;
   left: 0;
@@ -17,13 +21,15 @@
   opacity: 1 !important;
   visibility: visible !important;
   pointer-events: auto !important;
-  will-change: translate, rotate, transform, filter;
+  transform: translate(var(--worm-x), var(--worm-y))
+    rotate(var(--worm-rotation)) scale(var(--worm-scale));
+  will-change: transform, filter;
 }
 
 .worm-container:hover {
   filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 1))
     drop-shadow(0 0 15px rgba(0, 255, 0, 1));
-  transform: scale(1.1);
+  --worm-scale: 1.1;
 }
 
 /* === WORM BODY AND SEGMENTS === */

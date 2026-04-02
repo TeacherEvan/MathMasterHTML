@@ -1,6 +1,6 @@
 // worm/behavior/RushingState.js - Rushing to target behavior state
 // SOLID: Single Responsibility - Only handles rushing behavior
-(function() {
+(function () {
   "use strict";
 
   /**
@@ -51,7 +51,7 @@
      * @param {number} deltaTime - Time since last frame
      * @returns {string|null} Next state or null to stay
      */
-    update(worm, deltaTime) {
+    update(worm, _deltaTime) {
       // Check for devil attraction (higher priority)
       if (worm.isRushingToDevil) {
         return "devil";
@@ -91,7 +91,7 @@
      * Called when exiting rushing state
      * @param {Object} worm - Worm data object
      */
-    exit(worm) {
+    exit(_worm) {
       this._targetElement = null;
     }
 

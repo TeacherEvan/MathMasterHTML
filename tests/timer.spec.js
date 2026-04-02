@@ -163,9 +163,9 @@ test.describe("Timer and Score Countdown", () => {
     expect(nextProblemTimer).toBeGreaterThanOrEqual(598);
     expect(nextProblemTimer).toBeLessThanOrEqual(600);
 
-    await page.waitForTimeout(2200);
-
-    const laterTimer = parseInt((await timerValue.textContent()) || "0", 10);
-    expect(laterTimer).toBeLessThan(nextProblemTimer);
+    await expect(async () => {
+      const laterTimer = parseInt((await timerValue.textContent()) || "0", 10);
+      expect(laterTimer).toBeLessThan(nextProblemTimer);
+    }).toPass({ timeout: 6000 });
   });
 });

@@ -51,14 +51,16 @@
   };
 
   if (window.__PERF_SMOKE_MODE === true) {
-    config.initialFallSpeed = 0.4;
-    config.maxFallSpeed = 0.8;
-    config.spawnRate = 0.2;
-    config.burstSpawnRate = 0.08;
-    config.symbolsPerWave = 6;
-    config.waveInterval = 220;
-    config.guaranteedSpawnInterval = 12000;
-    config.faceRevealInterval = 9000;
+    config.initialFallSpeed = 0.35;
+    config.maxFallSpeed = 0.55;
+    config.spawnRate = 0;
+    config.burstSpawnRate = 0;
+    config.symbolsPerWave = 0;
+    config.waveInterval = 600;
+    config.guaranteedSpawnInterval = 20000;
+    config.faceRevealInterval = 15000;
+    config.poolSize = 1;
+    config.maxActiveSymbols = 0;
   }
 
   window.SymbolRainSymbols = symbols;

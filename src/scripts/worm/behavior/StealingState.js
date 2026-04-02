@@ -1,6 +1,6 @@
 // worm/behavior/StealingState.js - Stealing symbol behavior state
 // SOLID: Single Responsibility - Only handles stealing behavior
-(function() {
+(function () {
   "use strict";
 
   /**
@@ -58,7 +58,7 @@
      * @param {number} deltaTime - Time since last frame
      * @returns {string|null} Next state or null to stay
      */
-    update(worm, deltaTime) {
+    update(worm, _deltaTime) {
       const elapsed = Date.now() - this._stealStartTime;
 
       // Check if steal animation is complete
@@ -102,7 +102,7 @@
       // For example, pulse effect on worm
       if (worm.element) {
         const scale = 1 + Math.sin(progress * Math.PI) * 0.1;
-        worm.element.style.transform = `scale(${scale})`;
+        worm.element.style.setProperty("--worm-scale", String(scale));
       }
     }
 
@@ -138,7 +138,7 @@
 
       // Reset transform if applied
       if (worm.element) {
-        worm.element.style.transform = "";
+        worm.element.style.removeProperty("--worm-scale");
       }
     }
 

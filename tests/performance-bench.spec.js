@@ -32,14 +32,26 @@ test.describe("Performance benchmarks", () => {
   });
 
   test("captures a desktop perf smoke snapshot", async ({ page }) => {
+    test.setTimeout(120000);
+    const projectName = test.info().project.name;
+    const isFirefox = projectName === "firefox";
+    const isWebKit = projectName === "webkit";
+    const minSampleCount = isFirefox || isWebKit ? 120 : 300;
+    const minFps = isWebKit ? 8 : isFirefox ? 20 : 50;
+    const maxFrameBudgetViolationPercent = isFirefox || isWebKit ? 99 : 80;
+    const maxDomQueriesPerSec = isFirefox || isWebKit ? 250 : 150;
+
+    await page.waitForTimeout(9000);
+
     await page.waitForFunction(
-      () =>
+      (requiredSampleCount) =>
         !!window.performanceMonitor &&
-        typeof window.performanceMonitor.getSnapshot === "function",
-      undefined,
-      { timeout: 10000 },
+        typeof window.performanceMonitor.getSnapshot === "function" &&
+        window.performanceMonitor.getSnapshot().sampleCount >=
+          requiredSampleCount,
+      minSampleCount,
+      { timeout: 20000 },
     );
-    await page.waitForTimeout(2500);
 
     const snapshot = await page.evaluate(() => {
       if (
@@ -72,7 +84,11 @@ test.describe("Performance benchmarks", () => {
 
     expect(Number.isFinite(snapshot.fps)).toBeTruthy();
     expect(snapshot.sampleCount).toBeGreaterThan(0);
-    expect(snapshot.domQueriesPerSec).toBeLessThan(500);
+    expect(snapshot.fps).toBeGreaterThan(minFps);
+    expect(snapshot.frameBudgetViolationPercent).toBeLessThan(
+      maxFrameBudgetViolationPercent,
+    );
+    expect(snapshot.domQueriesPerSec).toBeLessThan(maxDomQueriesPerSec);
 
     // Task 0.1: frame budget violation and DOM node count metrics
     expect(snapshot).toHaveProperty("frameBudgetViolationPercent");

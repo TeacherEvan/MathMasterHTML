@@ -37,6 +37,20 @@ export default defineConfig({
       use: { ...devices["Pixel 7"] },
     },
     {
+      name: "qa-perf-smoke",
+      testMatch: [
+        "performance-bench.spec.js",
+        "lifecycle-tracker.spec.js",
+        "lifecycle-audit.spec.js",
+      ],
+      use: {
+        ...devices["Desktop Chrome"],
+        trace: "off",
+        screenshot: "off",
+        video: "off",
+      },
+    },
+    {
       name: "qa-matrix-chromium",
       use: { ...devices["Desktop Chrome"] },
     },

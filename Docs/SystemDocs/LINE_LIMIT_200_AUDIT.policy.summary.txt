@@ -1,42 +1,42 @@
 LINE LIMIT 200 AUDIT SUMMARY (policy exclusions applied)
-Root: /home/evan/Workspace/Games/MathMasterHTML
-Included file count: 315
-Violations (>200 lines): 54
+Root: /home/ewaldt/Documents/VS/GAMES/MathMasterHTML
+Included file count: 346
+Violations (>200 lines): 63
 
 Exclusions (generated/3rd-party): package-lock.json, test-results.json, test-results.competition.json
 
 Violations by category:
-js-runtime        32
-tests             11
-css                6
+js-runtime        35
+tests             12
+css               11
 assets-source      3
 misc               1
 pages              1
 
 Top 20 largest violators:
+   755  src\styles\css\level-select.polish.css
+   721  tests\gameplay-features.spec.js
    647  tests\integration\worm-movement-system.spec.js
    607  tests\integration\worm-movement-navigation.spec.js
-   577  tests\gameplay-features.spec.js
    562  tests\integration\worm-movement-behaviors.spec.js
    495  tests\unit\worm-movement.spec.js
+   487  src\scripts\worm-powerups.ui.js
+   478  tests\powerups.spec.js
+   451  src\styles\css\worm-effects.core.css
    429  src\scripts\worm\pools\ParticlePool.js
+   411  src\pages\game.html
    405  service-worker.js
+   398  src\scripts\performance-monitor.js
    397  src\scripts\worm-behavior-fsm.js
-   393  src\pages\game.html
    390  tests\performance\worm-movement-bench.spec.js
-   379  tests\powerups.spec.js
    379  tests\unit\worm-evasion.spec.js
+   372  tests\lifecycle-hardening.spec.js
    364  src\assets\components\lock-components\line-6-transformer.html
-   348  src\scripts\worm\pools\WormSegmentPool.js
-   344  src\scripts\worm-system.spawn.js
-   301  src\scripts\ui-boundary-manager.core.js
-   290  src\scripts\worm.js
-   277  src\assets\components\lock-components\Line-5-transformer.html
-   277  src\scripts\display-manager.js
-   274  tests\ui-boundary.spec.js
+   363  src\scripts\ui-boundary-manager.core.js
+   362  src\scripts\display-manager.js
 
 CSV (all): 
-/home/evan/Workspace/Games/MathMasterHTML/Docs/LINE_LIMIT_200_AUDIT.policy.all.csv
+/home/ewaldt/Documents/VS/GAMES/MathMasterHTML/Docs/SystemDocs/LINE_LIMIT_200_AUDIT.policy.all.csv
 CSV (violations): 
-/home/evan/Workspace/Games/MathMasterHTML/Docs/LINE_LIMIT_200_AUDIT.policy.violations.csv
+/home/ewaldt/Documents/VS/GAMES/MathMasterHTML/Docs/SystemDocs/LINE_LIMIT_200_AUDIT.policy.violations.csv
 

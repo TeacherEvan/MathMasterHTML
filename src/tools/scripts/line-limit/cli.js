@@ -79,3 +79,7 @@ export function runCli() {
   console.log("\n✅ Line limit check passed.");
   process.exit(0);
 }
+
+if (isExecutedDirectly(import.meta.url)) {
+  runCli();
+}

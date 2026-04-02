@@ -1,6 +1,6 @@
 // worm/behavior/WormState.js - Base class for worm behavior states
 // SOLID: Open/Closed - New states can be added without modifying existing code
-(function() {
+(function () {
   "use strict";
 
   /**
@@ -19,7 +19,7 @@
      * @param {Object} worm - Worm data object
      * @param {Object} [params] - Optional parameters
      */
-    enter(worm, params = {}) {
+    enter(worm, _params = {}) {
       // Override in subclass
     }
 
@@ -29,7 +29,7 @@
      * @param {number} deltaTime - Time since last frame in ms
      * @returns {string|null} New state name or null to stay
      */
-    update(worm, deltaTime) {
+    update(_worm, _deltaTime) {
       // Override in subclass
       return null;
     }
@@ -38,7 +38,7 @@
      * Called when exiting this state
      * @param {Object} worm - Worm data object
      */
-    exit(worm) {
+    exit(_worm) {
       // Override in subclass
     }
 
@@ -47,7 +47,7 @@
      * @param {string} stateName - Target state name
      * @returns {boolean}
      */
-    canTransitionTo(stateName) {
+    canTransitionTo(_stateName) {
       return true; // Override in subclass for restricted transitions
     }
 
