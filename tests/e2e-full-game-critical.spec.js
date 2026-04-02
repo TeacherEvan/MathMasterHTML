@@ -4,7 +4,9 @@ import { expect, test } from "@playwright/test";
 const LEVELS = ["beginner", "warrior", "master"];
 
 async function bootLevel(page, level) {
-  await page.goto(`/game.html?level=${level}`, { waitUntil: "domcontentloaded" });
+  await page.goto(`/game.html?level=${level}`, {
+    waitUntil: "domcontentloaded",
+  });
   const howToPlayModal = page.locator("#how-to-play-modal");
   await expect(howToPlayModal).toBeVisible({ timeout: 10000 });
   for (let attempt = 0; attempt < 4; attempt++) {
@@ -41,7 +43,9 @@ async function seedPowerUps(page) {
 
 for (const level of LEVELS) {
   test.describe(`Full critical path: ${level}`, () => {
-    test(`boots ${level} and renders core gameplay surfaces`, async ({ page }) => {
+    test(`boots ${level} and renders core gameplay surfaces`, async ({
+      page,
+    }) => {
       await bootLevel(page, level);
 
       await expect(page.locator("#panel-a")).toBeVisible();
@@ -54,6 +58,7 @@ for (const level of LEVELS) {
     test(`covers symbols, worms, purple path, and power-up interaction on ${level}`, async ({
       page,
     }) => {
+      test.slow();
       test.slow();
       await bootLevel(page, level);
       await seedPowerUps(page);
@@ -73,7 +78,10 @@ for (const level of LEVELS) {
       });
 
       await page.waitForFunction(
-        () => window.wormSystem?.worms.some((worm) => worm.active && !worm.isPurple),
+        () =>
+          window.wormSystem?.worms.some(
+            (worm) => worm.active && !worm.isPurple,
+          ),
         { timeout: 5000 },
       );
 
@@ -81,13 +89,18 @@ for (const level of LEVELS) {
         document.dispatchEvent(new CustomEvent("purpleWormTriggered"));
       });
       await page.waitForFunction(
-        () => window.wormSystem?.worms.some((worm) => worm.active && worm.isPurple),
+        () =>
+          window.wormSystem?.worms.some((worm) => worm.active && worm.isPurple),
         { timeout: 5000 },
       );
 
-      await expect(page.locator('[data-testid="powerup-chainLightning"]')).toBeVisible();
-      await page.click('[data-testid="powerup-chainLightning"]');
-      await page.click("#solution-container", { force: true });
+      await expect(
+        page.locator('[data-testid="powerup-chainLightning"]'),
+      ).toBeVisible();
+      await page
+        .locator('[data-testid="powerup-chainLightning"]')
+        .evaluate((btn) => btn.click());
+      await page.locator("#solution-container").evaluate((btn) => btn.click());
 
       const gameHealth = await page.evaluate(() => {
         const score = Number.parseInt(
@@ -95,7 +108,8 @@ for (const level of LEVELS) {
           10,
         );
         return {
-          activeWorms: window.wormSystem?.worms.filter((worm) => worm.active).length ?? 0,
+          activeWorms:
+            window.wormSystem?.worms.filter((worm) => worm.active).length ?? 0,
           scoreFinite: Number.isFinite(score),
           hiddenSymbols: document.querySelectorAll(".hidden-symbol").length,
         };

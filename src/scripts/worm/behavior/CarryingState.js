@@ -1,6 +1,6 @@
 // worm/behavior/CarryingState.js - Carrying stolen symbol behavior state
 // SOLID: Single Responsibility - Only handles carrying behavior
-(function() {
+(function () {
   "use strict";
 
   /**
@@ -60,7 +60,7 @@
      * @param {number} deltaTime - Time since last frame
      * @returns {string|null} Next state or null to stay
      */
-    update(worm, deltaTime) {
+    update(worm, _deltaTime) {
       // Move toward exit
       this._moveTowardExit(worm);
 

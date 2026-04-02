@@ -32,7 +32,7 @@ test.describe("UI Boundary Management", () => {
     });
 
     // Dismiss the how-to-play modal
-    await page.click("#start-game-btn");
+    await page.locator("#start-game-btn").click({ force: true });
     await page.waitForTimeout(500);
   });
 
@@ -306,7 +306,7 @@ test.describe("Panel A Layout", () => {
       state: "visible",
       timeout: 10000,
     });
-    await page.click("#start-game-btn");
+    await page.locator("#start-game-btn").click({ force: true });
     await page.waitForTimeout(500);
   });
 

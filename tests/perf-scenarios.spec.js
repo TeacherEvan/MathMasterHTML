@@ -10,6 +10,11 @@ import {
   wormBurstScenario,
 } from "./utils/perf-scenarios.js";
 
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').TestInfo} testInfo
+ * @param {{ scenarioName: string, level?: string, action: () => Promise<unknown> }} options
+ */
 async function runScenario(page, testInfo, { scenarioName, level, action }) {
   await preparePerfGame(page, { level });
 
@@ -30,15 +35,20 @@ async function runScenario(page, testInfo, { scenarioName, level, action }) {
   expect(after.scenario).toBe(scenarioName);
   expect(Number.isFinite(after.fps)).toBe(true);
   expect(after.sampleCount).toBeGreaterThan(0);
+
+  return snapshot;
 }
 test.describe("Performance scenarios", () => {
   test("idle scenario captures a stable baseline", async ({
     page,
   }, testInfo) => {
-    await runScenario(page, testInfo, {
+    const snapshot = await runScenario(page, testInfo, {
       scenarioName: "idle",
       action: () => idleScenario(page),
     });
+
+    expect(Number.isFinite(snapshot.after.fps)).toBe(true);
+    expect(snapshot.after.domQueriesPerSec).toBeLessThan(200);
   });
 
   test("normal play scenario captures symbol reveal load", async ({
@@ -49,6 +59,8 @@ test.describe("Performance scenarios", () => {
       action: () => normalPlayScenario(page),
     });
 
+    expect(Number.isFinite(snapshot.after.fps)).toBe(true);
+    expect(snapshot.after.domQueriesPerSec).toBeLessThan(200);
     expect(snapshot.after.domQueriesPerSec).toBeLessThan(150);
   });
 
@@ -60,6 +72,8 @@ test.describe("Performance scenarios", () => {
       action: () => wormBurstScenario(page),
     });
 
+    expect(Number.isFinite(snapshot.after.fps)).toBe(true);
+    expect(snapshot.after.domQueriesPerSec).toBeLessThan(200);
     expect(snapshot.after.wormCacheStats).toBeTruthy();
     expect(typeof snapshot.after.wormCacheStats.overallHitRate).toBe("number");
   });
@@ -67,27 +81,33 @@ test.describe("Performance scenarios", () => {
   test("dense rain scenario captures master-level activity", async ({
     page,
   }, testInfo) => {
-    await runScenario(page, testInfo, {
+    const snapshot = await runScenario(page, testInfo, {
       scenarioName: "denseRain",
       level: "master",
       action: () => denseRainScenario(page),
     });
+
+    expect(Number.isFinite(snapshot.after.fps)).toBe(true);
+    expect(snapshot.after.domQueriesPerSec).toBeLessThan(200);
   });
 
   test("lock transition scenario captures completion feedback", async ({
     page,
   }, testInfo) => {
-    await runScenario(page, testInfo, {
+    const snapshot = await runScenario(page, testInfo, {
       scenarioName: "lockTransition",
       action: () => lockTransitionScenario(page),
     });
+
+    expect(Number.isFinite(snapshot.after.fps)).toBe(true);
+    expect(snapshot.after.domQueriesPerSec).toBeLessThan(200);
   });
 
   test("long session scenario captures 30s stability", async ({
     page,
   }, testInfo) => {
     test.setTimeout(90000);
-    await runScenario(page, testInfo, {
+    const snapshot = await runScenario(page, testInfo, {
       scenarioName: "longSession",
       level: "beginner",
       action: async () => {
@@ -98,6 +118,9 @@ test.describe("Performance scenarios", () => {
         }
       },
     });
+
+    expect(Number.isFinite(snapshot.after.fps)).toBe(true);
+    expect(snapshot.after.domQueriesPerSec).toBeLessThan(200);
   });
 
   test("symbol rain pool never exceeds ceiling", async ({ page }, testInfo) => {
@@ -105,14 +128,18 @@ test.describe("Performance scenarios", () => {
     await page.waitForTimeout(10000);
 
     const counts = await page.evaluate(() => {
+      const typedWindow = /** @type {Window & {
+        getActiveSymbolCount?: () => number,
+        SymbolRainConfig?: { maxActiveSymbols?: number },
+      }} */ (window);
       const container = document.getElementById("symbol-rain-container");
       const childCount = container ? container.children.length : 0;
       const activeCount =
-        typeof window.getActiveSymbolCount === "function"
-          ? window.getActiveSymbolCount()
+        typeof typedWindow.getActiveSymbolCount === "function"
+          ? typedWindow.getActiveSymbolCount()
           : childCount;
       const configuredCeiling =
-        window.SymbolRainConfig?.maxActiveSymbols ?? 200;
+        typedWindow.SymbolRainConfig?.maxActiveSymbols ?? 200;
 
       return {
         activeCount,

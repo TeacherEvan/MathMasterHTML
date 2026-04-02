@@ -121,6 +121,15 @@
   function stopAnimation(state) {
     state.isAnimationRunning = false;
 
+    if (state.speedControllerId) {
+      clearInterval(state.speedControllerId);
+      state.speedControllerId = null;
+    }
+
+    if (SymbolRainSpawn?.stopGuaranteedSpawnController) {
+      SymbolRainSpawn.stopGuaranteedSpawnController(state);
+    }
+
     for (let i = 0; i < state.activeFallingSymbols.length; i++) {
       const symbolObj = state.activeFallingSymbols[i];
       SymbolRainHelpers.cleanupSymbolObject({
@@ -133,7 +142,11 @@
   }
 
   function startSpeedController(state) {
-    setInterval(() => {
+    if (state.speedControllerId) {
+      return;
+    }
+
+    state.speedControllerId = setInterval(() => {
       if (
         !state.isMobileMode &&
         state.symbolFallSpeed < state.config.maxFallSpeed

@@ -48,6 +48,8 @@ function initSymbolRain() {
       columnCount: 0,
       activeFallingSymbols: [],
       isAnimationRunning: false,
+      speedControllerId: null,
+      guaranteedSpawnControllerId: null,
       symbolsToRemove: new Set(),
       cachedContainerHeight: 0,
       isTabVisible: !document.hidden,
@@ -58,16 +60,16 @@ function initSymbolRain() {
       symbolPool: SymbolRainHelpers.createSymbolPool(SymbolRainConfig),
     };
 
+    window.__symbolRainState = state;
+
     const debounce = SymbolRainHelpers.debounce;
 
     function calculateColumns() {
-      const {
-        columnCount,
-        containerHeight,
-      } = SymbolRainHelpers.calculateColumns(
-        symbolRainContainer,
-        SymbolRainConfig,
-      );
+      const { columnCount, containerHeight } =
+        SymbolRainHelpers.calculateColumns(
+          symbolRainContainer,
+          SymbolRainConfig,
+        );
       state.cachedContainerHeight = containerHeight;
       state.columnCount = columnCount;
     }
@@ -115,11 +117,14 @@ function initSymbolRain() {
 
     window.addEventListener("resize", debouncedResize);
 
-    document.addEventListener(GameEvents.DISPLAY_RESOLUTION_CHANGED, (event) => {
-      state.isMobileMode = event.detail.name === "mobile";
-    });
+    document.addEventListener(
+      GameEvents.DISPLAY_RESOLUTION_CHANGED,
+      (event) => {
+        state.isMobileMode = event.detail.name === "mobile";
+      },
+    );
 
-    window.getActiveSymbolCount = function() {
+    window.getActiveSymbolCount = function () {
       return state.activeFallingSymbols.length;
     };
   } catch (e) {

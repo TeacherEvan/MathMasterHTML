@@ -14,11 +14,15 @@
  * @property {number} frameTimeP95
  * @property {number} frameTimeMax
  * @property {number} jankPercent
+ * @property {number} frameBudgetViolationPercent
+ * @property {number} domNodeCount
  * @property {number} domQueriesPerSec
  * @property {number} activeWorms
  * @property {number} rainSymbols
  * @property {number|null} inputLatencyAvg
  * @property {number|null} inputLatencyP95
+ * @property {{ activeTimeouts: number, activeIntervals: number, totalActive: number } | null} resourceManagerStats
+ * @property {{ totalHits: number, totalMisses: number, totalRequests: number, overallHitRate: number, caches: object }} wormCacheStats
  * @property {number} sampleCount
  * @property {number} timestamp
  * @property {string} [scenario]
@@ -65,7 +69,7 @@ export async function collectPerfSnapshot(page) {
  * Run a timed scenario and return before/after snapshots.
  *
  * @param {import('@playwright/test').Page} page
- * @param {() => Promise<void>} scenario - async function that drives the scenario
+ * @param {() => Promise<unknown>} scenario - async function that drives the scenario
  * @param {{ durationMs?: number, scenarioName?: string }} [opts]
  * @returns {Promise<{ before: PerfSnapshot, after: PerfSnapshot }>}
  */

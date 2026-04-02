@@ -10,6 +10,8 @@
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self';">
 
+    <script src="/src/scripts/perf-smoke-mode.js"></script>
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/src/assets/images/icon-192.png">
@@ -33,6 +35,7 @@
     <link rel="stylesheet" href="/src/styles/css/lock-responsive.css?v=20251007-mobile-fix">
     <link rel="stylesheet" href="/src/styles/css/modern-ux-enhancements.css">
     <link rel="stylesheet" href="/src/styles/css/lod-animations.css">
+    <link rel="stylesheet" href="/src/styles/css/perf-smoke-mode.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;700&family=Orbitron:wght@400;700;900&display=swap"
         rel="stylesheet">
@@ -293,6 +296,10 @@
     <script src="/src/scripts/interaction-audio.cyberpunk.ui.js"></script>
     <script src="/src/scripts/interaction-audio.cyberpunk.gameplay.js"></script>
     <script src="/src/scripts/interaction-audio.cyberpunk.encounters.js"></script>
+    <script src="/src/scripts/interaction-audio.cyberpunk.drums.loader.js"></script>
+    <script src="/src/scripts/interaction-audio.cyberpunk.drums.patterns.js"></script>
+    <script src="/src/scripts/interaction-audio.cyberpunk.drums.sequencer.js"></script>
+    <script src="/src/scripts/interaction-audio.cyberpunk.drums.playback.js"></script>
     <script src="/src/scripts/interaction-audio.cyberpunk.bootstrap.js"></script>
     <script src="/src/scripts/interaction-audio.cyberpunk.controls.js"></script>
     <!-- New modular managers -->

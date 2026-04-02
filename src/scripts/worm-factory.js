@@ -91,7 +91,12 @@ class WormFactory {
 
     // Apply consistent positioning and styling
     wormElement.style.position = "fixed";
-    wormElement.style.translate = `${x}px ${y}px`;
+    wormElement.style.setProperty("--worm-x", `${x}px`);
+    wormElement.style.setProperty("--worm-y", `${y}px`);
+    wormElement.style.setProperty("--worm-rotation", "0rad");
+    wormElement.style.setProperty("--worm-scale", "1");
+    wormElement.style.transform =
+      "translate(var(--worm-x), var(--worm-y)) rotate(var(--worm-rotation)) scale(var(--worm-scale, 1))";
     wormElement.style.zIndex = String(this.WORM_Z_INDEX);
     wormElement.style.opacity = "1";
     wormElement.style.visibility = "visible";

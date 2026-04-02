@@ -109,7 +109,11 @@ test.describe("Lifecycle hardening", () => {
     await page.evaluate(() => {
       window.wormSystem.queueWormSpawn("panelB", { targetSymbol: "x" });
     });
-    await page.waitForTimeout(300);
+    await page.waitForFunction(
+      () => (window.wormSystem?.worms?.length ?? 0) > 0,
+      undefined,
+      { timeout: 5000 },
+    );
 
     const result = await page.evaluate(() => {
       const worm = window.wormSystem.worms[0];
@@ -199,8 +203,7 @@ test.describe("Lifecycle hardening", () => {
         inlineTranslate: wormEl.style.translate,
         inlineRotate: wormEl.style.rotate,
         inlineTransform: wormEl.style.transform,
-        computedTranslate: getComputedStyle(wormEl).translate,
-        computedRotate: getComputedStyle(wormEl).rotate,
+        computedTransform: getComputedStyle(wormEl).transform,
       };
     });
 
@@ -214,8 +217,7 @@ test.describe("Lifecycle hardening", () => {
     expect(
       result.inlineRotate !== "" || result.inlineTransform.includes("rotate"),
     ).toBe(true);
-    expect(result.computedTranslate).not.toBe("none");
-    expect(result.computedRotate).not.toBe("none");
+    expect(result.computedTransform).not.toBe("none");
   });
 
   test("falling symbols use translate-based placement, not top", async ({

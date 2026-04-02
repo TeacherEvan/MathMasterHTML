@@ -4,7 +4,9 @@ import { expect, test } from "@playwright/test";
 const LEVELS = ["beginner", "warrior", "master"];
 
 async function bootLevel(page, level) {
-  await page.goto(`/game.html?level=${level}`, { waitUntil: "domcontentloaded" });
+  await page.goto(`/game.html?level=${level}`, {
+    waitUntil: "domcontentloaded",
+  });
   const howToPlayModal = page.locator("#how-to-play-modal");
   await expect(howToPlayModal).toBeVisible({ timeout: 10000 });
   for (let attempt = 0; attempt < 4; attempt++) {
@@ -30,7 +32,9 @@ async function bootLevel(page, level) {
 
 for (const level of LEVELS) {
   test.describe(`Bounded stress: ${level}`, () => {
-    test(`handles rapid back-to-back interactions on ${level}`, async ({ page }) => {
+    test(`handles rapid back-to-back interactions on ${level}`, async ({
+      page,
+    }) => {
       test.slow();
       await bootLevel(page, level);
 
@@ -51,7 +55,9 @@ for (const level of LEVELS) {
       await page.evaluate(() => {
         for (let i = 0; i < 2; i++) {
           document.dispatchEvent(
-            new CustomEvent("problemLineCompleted", { detail: { line: i + 1 } }),
+            new CustomEvent("problemLineCompleted", {
+              detail: { line: i + 1 },
+            }),
           );
         }
         document.dispatchEvent(new CustomEvent("purpleWormTriggered"));
@@ -62,8 +68,10 @@ for (const level of LEVELS) {
         { timeout: 5000 },
       );
 
-      await page.click('[data-testid="powerup-chainLightning"]');
-      await page.click("#solution-container", { force: true });
+      await page
+        .locator('[data-testid="powerup-chainLightning"]')
+        .evaluate((btn) => btn.click());
+      await page.locator("#solution-container").evaluate((el) => el.click());
 
       await page.evaluate(() => {
         const worms = window.wormSystem?.worms || [];
@@ -72,7 +80,10 @@ for (const level of LEVELS) {
           if (!worm.element) continue;
           const evt =
             typeof PointerEvent === "function"
-              ? new PointerEvent("pointerdown", { bubbles: true, cancelable: true })
+              ? new PointerEvent("pointerdown", {
+                  bubbles: true,
+                  cancelable: true,
+                })
               : new Event("pointerdown", { bubbles: true, cancelable: true });
           worm.element.dispatchEvent(evt);
         }

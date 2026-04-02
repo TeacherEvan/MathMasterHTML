@@ -1,6 +1,6 @@
 // worm/behavior/DevilState.js - Devil attraction behavior state
 // SOLID: Single Responsibility - Only handles devil attraction behavior
-(function() {
+(function () {
   "use strict";
 
   /**
@@ -69,7 +69,7 @@
      * @param {number} deltaTime - Time since last frame
      * @returns {string|null} Next state or null to stay
      */
-    update(worm, deltaTime) {
+    update(worm, _deltaTime) {
       // Check if devil still exists
       if (!this._isDevilActive(worm)) {
         // Devil no longer active, return to previous behavior

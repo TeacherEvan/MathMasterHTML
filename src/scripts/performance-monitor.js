@@ -288,12 +288,12 @@ class PerformanceMonitor {
         self.frameTimings.shift();
       }
 
-      // Extended histogram buffer (~5s at 60fps) for getSnapshot() P95/jank
-      if (self._isExtendedEnabled()) {
-        self._histogramBuffer.push(delta);
-        if (self._histogramBuffer.length > self._histogramSize) {
-          self._histogramBuffer.shift();
-        }
+      // Keep the rolling histogram warm at all times so perf snapshots taken
+      // after instrumentation is enabled still have enough frame history on
+      // slower engines like WebKit.
+      self._histogramBuffer.push(delta);
+      if (self._histogramBuffer.length > self._histogramSize) {
+        self._histogramBuffer.shift();
       }
 
       const avgDelta =

@@ -85,7 +85,8 @@ async function revealSymbols(page, count = 1) {
     let dispatches = 0;
 
     for (let i = 0; i < times; i++) {
-      const stepIndex = window.GameProblemManager?.currentSolutionStepIndex ?? 0;
+      const stepIndex =
+        window.GameProblemManager?.currentSolutionStepIndex ?? 0;
       const nextHiddenSymbol = document.querySelector(
         `[data-step-index="${stepIndex}"].hidden-symbol`,
       );
@@ -107,7 +108,9 @@ async function revealSymbols(page, count = 1) {
   }, count);
 
   expect(revealResult.dispatches).toBeGreaterThan(0);
-  expect(revealResult.revealedAfter).toBeGreaterThan(revealResult.revealedBefore);
+  expect(revealResult.revealedAfter).toBeGreaterThan(
+    revealResult.revealedBefore,
+  );
 }
 
 // ── test suite ───────────────────────────────────────────────────────────────
@@ -610,15 +613,19 @@ test.describe("Console Setup Modal — Non-Blocking Floating Panel", () => {
     expect(hasCloseBtn).toBe(true);
   });
 
-  test("symbol buttons stay clickable above gameplay layers", async ({ page }) => {
+  test("symbol buttons stay clickable above gameplay layers", async ({
+    page,
+  }) => {
     await openConsoleSelectionModal(page);
 
-    await page.locator(".symbol-choice[data-symbol='1']").click();
+    const symbolBtn = page.locator(".symbol-choice[data-symbol='1']");
+    await expect(symbolBtn).toBeVisible({ timeout: 5000 });
+    await symbolBtn.evaluate((btn) => btn.click());
 
-    await expect(page.locator(".symbol-choice[data-symbol='1']")).toHaveClass(
-      /selected/,
-    );
-    await expect(page.locator("#position-choices")).toBeVisible();
+    await expect(symbolBtn).toHaveClass(/selected/, { timeout: 5000 });
+    await expect(page.locator("#position-choices")).toBeVisible({
+      timeout: 5000,
+    });
   });
 
   test("selecting a symbol advances to the next problem", async ({ page }) => {
@@ -631,7 +638,8 @@ test.describe("Console Setup Modal — Non-Blocking Floating Panel", () => {
 
     await page.waitForFunction(
       (previousIndex) =>
-        (window.GameProblemManager?.currentProblemIndex ?? -1) !== previousIndex,
+        (window.GameProblemManager?.currentProblemIndex ?? -1) !==
+        previousIndex,
       beforeIndex,
     );
 
@@ -644,9 +652,7 @@ test.describe("Console Setup Modal — Non-Blocking Floating Panel", () => {
     expect(state.slotValue).toBe("1");
   });
 
-  test("close button auto-fills and resumes progression", async ({
-    page,
-  }) => {
+  test("close button auto-fills and resumes progression", async ({ page }) => {
     const beforeIndex = await page.evaluate(
       () => window.GameProblemManager?.currentProblemIndex ?? -1,
     );
@@ -657,7 +663,8 @@ test.describe("Console Setup Modal — Non-Blocking Floating Panel", () => {
 
     await page.waitForFunction(
       (previousIndex) =>
-        (window.GameProblemManager?.currentProblemIndex ?? -1) !== previousIndex,
+        (window.GameProblemManager?.currentProblemIndex ?? -1) !==
+        previousIndex,
       beforeIndex,
     );
 

@@ -1,4 +1,4 @@
-(function() {
+(function () {
   const SymbolRainHelpers = window.SymbolRainHelpers;
 
   function handleRandomSpawns(state) {
@@ -91,7 +91,11 @@
       return;
     }
 
-    setInterval(() => {
+    if (state.guaranteedSpawnControllerId) {
+      return;
+    }
+
+    state.guaranteedSpawnControllerId = setInterval(() => {
       const currentTimestamp = Date.now();
       state.symbols.forEach((symbolChar) => {
         if (
@@ -121,8 +125,18 @@
     }, 1000);
   }
 
+  function stopGuaranteedSpawnController(state) {
+    if (!state?.guaranteedSpawnControllerId) {
+      return;
+    }
+
+    clearInterval(state.guaranteedSpawnControllerId);
+    state.guaranteedSpawnControllerId = null;
+  }
+
   window.SymbolRainSpawn = {
     handleRandomSpawns,
     startGuaranteedSpawnController,
+    stopGuaranteedSpawnController,
   };
 })();

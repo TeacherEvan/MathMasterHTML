@@ -3,6 +3,9 @@ console.log("🎨 Worm Renderer Loading...");
 
 import * as WormConstants from "./worm-constants.js";
 
+const WORM_TRANSFORM_TEMPLATE =
+  "translate(var(--worm-x), var(--worm-y)) rotate(var(--worm-rotation)) scale(var(--worm-scale, 1))";
+
 class WormRenderer {
   constructor(system) {
     this.system = system;
@@ -228,12 +231,28 @@ class WormRenderer {
   // ========================================
 
   updateWormRotation(worm) {
+    if (!worm?.element) return;
+
+    if (worm.element.style.transform !== WORM_TRANSFORM_TEMPLATE) {
+      worm.element.style.transform = WORM_TRANSFORM_TEMPLATE;
+    }
+
     const rotation = Math.PI; // Flip worm so head faces forward
-    worm.element.style.rotate = `${worm.direction + rotation}rad`;
+    worm.element.style.setProperty(
+      "--worm-rotation",
+      `${worm.direction + rotation}rad`,
+    );
   }
 
   applyWormPosition(worm) {
-    worm.element.style.translate = `${worm.x}px ${worm.y}px`;
+    if (!worm?.element) return;
+
+    if (worm.element.style.transform !== WORM_TRANSFORM_TEMPLATE) {
+      worm.element.style.transform = WORM_TRANSFORM_TEMPLATE;
+    }
+
+    worm.element.style.setProperty("--worm-x", `${worm.x}px`);
+    worm.element.style.setProperty("--worm-y", `${worm.y}px`);
   }
 
   // ========================================

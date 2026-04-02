@@ -11,7 +11,7 @@ function csvEscape(value) {
 }
 
 export function writeAuditArtifacts({ rootDir, policy, scanned, violations }) {
-  const docsDir = resolve(rootDir, "Docs");
+  const docsDir = resolve(rootDir, "Docs", "SystemDocs");
   const allCsvPath = resolve(docsDir, "LINE_LIMIT_200_AUDIT.policy.all.csv");
   const violationsCsvPath = resolve(
     docsDir,
@@ -66,10 +66,7 @@ export function writeAuditArtifacts({ rootDir, policy, scanned, violations }) {
   const violationLines = [header.join(",")];
   for (const v of violationsSorted) {
     const ext = v.relPath.includes(".")
-      ? v.relPath
-          .split(".")
-          .pop()
-          .toLowerCase()
+      ? v.relPath.split(".").pop().toLowerCase()
       : "";
     violationLines.push(
       [

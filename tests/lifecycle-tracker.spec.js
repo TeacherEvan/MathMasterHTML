@@ -46,7 +46,6 @@ test.describe("Lifecycle tracker", () => {
       ),
     });
 
-    // Baseline only — no hard assertion yet, just capture data
     expect(typeof growthPercent).toBe("number");
   });
 
@@ -115,8 +114,6 @@ test.describe("Lifecycle tracker", () => {
     page,
   }, testInfo) => {
     await preparePerfGame(page);
-
-    // Ensure worms are active first
     const beforeState = await page.evaluate(() => ({
       animFrameId: window.wormSystem.animationFrameId,
       wormCount: window.wormSystem.worms.length,
@@ -156,12 +153,45 @@ test.describe("Lifecycle tracker", () => {
         JSON.stringify({ beforeState, hiddenState, visibleState }, null, 2),
       ),
     });
-
-    // When hidden, animationFrameId should be null (paused)
     expect(hiddenState.animFrameId).toBeNull();
-    // When visible again, animationFrameId should be restored (if worms exist)
     if (beforeState.wormCount > 0) {
       expect(visibleState.animFrameId).not.toBeNull();
+    }
+  });
+
+  test("worm positioning uses CSS transforms, not top/left", async ({
+    page,
+  }) => {
+    await preparePerfGame(page);
+    await page.evaluate(() => {
+      window.wormSystem?.queueWormSpawn?.("panelB", { targetSymbol: "x" });
+    });
+    await page.waitForFunction(
+      () => document.querySelectorAll(".worm-container").length > 0,
+      null,
+      { timeout: 5000 },
+    );
+    await page.waitForTimeout(250);
+
+    const result = await page.evaluate(() => {
+      const wormEl = document.querySelector(".worm-container");
+      if (!wormEl) return { found: false };
+      const computedTransform = getComputedStyle(wormEl).transform;
+      return {
+        found: true,
+        hasTransform:
+          wormEl.style.transform.includes("translate") ||
+          wormEl.style.translate !== "" ||
+          computedTransform !== "none",
+        hasInlineLeft: wormEl.style.left !== "",
+        hasInlineTop: wormEl.style.top !== "",
+      };
+    });
+
+    if (result.found) {
+      expect(result.hasTransform).toBe(true);
+      expect(result.hasInlineLeft).toBe(false);
+      expect(result.hasInlineTop).toBe(false);
     }
   });
 });

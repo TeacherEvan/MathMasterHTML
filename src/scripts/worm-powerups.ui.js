@@ -178,9 +178,11 @@
       !!timerRect &&
       timerRect.left < panelRect.right &&
       timerRect.right > panelRect.left;
-    const minX = timerOverlapsPanel
+    const shouldAvoidTimer = timerOverlapsPanel && !isCompactViewport;
+    const requestedMinX = shouldAvoidTimer
       ? Math.max(minXBase, timerRect.right + timerOverlapPadding)
       : minXBase;
+    const minX = Math.min(requestedMinX, maxXBase);
     const minTop = panelRect.top + config.DESKTOP_TOP_OFFSET;
     const controlsBottomLimit =
       controlsRect?.top !== undefined
@@ -398,6 +400,10 @@
       this.displayElement = this.createDisplayElement();
     }
 
+    const hasAvailablePowerUps = this.TYPES.some(
+      (type) => (this.inventory?.[type] || 0) > 0,
+    );
+
     // Build display with selection highlighting
     const createItem = (type, emoji, count) => {
       const isSelected = this.selectedPowerUp === type;
@@ -437,6 +443,21 @@
     this.displayElement.innerHTML = this.TYPES.map((type) =>
       createItem(type, this.EMOJIS[type], this.inventory[type]),
     ).join("");
+
+    this.displayElement.hidden = !hasAvailablePowerUps;
+    this.displayElement.setAttribute(
+      "aria-hidden",
+      hasAvailablePowerUps ? "false" : "true",
+    );
+    this.displayElement.style.display = hasAvailablePowerUps ? "flex" : "none";
+    this.displayElement.style.pointerEvents = hasAvailablePowerUps
+      ? "auto"
+      : "none";
+
+    if (!hasAvailablePowerUps) {
+      return;
+    }
+
     this.syncDisplayLayout();
   };
 
@@ -450,6 +471,9 @@
     display.className = "power-up-display";
     display.dataset.testid = "power-up-display";
     display.setAttribute("aria-label", "Power-up inventory");
+    display.hidden = true;
+    display.setAttribute("aria-hidden", "true");
+    display.style.display = "none";
 
     // Make it draggable with boundary validation
     this.makeDraggable(display);

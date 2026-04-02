@@ -8,6 +8,18 @@ console.log("🐛 Worm movement core loading...");
   }
 
   const proto = window.WormSystem.prototype;
+  const WORM_TRANSFORM_TEMPLATE =
+    "translate(var(--worm-x), var(--worm-y)) rotate(var(--worm-rotation)) scale(var(--worm-scale, 1))";
+
+  function ensureManagedWormTransform(worm) {
+    if (!worm?.element) {
+      return;
+    }
+
+    if (worm.element.style.transform !== WORM_TRANSFORM_TEMPLATE) {
+      worm.element.style.transform = WORM_TRANSFORM_TEMPLATE;
+    }
+  }
 
   /**
    * Calculate velocity toward target position (delegates to movement module)
@@ -67,8 +79,16 @@ console.log("🐛 Worm movement core loading...");
    * @private
    */
   proto._updateWormRotation = function (worm) {
+    if (!worm?.element) {
+      return;
+    }
+
+    ensureManagedWormTransform(worm);
     // Add π (180°) to flip worm so head faces forward
-    worm.element.style.rotate = `${worm.direction + Math.PI}rad`;
+    worm.element.style.setProperty(
+      "--worm-rotation",
+      `${worm.direction + Math.PI}rad`,
+    );
   };
 
   /**
@@ -93,7 +113,13 @@ console.log("🐛 Worm movement core loading...");
    * @private
    */
   proto._applyWormPosition = function (worm) {
-    worm.element.style.translate = `${worm.x}px ${worm.y}px`;
+    if (!worm?.element) {
+      return;
+    }
+
+    ensureManagedWormTransform(worm);
+    worm.element.style.setProperty("--worm-x", `${worm.x}px`);
+    worm.element.style.setProperty("--worm-y", `${worm.y}px`);
   };
 
   console.log("✅ Worm movement core loaded");

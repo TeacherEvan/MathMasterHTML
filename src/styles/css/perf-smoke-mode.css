@@ -1,0 +1,10 @@
+html[data-perf-smoke="true"] *,
+html[data-perf-smoke="true"] *::before,
+html[data-perf-smoke="true"] *::after {
+  animation: none !important;
+  transition: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  backdrop-filter: none !important;
+}
