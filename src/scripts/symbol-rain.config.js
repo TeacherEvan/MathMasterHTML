@@ -53,14 +53,14 @@
   if (window.__PERF_SMOKE_MODE === true) {
     config.initialFallSpeed = 0.35;
     config.maxFallSpeed = 0.55;
-    config.spawnRate = 0;
+    config.spawnRate = 0.01;
     config.burstSpawnRate = 0;
-    config.symbolsPerWave = 0;
-    config.waveInterval = 600;
-    config.guaranteedSpawnInterval = 20000;
+    config.symbolsPerWave = 1;
+    config.waveInterval = 1800;
+    config.guaranteedSpawnInterval = 30000;
     config.faceRevealInterval = 15000;
-    config.poolSize = 1;
-    config.maxActiveSymbols = 0;
+    config.poolSize = 4;
+    config.maxActiveSymbols = 2;
   }
 
   window.SymbolRainSymbols = symbols;
