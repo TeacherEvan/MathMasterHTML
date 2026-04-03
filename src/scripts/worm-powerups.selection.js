@@ -49,16 +49,17 @@
     document.documentElement.classList.add("power-up-placement-mode");
     document.documentElement.style.pointerEvents = "none";
     document.body.style.pointerEvents = "auto";
-    const keyboardCaptureTarget = this._ensureKeyboardCaptureTarget?.();
+
+    // Drop focus from any previously active element to ensure document keydown catches Escape
+    if (
+      document.activeElement &&
+      document.activeElement instanceof HTMLElement
+    ) {
+      document.activeElement.blur();
+    }
+
     requestAnimationFrame(() => {
       if (!this.selectedPowerUp) return;
-
-      if (keyboardCaptureTarget?.isConnected) {
-        keyboardCaptureTarget.value = "";
-        keyboardCaptureTarget.focus({ preventScroll: true });
-        return;
-      }
-
       document.body.tabIndex = -1;
       document.body.focus({ preventScroll: true });
     });
@@ -89,9 +90,7 @@
     document.documentElement.style.pointerEvents = "";
     document.body.style.pointerEvents = "";
 
-    if (this._keyboardCaptureTarget?.isConnected) {
-      this._keyboardCaptureTarget.blur();
-    }
+    this._keyboardCaptureTarget = null; // Clean up legacy reference if it exists
 
     this._dispatchSelectionChanged();
     this._hideTooltip();

@@ -27,33 +27,10 @@
   };
 
   proto._ensureKeyboardCaptureTarget = function () {
-    if (this._keyboardCaptureTarget?.isConnected) {
-      return this._keyboardCaptureTarget;
-    }
-
-    const input = document.createElement("input");
-    input.type = "text";
-    input.setAttribute("aria-hidden", "true");
-    input.tabIndex = -1;
-    input.autocomplete = "off";
-    // Prevent virtual keyboard on mobile when this hidden input is focused.
-    // `readonly` suppresses the keyboard on iOS Safari; `inputmode="none"` is
-    // the HTML5 standard approach and works on Android Chrome.
-    input.readOnly = true;
-    input.setAttribute("inputmode", "none");
-    input.style.cssText = `
-      position: fixed;
-      top: -1000px;
-      left: -1000px;
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-      pointer-events: none;
-    `;
-    input.addEventListener("keydown", this._keyboardHandler, true);
-    document.body.appendChild(input);
-    this._keyboardCaptureTarget = input;
-    return input;
+    // Deprecated: We no longer create a hidden text input to capture focus,
+    // as it triggers the virtual keyboard on mobile devices.
+    // Window/document keydown listeners are sufficient for capturing Escape.
+    return null;
   };
 
   /**

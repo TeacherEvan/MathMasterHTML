@@ -1,125 +1,171 @@
-/* Keep the same 3-column grid as desktop, just scaled down */
+/* ----------------------------------------------------
+   CROSS-CONTEXT ADAPTIVE SYSTEM
+   This handles layout shifts dynamically based on viewport.
+   MathMaster is played in Landscape, so we adapt across widths.
+------------------------------------------------------- */
+
+/* MEDIUM SCREENS (Tablets / small laptops ~ 768px - 1024px)
+   Keep 3 panels, but optimize widths. Panel C gets more room for interactive gameplay. */
+@media (max-width: 1100px) {
+  .grid-container {
+    grid-template-columns: 1fr 4px 1fr 4px 1.5fr !important;
+  }
+}
+
+/* SMALL SCREENS (Mobile Landscape < 800px or very short height)
+   Combine Panel A & B vertically on the left, let Panel C dominate the right. */
+@media (max-width: 800px), (max-height: 500px) {
+  .grid-container {
+    display: grid !important;
+    /* Two distinct zones: Info (Left) and Gameplay (Right) */
+    grid-template-columns: 45% 3px 1fr !important;
+    grid-template-rows: 100vh !important;
+    /* Remove padding to maximize space */
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+
+  /* Reposition Panels */
+  #panel-a {
+    grid-column: 1;
+    grid-row: 1;
+    position: relative;
+    /* Allow stacking with B */
+    z-index: 2;
+    background: transparent !important;
+    height: 40%; /* Top portion */
+    border-bottom: 2px solid rgba(0, 255, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  /* Hide the wall between A and B */
+  .grid-container > .wall:nth-of-type(1) {
+    display: none !important;
+  }
+
+  /* The wall between (A+B) and C */
+  .grid-container > .wall:nth-of-type(2) {
+    grid-column: 2;
+    grid-row: 1;
+    width: 3px !important;
+    background: linear-gradient(180deg, #0f0, #060);
+  }
+
+  #panel-b {
+    grid-column: 1;
+    grid-row: 1;
+    position: relative;
+    z-index: 2;
+    height: 60%; /* Bottom portion */
+    margin-top: 40vh; /* Push down below Panel A */
+    display: flex;
+    flex-direction: column;
+    background: transparent !important;
+  }
+
+  #panel-c {
+    grid-column: 3;
+    grid-row: 1;
+    position: relative;
+    z-index: 1;
+    /* Fully independent zone for tapping */
+    width: 100%;
+    height: 100vh;
+  }
+
+  /* ----------------------------------------------------
+     COMPONENTS RE-SPACING FOR THE COMPACT LAYOUT
+  ------------------------------------------------------- */
+
+  #problem-container {
+    top: auto !important;
+    position: relative;
+    font-size: min(12px, 3vh);
+    margin-top: 50px; /* Make space for HUD */
+    padding: 6px 12px;
+    width: 90%;
+    background: rgba(0, 20, 0, 0.85); /* Readability contrast */
+    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 0, 0.4);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    white-space: normal; /* don't force nowrap */
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  #lock-display {
+    position: absolute;
+    top: 50px !important;
+    left: -10px !important; /* Move to top-left corner out of the way */
+    transform: scale(0.4) !important;
+    transform-origin: top left;
+    max-height: unset;
+    pointer-events: none;
+    opacity: 0.7; /* Keep it visible but receded */
+  }
+
+  #solution-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    font-size: min(11px, 2.5vh);
+    margin-bottom: auto !important;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  /* Re-format console slot as a tight bottom row */
+  #symbol-console {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    padding: 4px 8px;
+    background: rgba(0, 20, 0, 0.9);
+    border: 1px solid #0f0;
+    border-radius: 8px;
+    max-width: 95%;
+    overflow-x: auto;
+  }
+
+  .console-slot {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 16px !important;
+    flex-shrink: 0;
+  }
+
+  /* Make Help/Clarify tight and right-aligned */
+  .panel-b-controls {
+    position: absolute;
+    right: 5px;
+    top: -35px;
+    display: flex;
+    gap: 5px;
+  }
+
+  #help-button,
+  #clarify-button {
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+}
+
+/* Fallback for the explicit .res-mobile class used by JS resize checks */
 .res-mobile .grid-container {
-  grid-template-columns: 1fr 3px 1fr 3px 1fr;
-  /* Thinner walls for mobile */
-  grid-template-rows: 100vh;
-  /* Full viewport height */
-}
-
-.res-mobile .wall {
-  width: 3px;
-  /* Thinner walls on mobile */
-  background: linear-gradient(180deg, #0f0, #060);
-}
-
-/* Scale down all panels proportionally for small landscape screen */
-.res-mobile .display-panel {
-  font-size: 12px;
-  /* Smaller base font */
-  padding: 10px;
-  /* Less padding */
-}
-
-/* Panel A - Lock and Problem (scaled) */
-.res-mobile #panel-a {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.res-mobile #problem-container {
-  font-size: 8px;
-  /* Reduced by 20% from 10px for better fit */
-  top: 90px;
-  /* Adjust position - below mobile HUD (fix overlap: score ends at ~80px) */
-  white-space: nowrap;
-  /* Keep symbols on same line */
-  overflow: visible;
-  /* Allow overflow if needed */
-  letter-spacing: 0.5px;
-  /* REDUCED from 1px to 0.5px (50% reduction) - tighter spacing for mobile */
-  /* Boundary constraints for mobile */
-  max-width: 95%;
-  padding: 4px 8px;
-}
-
-.res-mobile #lock-display {
-  position: absolute;
-  top: calc(50% + 30px); /* Shifted down to avoid problem container */
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.7);
-  /* Center AND scale down lock for mobile */
-  transform-origin: center center;
-  max-height: calc(100vh - 160px); /* Ensure clearance from HUD and problem */
-}
-
-/* Panel B - Solution and Console (scaled) */
-.res-mobile #panel-b {
-  display: flex;
-  flex-direction: column;
-}
-
-.res-mobile #solution-container {
-  font-size: 9px;
-  /* Reduced by 20% from 11px for better fit */
-  line-height: 1.2;
-  /* Tighter line spacing for mobile */
-  letter-spacing: 0.5px;
-  /* ADDED: 50% reduction for tighter symbol spacing on mobile */
-  margin-bottom: 50px;
-  /* Space for horizontal console */
-  padding: 90px 5px 5px 5px;
-  /* Reduced padding on mobile */
-  max-height: calc(100vh - 100px);
-  /* Ensure content doesn't overflow */
-  overflow-y: auto;
-  /* Allow scrolling if needed */
-}
-
-.res-mobile #symbol-console {
-  bottom: 5px;
-  /* Closer to bottom */
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 5px 10px;
-  /* Horizontal padding */
-  gap: 4px;
-  /* Tight horizontal spacing */
-  display: flex;
-  /* Change to horizontal flexbox */
-  flex-direction: row;
-  /* Single row layout */
-  flex-wrap: nowrap;
-  /* Keep all in one row */
-  overflow-x: auto;
-  /* Allow horizontal scroll if needed */
-  max-width: 95%;
-  /* Don't overflow panel width */
-}
-
-.res-mobile .console-slot {
-  width: 32px;
-  /* Smaller console buttons for horizontal layout */
-  height: 32px;
-  font-size: 16px;
-  flex-shrink: 0;
-  /* Prevent shrinking */
-}
-
-/* Panel C - Symbol Rain (scaled) */
-.res-mobile #panel-c {
-  /* Keep full height for vertical falling symbols */
-  height: 100vh;
-}
-
-.res-mobile .falling-symbol {
-  font-size: 18px;
-  /* Smaller symbols for mobile */
+  /* Rely on the media queries above instead of forcing squished sizes */
 }
 
 /* Rotation overlay - shown only in portrait mode */
 #rotation-overlay {
-  display: none;
+  display: flex;
   position: fixed;
   top: 0;
   left: 0;
@@ -131,9 +177,15 @@
   justify-content: center;
   align-items: center;
   color: #00ff00;
-  font-family: "Orbitron", monospace;
+  font-family: inherit; /* use default body font */
   text-align: center;
   padding: 20px;
+}
+
+@media (orientation: landscape) {
+  #rotation-overlay {
+    display: none !important;
+  }
 }
 
 #rotation-overlay .rotate-icon {
@@ -146,6 +198,7 @@
   font-size: 24px;
   font-weight: 700;
   text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+  font-family: "Exo 2", sans-serif;
 }
 
 /* Automation override: keep game visible for Playwright runs */

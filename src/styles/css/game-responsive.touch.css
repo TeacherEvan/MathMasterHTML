@@ -1,19 +1,37 @@
-/* Mobile and touch device optimizations */
-@media (max-width: 768px) {
-  .falling-symbol {
-    /* Even larger touch targets on mobile (no ::before needed) */
-    padding: 25px;
-    margin: -25px;
-    font-size: 28px;
-    /* Slightly larger symbols */
-  }
-}
+/* ----------------------------------------------------
+   TOUCH + INTERACTION RULES
+------------------------------------------------------- */
 
-/* Extra small devices */
-@media (max-width: 480px) {
+@media (max-width: 1024px) {
+  /* Enlarge touch targets on tablet and mobile */
   .falling-symbol {
     padding: 30px;
     margin: -30px;
-    font-size: 30px;
+    font-size: 24px !important;
+  }
+}
+
+/* Extra small devices / Mobile optimizations */
+@media (max-width: 800px), (max-height: 500px) {
+  .falling-symbol {
+    /* Touch targets must stay large even if symbols get a bit smaller */
+    padding: 36px;
+    margin: -36px;
+    font-size: 20px !important;
+  }
+
+  /* Consoles slots need larger minimum hit areas */
+  .console-slot {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    margin: 2px;
+  }
+
+  /* Buttons need fat targets */
+  #back-button,
+  #audio-toggle {
+    transform: scale(0.9) translateY(10px);
+    transform-origin: bottom left;
+    margin-bottom: 5px;
   }
 }
