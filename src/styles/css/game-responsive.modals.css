@@ -1,22 +1,42 @@
-/* Mobile adjustments for How to Play */
-@media (max-width: 768px) {
-  .how-to-play-modal {
-    width: 95%;
-    max-width: 95%;
-    max-height: 90vh;
-    padding: 15px;
+@media (max-width: 900px), (max-height: 500px) {
+  .how-to-play-content {
+    width: min(720px, calc(100vw - 1rem));
+    max-height: calc(100dvh - 1rem);
+    padding: 1rem;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: 0.75rem;
   }
 
-  .how-to-play-title {
-    font-size: 24px;
+  .how-to-play-content h2 {
+    margin-bottom: 0;
+    font-size: clamp(1.5rem, 5.4vw, 2.3rem);
   }
 
-  .how-to-play-section h2 {
-    font-size: 18px;
+  .how-to-play-kicker {
+    margin-bottom: 0;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
   }
 
-  .how-to-play-section p,
-  .how-to-play-section li {
-    font-size: 12px;
+  .how-to-play-message {
+    min-height: 0;
+    margin-bottom: 0;
+    gap: 0.75rem;
+    overflow-y: auto;
+    font-size: clamp(0.88rem, 2vw, 1rem);
+    line-height: 1.45;
+  }
+
+  .how-to-play-callout {
+    padding: 0.75rem 0.9rem;
+  }
+
+  .start-game-button {
+    min-width: 0;
+    width: 100%;
+    padding-block: 0.85rem;
+    position: sticky;
+    bottom: 0;
   }
 }

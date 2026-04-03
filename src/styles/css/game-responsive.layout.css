@@ -1,39 +1,25 @@
-/* ----------------------------------------------------
-   CROSS-CONTEXT ADAPTIVE SYSTEM
-   This handles layout shifts dynamically based on viewport.
-   MathMaster is played in Landscape, so we adapt across widths.
-------------------------------------------------------- */
-
-/* MEDIUM SCREENS (Tablets / small laptops ~ 768px - 1024px)
-   Keep 3 panels, but optimize widths. Panel C gets more room for interactive gameplay. */
 @media (max-width: 1100px) {
   .grid-container {
     grid-template-columns: 1fr 4px 1fr 4px 1.5fr !important;
   }
 }
 
-/* SMALL SCREENS (Mobile Landscape < 800px or very short height)
-   Combine Panel A & B vertically on the left, let Panel C dominate the right. */
 @media (max-width: 800px), (max-height: 500px) {
   .grid-container {
     display: grid !important;
-    /* Two distinct zones: Info (Left) and Gameplay (Right) */
     grid-template-columns: 45% 3px 1fr !important;
     grid-template-rows: 100vh !important;
-    /* Remove padding to maximize space */
     padding: 0 !important;
     gap: 0 !important;
   }
 
-  /* Reposition Panels */
   #panel-a {
     grid-column: 1;
     grid-row: 1;
     position: relative;
-    /* Allow stacking with B */
     z-index: 2;
     background: transparent !important;
-    height: 40%; /* Top portion */
+    height: 40%;
     border-bottom: 2px solid rgba(0, 255, 0, 0.2);
     display: flex;
     flex-direction: column;
@@ -41,12 +27,10 @@
     align-items: center;
   }
 
-  /* Hide the wall between A and B */
   .grid-container > .wall:nth-of-type(1) {
     display: none !important;
   }
 
-  /* The wall between (A+B) and C */
   .grid-container > .wall:nth-of-type(2) {
     grid-column: 2;
     grid-row: 1;
@@ -59,8 +43,8 @@
     grid-row: 1;
     position: relative;
     z-index: 2;
-    height: 60%; /* Bottom portion */
-    margin-top: 40vh; /* Push down below Panel A */
+    height: 60%;
+    margin-top: 40vh;
     display: flex;
     flex-direction: column;
     background: transparent !important;
@@ -71,28 +55,23 @@
     grid-row: 1;
     position: relative;
     z-index: 1;
-    /* Fully independent zone for tapping */
     width: 100%;
     height: 100vh;
   }
-
-  /* ----------------------------------------------------
-     COMPONENTS RE-SPACING FOR THE COMPACT LAYOUT
-  ------------------------------------------------------- */
 
   #problem-container {
     top: auto !important;
     position: relative;
     font-size: min(12px, 3vh);
-    margin-top: 50px; /* Make space for HUD */
+    margin-top: 50px;
     padding: 6px 12px;
     width: 90%;
-    background: rgba(0, 20, 0, 0.85); /* Readability contrast */
+    background: rgba(0, 20, 0, 0.85);
     border-radius: 8px;
     border: 1px solid rgba(0, 255, 0, 0.4);
     backdrop-filter: blur(4px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    white-space: normal; /* don't force nowrap */
+    white-space: normal;
     text-align: center;
     line-height: 1.4;
   }
@@ -100,12 +79,12 @@
   #lock-display {
     position: absolute;
     top: 50px !important;
-    left: -10px !important; /* Move to top-left corner out of the way */
+    left: -10px !important;
     transform: scale(0.4) !important;
     transform-origin: top left;
     max-height: unset;
     pointer-events: none;
-    opacity: 0.7; /* Keep it visible but receded */
+    opacity: 0.7;
   }
 
   #solution-container {
@@ -117,7 +96,6 @@
     background: rgba(0, 0, 0, 0.5);
   }
 
-  /* Re-format console slot as a tight bottom row */
   #symbol-console {
     position: absolute;
     bottom: 5px;
@@ -141,7 +119,6 @@
     flex-shrink: 0;
   }
 
-  /* Make Help/Clarify tight and right-aligned */
   .panel-b-controls {
     position: absolute;
     right: 5px;
@@ -158,12 +135,9 @@
   }
 }
 
-/* Fallback for the explicit .res-mobile class used by JS resize checks */
 .res-mobile .grid-container {
-  /* Rely on the media queries above instead of forcing squished sizes */
 }
 
-/* Rotation overlay - shown only in portrait mode */
 #rotation-overlay {
   display: flex;
   position: fixed;
@@ -177,7 +151,7 @@
   justify-content: center;
   align-items: center;
   color: #00ff00;
-  font-family: inherit; /* use default body font */
+  font-family: inherit;
   text-align: center;
   padding: 20px;
 }
@@ -201,7 +175,6 @@
   font-family: "Exo 2", sans-serif;
 }
 
-/* Automation override: keep game visible for Playwright runs */
 body.automation #rotation-overlay {
   display: none !important;
 }
