@@ -9,6 +9,18 @@ console.log("🔒 LockManager animation helpers loading...");
 
   const proto = window.LockManager.prototype;
 
+  const LOCK_MOMENT_TIMINGS = {
+    SURGE_DELAY_MS: 24,
+    SETTLE_DELAY_MS: 520,
+    CLEANUP_DELAY_MS: 820,
+  };
+
+  const LOCK_TONES = {
+    BEGINNER: "beginner",
+    WARRIOR: "warrior",
+    MASTER: "master",
+  };
+
   proto.activateLockLevel = function activateLockLevel(level) {
     console.log(`🔒 Activating lock level ${level}`);
 
@@ -19,24 +31,109 @@ console.log("🔒 LockManager animation helpers loading...");
     }
 
     // Remove any previous level-* classes
-    for (let lvl = 1; lvl <= 6; lvl++) {
+    for (let lvl = 1; lvl <= 6; lvl += 1) {
       lockBody.classList.remove(`level-${lvl}-active`);
     }
-    // Apply level-specific activation and update state
+
     lockBody.classList.add(`level-${level}-active`);
     this.currentLockLevel = level;
 
-    // Trigger level-specific animations
     this.triggerLevelAnimation(lockBody, level);
-
-    // Update progress indicators
     this.updateProgressIndicators(level);
 
     document.dispatchEvent(
       new CustomEvent("lockLevelUpdated", {
-        detail: { level },
+        detail: {
+          level,
+          tone: this.container.dataset.lockTone || this._resolveLockTone(level),
+          moment: this.container.dataset.lockMoment || "settled",
+        },
       }),
     );
+  };
+
+  proto._resolveLockTone = function _resolveLockTone(level) {
+    const isMasterLevel = document.body.classList.contains("master-level");
+    if (isMasterLevel || level >= 4) {
+      return LOCK_TONES.MASTER;
+    }
+    if (level >= 2) {
+      return LOCK_TONES.WARRIOR;
+    }
+    return LOCK_TONES.BEGINNER;
+  };
+
+  proto._clearLockMomentTimers = function _clearLockMomentTimers() {
+    if (this._lockMomentSurgeTimer) {
+      window.clearTimeout(this._lockMomentSurgeTimer);
+      this._lockMomentSurgeTimer = null;
+    }
+    if (this._lockMomentSettleTimer) {
+      window.clearTimeout(this._lockMomentSettleTimer);
+      this._lockMomentSettleTimer = null;
+    }
+    if (this._lockMomentCleanupTimer) {
+      window.clearTimeout(this._lockMomentCleanupTimer);
+      this._lockMomentCleanupTimer = null;
+    }
+  };
+
+  proto._applyLockMomentState = function _applyLockMomentState(
+    lockBody,
+    level,
+  ) {
+    const effectiveLevel = this.currentLockLevel || level;
+    const tone = this._resolveLockTone(effectiveLevel);
+    const reducedMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const progress = Math.min(effectiveLevel, 6) / 6;
+    const wrapper = this.container.querySelector(".lock-component-wrapper");
+
+    this._clearLockMomentTimers();
+
+    this.container.classList.add("is-lock-live");
+    this.container.classList.toggle(
+      "is-lock-master",
+      tone === LOCK_TONES.MASTER,
+    );
+    this.container.dataset.lockLevel = String(effectiveLevel);
+    this.container.dataset.lockTone = tone;
+    this.container.dataset.lockMotion = reducedMotion ? "reduced" : "full";
+    this.container.dataset.lockMoment = reducedMotion ? "settled" : "arming";
+    this.container.dataset.lockStatus = `Lock phase ${String(effectiveLevel).padStart(2, "0")} engaged`;
+    this.container.style.setProperty("--lock-progress", progress.toFixed(2));
+    this.container.style.setProperty(
+      "--lock-intensity",
+      String((0.78 + progress * 0.32).toFixed(2)),
+    );
+    this.container.setAttribute("aria-live", "polite");
+    this.container.setAttribute(
+      "aria-label",
+      `Lock phase ${String(effectiveLevel).padStart(2, "0")} engaged`,
+    );
+
+    if (wrapper) {
+      wrapper.classList.add("lock-ceremony-shell");
+    }
+
+    lockBody.classList.add("lock-body--ceremony");
+
+    if (reducedMotion) {
+      return;
+    }
+
+    this._lockMomentSurgeTimer = window.setTimeout(() => {
+      this.container.dataset.lockMoment = "surge";
+    }, LOCK_MOMENT_TIMINGS.SURGE_DELAY_MS);
+
+    this._lockMomentSettleTimer = window.setTimeout(() => {
+      this.container.dataset.lockMoment = "settled";
+    }, LOCK_MOMENT_TIMINGS.SETTLE_DELAY_MS);
+
+    this._lockMomentCleanupTimer = window.setTimeout(() => {
+      lockBody.classList.remove("lock-body--ceremony");
+    }, LOCK_MOMENT_TIMINGS.CLEANUP_DELAY_MS);
   };
 
   proto.progressLockLevel = function progressLockLevel() {
@@ -133,14 +230,7 @@ console.log("🔒 LockManager animation helpers loading...");
 
   proto.triggerBeginnerAnimation = function triggerBeginnerAnimation(lockBody) {
     console.log("🎮 Triggering beginner level animation");
-
-    // Scale and color progression
-    const scaleAmount = 1.2;
-    lockBody.style.transform = `scaleY(${scaleAmount})`;
-    lockBody.style.background =
-      "linear-gradient(145deg, #1a4a1a, #2a6a2a, #1a4a1a)";
-    lockBody.style.borderColor = "#0f0";
-    lockBody.style.boxShadow = "0 0 20px rgba(0, 255, 0, 0.4)";
+    this._applyLockMomentState(lockBody, 1);
   };
 
   proto.triggerWarriorAnimation = function triggerWarriorAnimation(
@@ -148,17 +238,7 @@ console.log("🔒 LockManager animation helpers loading...");
     level,
   ) {
     console.log(`🟡 Triggering warrior level ${level} animation`);
-
-    // Remove rotation: scale only for warrior levels
-    const scaleAmount = 1 + level * 0.15;
-    lockBody.style.transform = `scale(${scaleAmount})`;
-
-    const goldIntensity = Math.min(255, 150 + level * 30);
-    lockBody.style.background = `linear-gradient(145deg, #4a4a1a, rgb(${goldIntensity}, ${goldIntensity}, 42), #4a4a1a)`;
-    lockBody.style.borderColor = `rgb(${goldIntensity}, ${goldIntensity}, 0)`;
-    lockBody.style.boxShadow = `0 0 ${
-      25 + level * 15
-    }px rgba(255, 215, 0, 0.5)`;
+    this._applyLockMomentState(lockBody, level);
   };
 
   proto.triggerMasterAnimation = function triggerMasterAnimation(
@@ -166,18 +246,7 @@ console.log("🔒 LockManager animation helpers loading...");
     level,
   ) {
     console.log(`🔴 Triggering master level ${level} animation`);
-
-    // Remove rotation and skew: scale only for master levels
-    const scaleAmount = 1 + level * 0.2;
-    lockBody.style.transform = `scale(${scaleAmount})`;
-
-    const redIntensity = Math.min(255, 120 + level * 35);
-    lockBody.style.background = `linear-gradient(145deg, #4a1a1a, rgb(${redIntensity}, 42, 42), #4a1a1a)`;
-    lockBody.style.borderColor = `rgb(${redIntensity}, 0, 0)`;
-    lockBody.style.boxShadow = `0 0 ${30 + level * 20}px rgba(255, 0, 0, 0.6)`;
-
-    // Add pulsing effect
-    lockBody.style.animation = `lockPulse${level} 1s ease-in-out`;
+    this._applyLockMomentState(lockBody, level);
   };
 
   proto.triggerGenericAnimation = function triggerGenericAnimation(
@@ -185,10 +254,7 @@ console.log("🔒 LockManager animation helpers loading...");
     level,
   ) {
     console.log(`⚪ Triggering generic level ${level} animation`);
-
-    const scaleAmount = 1 + level * 0.1;
-    lockBody.style.transform = `scale(${scaleAmount})`;
-    lockBody.style.filter = `brightness(${1 + level * 0.2})`;
+    this._applyLockMomentState(lockBody, level);
   };
 
   proto.updateProgressIndicators = function updateProgressIndicators(level) {
