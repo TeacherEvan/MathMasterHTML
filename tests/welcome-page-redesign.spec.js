@@ -13,9 +13,10 @@ test.describe("Welcome page redesign", () => {
 
     await expect(page).toHaveURL(/\/src\/pages\/index\.html/);
     await expect(page).toHaveTitle("Math Master — Welcome");
-    await expect(
-      page.locator('meta[name="theme-color"]'),
-    ).toHaveAttribute("content", "#111714");
+    await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
+      "content",
+      "#111714",
+    );
 
     await expect(page.locator("header[role='banner'] .page-kicker")).toHaveText(
       "Training dossier",

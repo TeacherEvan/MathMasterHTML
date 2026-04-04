@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="Enter Math Master's training console and begin your algebra route.">
+    <meta name="description" content="Enter Math Master's training console and begin your algebra route.">
     <meta name="theme-color" content="#111714">
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self';">
@@ -21,7 +20,8 @@
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
         as="style">
     <link rel="stylesheet" href="/src/styles/css/index.css">
 </head>
@@ -57,8 +57,10 @@
         </blockquote>
 
         <div class="button-container" data-no-nav="true">
-            <button id="begin-training-button" class="action-button primary-action-button" type="button" data-testid="welcome-cta">Begin Training</button>
-            <button id="scoreboard-button" class="action-button secondary-action-button scoreboard-button" type="button" data-no-nav="true" aria-haspopup="dialog" aria-controls="scoreboard-modal">View Scoreboard</button>
+            <button id="begin-training-button" class="action-button primary-action-button" type="button"
+                data-testid="welcome-cta">Begin Training</button>
+            <button id="scoreboard-button" class="action-button secondary-action-button scoreboard-button" type="button"
+                data-no-nav="true" aria-haspopup="dialog" aria-controls="scoreboard-modal">View Scoreboard</button>
         </div>
 
         <p class="welcome-hint">Press Enter to begin</p>
@@ -66,13 +68,16 @@
     </main>
 
     <div id="scoreboard-modal" class="scoreboard-modal" hidden data-no-nav="true" aria-hidden="true">
-        <div class="scoreboard-modal-content" role="dialog" aria-modal="true" aria-labelledby="scoreboard-title" data-no-nav="true">
+        <div class="scoreboard-modal-content" role="dialog" aria-modal="true" aria-labelledby="scoreboard-title"
+            data-no-nav="true">
             <div class="scoreboard-modal-header" data-no-nav="true">
                 <div data-no-nav="true">
                     <p class="scoreboard-kicker" data-no-nav="true">Local scoreboard cache</p>
-                    <h2 id="scoreboard-title" data-no-nav="true">Welcome back, <span id="scoreboard-player-name" data-no-nav="true">Player</span></h2>
+                    <h2 id="scoreboard-title" data-no-nav="true">Welcome back, <span id="scoreboard-player-name"
+                            data-no-nav="true">Player</span></h2>
                 </div>
-                <button id="scoreboard-close-button" class="scoreboard-close-button" type="button" data-no-nav="true" aria-label="Close scoreboard">✕</button>
+                <button id="scoreboard-close-button" class="scoreboard-close-button" type="button" data-no-nav="true"
+                    aria-label="Close scoreboard">✕</button>
             </div>
 
             <section class="scoreboard-section" data-no-nav="true">

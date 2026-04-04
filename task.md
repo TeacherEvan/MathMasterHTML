@@ -4,7 +4,7 @@
 
 ### Users
 
-- **Primary audience**: Solo algebra students (ages 10–18) practicing independently.
+- **Primary audience**: Solo algebra learners (teens and adult self-learners) practicing independently.
 - **Context**: Browser-native PWA, fullscreen landscape on desktop; mobile is acceptable but secondary.
 - **Job to be done**: Turn equation-solving into an interactive, high-feedback drill where clicking falling symbols reveals solution steps line by line.
 - **Emotional arc**: Start each problem feeling _confident and capable_; build _momentum and flow_ as lines clear; end with a _rewarding sense of mastery_.
@@ -18,9 +18,10 @@
 ### Aesthetic Direction
 
 - **Tone**: Refined training-console sci-fi — the kind of interface a competent operator would trust. Preserve the project's Matrix DNA but push it toward premium clarity.
-- **Theme**: Dark-first and immersive. The runtime, PWA shell, and all three screens (welcome, level-select, game) are built around fullscreen play on black backgrounds.
+- **Theme**: Both themes are supported, with dark mode as the canonical benchmark for quality and immersion. The runtime, PWA shell, and all three screens (welcome, level-select, game) should preserve fullscreen play ergonomics in either theme.
 - **References**: No external references — evolve from the current state. The level-select screen (phosphor/brass/ember palette, Alegreya Sans, operator-console feel) is the quality bar to bring the other screens up to.
 - **Anti-references**: Generic AI-neon (cyan-on-dark, purple-blue gradients, glassmorphism everywhere), noisy arcade excess, childish cartoon energy.
+- **Signature interaction**: The synchronized rhythm between falling symbol rain and line-by-line algebra reveal is the unforgettable identity moment.
 
 ### Color System
 
@@ -75,7 +76,7 @@
 ### Design Principles
 
 1. **Focus under pressure**: Readability, hierarchy, and instant comprehension beat decoration. A student mid-problem should never squint or hesitate at the interface.
-2. **Premium, not loud**: Keep the futuristic identity but make every surface feel intentional and refined. Neon exists for gameplay feedback, not wallpaper.
-3. **Reward mastery**: Use playful, decisive feedback to celebrate momentum — combo streaks, lock progression, worm destruction — without breaking concentration.
+2. **Dark-first excellence, light-mode readiness**: Dark mode defines the visual quality bar, while light mode remains fully supported and intentionally designed.
+3. **Signature rhythm first**: Prioritize synchronization between symbol rain and algebra reveal as the core experiential differentiator.
 4. **Accessibility is structural**: WCAG AAA where feasible, AA always. Contrast, focus states, reduced motion, and non-color cues are mandatory, not optional polish.
 5. **Systems over flourishes**: Build from cohesive token systems for color, type, spacing, and motion. No one-off visual hacks. Every new value should reference or extend existing tokens.
