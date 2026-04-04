@@ -14,6 +14,7 @@
   };
   const STORAGE_KEY = "mathmaster_audio_pref_v1";
   const originalInit = proto.init;
+  const originalDestroy = proto.destroy;
   const originalPlayCue = proto._playCue;
 
   proto._readMutedPreference = function () {
@@ -60,13 +61,30 @@
     originalInit.call(this);
 
     if (!this._muteToggleListenerBound) {
-      this._muteToggleListenerBound = true;
-      document.addEventListener(AUDIO_EVENTS.toggleRequested, () => {
+      this._boundAudioToggleRequested = () => {
         this.toggleMuted("ui-toggle");
-      });
+      };
+      this._muteToggleListenerBound = true;
+      document.addEventListener(
+        AUDIO_EVENTS.toggleRequested,
+        this._boundAudioToggleRequested,
+      );
     }
 
     this._emitAudioStateChanged("init");
+  };
+
+  proto.destroy = function destroyCyberpunkInteractionAudioState() {
+    if (this._muteToggleListenerBound && this._boundAudioToggleRequested) {
+      document.removeEventListener(
+        AUDIO_EVENTS.toggleRequested,
+        this._boundAudioToggleRequested,
+      );
+      this._muteToggleListenerBound = false;
+      this._boundAudioToggleRequested = null;
+    }
+
+    return originalDestroy?.call(this);
   };
 
   proto._playCue = function (name, layers, minIntervalMs = 20) {

@@ -3,6 +3,8 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
 
 (function attachCyberpunkInteractionAudioCore() {
   const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+  const automationAudioOverride =
+    window.__MM_ENABLE_AUDIO_IN_TESTS === true;
   const GameEvents = window.GameEvents || {
     PROBLEM_LINE_COMPLETED: "problemLineCompleted",
     SYMBOL_CLICKED: "symbolClicked",
@@ -15,12 +17,26 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
       this.masterGain = null;
       this.disabled =
         !AudioContextCtor ||
-        (typeof navigator !== "undefined" && navigator.webdriver === true);
+        (typeof navigator !== "undefined" &&
+          navigator.webdriver === true &&
+          !automationAudioOverride);
       this.activeVoices = 0;
       this.maxVoices = 8;
       this.lastCueTimes = new Map();
+      this._listenersBound = false;
       this._boundHandlePointerDown = this._handlePointerDown.bind(this);
       this._boundUnlockAudio = this._unlockAudio.bind(this);
+      this._boundPlaySymbolClick = () => this.playSymbolClick?.();
+      this._boundPlaySymbolReveal = () => this.playSymbolReveal?.();
+      this._boundPlayLineCompleted = (event) => {
+        this.playLineCompleted?.(event.detail?.lineNumber ?? 1);
+      };
+      this._boundPlayLockAdvance = (event) => {
+        this.playLockAdvance?.(event.detail?.level ?? 1);
+      };
+      this._boundPlayPowerUpActivated = (event) => {
+        this.playPowerUpActivated?.(event.detail?.type || "default");
+      };
     }
 
     init() {
@@ -31,6 +47,10 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
         return;
       }
 
+      if (this._listenersBound) {
+        return;
+      }
+
       document.addEventListener("pointerdown", this._boundHandlePointerDown, {
         capture: true,
         passive: true,
@@ -38,23 +58,80 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
       document.addEventListener("keydown", this._boundUnlockAudio, {
         passive: true,
       });
-      document.addEventListener(GameEvents.SYMBOL_CLICKED, () =>
-        this.playSymbolClick?.(),
+      document.addEventListener(
+        GameEvents.SYMBOL_CLICKED,
+        this._boundPlaySymbolClick,
       );
-      document.addEventListener(GameEvents.SYMBOL_REVEALED, () =>
-        this.playSymbolReveal?.(),
+      document.addEventListener(
+        GameEvents.SYMBOL_REVEALED,
+        this._boundPlaySymbolReveal,
       );
-      document.addEventListener(GameEvents.PROBLEM_LINE_COMPLETED, (event) => {
-        this.playLineCompleted?.(event.detail?.lineNumber ?? 1);
-      });
-      document.addEventListener("lockLevelUpdated", (event) => {
-        this.playLockAdvance?.(event.detail?.level ?? 1);
-      });
-      document.addEventListener("powerUpActivated", (event) => {
-        this.playPowerUpActivated?.(event.detail?.type || "default");
-      });
+      document.addEventListener(
+        GameEvents.PROBLEM_LINE_COMPLETED,
+        this._boundPlayLineCompleted,
+      );
+      document.addEventListener("lockLevelUpdated", this._boundPlayLockAdvance);
+      document.addEventListener(
+        "powerUpActivated",
+        this._boundPlayPowerUpActivated,
+      );
+
+      this._listenersBound = true;
 
       console.log("🔊 Cyberpunk Interaction Audio ready");
+    }
+
+    destroy() {
+      if (this._listenersBound) {
+        document.removeEventListener(
+          "pointerdown",
+          this._boundHandlePointerDown,
+          { capture: true },
+        );
+        document.removeEventListener("keydown", this._boundUnlockAudio);
+        document.removeEventListener(
+          GameEvents.SYMBOL_CLICKED,
+          this._boundPlaySymbolClick,
+        );
+        document.removeEventListener(
+          GameEvents.SYMBOL_REVEALED,
+          this._boundPlaySymbolReveal,
+        );
+        document.removeEventListener(
+          GameEvents.PROBLEM_LINE_COMPLETED,
+          this._boundPlayLineCompleted,
+        );
+        document.removeEventListener(
+          "lockLevelUpdated",
+          this._boundPlayLockAdvance,
+        );
+        document.removeEventListener(
+          "powerUpActivated",
+          this._boundPlayPowerUpActivated,
+        );
+        this._listenersBound = false;
+      }
+
+      this.stopDrumSequencer?.();
+
+      if (this.masterGain) {
+        this.masterGain.disconnect();
+        this.masterGain = null;
+      }
+
+      if (
+        this.context &&
+        typeof this.context.close === "function" &&
+        this.context.state !== "closed"
+      ) {
+        this.context.close().catch((error) => {
+          console.log("🔇 Audio context close deferred:", error?.message || error);
+        });
+      }
+
+      this.context = null;
+      this.lastCueTimes.clear();
+      this.activeVoices = 0;
     }
 
     _ensureContext() {

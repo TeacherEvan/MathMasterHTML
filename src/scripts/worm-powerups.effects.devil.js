@@ -9,13 +9,24 @@
     proto.activateDevil = function () {
       console.log("👹 DEVIL ACTIVATED! Click location to spawn devil...");
 
-      const handleClick = (e) => {
+      const handlePlacement = (e) => {
+        if (e.type === "click" && e.detail !== 0) {
+          return;
+        }
+
+        if (typeof e.button === "number" && e.button !== 0) {
+          return;
+        }
+
+        e.preventDefault();
         this.spawnDevil(e.clientX, e.clientY);
-        document.removeEventListener("click", handleClick);
+        document.removeEventListener("pointerdown", handlePlacement);
+        document.removeEventListener("click", handlePlacement);
         document.body.style.cursor = "";
       };
 
-      document.addEventListener("click", handleClick);
+      document.addEventListener("pointerdown", handlePlacement);
+      document.addEventListener("click", handlePlacement);
       document.body.style.cursor = "crosshair";
     };
 

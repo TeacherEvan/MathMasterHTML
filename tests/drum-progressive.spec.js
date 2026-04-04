@@ -3,11 +3,18 @@
  */
 import { expect, test } from "@playwright/test";
 
+async function gotoDrumTestPage(page) {
+  await page.addInitScript(() => {
+    window.__MM_ENABLE_AUDIO_IN_TESTS = true;
+  });
+  await page.goto("/game.html?level=beginner");
+}
+
 test.describe("Progressive Drum Beat", () => {
   test("drum system initializes and exposes expected methods", async ({
     page,
   }) => {
-    await page.goto("/game.html?level=beginner");
+    await gotoDrumTestPage(page);
     await page.waitForLoadState("networkidle");
 
     const result = await page.evaluate(() => {
@@ -16,6 +23,7 @@ test.describe("Progressive Drum Beat", () => {
         hasLoader: typeof audio?.loadDrumSamples === "function",
         hasStart: typeof audio?.startDrumSequencer === "function",
         hasStop: typeof audio?.stopDrumSequencer === "function",
+        disabled: audio?.disabled === true,
         complexity: audio?._drumComplexity,
       };
     });
@@ -23,18 +31,19 @@ test.describe("Progressive Drum Beat", () => {
     expect(result.hasLoader).toBe(true);
     expect(result.hasStart).toBe(true);
     expect(result.hasStop).toBe(true);
+    expect(result.disabled).toBe(false);
     expect(result.complexity).toBe(0);
   });
 
   test("complexity ramps across successive line-completion events", async ({
     page,
   }) => {
-    await page.goto("/game.html?level=beginner");
+    await gotoDrumTestPage(page);
     await page.waitForLoadState("networkidle");
 
     const result = await page.evaluate(() => {
       const audio = window.CyberpunkInteractionAudio;
-      if (!audio || audio.disabled) return { skipped: true };
+      if (!audio) return { hasAudio: false };
 
       const complexities = [audio._drumComplexity];
       for (let i = 0; i < 5; i += 1) {
@@ -45,20 +54,25 @@ test.describe("Progressive Drum Beat", () => {
         );
         complexities.push(audio._drumComplexity);
       }
-      return { complexities };
+      return {
+        hasAudio: true,
+        disabled: audio.disabled === true,
+        complexities,
+      };
     });
 
-    if (result.skipped) return;
+    expect(result.hasAudio).toBe(true);
+    expect(result.disabled).toBe(false);
     expect(result.complexities).toEqual([0, 1, 2, 3, 4, 5]);
   });
 
   test("mute state reduces drum gain", async ({ page }) => {
-    await page.goto("/game.html?level=beginner");
+    await gotoDrumTestPage(page);
     await page.waitForLoadState("networkidle");
 
     const result = await page.evaluate(async () => {
       const audio = window.CyberpunkInteractionAudio;
-      if (!audio || audio.disabled) return { skipped: true };
+      if (!audio) return { hasAudio: false };
       audio._ensureContext();
       audio._drumEnsureGain();
       document.dispatchEvent(
@@ -68,11 +82,14 @@ test.describe("Progressive Drum Beat", () => {
       );
       await new Promise((resolve) => window.setTimeout(resolve, 100));
       return {
+        hasAudio: true,
+        disabled: audio.disabled === true,
         gainValue: audio._drumGain?.gain?.value ?? -1,
       };
     });
 
-    if (result.skipped) return;
+    expect(result.hasAudio).toBe(true);
+    expect(result.disabled).toBe(false);
     expect(result.gainValue).toBeLessThan(0.01);
   });
 });

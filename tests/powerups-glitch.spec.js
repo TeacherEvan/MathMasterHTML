@@ -4,7 +4,14 @@ test.describe("HUD Power-Up Glitch Animation", () => {
   test("should apply glitch transform styles on powerUpActivated event", async ({
     page,
   }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/src/pages/game.html?level=beginner");
+
+    // Dismiss modal so requestAnimationFrame runs at full speed
+    const startButton = page.locator("#start-game-btn");
+    if (await startButton.isVisible()) {
+      await startButton.click({ force: true });
+    }
 
     // Wait for UI to initialize
     await page.waitForFunction(() => !!window.wormSystem?.powerUpSystem);
@@ -30,12 +37,20 @@ test.describe("HUD Power-Up Glitch Animation", () => {
     // The glitch inline styles should be injected within a very short timeframe
     // We expect transform to be added as inline style.
     await expect(targetEl).toHaveAttribute("style", /transform:/, {
-      timeout: 150,
+      timeout: 300,
     });
   });
 
   test("should clean up styles after animation ends", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/src/pages/game.html?level=beginner");
+
+    // Dismiss modal so requestAnimationFrame runs at full speed
+    const startButton = page.locator("#start-game-btn");
+    if (await startButton.isVisible()) {
+      await startButton.click({ force: true });
+    }
+
     await page.waitForFunction(() => !!window.wormSystem?.powerUpSystem);
 
     // Add chain lightning

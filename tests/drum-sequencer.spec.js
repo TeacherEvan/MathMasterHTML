@@ -3,11 +3,18 @@
  */
 import { expect, test } from "@playwright/test";
 
+async function gotoDrumTestPage(page) {
+  await page.addInitScript(() => {
+    window.__MM_ENABLE_AUDIO_IN_TESTS = true;
+  });
+  await page.goto("/game.html?level=beginner");
+}
+
 test.describe("DrumSequencer", () => {
   test("should expose startDrumSequencer and stopDrumSequencer", async ({
     page,
   }) => {
-    await page.goto("/game.html?level=beginner");
+    await gotoDrumTestPage(page);
     const methods = await page.evaluate(() => {
       const audio = window.CyberpunkInteractionAudio;
       return {
@@ -20,7 +27,7 @@ test.describe("DrumSequencer", () => {
   });
 
   test("should initialize drum complexity at zero", async ({ page }) => {
-    await page.goto("/game.html?level=beginner");
+    await gotoDrumTestPage(page);
     const level = await page.evaluate(() => {
       return window.CyberpunkInteractionAudio?._drumComplexity ?? -1;
     });
@@ -30,10 +37,10 @@ test.describe("DrumSequencer", () => {
   test("should increment complexity on problemLineCompleted", async ({
     page,
   }) => {
-    await page.goto("/game.html?level=beginner");
+    await gotoDrumTestPage(page);
     const result = await page.evaluate(() => {
       const audio = window.CyberpunkInteractionAudio;
-      if (!audio || audio.disabled) return { skipped: true };
+      if (!audio) return { hasAudio: false };
       const before = audio._drumComplexity;
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", {
@@ -41,19 +48,22 @@ test.describe("DrumSequencer", () => {
         }),
       );
       return {
+        hasAudio: true,
+        disabled: audio.disabled === true,
         before,
         after: audio._drumComplexity,
       };
     });
-    if (result.skipped) return;
+    expect(result.hasAudio).toBe(true);
+    expect(result.disabled).toBe(false);
     expect(result.after).toBe(result.before + 1);
   });
 
   test("should cap complexity at the configured maximum", async ({ page }) => {
-    await page.goto("/game.html?level=beginner");
+    await gotoDrumTestPage(page);
     const capped = await page.evaluate(() => {
       const audio = window.CyberpunkInteractionAudio;
-      if (!audio || audio.disabled) return { skipped: true };
+      if (!audio) return { hasAudio: false };
       for (let i = 0; i < 20; i += 1) {
         document.dispatchEvent(
           new CustomEvent("problemLineCompleted", {
@@ -62,11 +72,14 @@ test.describe("DrumSequencer", () => {
         );
       }
       return {
+        hasAudio: true,
+        disabled: audio.disabled === true,
         complexity: audio._drumComplexity,
         max: audio._drumMaxComplexity,
       };
     });
-    if (capped.skipped) return;
+    expect(capped.hasAudio).toBe(true);
+    expect(capped.disabled).toBe(false);
     expect(capped.complexity).toBeLessThanOrEqual(capped.max);
   });
 });

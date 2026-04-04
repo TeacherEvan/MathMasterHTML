@@ -2,6 +2,18 @@
 // Playwright tests for MathMaster Power-Up Two-Click System
 import { expect, test } from "@playwright/test";
 
+async function pressPowerUp(page, type) {
+  await page
+    .locator(`[data-testid="powerup-${type}"]`)
+    .dispatchEvent("pointerdown", {
+      bubbles: true,
+      cancelable: true,
+      button: 0,
+      isPrimary: true,
+      pointerType: "mouse",
+    });
+}
+
 async function dismissHowToPlayModal(page) {
   const modal = page.locator("#how-to-play-modal");
   if (await modal.isVisible().catch(() => false)) {
@@ -90,7 +102,7 @@ test.describe("Power-Up Two-Click System", () => {
 
   test("should select power-up on first click", async ({ page }) => {
     // Click on spider power-up
-    await page.locator('[data-testid="powerup-spider"]').evaluate((el) => el.click());
+    await pressPowerUp(page, "spider");
 
     // Verify selection via console
     const isSelected = await page.evaluate(() => {
@@ -113,7 +125,7 @@ test.describe("Power-Up Two-Click System", () => {
     page,
   }) => {
     // Select spider
-    await page.locator('[data-testid="powerup-spider"]').evaluate((el) => el.click());
+    await pressPowerUp(page, "spider");
 
     // Verify selected
     let isSelected = await page.evaluate(() => {
@@ -122,7 +134,7 @@ test.describe("Power-Up Two-Click System", () => {
     expect(isSelected).toBe(true);
 
     // Click again to deselect
-    await page.locator('[data-testid="powerup-spider"]').evaluate((el) => el.click());
+    await pressPowerUp(page, "spider");
 
     // Verify deselected
     isSelected = await page.evaluate(() => {
@@ -139,7 +151,7 @@ test.describe("Power-Up Two-Click System", () => {
 
   test("should deselect power-up on ESC key", async ({ page }) => {
     // Select devil
-    await page.locator('[data-testid="powerup-devil"]').evaluate((el) => el.click());
+    await pressPowerUp(page, "devil");
 
     // Verify selected
     let isSelected = await page.evaluate(() => {
@@ -176,7 +188,7 @@ test.describe("Power-Up Two-Click System", () => {
 
   test("should place devil power-up on second click", async ({ page }) => {
     // Select devil
-    await page.locator('[data-testid="powerup-devil"]').evaluate((el) => el.click());
+    await pressPowerUp(page, "devil");
 
     // Get initial count
     const initialCount = await page.evaluate(() => {
@@ -201,7 +213,7 @@ test.describe("Power-Up Two-Click System", () => {
 
   test("should spawn spider at click location", async ({ page }) => {
     // Select spider
-    await page.locator('[data-testid="powerup-spider"]').evaluate((el) => el.click());
+    await pressPowerUp(page, "spider");
 
     // Click in game area
     await page.click("body", { position: { x: 400, y: 300 } });
@@ -224,7 +236,7 @@ test.describe("Power-Up Two-Click System", () => {
     });
 
     // Try to select
-    await page.locator('[data-testid="powerup-chainLightning"]').evaluate((el) => el.click());
+    await pressPowerUp(page, "chainLightning");
 
     // Verify not selected
     const isSelected = await page.evaluate(() => {
@@ -243,7 +255,7 @@ test.describe("Power-Up Two-Click System", () => {
     page,
   }) => {
     // Select spider
-    await page.locator('[data-testid="powerup-spider"]').evaluate((el) => el.click());
+    await pressPowerUp(page, "spider");
 
     let selected = await page.evaluate(() => {
       return window.wormSystem?.powerUpSystem?.selectedPowerUp;
@@ -251,7 +263,7 @@ test.describe("Power-Up Two-Click System", () => {
     expect(selected).toBe("spider");
 
     // Select devil instead
-    await page.locator('[data-testid="powerup-devil"]').evaluate((el) => el.click());
+    await pressPowerUp(page, "devil");
 
     selected = await page.evaluate(() => {
       return window.wormSystem?.powerUpSystem?.selectedPowerUp;
@@ -371,7 +383,7 @@ test.describe("Power-Up Chain Lightning", () => {
     });
 
     // Select chain lightning
-    await page.locator('[data-testid="powerup-chainLightning"]').evaluate((el) => el.click());
+    await pressPowerUp(page, "chainLightning");
 
     // Click where there are no worms
     await page.click("body", { position: { x: 100, y: 100 } });

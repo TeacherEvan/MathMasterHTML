@@ -38,11 +38,22 @@
     Object.assign(powerUp.style, POWER_UP_DROP_STYLE);
     powerUp.style.translate = `${x}px ${y}px`;
 
-    // Click to collect
-    powerUp.addEventListener("click", (e) => {
+    const collectPowerUp = (e) => {
+      if (e.type === "click" && e.detail !== 0) {
+        return;
+      }
+
+      if (typeof e.button === "number" && e.button !== 0) {
+        return;
+      }
+
+      e.preventDefault();
       e.stopPropagation();
       this.collectPowerUp(type, powerUp);
-    });
+    };
+
+    powerUp.addEventListener("pointerdown", collectPowerUp);
+    powerUp.addEventListener("click", collectPowerUp);
 
     if (this.crossPanelContainer) {
       this.crossPanelContainer.appendChild(powerUp);
@@ -167,9 +178,20 @@
       item.addEventListener("mouseleave", () => {
         item.classList.remove("is-hovered");
       });
-      item.addEventListener("click", () => {
+      const activatePowerUp = (event) => {
+        if (event.type === "click" && event.detail !== 0) {
+          return;
+        }
+
+        if (typeof event.button === "number" && event.button !== 0) {
+          return;
+        }
+
+        event.preventDefault();
         this.usePowerUp(type);
-      });
+      };
+      item.addEventListener("pointerdown", activatePowerUp);
+      item.addEventListener("click", activatePowerUp);
 
       const countSpan = document.createElement("span");
       countSpan.className = "power-up-count";

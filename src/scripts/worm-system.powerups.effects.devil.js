@@ -11,8 +11,16 @@
   proto.activateDevil = function () {
     console.log("👹 DEVIL ACTIVATED! Click location to spawn devil...");
 
-    // One-time click listener
-    const handleDevilClick = (e) => {
+    const handleDevilPlacement = (e) => {
+      if (e.type === "click" && e.detail !== 0) {
+        return;
+      }
+
+      if (typeof e.button === "number" && e.button !== 0) {
+        return;
+      }
+
+      e.preventDefault();
       const x = e.clientX;
       const y = e.clientY;
 
@@ -20,12 +28,13 @@
 
       this.spawnDevil(x, y);
 
-      // Remove listener and reset cursor
-      document.removeEventListener("click", handleDevilClick);
+      document.removeEventListener("pointerdown", handleDevilPlacement);
+      document.removeEventListener("click", handleDevilPlacement);
       document.body.style.cursor = "";
     };
 
-    document.addEventListener("click", handleDevilClick);
+    document.addEventListener("pointerdown", handleDevilPlacement);
+    document.addEventListener("click", handleDevilPlacement);
     document.body.style.cursor = "crosshair";
   };
 

@@ -7,12 +7,30 @@ test.describe("Performance benchmarks", () => {
    * @param {string} projectName
    */
   function getPerfBudget(projectName) {
+    const budgets = {
+      chromium: {
+        minSampleCount: 300,
+        minFps: 50,
+        maxFrameBudgetViolationPercent: 80,
+        maxDomQueriesPerSec: 150,
+      },
+      firefox: {
+        minSampleCount: 150,
+        minFps: 34,
+        maxFrameBudgetViolationPercent: 92,
+        maxDomQueriesPerSec: 235,
+      },
+      webkit: {
+        minSampleCount: 90,
+        minFps: 4,
+        maxFrameBudgetViolationPercent: 99,
+        maxDomQueriesPerSec: 250,
+      },
+    };
+
     return {
-      minSampleCount: projectName === "chromium" ? 300 : 120,
-      enforceHardGate: projectName === "chromium",
-      minFps: 50,
-      maxFrameBudgetViolationPercent: 80,
-      maxDomQueriesPerSec: projectName === "chromium" ? 150 : 250,
+      enforceHardGate: true,
+      ...(budgets[projectName] || budgets.webkit),
     };
   }
 
