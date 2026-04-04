@@ -30,6 +30,18 @@ async function bootLevel(page, level) {
   await page.evaluate(() => window.ScoreTimerManager?.pause?.());
 }
 
+async function pressPowerUp(page, type) {
+  await page
+    .locator(`[data-testid="powerup-${type}"]`)
+    .dispatchEvent("pointerdown", {
+      bubbles: true,
+      cancelable: true,
+      button: 0,
+      isPrimary: true,
+      pointerType: "mouse",
+    });
+}
+
 for (const level of LEVELS) {
   test.describe(`Bounded stress: ${level}`, () => {
     test(`handles rapid back-to-back interactions on ${level}`, async ({
@@ -68,10 +80,8 @@ for (const level of LEVELS) {
         { timeout: 5000 },
       );
 
-      await page
-        .locator('[data-testid="powerup-chainLightning"]')
-        .evaluate((btn) => btn.click());
-      await page.locator("#solution-container").evaluate((el) => el.click());
+      await pressPowerUp(page, "chainLightning");
+      await page.locator("#solution-container").click({ force: true });
 
       await page.evaluate(() => {
         const worms = window.wormSystem?.worms || [];

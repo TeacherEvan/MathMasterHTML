@@ -95,11 +95,23 @@
     });
     powerUp.style.translate = `${x}px ${y}px`;
 
-    // Click to collect
-    powerUp.addEventListener("click", (e) => {
+    const collectPowerUp = (e) => {
+      if (e.type === "click" && e.detail !== 0) {
+        return;
+      }
+
+      if (typeof e.button === "number" && e.button !== 0) {
+        return;
+      }
+
+      e.preventDefault();
       e.stopPropagation();
       this.collect(type, powerUp);
-    });
+    };
+
+    // Pointer-first for touch responsiveness; click remains as a keyboard/programmatic fallback.
+    powerUp.addEventListener("pointerdown", collectPowerUp);
+    powerUp.addEventListener("click", collectPowerUp);
 
     return powerUp;
   };

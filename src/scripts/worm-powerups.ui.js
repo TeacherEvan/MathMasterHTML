@@ -135,13 +135,19 @@
     const panelB = document.getElementById("panel-b");
     const controls = panelB?.querySelector(".panel-b-controls");
     const timerDisplay = document.getElementById("timer-display");
+    const hud = document.getElementById("game-hud");
     const panelRect = panelB?.getBoundingClientRect() || null;
     const controlsRect = controls?.getBoundingClientRect() || null;
     const timerRect = timerDisplay?.getBoundingClientRect() || null;
+    const hudRect = hud?.getBoundingClientRect() || null;
     const trayHeight =
       displayRect?.height || this.displayElement?.offsetHeight || 0;
     const trayWidth =
       displayRect?.width || this.displayElement?.offsetWidth || 0;
+    const hudSafeTop = Math.max(
+      0,
+      Math.ceil((hudRect?.bottom || 0) + (isCompactViewport ? -8 : 8)),
+    );
 
     if (!panelRect) {
       return {
@@ -156,7 +162,7 @@
           (isCompactViewport
             ? config.COMPACT_HORIZONTAL_INSET
             : config.DESKTOP_HORIZONTAL_INSET),
-        minY: 0,
+        minY: hudSafeTop,
         maxY: isCompactViewport ? config.COMPACT_MAX_Y : config.DESKTOP_MAX_Y,
         availableWidth: window.innerWidth,
       };
@@ -183,7 +189,9 @@
       ? Math.max(minXBase, timerRect.right + timerOverlapPadding)
       : minXBase;
     const minX = Math.min(requestedMinX, maxXBase);
-    const minTop = panelRect.top + config.DESKTOP_TOP_OFFSET;
+    const minTop = isCompactViewport
+      ? hudSafeTop
+      : Math.max(hudSafeTop, panelRect.top + config.DESKTOP_TOP_OFFSET);
     const controlsBottomLimit =
       controlsRect?.top !== undefined
         ? controlsRect.top - config.PANEL_B_CONTROLS_CLEARANCE
@@ -477,15 +485,26 @@
 
     // Make it draggable with boundary validation
     this.makeDraggable(display);
-    display.addEventListener("click", (event) => {
+    const activatePowerUp = (event) => {
       const item = event.target.closest(".power-up-item");
       if (!item || !display.contains(item)) {
         return;
       }
 
+      if (event.type === "click" && event.detail !== 0) {
+        return;
+      }
+
+      if (typeof event.button === "number" && event.button !== 0) {
+        return;
+      }
+
+      event.preventDefault();
       event.stopPropagation();
       this.selectPowerUp(item.dataset.type);
-    });
+    };
+    display.addEventListener("pointerdown", activatePowerUp);
+    display.addEventListener("click", activatePowerUp);
 
     document.body.appendChild(display);
     this.displayElement = display;

@@ -4,9 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="Math Master - An educational algebra game with Matrix-themed interface. Unlock your mind through interactive problem-solving.">
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Enter Math Master's training console and begin your algebra route.">
+    <meta name="theme-color" content="#111714">
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self';">
 
@@ -16,111 +15,30 @@
     <!-- Apple Touch Icon -->
     <link rel="apple-touch-icon" href="/Images/icon-192.png">
 
-    <title>Math Master - Unlock Your Mind</title>
+    <title>Math Master — Welcome</title>
 
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap"
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
         as="style">
     <link rel="stylesheet" href="/src/styles/css/index.css">
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-
-        /* Click Ripple Effect */
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(0, 255, 0, 0.3);
-            transform: scale(0);
-            animation: ripple-animation 0.6s linear;
-            pointer-events: none;
-        }
-
-        @keyframes ripple-animation {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-
-        /* Floating Mathematical Symbols */
-        .math-symbol {
-            position: absolute;
-            color: rgba(255, 215, 0, 0.3);
-            font-size: 2rem;
-            animation: float 6s ease-in-out infinite;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0px) rotate(0deg);
-            }
-
-            50% {
-                transform: translateY(-20px) rotate(180deg);
-            }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .logo-circle {
-                width: 100px;
-                height: 100px;
-            }
-
-            .logo-symbol {
-                font-size: 1.8rem;
-            }
-
-            .variable-x,
-            .variable-y {
-                font-size: 4rem;
-            }
-
-            .quote {
-                padding: 0 20px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .welcome-container {
-                padding: 15px;
-            }
-
-            .logo-circle {
-                width: 80px;
-                height: 80px;
-            }
-
-            .logo-symbol {
-                font-size: 1.5rem;
-            }
-
-            .variable-x,
-            .variable-y {
-                font-size: 3rem;
-            }
-        }
-    </style>
 </head>
 
-<body>
+<body class="welcome-page">
     <!-- Matrix Rain Background -->
-    <div class="matrix-bg" id="matrixBg"></div>
+    <div class="matrix-bg" id="matrixBg" aria-hidden="true"></div>
 
-    <!-- Main Welcome Container -->
-    <div class="welcome-container">
-        <h1 class="teacher-title">Evan's</h1>
+    <header class="welcome-header" role="banner">
+        <p class="page-kicker">Training dossier</p>
         <h1 class="main-title">MATH MASTER</h1>
         <h2 class="subtitle">Unlock Your Mind</h2>
+    </header>
 
-        <div class="logo-container">
+    <!-- Main Welcome Container -->
+    <main class="welcome-container" role="main">
+        <figure class="logo-container" aria-labelledby="welcome-logo-caption">
             <div class="logo-circle">
                 <div class="logo-content">
                     <div class="logo-symbol">⚖</div>
@@ -130,29 +48,36 @@
                     </div>
                 </div>
             </div>
-        </div>
+            <figcaption id="welcome-logo-caption" class="sr-only">Math Master symbol: scale and variables</figcaption>
+        </figure>
 
-        <div class="quote">
-            "If it is not right, do not do it; if it is not true, do not say it."
-            <div class="quote-author">- Marcus Aurelius</div>
-        </div>
+        <blockquote class="quote">
+            <p>“If it is not right, do not do it; if it is not true, do not say it.”</p>
+            <footer>— Marcus Aurelius</footer>
+        </blockquote>
 
         <div class="button-container" data-no-nav="true">
-            <button id="scoreboard-button" class="action-button level-button scoreboard-button" type="button" data-no-nav="true" aria-haspopup="dialog" aria-controls="scoreboard-modal">View Scoreboard</button>
+            <button id="begin-training-button" class="action-button primary-action-button" type="button"
+                data-testid="welcome-cta">Begin Training</button>
+            <button id="scoreboard-button" class="action-button secondary-action-button scoreboard-button" type="button"
+                data-no-nav="true" aria-haspopup="dialog" aria-controls="scoreboard-modal">View Scoreboard</button>
         </div>
 
-        <div class="continue-text">Click to continue</div>
+        <p class="welcome-hint">Press Enter to begin</p>
         <div class="creator-credit">Created by Teacher Evan</div>
-    </div>
+    </main>
 
     <div id="scoreboard-modal" class="scoreboard-modal" hidden data-no-nav="true" aria-hidden="true">
-        <div class="scoreboard-modal-content" role="dialog" aria-modal="true" aria-labelledby="scoreboard-title" data-no-nav="true">
+        <div class="scoreboard-modal-content" role="dialog" aria-modal="true" aria-labelledby="scoreboard-title"
+            data-no-nav="true">
             <div class="scoreboard-modal-header" data-no-nav="true">
                 <div data-no-nav="true">
                     <p class="scoreboard-kicker" data-no-nav="true">Local scoreboard cache</p>
-                    <h2 id="scoreboard-title" data-no-nav="true">Welcome back, <span id="scoreboard-player-name" data-no-nav="true">Player</span></h2>
+                    <h2 id="scoreboard-title" data-no-nav="true">Welcome back, <span id="scoreboard-player-name"
+                            data-no-nav="true">Player</span></h2>
                 </div>
-                <button id="scoreboard-close-button" class="scoreboard-close-button" type="button" data-no-nav="true" aria-label="Close scoreboard">✕</button>
+                <button id="scoreboard-close-button" class="scoreboard-close-button" type="button" data-no-nav="true"
+                    aria-label="Close scoreboard">✕</button>
             </div>
 
             <section class="scoreboard-section" data-no-nav="true">

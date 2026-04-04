@@ -8,7 +8,7 @@
   const proto = window.WormPowerUpSystem.prototype;
 
   /**
-   * TWO-CLICK SYSTEM: Select a power-up (first click)
+    * TWO-CLICK SYSTEM: Select a power-up (first tap/click)
    * @param {string} type - Power-up type to select
    */
   proto.selectPowerUp = function (type) {
@@ -47,8 +47,6 @@
     document.body.style.cursor = "crosshair";
     document.body.classList.add("power-up-placement-mode");
     document.documentElement.classList.add("power-up-placement-mode");
-    document.documentElement.style.pointerEvents = "none";
-    document.body.style.pointerEvents = "auto";
 
     // Drop focus from any previously active element to ensure document keydown catches Escape
     if (
@@ -64,7 +62,7 @@
       document.body.focus({ preventScroll: true });
     });
 
-    // Setup placement click handler
+    // Setup placement pointer handler
     this._setupPlacementHandler(type);
   };
 
@@ -87,8 +85,6 @@
     document.body.style.cursor = "";
     document.body.classList.remove("power-up-placement-mode");
     document.documentElement.classList.remove("power-up-placement-mode");
-    document.documentElement.style.pointerEvents = "";
-    document.body.style.pointerEvents = "";
 
     this._keyboardCaptureTarget = null; // Clean up legacy reference if it exists
 
@@ -97,7 +93,7 @@
   };
 
   /**
-   * Setup placement click handler for two-click system
+   * Setup placement input handler for two-click system
    * @param {string} type - Power-up type being placed
    * @private
    */
@@ -105,35 +101,55 @@
     // Remove any existing handler
     this._cleanupPlacementHandler();
 
-    this.placementHandler = (e) => {
+    const handlePlacementEvent = (e) => {
       // Ignore clicks on power-up display itself
       if (e.target.closest("#power-up-display")) {
+        return;
+      }
+
+      if (e.type === "click" && e.detail !== 0) {
+        return;
+      }
+
+      if (typeof e.button === "number" && e.button !== 0) {
         return;
       }
 
       e.preventDefault();
       e.stopPropagation();
 
-      // Execute the power-up at click location
+      // Execute the power-up at input location
       this._executePlacement(type, e.clientX, e.clientY, e);
     };
 
-    // Add with capture to ensure we get the click first
-    document.addEventListener("click", this.placementHandler, {
+    this.placementHandler = handlePlacementEvent;
+    this.placementClickFallbackHandler = handlePlacementEvent;
+
+    // Add with capture to ensure we get the pointer first on touch devices.
+    document.addEventListener("pointerdown", this.placementHandler, {
+      capture: true,
+    });
+    document.addEventListener("click", this.placementClickFallbackHandler, {
       capture: true,
     });
   };
 
   /**
-   * Cleanup placement click handler
+   * Cleanup placement input handler
    * @private
    */
   proto._cleanupPlacementHandler = function () {
     if (this.placementHandler) {
-      document.removeEventListener("click", this.placementHandler, {
+      document.removeEventListener("pointerdown", this.placementHandler, {
         capture: true,
       });
       this.placementHandler = null;
+    }
+    if (this.placementClickFallbackHandler) {
+      document.removeEventListener("click", this.placementClickFallbackHandler, {
+        capture: true,
+      });
+      this.placementClickFallbackHandler = null;
     }
   };
 

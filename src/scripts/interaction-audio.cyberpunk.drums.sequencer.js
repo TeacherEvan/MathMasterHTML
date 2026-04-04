@@ -18,6 +18,7 @@
   const { DRUM_PATTERNS, STEP_DURATION, LOOKAHEAD_MS, SCHEDULE_AHEAD_S } =
     drumConfig;
   const originalInit = proto.init;
+  const originalDestroy = proto.destroy;
 
   proto.init = function initWithDrums() {
     this._drumComplexity = 0;
@@ -32,22 +33,28 @@
     originalInit.call(this);
 
     if (!this._drumEventBound) {
-      this._drumEventBound = true;
-      document.addEventListener("problemLineCompleted", () => {
+      this._boundDrumAdvanceComplexity = () => {
         this._drumAdvanceComplexity();
-      });
+      };
+      this._boundDrumMuteStateChange = (event) => {
+        if (this._drumGain && this.context) {
+          const nextGain = event.detail?.muted ? 0 : 0.03;
+          this._drumGain.gain.cancelScheduledValues(this.context.currentTime);
+          this._drumGain.gain.setValueAtTime(
+            nextGain,
+            this.context.currentTime,
+          );
+        }
+      };
+      this._drumEventBound = true;
+      document.addEventListener(
+        "problemLineCompleted",
+        this._boundDrumAdvanceComplexity,
+      );
       document.addEventListener(
         window.CyberpunkInteractionAudioEvents?.stateChanged ||
           "cyberpunkAudioStateChanged",
-        (event) => {
-          if (this._drumGain && this.context) {
-            this._drumGain.gain.setTargetAtTime(
-              event.detail?.muted ? 0 : 0.03,
-              this.context.currentTime,
-              0.05,
-            );
-          }
-        },
+        this._boundDrumMuteStateChange,
       );
     }
   };
@@ -96,6 +103,36 @@
       this._drumSchedulerId = null;
     }
     this._drumRunning = false;
+  };
+
+  proto.destroyDrumSequencer = function destroyDrumSequencer() {
+    this.stopDrumSequencer();
+
+    if (this._drumEventBound) {
+      document.removeEventListener(
+        "problemLineCompleted",
+        this._boundDrumAdvanceComplexity,
+      );
+      document.removeEventListener(
+        window.CyberpunkInteractionAudioEvents?.stateChanged ||
+          "cyberpunkAudioStateChanged",
+        this._boundDrumMuteStateChange,
+      );
+      this._drumEventBound = false;
+    }
+
+    this._boundDrumAdvanceComplexity = null;
+    this._boundDrumMuteStateChange = null;
+
+    if (this._drumGain) {
+      this._drumGain.disconnect();
+      this._drumGain = null;
+    }
+  };
+
+  proto.destroy = function destroyCyberpunkInteractionAudioDrums() {
+    this.destroyDrumSequencer?.();
+    return originalDestroy?.call(this);
   };
 
   proto._drumSchedule = function _drumSchedule(

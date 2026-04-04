@@ -54,8 +54,16 @@
       isHeart: false,
     };
 
-    // Click to turn into heart
-    spider.addEventListener("click", (e) => {
+    const handleSpiderInteract = (e) => {
+      if (e.type === "click" && e.detail !== 0) {
+        return;
+      }
+
+      if (typeof e.button === "number" && e.button !== 0) {
+        return;
+      }
+
+      e.preventDefault();
       e.stopPropagation();
       if (!spiderData.isHeart) {
         spider.textContent = "❤️";
@@ -74,7 +82,10 @@
           }
         }, this.SPIDER_HEART_DURATION);
       }
-    });
+    };
+
+    spider.addEventListener("pointerdown", handleSpiderInteract);
+    spider.addEventListener("click", handleSpiderInteract);
 
     this.crossPanelContainer.appendChild(spider);
 

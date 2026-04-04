@@ -1,6 +1,24 @@
-html[data-perf-smoke="true"] *,
-html[data-perf-smoke="true"] *::before,
-html[data-perf-smoke="true"] *::after {
+html[data-perf-smoke="true"] .wall,
+html[data-perf-smoke="true"] .wall::before,
+html[data-perf-smoke="true"] .wall::after,
+html[data-perf-smoke="true"] #back-button,
+html[data-perf-smoke="true"] #audio-toggle,
+html[data-perf-smoke="true"] #game-hud,
+html[data-perf-smoke="true"] #game-hud *,
+html[data-perf-smoke="true"] #lock-display *,
+html[data-perf-smoke="true"] .worm-container,
+html[data-perf-smoke="true"] .worm-container *,
+html[data-perf-smoke="true"] .spider-entity,
+html[data-perf-smoke="true"] .devil-entity,
+html[data-perf-smoke="true"] .power-up,
+html[data-perf-smoke="true"] .explosion-particle,
+html[data-perf-smoke="true"] .slime-splat,
+html[data-perf-smoke="true"] .worm-crack,
+html[data-perf-smoke="true"] [data-ripple]::before,
+html[data-perf-smoke="true"] [data-ripple]::after,
+html[data-perf-smoke="true"] #symbol-rain-container .falling-symbol,
+html[data-perf-smoke="true"] #symbol-rain-container .falling-symbol::before,
+html[data-perf-smoke="true"] #symbol-rain-container .falling-symbol::after {
   animation: none !important;
   transition: none !important;
   filter: none !important;
