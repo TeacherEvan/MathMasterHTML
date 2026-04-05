@@ -135,11 +135,12 @@
   }
 }
 
-.res-mobile .grid-container {
+body.res-mobile .grid-container {
+  display: grid !important;
 }
 
 #rotation-overlay {
-  display: flex;
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -154,12 +155,6 @@
   font-family: inherit;
   text-align: center;
   padding: 20px;
-}
-
-@media (orientation: landscape) {
-  #rotation-overlay {
-    display: none !important;
-  }
 }
 
 #rotation-overlay .rotate-icon {

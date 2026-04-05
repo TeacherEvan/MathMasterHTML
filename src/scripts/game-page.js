@@ -10,6 +10,11 @@
     const elem = document.documentElement;
     if (!elem) return;
 
+    if (navigator.webdriver === true) {
+      console.log("🧪 Skipping auto-fullscreen while running automation");
+      return;
+    }
+
     if (elem.requestFullscreen) {
       elem.requestFullscreen().catch((err) => {
         console.log(

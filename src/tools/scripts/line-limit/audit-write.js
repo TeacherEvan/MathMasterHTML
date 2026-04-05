@@ -12,14 +12,17 @@ function csvEscape(value) {
 
 export function writeAuditArtifacts({ rootDir, policy, scanned, violations }) {
   const docsDir = resolve(rootDir, "Docs", "SystemDocs");
-  const allCsvPath = resolve(docsDir, "LINE_LIMIT_200_AUDIT.policy.all.csv");
+  const allCsvPath = resolve(
+    docsDir,
+    `LINE_LIMIT_${policy.maxLines}_AUDIT.policy.all.csv`,
+  );
   const violationsCsvPath = resolve(
     docsDir,
-    "LINE_LIMIT_200_AUDIT.policy.violations.csv",
+    `LINE_LIMIT_${policy.maxLines}_AUDIT.policy.violations.csv`,
   );
   const summaryPath = resolve(
     docsDir,
-    "LINE_LIMIT_200_AUDIT.policy.summary.txt",
+    `LINE_LIMIT_${policy.maxLines}_AUDIT.policy.summary.txt`,
   );
 
   const byCategory = new Map();
@@ -45,7 +48,7 @@ export function writeAuditArtifacts({ rootDir, policy, scanned, violations }) {
     "Extension",
     "Lines",
     "Category",
-    "Over200",
+    `Over${policy.maxLines}`,
   ].map(csvEscape);
 
   const allLines = [header.join(",")];
@@ -81,10 +84,14 @@ export function writeAuditArtifacts({ rootDir, policy, scanned, violations }) {
 
   const top20 = violationsSorted.slice(0, 20);
   const summaryLines = [];
-  summaryLines.push("LINE LIMIT 200 AUDIT SUMMARY (policy exclusions applied)");
+  summaryLines.push(
+    `LINE LIMIT ${policy.maxLines} AUDIT SUMMARY (policy exclusions applied)`,
+  );
   summaryLines.push(`Root: ${rootDir}`);
   summaryLines.push(`Included file count: ${scanned.length}`);
-  summaryLines.push(`Violations (>200 lines): ${violations.length}`);
+  summaryLines.push(
+    `Violations (>${policy.maxLines} lines): ${violations.length}`,
+  );
   summaryLines.push("");
   summaryLines.push(
     `Exclusions (generated/3rd-party): ${policy.excludeFileNames.join(", ")}`,

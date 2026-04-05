@@ -91,6 +91,8 @@ test.describe("UI Boundary Management", () => {
   test("Problem container should not overlap with score display", async ({
     page,
   }) => {
+    await expect(page.locator("#problem-container")).toBeVisible();
+
     const scoreBox = await page.locator("#score-display").boundingBox();
     const problemBox = await page.locator("#problem-container").boundingBox();
 
@@ -110,6 +112,14 @@ test.describe("UI Boundary Management", () => {
   test("Lock display should not overlap with problem container", async ({
     page,
   }) => {
+    await expect(page.locator("#problem-container")).toBeVisible();
+    await expect
+      .poll(async () => {
+        const lockBox = await page.locator("#lock-display").boundingBox();
+        return lockBox !== null;
+      })
+      .toBe(true);
+
     const problemBox = await page.locator("#problem-container").boundingBox();
     const lockBox = await page.locator("#lock-display").boundingBox();
 
@@ -193,6 +203,15 @@ test.describe("UI Boundary Management", () => {
   test("UIBoundaryManager should expose public constraint updates", async ({
     page,
   }) => {
+    await page.evaluate(() => {
+      if (window.WormSystem && window.WormSystem.powerUps) {
+        window.WormSystem.powerUps.inventory.chainLightning = 1;
+        window.WormSystem.powerUps.updateDisplay();
+      }
+    });
+
+    await page.waitForTimeout(300);
+
     const updateResult = await page.evaluate(() => {
       const manager = window.uiBoundaryManager;
       const display = document.getElementById("power-up-display");

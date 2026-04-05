@@ -15,6 +15,20 @@ body.power-up-placement-mode {
   pointer-events: auto;
 }
 
+html.power-up-placement-mode #symbol-console,
+html.power-up-placement-mode #symbol-console *,
+body.power-up-placement-mode #symbol-console,
+body.power-up-placement-mode #symbol-console * {
+  pointer-events: none !important;
+}
+
+html.power-up-placement-mode #power-up-display,
+html.power-up-placement-mode #power-up-display *,
+body.power-up-placement-mode #power-up-display,
+body.power-up-placement-mode #power-up-display * {
+  pointer-events: auto !important;
+}
+
 .power-up-display {
   position: fixed;
   background: rgba(0, 0, 0, 0.9);
@@ -111,7 +125,9 @@ body.power-up-placement-mode {
   }
 
   50% {
-    box-shadow: 0 0 20px #0ff, 0 0 30px rgba(0, 255, 255, 0.5);
+    box-shadow:
+      0 0 20px #0ff,
+      0 0 30px rgba(0, 255, 255, 0.5);
   }
 }
 
@@ -151,12 +167,17 @@ body.power-up-placement-mode {
   0%,
   100% {
     background: rgba(255, 0, 0, 0.3);
-    text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+    text-shadow:
+      0 0 10px #ff0000,
+      0 0 20px #ff0000;
     transform: scale(1);
   }
   50% {
     background: rgba(255, 0, 0, 0.6);
-    text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff6600;
+    text-shadow:
+      0 0 20px #ff0000,
+      0 0 40px #ff0000,
+      0 0 60px #ff6600;
     transform: scale(1.2);
   }
 }

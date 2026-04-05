@@ -13,12 +13,15 @@ export function checkLineLimits(rootDir, mode = "baseline") {
     baselineCsv: mode === "baseline" ? baselineCsv : null,
   });
 
-  logSection("LINE LIMIT (200) CHECK");
+  logSection(`LINE LIMIT (${LINE_LIMIT_POLICY.maxLines}) CHECK`);
   log(
     `Mode: ${mode}${mode === "baseline" ? " (no-new-violations)" : ""}`,
     "cyan",
   );
-  log(`Violations (>200): ${result.violations.length}`, "cyan");
+  log(
+    `Violations (>${LINE_LIMIT_POLICY.maxLines}): ${result.violations.length}`,
+    "cyan",
+  );
 
   if (mode === "baseline") {
     if (result.newViolations.length > 0) {

@@ -36,6 +36,20 @@ function initSymbolRain() {
     const lastSymbolSpawnTimestamp = {};
     SymbolRainSymbols.forEach((s) => (lastSymbolSpawnTimestamp[s] = now));
 
+    const getViewportContract = () =>
+      window.displayManager?.getCurrentResolution?.() ||
+      window.displayManager?.getViewportState?.() ||
+      null;
+
+    const isCompactDisplayMode = () => {
+      const activeResolution = getViewportContract();
+      return (
+        activeResolution?.isCompactViewport === true ||
+        document.body.classList.contains("viewport-compact") ||
+        document.body.classList.contains("res-mobile")
+      );
+    };
+
     const state = {
       config: SymbolRainConfig,
       symbols: SymbolRainSymbols,
@@ -53,9 +67,7 @@ function initSymbolRain() {
       symbolsToRemove: new Set(),
       cachedContainerHeight: 0,
       isTabVisible: !document.hidden,
-      isMobileMode:
-        window.innerWidth <= 768 ||
-        document.body.classList.contains("res-mobile"),
+      isMobileMode: isCompactDisplayMode(),
       spatialGrid: SymbolRainHelpers.createSpatialGrid(SymbolRainConfig),
       symbolPool: SymbolRainHelpers.createSymbolPool(SymbolRainConfig),
     };
@@ -109,9 +121,7 @@ function initSymbolRain() {
     });
 
     const debouncedResize = debounce(() => {
-      state.isMobileMode =
-        window.innerWidth <= 768 ||
-        document.body.classList.contains("res-mobile");
+      state.isMobileMode = isCompactDisplayMode();
       calculateColumns();
     }, 250);
 
@@ -120,7 +130,10 @@ function initSymbolRain() {
     document.addEventListener(
       GameEvents.DISPLAY_RESOLUTION_CHANGED,
       (event) => {
-        state.isMobileMode = event.detail.name === "mobile";
+        state.isMobileMode =
+          event.detail?.isCompactViewport === true ||
+          document.body.classList.contains("viewport-compact") ||
+          document.body.classList.contains("res-mobile");
       },
     );
 

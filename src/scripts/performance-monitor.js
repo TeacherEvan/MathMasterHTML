@@ -81,6 +81,7 @@ class PerformanceMonitor {
       : this.frameTimings;
     const sorted = buf.length > 0 ? [...buf].sort((a, b) => a - b) : [16.67];
     const avg = sorted.reduce((a, b) => a + b, 0) / sorted.length;
+    const preciseFps = Math.round((1000 / avg) * 100) / 100;
     const p95 = sorted[Math.floor(sorted.length * 0.95)] ?? avg;
     const max = sorted[sorted.length - 1] ?? avg;
     const jankCount = sorted.filter((d) => d > 50).length;
@@ -139,7 +140,7 @@ class PerformanceMonitor {
       currentDomQueryRate > 0 ? currentDomQueryRate : this.lastDomQueriesPerSec;
 
     return {
-      fps: this.fps,
+      fps: preciseFps,
       frameTimeAvg: Math.round(avg * 100) / 100,
       frameTimeP95: Math.round(p95 * 100) / 100,
       frameTimeMax: Math.round(max * 100) / 100,

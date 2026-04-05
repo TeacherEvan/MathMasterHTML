@@ -1,33 +1,46 @@
 (function mobileDisplayManagerOverrides() {
-  const COMPACT_WIDTH = 850;
-  const COMPACT_HEIGHT = 500;
+  function getViewportContract() {
+    return (
+      window.displayManager?.getCurrentResolution?.() ||
+      window.displayManager?.getViewportState?.() ||
+      null
+    );
+  }
 
   function isCompactViewport() {
-    const media = window.matchMedia?.("(hover: none) and (pointer: coarse)");
+    const viewportContract = getViewportContract();
     return (
-      window.innerWidth <= COMPACT_WIDTH ||
-      window.innerHeight <= COMPACT_HEIGHT ||
-      !!media?.matches
+      viewportContract?.isCompactViewport === true ||
+      document.body.classList.contains("viewport-compact") ||
+      document.body.classList.contains("res-mobile")
     );
   }
 
   function applyCompactTypography() {
-    if (!isCompactViewport()) {
-      return;
-    }
-
     const problemContainer = document.getElementById("problem-container");
+    const solutionContainer = document.getElementById("solution-container");
+    const compactViewport = isCompactViewport();
+
     if (problemContainer) {
-      problemContainer.style.fontSize = "clamp(12px, 2.9vh, 16px)";
-      problemContainer.style.lineHeight = "1.35";
-      problemContainer.style.letterSpacing = "0.4px";
+      if (!compactViewport) {
+        problemContainer.style.lineHeight = "";
+        problemContainer.style.letterSpacing = "";
+      } else {
+        problemContainer.style.fontSize = "clamp(12px, 2.9vh, 16px)";
+        problemContainer.style.lineHeight = "1.35";
+        problemContainer.style.letterSpacing = "0.4px";
+      }
     }
 
-    const solutionContainer = document.getElementById("solution-container");
     if (solutionContainer) {
-      solutionContainer.style.fontSize = "clamp(10px, 2.35vh, 13px)";
-      solutionContainer.style.lineHeight = "1.3";
-      solutionContainer.style.letterSpacing = "0.2px";
+      if (!compactViewport) {
+        solutionContainer.style.lineHeight = "";
+        solutionContainer.style.letterSpacing = "";
+      } else {
+        solutionContainer.style.fontSize = "clamp(10px, 2.35vh, 13px)";
+        solutionContainer.style.lineHeight = "1.3";
+        solutionContainer.style.letterSpacing = "0.2px";
+      }
     }
   }
 

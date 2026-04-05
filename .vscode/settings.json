@@ -15,5 +15,8 @@
         "powerups",
         "worm",
         "worms"
-    ]
+    ],
+    "window.zoomLevel": 0,
+    "window.titleSeparator": "1",
+    "chat.planAgent.defaultModel": "GPT-5.4 (copilot)"
 }

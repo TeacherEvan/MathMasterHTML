@@ -57,7 +57,9 @@ async function dispatchPointerDownOnActiveWorm(page, predicateSource) {
 
 test.describe("Worm behavior: aggression, targeting, and click rules", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/game.html?level=beginner");
+    await page.goto("/game.html?level=beginner", {
+      waitUntil: "domcontentloaded",
+    });
 
     const startButton = page.locator("#start-game-btn");
     await expect(startButton).toBeVisible({ timeout: 10000 });
@@ -82,15 +84,14 @@ test.describe("Worm behavior: aggression, targeting, and click rules", () => {
       );
     });
 
-    await page.waitForFunction(
-      () =>
-        window.wormSystem?.worms.some(
-          (w) =>
-            w.active &&
-            !w.isPurple &&
-            w.isRushingToTarget &&
-            Boolean(w.targetSymbol),
-        ),
+    await page.waitForFunction(() =>
+      window.wormSystem?.worms.some(
+        (w) =>
+          w.active &&
+          !w.isPurple &&
+          w.isRushingToTarget &&
+          Boolean(w.targetSymbol),
+      ),
     );
 
     const wormState = await page.evaluate(() => {
@@ -108,7 +109,7 @@ test.describe("Worm behavior: aggression, targeting, and click rules", () => {
     expect(wormState?.targetSymbol).toBeTruthy();
   });
 
-test("green worms die on single tap", async ({ page }) => {
+  test("green worms die on single tap", async ({ page }) => {
     await page.evaluate(() => {
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
@@ -127,7 +128,9 @@ test("green worms die on single tap", async ({ page }) => {
     expect(afterFirstTap).toBeTruthy();
     await page.waitForFunction(
       (wormId) => {
-        const worm = window.wormSystem?.worms.find((candidate) => candidate.id === wormId);
+        const worm = window.wormSystem?.worms.find(
+          (candidate) => candidate.id === wormId,
+        );
         return !worm || worm.active === false;
       },
       afterFirstTap.id,
@@ -140,12 +143,13 @@ test("green worms die on single tap", async ({ page }) => {
       document.dispatchEvent(new CustomEvent("purpleWormTriggered"));
     });
 
-    await page.waitForFunction(
-      () => window.wormSystem?.worms.some((w) => w.active && w.isPurple),
+    await page.waitForFunction(() =>
+      window.wormSystem?.worms.some((w) => w.active && w.isPurple),
     );
 
     const beforeClickCount = await page.evaluate(
-      () => window.wormSystem.worms.filter((w) => w.active && w.isPurple).length,
+      () =>
+        window.wormSystem.worms.filter((w) => w.active && w.isPurple).length,
     );
 
     await dispatchPointerDownOnActiveWorm(page, "(worm) => worm.isPurple");
@@ -166,5 +170,4 @@ test("green worms die on single tap", async ({ page }) => {
     expect(afterClickState.purpleCount).toBeGreaterThan(beforeClickCount);
     expect(afterClickState.totalActive).toBeGreaterThanOrEqual(2);
   });
-
 });

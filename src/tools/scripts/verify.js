@@ -36,7 +36,7 @@ async function main() {
     eslint: checkESLint(ROOT),
     packageJson: checkPackageJson(ROOT),
     documentation: checkDocumentation(ROOT),
-    lineLimit200: checkLineLimits(ROOT, "baseline"),
+    lineLimitPolicy: checkLineLimits(ROOT, "baseline"),
   };
 
   generateStats(ROOT);
