@@ -51,4 +51,5 @@ test-results.competition.json
 # Snapshots (if not needed in repo)
 # .snapshots/
 
-.vscode/settings.json
+# Local one-off debug probes
+.tmp-*

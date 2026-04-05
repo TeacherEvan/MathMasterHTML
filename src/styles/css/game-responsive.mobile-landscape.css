@@ -75,7 +75,8 @@ body.res-mobile #problem-container {
 }
 
 body.res-mobile #lock-display {
-  top: 130px !important;
+  /* Keep lock clear of the taller compact problem card once Orbitron loads. */
+  top: 144px !important;
   right: 8px;
   bottom: 8px;
   left: 8px !important;

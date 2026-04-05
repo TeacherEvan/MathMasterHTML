@@ -72,7 +72,13 @@
       return;
     }
 
-    document.addEventListener("DOMContentLoaded", handleDOMContentLoaded);
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", handleDOMContentLoaded, {
+        once: true,
+      });
+    } else {
+      handleDOMContentLoaded();
+    }
     window.addEventListener("resize", handleResize);
     document.addEventListener("visibilitychange", handleVisibilityChange);
     document.addEventListener("keydown", handleKeydown);

@@ -1,0 +1,159 @@
+/* Welcome page emblem/logo layer extracted to keep line-limit scope tight. */
+
+.logo-container {
+  margin: 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+}
+
+.logo-circle {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(196px, 27vw, 272px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid rgba(170, 255, 214, 0.2);
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(255, 255, 255, 0.07),
+      transparent 44%
+    ),
+    radial-gradient(
+      circle at center,
+      rgba(16, 40, 30, 0.96),
+      rgba(6, 12, 10, 0.94)
+    );
+  box-shadow:
+    0 0 0 1px rgba(123, 255, 188, 0.16),
+    0 18px 48px rgba(0, 0, 0, 0.42),
+    0 0 46px rgba(36, 198, 141, 0.24);
+  transition:
+    box-shadow 320ms ease,
+    transform 320ms ease,
+    border-color 320ms ease;
+}
+
+.logo-circle::before,
+.logo-circle::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(170, 255, 214, 0.12);
+}
+
+.logo-circle::before {
+  inset: 10px;
+  border-style: solid;
+  box-shadow: inset 0 0 18px rgba(122, 255, 187, 0.12);
+  animation: hero-orbit 16s linear infinite;
+}
+
+.logo-circle::after {
+  inset: 26px;
+  border-color: rgba(255, 224, 143, 0.18);
+  animation: hero-orbit 20s linear infinite reverse;
+}
+
+.logo-content {
+  position: relative;
+  width: 74%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 45%),
+    linear-gradient(180deg, rgba(10, 28, 21, 0.98), rgba(8, 15, 12, 0.9));
+  box-shadow:
+    inset 0 0 0 1px rgba(207, 255, 227, 0.06),
+    inset 0 -16px 24px rgba(0, 0, 0, 0.28);
+}
+
+.logo-content::before,
+.logo-content::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.logo-content::before {
+  width: 68%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 224, 143, 0.85),
+    transparent
+  );
+  box-shadow: 0 0 12px rgba(255, 224, 143, 0.25);
+}
+
+.logo-content::after {
+  width: 40%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid rgba(122, 255, 187, 0.18);
+}
+
+.logo-symbol {
+  position: relative;
+  z-index: 1;
+  font-family: "Orbitron", monospace;
+  font-size: clamp(3.2rem, 8vw, 5rem);
+  line-height: 1;
+  color: #f4ffef;
+  text-shadow:
+    0 0 18px rgba(255, 255, 255, 0.14),
+    0 0 28px rgba(255, 224, 143, 0.28);
+}
+
+.logo-variables {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.logo-variables span {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 224, 143, 0.26);
+  background: rgba(9, 18, 14, 0.88);
+  color: #ffe9ae;
+  font-family: "Orbitron", monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: 0 0 18px rgba(255, 224, 143, 0.12);
+}
+
+.variable-x {
+  top: 16%;
+  left: 9%;
+}
+
+.variable-y {
+  right: 9%;
+  bottom: 16%;
+}
+
+@keyframes hero-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
