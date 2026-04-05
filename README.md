@@ -12,6 +12,7 @@ Math Master is a browser-native algebra game with a Matrix-inspired presentation
 - Event-driven gameplay built on DOM `CustomEvent` contracts
 - Score/timer HUD with persisted local profile and scoreboard data
 - Playwright automation for browser, mobile, competition, and performance checks
+- Polished welcome and level-select flows backed by focused interaction, layout, boundary, and reduced-motion coverage
 
 ## Quick start
 
@@ -47,6 +48,7 @@ Useful focused checks:
 npx playwright test tests/worm-rewards.spec.js tests/timer.spec.js --project=chromium
 npx playwright test tests/performance-bench.spec.js --project=chromium
 npx playwright test tests/perf-scenarios.spec.js --project=chromium --project=pixel-7
+npx playwright test tests/game-mobile-layout.spec.js tests/welcome-page-redesign.spec.js tests/welcome-page-motion.spec.js tests/level-select-scoreboard.spec.js tests/level-select-polish.spec.js tests/level-select-interactions.spec.js tests/ui-boundary.spec.js
 ```
 
 ## How to play

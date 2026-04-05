@@ -33,6 +33,21 @@ function expectDefined(value) {
   return /** @type {T} */ (value);
 }
 
+/**
+ * @param {{ x: number; y: number; width: number; height: number }} cardBox
+ * @param {{ x: number; y: number; width: number; height: number }} buttonBox
+ */
+function expectButtonWithinCard(cardBox, buttonBox) {
+  expect(buttonBox.width).toBeGreaterThanOrEqual(120);
+  expect(buttonBox.x).toBeGreaterThanOrEqual(cardBox.x - 1);
+  expect(buttonBox.x + buttonBox.width).toBeLessThanOrEqual(
+    cardBox.x + cardBox.width + 1,
+  );
+  expect(buttonBox.y + buttonBox.height).toBeLessThanOrEqual(
+    cardBox.y + cardBox.height + 1,
+  );
+}
+
 test.describe("Level select polish", () => {
   test("keeps the hero and route cards visually readable after polish", async ({
     page,
@@ -109,35 +124,52 @@ test.describe("Level select polish", () => {
       waitUntil: "domcontentloaded",
     });
 
+    await waitForCardsToSettle(page);
+
     const header = page.locator(".header");
     const levelsGrid = page.locator(".levels-grid");
     const cards = page.locator(".level-card");
     const firstCard = cards.nth(0);
     const secondCard = cards.nth(1);
-    const cta = firstCard.locator(".level-button");
+    const thirdCard = cards.nth(2);
+    const ctas = cards.locator(".level-button");
 
-    const [gridTemplateColumns, firstCardBox, secondCardBox, ctaBox] =
-      await Promise.all([
-        levelsGrid.evaluate(
-          (element) => window.getComputedStyle(element).gridTemplateColumns,
-        ),
-        firstCard.boundingBox(),
-        secondCard.boundingBox(),
-        cta.boundingBox(),
-      ]);
+    const [
+      gridTemplateColumns,
+      firstCardBox,
+      secondCardBox,
+      thirdCardBox,
+      firstCtaBox,
+      secondCtaBox,
+      thirdCtaBox,
+    ] = await Promise.all([
+      levelsGrid.evaluate(
+        (element) => window.getComputedStyle(element).gridTemplateColumns,
+      ),
+      firstCard.boundingBox(),
+      secondCard.boundingBox(),
+      thirdCard.boundingBox(),
+      ctas.nth(0).boundingBox(),
+      ctas.nth(1).boundingBox(),
+      ctas.nth(2).boundingBox(),
+    ]);
 
     const resolvedFirstCardBox = expectDefined(firstCardBox);
     const resolvedSecondCardBox = expectDefined(secondCardBox);
-    const resolvedCtaBox = expectDefined(ctaBox);
+    const resolvedThirdCardBox = expectDefined(thirdCardBox);
+    const resolvedFirstCtaBox = expectDefined(firstCtaBox);
+    const resolvedSecondCtaBox = expectDefined(secondCtaBox);
+    const resolvedThirdCtaBox = expectDefined(thirdCtaBox);
 
     expect(gridTemplateColumns).not.toContain(" ");
     expect(resolvedSecondCardBox.y).toBeGreaterThanOrEqual(
       resolvedFirstCardBox.y + resolvedFirstCardBox.height - 2,
     );
-    expect(resolvedCtaBox.width).toBeGreaterThanOrEqual(120);
-    expect(resolvedCtaBox.x).toBeGreaterThanOrEqual(resolvedFirstCardBox.x - 1);
-    expect(resolvedCtaBox.x + resolvedCtaBox.width).toBeLessThanOrEqual(
-      resolvedFirstCardBox.x + resolvedFirstCardBox.width + 1,
+    expect(resolvedThirdCardBox.y).toBeGreaterThanOrEqual(
+      resolvedSecondCardBox.y + resolvedSecondCardBox.height - 2,
     );
+    expectButtonWithinCard(resolvedFirstCardBox, resolvedFirstCtaBox);
+    expectButtonWithinCard(resolvedSecondCardBox, resolvedSecondCtaBox);
+    expectButtonWithinCard(resolvedThirdCardBox, resolvedThirdCtaBox);
   });
 });

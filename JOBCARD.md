@@ -1,6 +1,14 @@
 # JOBCARD
 
-## Latest update (2026-03-31)
+## Latest update (2026-04-06)
+
+- Completed the mobile gameplay / welcome / level-select review-response pass on `main` and kept the implementation aligned with the shared compact/mobile contract.
+- Hardened the focused Playwright UI lane by expanding `tests/level-select-polish.spec.js`, adding `tests/level-select-interactions.spec.js`, and adding `tests/welcome-page-motion.spec.js`.
+- Replaced synthetic welcome-page click dispatch in `tests/welcome-page-redesign.spec.js` with real browser click paths and stabilized the scoreboard/local-navigation assertions across slower/mobile projects.
+- Revalidated the review-response suite (`65 passed`), `npm run verify`, and `npm run test:competition:smoke` after the changes.
+- Refreshed `README.md` and `.github/copilot-instructions.md` so the living docs reflect the current focused validation lane and the `src/pages/` runtime-entrypoint reality.
+
+## Previous update (2026-03-31)
 
 - Completed a documentation spring clean on `main` using an isolated worktree so an existing staged feature-branch test change stayed untouched.
 - Consolidated the repo down to a smaller living doc set centered on `README.md`, the `Docs/SystemDocs/*` core guides, the worm guides, the competition docs, and `JOBCARD.md`.
@@ -28,4 +36,5 @@
 - This repo uses `npm` scripts for local run/test/verify workflows.
 - Playwright is the active browser QA stack.
 - Event-driven architecture remains the integration rule across runtime modules.
+- Root HTML files remain redirect entrypoints; active runtime pages live under `src/pages/`.
 - Panel A and B font sizing still belongs in `src/scripts/display-manager.js`, not CSS overrides.

@@ -7,6 +7,7 @@ Educational math game with Matrix-themed UI where players solve algebra equation
 - The game runtime is browser-native and script-tag driven.
 - `npm` **is used in this repository** for local serving, linting, verification, type-checking, and Playwright test workflows.
 - Playwright is the active browser automation stack.
+- Active runtime HTML lives in `src/pages/`; root HTML files are kept as redirect entrypoints.
 - If workspace tasks mention Maven or other non-Node commands for this repo, treat them as stale until corrected.
 
 ## Quick Start
@@ -19,6 +20,7 @@ npm install
 npm start  # or: python -m http.server 8000
 
 # Open: http://localhost:8000/game.html?level=beginner
+# Or direct runtime page: http://localhost:8000/src/pages/game.html?level=beginner
 # Press 'P' to toggle performance monitor
 
 # Verify code quality before committing
@@ -163,6 +165,7 @@ Do not collapse helper responsibilities back into large monolith files unless th
 - [ ] `npm run verify` passes
 - [ ] `npm run typecheck` passes
 - [ ] `npm run test:competition:smoke` passes
+- [ ] Focused mobile/welcome/level-select lane passes (`tests/game-mobile-layout.spec.js`, `tests/welcome-page-redesign.spec.js`, `tests/welcome-page-motion.spec.js`, `tests/level-select-scoreboard.spec.js`, `tests/level-select-polish.spec.js`, `tests/level-select-interactions.spec.js`, `tests/ui-boundary.spec.js`)
 - [ ] All 3 levels: `?level=beginner|warrior|master`
 - [ ] Press 'P' - FPS should be 55-60, DOM queries < 150/sec
 - [ ] Worm spawning on line completion

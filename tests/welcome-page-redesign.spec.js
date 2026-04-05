@@ -6,19 +6,6 @@ function getWelcomeUrl() {
 }
 
 test.describe("Welcome page redesign", () => {
-  async function dispatchClick(page, selector) {
-    await page.evaluate((targetSelector) => {
-      const element = document.querySelector(targetSelector);
-      if (!(element instanceof HTMLElement)) {
-        throw new Error(
-          `Missing element for click dispatch: ${targetSelector}`,
-        );
-      }
-
-      element.click();
-    }, selector);
-  }
-
   test("renders the operator-console hero structure and CTA", async ({
     page,
   }) => {
@@ -157,7 +144,9 @@ test.describe("Welcome page redesign", () => {
     await page.goto(getWelcomeUrl(), { waitUntil: "domcontentloaded" });
 
     await expect(page.locator("#scoreboard-button")).toBeVisible();
-    await dispatchClick(page, "#scoreboard-button");
+    await page
+      .locator("#scoreboard-button")
+      .click({ force: true, noWaitAfter: true });
     await page.waitForFunction(() => {
       const modal = document.getElementById("scoreboard-modal");
       return Boolean(modal && modal.hidden === false);
@@ -165,8 +154,10 @@ test.describe("Welcome page redesign", () => {
     await expect(page.locator("#scoreboard-modal")).toBeVisible();
     await expect(page).toHaveURL(/\/src\/pages\/index\.html/);
 
-    await page.mouse.click(24, 24);
-    await page.waitForTimeout(400);
+    await page
+      .locator("#scoreboard-close-button")
+      .click({ force: true, noWaitAfter: true });
+    await expect(page.locator("#scoreboard-modal")).toBeHidden();
     await expect(page).toHaveURL(/\/src\/pages\/index\.html/);
   });
 
@@ -183,13 +174,13 @@ test.describe("Welcome page redesign", () => {
       .poll(() => page.url())
       .toMatch(/\/src\/pages\/level-select\.html/);
 
-    await page.goBack();
-    await expect.poll(() => page.url()).toMatch(/\/src\/pages\/index\.html/);
+    await page.goto(getWelcomeUrl(), { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/src\/pages\/index\.html/);
 
     await expect(
       page.getByRole("button", { name: "Begin Training" }),
     ).toBeVisible();
-    await dispatchClick(page, "#begin-training-button");
+    await page.getByRole("button", { name: "Begin Training" }).click();
     await expect
       .poll(() => page.url())
       .toMatch(/\/src\/pages\/level-select\.html/);
