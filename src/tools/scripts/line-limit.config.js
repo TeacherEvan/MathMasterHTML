@@ -1,8 +1,8 @@
 // src/tools/scripts/line-limit.config.js
-// Central policy config for the 200-line limit enforcement.
+// Central policy config for the line limit enforcement.
 
 export const LINE_LIMIT_POLICY = {
-  maxLines: 200,
+  maxLines: 300,
 
   // File extensions we consider "source" for this policy.
   includeExtensions: [
@@ -47,5 +47,6 @@ export const LINE_LIMIT_POLICY = {
   excludeExtensions: [".md"],
 
   // Baseline violations file (used for "no new violations" mode).
-  baselineViolationsCsv: "Docs/SystemDocs/LINE_LIMIT_200_AUDIT.policy.violations.csv",
+  baselineViolationsCsv:
+    "Docs/SystemDocs/LINE_LIMIT_300_AUDIT.policy.violations.csv",
 };

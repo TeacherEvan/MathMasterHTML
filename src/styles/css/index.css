@@ -1,7 +1,5 @@
 /* index.css - Import hub (keeps existing references stable) */
 
-@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap");
-
 @import url("/src/styles/css/index.core.css");
 @import url("/src/styles/css/index.matrix.css");
 @import url("/src/styles/css/index.hero.css");

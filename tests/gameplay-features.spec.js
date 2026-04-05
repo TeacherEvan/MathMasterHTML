@@ -15,7 +15,9 @@ import { expect, test } from "@playwright/test";
 // ── helpers ─────────────────────────────────────────────────────────────────
 
 async function startGame(page) {
-  await page.goto("/game.html?level=beginner");
+  await page.goto("/game.html?level=beginner", {
+    waitUntil: "domcontentloaded",
+  });
   const startBtn = page.locator("#start-game-btn");
   const howToPlayModal = page.locator("#how-to-play-modal");
   await expect(startBtn).toBeVisible({ timeout: 10000 });
@@ -471,11 +473,35 @@ test.describe("Row Reset — Worm Steals Blue Symbol", () => {
   test("rowResetByWorm event fires when a revealed symbol is stolen", async ({
     page,
   }) => {
-    await revealSymbols(page);
-
-    // Listen for the row reset event
     const gotEvent = await page.evaluate(() => {
+      const revealSymbolsInPage = (count = 1) => {
+        let dispatches = 0;
+        for (let i = 0; i < count; i++) {
+          const stepIndex =
+            window.GameProblemManager?.currentSolutionStepIndex ?? 0;
+          const nextHiddenSymbol = document.querySelector(
+            `[data-step-index="${stepIndex}"].hidden-symbol`,
+          );
+          if (!nextHiddenSymbol?.textContent) continue;
+          document.dispatchEvent(
+            new CustomEvent("symbolClicked", {
+              detail: { symbol: nextHiddenSymbol.textContent },
+            }),
+          );
+          dispatches++;
+        }
+        return dispatches;
+      };
+
       return new Promise((resolve) => {
+        const dispatches = revealSymbolsInPage(1);
+        if (dispatches === 0) {
+          resolve(null);
+          return;
+        }
+
+        window.wormSystem?.invalidateSymbolCache?.();
+
         const timeout = setTimeout(() => resolve(false), 8000);
         document.addEventListener(
           "rowResetByWorm",
@@ -486,11 +512,10 @@ test.describe("Row Reset — Worm Steals Blue Symbol", () => {
           { once: true },
         );
 
-        // Trigger steal by calling stealSymbol directly on a mock worm
         const revealedSymbols = document.querySelectorAll(".revealed-symbol");
         if (revealedSymbols.length === 0) {
           clearTimeout(timeout);
-          resolve(null); // skip – no revealed symbols
+          resolve(null);
           return;
         }
 
@@ -533,9 +558,32 @@ test.describe("Row Reset — Worm Steals Blue Symbol", () => {
   test("after a blue steal, revealed symbols in the row become hidden again", async ({
     page,
   }) => {
-    await revealSymbols(page, 2);
-
     const result = await page.evaluate(() => {
+      const revealSymbolsInPage = (count = 1) => {
+        let dispatches = 0;
+        for (let i = 0; i < count; i++) {
+          const stepIndex =
+            window.GameProblemManager?.currentSolutionStepIndex ?? 0;
+          const nextHiddenSymbol = document.querySelector(
+            `[data-step-index="${stepIndex}"].hidden-symbol`,
+          );
+          if (!nextHiddenSymbol?.textContent) continue;
+          document.dispatchEvent(
+            new CustomEvent("symbolClicked", {
+              detail: { symbol: nextHiddenSymbol.textContent },
+            }),
+          );
+          dispatches++;
+        }
+        return dispatches;
+      };
+
+      if (revealSymbolsInPage(2) === 0) {
+        return null;
+      }
+
+      window.wormSystem?.invalidateSymbolCache?.();
+
       const revealedBefore = document.querySelectorAll(".revealed-symbol");
       if (revealedBefore.length === 0) return null;
 

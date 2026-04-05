@@ -52,10 +52,10 @@ export function runCli() {
   const newCount = result.newViolations.length;
 
   console.log("\n==================================================");
-  console.log("  LINE LIMIT (200) CHECK");
+  console.log(`  LINE LIMIT (${LINE_LIMIT_POLICY.maxLines}) CHECK`);
   console.log("==================================================\n");
   console.log(`Mode: ${mode}${useBaseline ? " (no-new-violations)" : ""}`);
-  console.log(`Violations (>200): ${total}`);
+  console.log(`Violations (>${LINE_LIMIT_POLICY.maxLines}): ${total}`);
 
   if (mode === "baseline") {
     console.log(`New violations: ${newCount}`);

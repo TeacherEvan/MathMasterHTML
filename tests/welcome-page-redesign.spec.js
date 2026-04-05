@@ -42,6 +42,104 @@ test.describe("Welcome page redesign", () => {
     await expect(page.locator(".logo-container figcaption")).toHaveText(
       "Math Master symbol: scale and variables",
     );
+
+    const viewport = page.viewportSize();
+    expect(viewport).not.toBeNull();
+
+    const header = page.locator(".welcome-header");
+    const title = page.locator(".welcome-header .main-title");
+    const logoCircle = page.locator(".logo-circle");
+    const quote = page.locator(".quote");
+    const buttons = page.locator(".button-container");
+    const hint = page.locator(".welcome-hint");
+    const credit = page.locator(".creator-credit");
+    const heroMain = page.locator("main[role='main']");
+
+    const [
+      headerBox,
+      titleBox,
+      logoBox,
+      quoteBox,
+      buttonsBox,
+      hintBox,
+      creditBox,
+      heroMainBox,
+    ] = await Promise.all([
+      header.boundingBox(),
+      title.boundingBox(),
+      logoCircle.boundingBox(),
+      quote.boundingBox(),
+      buttons.boundingBox(),
+      hint.boundingBox(),
+      credit.boundingBox(),
+      heroMain.boundingBox(),
+    ]);
+
+    const normalizeBox = (box) =>
+      box
+        ? {
+            ...box,
+            top: box.y,
+            right: box.x + box.width,
+            bottom: box.y + box.height,
+            left: box.x,
+          }
+        : null;
+
+    const normalizedTitleBox = normalizeBox(titleBox);
+    const normalizedLogoBox = normalizeBox(logoBox);
+    const normalizedQuoteBox = normalizeBox(quoteBox);
+    const normalizedButtonsBox = normalizeBox(buttonsBox);
+    const normalizedHintBox = normalizeBox(hintBox);
+    const normalizedCreditBox = normalizeBox(creditBox);
+    const normalizedHeroMainBox = normalizeBox(heroMainBox);
+
+    expect(headerBox).toBeTruthy();
+    expect(titleBox).toBeTruthy();
+    expect(logoBox).toBeTruthy();
+    expect(quoteBox).toBeTruthy();
+    expect(buttonsBox).toBeTruthy();
+    expect(hintBox).toBeTruthy();
+    expect(creditBox).toBeTruthy();
+    expect(heroMainBox).toBeTruthy();
+
+    const [headerTextAlign, logoShadow] = await Promise.all([
+      header.evaluate((element) => window.getComputedStyle(element).textAlign),
+      logoCircle.evaluate(
+        (element) => window.getComputedStyle(element).boxShadow,
+      ),
+    ]);
+
+    const viewportCenter = viewport.width / 2;
+    const getCenter = (box) => box.x + box.width / 2;
+
+    expect(headerTextAlign).toBe("center");
+    expect(
+      Math.abs(getCenter(normalizedTitleBox) - viewportCenter),
+    ).toBeLessThanOrEqual(32);
+    expect(
+      Math.abs(getCenter(normalizedLogoBox) - viewportCenter),
+    ).toBeLessThanOrEqual(32);
+    expect(
+      Math.abs(getCenter(normalizedQuoteBox) - viewportCenter),
+    ).toBeLessThanOrEqual(36);
+    expect(normalizedHeroMainBox.bottom).toBeLessThanOrEqual(
+      viewport.height + 8,
+    );
+    expect(
+      normalizedQuoteBox.top - normalizedLogoBox.bottom,
+    ).toBeGreaterThanOrEqual(24);
+    expect(
+      normalizedButtonsBox.top - normalizedQuoteBox.bottom,
+    ).toBeGreaterThanOrEqual(20);
+    expect(
+      normalizedHintBox.top - normalizedButtonsBox.bottom,
+    ).toBeGreaterThanOrEqual(16);
+    expect(
+      normalizedCreditBox.top - normalizedHintBox.bottom,
+    ).toBeGreaterThanOrEqual(12);
+    expect(normalizedLogoBox.width).toBeGreaterThanOrEqual(180);
+    expect(logoShadow).not.toBe("none");
   });
 
   test("keeps scoreboard interactions local while navigation is restricted to the CTA", async ({

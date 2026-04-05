@@ -1,10 +1,14 @@
 // js/game-symbol-handler.stolen.js - Stolen symbol restoration
 console.log("🔤 Game symbol handler stolen module loading...");
 
-(function() {
+(function () {
   if (!window.normalizeSymbol) {
     console.error("❌ normalizeSymbol not loaded");
     return;
+  }
+
+  function invalidateWormSymbolCache() {
+    window.wormSystem?.invalidateSymbolCache?.();
   }
 
   function restoreStolenSymbol({
@@ -32,6 +36,7 @@ console.log("🔤 Game symbol handler stolen module loading...");
         stolenSymbol.classList.add("revealed-symbol");
         stolenSymbol.style.visibility = "visible";
         delete stolenSymbol.dataset.stolen;
+        invalidateWormSymbolCache();
 
         if (wasBlueSymbol) {
           delete stolenSymbol.dataset.wasRevealed;

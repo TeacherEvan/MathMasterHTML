@@ -94,8 +94,8 @@
 
     if (!hasFreshCache) {
       const container =
-        this.solutionContainer ||
         document.getElementById("panel-b") ||
+        this.solutionContainer ||
         this.wormContainer;
       this.cachedContainerRect = container.getBoundingClientRect();
       this.containerRectCacheTime = now;

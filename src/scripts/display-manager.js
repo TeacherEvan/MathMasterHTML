@@ -94,6 +94,19 @@ class DisplayManager {
       DISPLAY_RESOLUTION_CHANGED: "displayResolutionChanged",
     };
     this.currentResolution = null;
+    this.compactViewportConfig = {
+      mobileMaxWidth: 768,
+      compactMaxWidth: 1024,
+      compactMaxHeight: 500,
+      compactLandscapeWidth: 950,
+      compactLandscapeMaxHeight: 600,
+    };
+    this.viewportStateClasses = [
+      "viewport-compact",
+      "viewport-standard",
+      "viewport-portrait",
+      "viewport-landscape",
+    ];
     this.resolutions = {
       "4k": { width: 3840, minWidth: 2560, scale: 1.0, fontSize: "24px" },
       "1440p": { width: 2560, minWidth: 1920, scale: 0.9, fontSize: "20px" },
@@ -110,6 +123,10 @@ class DisplayManager {
 
   init() {
     console.log("🚀 Initializing Display Manager");
+
+    if (navigator.webdriver) {
+      document.body.classList.add("automation");
+    }
 
     // PERFORMANCE: Cache DOM elements once at initialization
     this.cacheDOMElements();
@@ -149,14 +166,98 @@ class DisplayManager {
   detectResolution() {
     const width = window.innerWidth;
     const height = window.innerHeight;
+    const viewportState = this.getViewportState({ width, height });
+
+    if (viewportState.isCompactViewport) {
+      return {
+        name: "mobile",
+        config: this.resolutions.mobile,
+        width,
+        height,
+        ...viewportState,
+      };
+    }
 
     for (const [name, config] of Object.entries(this.resolutions)) {
       if (width >= config.minWidth) {
-        return { name, config, width, height };
+        return {
+          name,
+          config,
+          width,
+          height,
+          ...viewportState,
+          isCompactViewport: false,
+        };
       }
     }
 
-    return { name: "mobile", config: this.resolutions.mobile, width, height };
+    return {
+      name: "mobile",
+      config: this.resolutions.mobile,
+      width,
+      height,
+      ...viewportState,
+    };
+  }
+
+  getViewportState({
+    width = window.innerWidth,
+    height = window.innerHeight,
+  } = {}) {
+    const coarsePointerQuery = window.matchMedia?.(
+      "(hover: none) and (pointer: coarse)",
+    );
+    const hasCoarsePointer = Boolean(coarsePointerQuery?.matches);
+    const {
+      mobileMaxWidth,
+      compactMaxWidth,
+      compactMaxHeight,
+      compactLandscapeWidth,
+      compactLandscapeMaxHeight,
+    } = this.compactViewportConfig;
+    const isLandscape = width >= height;
+    const isPortrait = height > width;
+    const isCompactLandscapeTouch =
+      hasCoarsePointer &&
+      isLandscape &&
+      width <= compactLandscapeWidth &&
+      height <= compactLandscapeMaxHeight;
+    const isCompactShortViewport =
+      width <= compactMaxWidth && height <= compactMaxHeight;
+    const isCompactViewport =
+      width <= mobileMaxWidth ||
+      isCompactLandscapeTouch ||
+      isCompactShortViewport;
+
+    return {
+      width,
+      height,
+      hasCoarsePointer,
+      isLandscape,
+      isPortrait,
+      isCompactViewport,
+      isCompactLandscapeTouch,
+      isCompactShortViewport,
+      shouldShowRotationOverlay: isCompactViewport && isPortrait,
+    };
+  }
+
+  isCompactViewport(viewport = {}) {
+    return this.getViewportState(viewport).isCompactViewport;
+  }
+
+  updateViewportClasses(detected) {
+    document.body.classList.remove(
+      ...Object.keys(this.resolutions).map((name) => `res-${name}`),
+    );
+    document.body.classList.remove(...this.viewportStateClasses);
+    document.body.classList.add(`res-${detected.name}`);
+    document.body.classList.add(
+      detected.isCompactViewport ? "viewport-compact" : "viewport-standard",
+    );
+    document.body.classList.add(
+      detected.isPortrait ? "viewport-portrait" : "viewport-landscape",
+    );
   }
 
   detectAndApply() {
@@ -171,9 +272,10 @@ class DisplayManager {
     console.log(`📊 Base Font Size: ${detected.config.fontSize}`);
     console.log(`📊 ========================================`);
 
-    // Apply resolution class to body
-    document.body.className = document.body.className.replace(/\bres-\S+/g, "");
-    document.body.classList.add(`res-${detected.name}`); // Apply CSS variables for dynamic scaling
+    // Apply shared viewport/body contract
+    this.updateViewportClasses(detected);
+
+    // Apply CSS variables for dynamic scaling
     document.documentElement.style.setProperty(
       "--display-scale",
       detected.config.scale,
@@ -209,11 +311,7 @@ class DisplayManager {
   }
 
   applyFontSizes(config) {
-    // Determine if we're on mobile (include landscape phones)
-    const isMobile =
-      this.currentResolution.name === "mobile" ||
-      window.innerWidth <= 850 ||
-      window.innerHeight <= 450;
+    const isMobile = this.currentResolution?.isCompactViewport === true;
 
     console.log(`📱 Mobile mode: ${isMobile ? "YES" : "NO"}`);
 
@@ -264,9 +362,7 @@ class DisplayManager {
   }
 
   applySymbolRainAdjustments(config) {
-    // Determine if we're on mobile
-    const isMobile =
-      this.currentResolution.name === "mobile" || window.innerWidth <= 768;
+    const isMobile = this.currentResolution?.isCompactViewport === true;
 
     // Adjust falling symbol sizes
     const style = document.createElement("style");

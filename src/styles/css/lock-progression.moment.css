@@ -1,0 +1,99 @@
+/* Dedicated visual ceremony layer for lock progression moments. */
+
+#lock-display {
+  --lock-moment-accent: rgba(142, 203, 117, 0.72);
+  --lock-moment-glow: rgba(142, 203, 117, 0.28);
+  --lock-moment-scale: 1;
+  --lock-moment-translate-y: 0px;
+}
+
+#lock-display[data-lock-tone="warrior"] {
+  --lock-moment-accent: rgba(199, 164, 76, 0.78);
+  --lock-moment-glow: rgba(199, 164, 76, 0.3);
+}
+
+#lock-display[data-lock-tone="master"] {
+  --lock-moment-accent: rgba(199, 107, 82, 0.84);
+  --lock-moment-glow: rgba(199, 107, 82, 0.34);
+}
+
+#lock-display.is-lock-live .lock-component-wrapper {
+  filter: drop-shadow(0 0 12px var(--lock-moment-glow));
+}
+
+#lock-display .lock-component-wrapper.lock-ceremony-shell {
+  transition:
+    filter 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#lock-display .lock-body--ceremony {
+  transform: translateY(var(--lock-moment-translate-y))
+    scale(var(--lock-moment-scale));
+  transition:
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, filter;
+}
+
+#lock-display[data-lock-moment="arming"] .lock-body--ceremony {
+  --lock-moment-scale: 0.972;
+  --lock-moment-translate-y: 3px;
+  filter: saturate(1.02) brightness(0.98);
+}
+
+#lock-display[data-lock-moment="surge"]
+  .lock-component-wrapper.lock-ceremony-shell {
+  filter: drop-shadow(0 0 16px var(--lock-moment-glow))
+    drop-shadow(
+      0 0 32px color-mix(in srgb, var(--lock-moment-accent) 32%, transparent)
+    );
+}
+
+#lock-display[data-lock-moment="surge"] .lock-body--ceremony {
+  --lock-moment-scale: 1.035;
+  --lock-moment-translate-y: -2px;
+  filter: saturate(1.1) brightness(1.06)
+    drop-shadow(
+      0 0 10px color-mix(in srgb, var(--lock-moment-accent) 32%, transparent)
+    );
+}
+
+#lock-display[data-lock-moment="settled"]
+  .lock-component-wrapper.lock-ceremony-shell {
+  filter: drop-shadow(0 0 12px var(--lock-moment-glow));
+}
+
+#lock-display[data-lock-moment="settled"] .lock-body--ceremony,
+#lock-display[data-lock-moment="settled"] .lock-body {
+  --lock-moment-scale: 1;
+  --lock-moment-translate-y: 0px;
+  filter: none;
+}
+
+#lock-display.is-lock-master .lock-component-wrapper.lock-ceremony-shell {
+  filter: drop-shadow(0 0 16px var(--lock-moment-glow))
+    drop-shadow(
+      0 0 40px color-mix(in srgb, var(--lock-moment-accent) 28%, transparent)
+    );
+}
+
+#lock-display[data-lock-motion="reduced"]
+  .lock-component-wrapper.lock-ceremony-shell,
+#lock-display[data-lock-motion="reduced"] .lock-body--ceremony {
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #lock-display .lock-component-wrapper.lock-ceremony-shell,
+  #lock-display .lock-body--ceremony {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}

@@ -14,7 +14,6 @@ console.log("🔒 LockManager animation helpers loading...");
     SETTLE_DELAY_MS: 520,
     CLEANUP_DELAY_MS: 820,
   };
-
   const LOCK_TONES = {
     BEGINNER: "beginner",
     WARRIOR: "warrior",
@@ -25,12 +24,30 @@ console.log("🔒 LockManager animation helpers loading...");
     console.log(`🔒 Activating lock level ${level}`);
 
     const lockBody = this.container.querySelector(".lock-body");
+    const resolvedTone =
+      this.container.dataset.lockTone || this._resolveLockTone(level);
     if (!lockBody) {
       console.warn("⚠️ Lock body not found for activation");
+      this.currentLockLevel = level;
+      this.container.classList.add("is-lock-live");
+      this.container.dataset.lockLevel = String(level);
+      this.container.dataset.lockTone = resolvedTone;
+      this.container.dataset.lockMoment =
+        this.container.dataset.lockMoment || "settled";
+      this.container.dataset.lockStatus = `Lock phase ${String(level).padStart(2, "0")} engaged`;
+
+      document.dispatchEvent(
+        new CustomEvent("lockLevelUpdated", {
+          detail: {
+            level,
+            tone: this.container.dataset.lockTone,
+            moment: this.container.dataset.lockMoment,
+          },
+        }),
+      );
       return;
     }
 
-    // Remove any previous level-* classes
     for (let lvl = 1; lvl <= 6; lvl += 1) {
       lockBody.classList.remove(`level-${lvl}-active`);
     }
@@ -45,7 +62,7 @@ console.log("🔒 LockManager animation helpers loading...");
       new CustomEvent("lockLevelUpdated", {
         detail: {
           level,
-          tone: this.container.dataset.lockTone || this._resolveLockTone(level),
+          tone: this.container.dataset.lockTone || resolvedTone,
           moment: this.container.dataset.lockMoment || "settled",
         },
       }),
@@ -142,16 +159,11 @@ console.log("🔒 LockManager animation helpers loading...");
       return;
     }
 
-    // Get the current level
     const isMasterLevel = document.body.classList.contains("master-level");
-
-    // Progress calculation differs for Master level vs other levels
     let newLevel;
     if (isMasterLevel) {
-      // In Master level, all 6 lock lines can be triggered
       newLevel = Math.min(6, this.completedLinesCount);
     } else {
-      // For other levels, advance one level per completed line, capped at 3
       newLevel = Math.min(3, this.completedLinesCount);
     }
 
@@ -165,15 +177,10 @@ console.log("🔒 LockManager animation helpers loading...");
       );
       this.currentLockLevel = newLevel;
       this.isLoadingComponent = true;
-
-      // Normalize component filename (handle inconsistent naming)
       const componentName = this.normalizeComponentName(newLevel);
-
       console.log(
         `🔒 Loading component for level ${newLevel}: ${componentName}`,
       );
-
-      // Load the new lock component
       this.loadLockComponent(componentName)
         .then(() => {
           setTimeout(() => {
@@ -184,7 +191,6 @@ console.log("🔒 LockManager animation helpers loading...");
         .catch((error) => {
           console.error(`❌ Failed to load level ${newLevel} lock:`, error);
           this.isLoadingComponent = false;
-          // Fallback to generic animation
           this.activateLockLevel(newLevel);
         });
     }
@@ -195,11 +201,7 @@ console.log("🔒 LockManager animation helpers loading...");
     level,
   ) {
     console.log(`🎨 Triggering level ${level} animation`);
-
-    // Check if we're in master level
     const isMasterLevel = document.body.classList.contains("master-level");
-
-    // In non-master levels, cap at level 3
     if (!isMasterLevel && level > 3) {
       console.log(`⚠️ Capping animation at level 3 (non-master level)`);
       level = 3;
@@ -219,7 +221,6 @@ console.log("🔒 LockManager animation helpers loading...");
         if (isMasterLevel) {
           this.triggerMasterAnimation(lockBody, level);
         } else {
-          // Fallback to warrior animation if somehow reached here in non-master level
           this.triggerWarriorAnimation(lockBody, 3);
         }
         break;
@@ -232,7 +233,6 @@ console.log("🔒 LockManager animation helpers loading...");
     console.log("🎮 Triggering beginner level animation");
     this._applyLockMomentState(lockBody, 1);
   };
-
   proto.triggerWarriorAnimation = function triggerWarriorAnimation(
     lockBody,
     level,
@@ -240,7 +240,6 @@ console.log("🔒 LockManager animation helpers loading...");
     console.log(`🟡 Triggering warrior level ${level} animation`);
     this._applyLockMomentState(lockBody, level);
   };
-
   proto.triggerMasterAnimation = function triggerMasterAnimation(
     lockBody,
     level,
@@ -248,7 +247,6 @@ console.log("🔒 LockManager animation helpers loading...");
     console.log(`🔴 Triggering master level ${level} animation`);
     this._applyLockMomentState(lockBody, level);
   };
-
   proto.triggerGenericAnimation = function triggerGenericAnimation(
     lockBody,
     level,
@@ -258,7 +256,6 @@ console.log("🔒 LockManager animation helpers loading...");
   };
 
   proto.updateProgressIndicators = function updateProgressIndicators(level) {
-    // Update any progress bars or indicators
     const progressBars = this.container.querySelectorAll(
       ".progress-bar, .lock-progress",
     );
@@ -271,7 +268,6 @@ console.log("🔒 LockManager animation helpers loading...");
       bar.style.boxShadow = "0 0 10px rgba(0, 255, 0, 0.5)";
     });
 
-    // Update lock segments
     const segments = this.container.querySelectorAll(".lock-segment");
     segments.forEach((segment, index) => {
       if (index < level) {

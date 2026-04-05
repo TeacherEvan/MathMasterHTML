@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
-
 :root {
   --level-font-body: "Alegreya Sans", "Segoe UI", sans-serif;
   --level-font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
@@ -15,6 +13,9 @@
   --level-brass: #c7a44c;
   --level-ember: #c76b52;
   --level-focus: #edf7dd;
+  --level-panel-shadow: 0 28px 70px rgba(0, 0, 0, 0.34);
+  --level-panel-border: rgba(255, 255, 255, 0.06);
+  --level-hero-width: min(72rem, calc(100vw - 2rem));
 }
 
 * {
@@ -67,6 +68,22 @@ body::before {
     );
 }
 
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.45;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    transparent 18%,
+    transparent 82%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+}
+
 button {
   font: inherit;
 }
@@ -103,13 +120,31 @@ button {
 .header {
   position: relative;
   z-index: 1;
+  width: var(--level-hero-width);
   max-width: 1180px;
   margin: 0 auto;
   padding: clamp(2rem, 4.8vw, 4.5rem) clamp(1rem, 4vw, 2rem) 0;
   display: grid;
-  justify-items: start;
-  gap: 0.65rem;
-  text-align: left;
+  justify-items: center;
+  gap: 0.72rem;
+  text-align: center;
+}
+
+.header::before {
+  content: "";
+  position: absolute;
+  inset: clamp(0.5rem, 2vw, 1rem) clamp(1rem, 5vw, 4rem) auto;
+  height: clamp(11rem, 24vw, 16rem);
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(142, 203, 117, 0.14) 0%,
+    rgba(199, 164, 76, 0.08) 42%,
+    transparent 72%
+  );
+  filter: blur(16px);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .page-kicker {
@@ -145,32 +180,39 @@ button {
 
 .level-select-subtitle {
   margin: 0;
-  max-width: 44ch;
+  max-width: 58ch;
   font-size: clamp(1rem, 1.8vw, 1.08rem);
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--level-text-1);
 }
 
 .header-hint {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.75rem;
-  margin-top: 0.3rem;
+  margin-top: 0.45rem;
 }
 
 .header-hint > span {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   min-height: 2.5rem;
-  padding: 0.65rem 0.9rem;
+  padding: 0.65rem 0.95rem;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.03);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.025) 100%
+  );
   color: var(--level-text-2);
   font-family: var(--level-font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .level-container {
@@ -178,38 +220,38 @@ button {
   z-index: 1;
   max-width: 1180px;
   margin: 0 auto;
-  padding: clamp(1.75rem, 3vw, 2.75rem) clamp(1rem, 4vw, 2rem)
+  padding: clamp(1.75rem, 3vw, 2.9rem) clamp(1rem, 4vw, 2rem)
     clamp(2.25rem, 5vw, 4rem);
   container: level-select / inline-size;
 }
 
 .levels-grid {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(1rem, 2vw, 1.4rem);
-  align-items: start;
+  align-items: stretch;
 }
 
 .level-card {
   --level-accent: var(--level-phosphor);
   --level-accent-soft: rgba(142, 203, 117, 0.18);
   --level-accent-shadow: rgba(142, 203, 117, 0.1);
-  grid-column: span 4;
   position: relative;
   display: grid;
+  grid-template-rows: auto auto auto auto auto 1fr auto;
   gap: 1rem;
   align-content: start;
   min-height: 100%;
   padding: clamp(1.35rem, 2.3vw, 1.95rem);
   border-radius: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--level-panel-border);
   background: linear-gradient(
     180deg,
     rgba(29, 34, 30, 0.98) 0%,
     rgba(17, 21, 19, 0.98) 100%
   );
   box-shadow:
-    0 28px 70px rgba(0, 0, 0, 0.34),
+    var(--level-panel-shadow),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
   overflow: hidden;
   cursor: pointer;
@@ -236,8 +278,8 @@ button {
 .level-card::after {
   content: "";
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
+  inset: 1px;
+  border-radius: calc(28px - 1px);
   border: 1px solid color-mix(in srgb, var(--level-accent) 20%, transparent);
   pointer-events: none;
 }
@@ -261,14 +303,6 @@ button {
     0 34px 90px rgba(0, 0, 0, 0.46),
     0 0 0 1px color-mix(in srgb, var(--level-accent) 18%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.level-card:nth-child(2) {
-  margin-top: 0.9rem;
-}
-
-.level-card:nth-child(3) {
-  margin-top: 1.8rem;
 }
 
 .level-easy {
@@ -307,13 +341,19 @@ button {
   border-radius: 1rem;
   border: 1px solid
     color-mix(in srgb, var(--level-accent) 40%, rgba(255, 255, 255, 0.08));
-  background: rgba(255, 255, 255, 0.03);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.025) 100%
+  );
   color: var(--level-accent);
   font-family: var(--level-font-mono);
   font-size: 0.92rem;
   font-weight: 600;
   letter-spacing: 0.18em;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 0 1px color-mix(in srgb, var(--level-accent) 10%, transparent);
 }
 
 .level-title {
@@ -328,7 +368,6 @@ button {
 
 .level-description {
   margin: 0;
-  max-width: 32ch;
   color: var(--level-text-1);
   font-size: clamp(0.98rem, 1.4vw, 1.06rem);
   line-height: 1.68;
@@ -336,7 +375,7 @@ button {
 
 .level-stats {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
   margin: 0.2rem 0 0;
 }
@@ -344,10 +383,17 @@ button {
 .stat {
   display: grid;
   gap: 0.16rem;
+  align-content: start;
+  min-height: 100%;
   padding: 0.84rem 0.9rem;
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.025);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.045) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .stat-value {
@@ -355,6 +401,7 @@ button {
   font-size: clamp(1.04rem, 1.8vw, 1.28rem);
   font-weight: 600;
   color: var(--level-text-0);
+  overflow-wrap: anywhere;
 }
 
 .stat-label {
@@ -369,6 +416,7 @@ button {
 .progress-container {
   display: grid;
   gap: 0.45rem;
+  align-self: end;
 }
 
 .progress-label {
@@ -402,13 +450,22 @@ button {
 }
 
 .level-button {
-  justify-self: start;
-  min-height: 2.95rem;
+  justify-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  width: 100%;
+  margin-top: auto;
   padding: 0.92rem 1.15rem;
   border-radius: 999px;
   border: 1px solid
     color-mix(in srgb, var(--level-accent) 35%, rgba(255, 255, 255, 0.08));
-  background: rgba(255, 255, 255, 0.03);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--level-accent) 14%, rgba(255, 255, 255, 0.05)) 0%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
   color: var(--level-text-0);
   font-family: var(--level-font-mono);
   font-size: 0.74rem;
@@ -420,7 +477,8 @@ button {
     transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
     border-color 220ms cubic-bezier(0.16, 1, 0.3, 1),
     color 220ms cubic-bezier(0.16, 1, 0.3, 1),
-    background 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    background 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .level-button:hover,
@@ -433,6 +491,8 @@ button {
     var(--level-accent) 12%,
     rgba(255, 255, 255, 0.03)
   );
+  box-shadow: 0 12px 28px
+    color-mix(in srgb, var(--level-accent) 12%, transparent);
 }
 
 .level-button:active {
@@ -586,7 +646,7 @@ button {
 .level-locked:hover {
   transform: none !important;
   box-shadow:
-    0 28px 70px rgba(0, 0, 0, 0.34),
+    var(--level-panel-shadow),
     inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
 }
 
@@ -604,24 +664,18 @@ button {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .level-card {
-    grid-column: auto;
-    margin-top: 0;
-  }
-
   .level-card:last-child {
     grid-column: 1 / -1;
+  }
+
+  .level-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @container level-select (max-width: 980px) {
   .levels-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .level-card {
-    grid-column: auto;
-    margin-top: 0;
   }
 
   .level-card:last-child {
@@ -652,12 +706,6 @@ button {
   .reset-progress-btn {
     width: 100%;
   }
-
-  .back-button,
-  .reset-progress-btn,
-  .level-button {
-    justify-content: center;
-  }
 }
 
 @media (max-width: 760px) {
@@ -676,11 +724,10 @@ button {
   .level-card,
   .level-card:last-child {
     grid-column: auto;
-    margin-top: 0;
   }
 
   .level-stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .navigation {
@@ -705,11 +752,29 @@ button {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 560px) {
   .header {
-    gap: 0.5rem;
+    gap: 0.56rem;
   }
 
+  .level-select-subtitle {
+    max-width: 34ch;
+  }
+
+  .header-hint {
+    width: min(100%, 26rem);
+  }
+
+  .header-hint > span {
+    width: 100%;
+  }
+
+  .level-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
   .main-title {
     letter-spacing: 0.18em;
   }

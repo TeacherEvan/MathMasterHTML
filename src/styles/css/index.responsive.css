@@ -1,27 +1,51 @@
 /* Responsive Design */
+.button-container .scoreboard-button {
+  margin-top: 0;
+}
+
+@media (max-width: 960px) {
+  body.welcome-page {
+    padding-inline: 20px;
+  }
+
+  .welcome-container {
+    width: min(100%, 900px);
+  }
+}
+
 @media (max-width: 768px) {
+  body.welcome-page {
+    overflow-y: auto;
+    height: auto;
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .welcome-header {
+    gap: 10px;
+    padding-top: 2px;
+  }
+
+  .welcome-container {
+    max-height: none;
+    padding: 22px 18px 26px;
+    border-radius: 24px;
+    gap: 18px;
+  }
+
   .button-container {
     flex-direction: column;
-    width: 100%;
+    width: min(100%, 320px);
   }
 
   .action-button {
     width: 100%;
-    max-width: 300px;
+    min-width: 0;
+    max-width: none;
   }
 
   .logo-circle {
-    width: 80px;
-    height: 80px;
-  }
-
-  .logo-circle::before {
-    width: 40px;
-    height: 40px;
-  }
-
-  .logo-circle::after {
-    font-size: 2rem;
+    width: min(72vw, 240px);
   }
 
   .scoreboard-summary-grid,
@@ -35,5 +59,186 @@
 
   .scoreboard-modal-content {
     padding: 20px;
+  }
+}
+
+@media (max-height: 760px) {
+  body.welcome-page {
+    padding: 20px 20px 16px;
+    gap: 6px;
+  }
+
+  .welcome-header {
+    gap: 6px;
+  }
+
+  .page-kicker {
+    font-size: 0.68rem;
+    letter-spacing: 0.28em;
+  }
+
+  .main-title {
+    font-size: clamp(2.45rem, 6vw, 4.2rem);
+  }
+
+  .subtitle {
+    font-size: clamp(0.92rem, 1.8vw, 1.15rem);
+    letter-spacing: 0.16em;
+  }
+
+  .welcome-container {
+    max-height: calc(100vh - 98px);
+    gap: 12px;
+    padding: 16px 22px 18px;
+  }
+
+  .logo-circle {
+    width: clamp(184px, 22vw, 212px);
+  }
+
+  .quote {
+    margin-top: 12px;
+    padding: 14px 18px;
+  }
+
+  .quote p {
+    font-size: clamp(1rem, 1.9vw, 1.18rem);
+  }
+
+  .button-container {
+    margin-top: 8px;
+    gap: 10px;
+  }
+
+  .button-container .scoreboard-button {
+    margin-top: 0;
+  }
+
+  .action-button {
+    padding: 12px 18px;
+    min-width: 196px;
+    font-size: 0.88rem;
+  }
+
+  .welcome-hint {
+    margin-top: 4px;
+    font-size: 0.76rem;
+  }
+
+  .creator-credit {
+    font-size: 0.74rem;
+  }
+}
+
+@media (max-height: 520px) {
+  body.welcome-page {
+    padding: 8px 16px 10px;
+    gap: 0;
+  }
+
+  .welcome-header {
+    gap: 4px;
+    padding-top: 0;
+  }
+
+  .page-kicker {
+    font-size: 0.58rem;
+    letter-spacing: 0.24em;
+  }
+
+  .main-title {
+    font-size: clamp(1.9rem, 5.8vw, 3.35rem);
+  }
+
+  .subtitle {
+    font-size: clamp(0.78rem, 1.6vw, 1rem);
+    letter-spacing: 0.14em;
+  }
+
+  .welcome-container {
+    max-height: calc(100vh - 82px);
+    gap: 8px;
+    padding: 10px 16px 12px;
+    border-radius: 22px;
+  }
+
+  .logo-circle {
+    width: 180px;
+  }
+
+  .logo-variables span {
+    min-width: 28px;
+    min-height: 28px;
+    font-size: 0.88rem;
+  }
+
+  .quote {
+    margin-top: 28px;
+    padding: 12px 16px;
+  }
+
+  .quote p {
+    font-size: clamp(0.92rem, 1.8vw, 1.08rem);
+    line-height: 1.32;
+  }
+
+  .quote {
+    margin-top: 16px;
+  }
+
+  .quote footer {
+    margin-top: 8px;
+    font-size: 0.76rem;
+  }
+
+  .button-container {
+    margin-top: 12px;
+    gap: 8px;
+  }
+
+  .button-container .scoreboard-button {
+    margin-top: 0;
+  }
+
+  .action-button {
+    min-width: 188px;
+    padding: 11px 18px;
+    font-size: 0.84rem;
+  }
+
+  .welcome-hint,
+  .creator-credit {
+    font-size: 0.72rem;
+  }
+
+  .welcome-hint {
+    margin-top: 8px;
+  }
+
+  .creator-credit {
+    margin-top: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-title,
+  .subtitle,
+  .logo-circle,
+  .logo-circle::before,
+  .logo-circle::after,
+  .math-symbol,
+  .matrix-column,
+  .action-button {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .logo-circle,
+  .logo-circle::before,
+  .logo-circle::after,
+  .action-button:hover,
+  .action-button:focus-visible,
+  .action-button.is-activating {
+    transform: none !important;
   }
 }

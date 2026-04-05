@@ -2,6 +2,10 @@
 console.log("🎯 GameSymbolHelpers loading...");
 
 (function attachGameSymbolHelpers() {
+  function invalidateWormSymbolCache() {
+    window.wormSystem?.invalidateSymbolCache?.();
+  }
+
   function getNextSymbol({ stepIndex, getCachedStepSymbols }) {
     const currentStepSymbols = getCachedStepSymbols(stepIndex);
     const hiddenSymbols = Array.from(currentStepSymbols).filter((el) =>
@@ -54,6 +58,7 @@ console.log("🎯 GameSymbolHelpers loading...");
         span.classList.remove("hidden-symbol");
         span.classList.add("revealed-symbol");
         invalidateStepCache();
+        invalidateWormSymbolCache();
 
         onSymbolRevealed?.(targetSymbol, span);
         return true;

@@ -1,0 +1,42 @@
+LINE LIMIT 300 AUDIT SUMMARY (policy exclusions applied)
+Root: /home/ewaldt/Documents/VS/GAMES/MathMasterHTML
+Included file count: 371
+Violations (>300 lines): 28
+
+Exclusions (generated/3rd-party): package-lock.json, test-results.json, test-results.competition.json
+
+Violations by category:
+js-runtime        12
+tests             11
+css                2
+assets-source      1
+misc               1
+pages              1
+
+Top 20 largest violators:
+   822  src\styles\css\level-select.polish.css
+   728  tests\gameplay-features.spec.js
+   647  tests\integration\worm-movement-system.spec.js
+   607  tests\integration\worm-movement-navigation.spec.js
+   562  tests\integration\worm-movement-behaviors.spec.js
+   530  src\scripts\worm-powerups.ui.js
+   495  tests\unit\worm-movement.spec.js
+   492  tests\powerups.spec.js
+   460  src\scripts\display-manager.js
+   451  src\styles\css\worm-effects.core.css
+   429  src\scripts\worm\pools\ParticlePool.js
+   421  src\pages\game.html
+   405  service-worker.js
+   398  src\scripts\performance-monitor.js
+   397  src\scripts\worm-behavior-fsm.js
+   390  tests\performance\worm-movement-bench.spec.js
+   379  tests\unit\worm-evasion.spec.js
+   374  tests\lifecycle-hardening.spec.js
+   368  src\scripts\ui-boundary-manager.core.js
+   364  src\assets\components\lock-components\line-6-transformer.html
+
+CSV (all): 
+/home/ewaldt/Documents/VS/GAMES/MathMasterHTML/Docs/SystemDocs/LINE_LIMIT_300_AUDIT.policy.all.csv
+CSV (violations): 
+/home/ewaldt/Documents/VS/GAMES/MathMasterHTML/Docs/SystemDocs/LINE_LIMIT_300_AUDIT.policy.violations.csv
+

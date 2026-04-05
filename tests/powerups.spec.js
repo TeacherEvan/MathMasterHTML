@@ -16,16 +16,51 @@ async function pressPowerUp(page, type) {
 
 async function dismissHowToPlayModal(page) {
   const modal = page.locator("#how-to-play-modal");
-  if (await modal.isVisible().catch(() => false)) {
-    const startButton = page.locator("#start-game-btn");
-    await expect(startButton).toBeVisible({ timeout: 5000 });
-    await startButton.click({ force: true });
-    await expect(modal).toBeHidden({ timeout: 5000 });
+  const startButton = page.locator("#start-game-btn");
+
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const [startVisible, modalVisible] = await Promise.all([
+      startButton.isVisible().catch(() => false),
+      modal.isVisible().catch(() => false),
+    ]);
+
+    if (startVisible || modalVisible) {
+      break;
+    }
+
+    await page.waitForTimeout(100);
   }
+
+  const [startVisible, modalVisible] = await Promise.all([
+    startButton.isVisible().catch(() => false),
+    modal.isVisible().catch(() => false),
+  ]);
+
+  if (!startVisible && !modalVisible) {
+    return;
+  }
+
+  await expect(startButton).toBeVisible({ timeout: 10000 });
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await startButton.click({ force: true });
+
+    try {
+      await expect(modal).toBeHidden({ timeout: 2000 });
+      return;
+    } catch {
+      // Some engines delay the modal fade-out or miss the first synthetic
+      // tap during startup; retry a couple of times before failing.
+    }
+  }
+
+  await expect(modal).toBeHidden({ timeout: 5000 });
 }
 
 async function setupPowerUpPage(page, inventory = null) {
-  await page.goto("/game.html?level=beginner");
+  await page.goto("/game.html?level=beginner", {
+    waitUntil: "domcontentloaded",
+  });
 
   await dismissHowToPlayModal(page);
 
@@ -409,7 +444,9 @@ test.describe("Power-Up Chain Lightning", () => {
 
 test.describe("Game Flow Integration", () => {
   test("game page loads successfully", async ({ page }) => {
-    await page.goto("/game.html?level=beginner");
+    await page.goto("/game.html?level=beginner", {
+      waitUntil: "domcontentloaded",
+    });
 
     await dismissHowToPlayModal(page);
 
@@ -438,7 +475,9 @@ test.describe("Game Flow Integration", () => {
 
 test.describe("Worm System Basic Tests", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/game.html?level=beginner");
+    await page.goto("/game.html?level=beginner", {
+      waitUntil: "domcontentloaded",
+    });
 
     await dismissHowToPlayModal(page);
     await page.waitForSelector("#solution-container", { timeout: 10000 });
