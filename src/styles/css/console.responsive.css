@@ -1,5 +1,5 @@
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   #symbol-console {
     /* Mobile: Span full viewport width, not confined to Panel B */
     position: fixed;
@@ -75,7 +75,7 @@
 }
 
 /* Mobile-specific console adjustments for horizontal layout */
-.res-mobile #symbol-console {
+.viewport-compact #symbol-console {
   /* Override grid to flexbox on mobile */
   display: flex !important;
   flex-direction: row !important;

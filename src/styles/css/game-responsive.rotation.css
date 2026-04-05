@@ -1,44 +1,41 @@
-/* Show overlay ONLY for compact/mobile portrait viewports */
-body.res-mobile.viewport-portrait #rotation-overlay {
+/* Show overlay only when the shared display contract explicitly requires it. */
+body.viewport-rotate-required #rotation-overlay {
   display: flex !important;
 }
 
-/* Hide game content only when the shared compact/mobile contract says portrait mobile */
-body.res-mobile.viewport-portrait .grid-container {
+/* Hide game content only when the shared display contract explicitly requires rotation. */
+body.viewport-rotate-required .grid-container {
   display: none !important;
 }
 
-body.res-mobile.viewport-portrait #back-button {
+body.viewport-rotate-required #back-button {
   display: none !important;
 }
 
 /* Automation runs should keep the gameplay grid visible even on portrait mobile
    so Playwright can exercise boundary/layout assertions without the rotate gate. */
-body.automation.viewport-portrait #rotation-overlay,
-body.automation.res-mobile.viewport-portrait #rotation-overlay {
+body.automation.viewport-rotate-required #rotation-overlay {
   display: none !important;
 }
 
-body.automation.viewport-portrait .grid-container,
-body.automation.res-mobile.viewport-portrait .grid-container {
+body.automation.viewport-rotate-required .grid-container {
   display: grid !important;
 }
 
-body.automation.viewport-portrait #back-button,
-body.automation.res-mobile.viewport-portrait #back-button {
+body.automation.viewport-rotate-required #back-button {
   display: block !important;
 }
 
 /* Landscape mode on compact/mobile - ensure full visibility */
-body.res-mobile.viewport-landscape #rotation-overlay {
+body.viewport-compact.viewport-landscape #rotation-overlay {
   display: none !important;
 }
 
-body.res-mobile.viewport-landscape #panel-a {
+body.viewport-compact.viewport-landscape #panel-a {
   min-height: 80px;
   max-height: 20vh;
 }
 
-body.res-mobile.viewport-landscape #panel-b {
+body.viewport-compact.viewport-landscape #panel-b {
   min-height: 120px;
 }

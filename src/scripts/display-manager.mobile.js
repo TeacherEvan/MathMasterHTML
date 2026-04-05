@@ -11,8 +11,7 @@
     const viewportContract = getViewportContract();
     return (
       viewportContract?.isCompactViewport === true ||
-      document.body.classList.contains("viewport-compact") ||
-      document.body.classList.contains("res-mobile")
+      document.body.classList.contains("viewport-compact")
     );
   }
 

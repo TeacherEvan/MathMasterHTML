@@ -1,30 +1,30 @@
-body.res-mobile .grid-container {
-  grid-template-columns: minmax(0, 0.42fr) 3px minmax(0, 0.58fr) !important;
-  grid-template-rows: minmax(0, 0.44fr) 3px minmax(0, 0.56fr) !important;
+body.viewport-compact .grid-container {
+  grid-template-columns: minmax(320px, 0.42fr) 3px minmax(0, 0.58fr) !important;
+  grid-template-rows: minmax(136px, 0.46fr) 3px minmax(0, 0.54fr) !important;
   grid-auto-flow: row;
   height: 100dvh;
   min-height: 100dvh;
   overflow: hidden;
 }
 
-body.res-mobile #panel-a,
-body.res-mobile #panel-b,
-body.res-mobile #panel-c {
+body.viewport-compact #panel-a,
+body.viewport-compact #panel-b,
+body.viewport-compact #panel-c {
   box-sizing: border-box;
   min-width: 0;
   min-height: 0;
 }
 
-body.res-mobile #panel-a {
+body.viewport-compact #panel-a {
   grid-column: 1 !important;
   grid-row: 1 !important;
   align-self: stretch;
-  padding: 72px 10px 10px;
+  padding: 70px 10px 10px;
   align-items: stretch;
   border-bottom: 0;
 }
 
-body.res-mobile .grid-container > .wall:nth-child(2) {
+body.viewport-compact .grid-container > .wall:nth-child(2) {
   display: block !important;
   grid-column: 1 !important;
   grid-row: 2 !important;
@@ -33,14 +33,14 @@ body.res-mobile .grid-container > .wall:nth-child(2) {
   background: linear-gradient(90deg, #0f0, #060);
 }
 
-body.res-mobile .grid-container > .wall:nth-child(4) {
+body.viewport-compact .grid-container > .wall:nth-child(4) {
   grid-column: 2 !important;
   grid-row: 1 / span 3 !important;
   width: 3px !important;
   height: auto;
 }
 
-body.res-mobile #panel-b {
+body.viewport-compact #panel-b {
   grid-column: 1 !important;
   grid-row: 3 !important;
   align-self: stretch;
@@ -50,7 +50,7 @@ body.res-mobile #panel-b {
   overflow: hidden;
 }
 
-body.res-mobile #panel-c {
+body.viewport-compact #panel-c {
   grid-column: 3 !important;
   grid-row: 1 / span 3 !important;
   align-self: stretch;
@@ -59,7 +59,7 @@ body.res-mobile #panel-c {
   padding: 0;
 }
 
-body.res-mobile #problem-container {
+body.viewport-compact #problem-container {
   position: relative;
   top: auto !important;
   left: auto !important;
@@ -74,7 +74,7 @@ body.res-mobile #problem-container {
   z-index: 2;
 }
 
-body.res-mobile #lock-display {
+body.viewport-compact #lock-display {
   /* Keep lock clear of the taller compact problem card once Orbitron loads. */
   top: 144px !important;
   right: 8px;
@@ -90,7 +90,7 @@ body.res-mobile #lock-display {
   z-index: 1;
 }
 
-body.res-mobile #solution-container {
+body.viewport-compact #solution-container {
   min-height: 0;
   max-height: none;
   padding: 0 2px 6px;
@@ -98,7 +98,7 @@ body.res-mobile #solution-container {
   background: rgba(0, 0, 0, 0.45);
 }
 
-body.res-mobile #symbol-console {
+body.viewport-compact #symbol-console {
   left: 8px !important;
   right: 8px !important;
   bottom: 8px !important;
@@ -114,13 +114,13 @@ body.res-mobile #symbol-console {
   overflow: visible;
 }
 
-body.res-mobile .console-slot {
+body.viewport-compact .console-slot {
   width: 36px !important;
   height: 36px !important;
   font-size: 16px !important;
 }
 
-body.res-mobile .panel-b-controls {
+body.viewport-compact .panel-b-controls {
   position: relative;
   top: auto;
   right: auto;
@@ -129,8 +129,8 @@ body.res-mobile .panel-b-controls {
   gap: 6px;
 }
 
-body.res-mobile #help-button,
-body.res-mobile #clarify-button {
+body.viewport-compact #help-button,
+body.viewport-compact #clarify-button {
   font-size: 11px;
   padding: 6px 10px;
 }

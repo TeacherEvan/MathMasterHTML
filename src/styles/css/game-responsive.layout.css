@@ -4,7 +4,7 @@
   }
 }
 
-body.res-mobile .grid-container {
+body.viewport-compact .grid-container {
   display: grid !important;
 }
 

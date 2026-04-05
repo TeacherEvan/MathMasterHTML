@@ -249,16 +249,6 @@ class LockResponsiveManager {
       wrapper.style.alignItems = "center"; // Center alignment
     });
 
-    // Add resolution class for CSS targeting
-    document.body.classList.remove(
-      "res-4k",
-      "res-1440p",
-      "res-1080p",
-      "res-720p",
-      "res-mobile",
-    );
-    document.body.classList.add(`res-${resolution}`);
-
     // Trigger custom event for other components
     document.dispatchEvent(
       new CustomEvent("lockScaleChanged", {

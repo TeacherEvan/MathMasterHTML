@@ -45,8 +45,7 @@ function initSymbolRain() {
       const activeResolution = getViewportContract();
       return (
         activeResolution?.isCompactViewport === true ||
-        document.body.classList.contains("viewport-compact") ||
-        document.body.classList.contains("res-mobile")
+        document.body.classList.contains("viewport-compact")
       );
     };
 
@@ -132,8 +131,7 @@ function initSymbolRain() {
       (event) => {
         state.isMobileMode =
           event.detail?.isCompactViewport === true ||
-          document.body.classList.contains("viewport-compact") ||
-          document.body.classList.contains("res-mobile");
+          document.body.classList.contains("viewport-compact");
       },
     );
 

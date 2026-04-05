@@ -95,7 +95,7 @@ class DisplayManager {
     };
     this.currentResolution = null;
     this.compactViewportConfig = {
-      mobileMaxWidth: 768,
+      mobileMaxWidth: 600,
       compactMaxWidth: 1024,
       compactMaxHeight: 500,
       compactLandscapeWidth: 950,
@@ -106,6 +106,8 @@ class DisplayManager {
       "viewport-standard",
       "viewport-portrait",
       "viewport-landscape",
+      "viewport-rotate-required",
+      "viewport-rotate-not-required",
     ];
     this.resolutions = {
       "4k": { width: 3840, minWidth: 2560, scale: 1.0, fontSize: "24px" },
@@ -217,6 +219,7 @@ class DisplayManager {
     } = this.compactViewportConfig;
     const isLandscape = width >= height;
     const isPortrait = height > width;
+    const isCompactNarrowViewport = width <= mobileMaxWidth;
     const isCompactLandscapeTouch =
       hasCoarsePointer &&
       isLandscape &&
@@ -225,7 +228,7 @@ class DisplayManager {
     const isCompactShortViewport =
       width <= compactMaxWidth && height <= compactMaxHeight;
     const isCompactViewport =
-      width <= mobileMaxWidth ||
+      isCompactNarrowViewport ||
       isCompactLandscapeTouch ||
       isCompactShortViewport;
 
@@ -235,10 +238,12 @@ class DisplayManager {
       hasCoarsePointer,
       isLandscape,
       isPortrait,
+      isCompactNarrowViewport,
       isCompactViewport,
       isCompactLandscapeTouch,
       isCompactShortViewport,
-      shouldShowRotationOverlay: isCompactViewport && isPortrait,
+      shouldShowRotationOverlay:
+        hasCoarsePointer && isPortrait && isCompactNarrowViewport,
     };
   }
 
@@ -257,6 +262,11 @@ class DisplayManager {
     );
     document.body.classList.add(
       detected.isPortrait ? "viewport-portrait" : "viewport-landscape",
+    );
+    document.body.classList.add(
+      detected.shouldShowRotationOverlay
+        ? "viewport-rotate-required"
+        : "viewport-rotate-not-required",
     );
   }
 
