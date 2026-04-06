@@ -1,21 +1,21 @@
-body.viewport-compact .grid-container {
-  grid-template-columns: minmax(360px, 0.46fr) 3px minmax(0, 0.54fr) !important;
-  grid-template-rows: minmax(180px, 1fr) 3px minmax(180px, 1fr) !important;
+body.viewport-compact.viewport-landscape .grid-container {
+  grid-template-columns: minmax(400px, 0.48fr) 3px minmax(0, 0.52fr) !important;
+  grid-template-rows: minmax(220px, 0.58fr) 3px minmax(150px, 0.42fr) !important;
   grid-auto-flow: row;
   height: 100dvh;
   min-height: 100dvh;
   overflow: hidden;
 }
 
-body.viewport-compact #panel-a,
-body.viewport-compact #panel-b,
-body.viewport-compact #panel-c {
+body.viewport-compact.viewport-landscape #panel-a,
+body.viewport-compact.viewport-landscape #panel-b,
+body.viewport-compact.viewport-landscape #panel-c {
   box-sizing: border-box;
   min-width: 0;
   min-height: 0;
 }
 
-body.viewport-compact #panel-a {
+body.viewport-compact.viewport-landscape #panel-a {
   grid-column: 1 !important;
   grid-row: 1 !important;
   align-self: stretch;
@@ -24,7 +24,7 @@ body.viewport-compact #panel-a {
   border-bottom: 0;
 }
 
-body.viewport-compact .grid-container > .wall:nth-child(2) {
+body.viewport-compact.viewport-landscape .grid-container > .wall:nth-child(2) {
   display: block !important;
   grid-column: 1 !important;
   grid-row: 2 !important;
@@ -33,24 +33,24 @@ body.viewport-compact .grid-container > .wall:nth-child(2) {
   background: linear-gradient(90deg, #0f0, #060);
 }
 
-body.viewport-compact .grid-container > .wall:nth-child(4) {
+body.viewport-compact.viewport-landscape .grid-container > .wall:nth-child(4) {
   grid-column: 2 !important;
   grid-row: 1 / span 3 !important;
   width: 3px !important;
   height: auto;
 }
 
-body.viewport-compact #panel-b {
+body.viewport-compact.viewport-landscape #panel-b {
   grid-column: 1 !important;
   grid-row: 3 !important;
   align-self: stretch;
   margin-top: 0;
-  padding: 8px 8px 70px;
+  padding: 8px 8px 58px;
   gap: 8px;
   overflow: hidden;
 }
 
-body.viewport-compact #panel-c {
+body.viewport-compact.viewport-landscape #panel-c {
   grid-column: 3 !important;
   grid-row: 1 / span 3 !important;
   align-self: stretch;
@@ -59,7 +59,7 @@ body.viewport-compact #panel-c {
   padding: 0;
 }
 
-body.viewport-compact #problem-container {
+body.viewport-compact.viewport-landscape #problem-container {
   position: relative;
   top: auto !important;
   left: auto !important;
@@ -74,9 +74,9 @@ body.viewport-compact #problem-container {
   z-index: 2;
 }
 
-body.viewport-compact #lock-display {
+body.viewport-compact.viewport-landscape #lock-display {
   /* Keep lock clear of the taller compact problem card once Orbitron loads. */
-  top: 132px !important;
+  top: 130px !important;
   right: 8px;
   bottom: 8px;
   left: 8px !important;
@@ -90,7 +90,7 @@ body.viewport-compact #lock-display {
   z-index: 1;
 }
 
-body.viewport-compact #solution-container {
+body.viewport-compact.viewport-landscape #solution-container {
   min-height: 0;
   max-height: none;
   padding: 0 2px 6px;
@@ -98,7 +98,7 @@ body.viewport-compact #solution-container {
   background: rgba(0, 0, 0, 0.45);
 }
 
-body.viewport-compact #symbol-console {
+body.viewport-compact.viewport-landscape #symbol-console {
   left: 8px !important;
   right: 8px !important;
   bottom: 8px !important;
@@ -114,13 +114,15 @@ body.viewport-compact #symbol-console {
   overflow: visible;
 }
 
-body.viewport-compact .console-slot {
+body.viewport-compact.viewport-landscape .console-slot {
   width: 34px !important;
   height: 34px !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
   font-size: 15px !important;
 }
 
-body.viewport-compact .panel-b-controls {
+body.viewport-compact.viewport-landscape .panel-b-controls {
   position: relative;
   top: auto;
   right: auto;
@@ -129,8 +131,8 @@ body.viewport-compact .panel-b-controls {
   gap: 6px;
 }
 
-body.viewport-compact #help-button,
-body.viewport-compact #clarify-button {
+body.viewport-compact.viewport-landscape #help-button,
+body.viewport-compact.viewport-landscape #clarify-button {
   font-size: 11px;
   padding: 6px 10px;
 }
