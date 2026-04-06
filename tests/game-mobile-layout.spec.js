@@ -20,7 +20,7 @@ test.describe("Gameplay mobile landscape layout", () => {
     await page.waitForFunction(() => {
       const overlay = document.getElementById("rotation-overlay");
       return (
-        document.body.classList.contains("res-mobile") &&
+        document.body.classList.contains("viewport-compact") &&
         document.body.classList.contains("viewport-landscape") &&
         overlay &&
         window.getComputedStyle(overlay).display === "none"
@@ -44,6 +44,9 @@ test.describe("Gameplay mobile landscape layout", () => {
           left: rect.left,
           width: rect.width,
           height: rect.height,
+          display: style.display,
+          gridTemplateColumns: style.gridTemplateColumns,
+          gridAutoRows: style.gridAutoRows,
           fontSize: Number.parseFloat(style.fontSize || "0"),
         };
       };
@@ -65,7 +68,7 @@ test.describe("Gameplay mobile landscape layout", () => {
       };
     });
 
-    expect(layout.bodyClasses).toContain("res-mobile");
+    expect(layout.bodyClasses).toContain("viewport-compact");
     expect(layout.activeResolution).toBe("mobile");
     expect(layout.overlayDisplay).toBe("none");
     expect(layout.panelB.bottom).toBeLessThanOrEqual(
@@ -77,12 +80,14 @@ test.describe("Gameplay mobile landscape layout", () => {
     expect(layout.controls.top).toBeGreaterThanOrEqual(0);
     expect(layout.problem.fontSize).toBeGreaterThanOrEqual(12);
     expect(layout.solution.fontSize).toBeGreaterThanOrEqual(10);
+    expect(layout.console.display).toBe("grid");
+    expect(layout.console.gridTemplateColumns).not.toBe("none");
+    expect(layout.console.gridAutoRows).not.toBe("auto");
     expect(layout.console.top).toBeGreaterThanOrEqual(0);
-    expect(layout.console.bottom).toBeLessThanOrEqual(
-      layout.viewport.height + 1,
-    );
+    expect(layout.console.left).toBeGreaterThanOrEqual(layout.panelB.left - 1);
+    expect(layout.console.right).toBeLessThanOrEqual(layout.panelB.right + 1);
+    expect(layout.console.bottom).toBeLessThanOrEqual(layout.panelB.bottom + 1);
     expect(layout.console.right).toBeLessThanOrEqual(layout.viewport.width + 1);
-    expect(layout.console.left).toBeGreaterThanOrEqual(-1);
   });
 
   test.describe("coarse-pointer compact CSS contract", () => {
@@ -106,7 +111,7 @@ test.describe("Gameplay mobile landscape layout", () => {
       await page.waitForFunction(() => {
         const overlay = document.getElementById("rotation-overlay");
         return (
-          document.body.classList.contains("res-mobile") &&
+          document.body.classList.contains("viewport-compact") &&
           document.body.classList.contains("viewport-landscape") &&
           overlay &&
           window.getComputedStyle(overlay).display === "none"
@@ -121,6 +126,7 @@ test.describe("Gameplay mobile landscape layout", () => {
           }
 
           const rect = element.getBoundingClientRect();
+          const style = window.getComputedStyle(element);
           return {
             top: rect.top,
             bottom: rect.bottom,
@@ -128,6 +134,8 @@ test.describe("Gameplay mobile landscape layout", () => {
             right: rect.right,
             width: rect.width,
             height: rect.height,
+            display: style.display,
+            gridTemplateColumns: style.gridTemplateColumns,
           };
         };
 
@@ -150,7 +158,7 @@ test.describe("Gameplay mobile landscape layout", () => {
         };
       });
 
-      expect(layout.bodyClasses).toContain("res-mobile");
+      expect(layout.bodyClasses).toContain("viewport-compact");
       expect(layout.activeResolution).toBe("mobile");
       expect(layout.overlayDisplay).toBe("none");
       expect(layout.gridTemplateRows).not.toBe("1fr");
@@ -174,12 +182,14 @@ test.describe("Gameplay mobile landscape layout", () => {
       expect(layout.panelC.bottom).toBeLessThanOrEqual(
         layout.viewport.height + 1,
       );
-      expect(layout.console.left).toBeGreaterThanOrEqual(-1);
-      expect(layout.console.right).toBeLessThanOrEqual(
-        layout.viewport.width + 1,
+      expect(layout.console.display).toBe("grid");
+      expect(layout.console.gridTemplateColumns).not.toBe("none");
+      expect(layout.console.left).toBeGreaterThanOrEqual(
+        layout.panelB.left - 1,
       );
+      expect(layout.console.right).toBeLessThanOrEqual(layout.panelB.right + 1);
       expect(layout.console.bottom).toBeLessThanOrEqual(
-        layout.viewport.height + 1,
+        layout.panelB.bottom + 1,
       );
     });
   });

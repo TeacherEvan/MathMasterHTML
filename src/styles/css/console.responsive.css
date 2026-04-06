@@ -73,12 +73,3 @@
     grid-template-columns: repeat(3, 1fr);
   }
 }
-
-/* Mobile-specific console adjustments for horizontal layout */
-.viewport-compact #symbol-console {
-  /* Override grid to flexbox on mobile */
-  display: flex !important;
-  flex-direction: row !important;
-  grid-template-columns: none;
-  grid-template-rows: none;
-}

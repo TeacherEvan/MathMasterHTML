@@ -177,18 +177,35 @@
     );
     const minXBase = panelRect.left + panelInset;
     const maxXBase = panelRect.right - panelInset;
-    const timerOverlapPadding = isCompactViewport
-      ? (window.uiBoundaryManager?.config?.minSpacing || 10) + 2
-      : 0;
+    const timerOverlapPadding =
+      (window.uiBoundaryManager?.config?.minSpacing || 10) +
+      (isCompactViewport ? 2 : 0);
     const timerOverlapsPanel =
       !!timerRect &&
       timerRect.left < panelRect.right &&
       timerRect.right > panelRect.left;
-    const shouldAvoidTimer = timerOverlapsPanel && !isCompactViewport;
-    const requestedMinX = shouldAvoidTimer
-      ? Math.max(minXBase, timerRect.right + timerOverlapPadding)
-      : minXBase;
-    const minX = Math.min(requestedMinX, maxXBase);
+    let minX = minXBase;
+    let maxX = maxXBase;
+
+    if (timerOverlapsPanel && timerRect) {
+      const leftSafeMaxX = Math.min(
+        maxXBase,
+        timerRect.left - timerOverlapPadding,
+      );
+      const rightSafeMinX = Math.max(
+        minXBase,
+        timerRect.right + timerOverlapPadding,
+      );
+      const leftSafeWidth = Math.max(0, leftSafeMaxX - minXBase);
+      const rightSafeWidth = Math.max(0, maxXBase - rightSafeMinX);
+
+      if (rightSafeWidth > leftSafeWidth && rightSafeWidth > 0) {
+        minX = rightSafeMinX;
+      } else if (leftSafeWidth > 0) {
+        maxX = leftSafeMaxX;
+      }
+    }
+
     const minTop = isCompactViewport
       ? hudSafeTop
       : Math.max(hudSafeTop, panelRect.top + config.DESKTOP_TOP_OFFSET);
@@ -210,10 +227,10 @@
       controlsRect,
       timerRect,
       minX,
-      maxX: maxXBase,
+      maxX,
       minY: minTop,
       maxY,
-      availableWidth: Math.max(0, maxXBase - minX),
+      availableWidth: Math.max(0, maxX - minX),
       trayWidth,
       trayHeight,
     };
@@ -300,13 +317,15 @@
 
     const panelContext = this.getDisplayPanelContext();
     const panelRect = panelContext.panelRect;
-    const narrowPanel = panelRect && panelContext.availableWidth < 120;
-    const resolvedDisplayWidth =
-      panelRect && narrowPanel
-        ? Math.max(52, Math.floor(panelContext.availableWidth))
-        : displayWidth;
+    const availableDisplayWidth = panelRect
+      ? Math.max(52, Math.floor(panelContext.availableWidth))
+      : displayWidth;
+    const narrowPanel = panelRect && panelContext.availableWidth < displayWidth;
+    const resolvedDisplayWidth = panelRect
+      ? Math.min(displayWidth, availableDisplayWidth)
+      : displayWidth;
     const panelMaxWidth = panelRect
-      ? `${Math.max(52, Math.floor(panelContext.maxX - panelContext.minX))}px`
+      ? `${availableDisplayWidth}px`
       : isCompactViewport
         ? `min(${config.COMPACT_WIDTH_CAP}px, calc(100vw - ${config.COMPACT_HORIZONTAL_INSET * 2}px))`
         : `calc(100vw - ${config.DESKTOP_HORIZONTAL_INSET * 2}px)`;

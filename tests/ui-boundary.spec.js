@@ -14,6 +14,33 @@ function boxesOverlap(boxA, boxB, spacing = 0) {
   );
 }
 
+async function ensurePowerUpDisplay(page) {
+  await expect
+    .poll(async () => {
+      return await page.evaluate(() => {
+        return Boolean(
+          window.wormSystem?.powerUpSystem &&
+          typeof window.wormSystem.powerUpSystem.updateDisplay === "function",
+        );
+      });
+    })
+    .toBe(true);
+
+  const displayCreated = await page.evaluate(() => {
+    const powerUpSystem = window.wormSystem?.powerUpSystem;
+    if (!powerUpSystem?.inventory) {
+      return false;
+    }
+
+    powerUpSystem.inventory.chainLightning = 1;
+    powerUpSystem.updateDisplay();
+    return true;
+  });
+
+  expect(displayCreated).toBe(true);
+  await expect(page.locator("#power-up-display")).toBeVisible();
+}
+
 // Increase timeout for all tests
 test.setTimeout(60000);
 
@@ -56,36 +83,19 @@ test.describe("UI Boundary Management", () => {
   });
 
   test("Powerup display should not overlap with timer", async ({ page }) => {
-    // Wait for powerup display to be created (may need to trigger worm kill first)
-    // For this test, we'll inject a test powerup
-    await page.evaluate(() => {
-      if (window.WormSystem && window.WormSystem.powerUps) {
-        window.WormSystem.powerUps.inventory.chainLightning = 1;
-        window.WormSystem.powerUps.updateDisplay();
-      }
-    });
+    await ensurePowerUpDisplay(page);
 
-    await page.waitForTimeout(300);
+    const powerupBox = await page.locator("#power-up-display").boundingBox();
+    const timerBox = await page.locator("#timer-display").boundingBox();
 
-    // Check if powerup display exists
-    const powerupDisplay = page.locator("#power-up-display");
-    const powerupExists = (await powerupDisplay.count()) > 0;
-
-    if (powerupExists) {
-      const powerupBox = await powerupDisplay.boundingBox();
-      const timerBox = await page.locator("#timer-display").boundingBox();
-
-      if (powerupBox && timerBox) {
-        expect(boxesOverlap(powerupBox, timerBox, 0)).toBe(false);
-        console.log(
-          `✅ Powerup display does not overlap with timer: Powerup box=${JSON.stringify(
-            powerupBox,
-          )}, Timer box=${JSON.stringify(timerBox)}`,
-        );
-      }
-    } else {
-      console.log("⚠️ Powerup display not present - skipping overlap check");
-    }
+    expect(powerupBox).toBeTruthy();
+    expect(timerBox).toBeTruthy();
+    expect(boxesOverlap(powerupBox, timerBox, 0)).toBe(false);
+    console.log(
+      `✅ Powerup display does not overlap with timer: Powerup box=${JSON.stringify(
+        powerupBox,
+      )}, Timer box=${JSON.stringify(timerBox)}`,
+    );
   });
 
   test("Problem container should not overlap with score display", async ({
@@ -203,35 +213,22 @@ test.describe("UI Boundary Management", () => {
   test("UIBoundaryManager should expose public constraint updates", async ({
     page,
   }) => {
-    await page.evaluate(() => {
-      const modernSystem =
-        window.wormSystem?.powerUpSystem || window.WormSystem?.powerUpSystem;
-
-      if (
-        modernSystem?.inventory &&
-        typeof modernSystem.updateDisplay === "function"
-      ) {
-        modernSystem.inventory.chainLightning = 1;
-        modernSystem.updateDisplay();
-        return;
-      }
-
-      if (
-        window.wormSystem?.powerUps &&
-        typeof window.wormSystem.updatePowerUpDisplay === "function"
-      ) {
-        window.wormSystem.powerUps.chainLightning = 1;
-        window.wormSystem.updatePowerUpDisplay();
-      }
-    });
-
-    await page.waitForTimeout(300);
+    await ensurePowerUpDisplay(page);
+    await expect
+      .poll(async () => {
+        return await page.evaluate(() => {
+          return Boolean(
+            window.uiBoundaryManager?.elements?.has?.("power-up-display"),
+          );
+        });
+      })
+      .toBe(true);
 
     const updateResult = await page.evaluate(() => {
       const manager = window.uiBoundaryManager;
       const display = document.getElementById("power-up-display");
       if (!manager || !display) {
-        return { skipped: true };
+        return null;
       }
 
       const nextConstraints = {
@@ -248,18 +245,10 @@ test.describe("UI Boundary Management", () => {
       const registration = manager.elements.get("power-up-display");
 
       return {
-        skipped: false,
         updated,
         constraints: registration?.constraints || null,
       };
     });
-
-    if (updateResult?.skipped) {
-      console.log(
-        "⚠️ Power-up display unavailable on this run - skipping public constraint update assertion",
-      );
-      return;
-    }
 
     expect(updateResult).not.toBeNull();
     expect(updateResult.updated).toBe(true);
