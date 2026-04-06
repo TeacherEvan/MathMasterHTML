@@ -1,7 +1,9 @@
 body.viewport-compact.viewport-landscape .grid-container {
-  grid-template-columns: minmax(400px, 0.48fr) 3px minmax(0, 0.52fr) !important;
-  grid-template-rows: minmax(220px, 0.58fr) 3px minmax(150px, 0.42fr) !important;
-  grid-auto-flow: row;
+  grid-template-columns: minmax(0, 0.94fr) 2px minmax(0, 1.02fr) 2px minmax(
+      0,
+      1.18fr
+    ) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
   height: 100dvh;
   min-height: 100dvh;
   overflow: hidden;
@@ -18,44 +20,38 @@ body.viewport-compact.viewport-landscape #panel-c {
 body.viewport-compact.viewport-landscape #panel-a {
   grid-column: 1 !important;
   grid-row: 1 !important;
-  align-self: stretch;
-  padding: 70px 10px 10px;
+  padding: 52px 6px 8px;
   align-items: stretch;
-  border-bottom: 0;
 }
 
 body.viewport-compact.viewport-landscape .grid-container > .wall:nth-child(2) {
   display: block !important;
-  grid-column: 1 !important;
-  grid-row: 2 !important;
-  width: auto !important;
-  height: 3px;
-  background: linear-gradient(90deg, #0f0, #060);
-}
-
-body.viewport-compact.viewport-landscape .grid-container > .wall:nth-child(4) {
   grid-column: 2 !important;
-  grid-row: 1 / span 3 !important;
-  width: 3px !important;
+  grid-row: 1 !important;
+  width: 2px !important;
   height: auto;
+  background: linear-gradient(180deg, #0f0, #060);
 }
 
 body.viewport-compact.viewport-landscape #panel-b {
-  grid-column: 1 !important;
-  grid-row: 3 !important;
-  align-self: stretch;
-  margin-top: 0;
-  padding: 8px 8px 58px;
-  gap: 8px;
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  padding: calc(var(--panel-b-top-safe-zone, 72px) - 14px) 6px 8px;
+  gap: 6px;
   overflow: hidden;
 }
 
+body.viewport-compact.viewport-landscape .grid-container > .wall:nth-child(4) {
+  display: block !important;
+  grid-column: 4 !important;
+  grid-row: 1 !important;
+  width: 2px !important;
+  height: auto;
+}
+
 body.viewport-compact.viewport-landscape #panel-c {
-  grid-column: 3 !important;
-  grid-row: 1 / span 3 !important;
-  align-self: stretch;
-  width: 100%;
-  height: 100%;
+  grid-column: 5 !important;
+  grid-row: 1 !important;
   padding: 0;
 }
 
@@ -68,71 +64,133 @@ body.viewport-compact.viewport-landscape #problem-container {
   margin: 0;
   width: 100%;
   max-width: none;
-  min-height: 44px;
-  padding: 8px 10px;
+  min-height: 30px;
+  padding: 6px 8px;
   text-align: center;
+  white-space: normal;
+  letter-spacing: 0.12em;
   z-index: 2;
 }
 
 body.viewport-compact.viewport-landscape #lock-display {
-  /* Keep lock clear of the taller compact problem card once Orbitron loads. */
-  top: 130px !important;
-  right: 8px;
-  bottom: 8px;
-  left: 8px !important;
+  top: 86px !important;
+  right: 6px;
+  bottom: 6px;
+  left: 6px !important;
   width: auto;
   height: auto;
-  min-height: 64px;
+  min-height: 34px;
   max-height: none;
   transform: none !important;
   transform-origin: center;
-  opacity: 0.72;
+  opacity: 0.58;
   z-index: 1;
 }
 
 body.viewport-compact.viewport-landscape #solution-container {
   min-height: 0;
   max-height: none;
-  padding: 0 2px 6px;
+  padding: 0 0 4px;
   margin: 0 !important;
   background: rgba(0, 0, 0, 0.45);
+  flex: 1 1 auto;
 }
 
 body.viewport-compact.viewport-landscape #symbol-console {
-  left: 8px !important;
-  right: 8px !important;
-  bottom: 8px !important;
+  position: absolute;
+  left: 6px !important;
+  right: 6px !important;
+  bottom: 6px !important;
   transform: none !important;
   width: auto !important;
   max-width: none;
   display: grid;
-  grid-template-columns: repeat(3, 34px);
-  grid-template-rows: repeat(3, 34px);
-  justify-content: center;
+  grid-auto-flow: column;
+  grid-auto-columns: 24px;
+  grid-template-columns: none !important;
+  grid-template-rows: 28px !important;
+  justify-content: start;
   gap: 4px;
-  padding: 4px;
-  overflow: visible;
+  padding: 4px 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+body.viewport-compact.viewport-landscape #symbol-console::-webkit-scrollbar {
+  display: none;
 }
 
 body.viewport-compact.viewport-landscape .console-slot {
-  width: 34px !important;
-  height: 34px !important;
-  min-width: 34px !important;
-  min-height: 34px !important;
-  font-size: 15px !important;
+  width: 24px !important;
+  height: 28px !important;
+  min-width: 24px !important;
+  min-height: 28px !important;
+  font-size: 12px !important;
+  border-radius: 0.55rem;
 }
 
 body.viewport-compact.viewport-landscape .panel-b-controls {
   position: relative;
   top: auto;
   right: auto;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 6px;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 4px;
 }
 
 body.viewport-compact.viewport-landscape #help-button,
 body.viewport-compact.viewport-landscape #clarify-button {
-  font-size: 11px;
-  padding: 6px 10px;
+  min-height: 28px;
+  font-size: 10px;
+  padding: 4px 6px;
+}
+
+body.viewport-compact.viewport-landscape .game-hud {
+  top: 4px;
+  left: 6px;
+  right: 6px;
+  gap: 6px;
+}
+
+body.viewport-compact.viewport-landscape .hud-block {
+  min-width: 0;
+  max-width: none;
+  padding: 4px 6px;
+  border-radius: 0.85rem;
+}
+
+body.viewport-compact.viewport-landscape .hud-label {
+  font-size: 0.38rem;
+  letter-spacing: 0.12em;
+}
+
+body.viewport-compact.viewport-landscape .hud-value {
+  font-size: clamp(0.82rem, 3.2vh, 1.05rem);
+}
+
+body.viewport-compact.viewport-landscape #back-button,
+body.viewport-compact.viewport-landscape #audio-toggle {
+  min-width: auto;
+  min-height: 2rem;
+  padding: 0.3rem 0.55rem;
+  bottom: 6px;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  border-radius: 0.8rem;
+  transform: none !important;
+}
+
+body.viewport-compact.viewport-landscape .audio-toggle__eyebrow {
+  display: none;
+}
+
+body.viewport-compact.viewport-landscape .audio-toggle__label {
+  margin-bottom: 0;
+  font-size: 0.7rem;
+}
+
+body.viewport-compact.viewport-landscape #power-up-display {
+  max-width: min(160px, calc(100vw - 180px));
 }

@@ -127,3 +127,33 @@
     font-size: clamp(1rem, 3.8vw, 1.35rem);
   }
 }
+
+@media (max-width: 600px), (max-height: 260px) {
+  body.viewport-compact.viewport-landscape #symbol-console {
+    position: absolute !important;
+    left: 6px !important;
+    right: 6px !important;
+    bottom: 6px !important;
+    width: auto !important;
+    max-width: none;
+    margin-top: 0;
+    padding: 4px 6px;
+    grid-auto-flow: column;
+    grid-auto-columns: 24px;
+    grid-template-columns: none !important;
+    grid-template-rows: 28px !important;
+    gap: 4px;
+    justify-content: start;
+    border-radius: 0.95rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  body.viewport-compact.viewport-landscape .console-slot {
+    width: 24px !important;
+    height: 28px !important;
+    min-width: 24px !important;
+    min-height: 28px !important;
+    border-radius: 0.55rem;
+  }
+}

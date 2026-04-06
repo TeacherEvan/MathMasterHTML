@@ -2,7 +2,7 @@
    TOUCH + INTERACTION RULES
 ------------------------------------------------------- */
 
-@media (max-width: 1024px) {
+@media (hover: none) and (pointer: coarse) and (max-width: 1024px) {
   /* Enlarge touch targets on tablet and mobile */
   .falling-symbol {
     padding: 30px;
@@ -12,7 +12,8 @@
 }
 
 /* Extra small devices / Mobile optimizations */
-@media (max-width: 800px), (max-height: 500px) {
+@media (hover: none) and (pointer: coarse) and (max-width: 800px),
+  (hover: none) and (pointer: coarse) and (max-height: 500px) {
   .falling-symbol {
     /* Touch targets must stay large even if symbols get a bit smaller */
     padding: 36px;

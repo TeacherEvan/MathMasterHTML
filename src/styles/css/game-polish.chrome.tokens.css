@@ -147,6 +147,28 @@ body::before {
   }
 }
 
+@media (max-width: 600px), (max-height: 260px) {
+  body.viewport-compact.viewport-landscape #back-button,
+  body.viewport-compact.viewport-landscape #audio-toggle {
+    min-width: auto;
+    min-height: 2.15rem;
+    padding: 0.35rem 0.65rem;
+    bottom: 6px;
+    font: 700 0.68rem/1 var(--font-body);
+    letter-spacing: 0.12em;
+    border-radius: 0.85rem;
+  }
+
+  body.viewport-compact.viewport-landscape .audio-toggle__eyebrow {
+    display: none;
+  }
+
+  body.viewport-compact.viewport-landscape .audio-toggle__label {
+    margin-bottom: 0;
+    font-size: 0.72rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   body::before,
   .timer-display,

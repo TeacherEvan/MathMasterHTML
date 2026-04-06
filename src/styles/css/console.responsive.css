@@ -1,5 +1,38 @@
 /* Responsive adjustments */
 @media (max-width: 600px) {
+  body.viewport-compact.viewport-landscape #symbol-console {
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    right: 6px;
+    transform: none;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 24px;
+    grid-template-columns: none;
+    grid-template-rows: 28px;
+    justify-content: start;
+    align-items: stretch;
+    gap: 4px;
+    padding: 4px 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    z-index: 60;
+  }
+
+  body.viewport-compact.viewport-landscape .console-slot {
+    width: 24px;
+    height: 28px;
+    font-size: 12px;
+    flex: 0 0 auto;
+  }
+
+  body.viewport-compact.viewport-landscape .console-slot:nth-child(2),
+  body.viewport-compact.viewport-landscape .console-slot:nth-child(4),
+  body.viewport-compact.viewport-landscape .console-slot:nth-child(6) {
+    margin-right: 0;
+  }
+
   #symbol-console {
     /* Mobile: Span full viewport width, not confined to Panel B */
     position: fixed;
@@ -55,6 +88,18 @@
 }
 
 @media (max-width: 480px) {
+  body.viewport-compact.viewport-landscape .console-slot {
+    width: 22px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  body.viewport-compact.viewport-landscape .console-slot:nth-child(2),
+  body.viewport-compact.viewport-landscape .console-slot:nth-child(4),
+  body.viewport-compact.viewport-landscape .console-slot:nth-child(6) {
+    margin-right: 0;
+  }
+
   .console-slot {
     /* Slightly smaller on very small screens */
     width: 40px;

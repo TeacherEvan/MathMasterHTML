@@ -5,7 +5,8 @@
 ### Users
 
 - **Primary audience**: Solo algebra learners (teens and adult self-learners) practicing independently.
-- **Context**: Browser-native PWA, fullscreen landscape on desktop; mobile is acceptable but secondary.
+- **Primary usage context**: Optimize for solo self-study at home first; classroom or tutoring use is welcome, but secondary.
+- **Context**: Browser-native PWA with mobile as the primary quality bar. Touch-first play, fast readability, and resilient small-screen ergonomics come first; desktop should feel like the expanded premium version, not the source of truth.
 - **Job to be done**: Turn equation-solving into an interactive, high-feedback drill where clicking falling symbols reveals solution steps line by line.
 - **Emotional arc**: Start each problem feeling _confident and capable_; build _momentum and flow_ as lines clear; end with a _rewarding sense of mastery_.
 
@@ -18,7 +19,7 @@
 ### Aesthetic Direction
 
 - **Tone**: Refined training-console sci-fi — the kind of interface a competent operator would trust. Preserve the project's Matrix DNA but push it toward premium clarity.
-- **Theme**: Both themes are supported, with dark mode as the canonical benchmark for quality and immersion. The runtime, PWA shell, and all three screens (welcome, level-select, game) should preserve fullscreen play ergonomics in either theme.
+- **Theme**: Dark-first, light supported. Dark mode is the canonical benchmark for quality and immersion; light mode remains a supported, intentionally designed variant. The runtime, PWA shell, and all three screens (welcome, level-select, game) should preserve fullscreen play ergonomics in either theme.
 - **References**: No external references — evolve from the current state. The level-select screen (phosphor/brass/ember palette, Alegreya Sans, operator-console feel) is the quality bar to bring the other screens up to.
 - **Anti-references**: Generic AI-neon (cyan-on-dark, purple-blue gradients, glassmorphism everywhere), noisy arcade excess, childish cartoon energy.
 - **Signature interaction**: The synchronized rhythm between falling symbol rain and line-by-line algebra reveal is the unforgettable identity moment.
@@ -61,12 +62,13 @@
 
 - **Three-panel game**: Panel A (problem + lock), Panel B (solution steps + worms + console), Panel C (symbol rain). These zones are fixed.
 - **HUD**: CSS Grid with three zones — score, timer, power-up reserve. Elements must not overlap.
-- **Desktop-first**: Primary viewport is landscape fullscreen. Mobile is acceptable but secondary — adapt the layout, don't amputate features.
+- **Mobile-first priority**: The primary viewport and design validation target is mobile. Core actions, hierarchy, hit targets, and first-paint decisions must work on small touch screens before desktop enhancements are added.
 - **Spacing**: Use fluid spacing with `clamp()`. Tight groupings within panels, generous separation between them.
 
 ### Accessibility
 
 - **Target**: WCAG AAA where feasible; AA is the hard minimum.
+- **Current requirement stance**: The existing strong-contrast, keyboard-focus, and reduced-motion baseline is sufficient for now; add more accommodations when a concrete user need emerges.
 - **Contrast**: 7:1 for normal text, 4.5:1 for large text / UI components where AAA is achievable.
 - **Focus**: `focus-visible` outlines on all interactive elements (green `#00ff00` for game, `--level-phosphor` for level-select). No visible outline on pointer click.
 - **Non-color cues**: Shape, text labels, and animation (respecting reduced-motion) must supplement all color-coded state changes.

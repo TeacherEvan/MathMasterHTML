@@ -7,8 +7,9 @@
 
 /* game-responsive.css - Import hub (keeps existing references stable) */
 
-@import url("/src/styles/css/game-responsive.touch.css");
-@import url("/src/styles/css/game-responsive.layout.css");
-@import url("/src/styles/css/game-responsive.mobile-landscape.css");
-@import url("/src/styles/css/game-responsive.rotation.css");
-@import url("/src/styles/css/game-responsive.modals.css");
+@import url("/src/styles/css/game-responsive.touch.css?v=20260406-embedded-pane-3");
+@import url("/src/styles/css/game-responsive.layout.css?v=20260406-embedded-pane-3");
+@import url("/src/styles/css/game-responsive.mobile-landscape.css?v=20260406-embedded-pane-3");
+@import url("/src/styles/css/game-responsive.mobile-landscape.shallow.css?v=20260406-embedded-pane-3");
+@import url("/src/styles/css/game-responsive.rotation.css?v=20260406-embedded-pane-3");
+@import url("/src/styles/css/game-responsive.modals.css?v=20260406-embedded-pane-3");
