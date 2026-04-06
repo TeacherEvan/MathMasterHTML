@@ -1,6 +1,6 @@
 body.viewport-compact .grid-container {
-  grid-template-columns: minmax(320px, 0.42fr) 3px minmax(0, 0.58fr) !important;
-  grid-template-rows: minmax(136px, 0.46fr) 3px minmax(0, 0.54fr) !important;
+  grid-template-columns: minmax(360px, 0.46fr) 3px minmax(0, 0.54fr) !important;
+  grid-template-rows: minmax(180px, 1fr) 3px minmax(180px, 1fr) !important;
   grid-auto-flow: row;
   height: 100dvh;
   min-height: 100dvh;
@@ -45,7 +45,7 @@ body.viewport-compact #panel-b {
   grid-row: 3 !important;
   align-self: stretch;
   margin-top: 0;
-  padding: 8px 8px 86px;
+  padding: 8px 8px 70px;
   gap: 8px;
   overflow: hidden;
 }
@@ -76,7 +76,7 @@ body.viewport-compact #problem-container {
 
 body.viewport-compact #lock-display {
   /* Keep lock clear of the taller compact problem card once Orbitron loads. */
-  top: 144px !important;
+  top: 132px !important;
   right: 8px;
   bottom: 8px;
   left: 8px !important;
@@ -106,18 +106,18 @@ body.viewport-compact #symbol-console {
   width: auto !important;
   max-width: none;
   display: grid;
-  grid-template-columns: repeat(3, 36px);
-  grid-auto-rows: 36px;
+  grid-template-columns: repeat(3, 34px);
+  grid-template-rows: repeat(3, 34px);
   justify-content: center;
-  gap: 6px;
-  padding: 6px;
+  gap: 4px;
+  padding: 4px;
   overflow: visible;
 }
 
 body.viewport-compact .console-slot {
-  width: 36px !important;
-  height: 36px !important;
-  font-size: 16px !important;
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 15px !important;
 }
 
 body.viewport-compact .panel-b-controls {

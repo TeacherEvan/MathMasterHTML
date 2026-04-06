@@ -32,10 +32,10 @@ body.viewport-compact.viewport-landscape #rotation-overlay {
 }
 
 body.viewport-compact.viewport-landscape #panel-a {
-  min-height: 80px;
-  max-height: 20vh;
+  min-height: 0;
+  max-height: none;
 }
 
 body.viewport-compact.viewport-landscape #panel-b {
-  min-height: 120px;
+  min-height: 0;
 }

@@ -46,7 +46,7 @@ test.describe("Gameplay mobile landscape layout", () => {
           height: rect.height,
           display: style.display,
           gridTemplateColumns: style.gridTemplateColumns,
-          gridAutoRows: style.gridAutoRows,
+          gridTemplateRows: style.gridTemplateRows,
           fontSize: Number.parseFloat(style.fontSize || "0"),
         };
       };
@@ -82,7 +82,7 @@ test.describe("Gameplay mobile landscape layout", () => {
     expect(layout.solution.fontSize).toBeGreaterThanOrEqual(10);
     expect(layout.console.display).toBe("grid");
     expect(layout.console.gridTemplateColumns).not.toBe("none");
-    expect(layout.console.gridAutoRows).not.toBe("auto");
+    expect(layout.console.gridTemplateRows).not.toBe("none");
     expect(layout.console.top).toBeGreaterThanOrEqual(0);
     expect(layout.console.left).toBeGreaterThanOrEqual(layout.panelB.left - 1);
     expect(layout.console.right).toBeLessThanOrEqual(layout.panelB.right + 1);
