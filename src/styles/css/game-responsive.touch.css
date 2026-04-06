@@ -11,6 +11,15 @@
   }
 }
 
+@media (hover: none) and (pointer: coarse) {
+  body.viewport-compact.viewport-landscape .falling-symbol {
+    padding: 14px;
+    margin: -14px;
+    font-size: 18px !important;
+    line-height: 1;
+  }
+}
+
 /* Extra small devices / Mobile optimizations */
 @media (hover: none) and (pointer: coarse) and (max-width: 800px),
   (hover: none) and (pointer: coarse) and (max-height: 500px) {

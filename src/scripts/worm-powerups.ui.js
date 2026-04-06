@@ -15,18 +15,27 @@
     COMPACT_MIN_WIDTH: 220,
     COMPACT_WIDTH_RATIO: 0.68,
     COMPACT_WIDTH_CAP: 280,
+    COMPACT_LANDSCAPE_MIN_WIDTH: 132,
+    COMPACT_LANDSCAPE_WIDTH_RATIO: 0.18,
+    COMPACT_LANDSCAPE_WIDTH_CAP: 168,
     DESKTOP_TOP_OFFSET: 12,
     COMPACT_TOP_OFFSET: 86,
+    COMPACT_LANDSCAPE_TOP_OFFSET: 40,
     DESKTOP_HORIZONTAL_INSET: 180,
     COMPACT_HORIZONTAL_INSET: 12,
     DESKTOP_MAX_Y: 100,
     COMPACT_MAX_Y: 160,
+    COMPACT_LANDSCAPE_MAX_Y: 132,
     DESKTOP_GAP: 15,
     COMPACT_GAP: 8,
+    COMPACT_LANDSCAPE_GAP: 4,
     DESKTOP_PADDING: 10,
     COMPACT_PADDING: 6,
+    COMPACT_LANDSCAPE_PADDING: 4,
     DESKTOP_FONT_SIZE: 18,
     COMPACT_FONT_SIZE: 14,
+    COMPACT_LANDSCAPE_FONT_SIZE: 12,
+    PANEL_B_LANDSCAPE_SAFE_ZONE: 62,
   });
 
   /**
@@ -106,32 +115,54 @@
     const isCompactViewport =
       window.innerWidth <= config.COMPACT_MAX_WIDTH ||
       window.innerHeight <= config.COMPACT_MAX_HEIGHT;
+    const isCompactLandscape =
+      isCompactViewport &&
+      window.innerWidth >= window.innerHeight &&
+      document.body.classList.contains("viewport-landscape");
     const compactWidth = Math.max(
       config.COMPACT_MIN_WIDTH,
       Math.floor(window.innerWidth * config.COMPACT_WIDTH_RATIO),
     );
+    const compactLandscapeWidth = Math.max(
+      config.COMPACT_LANDSCAPE_MIN_WIDTH,
+      Math.floor(window.innerWidth * config.COMPACT_LANDSCAPE_WIDTH_RATIO),
+    );
     const displayWidth = isCompactViewport
-      ? Math.min(config.COMPACT_WIDTH_CAP, compactWidth)
+      ? isCompactLandscape
+        ? Math.min(config.COMPACT_LANDSCAPE_WIDTH_CAP, compactLandscapeWidth)
+        : Math.min(config.COMPACT_WIDTH_CAP, compactWidth)
       : config.DESKTOP_WIDTH;
     return {
       config,
       isCompactViewport,
+      isCompactLandscape,
       displayWidth,
-      topOffset: isCompactViewport
-        ? config.COMPACT_TOP_OFFSET
-        : config.DESKTOP_TOP_OFFSET,
-      displayGap: isCompactViewport ? config.COMPACT_GAP : config.DESKTOP_GAP,
-      displayPadding: isCompactViewport
-        ? config.COMPACT_PADDING
-        : config.DESKTOP_PADDING,
-      displayFontSize: isCompactViewport
-        ? config.COMPACT_FONT_SIZE
-        : config.DESKTOP_FONT_SIZE,
+      topOffset: isCompactLandscape
+        ? config.COMPACT_LANDSCAPE_TOP_OFFSET
+        : isCompactViewport
+          ? config.COMPACT_TOP_OFFSET
+          : config.DESKTOP_TOP_OFFSET,
+      displayGap: isCompactLandscape
+        ? config.COMPACT_LANDSCAPE_GAP
+        : isCompactViewport
+          ? config.COMPACT_GAP
+          : config.DESKTOP_GAP,
+      displayPadding: isCompactLandscape
+        ? config.COMPACT_LANDSCAPE_PADDING
+        : isCompactViewport
+          ? config.COMPACT_PADDING
+          : config.DESKTOP_PADDING,
+      displayFontSize: isCompactLandscape
+        ? config.COMPACT_LANDSCAPE_FONT_SIZE
+        : isCompactViewport
+          ? config.COMPACT_FONT_SIZE
+          : config.DESKTOP_FONT_SIZE,
     };
   };
 
   proto.getDisplayPanelContext = function (displayRect = null) {
-    const { config, isCompactViewport } = this.getDisplayLayoutMetrics();
+    const { config, isCompactViewport, isCompactLandscape } =
+      this.getDisplayLayoutMetrics();
     const panelB = document.getElementById("panel-b");
     const controls = panelB?.querySelector(".panel-b-controls");
     const timerDisplay = document.getElementById("timer-display");
@@ -146,7 +177,10 @@
       displayRect?.width || this.displayElement?.offsetWidth || 0;
     const hudSafeTop = Math.max(
       0,
-      Math.ceil((hudRect?.bottom || 0) + (isCompactViewport ? -8 : 8)),
+      Math.ceil(
+        (hudRect?.bottom || 0) +
+          (isCompactLandscape ? 1 : isCompactViewport ? -8 : 8),
+      ),
     );
 
     if (!panelRect) {
@@ -168,9 +202,11 @@
       };
     }
 
-    const compactInset = isCompactViewport
-      ? 4
-      : config.COMPACT_HORIZONTAL_INSET;
+    const compactInset = isCompactLandscape
+      ? 6
+      : isCompactViewport
+        ? 4
+        : config.COMPACT_HORIZONTAL_INSET;
     const panelInset = Math.max(
       compactInset,
       Math.floor(panelRect.width * (isCompactViewport ? 0.02 : 0.04)),
@@ -216,7 +252,11 @@
           (isCompactViewport ? config.COMPACT_MAX_Y : config.DESKTOP_MAX_Y);
     const fallbackBottomLimit =
       panelRect.top +
-      (isCompactViewport ? config.COMPACT_MAX_Y : config.DESKTOP_MAX_Y);
+      (isCompactLandscape
+        ? config.COMPACT_LANDSCAPE_MAX_Y
+        : isCompactViewport
+          ? config.COMPACT_MAX_Y
+          : config.DESKTOP_MAX_Y);
     const maxY = Math.max(
       minTop + trayHeight,
       Math.min(controlsBottomLimit, fallbackBottomLimit),
@@ -290,6 +330,7 @@
     const {
       config,
       isCompactViewport,
+      isCompactLandscape,
       displayWidth,
       displayGap,
       displayPadding,
@@ -329,7 +370,11 @@
       : isCompactViewport
         ? `min(${config.COMPACT_WIDTH_CAP}px, calc(100vw - ${config.COMPACT_HORIZONTAL_INSET * 2}px))`
         : `calc(100vw - ${config.DESKTOP_HORIZONTAL_INSET * 2}px)`;
-    this.displayElement.dataset.layout = narrowPanel ? "stacked" : "row";
+    this.displayElement.dataset.layout = isCompactLandscape
+      ? "row-compact"
+      : narrowPanel
+        ? "stacked"
+        : "row";
     this.displayElement.style.setProperty(
       "--power-up-display-width",
       `${resolvedDisplayWidth}px`,
@@ -348,15 +393,24 @@
       displayWidthActual,
       displayHeight,
     );
-    const panelBSafeZone = isCompactViewport
+    const panelBSafeZone = isCompactLandscape
       ? Math.max(
-          config.PANEL_B_BASE_SAFE_ZONE,
+          config.PANEL_B_LANDSCAPE_SAFE_ZONE,
           anchoredPosition.top +
             displayHeight -
             (panelRect?.top || 0) +
-            config.PANEL_B_CONTROLS_CLEARANCE,
+            config.PANEL_B_CONTROLS_CLEARANCE +
+            4,
         )
-      : config.PANEL_B_BASE_SAFE_ZONE;
+      : isCompactViewport
+        ? Math.max(
+            config.PANEL_B_BASE_SAFE_ZONE,
+            anchoredPosition.top +
+              displayHeight -
+              (panelRect?.top || 0) +
+              config.PANEL_B_CONTROLS_CLEARANCE,
+          )
+        : config.PANEL_B_BASE_SAFE_ZONE;
     document.documentElement.style.setProperty(
       "--panel-b-top-safe-zone",
       `${panelBSafeZone}px`,

@@ -51,6 +51,31 @@ body.power-up-placement-mode #power-up-display * {
   box-sizing: border-box;
 }
 
+.power-up-display[data-layout="row-compact"] {
+  gap: 4px;
+  padding: 4px 6px;
+  align-items: stretch;
+}
+
+.power-up-display[data-layout="row-compact"] .power-up-item {
+  padding: 4px 6px;
+}
+
+.power-up-display[data-layout="row-compact"] .power-up-item-value {
+  gap: 4px;
+}
+
+.power-up-display[data-layout="row-compact"] .power-up-item-selected-label {
+  bottom: -10px;
+  font-size: 8px;
+}
+
+.power-up-display[data-layout="row-compact"] .power-up-count-badge {
+  top: -6px;
+  right: -6px;
+  font-size: 9px;
+}
+
 .power-up-item {
   appearance: none;
   background: transparent;

@@ -1,4 +1,4 @@
-(function() {
+(function () {
   const SymbolRainHelpers = window.SymbolRainHelpers;
 
   function bindInteractions(symbolRainContainer, state) {
@@ -8,6 +8,11 @@
 
     let isPointerCurrentlyDown = false;
     let _lastClickedFallingSymbol = null;
+
+    const resetPointerState = () => {
+      isPointerCurrentlyDown = false;
+      _lastClickedFallingSymbol = null;
+    };
 
     symbolRainContainer.addEventListener(
       "pointerdown",
@@ -36,14 +41,16 @@
       { passive: false },
     );
 
-    symbolRainContainer.addEventListener("pointerup", () => {
-      isPointerCurrentlyDown = false;
-      _lastClickedFallingSymbol = null;
+    window.addEventListener("pointerup", resetPointerState, {
+      passive: true,
     });
 
-    symbolRainContainer.addEventListener("pointercancel", () => {
-      isPointerCurrentlyDown = false;
-      _lastClickedFallingSymbol = null;
+    window.addEventListener("pointercancel", resetPointerState, {
+      passive: true,
+    });
+
+    window.addEventListener("blur", resetPointerState, {
+      passive: true,
     });
 
     if (!window.PointerEvent) {

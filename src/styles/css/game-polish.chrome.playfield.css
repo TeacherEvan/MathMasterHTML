@@ -128,6 +128,48 @@
   }
 }
 
+body.viewport-compact.viewport-landscape .game-hud {
+  grid-template-columns: max-content max-content 1fr;
+  grid-template-areas: "score timer powerup-zone";
+  gap: 6px;
+}
+
+body.viewport-compact.viewport-landscape .score-display,
+body.viewport-compact.viewport-landscape .timer-display {
+  justify-self: start;
+}
+
+body.viewport-compact.viewport-landscape .hud-block {
+  width: max-content;
+  min-width: 84px;
+  max-width: 108px;
+  padding: 4px 8px;
+  border-radius: 0.85rem;
+}
+
+body.viewport-compact.viewport-landscape .hud-label {
+  font-size: 0.38rem;
+  letter-spacing: 0.12em;
+}
+
+body.viewport-compact.viewport-landscape .hud-value {
+  font-size: clamp(0.82rem, 2.7vh, 1rem);
+}
+
+body.viewport-compact.viewport-landscape
+  #power-up-display[data-layout="row-compact"] {
+  padding: 4px 6px;
+  gap: 4px;
+}
+
+body.viewport-compact.viewport-landscape
+  #power-up-display[data-layout="row-compact"]
+  .power-up-item {
+  min-height: 30px;
+  padding: 4px 6px;
+  border-radius: 0.7rem;
+}
+
 @media (max-width: 600px), (max-height: 260px) {
   body.viewport-compact.viewport-landscape #symbol-console {
     position: absolute !important;

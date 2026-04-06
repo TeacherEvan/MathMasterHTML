@@ -373,6 +373,8 @@ class DisplayManager {
 
   applySymbolRainAdjustments(config) {
     const isMobile = this.currentResolution?.isCompactViewport === true;
+    const isCompactLandscape =
+      isMobile && document.body.classList.contains("viewport-landscape");
 
     // Adjust falling symbol sizes
     const style = document.createElement("style");
@@ -386,7 +388,7 @@ class DisplayManager {
 
     // On mobile: increase falling symbols by 50% (1.5x larger)
     // On desktop: normal size
-    const symbolMultiplier = isMobile ? 1.8 : 1.2;
+    const symbolMultiplier = isCompactLandscape ? 1.35 : isMobile ? 1.65 : 1.2;
 
     style.textContent = `
             .falling-symbol {
@@ -396,7 +398,7 @@ class DisplayManager {
 
     if (isMobile) {
       console.log(
-        `📱 Falling symbols increased by 50% (multiplier: ${symbolMultiplier})`,
+        `📱 Falling symbols tuned for compact input (multiplier: ${symbolMultiplier})`,
       );
     }
 
