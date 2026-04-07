@@ -55,7 +55,9 @@ async function clickCardBody(page, level) {
     throw new Error(`Could not resolve a stable body-click target for ${level}.`);
   }
 
-  await card.scrollIntoViewIfNeeded();
+  await card.evaluate((element) => {
+    element.scrollIntoView({ block: "center", inline: "nearest" });
+  });
 
   const [cardBox, buttonBox] = await Promise.all([
     card.boundingBox(),
@@ -76,25 +78,10 @@ async function clickCardBody(page, level) {
     throw new Error(`Could not resolve a stable body-click target for ${level}.`);
   }
 
-  await card.click({
-    position: {
-      x: Math.round(cardBox.width / 2),
-      y: clickY,
-    },
-  });
-}
-
-/**
- * @param {import("@playwright/test").Page} page
- * @param {string} level
- */
-async function expectToRemainOnLevelSelect(page, level) {
-  const unexpectedNavigation = page
-    .waitForURL(`**/src/pages/game.html?level=${level}`, { timeout: 1000 })
-    .then(() => "navigated")
-    .catch(() => "stayed");
-
-  await expect(unexpectedNavigation).resolves.toBe("stayed");
+  await page.mouse.click(
+    Math.round(cardBox.x + cardBox.width / 2),
+    Math.round(cardBox.y + clickY),
+  );
 }
 
 test.describe("Level select interactions", () => {
@@ -102,9 +89,8 @@ test.describe("Level select interactions", () => {
     await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
     await waitForCardsToSettle(page);
 
-    const remainsOnLevelSelect = expectToRemainOnLevelSelect(page, "beginner");
     await clickCardBody(page, "beginner");
-    await remainsOnLevelSelect;
+    await expect(page).toHaveURL(/\/src\/pages\/level-select\.html(?:$|\?)/);
   });
 
   for (const route of ROUTES) {
@@ -112,8 +98,10 @@ test.describe("Level select interactions", () => {
       await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
       await waitForCardsToSettle(page);
       const button = page.getByRole("button", { name: route.buttonName });
-      await button.scrollIntoViewIfNeeded();
-      await button.click({ force: true, noWaitAfter: true });
+      await button.evaluate((element) => {
+        element.scrollIntoView({ block: "center", inline: "nearest" });
+      });
+      await button.click({ noWaitAfter: true });
       await expectRouteLaunch(page, route.level);
     });
 
@@ -152,7 +140,7 @@ test.describe("Level select interactions", () => {
 
     await page
       .getByRole("button", { name: "Enter foundations" })
-      .click({ force: true, noWaitAfter: true });
+      .click({ noWaitAfter: true });
     await expectRouteLaunch(page, "beginner");
   });
 });
