@@ -38,6 +38,7 @@ async function runScenario(page, testInfo, { scenarioName, level, action }) {
 
   return snapshot;
 }
+
 test.describe("Performance scenarios", () => {
   test("idle scenario captures a stable baseline", async ({
     page,
