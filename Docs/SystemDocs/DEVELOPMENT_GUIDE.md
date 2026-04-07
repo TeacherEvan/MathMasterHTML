@@ -50,14 +50,20 @@ Large systems are intentionally split by concern:
 
 Additions should follow the existing split convention instead of rebuilding monolith files.
 
-### 3. Respect current UI ownership
+### 3. Reuse centralized constants and event names
+
+- Runtime constants belong in `src/scripts/constants.js`.
+- Shared event names belong in `src/scripts/constants.events.js`.
+- Do not invent ad hoc constants or cross-module event strings when the shared surface should own them.
+
+### 4. Respect current UI ownership
 
 - Panel A and B text sizing is controlled by `src/scripts/display-manager.js` via inline styles.
 - Problem data comes from `src/assets/problems/**/*.md`.
 - Lock visuals are injected from `lock/` HTML fragments.
 - Touch-first interactions use `pointerdown`, not delayed `click` handlers.
 
-### 4. Prefer current code over historical docs
+### 5. Prefer current code over historical docs
 
 Some removed reports captured point-in-time snapshots. When in doubt, verify behavior against `src/scripts/` and update the living docs instead of resurrecting old assumptions.
 
@@ -89,3 +95,7 @@ Use these files as the source of truth:
 - Recent noteworthy work: `JOBCARD.md`
 
 Avoid creating new completion reports, audit summaries, or plan markdown unless the document will remain a durable part of the living set.
+
+## Agent customization upkeep
+
+Treat `.github/copilot-instructions.md` as a minimal repo-wide routing layer, not a second source of truth for runtime or testing rules. When upkeep changes affect ownership or instruction layering, update the durable docs first and use `Docs/SystemDocs/AGENT_CUSTOMIZATION_ARCHITECTURE.md` as the reference for the routing model and update protocol.
