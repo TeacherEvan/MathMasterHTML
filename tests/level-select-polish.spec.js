@@ -181,4 +181,36 @@ test.describe("Level select polish", () => {
 
     expect(visibleLevels).toEqual(["warrior"]);
   });
+
+  test("switches the visible route panel when a compact selector button is activated from the keyboard", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 430, height: 932 });
+    await page.goto("/src/pages/level-select.html", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await waitForCardsToSettle(page);
+
+    const warriorButton = page.locator(
+      '.route-switcher-button[data-level="warrior"]',
+    );
+    const masterButton = page.locator(
+      '.route-switcher-button[data-level="master"]',
+    );
+
+    await warriorButton.focus();
+    await page.keyboard.press("Enter");
+    await expect(warriorButton).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      page.locator('.level-card[data-level="warrior"]'),
+    ).toBeVisible();
+
+    await masterButton.focus();
+    await page.keyboard.press("Space");
+    await expect(masterButton).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      page.locator('.level-card[data-level="master"]'),
+    ).toBeVisible();
+  });
 });
