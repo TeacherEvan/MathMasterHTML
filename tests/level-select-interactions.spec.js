@@ -43,9 +43,72 @@ async function expectRouteLaunch(page, level) {
     .toBe(`/src/pages/game.html?level=${level}`);
 }
 
+/**
+ * @param {import("@playwright/test").Page} page
+ * @param {string} level
+ */
+async function clickCardBody(page, level) {
+  const card = page.locator(`.level-card[data-level="${level}"]`);
+  const ctaButton = card.locator(".level-button");
+
+  if ((await card.count()) !== 1 || (await ctaButton.count()) !== 1) {
+    throw new Error(`Could not resolve a stable body-click target for ${level}.`);
+  }
+
+  await card.scrollIntoViewIfNeeded();
+
+  const [cardBox, buttonBox] = await Promise.all([
+    card.boundingBox(),
+    ctaButton.boundingBox(),
+  ]);
+
+  if (!cardBox || !buttonBox) {
+    throw new Error(`Could not resolve a stable body-click target for ${level}.`);
+  }
+
+  const buttonTopWithinCard = buttonBox.y - cardBox.y;
+  const clickY = Math.max(
+    24,
+    Math.min(buttonTopWithinCard - 24, Math.round(buttonTopWithinCard * 0.5)),
+  );
+
+  if (clickY >= buttonTopWithinCard) {
+    throw new Error(`Could not resolve a stable body-click target for ${level}.`);
+  }
+
+  await card.click({
+    position: {
+      x: Math.round(cardBox.width / 2),
+      y: clickY,
+    },
+  });
+}
+
+/**
+ * @param {import("@playwright/test").Page} page
+ * @param {string} level
+ */
+async function expectToRemainOnLevelSelect(page, level) {
+  const unexpectedNavigation = page
+    .waitForURL(`**/src/pages/game.html?level=${level}`, { timeout: 1000 })
+    .then(() => "navigated")
+    .catch(() => "stayed");
+
+  await expect(unexpectedNavigation).resolves.toBe("stayed");
+}
+
 test.describe("Level select interactions", () => {
+  test("does not launch a route when the panel body is clicked", async ({ page }) => {
+    await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
+    await waitForCardsToSettle(page);
+
+    const remainsOnLevelSelect = expectToRemainOnLevelSelect(page, "beginner");
+    await clickCardBody(page, "beginner");
+    await remainsOnLevelSelect;
+  });
+
   for (const route of ROUTES) {
-    test(`launches ${route.level} from a card click`, async ({ page }) => {
+    test(`launches ${route.level} only from its CTA button`, async ({ page }) => {
       await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
       await waitForCardsToSettle(page);
       const button = page.getByRole("button", { name: route.buttonName });
@@ -64,7 +127,7 @@ test.describe("Level select interactions", () => {
     });
   }
 
-  test("keeps route cards visible and usable with reduced motion enabled", async ({
+  test("keeps CTA launch working with reduced motion enabled", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
