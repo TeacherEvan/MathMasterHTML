@@ -144,10 +144,10 @@ body::before {
   body.viewport-compact.viewport-landscape #back-button,
   body.viewport-compact.viewport-landscape #audio-toggle {
     min-width: auto;
-    min-height: 2.15rem;
-    padding: 0.35rem 0.65rem;
+    min-height: 44px;
+    padding: 0.4rem 0.55rem;
     bottom: 6px;
-    font: 700 0.68rem/1 var(--font-body);
+    font: 700 0.66rem/1 var(--font-body);
     letter-spacing: 0.12em;
     border-radius: 0.85rem;
   }
