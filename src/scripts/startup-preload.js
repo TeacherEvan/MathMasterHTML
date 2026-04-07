@@ -3,44 +3,88 @@
   const overlay = document.getElementById("startup-preload");
   const messageEl = document.getElementById("startup-preload-message");
   const progressEl = document.getElementById("startup-preload-progress");
+  const OVERLAY_HIDE_DELAY_MS = 400;
 
   let complete = false;
   let progressBar = null;
+  let hideOverlayTimer = null;
 
-  function dispatchComplete() {
-    document.dispatchEvent(new CustomEvent(GE.STARTUP_PRELOAD_COMPLETE));
+  function hideOverlay() {
+    if (!overlay) return;
+
+    overlay.style.opacity = "0";
+    overlay.style.pointerEvents = "none";
+    overlay.setAttribute("aria-hidden", "true");
+    clearTimeout(hideOverlayTimer);
+    hideOverlayTimer = setTimeout(() => {
+      overlay.style.display = "none";
+    }, OVERLAY_HIDE_DELAY_MS);
   }
 
-  function finishOverlay() {
-    if (overlay) {
-      overlay.style.opacity = "0";
-      setTimeout(() => {
-        overlay.style.display = "none";
-        overlay.setAttribute("aria-hidden", "true");
-      }, 400);
-    }
-    dispatchComplete();
+  function dispatchComplete(reason) {
+    if (!GE?.STARTUP_PRELOAD_COMPLETE) return;
+
+    document.dispatchEvent(
+      new CustomEvent(GE.STARTUP_PRELOAD_COMPLETE, {
+        detail: { reason },
+      }),
+    );
   }
 
-  function markComplete() {
+  function markComplete(reason = "complete", shouldDispatch = true) {
     if (complete) return;
+
     complete = true;
-    finishOverlay();
+    hideOverlay();
+
+    if (shouldDispatch) {
+      dispatchComplete(reason);
+    }
+  }
+
+  function setOverlayProgress(event) {
+    if (complete) return;
+
+    const { progress, message } = event.detail || {};
+    if (messageEl && message) {
+      messageEl.textContent = message;
+    }
+    if (progressEl && typeof progress === "number") {
+      progressEl.setAttribute("aria-valuenow", String(progress));
+      progressEl.style.setProperty("--progress", progress + "%");
+    }
+    if (progressBar && typeof progress === "number") {
+      try {
+        progressBar.setProgress(progress);
+      } catch {
+        // Progress bar is optional.
+      }
+    }
   }
 
   function init() {
     const mode = window.GameOnboarding?.preloadMode;
 
+    if (!GE) {
+      complete = true;
+      hideOverlay();
+      return;
+    }
+
     if (mode === "off" || !overlay) {
       complete = true;
       if (overlay) {
         overlay.style.display = "none";
+        overlay.style.pointerEvents = "none";
         overlay.setAttribute("aria-hidden", "true");
       }
-      dispatchComplete();
+      dispatchComplete(mode === "off" ? "disabled" : "missing-overlay");
       return;
     }
+
     overlay.style.display = "flex";
+    overlay.style.opacity = "1";
+    overlay.style.pointerEvents = "auto";
     overlay.removeAttribute("aria-hidden");
 
     if (window.UXModules?.ProgressBarManager && progressEl) {
@@ -49,35 +93,19 @@
           "#startup-preload-progress",
         );
       } catch {
-        // Progress bar optional — overlay still functions
+        // Progress bar optional — overlay still functions.
       }
     }
 
-    document.addEventListener(GE.PRELOAD_PROGRESS, (e) => {
-      if (complete) return;
-      const { progress, message } = e.detail || {};
-      if (messageEl && message) {
-        messageEl.textContent = message;
-      }
-      if (progressEl && typeof progress === "number") {
-        progressEl.setAttribute("aria-valuenow", String(progress));
-        progressEl.style.setProperty("--progress", progress + "%");
-      }
-      if (progressBar && typeof progress === "number") {
-        try {
-          progressBar.setProgress(progress);
-        } catch {
-          // ignore
-        }
-      }
-    });
-
+    document.addEventListener(GE.PRELOAD_PROGRESS, setOverlayProgress);
     document.addEventListener(GE.PRELOAD_READY, () => {
-      markComplete();
+      markComplete("ready");
     });
-
     document.addEventListener(GE.PRELOAD_FAILED, () => {
-      markComplete();
+      markComplete("failed");
+    });
+    document.addEventListener(GE.STARTUP_PRELOAD_FORCE_COMPLETE, (event) => {
+      markComplete(event.detail?.reason || "forced");
     });
   }
 
@@ -86,6 +114,17 @@
   window.StartupPreload = {
     isBlocking: () => !complete,
     isComplete: () => complete,
-    _onComplete: markComplete,
+    requestComplete: (reason = "api") => {
+      if (GE?.STARTUP_PRELOAD_FORCE_COMPLETE) {
+        document.dispatchEvent(
+          new CustomEvent(GE.STARTUP_PRELOAD_FORCE_COMPLETE, {
+            detail: { reason },
+          }),
+        );
+        return;
+      }
+
+      markComplete(reason, false);
+    },
   };
 })();

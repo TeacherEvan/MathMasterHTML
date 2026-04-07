@@ -90,7 +90,13 @@
     }
   });
 
+  document.addEventListener(GE.BRIEFING_DISMISSED, () => {
+    onBriefingDismissed();
+  });
+
   window.GameOnboardingController = {
-    onBriefingDismissed,
+    onBriefingDismissed: () => {
+      document.dispatchEvent(new CustomEvent(GE.BRIEFING_DISMISSED));
+    },
   };
 })();

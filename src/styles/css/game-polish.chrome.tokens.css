@@ -8,6 +8,16 @@
   --shell-line-soft: color-mix(in oklch, var(--shell-line) 40%, transparent);
   --shell-signal: oklch(0.84 0.12 82);
   --shell-alert: oklch(0.74 0.16 42);
+  --shell-surface-raised: linear-gradient(160deg, color-mix(in oklch, var(--shell-panel-strong) 84%, transparent), color-mix(in oklch, var(--shell-bg) 92%, black 8%));
+  --shell-surface-soft: linear-gradient(180deg, color-mix(in oklch, var(--shell-panel) 88%, transparent), color-mix(in oklch, var(--shell-bg) 94%, black 6%));
+  --shell-border-subtle: color-mix(in oklch, var(--shell-copy) 8%, transparent);
+  --shell-border-strong: color-mix(in oklch, var(--shell-line) 26%, transparent);
+  --shell-border-signal: color-mix(in oklch, var(--shell-signal) 34%, transparent);
+  --shell-shadow-panel: inset 0 1px 0 color-mix(in oklch, var(--shell-copy) 8%, transparent), 0 16px 40px rgba(0, 0, 0, 0.3);
+  --shell-shadow-control: 0 0 0 1px rgba(194, 236, 102, 0.12), 0 14px 30px rgba(0, 0, 0, 0.35);
+  --shell-ring-soft: 0 0 0 1px color-mix(in oklch, var(--shell-signal) 28%, transparent);
+  --shell-scrollbar-thumb: color-mix(in oklch, var(--shell-line) 42%, black 18%);
+  --shell-scrollbar-track: color-mix(in oklch, var(--shell-bg) 88%, black 12%);
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -21,13 +31,7 @@
 body {
   font-family: var(--font-body);
   color: var(--shell-copy);
-  background:
-    radial-gradient(
-      circle at top,
-      color-mix(in oklch, var(--shell-signal) 14%, transparent),
-      transparent 34%
-    ),
-    linear-gradient(180deg, oklch(0.18 0.02 122), var(--shell-bg) 58%);
+  background: radial-gradient(circle at top, color-mix(in oklch, var(--shell-signal) 14%, transparent), transparent 34%), linear-gradient(180deg, oklch(0.18 0.02 122), var(--shell-bg) 58%);
 }
 
 body::before {
@@ -36,19 +40,11 @@ body::before {
   inset: 0;
   pointer-events: none;
   opacity: 0.08;
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklch, var(--shell-line) 7%, transparent),
-    transparent 32%
-  );
+  background: linear-gradient(180deg, color-mix(in oklch, var(--shell-line) 7%, transparent), transparent 32%);
 }
 
 .wall {
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklch, var(--shell-signal) 78%, var(--shell-line) 22%),
-    color-mix(in oklch, var(--shell-line) 82%, black 18%)
-  );
+  background: linear-gradient(180deg, color-mix(in oklch, var(--shell-signal) 78%, var(--shell-line) 22%), color-mix(in oklch, var(--shell-line) 82%, black 18%));
 }
 
 #back-button,
@@ -60,18 +56,12 @@ body::before {
   padding: 0.8rem 1rem;
   border-radius: 999px;
   border: 1px solid color-mix(in oklch, var(--shell-line) 78%, black 22%);
-  background: linear-gradient(
-    145deg,
-    color-mix(in oklch, var(--shell-panel-strong) 88%, transparent),
-    color-mix(in oklch, var(--shell-bg) 90%, black 10%)
-  );
+  background: var(--shell-surface-raised);
   color: var(--shell-copy);
   font: 700 0.88rem/1 var(--font-body);
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  box-shadow:
-    0 0 0 1px rgba(194, 236, 102, 0.12),
-    0 14px 30px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shell-shadow-control);
   transition:
     transform 180ms ease-out,
     border-color 180ms ease-out,
@@ -127,7 +117,7 @@ body::before {
 .start-game-button:active {
   transform: translateY(0) scale(0.985);
   box-shadow:
-    0 0 0 1px rgba(194, 236, 102, 0.12),
+    var(--shell-ring-soft),
     0 10px 22px rgba(0, 0, 0, 0.3);
 }
 

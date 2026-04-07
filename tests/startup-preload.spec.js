@@ -90,17 +90,23 @@ test.describe("Startup Preload — Build 2", () => {
     expect(state.display).toBe("none");
   });
 
-  test("briefing modal visible after startupPreloadComplete", async ({
+  test("briefing modal visible after forced startup preload completion", async ({
     page,
   }) => {
     await gotoBlockingPreloadRuntime(page, "?level=beginner");
 
     await page.evaluate(() => {
       document.dispatchEvent(
-        new CustomEvent(window.GameEvents.STARTUP_PRELOAD_COMPLETE),
+        new CustomEvent(window.GameEvents.STARTUP_PRELOAD_FORCE_COMPLETE, {
+          detail: { reason: "test" },
+        }),
       );
     });
 
+    await page.waitForFunction(
+      () => window.StartupPreload?.isComplete() === true,
+    );
+    await expect(page.locator("#startup-preload")).toBeHidden();
     await waitForBriefingVisible(page);
     await expect(page.locator("#how-to-play-modal")).toBeVisible();
   });

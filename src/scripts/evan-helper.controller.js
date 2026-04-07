@@ -14,31 +14,27 @@
   const pending = [];
   let wormTapStreak = 0;
 
+  function getLiveTarget(target) {
+    return hasLiveRect(target) ? target : null;
+  }
+
   function emit(name, detail) {
     document.dispatchEvent(new CustomEvent(name, { detail }));
   }
 
   async function clickSymbol(el, symbol) {
     const T = window.EvanTargets;
-    if (!hasLiveRect(el)) return;
-    const pos = T.centerOf(el);
+    const target = getLiveTarget(el);
+    if (!target) return;
+    const pos = T.centerOf(target);
     window.EvanPresenter?.moveHandTo?.(pos.x, pos.y);
     emit(GE.EVAN_ACTION_REQUESTED, { action: "symbolClick", symbol });
     await wait(pending, DELAY_TARGET);
-    const liveSymbol = String(el.textContent || "")
-      .trim()
-      .toLowerCase();
-    const expectedSymbol = String(symbol || "")
-      .trim()
-      .toLowerCase();
-    if (
-      !active ||
-      !hasLiveRect(el) ||
-      !liveSymbol ||
-      liveSymbol !== expectedSymbol
-    )
-      return;
-    el.classList.add("clicked");
+    const liveSymbol = String(target.textContent || "").trim().toLowerCase();
+    const expectedSymbol = String(symbol || "").trim().toLowerCase();
+    if (!active || !getLiveTarget(target) || !liveSymbol) return;
+    if (expectedSymbol && liveSymbol !== expectedSymbol) return;
+    target.classList.add("clicked");
     emit(GE.SYMBOL_CLICKED, { symbol });
     emit(GE.EVAN_ACTION_COMPLETED, { action: "symbolClick", symbol });
     await wait(pending, DELAY_POST);
@@ -46,12 +42,13 @@
 
   async function tapWormSegment(seg) {
     const T = window.EvanTargets;
-    if (!hasLiveRect(seg)) return;
-    const pos = T.centerOf(seg);
+    const target = getLiveTarget(seg);
+    if (!target) return;
+    const pos = T.centerOf(target);
     window.EvanPresenter?.moveHandTo?.(pos.x, pos.y);
     emit(GE.EVAN_ACTION_REQUESTED, { action: "wormTap", ...pos });
     await wait(pending, DELAY_TARGET);
-    if (!active || !hasLiveRect(seg)) return;
+    if (!active || !getLiveTarget(target)) return;
     emit(GE.WORM_CURSOR_TAP, pos);
     emit(GE.EVAN_ACTION_COMPLETED, { action: "wormTap", ...pos });
     wormTapStreak++;
@@ -60,19 +57,20 @@
 
   async function collectMuffin(muffin) {
     const T = window.EvanTargets;
-    if (!hasLiveRect(muffin)) return;
-    const pos = T.centerOf(muffin);
+    const target = getLiveTarget(muffin);
+    if (!target) return;
+    const pos = T.centerOf(target);
     window.EvanPresenter?.moveHandTo?.(pos.x, pos.y);
     emit(GE.EVAN_ACTION_REQUESTED, { action: "muffinCollect" });
     let attempts = 0;
     while (
       active &&
-      muffin.isConnected &&
-      !muffin.disabled &&
-      hasLiveRect(muffin) &&
+      target.isConnected &&
+      !target.disabled &&
+      getLiveTarget(target) &&
       attempts < 20
     ) {
-      muffin.dispatchEvent(
+      target.dispatchEvent(
         new PointerEvent("pointerdown", { bubbles: true, cancelable: true }),
       );
       attempts++;
@@ -86,8 +84,8 @@
     const T = window.EvanTargets;
     const sys = window.wormSystem?.powerUpSystem;
     if (!sys) return;
-    const target = T.findGreenWormSegment();
-    if (!hasLiveRect(target)) return;
+    const target = getLiveTarget(T.findGreenWormSegment?.());
+    if (!target) return;
     const pos = T.centerOf(target);
     window.EvanPresenter?.moveHandTo?.(pos.x, pos.y);
     emit(GE.EVAN_ACTION_REQUESTED, { action: "powerUp", type });
@@ -127,7 +125,7 @@
   async function runLoop() {
     const T = window.EvanTargets;
     while (active) {
-      const seg = T.findGreenWormSegment();
+      const seg = getLiveTarget(T.findGreenWormSegment?.());
       const puType = T.getBestPowerUp(seg);
       const neededSymbols = [];
       const neededSymbol = T.getNeededSymbol?.();
@@ -137,9 +135,10 @@
           neededSymbols.push(symbol);
         }
       }
-      const symbolTarget =
+      const symbolTarget = getLiveTarget(
         T.findBestFallingSymbol?.(neededSymbols) ||
-        (neededSymbols[0] ? T.findFallingSymbol?.(neededSymbols[0]) : null);
+          (neededSymbols[0] ? T.findFallingSymbol?.(neededSymbols[0]) : null),
+      );
 
       if (puType) {
         await usePowerUp(puType);
@@ -153,7 +152,7 @@
       }
       if (!active) break;
 
-      const muffin = T.findMuffinReward();
+      const muffin = getLiveTarget(T.findMuffinReward?.());
       if (muffin) {
         await collectMuffin(muffin);
         continue;
@@ -162,7 +161,10 @@
 
       if (symbolTarget) {
         wormTapStreak = 0;
-        await clickSymbol(symbolTarget, symbolTarget.textContent.trim());
+        await clickSymbol(
+          symbolTarget,
+          neededSymbol || neededSymbols[0] || symbolTarget.textContent.trim(),
+        );
       } else {
         if (!neededSymbols.length) {
           wormTapStreak = 0;

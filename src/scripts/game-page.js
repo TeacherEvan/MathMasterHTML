@@ -1,4 +1,5 @@
 (function () {
+  const GE = window.GameEvents;
   const backButton = document.getElementById("back-button");
 
   function goBack() {
@@ -28,6 +29,29 @@
     }
   }
 
+  function requestStartupPreloadCompletion(reason) {
+    if (GE?.STARTUP_PRELOAD_FORCE_COMPLETE) {
+      document.dispatchEvent(
+        new CustomEvent(GE.STARTUP_PRELOAD_FORCE_COMPLETE, {
+          detail: { reason },
+        }),
+      );
+      return;
+    }
+
+    window.StartupPreload?.requestComplete?.(reason);
+  }
+
+  function notifyBriefingDismissed() {
+    if (GE?.BRIEFING_DISMISSED) {
+      document.dispatchEvent(new CustomEvent(GE.BRIEFING_DISMISSED));
+      return;
+    }
+
+    window.ScoreTimerManager?.setGameStarted?.();
+    window.GameOnboardingController?.onBriefingDismissed?.();
+  }
+
   function setupHowToPlayModal() {
     const modal = document.getElementById("how-to-play-modal");
     const startButton = document.getElementById("start-game-btn");
@@ -42,8 +66,7 @@
       modal.style.animation = "modalFadeOut 0.3s ease-out";
       setTimeout(() => {
         modal.style.display = "none";
-        window.ScoreTimerManager?.setGameStarted?.();
-        window.GameOnboardingController?.onBriefingDismissed?.();
+        notifyBriefingDismissed();
         enterFullscreen();
       }, 300);
     }
@@ -53,10 +76,10 @@
     if (window.StartupPreload?.isBlocking()) {
       modal.style.display = "none";
       const safetyTimeout = setTimeout(() => {
-        window.StartupPreload?._onComplete?.();
+        requestStartupPreloadCompletion("timeout");
       }, 8000);
       document.addEventListener(
-        window.GameEvents.STARTUP_PRELOAD_COMPLETE,
+        GE.STARTUP_PRELOAD_COMPLETE,
         () => {
           clearTimeout(safetyTimeout);
           showModal();

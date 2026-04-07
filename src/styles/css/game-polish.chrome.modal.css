@@ -1,29 +1,44 @@
 .how-to-play-overlay {
   background: linear-gradient(
     180deg,
-    rgba(14, 16, 13, 0.88),
-    rgba(10, 11, 10, 0.96)
+    color-mix(in oklch, var(--shell-bg) 44%, transparent),
+    color-mix(in oklch, var(--shell-bg) 68%, black 32%)
   );
-  backdrop-filter: blur(14px);
+  align-items: flex-start;
+  padding: clamp(1rem, 4vw, 2.25rem);
+  backdrop-filter: blur(10px);
 }
 
 .how-to-play-content {
-  width: min(720px, calc(100vw - 2rem));
-  padding: clamp(1.5rem, 4vw, 2.75rem);
+  width: min(640px, calc(100vw - 3rem));
+  margin-top: clamp(1rem, 8vh, 4.5rem);
+  padding: clamp(1.35rem, 3.4vw, 2.2rem);
   border-radius: 1.75rem;
-  border: 1px solid color-mix(in oklch, var(--shell-signal) 35%, transparent);
-  background: linear-gradient(
-    160deg,
-    color-mix(in oklch, var(--shell-panel-strong) 92%, transparent),
-    color-mix(in oklch, var(--shell-bg) 88%, black 12%)
-  );
+  border: 1px solid var(--shell-border-signal);
+  background: var(--shell-surface-raised);
   box-shadow:
-    0 32px 80px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 color-mix(in oklch, var(--shell-copy) 8%, transparent);
+    var(--shell-shadow-panel),
+    0 32px 80px rgba(0, 0, 0, 0.44);
+  scrollbar-width: thin;
+  scrollbar-color: var(--shell-scrollbar-thumb) var(--shell-scrollbar-track);
+}
+
+.how-to-play-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.how-to-play-content::-webkit-scrollbar-track {
+  background: var(--shell-scrollbar-track);
+  border-radius: 999px;
+}
+
+.how-to-play-content::-webkit-scrollbar-thumb {
+  background: var(--shell-scrollbar-thumb);
+  border-radius: 999px;
 }
 
 .how-to-play-kicker {
-  margin: 0 0 0.9rem;
+  margin: 0 0 0.8rem;
   color: var(--shell-signal);
   font: 700 0.72rem/1.2 var(--font-body);
   letter-spacing: 0.28em;
@@ -31,11 +46,11 @@
 }
 
 .how-to-play-content h2 {
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
   color: var(--shell-copy);
   font-family: var(--font-display);
-  font-size: clamp(2rem, 5vw, 3.7rem);
-  line-height: 0.95;
+  font-size: clamp(1.9rem, 4.8vw, 3.35rem);
+  line-height: 0.98;
   text-align: left;
   text-shadow: 0 0 24px
     color-mix(in oklch, var(--shell-signal) 18%, transparent);
@@ -43,29 +58,32 @@
 
 .how-to-play-message {
   display: grid;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  color: var(--shell-copy-muted);
-  font: 500 clamp(1rem, 1.3vw, 1.15rem)/1.65 var(--font-body);
+  gap: 0.85rem;
+  margin-bottom: 1.2rem;
+  color: color-mix(in oklch, var(--shell-copy-muted) 88%, var(--shell-copy) 12%);
+  font: 500 clamp(0.98rem, 1.2vw, 1.08rem)/1.58 var(--font-body);
   text-align: left;
 }
 
 .how-to-play-message p,
 .how-to-play-message li {
-  max-width: 54ch;
+  max-width: 50ch;
 }
 
 .how-to-play-callout {
-  padding: 1rem 1.1rem;
+  padding: 0.9rem 1rem;
   border-radius: 1.1rem;
-  border: 1px solid color-mix(in oklch, var(--shell-line) 28%, transparent);
-  background: color-mix(in oklch, var(--shell-panel) 88%, black 12%);
+  border: 1px solid var(--shell-border-strong);
+  background: var(--shell-surface-soft);
+  box-shadow:
+    inset 0 1px 0 var(--shell-border-subtle),
+    0 8px 18px rgba(0, 0, 0, 0.22);
 }
 
 .how-to-play-callout strong {
   display: block;
   margin-bottom: 0.7rem;
-  color: var(--shell-copy);
+  color: color-mix(in oklch, var(--shell-copy) 84%, var(--shell-signal) 16%);
   font-family: var(--font-display);
   font-size: 0.9rem;
   letter-spacing: 0.18em;
@@ -82,21 +100,21 @@
 #clarify-button {
   min-height: 44px;
   border-radius: 1rem;
-  border: 1px solid color-mix(in oklch, var(--shell-signal) 34%, transparent);
+  border: 1px solid var(--shell-border-signal);
   background: linear-gradient(
     145deg,
-    color-mix(in oklch, var(--shell-signal) 30%, var(--shell-panel) 70%),
-    color-mix(in oklch, var(--shell-panel) 82%, black 18%)
+    color-mix(in oklch, var(--shell-signal) 14%, var(--shell-panel-strong) 86%),
+    color-mix(in oklch, var(--shell-panel) 80%, black 20%)
   );
   color: var(--shell-copy);
   font-family: var(--font-body);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26);
+  box-shadow: var(--shell-shadow-control);
 }
 
 .start-game-button {
   width: auto;
-  min-width: 15rem;
-  padding-inline: 1.25rem;
+  min-width: 14rem;
+  padding-inline: 1.1rem;
 }
 
 .panel-b-controls {
@@ -106,6 +124,10 @@
 }
 
 @media (max-width: 900px) {
+  .how-to-play-overlay {
+    padding: 0.9rem;
+  }
+
   .how-to-play-content h2 {
     font-size: clamp(1.8rem, 8vw, 3rem);
   }

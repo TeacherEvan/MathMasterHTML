@@ -4,6 +4,7 @@ console.log("🎮 Game initialization module loading...");
 (function () {
   // Simple error boundary for game initialization
   try {
+    const GE = window.GameEvents;
     const problemContainer = document.getElementById("problem-container");
     const solutionContainer = document.getElementById("solution-container");
     const lockDisplay = document.getElementById("lock-display");
@@ -40,12 +41,9 @@ console.log("🎮 Game initialization module loading...");
     }
 
     // Don't start the per-step countdown behind the How-To-Play modal
-    if (startGameButton && window.ScoreTimerManager) {
-      startGameButton.addEventListener("click", () => {
-        // game.html uses a ~300ms fade-out; increase buffer to ensure modal is gone
-        setTimeout(() => {
-          window.ScoreTimerManager.setGameStarted();
-        }, 500);
+    if (GE?.BRIEFING_DISMISSED && window.ScoreTimerManager) {
+      document.addEventListener(GE.BRIEFING_DISMISSED, () => {
+        window.ScoreTimerManager.setGameStarted();
       });
     }
     // Mark automation runs (Playwright) to avoid portrait lock overlay

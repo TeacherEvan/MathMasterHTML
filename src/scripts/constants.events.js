@@ -18,12 +18,14 @@
     PRELOAD_PROGRESS: "preloadProgress",
     PRELOAD_READY: "preloadReady",
     PRELOAD_FAILED: "preloadFailed",
+    STARTUP_PRELOAD_FORCE_COMPLETE: "startupPreloadForceComplete",
     EVAN_HELP_STARTED: "evanHelpStarted",
     EVAN_HELP_STOPPED: "evanHelpStopped",
     EVAN_ACTION_REQUESTED: "evanActionRequested",
     EVAN_ACTION_COMPLETED: "evanActionCompleted",
     INSTALL_PROMPT_AVAILABLE: "installPromptAvailable",
     INSTALL_PROMPT_DISMISSED: "installPromptDismissed",
+    BRIEFING_DISMISSED: "briefingDismissed",
     STARTUP_PRELOAD_COMPLETE: "startupPreloadComplete",
   });
 })();

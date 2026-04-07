@@ -16,7 +16,6 @@
       if (typeof entry === "function") entry();
       else clearTimeout(entry);
     });
-    pending.length = 0;
   }
 
   function wait(pending, ms) {
@@ -42,7 +41,18 @@
     return new Promise((resolve) => {
       let done = false;
       let timeoutId = null;
-      const handler = (event) => {
+      let release = () => {};
+      let handler = () => {};
+      const cancel = () => {
+        if (done) return;
+        done = true;
+        clearTimeout(timeoutId);
+        document.removeEventListener(name, handler);
+        release();
+        resolve(false);
+      };
+      release = trackPending(pending, cancel);
+      handler = (event) => {
         if (done || (matcher && !matcher(event))) return;
         done = true;
         clearTimeout(timeoutId);
@@ -59,14 +69,6 @@
         release();
         resolve(false);
       }, timeout);
-      const cancel = () => {
-        if (done) return;
-        done = true;
-        clearTimeout(timeoutId);
-        document.removeEventListener(name, handler);
-        resolve(false);
-      };
-      const release = trackPending(pending, cancel);
     });
   }
 

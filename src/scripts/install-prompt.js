@@ -6,6 +6,15 @@
   let deferredPrompt = null;
   let shown = false;
   let briefingDismissed = false;
+  let preloadComplete = window.StartupPreload?.isBlocking?.() !== true;
+  let toastManager = null;
+  let toastEl = null;
+
+  function dismissToast() {
+    if (!toastEl) return;
+    toastManager?.dismiss?.(toastEl);
+    toastEl = null;
+  }
 
   function markBriefingDismissed() {
     if (briefingDismissed) return;
@@ -23,6 +32,7 @@
   function tryShow() {
     if (shown || !deferredPrompt) return;
     if (!storage.shouldShowInstallPrompt()) return;
+    if (!preloadComplete) return;
     if (!briefingDismissed) {
       return;
     }
@@ -33,55 +43,59 @@
     if (shown) return;
     shown = true;
 
-    const toast =
+    toastManager =
       window.UXEnhancements?.toast ||
       (window.UXModules?.ToastNotificationManager
         ? new window.UXModules.ToastNotificationManager()
         : null);
 
-    if (!toast || typeof toast.info !== "function") {
-      promptNow();
+    if (!toastManager || typeof toastManager.info !== "function") {
+      shown = false;
       return;
     }
 
-    const el = toast.info("Install Math Master for offline play \u2192", 0);
+    toastEl = toastManager.info("Install Math Master for offline play \u2192", 0);
 
-    if (el) {
-      el.style.cursor = "pointer";
-      el.addEventListener("click", () => {
+    if (toastEl) {
+      toastEl.style.cursor = "pointer";
+      toastEl.addEventListener("click", () => {
         promptNow();
       });
     }
   }
 
   async function promptNow() {
-    if (deferredPrompt) {
-      try {
-        deferredPrompt.prompt();
-        await deferredPrompt.userChoice;
-      } catch {
-        // ignore
-      }
+    if (!deferredPrompt) {
+      shown = false;
+      return;
+    }
+    try {
+      await deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+    } catch {
+      shown = false;
+      dismissToast();
+      return;
     }
     finish();
   }
 
   function finish() {
+    dismissToast();
+    shown = false;
     storage.markInstallPromptDismissed();
     document.dispatchEvent(new CustomEvent(GE.INSTALL_PROMPT_DISMISSED));
     deferredPrompt = null;
   }
 
-  document.addEventListener(GE.STARTUP_PRELOAD_COMPLETE, () => tryShow(), {
-    once: true,
+  document.addEventListener(GE.STARTUP_PRELOAD_COMPLETE, () => {
+    preloadComplete = true;
+    tryShow();
   });
 
-  const startButton = document.getElementById("start-game-btn");
-  if (startButton) {
-    startButton.addEventListener("click", () => {
-      setTimeout(markBriefingDismissed, 320);
-    });
-  }
+  document.addEventListener(GE.BRIEFING_DISMISSED, () => {
+    markBriefingDismissed();
+  });
 
   window.InstallPromptManager = { tryShow };
 })();

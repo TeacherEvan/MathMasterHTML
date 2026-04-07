@@ -1,7 +1,6 @@
 const GAME_RUNTIME_PATH = "/src/pages/game.html";
 const ONBOARDING_STORAGE_KEY = "mathmaster_onboarding_v1";
 const NAVIGATION_RETRY_COUNT = 3;
-const RUNTIME_ORIGIN = "http://127.0.0.1:8000";
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -19,7 +18,7 @@ function getRuntimeUrl(search = "") {
     params.set("case", `${Date.now()}-${Math.random().toString(16).slice(2)}`);
   }
 
-  return `${RUNTIME_ORIGIN}${GAME_RUNTIME_PATH}?${params.toString()}`;
+  return `${GAME_RUNTIME_PATH}?${params.toString()}`;
 }
 
 async function gotoRuntimeWithRetry(page, url) {
