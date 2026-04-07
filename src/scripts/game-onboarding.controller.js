@@ -12,6 +12,7 @@
   const level = bootstrap.level;
   let currentMode = null;
   let helpActive = false;
+  let gameplayReadyHandled = false;
 
   function shouldAutoRun() {
     return storage.shouldAutoRunEvan(level, bootstrap.evanMode);
@@ -25,6 +26,12 @@
     } else {
       window.EvanPresenter?.hideSolve?.();
     }
+  }
+
+  function onGameplayReady() {
+    if (gameplayReadyHandled) return;
+    gameplayReadyHandled = true;
+    onBriefingDismissed();
   }
 
   function startEvanHelp(mode) {
@@ -90,9 +97,17 @@
     }
   });
 
-  document.addEventListener(GE.BRIEFING_DISMISSED, () => {
-    onBriefingDismissed();
+  document.addEventListener(GE.GAMEPLAY_READY_CHANGED, (event) => {
+    if (!event.detail?.gameplayReady) {
+      return;
+    }
+
+    onGameplayReady();
   });
+
+  if (window.GameRuntimeCoordinator?.isGameplayReady?.()) {
+    onGameplayReady();
+  }
 
   window.GameOnboardingController = {
     onBriefingDismissed: () => {

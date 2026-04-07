@@ -15,6 +15,7 @@ This repository now keeps a small living documentation set. Historical reports, 
 | Worm validation and regression checks | [`../Worms/WORM_TESTING_GUIDE.md`](../Worms/WORM_TESTING_GUIDE.md) |
 | Competition planning | [`../COMPETITION_PHASE1_ARCHITECTURAL_ROADMAP.md`](../COMPETITION_PHASE1_ARCHITECTURAL_ROADMAP.md) |
 | Competition execution order | [`../COMPETITION_PHASE1_EXECUTION_MATRIX.md`](../COMPETITION_PHASE1_EXECUTION_MATRIX.md) |
+| Agent customization ownership and update protocol for docs/instructions structure changes | [`./AGENT_CUSTOMIZATION_ARCHITECTURE.md`](./AGENT_CUSTOMIZATION_ARCHITECTURE.md) |
 | Rolling work log | [`../../JOBCARD.md`](../../JOBCARD.md) |
 | Agent-specific repo instructions | [`../../.github/copilot-instructions.md`](../../.github/copilot-instructions.md) |
 
@@ -24,7 +25,8 @@ This repository now keeps a small living documentation set. Historical reports, 
 2. `DEVELOPMENT_GUIDE.md`
 3. `ARCHITECTURE.md`
 4. Area-specific guide (`WORM_DEVELOPER_GUIDE.md`, `PERFORMANCE.md`, competition docs)
-5. `REFACTORING_HISTORY.md` when you need historical context rather than current rules
+5. `AGENT_CUSTOMIZATION_ARCHITECTURE.md` when you are changing agent customization ownership, instruction layering, or docs structure
+6. `REFACTORING_HISTORY.md` when you need historical context rather than current rules
 
 ## Documentation rules
 

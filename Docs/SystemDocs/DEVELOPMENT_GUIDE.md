@@ -89,3 +89,7 @@ Use these files as the source of truth:
 - Recent noteworthy work: `JOBCARD.md`
 
 Avoid creating new completion reports, audit summaries, or plan markdown unless the document will remain a durable part of the living set.
+
+## Agent customization upkeep
+
+Treat `.github/copilot-instructions.md` as a minimal repo-wide routing layer, not a second source of truth for runtime or testing rules. When upkeep changes affect ownership or instruction layering, update the durable docs first and use `Docs/SystemDocs/AGENT_CUSTOMIZATION_ARCHITECTURE.md` as the reference for the routing model and update protocol.

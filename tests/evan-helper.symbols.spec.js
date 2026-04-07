@@ -1,6 +1,10 @@
 // tests/evan-helper.symbols.spec.js
 import { expect, test } from "@playwright/test";
-import { resetOnboardingState } from "./utils/onboarding-runtime.js";
+import { installRectTarget } from "./utils/evan-target-fixtures.js";
+import {
+  dismissBriefingAndWaitForInteractiveGameplay,
+  resetOnboardingState,
+} from "./utils/onboarding-runtime.js";
 
 test.setTimeout(60000);
 
@@ -23,7 +27,7 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
       });
     });
 
-    await page.click("#start-game-btn");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await page.waitForFunction(() => window.__symbolClicks?.length > 0, {
       timeout: 30000,
     });
@@ -37,7 +41,7 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
   });
 
   test("#evan-hand moves during action", async ({ page }) => {
-    await page.click("#start-game-btn");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await page.waitForFunction(
       () => document.body.classList.contains("evan-help-active"),
       { timeout: 10000 },
@@ -58,10 +62,12 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
   test("after PROBLEM_COMPLETED, no further SYMBOL_CLICKED events", async ({
     page,
   }) => {
+    await installRectTarget(page, "symbol", "x");
     await page.evaluate(() => {
       window.__postCompleteClicks = 0;
       window.__symbolClicksBeforeComplete = 0;
       window.__problemDone = false;
+      const symbolTarget = document.querySelector('[data-test-target="symbol"]');
       document.addEventListener(window.GameEvents.PROBLEM_COMPLETED, () => {
         window.__problemDone = true;
       });
@@ -72,9 +78,12 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
           window.__symbolClicksBeforeComplete++;
         }
       });
+      window.EvanTargets.getNeededSymbol = () => "x";
+      window.EvanTargets.getNeededSymbols = () => ["x"];
+      window.EvanTargets.findFallingSymbol = () => symbolTarget;
     });
 
-    await page.click("#start-game-btn");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await page.waitForFunction(() => window.__symbolClicksBeforeComplete > 0, {
       timeout: 30000,
     });
@@ -101,7 +110,7 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
       });
     });
 
-    await page.click("#start-game-btn");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await page.waitForFunction(
       () => document.body.classList.contains("evan-help-active"),
       { timeout: 10000 },
@@ -123,17 +132,18 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
   test("zero-area target does not freeze Evan; solving continues", async ({
     page,
   }) => {
+    await installRectTarget(page, "symbol", "x");
     await page.evaluate(() => {
       window.__symbolClicks = [];
+      const symbolTarget = document.querySelector('[data-test-target="symbol"]');
       document.addEventListener(window.GameEvents.SYMBOL_CLICKED, (e) => {
         window.__symbolClicks.push(e.detail?.symbol);
       });
 
-      const originalFind = window.EvanTargets.findFallingSymbol.bind(
-        window.EvanTargets,
-      );
+      window.EvanTargets.getNeededSymbol = () => "x";
+      window.EvanTargets.getNeededSymbols = () => ["x"];
       let injected = false;
-      window.EvanTargets.findFallingSymbol = (symbol) => {
+      window.EvanTargets.findFallingSymbol = () => {
         if (!injected) {
           injected = true;
           const fake = document.createElement("div");
@@ -158,11 +168,11 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
           }, 50);
           return fake;
         }
-        return originalFind(symbol);
+        return symbolTarget;
       };
     });
 
-    await page.click("#start-game-btn");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await page.waitForFunction(() => window.__symbolClicks?.length > 0, {
       timeout: 30000,
     });

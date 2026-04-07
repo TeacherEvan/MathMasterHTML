@@ -44,8 +44,20 @@ async function expectRouteLaunch(page, level) {
 }
 
 test.describe("Level select interactions", () => {
+  test("does not launch a route when the panel body is clicked", async ({ page }) => {
+    await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
+    await waitForCardsToSettle(page);
+
+    await page
+      .locator('.level-card[data-level="beginner"] .level-description')
+      .click();
+
+    await page.waitForTimeout(400);
+    await expect(page).toHaveURL(/\/src\/pages\/level-select\.html(?:$|\?)/);
+  });
+
   for (const route of ROUTES) {
-    test(`launches ${route.level} from a card click`, async ({ page }) => {
+    test(`launches ${route.level} only from its CTA button`, async ({ page }) => {
       await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
       await waitForCardsToSettle(page);
       const button = page.getByRole("button", { name: route.buttonName });
@@ -64,7 +76,7 @@ test.describe("Level select interactions", () => {
     });
   }
 
-  test("keeps route cards visible and usable with reduced motion enabled", async ({
+  test("keeps CTA launch working with reduced motion enabled", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });

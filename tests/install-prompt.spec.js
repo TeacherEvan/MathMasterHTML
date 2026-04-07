@@ -100,6 +100,30 @@ test.describe("Deferred Install Prompt — Build 8", () => {
     );
   });
 
+  test("install toast appears only after gameplayReady becomes true", async ({
+    page,
+  }) => {
+    await seedOnboardingState(page, thresholdState(), "?level=beginner");
+
+    await simulateBeforeInstallPrompt(page);
+    await expect(page.locator(".toast")).toHaveCount(0);
+
+    const blockedState = await page.evaluate(() =>
+      window.GameRuntimeCoordinator?.getState?.(),
+    );
+    expect(blockedState).toEqual(
+      expect.objectContaining({
+        gameplayReady: false,
+      }),
+    );
+
+    await dismissBriefing(page);
+    await page.waitForFunction(() => window.GameRuntimeCoordinator.isGameplayReady());
+    await expect(page.locator(".toast")).toContainText(
+      "Install Math Master for offline play",
+    );
+  });
+
   test("dismissal marks prompt dismissed and prevents repeat prompts on reload", async ({
     page,
   }) => {

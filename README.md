@@ -85,23 +85,13 @@ For local QA, keep using `npm start` (or another simple HTTP server) instead of 
 | `src/assets/` | Problem data, images, and injected HTML fragments |
 | `tests/` | Playwright E2E, performance, integration, and unit-style tests |
 | `Docs/` | Living project documentation |
-| `.github/copilot-instructions.md` | Canonical agent-specific repository guidance |
+| `.github/copilot-instructions.md` | Repo-wide agent routing and reminder layer that points to authoritative docs |
 
 ## Documentation
 
-Start with `Docs/SystemDocs/_INDEX.md`. The trimmed documentation set is:
+Start with `Docs/SystemDocs/_INDEX.md` for the current living-doc catalog and reading order.
 
-- `Docs/SystemDocs/ARCHITECTURE.md`
-- `Docs/SystemDocs/DEVELOPMENT_GUIDE.md`
-- `Docs/SystemDocs/PERFORMANCE.md`
-- `Docs/SystemDocs/REFACTORING_HISTORY.md`
-- `Docs/Worms/WORM_DEVELOPER_GUIDE.md`
-- `Docs/Worms/WORM_TESTING_GUIDE.md`
-- `Docs/COMPETITION_PHASE1_ARCHITECTURAL_ROADMAP.md`
-- `Docs/COMPETITION_PHASE1_EXECUTION_MATRIX.md`
-- `JOBCARD.md`
-
-Historical reports, one-off audits, and stale plans were consolidated into the living docs above.
+For agent customization ownership, thin-wrapper expectations, and update protocol, see `Docs/SystemDocs/AGENT_CUSTOMIZATION_ARCHITECTURE.md`.
 
 ## License
 

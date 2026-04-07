@@ -1,7 +1,10 @@
 // tests/evan-helper.worms.spec.js
 import { expect, test } from "@playwright/test";
 import { installRectTarget } from "./utils/evan-target-fixtures.js";
-import { resetOnboardingState } from "./utils/onboarding-runtime.js";
+import {
+  dismissBriefingAndWaitForInteractiveGameplay,
+  resetOnboardingState,
+} from "./utils/onboarding-runtime.js";
 
 test.setTimeout(60000);
 
@@ -41,7 +44,7 @@ test.describe("Evan Worm + Reward Behavior — Build 6", () => {
       window.EvanTargets.findFallingSymbol = () => symbol;
     });
 
-    await page.click("#start-game-btn");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await page.waitForFunction(() => window.__actions?.length >= 2, {
       timeout: 10000,
     });
@@ -65,7 +68,7 @@ test.describe("Evan Worm + Reward Behavior — Build 6", () => {
       window.EvanTargets.getNeededSymbol = () => null;
     });
 
-    await page.click("#start-game-btn");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await page.waitForFunction(() => window.__muffinClicks >= 3, {
       timeout: 5000,
     });
@@ -107,7 +110,7 @@ test.describe("Evan Worm + Reward Behavior — Build 6", () => {
       window.EvanTargets.findFallingSymbol = () => symbol;
     });
 
-    await page.click("#start-game-btn");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await page.waitForFunction(
       () => window.__actions?.includes("symbolClick"),
       { timeout: 10000 },
@@ -153,7 +156,7 @@ test.describe("Evan Worm + Reward Behavior — Build 6", () => {
       window.EvanTargets.findFallingSymbol = () => symbol;
     });
 
-    await page.click("#start-game-btn");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await page.waitForFunction(() => window.__actions?.length >= 3, {
       timeout: 12000,
     });

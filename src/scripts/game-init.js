@@ -40,11 +40,17 @@ console.log("🎮 Game initialization module loading...");
       window.ScoreTimerManager.init({ level });
     }
 
-    // Don't start the per-step countdown behind the How-To-Play modal
-    if (GE?.BRIEFING_DISMISSED && window.ScoreTimerManager) {
-      document.addEventListener(GE.BRIEFING_DISMISSED, () => {
-        window.ScoreTimerManager.setGameStarted();
+    // Don't start the per-step countdown until shared gameplay readiness is reached.
+    if (GE?.GAMEPLAY_READY_CHANGED && window.ScoreTimerManager) {
+      document.addEventListener(GE.GAMEPLAY_READY_CHANGED, (event) => {
+        if (event.detail?.gameplayReady) {
+          window.ScoreTimerManager.setGameStarted();
+        }
       });
+
+      if (window.GameRuntimeCoordinator?.isGameplayReady?.()) {
+        window.ScoreTimerManager.setGameStarted();
+      }
     }
     // Mark automation runs (Playwright) to avoid portrait lock overlay
     if (navigator.webdriver) {

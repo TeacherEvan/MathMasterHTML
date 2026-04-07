@@ -2,6 +2,10 @@
 
 This is the living reference for the current worm runtime.
 
+## Authoritative Source Note
+
+This guide is the authoritative developer-facing source for worm runtime behavior. Keep `.github/instructions/worm-runtime.instructions.md` and other `.github` instruction files as thin wrappers that link here instead of duplicating subsystem behavior.
+
 ## Runtime truth
 
 - Active code lives under `src/scripts/`, not legacy `js/` paths.
