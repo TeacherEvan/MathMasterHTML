@@ -116,7 +116,26 @@ export async function wormBurstScenario(page, opts = {}) {
     (await page.evaluate(
       () => window.GameSymbolHandlerCore?.PURPLE_WORM_THRESHOLD ?? 3,
     ));
+
+  await page.evaluate(() => {
+    if (!window.__perfPurpleWormListenerInstalled) {
+      window.__perfPurpleWormTriggered = false;
+      document.addEventListener("purpleWormTriggered", () => {
+        window.__perfPurpleWormTriggered = true;
+      });
+      window.__perfPurpleWormListenerInstalled = true;
+    }
+
+    window.__perfPurpleWormTriggered = false;
+  });
+
   const dispatches = await dispatchWrongSymbolClicks(page, wrongAnswers);
+
+  await page.waitForFunction(
+    () => window.__perfPurpleWormTriggered === true,
+    null,
+    { timeout: 5000 },
+  );
 
   await page.waitForFunction(
     () =>
@@ -124,7 +143,7 @@ export async function wormBurstScenario(page, opts = {}) {
         (worm) => worm.active && Boolean(worm.isPurple),
       ) === true,
     null,
-    { timeout: 5000 },
+    { timeout: 10000 },
   );
   await page.waitForTimeout(500);
 

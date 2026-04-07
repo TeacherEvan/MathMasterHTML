@@ -37,7 +37,10 @@ export function checkLineLimits(rootDir, mode = "baseline") {
   }
 
   if (result.violations.length > 0) {
-    log(`⚠️  ${result.violations.length} file(s) over suggested length — not a blocker`, "yellow");
+    log(
+      `⚠️  ${result.violations.length} file(s) over suggested length — not a blocker`,
+      "yellow",
+    );
   }
   return true;
 }
