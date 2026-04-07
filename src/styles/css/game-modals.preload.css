@@ -1,0 +1,58 @@
+/* game-modals.preload.css - Startup Preload Overlay Styles */
+
+/* ============================================
+   STARTUP PRELOAD OVERLAY
+   ============================================ */
+#startup-preload {
+    position: fixed;
+    inset: 0;
+    z-index: 1000001;
+    background: rgba(0, 0, 0, 0.97);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.2rem;
+    font-family: 'Orbitron', monospace;
+    color: #00ffff;
+    transition: opacity 0.4s ease;
+}
+
+#startup-preload[aria-hidden="true"] {
+    pointer-events: none;
+}
+
+#startup-preload-message {
+    font-size: 1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+}
+
+#startup-preload-progress {
+    width: min(60vw, 320px);
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+#startup-preload-progress::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: var(--progress, 0%);
+    background: linear-gradient(90deg, #00ffff, #ffd700);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #startup-preload {
+        transition: none;
+    }
+    #startup-preload-progress::after {
+        transition: none;
+    }
+}

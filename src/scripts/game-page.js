@@ -1,4 +1,3 @@
-// src/scripts/game-page.js
 (function () {
   const backButton = document.getElementById("back-button");
 
@@ -35,17 +34,36 @@
 
     if (!modal || !startButton) return;
 
-    modal.style.display = "flex";
+    function showModal() {
+      modal.style.display = "flex";
+    }
 
-    startButton.addEventListener("click", () => {
+    function onStartClick() {
       modal.style.animation = "modalFadeOut 0.3s ease-out";
       setTimeout(() => {
         modal.style.display = "none";
-        console.log("🎮 How to Play modal dismissed - game ready to start");
         window.ScoreTimerManager?.setGameStarted?.();
+        window.GameOnboardingController?.onBriefingDismissed?.();
         enterFullscreen();
       }, 300);
-    });
+    }
+
+    startButton.addEventListener("click", onStartClick);
+
+    if (window.StartupPreload?.isBlocking()) {
+      modal.style.display = "none";
+      const safetyTimeout = setTimeout(showModal, 8000);
+      document.addEventListener(
+        window.GameEvents.STARTUP_PRELOAD_COMPLETE,
+        () => {
+          clearTimeout(safetyTimeout);
+          showModal();
+        },
+        { once: true },
+      );
+    } else {
+      showModal();
+    }
   }
 
   if (backButton) {

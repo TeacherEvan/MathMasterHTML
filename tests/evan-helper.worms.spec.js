@@ -1,0 +1,216 @@
+// tests/evan-helper.worms.spec.js
+import { expect, test } from "@playwright/test";
+import { installRectTarget } from "./utils/evan-target-fixtures.js";
+import { resetOnboardingState } from "./utils/onboarding-runtime.js";
+
+test.setTimeout(60000);
+
+test.describe("Evan Worm + Reward Behavior — Build 6", () => {
+  test.beforeEach(async ({ page }) => {
+    await resetOnboardingState(page, "?level=beginner&evan=force&preload=off");
+    await page.waitForSelector("#start-game-btn", {
+      state: "visible",
+      timeout: 10000,
+    });
+  });
+
+  test("Evan targets green worm segments before symbols when present", async ({
+    page,
+  }) => {
+    await installRectTarget(page, "worm-segment");
+    await installRectTarget(page, "symbol", "x");
+    await page.evaluate(() => {
+      window.__actions = [];
+      document.addEventListener(
+        window.GameEvents.EVAN_ACTION_REQUESTED,
+        (e) => {
+          window.__actions.push(e.detail?.action);
+        },
+      );
+
+      let wormServed = false;
+      const worm = document.querySelector('[data-test-target="worm-segment"]');
+      const symbol = document.querySelector('[data-test-target="symbol"]');
+      window.EvanTargets.findGreenWormSegment = () => {
+        if (!wormServed) {
+          wormServed = true;
+          return worm;
+        }
+        return null;
+      };
+      window.EvanTargets.getNeededSymbol = () => "x";
+      window.EvanTargets.findFallingSymbol = () => symbol;
+    });
+
+    await page.click("#start-game-btn");
+    await page.waitForFunction(() => window.__actions?.length >= 2, {
+      timeout: 10000,
+    });
+
+    const actions = await page.evaluate(() => window.__actions);
+    expect(actions[0]).toBe("wormTap");
+    expect(actions).toContain("symbolClick");
+  });
+
+  test("Evan clicks muffin rewards until removed", async ({ page }) => {
+    await installRectTarget(page, "muffin");
+    await page.evaluate(() => {
+      const muffin = document.querySelector('[data-test-target="muffin"]');
+      window.__muffinClicks = 0;
+      muffin.addEventListener("pointerdown", () => {
+        window.__muffinClicks++;
+        if (window.__muffinClicks >= 3) {
+          muffin.remove();
+        }
+      });
+
+      window.EvanTargets.findGreenWormSegment = () => null;
+      window.EvanTargets.findMuffinReward = () =>
+        document.querySelector('[data-test-target="muffin"]');
+      window.EvanTargets.getNeededSymbol = () => null;
+    });
+
+    await page.click("#start-game-btn");
+    await page.waitForFunction(() => window.__muffinClicks >= 3, {
+      timeout: 5000,
+    });
+
+    expect(
+      await page.evaluate(() => window.__muffinClicks),
+    ).toBeGreaterThanOrEqual(3);
+    expect(
+      await page.evaluate(
+        () => document.querySelector('[data-test-target="muffin"]') === null,
+      ),
+    ).toBe(true);
+  });
+
+  test("Evan re-evaluates cleanly if worm target disappears before click completes", async ({
+    page,
+  }) => {
+    await installRectTarget(page, "worm-gone");
+    await installRectTarget(page, "symbol", "x");
+    await page.evaluate(() => {
+      window.__actions = [];
+      document.addEventListener(
+        window.GameEvents.EVAN_ACTION_COMPLETED,
+        (e) => {
+          window.__actions.push(e.detail?.action);
+        },
+      );
+
+      let wormCalls = 0;
+      const symbol = document.querySelector('[data-test-target="symbol"]');
+      window.EvanTargets.findGreenWormSegment = () => {
+        wormCalls++;
+        if (wormCalls === 1) {
+          const worm = document.querySelector('[data-test-target="worm-gone"]');
+          if (worm) {
+            setTimeout(() => worm.remove(), 50);
+          }
+          return worm;
+        }
+        return null;
+      };
+      window.EvanTargets.getNeededSymbol = () => "x";
+      window.EvanTargets.findFallingSymbol = () => symbol;
+    });
+
+    await page.click("#start-game-btn");
+    await page.waitForFunction(
+      () => window.__actions?.includes("symbolClick"),
+      { timeout: 10000 },
+    );
+
+    const actions = await page.evaluate(() => window.__actions);
+    expect(actions).toContain("symbolClick");
+  });
+
+  test("Evan resumes symbol solving after worm/reward targets cleared", async ({
+    page,
+  }) => {
+    await installRectTarget(page, "worm-segment");
+    await installRectTarget(page, "muffin");
+    await installRectTarget(page, "symbol", "x");
+    await page.evaluate(() => {
+      window.__actions = [];
+      document.addEventListener(
+        window.GameEvents.EVAN_ACTION_COMPLETED,
+        (e) => {
+          window.__actions.push(e.detail?.action);
+        },
+      );
+
+      const worm = document.querySelector('[data-test-target="worm-segment"]');
+      const muffin = document.querySelector('[data-test-target="muffin"]');
+      const symbol = document.querySelector('[data-test-target="symbol"]');
+      let wormServed = false;
+      let muffinClicks = 0;
+      muffin.addEventListener("pointerdown", () => {
+        muffinClicks++;
+        if (muffinClicks >= 2) {
+          muffin.remove();
+        }
+      });
+
+      window.EvanTargets.findGreenWormSegment = () => {
+        if (!wormServed) {
+          wormServed = true;
+          return worm;
+        }
+        return null;
+      };
+      window.EvanTargets.findMuffinReward = () =>
+        document.querySelector('[data-test-target="muffin"]');
+      window.EvanTargets.getNeededSymbol = () => "x";
+      window.EvanTargets.findFallingSymbol = () => symbol;
+    });
+
+    await page.click("#start-game-btn");
+    await page.waitForFunction(() => window.__actions?.length >= 3, {
+      timeout: 12000,
+    });
+
+    const actions = await page.evaluate(() => window.__actions);
+    expect(actions.slice(0, 3)).toEqual([
+      "wormTap",
+      "muffinCollect",
+      "symbolClick",
+    ]);
+  });
+
+  test("Evan does not directly click .purple-worm elements", async ({
+    page,
+  }) => {
+    await installRectTarget(page, "purple-worm");
+    await installRectTarget(page, "symbol", "x");
+    await page.evaluate(() => {
+      const purple = document.querySelector('[data-test-target="purple-worm"]');
+      purple.classList.add("purple-worm");
+      window.__purpleTouches = 0;
+      purple.addEventListener("pointerdown", () => {
+        window.__purpleTouches++;
+      });
+      purple.addEventListener("click", () => {
+        window.__purpleTouches++;
+      });
+
+      const symbol = document.querySelector('[data-test-target="symbol"]');
+      window.EvanTargets.findGreenWormSegment = () => null;
+      window.EvanTargets.findMuffinReward = () => null;
+      window.EvanTargets.getNeededSymbols = () => ["x"];
+      window.EvanTargets.getNeededSymbol = () => "x";
+      window.EvanTargets.findFallingSymbol = () => symbol;
+      window.EvanTargets.findBestFallingSymbol = () => symbol;
+    });
+
+    await page.click("#start-game-btn");
+    await page.waitForFunction(
+      () => document.body.classList.contains("evan-help-active"),
+      { timeout: 5000 },
+    );
+    await page.waitForTimeout(1000);
+
+    expect(await page.evaluate(() => window.__purpleTouches)).toBe(0);
+  });
+});

@@ -1,0 +1,124 @@
+/* game-modals.evan.css - Evan Helper Shell Styles */
+
+/* ============================================
+   EVAN ASSIST SHELL
+   ============================================ */
+#evan-assist-shell {
+    position: fixed;
+    inset: 0;
+    z-index: 900000;
+    pointer-events: none;
+}
+
+#evan-assist-shell:not([hidden]) {
+    display: block;
+}
+
+#evan-assist-border {
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--evan-border-color, #ff3333);
+    border-radius: 4px;
+    animation: evan-pulse 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+#evan-assist-label {
+    position: absolute;
+    top: 4px;
+    left: 8px;
+    font-family: var(--font-display, "Orbitron", monospace);
+    font-size: 0.65rem;
+    color: var(--evan-label-color, #aaddee);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+#evan-hand {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--evan-hand-size, 2.4rem);
+    height: var(--evan-hand-size, 2.4rem);
+    transform: translate(-200px, -200px);
+    pointer-events: none;
+    font-size: var(--evan-hand-size, 2.4rem);
+    line-height: 1;
+}
+
+#evan-hand::after {
+    content: "\1F449";
+    display: block;
+}
+
+#evan-skip-button {
+    position: fixed;
+    bottom: 12px;
+    right: 12px;
+    pointer-events: auto;
+    font-family: var(--font-display, "Orbitron", monospace);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 8px 20px;
+    border: 2px solid #ffd700;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.85);
+    color: #ffd700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+#evan-skip-button:hover,
+#evan-skip-button:focus-visible {
+    background: rgba(255, 215, 0, 0.15);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+}
+
+/* Solve button inside panel-b-controls */
+#evan-controls-slot {
+    display: inline-block;
+}
+
+#evan-solve-button {
+    font-family: var(--font-display, "Orbitron", monospace);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 6px 14px;
+    border: 2px solid #00ffff;
+    border-radius: 6px;
+    background: rgba(0, 255, 255, 0.08);
+    color: #00ffff;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+#evan-solve-button:hover,
+#evan-solve-button:focus-visible {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+}
+
+@keyframes evan-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #evan-assist-border {
+        animation: none;
+        opacity: 0.7;
+    }
+    #evan-hand {
+        transition: none !important;
+    }
+    #evan-skip-button,
+    #evan-solve-button {
+        transition: none;
+    }
+}

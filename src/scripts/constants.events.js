@@ -1,4 +1,4 @@
-(function() {
+(function () {
   window.GameEvents = Object.freeze({
     COMBO_UPDATED: "comboUpdated",
     CONSOLE_SYMBOL_ADDED: "consoleSymbolAdded",
@@ -15,5 +15,15 @@
     WORM_CURSOR_UPDATE: "wormCursorUpdate",
     WORM_SYMBOL_CORRECT: "wormSymbolCorrect",
     WORM_SYMBOL_SAVED: "wormSymbolSaved",
+    PRELOAD_PROGRESS: "preloadProgress",
+    PRELOAD_READY: "preloadReady",
+    PRELOAD_FAILED: "preloadFailed",
+    EVAN_HELP_STARTED: "evanHelpStarted",
+    EVAN_HELP_STOPPED: "evanHelpStopped",
+    EVAN_ACTION_REQUESTED: "evanActionRequested",
+    EVAN_ACTION_COMPLETED: "evanActionCompleted",
+    INSTALL_PROMPT_AVAILABLE: "installPromptAvailable",
+    INSTALL_PROMPT_DISMISSED: "installPromptDismissed",
+    STARTUP_PRELOAD_COMPLETE: "startupPreloadComplete",
   });
 })();

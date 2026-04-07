@@ -1,5 +1,6 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
+import { gotoGameRuntime } from "./utils/onboarding-runtime.js";
 
 const PLAYER_PROFILE_STORAGE_KEY = "mathmaster_player_profile_v1";
 const GAME_LOAD_TIMEOUT_MS = 15_000;
@@ -23,27 +24,47 @@ async function clickHelpButton(page, count = 1) {
 
 test.describe("ProblemManager and SymbolManager Integration", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to game page
-    await page.goto("/game.html?level=beginner");
+    // Navigate directly to the runtime page and disable unrelated onboarding flows.
+    await gotoGameRuntime(page, "?level=beginner&evan=off&preload=off");
 
     // Wait for the modal to appear and dismiss it
     const startButton = page.locator("#start-game-btn");
+    const howToPlayModal = page.locator("#how-to-play-modal");
     await expect(startButton).toBeVisible({ timeout: 10000 });
 
-    // Click the start button to dismiss modal and start the game
-    await startButton.click({ force: true });
+    // Dismiss the modal with the same retry pattern used by the passing E2E suites.
+    for (let attempt = 0; attempt < 4; attempt++) {
+      await page.evaluate(() => {
+        const button = document.getElementById("start-game-btn");
+        if (button) button.click();
+      });
 
-    // Wait for modal to fade out and game to initialize
+      try {
+        await expect(howToPlayModal).toBeHidden({ timeout: 1500 });
+        break;
+      } catch (error) {
+        if (attempt === 3) {
+          throw error;
+        }
+      }
+    }
+
+    // Wait for modal fade and countdown start before running integration assertions.
+    await page.waitForFunction(
+      () => window.ScoreTimerManager?._gameStarted === true,
+      null,
+      { timeout: 8000 },
+    );
     await page.waitForTimeout(600);
     await page.waitForFunction(
       () => window.GameProblemManager?.problems?.length > 0,
       null,
-      { timeout: GAME_LOAD_TIMEOUT_MS }
+      { timeout: GAME_LOAD_TIMEOUT_MS },
     );
     await page.waitForFunction(
       () => document.querySelectorAll(".hidden-symbol").length > 0,
       null,
-      { timeout: GAME_LOAD_TIMEOUT_MS }
+      { timeout: GAME_LOAD_TIMEOUT_MS },
     );
   });
 
@@ -127,7 +148,7 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
     test("should mark completed rows with cyan styling", async ({ page }) => {
       // Get the first step's hidden symbols
       const firstStepHidden = page.locator(
-        '[data-step-index="0"].hidden-symbol'
+        '[data-step-index="0"].hidden-symbol',
       );
       const initialCount = await firstStepHidden.count();
 
@@ -166,7 +187,7 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
 
       // Filter out non-critical errors
       const criticalErrors = errors.filter(
-        (e) => !e.includes("net::") && !e.includes("favicon")
+        (e) => !e.includes("net::") && !e.includes("favicon"),
       );
       expect(criticalErrors).toHaveLength(0);
     });
@@ -183,7 +204,7 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       // Complete first step by clicking help repeatedly
       const helpButton = page.locator("#help-button");
       const firstStepHidden = page.locator(
-        '[data-step-index="0"].hidden-symbol'
+        '[data-step-index="0"].hidden-symbol',
       );
       const hiddenCount = await firstStepHidden.count();
 
@@ -231,7 +252,7 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       await page.waitForFunction(
         () => document.getElementById("symbol-modal")?.style.display === "flex",
         null,
-        { timeout: 5000 }
+        { timeout: 5000 },
       );
       expect(unexpectedDialog).toBeNull();
       await page.waitForFunction(
@@ -239,7 +260,7 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
           document.getElementById("position-instruction")?.style.display ===
           "none",
         null,
-        { timeout: 5000 }
+        { timeout: 5000 },
       );
 
       await page.evaluate(() => {
@@ -250,7 +271,7 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
           document.getElementById("position-instruction")?.style.display ===
           "block",
         null,
-        { timeout: 5000 }
+        { timeout: 5000 },
       );
       await page.evaluate(() => {
         document.querySelector('.position-choice[data-position="0"]')?.click();
@@ -260,25 +281,34 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       await page.waitForFunction(
         () => document.getElementById("symbol-modal")?.style.display === "none",
         null,
-        { timeout: 5000 }
+        { timeout: 5000 },
       );
       await page.waitForFunction(
         (expectedIndex) =>
           window.GameProblemManager.currentProblemIndex === expectedIndex,
         initialState.currentProblemIndex + 1,
-        { timeout: 5000 }
+        { timeout: 5000 },
+      );
+      await page.waitForFunction(
+        () =>
+          window.ScoreTimerManager?._gameStarted === true &&
+          window.ScoreTimerManager?._problemStarted === true &&
+          window.ScoreTimerManager?._paused === false,
+        null,
+        { timeout: 5000 },
       );
 
-      const nextState = await page.evaluate((storageKey) => ({
-        currentProblemIndex: window.GameProblemManager.currentProblemIndex,
-        currentProblem: window.GameProblemManager.currentProblem.problem,
-        storedProfile: JSON.parse(
-          localStorage.getItem(storageKey) || "{}"
-        ),
-      }), PLAYER_PROFILE_STORAGE_KEY);
+      const nextState = await page.evaluate(
+        (storageKey) => ({
+          currentProblemIndex: window.GameProblemManager.currentProblemIndex,
+          currentProblem: window.GameProblemManager.currentProblem.problem,
+          storedProfile: JSON.parse(localStorage.getItem(storageKey) || "{}"),
+        }),
+        PLAYER_PROFILE_STORAGE_KEY,
+      );
 
       expect(nextState.currentProblemIndex).toBe(
-        initialState.currentProblemIndex + 1
+        initialState.currentProblemIndex + 1,
       );
       expect(nextState.currentProblem).not.toBe(initialState.currentProblem);
       expect(nextState.storedProfile.name).toBe("Player");
@@ -287,22 +317,22 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       const scoreValue = page.locator("#score-value");
       const timerBeforeResume = parseInt(
         (await timerValue.textContent()) || "0",
-        10
+        10,
       );
       const scoreBeforeResume = parseInt(
         (await scoreValue.textContent()) || "0",
-        10
+        10,
       );
 
       await page.waitForTimeout(1500);
 
       const timerAfterResume = parseInt(
         (await timerValue.textContent()) || "0",
-        10
+        10,
       );
       const scoreAfterResume = parseInt(
         (await scoreValue.textContent()) || "0",
-        10
+        10,
       );
 
       expect(timerAfterResume).toBeLessThan(timerBeforeResume);
@@ -331,7 +361,7 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
 
       // No JavaScript errors should occur
       const jsErrors = errors.filter(
-        (e) => !e.includes("net::") && !e.includes("favicon")
+        (e) => !e.includes("net::") && !e.includes("favicon"),
       );
       expect(jsErrors).toHaveLength(0);
     });

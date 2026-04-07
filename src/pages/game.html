@@ -29,6 +29,8 @@
     <link rel="stylesheet" href="/src/styles/css/game-animations.css">
     <link rel="stylesheet" href="/src/styles/css/game-responsive.css?v=20260406-embedded-pane-3">
     <link rel="stylesheet" href="/src/styles/css/game-modals.css">
+    <link rel="stylesheet" href="/src/styles/css/game-modals.preload.css">
+    <link rel="stylesheet" href="/src/styles/css/game-modals.evan.css">
     <link rel="stylesheet" href="/src/styles/css/console.css">
     <link rel="stylesheet" href="/src/styles/css/worm-base.css">
     <link rel="stylesheet" href="/src/styles/css/worm-effects.css">
@@ -139,8 +141,15 @@
 </head>
 
 <body>
+    <!-- Startup Preload Overlay -->
+    <div id="startup-preload" role="status" aria-live="polite" aria-label="Game loading">
+        <p id="startup-preload-message">Initializing…</p>
+        <div id="startup-preload-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        </div>
+    </div>
+
     <!-- How to Play Modal -->
-    <div id="how-to-play-modal" class="how-to-play-overlay">
+    <div id="how-to-play-modal" class="how-to-play-overlay" style="display: none;">
         <div class="how-to-play-content">
             <p class="how-to-play-kicker">Field briefing // algebra calibration</p>
             <h2>Unlock Your Mind</h2>
@@ -159,6 +168,14 @@
             </div>
             <button id="start-game-btn" class="start-game-button">Begin calibration</button>
         </div>
+    </div>
+
+    <!-- Evan Helper Overlay Shell -->
+    <div id="evan-assist-shell" aria-hidden="true" hidden>
+        <div id="evan-assist-border"></div>
+        <span id="evan-assist-label">Mr. Evan helping out</span>
+        <div id="evan-hand" aria-hidden="true"></div>
+        <button id="evan-skip-button" type="button" hidden aria-label="Skip Evan's help and take over">Skip</button>
     </div>
 
     <!-- Rotation Overlay - Force Landscape -->
@@ -201,10 +218,14 @@
                 <button id="help-button" data-ripple aria-label="Get help with current problem">HELP</button>
                 <button id="clarify-button" data-ripple
                     aria-label="Ask for clarifications about ambiguous problem aspects">CLARIFY</button>
+                <div id="evan-controls-slot" hidden>
+                    <button id="evan-solve-button" type="button"
+                        aria-label="Ask Evan to solve this problem">Solve</button>
+                </div>
             </div>
             <div id="solution-container" class="custom-scrollbar"></div>
             <div id="worm-container"></div>
-            <!-- Symbol Console (moved from Panel A) -->
+            <!-- Symbol Console -->
             <div id="symbol-console">
                 <button class="console-slot" data-slot="0"></button>
                 <button class="console-slot" data-slot="1"></button>
@@ -302,7 +323,6 @@
     <script src="/src/scripts/interaction-audio.cyberpunk.drums.playback.js"></script>
     <script src="/src/scripts/interaction-audio.cyberpunk.bootstrap.js"></script>
     <script src="/src/scripts/interaction-audio.cyberpunk.controls.js"></script>
-    <!-- New modular managers -->
     <script src="/src/scripts/problem-manager.js"></script>
     <script src="/src/scripts/symbol-manager.js"></script>
     <!-- UX Enhancements - Load early for toast/loading features -->
@@ -339,10 +359,10 @@
     <script src="/src/scripts/symbol-rain.animation.js"></script>
     <script src="/src/scripts/symbol-rain.interactions.js"></script>
     <script src="/src/scripts/3rdDISPLAY.js"></script>
-    <!-- Refactored game modules - load before main game.js -->
+    <!-- Load before main game.js -->
     <script src="/src/scripts/problem-loader.js"></script>
     <script src="/src/scripts/symbol-validator.js"></script>
-    <!-- Refactored worm modules - load before main worm.js -->
+    <!-- Load before main worm.js -->
     <script src="/src/scripts/worm-factory.js"></script>
     <script src="/src/scripts/worm-movement.js"></script>
     <script src="/src/scripts/worm-spawn-manager.queue.js"></script>
@@ -354,7 +374,6 @@
     <script src="/src/scripts/worm-pathfinding.js"></script>
     <script src="/src/scripts/worm-obstacle-map.js"></script>
     <script src="/src/scripts/worm-evasion.js"></script>
-    <!-- Original worm modules -->
     <script src="/src/scripts/worm-powerups.js"></script>
     <script src="/src/scripts/worm-powerups.core.js"></script>
     <script src="/src/scripts/worm-powerups.selection.js"></script>
@@ -401,6 +420,9 @@
     <!-- Timer + scoring + persistence -->
     <script src="/src/scripts/player-storage.helpers.js"></script>
     <script src="/src/scripts/player-storage.js"></script>
+    <!-- Onboarding state + bootstrap -->
+    <script src="/src/scripts/game-onboarding.storage.js"></script>
+    <script src="/src/scripts/game-onboarding.bootstrap.js"></script>
     <script src="/src/scripts/score-timer.utils.js"></script>
     <script src="/src/scripts/score-timer.boundary.js"></script>
     <script src="/src/scripts/score-timer.runtime.js"></script>
@@ -410,9 +432,16 @@
     <script src="/src/scripts/game-effects.js"></script>
     <!-- Main game logic -->
     <script src="/src/scripts/game.js"></script>
+    <!-- Onboarding + Evan helper -->
+    <script src="/src/scripts/startup-preload.js"></script>
+    <script src="/src/scripts/evan-helper.presenter.js"></script>
+    <script src="/src/scripts/game-onboarding.controller.js"></script>
+    <script src="/src/scripts/evan-helper.controller.targets.js"></script>
+    <script src="/src/scripts/evan-helper.controller.js"></script>
     <script src="/src/scripts/game-page.js" defer></script>
 
-    <!-- Service Worker Registration -->
+    <!-- Service Worker Registration + Install Prompt -->
+    <script src="/src/scripts/install-prompt.js"></script>
     <script src="/src/scripts/service-worker-register.js"></script>
 
 </body>

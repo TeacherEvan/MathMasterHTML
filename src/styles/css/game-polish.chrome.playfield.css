@@ -1,6 +1,4 @@
-/* Preserve the default HUD geometry from `score-timer.css`.
-   This polish layer may restyle the shell, but it should not move
-   the score, timer, or reserved power-up zone. */
+/* Preserve the default HUD geometry from `score-timer.css`; this layer may restyle the shell, but it must not move the score, timer, or reserved power-up zone. */
 
 .hud-block,
 .power-up-display {

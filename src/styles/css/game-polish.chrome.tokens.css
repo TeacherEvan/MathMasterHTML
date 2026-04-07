@@ -11,6 +11,9 @@
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --evan-border-color: oklch(55% 0.25 25);
+  --evan-label-color: oklch(85% 0.06 210);
+  --evan-hand-size: 2.4rem;
   --font-display: "Orbitron", sans-serif;
   --font-body: "Exo 2", "Segoe UI", sans-serif;
 }
