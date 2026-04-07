@@ -111,11 +111,31 @@ async function chooseConsoleReward(
     page.locator(`.symbol-choice[data-symbol="${symbol}"]`),
     activation,
   );
-  await expect(page.locator("#position-choices")).toBeVisible();
-  await activateConsoleButton(
-    page.locator(`.position-choice[data-position="${position}"]`),
-    activation,
+  await page.waitForFunction(
+    ({ expectedSymbol, expectedPosition }) => {
+      const positionChoices = document.getElementById("position-choices");
+      const positionChoice = document.querySelector(
+        `.position-choice[data-position="${expectedPosition}"]`,
+      );
+
+      return Boolean(
+        positionChoices &&
+          window.getComputedStyle(positionChoices).display !== "none" &&
+          window.consoleManager?.selectedSymbol === expectedSymbol &&
+          positionChoice instanceof HTMLButtonElement &&
+          !positionChoice.disabled &&
+          !positionChoice.classList.contains("disabled"),
+      );
+    },
+    { expectedSymbol: symbol, expectedPosition: position },
   );
+  const positionChoice = page.locator(
+    `.position-choice[data-position="${position}"]`,
+  );
+  await expect(positionChoice).toBeVisible();
+  await expect(positionChoice).toBeEnabled();
+  await positionChoice.scrollIntoViewIfNeeded();
+  await activateConsoleButton(positionChoice, activation);
   await page.waitForFunction(
     () => window.consoleManager?.isPendingSelection === false,
   );
@@ -837,6 +857,57 @@ test.describe("Console Selection Panel — Dedicated No-Scroll Window", () => {
 
     expect(autofillState.index).not.toBe(nextIndex);
     expect(autofillState.populatedSlots).toBeGreaterThan(0);
+  });
+
+  test("numeric console shortcuts do not activate filled slots while the selection panel is open", async ({
+    page,
+  }) => {
+    await openConsoleSelectionModal(page);
+    await chooseConsoleReward(page, {
+      symbol: "1",
+      position: 0,
+      activation: "pointerdown",
+    });
+
+    await page.evaluate(() => {
+      window.__consoleShortcutProbeCleanup?.();
+
+      const eventName = window.GameEvents?.SYMBOL_CLICKED ?? "symbolClicked";
+      const recordedSymbols = [];
+      const handler = (event) => {
+        recordedSymbols.push(event.detail?.symbol ?? null);
+      };
+
+      document.addEventListener(eventName, handler);
+      window.__consoleShortcutProbeCleanup = () => {
+        document.removeEventListener(eventName, handler);
+      };
+      window.__consoleShortcutProbeSymbols = recordedSymbols;
+    });
+
+    await openConsoleSelectionModal(page);
+    await page.keyboard.press("1");
+    await page.waitForTimeout(150);
+
+    const shortcutState = await page.evaluate(() => {
+      const modal = document.getElementById("symbol-modal");
+      const symbols = window.__consoleShortcutProbeSymbols ?? [];
+
+      window.__consoleShortcutProbeCleanup?.();
+      delete window.__consoleShortcutProbeCleanup;
+      delete window.__consoleShortcutProbeSymbols;
+
+      return {
+        recordedSymbols: [...symbols],
+        isPendingSelection: window.consoleManager?.isPendingSelection ?? null,
+        modalVisible:
+          !!modal && window.getComputedStyle(modal).display !== "none",
+      };
+    });
+
+    expect(shortcutState.recordedSymbols).toEqual([]);
+    expect(shortcutState.isPendingSelection).toBe(true);
+    expect(shortcutState.modalVisible).toBe(true);
   });
 
   test("keyboard activation can complete a reward selection flow", async ({

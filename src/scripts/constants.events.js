@@ -2,6 +2,8 @@
   window.GameEvents = Object.freeze({
     COMBO_UPDATED: "comboUpdated",
     CONSOLE_SYMBOL_ADDED: "consoleSymbolAdded",
+    CONSOLE_SELECTION_OPENED: "consoleSelectionOpened",
+    CONSOLE_SELECTION_CLOSED: "consoleSelectionClosed",
     DISPLAY_RESOLUTION_CHANGED: "displayResolutionChanged",
     FIRST_LINE_SOLVED: "first-line-solved",
     PROBLEM_COMPLETED: "problemCompleted",

@@ -8,18 +8,20 @@ console.log("🎮 Console Manager UI loading");
   }
 
   const proto = window.ConsoleManager.prototype;
-  const resolveConsoleLifecycleEventName = function(eventKey, fallbackName) {
+  const ConsoleLifecycleEvents = Object.freeze({
+    CONSOLE_SELECTION_OPENED: "consoleSelectionOpened",
+    CONSOLE_SELECTION_CLOSED: "consoleSelectionClosed",
+  });
+  const resolveConsoleLifecycleEventName = function(eventKey) {
     const GameEvents = window.GameEvents;
     return typeof GameEvents?.[eventKey] === "string"
       ? GameEvents[eventKey]
-      : fallbackName;
+      : ConsoleLifecycleEvents[eventKey];
   };
 
-  const dispatchConsoleLifecycleEvent = function(eventKey, fallbackName) {
+  const dispatchConsoleLifecycleEvent = function(eventKey) {
     document.dispatchEvent(
-      new CustomEvent(
-        resolveConsoleLifecycleEventName(eventKey, fallbackName),
-      ),
+      new CustomEvent(resolveConsoleLifecycleEventName(eventKey)),
     );
   };
 
@@ -54,10 +56,7 @@ console.log("🎮 Console Manager UI loading");
     document.body.classList.add("console-modal-open");
     this.modal.style.display = "grid";
     this._applySymbolModalAccessibility?.();
-    dispatchConsoleLifecycleEvent(
-      "CONSOLE_SELECTION_OPENED",
-      "consoleSelectionOpened",
-    );
+    dispatchConsoleLifecycleEvent("CONSOLE_SELECTION_OPENED");
 
     console.log("📋 Console selection panel opened");
   };
@@ -68,10 +67,7 @@ console.log("🎮 Console Manager UI loading");
     document.body.classList.remove("console-modal-open");
     this.modal.style.display = "none";
     this.isPendingSelection = false;
-    dispatchConsoleLifecycleEvent(
-      "CONSOLE_SELECTION_CLOSED",
-      "consoleSelectionClosed",
-    );
+    dispatchConsoleLifecycleEvent("CONSOLE_SELECTION_CLOSED");
     console.log("📋 Console selection panel closed");
   };
 

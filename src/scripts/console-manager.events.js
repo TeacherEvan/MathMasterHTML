@@ -26,6 +26,10 @@ console.log("🎮 Console Manager events loading");
       POINTER_FOLLOWUP_CLICK_WINDOW_MS;
   }
 
+  function isNonPrimaryActivation(event) {
+    return event instanceof MouseEvent && event.button !== 0;
+  }
+
   function bindPrimaryActivation(element, handler) {
     if (!element) {
       return;
@@ -35,6 +39,10 @@ console.log("🎮 Console Manager events loading");
       element.addEventListener(
         "pointerdown",
         (event) => {
+          if (isNonPrimaryActivation(event)) {
+            return;
+          }
+
           recentPointerActivations.set(element, performance.now());
           event.preventDefault();
           handler(event);
@@ -43,6 +51,10 @@ console.log("🎮 Console Manager events loading");
       );
 
       element.addEventListener("click", (event) => {
+        if (isNonPrimaryActivation(event)) {
+          return;
+        }
+
         if (shouldIgnoreFollowupClick(element)) {
           return;
         }
@@ -52,7 +64,13 @@ console.log("🎮 Console Manager events loading");
       return;
     }
 
-    element.addEventListener("click", handler);
+    element.addEventListener("click", (event) => {
+      if (isNonPrimaryActivation(event)) {
+        return;
+      }
+
+      handler(event);
+    });
   }
 
   proto.setupConsoleButtons = function() {
@@ -128,6 +146,13 @@ console.log("🎮 Console Manager events loading");
       }
 
       if (slotIndex >= 0 && slotIndex < 9) {
+        if (this.isPendingSelection) {
+          console.log(
+            `⌨️ Keyboard shortcut ${key} ignored while console selection panel is open`,
+          );
+          return;
+        }
+
         const symbol = this.slots[slotIndex];
         if (symbol) {
           console.log(

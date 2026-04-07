@@ -1,45 +1,10 @@
 // tests/ui-boundary.spec.js - Tests for UI Boundary Management
 import { expect, test } from "@playwright/test";
-
-const BASE_URL = "http://localhost:8000";
-
-function boxesOverlap(boxA, boxB, spacing = 0) {
-  if (!boxA || !boxB) return false;
-
-  return !(
-    boxA.x + boxA.width + spacing <= boxB.x ||
-    boxB.x + boxB.width + spacing <= boxA.x ||
-    boxA.y + boxA.height + spacing <= boxB.y ||
-    boxB.y + boxB.height + spacing <= boxA.y
-  );
-}
-
-async function ensurePowerUpDisplay(page) {
-  await expect
-    .poll(async () => {
-      return await page.evaluate(() => {
-        return Boolean(
-          window.wormSystem?.powerUpSystem &&
-          typeof window.wormSystem.powerUpSystem.updateDisplay === "function",
-        );
-      });
-    })
-    .toBe(true);
-
-  const displayCreated = await page.evaluate(() => {
-    const powerUpSystem = window.wormSystem?.powerUpSystem;
-    if (!powerUpSystem?.inventory) {
-      return false;
-    }
-
-    powerUpSystem.inventory.chainLightning = 1;
-    powerUpSystem.updateDisplay();
-    return true;
-  });
-
-  expect(displayCreated).toBe(true);
-  await expect(page.locator("#power-up-display")).toBeVisible();
-}
+import {
+  BASE_URL,
+  boxesOverlap,
+  ensurePowerUpDisplay,
+} from "./utils/game-helpers.js";
 
 // Increase timeout for all tests
 test.setTimeout(60000);
@@ -259,9 +224,10 @@ test.describe("UI Boundary Management", () => {
     });
   });
 
-  test("UI elements should reposition on window resize", async ({
-    page,
-  }, testInfo) => {
+  test("UI elements should reposition on window resize", async (
+    { page },
+    testInfo,
+  ) => {
     test.skip(
       testInfo.project.use?.isMobile,
       "Viewport resize is not supported for emulated mobile projects",
@@ -294,9 +260,10 @@ test.describe("UI Boundary Management", () => {
     console.log("✅ UI elements properly positioned after resize");
   });
 
-  test("Mobile layout should maintain separation", async ({
-    page,
-  }, testInfo) => {
+  test("Mobile layout should maintain separation", async (
+    { page },
+    testInfo,
+  ) => {
     test.skip(
       !testInfo.project.use?.isMobile,
       "Mobile layout assertions run on mobile-emulated projects only",
@@ -394,12 +361,6 @@ test.describe("Evan Helper — Boundary Constraints (Build 3)", () => {
 
     const overlap = boxesOverlap(evanShellBox, powerUpBox, 0);
     expect(overlap).toBe(false);
-
-    console.log(
-      `✅ Evan shell does not overlap power-up display: Shell=${JSON.stringify(
-        evanShellBox,
-      )}, PowerUp=${JSON.stringify(powerUpBox)}`,
-    );
   });
 
   test("With body.evan-layout-preview, #evan-assist-shell does not overlap #timer-display", async ({
@@ -422,12 +383,6 @@ test.describe("Evan Helper — Boundary Constraints (Build 3)", () => {
 
     const overlap = boxesOverlap(evanShellBox, timerBox, 0);
     expect(overlap).toBe(false);
-
-    console.log(
-      `✅ Evan shell does not overlap timer: Shell=${JSON.stringify(
-        evanShellBox,
-      )}, Timer=${JSON.stringify(timerBox)}`,
-    );
   });
 
   test("With body.evan-layout-preview, #evan-controls-slot does not overlap .panel-b-controls outer edge", async ({
@@ -460,11 +415,5 @@ test.describe("Evan Helper — Boundary Constraints (Build 3)", () => {
         panelBControlsBox.y + panelBControlsBox.height;
 
     expect(isContained).toBe(true);
-
-    console.log(
-      `✅ Evan controls slot is contained within panel-b-controls: Slot=${JSON.stringify(
-        controlsSlotBox,
-      )}, Panel=${JSON.stringify(panelBControlsBox)}`,
-    );
   });
 });

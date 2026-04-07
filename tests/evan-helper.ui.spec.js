@@ -1,52 +1,12 @@
 // tests/evan-helper.ui.spec.js - Evan Helper UI Coverage (Build 3)
 import { expect, test } from "@playwright/test";
-import { gotoGameRuntime } from "./utils/onboarding-runtime.js";
+import {
+  BASE_URL,
+  dismissBriefing,
+  ensurePowerUpDisplay,
+} from "./utils/game-helpers.js";
 
 test.setTimeout(30000);
-
-const BASE_URL = "http://localhost:8000";
-
-async function dismissBriefing(page) {
-  await page.waitForSelector("#start-game-btn", {
-    state: "visible",
-    timeout: 10000,
-  });
-  await page.click("#start-game-btn");
-  await page.waitForFunction(
-    () => {
-      const modal = document.getElementById("how-to-play-modal");
-      return !modal || window.getComputedStyle(modal).display === "none";
-    },
-    { timeout: 10000 },
-  );
-}
-
-async function ensurePowerUpDisplay(page) {
-  await expect
-    .poll(async () => {
-      return await page.evaluate(() => {
-        return Boolean(
-          window.wormSystem?.powerUpSystem &&
-          typeof window.wormSystem.powerUpSystem.updateDisplay === "function",
-        );
-      });
-    })
-    .toBe(true);
-
-  const displayCreated = await page.evaluate(() => {
-    const powerUpSystem = window.wormSystem?.powerUpSystem;
-    if (!powerUpSystem?.inventory) {
-      return false;
-    }
-
-    powerUpSystem.inventory.chainLightning = 1;
-    powerUpSystem.updateDisplay();
-    return true;
-  });
-
-  expect(displayCreated).toBe(true);
-  await expect(page.locator("#power-up-display")).toBeVisible();
-}
 
 test.describe("Evan Helper — UI Elements (Build 3)", () => {
   test.beforeEach(async ({ page }) => {

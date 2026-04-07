@@ -75,13 +75,13 @@ The original draft below is still useful as the implementation blueprint, but th
 | ----- | ------ | ------------------ |
 | Build 1 — Onboarding Core | **Done** | `game-onboarding.storage.js`, `game-onboarding.bootstrap.js`, `constants.events.js`, `game.html`, and `tests/onboarding-gates.spec.js` are present and wired. |
 | Build 2 — Preload Shell | **Done** | `startup-preload.js`, preload markup, `service-worker-register.js` progress dispatch, `game-page.js` preload gating, `game-modals.preload.css`, and `tests/startup-preload.spec.js` are present. |
-| Build 3 — Evan UI Shell | **Partial** | Evan shell markup, presenter, styles, and tokens are shipped, but the dedicated `tests/evan-helper.ui.spec.js`, `tests/evan-helper.controls.spec.js`, and Evan-specific `tests/ui-boundary.spec.js` assertions called for below are still missing. |
+| Build 3 — Evan UI Shell | **Done** | Evan shell markup, presenter, styles, tokens, dedicated UI/controls specs, and Evan-specific `tests/ui-boundary.spec.js` assertions are now present. |
 | Build 4 — Onboarding Flow | **Done** | `game-onboarding.controller.js` is wired and the flow coverage is split across `tests/evan-helper.flow.spec.js` and `tests/evan-helper.flow-solve.spec.js`. |
 | Build 5 — Evan Symbols | **Done** | The symbol loop is implemented, but split across `evan-helper.controller.targets.js`, `evan-helper.controller.runtime.js`, and `evan-helper.controller.js` to satisfy the line-limit policy; `tests/evan-helper.symbols.spec.js` exists. |
 | Build 6 — Evan Worms & Rewards | **Done** | Worm/reward behavior is implemented; coverage is split across `tests/evan-helper.worms.spec.js` and `tests/evan-helper.worms.purple.spec.js`. |
 | Build 7 — Evan Power-Ups | **Done** | Power-up behavior is implemented; coverage is split across `tests/evan-helper.powerups.spec.js` and `tests/evan-helper.powerups.activation.spec.js`. |
 | Build 8 — Install Prompt | **Done** | `install-prompt.js` and `tests/install-prompt.spec.js` are present and wired to onboarding state. |
-| Build 9 — Verification | **Partial** | The focused verification suite listed later in this document now matches the shipped spec layout. This build remains partial because the Build 3 UI/layout coverage gap is still open and the document is tracking verification guidance rather than a completed closeout run. |
+| Build 9 — Verification | **Partial** | The focused verification suite listed later in this document now matches the shipped spec layout. This build remains partial because the section is still tracking verification guidance rather than a completed final closeout run recorded in this document. |
 
 ### Current deltas from the original draft
 
@@ -92,8 +92,7 @@ The original draft below is still useful as the implementation blueprint, but th
 
 ### Remaining closeout work
 
-1. Finish Build 3 test debt by either adding `tests/evan-helper.ui.spec.js` + `tests/evan-helper.controls.spec.js` and Evan-specific `tests/ui-boundary.spec.js` assertions, or explicitly retiring those checks from the plan.
-2. Use the refreshed Build 9 suite below when doing final onboarding/Evan verification; the old suite list is no longer accurate.
+1. Run and record the final Build 9 onboarding/Evan verification pass using the refreshed suite below.
 
 ## Build decomposition for separate project tracks
 
@@ -462,7 +461,7 @@ Introduce Evan's visible shell and reserve its layout slots without yet adding a
 
 ### Status
 
-**Partial.** Runtime shell, presenter, markup, styles, and token work are in place. The dedicated UI/controls/layout-spec follow-through described in this build has not all landed yet.
+**Done.** Runtime shell, presenter, markup, styles, token work, dedicated UI/controls specs, and Evan-specific `ui-boundary` follow-through are now in place.
 
 ### Files to create
 
@@ -1101,7 +1100,7 @@ Run all targeted gates and repo verification commands after all builds are compl
 
 ### Status
 
-**Partial.** The commands below now match the repo's current spec layout. This build stays partial because the remaining Build 3 UI/layout coverage debt is still called out in this plan, and the section is acting as closeout guidance rather than proof of a completed final verification pass.
+**Partial.** The commands below now match the repo's current spec layout. This build stays partial because the section is acting as closeout guidance rather than proof of a completed final verification pass recorded in this document.
 
 ### Focused onboarding/Evan/install suite
 
@@ -1120,7 +1119,7 @@ npx playwright test \
   --reporter=line --workers=1
 ```
 
-Expected: all shipped onboarding/Evan/install specs pass. Build 3 still needs its dedicated UI/layout follow-up coverage before the overall plan is fully closed.
+Expected: all shipped onboarding/Evan/install specs pass. This suite is now the canonical closeout lane for the onboarding/Evan work tracked in this document.
 
 ### Layout and tray safety suite
 
