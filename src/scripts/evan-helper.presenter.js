@@ -12,6 +12,7 @@
   if (hand) hand.style.transition = handTransition;
 
   function setInputLock(locked) {
+    window.GameRuntimeCoordinator?.setInputLock?.("evan-auto", locked);
     document.body.classList.toggle("evan-input-locked", locked);
     if (locked && skipBtn && !skipBtn.hidden) {
       skipBtn.focus({ preventScroll: true });
@@ -27,6 +28,13 @@
     );
   }
 
+  function isAllowedOverlayInteractionTarget(target) {
+    return Boolean(
+      target instanceof Element &&
+        target.closest(".toast, .toast-container"),
+    );
+  }
+
   function isAllowedSkipKey(event) {
     if (!skipBtn || skipBtn.hidden) return false;
     const isSkipFocused =
@@ -38,9 +46,13 @@
   }
 
   function guardLockedUserInput(event) {
-    if (!document.body.classList.contains("evan-input-locked")) return;
+    const isLocked =
+      window.GameRuntimeCoordinator?.getState?.().inputLocked ??
+      document.body.classList.contains("evan-input-locked");
+    if (!isLocked) return;
     if (event.type !== "keydown" && !event.isTrusted) return;
     if (isSkipInteractionTarget(event.target)) return;
+    if (isAllowedOverlayInteractionTarget(event.target)) return;
 
     if (event.type === "keydown" && isAllowedSkipKey(event)) {
       return;

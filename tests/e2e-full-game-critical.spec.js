@@ -1,5 +1,9 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
+import {
+  dismissBriefingAndWaitForInteractiveGameplay,
+  stopEvanHelpIfActive,
+} from "./utils/onboarding-runtime.js";
 
 const LEVELS = ["beginner", "warrior", "master"];
 
@@ -7,26 +11,11 @@ async function bootLevel(page, level) {
   await page.goto(`/game.html?level=${level}`, {
     waitUntil: "domcontentloaded",
   });
-  const howToPlayModal = page.locator("#how-to-play-modal");
-  await expect(howToPlayModal).toBeVisible({ timeout: 10000 });
-  for (let attempt = 0; attempt < 4; attempt++) {
-    await page.evaluate(() => {
-      const button = document.getElementById("start-game-btn");
-      if (button) button.click();
-    });
-    try {
-      await expect(howToPlayModal).toBeHidden({ timeout: 1500 });
-      break;
-    } catch (error) {
-      if (attempt === 3) {
-        throw error;
-      }
-    }
-  }
+  await expect(page.locator("#how-to-play-modal")).toBeVisible({
+    timeout: 10000,
+  });
+  await dismissBriefingAndWaitForInteractiveGameplay(page);
   await page.waitForFunction(() => window.wormSystem?.isInitialized === true);
-  await page.waitForFunction(
-    () => document.querySelectorAll(".hidden-symbol").length > 0,
-  );
   await page.evaluate(() => window.ScoreTimerManager?.pause?.());
 }
 
@@ -62,6 +51,7 @@ for (const level of LEVELS) {
       test.slow();
       await bootLevel(page, level);
       await seedPowerUps(page);
+      await stopEvanHelpIfActive(page);
 
       const beforeRevealed = await page.locator(".revealed-symbol").count();
       await page.click("#help-button");

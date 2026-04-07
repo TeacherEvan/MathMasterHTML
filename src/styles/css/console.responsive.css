@@ -71,25 +71,69 @@
     /* Space after every 2nd, 4th, 6th slot to create pairs */
   }
 
-  .modal-content {
-    padding: 20px;
-    max-width: 90%;
+}
+
+@media (max-width: 900px), (max-height: 560px) {
+  .console-selection-shell {
+    padding: 10px;
   }
 
-  .symbol-choice {
-    width: 50px;
-    height: 50px;
+  .console-selection-window {
+    width: min(680px, calc(100vw - 20px));
+    height: min(400px, calc(100vh - 20px));
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .console-selection-header {
+    gap: 4px;
+  }
+
+  .console-selection-header h2 {
     font-size: 24px;
   }
 
+  .console-selection-copy {
+    font-size: 13px;
+  }
+
+  .console-selection-body {
+    gap: 10px;
+  }
+
+  .console-selection-card {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .console-selection-card h3 {
+    font-size: 12px;
+  }
+
+  .symbol-grid,
+  .position-grid {
+    gap: 6px;
+  }
+
+  .symbol-choice {
+    font-size: 18px;
+  }
+
   .position-choice {
-    width: 60px;
-    height: 60px;
-    font-size: 20px;
+    font-size: 16px;
+  }
+
+  .console-selection-footer {
+    gap: 10px;
+  }
+
+  .console-selection-status,
+  .console-selection-autofill {
+    font-size: 10px;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   body.viewport-compact.viewport-landscape .console-slot {
     width: 44px;
     height: 44px;
@@ -118,7 +162,54 @@
     margin-right: 10px;
   }
 
-  .symbol-grid {
-    grid-template-columns: repeat(3, 1fr);
+  .console-selection-shell {
+    padding: 6px;
+  }
+
+  .console-selection-window {
+    width: calc(100vw - 12px);
+    height: min(340px, calc(100vh - 12px));
+    gap: 8px;
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .console-selection-header h2 {
+    font-size: 20px;
+  }
+
+  .console-selection-copy {
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .console-selection-body {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .console-selection-card {
+    padding: 8px;
+  }
+
+  .symbol-grid,
+  .position-grid {
+    gap: 5px;
+  }
+
+  .symbol-choice {
+    font-size: 16px;
+  }
+
+  .position-choice {
+    font-size: 14px;
+  }
+
+  .console-selection-footer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .console-selection-autofill {
+    justify-self: stretch;
   }
 }

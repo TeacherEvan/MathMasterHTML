@@ -6,7 +6,7 @@
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 10000;
+  z-index: 910000;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -57,6 +57,19 @@
 
 .toast.toast-hide {
   animation: toast-slide-out 0.4s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .toast-container {
+    top: 72px;
+    right: 12px;
+    width: min(260px, calc(100vw - 24px));
+  }
+
+  .toast {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
 }
 
 @keyframes toast-slide-out {

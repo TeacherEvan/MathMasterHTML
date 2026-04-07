@@ -1,5 +1,9 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
+import {
+  dismissBriefingAndWaitForInteractiveGameplay,
+  waitForInteractiveGameplay,
+} from "./utils/onboarding-runtime.js";
 
 async function solveCurrentProblem(page) {
   for (let attempt = 0; attempt < 120; attempt += 1) {
@@ -36,17 +40,33 @@ async function solveCurrentProblem(page) {
   throw new Error("Failed to solve current problem within guard limit");
 }
 
+test.describe("Timer readiness gating", () => {
+  test("timer starts after gameplayReady", async ({ page }) => {
+    await page.goto("/game.html?level=beginner");
+
+    const timerValue = page.locator("#timer-value");
+    await expect(timerValue).toBeVisible({ timeout: 10000 });
+
+    const beforeStart = parseInt((await timerValue.textContent()) || "0", 10);
+    await page.waitForTimeout(1000);
+    const stillBlocked = parseInt((await timerValue.textContent()) || "0", 10);
+    expect(stillBlocked).toBe(beforeStart);
+
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+    await page.waitForTimeout(1500);
+
+    const afterStart = parseInt((await timerValue.textContent()) || "0", 10);
+    expect(afterStart).toBeLessThan(beforeStart);
+  });
+});
+
 test.describe("Timer and Score Countdown", () => {
   test.describe.configure({ timeout: 90_000 });
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/game.html?level=beginner");
 
-    const startButton = page.locator("#start-game-btn");
-    if (await startButton.isVisible()) {
-      await startButton.click({ force: true });
-      await page.waitForTimeout(500);
-    }
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
 
     await expect(page.locator("#timer-value")).toBeVisible({ timeout: 10000 });
   });

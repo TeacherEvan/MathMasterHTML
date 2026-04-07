@@ -117,6 +117,29 @@ body.evan-input-locked #evan-skip-button {
     50% { opacity: 1; }
 }
 
+/* Test-time layout measurement class - positions Evan elements
+   to avoid overlaps with HUD, timer, and power-up display */
+body.evan-layout-preview #evan-assist-shell {
+    inset: auto;
+    bottom: 40px;
+    left: 50%;
+    top: auto;
+    right: auto;
+    width: 280px;
+    height: 60px;
+    transform: translateX(-50%);
+}
+
+body.evan-layout-preview #evan-assist-label {
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+body.evan-layout-preview #evan-assist-border {
+    display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
     #evan-assist-border {
         animation: none;

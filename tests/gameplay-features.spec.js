@@ -7,10 +7,15 @@
  *  2. 1× green worm spawned inside Panel B on row completion
  *  3. Green worm targets revealed (blue) symbols only
  *  4. Row resets to red when worm steals a blue symbol
- *  5. Console setup modal is non-blocking (floating panel, not full-screen overlay)
+ *  5. Console selection panel opens as a dedicated no-scroll window
  *  6. Console slot shows refresh animation after a symbol is placed
  */
 import { expect, test } from "@playwright/test";
+import {
+  dismissBriefingAndWaitForInteractiveGameplay,
+  stopEvanHelpIfActive,
+  waitForInteractiveGameplay,
+} from "./utils/onboarding-runtime.js";
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 
@@ -18,26 +23,37 @@ async function startGame(page) {
   await page.goto("/game.html?level=beginner", {
     waitUntil: "domcontentloaded",
   });
-  const startBtn = page.locator("#start-game-btn");
-  const howToPlayModal = page.locator("#how-to-play-modal");
-  await expect(startBtn).toBeVisible({ timeout: 10000 });
 
-  for (let attempt = 0; attempt < 3; attempt++) {
-    await startBtn.click({ force: true });
+  const startupState = await page
+    .waitForFunction(() => {
+      const briefingModal = document.getElementById("how-to-play-modal");
+      const briefingModalVisible = Boolean(
+        briefingModal &&
+          window.getComputedStyle(briefingModal).display !== "none",
+      );
 
-    try {
-      await expect(howToPlayModal).toBeHidden({ timeout: 1500 });
-      break;
-    } catch (error) {
-      if (attempt === 2) {
-        throw error;
+      if (briefingModalVisible) {
+        return "briefing";
       }
-    }
+
+      if (window.GameRuntimeCoordinator?.isGameplayReady?.() === true) {
+        return "interactive";
+      }
+
+      return false;
+    }, { timeout: 15000 })
+    .then((handle) => handle.jsonValue());
+
+  if (startupState === "briefing") {
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+  } else {
+    await waitForInteractiveGameplay(page);
   }
 
   await page.waitForFunction(
     () => window.wormSystem && window.wormSystem.isInitialized === true,
   );
+  await stopEvanHelpIfActive(page);
   await page.waitForFunction(
     () => document.querySelectorAll(".hidden-symbol").length > 0,
   );
@@ -68,14 +84,38 @@ async function openConsoleSelectionModal(page) {
     return !!modal && window.getComputedStyle(modal).display !== "none";
   });
 
-  await expect(page.locator(".modal-content")).toBeVisible();
+  await expect(page.locator(".console-selection-window")).toBeVisible();
   await expect(page.locator(".symbol-choice[data-symbol='1']")).toBeVisible();
 }
 
-async function chooseConsoleReward(page, { symbol = "1", position = 0 } = {}) {
-  await page.locator(`.symbol-choice[data-symbol="${symbol}"]`).click();
+async function activateConsoleButton(locator, activation = "pointerdown") {
+  if (activation === "click") {
+    await locator.click();
+    return;
+  }
+
+  if (activation === "keyboard") {
+    await locator.focus();
+    await locator.press("Enter");
+    return;
+  }
+
+  await locator.dispatchEvent("pointerdown");
+}
+
+async function chooseConsoleReward(
+  page,
+  { symbol = "1", position = 0, activation = "pointerdown" } = {},
+) {
+  await activateConsoleButton(
+    page.locator(`.symbol-choice[data-symbol="${symbol}"]`),
+    activation,
+  );
   await expect(page.locator("#position-choices")).toBeVisible();
-  await page.locator(`.position-choice[data-position="${position}"]`).click();
+  await activateConsoleButton(
+    page.locator(`.position-choice[data-position="${position}"]`),
+    activation,
+  );
   await page.waitForFunction(
     () => window.consoleManager?.isPendingSelection === false,
   );
@@ -629,60 +669,137 @@ test.describe("Row Reset — Worm Steals Blue Symbol", () => {
   });
 });
 
-test.describe("Console Setup Modal — Non-Blocking Floating Panel", () => {
+test.describe("Console Selection Panel — Dedicated No-Scroll Window", () => {
   test.beforeEach(async ({ page }) => startGame(page));
 
-  test("modal overlay does not cover the full viewport", async ({ page }) => {
-    await openConsoleSelectionModal(page);
-
-    const modalRect = await page.evaluate(() => {
-      const modal = document.getElementById("symbol-modal");
-      const rect = modal?.getBoundingClientRect();
-      return rect ? { width: rect.width, height: rect.height } : null;
-    });
-
-    expect(modalRect).toBeTruthy();
-    // Should NOT fill the full viewport width; floating panel should remain clearly smaller than the viewport
-    const viewportWidth = await page.evaluate(() => window.innerWidth);
-    expect(modalRect.width).toBeLessThan(viewportWidth * 0.8);
-  });
-
-  test("modal has a drag handle element", async ({ page }) => {
-    const hasDragHandle = await page.evaluate(
-      () => !!document.getElementById("modal-drag-handle"),
-    );
-    expect(hasDragHandle).toBe(true);
-  });
-
-  test("modal has a close button", async ({ page }) => {
-    const hasCloseBtn = await page.evaluate(
-      () => !!document.getElementById("modal-close-btn"),
-    );
-    expect(hasCloseBtn).toBe(true);
-  });
-
-  test("symbol buttons stay clickable above gameplay layers", async ({
+  test("selection panel opens as a dedicated window without internal scrolling", async ({
     page,
   }) => {
     await openConsoleSelectionModal(page);
 
-    const symbolBtn = page.locator(".symbol-choice[data-symbol='1']");
-    await expect(symbolBtn).toBeVisible({ timeout: 5000 });
-    await symbolBtn.evaluate((btn) => btn.click());
+    const panelState = await page.evaluate(() => {
+      const shell = document.getElementById("symbol-modal");
+      const windowEl = shell?.querySelector(".console-selection-window");
+      const status = document.getElementById("console-selection-status");
+      const positionGrid = document.getElementById("position-choices");
+      const positionButtons = Array.from(
+        document.querySelectorAll(".position-choice"),
+      );
 
-    await expect(symbolBtn).toHaveClass(/selected/, { timeout: 5000 });
-    await expect(page.locator("#position-choices")).toBeVisible({
-      timeout: 5000,
+      if (
+        !shell ||
+        !windowEl ||
+        !status ||
+        !positionGrid ||
+        positionButtons.length === 0
+      ) {
+        return null;
+      }
+
+      const shellStyle = window.getComputedStyle(shell);
+      const windowStyle = window.getComputedStyle(windowEl);
+      const positionStyle = window.getComputedStyle(positionGrid);
+      const normalizedStatusText = status.textContent
+        ? status.textContent.replace(/\s+/g, " ").trim()
+        : "";
+
+      return {
+        shellDisplay: shellStyle.display,
+        overflowY: windowStyle.overflowY,
+        clientHeight: windowEl.clientHeight,
+        scrollHeight: windowEl.scrollHeight,
+        statusText: normalizedStatusText,
+        positionGridDisplay: positionStyle.display,
+        positionButtonsDisabled: positionButtons.every(
+          (button) => button.disabled,
+        ),
+        positionButtonsHaveDisabledClass: positionButtons.every((button) =>
+          button.classList.contains("disabled"),
+        ),
+        positionButtonCount: positionButtons.length,
+      };
     });
+
+    expect(panelState).toBeTruthy();
+    expect(panelState.shellDisplay).toBe("grid");
+    expect(panelState.overflowY).toBe("hidden");
+    expect(panelState.scrollHeight).toBeLessThanOrEqual(
+      panelState.clientHeight + 1,
+    );
+    expect(panelState.statusText).toBe(
+      "Choose a symbol to unlock the slot grid.",
+    );
+    expect(panelState.positionGridDisplay).toBe("grid");
+    expect(panelState.positionButtonCount).toBeGreaterThan(0);
+    expect(panelState.positionButtonsDisabled).toBe(true);
+    expect(panelState.positionButtonsHaveDisabledClass).toBe(true);
   });
 
-  test("selecting a symbol advances to the next problem", async ({ page }) => {
+  test("selecting a symbol updates the panel state without expanding the window", async ({
+    page,
+  }) => {
+    await openConsoleSelectionModal(page);
+
+    const beforeHeight = await page
+      .locator(".console-selection-window")
+      .evaluate((node) => node.getBoundingClientRect().height);
+
+    await page
+      .locator(".symbol-choice[data-symbol='1']")
+      .dispatchEvent("pointerdown");
+    await expect(page.locator(".symbol-choice[data-symbol='1']")).toHaveClass(
+      /selected/,
+    );
+
+    const panelState = await page.evaluate(() => {
+      const windowEl = document.querySelector(".console-selection-window");
+      const status = document.getElementById("console-selection-status");
+      const positionButtons = Array.from(
+        document.querySelectorAll(".position-choice"),
+      );
+      const normalizedStatusText = status?.textContent
+        ? status.textContent.replace(/\s+/g, " ").trim()
+        : "";
+      return windowEl && status
+        ? {
+            afterHeight: windowEl.getBoundingClientRect().height,
+            statusText: normalizedStatusText,
+            positionButtonsEnabled:
+              positionButtons.length > 0 &&
+              positionButtons.every((button) => button.disabled === false),
+            positionButtonsLackDisabledClass:
+              positionButtons.length > 0 &&
+              positionButtons.every(
+                (button) => button.classList.contains("disabled") === false,
+              ),
+            positionButtonCount: positionButtons.length,
+          }
+        : null;
+    });
+
+    expect(panelState).toBeTruthy();
+    expect(Math.abs(panelState.afterHeight - beforeHeight)).toBeLessThanOrEqual(
+      1,
+    );
+    expect(panelState.statusText).toBe("Symbol 1 selected. Choose a slot.");
+    expect(panelState.positionButtonCount).toBeGreaterThan(0);
+    expect(panelState.positionButtonsEnabled).toBe(true);
+    expect(panelState.positionButtonsLackDisabledClass).toBe(true);
+  });
+
+  test("manual selection and autofill both still advance to the next problem", async ({
+    page,
+  }) => {
     const beforeIndex = await page.evaluate(
       () => window.GameProblemManager?.currentProblemIndex ?? -1,
     );
 
     await openConsoleSelectionModal(page);
-    await chooseConsoleReward(page, { symbol: "1", position: 0 });
+    await chooseConsoleReward(page, {
+      symbol: "1",
+      position: 0,
+      activation: "click",
+    });
 
     await page.waitForFunction(
       (previousIndex) =>
@@ -691,23 +808,50 @@ test.describe("Console Setup Modal — Non-Blocking Floating Panel", () => {
       beforeIndex,
     );
 
-    const state = await page.evaluate(() => ({
+    const manualState = await page.evaluate(() => ({
       index: window.GameProblemManager?.currentProblemIndex ?? -1,
       slotValue: window.consoleManager?.slots?.[0] ?? null,
     }));
 
-    expect(state.index).not.toBe(beforeIndex);
-    expect(state.slotValue).toBe("1");
+    expect(manualState.index).toBe(beforeIndex + 1);
+    expect(manualState.slotValue).toBe("1");
+
+    const nextIndex = manualState.index;
+    await openConsoleSelectionModal(page);
+    await page.locator("#skip-button").dispatchEvent("pointerdown");
+
+    await page.waitForFunction(
+      (previousIndex) =>
+        (window.GameProblemManager?.currentProblemIndex ?? -1) !==
+        previousIndex,
+      nextIndex,
+    );
+
+    const autofillState = await page.evaluate(() => {
+      const slots = window.consoleManager?.slots ?? [];
+      return {
+        index: window.GameProblemManager?.currentProblemIndex ?? -1,
+        populatedSlots: slots.filter((slot) => slot !== null).length,
+      };
+    });
+
+    expect(autofillState.index).not.toBe(nextIndex);
+    expect(autofillState.populatedSlots).toBeGreaterThan(0);
   });
 
-  test("close button auto-fills and resumes progression", async ({ page }) => {
+  test("keyboard activation can complete a reward selection flow", async ({
+    page,
+  }) => {
     const beforeIndex = await page.evaluate(
       () => window.GameProblemManager?.currentProblemIndex ?? -1,
     );
 
     await openConsoleSelectionModal(page);
-    await page.locator("#modal-close-btn").click();
-    await expect(page.locator("#symbol-modal")).toBeHidden();
+    await chooseConsoleReward(page, {
+      symbol: "1",
+      position: 0,
+      activation: "keyboard",
+    });
 
     await page.waitForFunction(
       (previousIndex) =>
@@ -716,16 +860,13 @@ test.describe("Console Setup Modal — Non-Blocking Floating Panel", () => {
       beforeIndex,
     );
 
-    const state = await page.evaluate(() => {
-      const slots = window.consoleManager?.slots ?? [];
-      return {
-        index: window.GameProblemManager?.currentProblemIndex ?? -1,
-        filledSlots: slots.filter((slot) => slot !== null).length,
-      };
-    });
+    const rewardState = await page.evaluate(() => ({
+      index: window.GameProblemManager?.currentProblemIndex ?? -1,
+      slotValue: window.consoleManager?.slots?.[0] ?? null,
+    }));
 
-    expect(state.index).not.toBe(beforeIndex);
-    expect(state.filledSlots).toBeGreaterThan(0);
+    expect(rewardState.index).toBe(beforeIndex + 1);
+    expect(rewardState.slotValue).toBe("1");
   });
 });
 

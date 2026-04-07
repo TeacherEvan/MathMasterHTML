@@ -357,3 +357,114 @@ test.describe("Panel A Layout", () => {
     }
   });
 });
+
+test.describe("Evan Helper — Boundary Constraints (Build 3)", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(`${BASE_URL}/game.html?level=beginner`, {
+      waitUntil: "domcontentloaded",
+      timeout: 30000,
+    });
+    await page.waitForSelector("#start-game-btn", {
+      state: "visible",
+      timeout: 10000,
+    });
+    await page.locator("#start-game-btn").click({ force: true });
+    await page.waitForTimeout(500);
+  });
+
+  test("With body.evan-layout-preview, #evan-assist-shell does not overlap #power-up-display", async ({
+    page,
+  }) => {
+    await ensurePowerUpDisplay(page);
+
+    await page.evaluate(() => {
+      document.body.classList.add("evan-layout-preview");
+      window.EvanPresenter?.show();
+    });
+
+    await expect(page.locator("#evan-assist-shell")).toBeVisible();
+
+    const evanShellBox = await page
+      .locator("#evan-assist-shell")
+      .boundingBox();
+    const powerUpBox = await page.locator("#power-up-display").boundingBox();
+
+    expect(evanShellBox).toBeTruthy();
+    expect(powerUpBox).toBeTruthy();
+
+    const overlap = boxesOverlap(evanShellBox, powerUpBox, 0);
+    expect(overlap).toBe(false);
+
+    console.log(
+      `✅ Evan shell does not overlap power-up display: Shell=${JSON.stringify(
+        evanShellBox,
+      )}, PowerUp=${JSON.stringify(powerUpBox)}`,
+    );
+  });
+
+  test("With body.evan-layout-preview, #evan-assist-shell does not overlap #timer-display", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      document.body.classList.add("evan-layout-preview");
+      window.EvanPresenter?.show();
+    });
+
+    await expect(page.locator("#evan-assist-shell")).toBeVisible();
+
+    const evanShellBox = await page
+      .locator("#evan-assist-shell")
+      .boundingBox();
+    const timerBox = await page.locator("#timer-display").boundingBox();
+
+    expect(evanShellBox).toBeTruthy();
+    expect(timerBox).toBeTruthy();
+
+    const overlap = boxesOverlap(evanShellBox, timerBox, 0);
+    expect(overlap).toBe(false);
+
+    console.log(
+      `✅ Evan shell does not overlap timer: Shell=${JSON.stringify(
+        evanShellBox,
+      )}, Timer=${JSON.stringify(timerBox)}`,
+    );
+  });
+
+  test("With body.evan-layout-preview, #evan-controls-slot does not overlap .panel-b-controls outer edge", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      document.body.classList.add("evan-layout-preview");
+      window.EvanPresenter?.showSolve();
+    });
+
+    await expect(page.locator("#evan-controls-slot")).toBeVisible();
+
+    const controlsSlotBox = await page
+      .locator("#evan-controls-slot")
+      .boundingBox();
+    const panelBControlsBox = await page
+      .locator(".panel-b-controls")
+      .boundingBox();
+
+    expect(controlsSlotBox).toBeTruthy();
+    expect(panelBControlsBox).toBeTruthy();
+
+    // Check that controls slot is fully contained within panel-b-controls
+    const isContained =
+      controlsSlotBox.x >= panelBControlsBox.x &&
+      controlsSlotBox.y >= panelBControlsBox.y &&
+      controlsSlotBox.x + controlsSlotBox.width <=
+        panelBControlsBox.x + panelBControlsBox.width &&
+      controlsSlotBox.y + controlsSlotBox.height <=
+        panelBControlsBox.y + panelBControlsBox.height;
+
+    expect(isContained).toBe(true);
+
+    console.log(
+      `✅ Evan controls slot is contained within panel-b-controls: Slot=${JSON.stringify(
+        controlsSlotBox,
+      )}, Panel=${JSON.stringify(panelBControlsBox)}`,
+    );
+  });
+});

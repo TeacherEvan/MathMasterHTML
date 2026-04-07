@@ -5,8 +5,6 @@
 
   let deferredPrompt = null;
   let shown = false;
-  let briefingDismissed = false;
-  let preloadComplete = window.StartupPreload?.isBlocking?.() !== true;
   let toastManager = null;
   let toastEl = null;
 
@@ -16,10 +14,8 @@
     toastEl = null;
   }
 
-  function markBriefingDismissed() {
-    if (briefingDismissed) return;
-    briefingDismissed = true;
-    tryShow();
+  function isGameplayReady() {
+    return window.GameRuntimeCoordinator?.isGameplayReady?.() === true;
   }
 
   window.addEventListener("beforeinstallprompt", (e) => {
@@ -32,8 +28,7 @@
   function tryShow() {
     if (shown || !deferredPrompt) return;
     if (!storage.shouldShowInstallPrompt()) return;
-    if (!preloadComplete) return;
-    if (!briefingDismissed) {
+    if (!isGameplayReady()) {
       return;
     }
     showInstallUI();
@@ -88,13 +83,10 @@
     deferredPrompt = null;
   }
 
-  document.addEventListener(GE.STARTUP_PRELOAD_COMPLETE, () => {
-    preloadComplete = true;
-    tryShow();
-  });
-
-  document.addEventListener(GE.BRIEFING_DISMISSED, () => {
-    markBriefingDismissed();
+  document.addEventListener(GE.GAMEPLAY_READY_CHANGED, (event) => {
+    if (event.detail?.gameplayReady) {
+      tryShow();
+    }
   });
 
   window.InstallPromptManager = { tryShow };

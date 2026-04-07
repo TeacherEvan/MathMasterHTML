@@ -27,6 +27,8 @@ console.log("🎮 Console Manager core loading");
       this.selectedPosition = null;
       this.consoleElement = null;
       this.modal = null;
+      this.selectionWindowElement = null;
+      this.selectionStatusElement = null;
       this.isPendingSelection = false;
       this.currentLevel =
         typeof getLevelFromURL === "function"
@@ -54,9 +56,20 @@ console.log("🎮 Console Manager core loading");
     setup() {
       this.consoleElement = document.getElementById("symbol-console");
       this.modal = document.getElementById("symbol-modal");
+      this.selectionWindowElement = this.modal?.querySelector(
+        ".console-selection-window",
+      );
+      this.selectionStatusElement = document.getElementById(
+        "console-selection-status",
+      );
 
-      if (!this.consoleElement || !this.modal) {
-        console.error("❌ Console elements not found in DOM");
+      if (
+        !this.consoleElement ||
+        !this.modal ||
+        !this.selectionWindowElement ||
+        !this.selectionStatusElement
+      ) {
+        console.error("❌ Console selection elements not found in DOM");
         return;
       }
 
@@ -67,11 +80,12 @@ console.log("🎮 Console Manager core loading");
       this.setupModalInteractions();
       this.setupKeyboardShortcuts();
       const GameEvents = window.GameEvents || {
+        CONSOLE_SYMBOL_ADDED: "consoleSymbolAdded",
         PROBLEM_COMPLETED: "problemCompleted",
       };
 
       document.addEventListener(GameEvents.PROBLEM_COMPLETED, () => {
-        console.log("🎉 Problem completed! Showing symbol selection modal");
+        console.log("🎉 Problem completed! Opening console selection panel");
         this.incrementProblemsCompleted();
         this.showSymbolSelectionModal();
       });

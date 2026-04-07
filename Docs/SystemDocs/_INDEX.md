@@ -15,8 +15,8 @@ This repository now keeps a small living documentation set. Historical reports, 
 | Worm validation and regression checks | [`../Worms/WORM_TESTING_GUIDE.md`](../Worms/WORM_TESTING_GUIDE.md) |
 | Competition planning | [`../COMPETITION_PHASE1_ARCHITECTURAL_ROADMAP.md`](../COMPETITION_PHASE1_ARCHITECTURAL_ROADMAP.md) |
 | Competition execution order | [`../COMPETITION_PHASE1_EXECUTION_MATRIX.md`](../COMPETITION_PHASE1_EXECUTION_MATRIX.md) |
+| Agent customization ownership and update protocol for docs/instructions structure changes | [`./AGENT_CUSTOMIZATION_ARCHITECTURE.md`](./AGENT_CUSTOMIZATION_ARCHITECTURE.md) |
 | Rolling work log | [`../../JOBCARD.md`](../../JOBCARD.md) |
-| Agent-specific repo instructions | [`../../.github/copilot-instructions.md`](../../.github/copilot-instructions.md) |
 
 ## Suggested reading order
 
@@ -24,7 +24,8 @@ This repository now keeps a small living documentation set. Historical reports, 
 2. `DEVELOPMENT_GUIDE.md`
 3. `ARCHITECTURE.md`
 4. Area-specific guide (`WORM_DEVELOPER_GUIDE.md`, `PERFORMANCE.md`, competition docs)
-5. `REFACTORING_HISTORY.md` when you need historical context rather than current rules
+5. `AGENT_CUSTOMIZATION_ARCHITECTURE.md` when you are changing agent customization ownership, instruction layering, or docs structure
+6. `REFACTORING_HISTORY.md` when you need historical context rather than current rules
 
 ## Documentation rules
 
@@ -32,4 +33,4 @@ This repository now keeps a small living documentation set. Historical reports, 
 - Put durable historical context in `REFACTORING_HISTORY.md`.
 - Keep `JOBCARD.md` for recent noteworthy work, not full technical design dumps.
 - Treat `src/assets/problems/**/*.md` as gameplay data, not developer documentation.
-- Keep workflow/config Markdown such as `.github/copilot-instructions.md` and `.github/superpower/**/*.md` separate from system docs.
+- Keep workflow/config Markdown such as `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, and `.github/superpower/**/*.md` separate from system docs and out of the primary docs catalog.

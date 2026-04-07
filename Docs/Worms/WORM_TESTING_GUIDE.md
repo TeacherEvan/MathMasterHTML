@@ -2,6 +2,10 @@
 
 This guide covers the current manual and automated validation paths for the worm system.
 
+## Authoritative Source Note
+
+This guide is the authoritative developer-facing source for worm testing and validation expectations. Keep `.github/instructions/worm-runtime.instructions.md` and other `.github` instruction files as thin wrappers that link here instead of duplicating scenario detail.
+
 ## Baseline commands
 
 ```bash

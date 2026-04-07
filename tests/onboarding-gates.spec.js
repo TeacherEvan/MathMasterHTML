@@ -1,9 +1,11 @@
 import { expect, test } from "@playwright/test";
 import {
+  dismissBriefingAndWaitForInteractiveGameplay,
   gotoGameRuntime,
   resetOnboardingState,
   seedOnboardingState,
   setCorruptOnboardingState,
+  waitForGameplayReady,
 } from "./utils/onboarding-runtime.js";
 
 test.describe("Onboarding gates — Build 1", () => {
@@ -61,14 +63,51 @@ test.describe("Onboarding gates — Build 1", () => {
     expect(mode).toBe("off");
   });
 
+  test("auto Evan waits for shared gameplay readiness instead of briefing alone", async ({
+    page,
+  }) => {
+    await resetOnboardingState(page, "?level=beginner&evan=auto&preload=off");
+
+    await page.evaluate(() => {
+      window.__evanStartCount = 0;
+      document.addEventListener(window.GameEvents.EVAN_HELP_STARTED, () => {
+        window.__evanStartCount += 1;
+      });
+    });
+
+    await page.waitForTimeout(300);
+    expect(await page.evaluate(() => window.__evanStartCount)).toBe(0);
+
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+    await waitForGameplayReady(page);
+
+    await page.waitForFunction(() => window.__evanStartCount === 1, {
+      timeout: 5000,
+    });
+    expect(await page.evaluate(() => window.__evanStartCount)).toBe(1);
+  });
+
   test("session counter increments on each page load", async ({ page }) => {
-    await resetOnboardingState(page, "?level=beginner&preload=off");
+    await page.addInitScript((storageKey) => {
+      if (!sessionStorage.getItem("onboarding-session-counter-reset")) {
+        localStorage.removeItem(storageKey);
+        sessionStorage.setItem("onboarding-session-counter-reset", "1");
+      }
+    }, "mathmaster_onboarding_v1");
+
+    await gotoGameRuntime(page, "?level=beginner&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+    await waitForGameplayReady(page);
+
     const count1 = await page.evaluate(
       () => window.GameOnboardingStorage.getState().sessionCount,
     );
     expect(count1).toBeGreaterThanOrEqual(1);
 
     await gotoGameRuntime(page, "?level=beginner&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+    await waitForGameplayReady(page);
+
     const count2 = await page.evaluate(
       () => window.GameOnboardingStorage.getState().sessionCount,
     );

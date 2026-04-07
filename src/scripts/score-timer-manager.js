@@ -162,6 +162,9 @@ console.log("⏱️ ScoreTimerManager loading...");
 
     setGameStarted() {
       if (this._gameStarted) return;
+      if (window.GameRuntimeCoordinator?.isGameplayReady?.() === false) {
+        return;
+      }
       this._gameStarted = true;
       if (this._problemStarted && !this._paused) {
         this.startStep();

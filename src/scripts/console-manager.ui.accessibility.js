@@ -11,13 +11,15 @@ console.log("🎮 Console Manager UI accessibility loading");
 
   proto._applySymbolModalAccessibility = function() {
     this.modal?.setAttribute("aria-hidden", "false");
+    this.selectionStatusElement?.setAttribute("aria-live", "polite");
     this._modalFocusCleanup =
       window.UXModules?.AccessibilityManager?.trapFocus?.(
-        this.modal?.querySelector(".modal-content"),
+        this.selectionWindowElement ||
+          this.modal?.querySelector(".console-selection-window"),
         {
           initialFocus: () =>
             this.modal?.querySelector(".symbol-choice") ||
-            this.modal?.querySelector("#modal-close-btn"),
+            this.modal?.querySelector("#skip-button"),
         },
       ) || null;
   };

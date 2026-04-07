@@ -11,6 +11,49 @@ console.log("🎮 Console Manager events loading");
   const GameEvents = window.GameEvents || {
     SYMBOL_CLICKED: "symbolClicked",
   };
+  const POINTER_FOLLOWUP_CLICK_WINDOW_MS = 400;
+  const recentPointerActivations = new WeakMap();
+
+  function shouldIgnoreFollowupClick(element) {
+    const lastPointerActivation = recentPointerActivations.get(element);
+
+    if (typeof lastPointerActivation !== "number") {
+      return false;
+    }
+
+    recentPointerActivations.delete(element);
+    return performance.now() - lastPointerActivation <
+      POINTER_FOLLOWUP_CLICK_WINDOW_MS;
+  }
+
+  function bindPrimaryActivation(element, handler) {
+    if (!element) {
+      return;
+    }
+
+    if (window.PointerEvent) {
+      element.addEventListener(
+        "pointerdown",
+        (event) => {
+          recentPointerActivations.set(element, performance.now());
+          event.preventDefault();
+          handler(event);
+        },
+        { passive: false },
+      );
+
+      element.addEventListener("click", (event) => {
+        if (shouldIgnoreFollowupClick(element)) {
+          return;
+        }
+
+        handler(event);
+      });
+      return;
+    }
+
+    element.addEventListener("click", handler);
+  }
 
   proto.setupConsoleButtons = function() {
     const slots = this.consoleElement.querySelectorAll(".console-slot");
@@ -39,18 +82,7 @@ console.log("🎮 Console Manager events loading");
         }
       };
 
-      if (window.PointerEvent) {
-        slot.addEventListener(
-          "pointerdown",
-          (event) => {
-            event.preventDefault();
-            handleConsoleClick();
-          },
-          { passive: false },
-        );
-      } else {
-        slot.addEventListener("click", handleConsoleClick);
-      }
+      bindPrimaryActivation(slot, handleConsoleClick);
     });
 
     console.log(
@@ -59,36 +91,22 @@ console.log("🎮 Console Manager events loading");
   };
 
   proto.setupModalInteractions = function() {
-    const symbolButtons = document.querySelectorAll(".symbol-choice");
-    symbolButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const symbol = btn.dataset.symbol;
-        this.selectSymbol(symbol);
+    document.querySelectorAll(".symbol-choice").forEach((btn) => {
+      bindPrimaryActivation(btn, () => {
+        this.selectSymbol(btn.dataset.symbol);
       });
     });
 
-    const positionButtons = document.querySelectorAll(".position-choice");
-    positionButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const position = parseInt(btn.dataset.position);
+    document.querySelectorAll(".position-choice").forEach((btn) => {
+      bindPrimaryActivation(btn, () => {
+        const position = Number.parseInt(btn.dataset.position, 10);
         this.selectPosition(position);
       });
     });
 
-    const skipButton = document.getElementById("skip-button");
-    if (skipButton) {
-      skipButton.addEventListener("click", () => {
-        this.skipSelection();
-      });
-    }
-
-    // Close button
-    const closeBtn = document.getElementById("modal-close-btn");
-    if (closeBtn) {
-      closeBtn.addEventListener("click", () => {
-        this.skipSelection();
-      });
-    }
+    bindPrimaryActivation(document.getElementById("skip-button"), () => {
+      this.skipSelection();
+    });
 
     this.modal.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && this.isPendingSelection) {
@@ -97,44 +115,7 @@ console.log("🎮 Console Manager events loading");
       }
     });
 
-    // Drag-to-reposition the floating modal panel
-    const dragHandle = document.getElementById("modal-drag-handle");
-    const modalOverlay = this.modal;
-    if (dragHandle && modalOverlay) {
-      let isDragging = false;
-      let dragStartX = 0;
-      let dragStartY = 0;
-      let originRight = 20;
-      let originBottom = 20;
-
-      dragHandle.addEventListener("pointerdown", (e) => {
-        if (e.target === closeBtn) return;
-        isDragging = true;
-        dragStartX = e.clientX;
-        dragStartY = e.clientY;
-        const style = window.getComputedStyle(modalOverlay);
-        originRight = parseInt(style.right) || 20;
-        originBottom = parseInt(style.bottom) || 20;
-        dragHandle.setPointerCapture(e.pointerId);
-        e.preventDefault();
-      });
-
-      dragHandle.addEventListener("pointermove", (e) => {
-        if (!isDragging) return;
-        const dx = e.clientX - dragStartX;
-        const dy = e.clientY - dragStartY;
-        const newRight = Math.max(0, originRight - dx);
-        const newBottom = Math.max(0, originBottom - dy);
-        modalOverlay.style.right = `${newRight}px`;
-        modalOverlay.style.bottom = `${newBottom}px`;
-      });
-
-      dragHandle.addEventListener("pointerup", () => {
-        isDragging = false;
-      });
-    }
-
-    console.log("✅ Modal interaction handlers set up");
+    console.log("✅ Console selection panel interactions set up");
   };
 
   proto.setupKeyboardShortcuts = function() {

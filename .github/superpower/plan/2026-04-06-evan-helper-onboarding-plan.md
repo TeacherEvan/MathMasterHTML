@@ -81,7 +81,7 @@ The original draft below is still useful as the implementation blueprint, but th
 | Build 6 — Evan Worms & Rewards | **Done** | Worm/reward behavior is implemented; coverage is split across `tests/evan-helper.worms.spec.js` and `tests/evan-helper.worms.purple.spec.js`. |
 | Build 7 — Evan Power-Ups | **Done** | Power-up behavior is implemented; coverage is split across `tests/evan-helper.powerups.spec.js` and `tests/evan-helper.powerups.activation.spec.js`. |
 | Build 8 — Install Prompt | **Done** | `install-prompt.js` and `tests/install-prompt.spec.js` are present and wired to onboarding state. |
-| Build 9 — Verification | **Partial** | The implementation exists, but the verification suite listed later in this document is stale and still references missing Build 3 specs while omitting several shipped spec files. |
+| Build 9 — Verification | **Partial** | The focused verification suite listed later in this document now matches the shipped spec layout. This build remains partial because the Build 3 UI/layout coverage gap is still open and the document is tracking verification guidance rather than a completed closeout run. |
 
 ### Current deltas from the original draft
 
@@ -349,7 +349,7 @@ Introduce a real startup preload overlay tied to readiness, while preventing `ga
 - `src/pages/game.html` — add preload markup and new script tag
 - `src/scripts/game-page.js` — gate briefing modal on preload completion
 - `src/scripts/service-worker-register.js` — dispatch progress milestones
-- `src/styles/css/game-modals.css` — add preload overlay styles
+- `src/styles/css/game-modals.preload.css` — preload overlay styles
 
 ### Required runtime behavior
 
@@ -415,7 +415,7 @@ Modify `setupHowToPlayModal` so:
 3. The start-button click path remains unchanged after the modal is visible.
 4. A safety timeout of 8000ms must exist: if `startupPreloadComplete` has not fired, show the modal anyway. No session may be blocked indefinitely.
 
-#### `src/styles/css/game-modals.css`
+#### `src/styles/css/game-modals.preload.css`
 
 Add styles for `#startup-preload`. Follow existing modal/overlay patterns. Use `transform` and `opacity` only for any transitions. Add a `@media (prefers-reduced-motion: reduce)` block that disables transition on the overlay.
 
@@ -473,7 +473,7 @@ Introduce Evan's visible shell and reserve its layout slots without yet adding a
 ### Files to update
 
 - `src/pages/game.html` — add Evan shell markup and Solve slot
-- `src/styles/css/game-modals.css` — Evan shell styles
+- `src/styles/css/game-modals.evan.css` — Evan shell styles
 - `src/styles/css/game-responsive.mobile-landscape.css` — compact landscape safety rules
 - `src/styles/css/game-polish.chrome.playfield.css` — playfield coexistence rules
 - `src/styles/css/game-polish.chrome.tokens.css` — Evan color tokens
@@ -1101,7 +1101,7 @@ Run all targeted gates and repo verification commands after all builds are compl
 
 ### Status
 
-**Partial.** The commands below were accurate for the original draft, but they need to match the repo's current spec layout before this plan can be treated as closed.
+**Partial.** The commands below now match the repo's current spec layout. This build stays partial because the remaining Build 3 UI/layout coverage debt is still called out in this plan, and the section is acting as closeout guidance rather than proof of a completed final verification pass.
 
 ### Focused onboarding/Evan/install suite
 

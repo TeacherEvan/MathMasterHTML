@@ -1,6 +1,7 @@
 // tests/install-prompt.spec.js
 import { expect, test } from "@playwright/test";
 import {
+  dismissBriefingAndWaitForInteractiveGameplay,
   gotoGameRuntime,
   resetOnboardingState,
   seedOnboardingState,
@@ -25,21 +26,6 @@ function boxesOverlap(boxA, boxB) {
     boxB.x + boxB.width <= boxA.x ||
     boxA.y + boxA.height <= boxB.y ||
     boxB.y + boxB.height <= boxA.y
-  );
-}
-
-async function dismissBriefing(page) {
-  await page.waitForSelector("#start-game-btn", {
-    state: "visible",
-    timeout: 10000,
-  });
-  await page.click("#start-game-btn");
-  await page.waitForFunction(
-    () => {
-      const modal = document.getElementById("how-to-play-modal");
-      return modal && getComputedStyle(modal).display === "none";
-    },
-    { timeout: 5000 },
   );
 }
 
@@ -78,7 +64,7 @@ async function ensurePowerUpDisplay(page) {
 test.describe("Deferred Install Prompt — Build 8", () => {
   test("no install toast before sessionCount >= 3", async ({ page }) => {
     await resetOnboardingState(page, "?level=beginner&preload=off");
-    await dismissBriefing(page);
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await simulateBeforeInstallPrompt(page);
     await page.waitForTimeout(300);
 
@@ -94,7 +80,31 @@ test.describe("Deferred Install Prompt — Build 8", () => {
     await simulateBeforeInstallPrompt(page);
     await expect(page.locator(".toast")).toHaveCount(0);
 
-    await dismissBriefing(page);
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+    await expect(page.locator(".toast")).toContainText(
+      "Install Math Master for offline play",
+    );
+  });
+
+  test("install toast appears only after gameplayReady becomes true", async ({
+    page,
+  }) => {
+    await seedOnboardingState(page, thresholdState(), "?level=beginner");
+
+    await simulateBeforeInstallPrompt(page);
+    await expect(page.locator(".toast")).toHaveCount(0);
+
+    const blockedState = await page.evaluate(() =>
+      window.GameRuntimeCoordinator?.getState?.(),
+    );
+    expect(blockedState).toEqual(
+      expect.objectContaining({
+        gameplayReady: false,
+      }),
+    );
+
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+    await page.waitForFunction(() => window.GameRuntimeCoordinator.isGameplayReady());
     await expect(page.locator(".toast")).toContainText(
       "Install Math Master for offline play",
     );
@@ -104,11 +114,11 @@ test.describe("Deferred Install Prompt — Build 8", () => {
     page,
   }) => {
     await seedOnboardingState(page, thresholdState(), "?level=beginner&preload=off");
-    await dismissBriefing(page);
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await simulateBeforeInstallPrompt(page);
     await expect(page.locator(".toast")).toBeVisible();
 
-    await page.click(".toast");
+    await page.locator(".toast").evaluate((element) => element.click());
     await page.waitForFunction(
       () => window.GameOnboardingStorage.getState().installPromptDismissedAt !== null,
       { timeout: 5000 },
@@ -116,7 +126,7 @@ test.describe("Deferred Install Prompt — Build 8", () => {
     expect(await page.evaluate(() => window.__promptCalls)).toBe(1);
 
     await gotoGameRuntime(page, "?level=beginner&preload=off");
-    await dismissBriefing(page);
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await simulateBeforeInstallPrompt(page);
     await page.waitForTimeout(300);
 
@@ -128,7 +138,7 @@ test.describe("Deferred Install Prompt — Build 8", () => {
   }) => {
     await page.setViewportSize({ width: 844, height: 390 });
     await seedOnboardingState(page, thresholdState(), "?level=beginner&preload=off");
-    await dismissBriefing(page);
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await ensurePowerUpDisplay(page);
     await simulateBeforeInstallPrompt(page);
     await expect(page.locator(".toast")).toBeVisible();
@@ -142,7 +152,7 @@ test.describe("Deferred Install Prompt — Build 8", () => {
     page,
   }) => {
     await seedOnboardingState(page, thresholdState(), "?level=beginner&preload=off");
-    await dismissBriefing(page);
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await page.evaluate(() => {
       window.__installDismissed = false;
       document.addEventListener(
@@ -156,7 +166,7 @@ test.describe("Deferred Install Prompt — Build 8", () => {
     await simulateBeforeInstallPrompt(page);
     await expect(page.locator(".toast")).toBeVisible();
 
-    await page.click(".toast");
+    await page.locator(".toast").evaluate((element) => element.click());
     await page.waitForFunction(() => window.__installDismissed === true, {
       timeout: 5000,
     });

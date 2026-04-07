@@ -25,6 +25,8 @@
     EVAN_ACTION_COMPLETED: "evanActionCompleted",
     INSTALL_PROMPT_AVAILABLE: "installPromptAvailable",
     INSTALL_PROMPT_DISMISSED: "installPromptDismissed",
+    GAMEPLAY_READY_CHANGED: "gameplayReadyChanged",
+    GAMEPLAY_INPUT_LOCK_CHANGED: "gameplayInputLockChanged",
     BRIEFING_DISMISSED: "briefingDismissed",
     STARTUP_PRELOAD_COMPLETE: "startupPreloadComplete",
   });
