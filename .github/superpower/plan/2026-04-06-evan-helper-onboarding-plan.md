@@ -1,4 +1,4 @@
-# MathMasterHTML Detailed Implementation Plan
+# MathMasterHTML Evan Helper Onboarding Plan and Status
 
 ## Goal
 
@@ -66,6 +66,34 @@ These facts govern implementation decisions and were verified against the live c
 - **Worm selectors**: Purple worms are `.worm-container.purple-worm` (modifier class on container). Green worm segments are `.worm-segment` (inner child divs). Muffin rewards are `button.worm-muffin-reward`.
 - **z-index hierarchy**: How-to-Play modal = `1000000`, Game Over modal = `999999`. Evan's overlay shell must sit below both game modals but above normal gameplay elements.
 - **`game.js` is a dynamic loader**: It loads 7 sub-modules via `await loadModule()` in sequence: `game-init.js`, `game-problem-manager.js`, `game-symbol-handler.stolen.js`, `game-symbol-handler.core.js`, `game-symbol-handler.events.js`, `game-symbol-handler.js`, `game-state-manager.js`. These modules become available asynchronously after `game.js` starts executing. Any code that needs `GameSymbolHandlerCore` or `GameProblemManager` must wait for them.
+
+## Status snapshot (updated 2026-04-07)
+
+The original draft below is still useful as the implementation blueprint, but the repo is no longer at "pre-build" status.
+
+| Build | Status | Current repo state |
+| ----- | ------ | ------------------ |
+| Build 1 — Onboarding Core | **Done** | `game-onboarding.storage.js`, `game-onboarding.bootstrap.js`, `constants.events.js`, `game.html`, and `tests/onboarding-gates.spec.js` are present and wired. |
+| Build 2 — Preload Shell | **Done** | `startup-preload.js`, preload markup, `service-worker-register.js` progress dispatch, `game-page.js` preload gating, `game-modals.preload.css`, and `tests/startup-preload.spec.js` are present. |
+| Build 3 — Evan UI Shell | **Partial** | Evan shell markup, presenter, styles, and tokens are shipped, but the dedicated `tests/evan-helper.ui.spec.js`, `tests/evan-helper.controls.spec.js`, and Evan-specific `tests/ui-boundary.spec.js` assertions called for below are still missing. |
+| Build 4 — Onboarding Flow | **Done** | `game-onboarding.controller.js` is wired and the flow coverage is split across `tests/evan-helper.flow.spec.js` and `tests/evan-helper.flow-solve.spec.js`. |
+| Build 5 — Evan Symbols | **Done** | The symbol loop is implemented, but split across `evan-helper.controller.targets.js`, `evan-helper.controller.runtime.js`, and `evan-helper.controller.js` to satisfy the line-limit policy; `tests/evan-helper.symbols.spec.js` exists. |
+| Build 6 — Evan Worms & Rewards | **Done** | Worm/reward behavior is implemented; coverage is split across `tests/evan-helper.worms.spec.js` and `tests/evan-helper.worms.purple.spec.js`. |
+| Build 7 — Evan Power-Ups | **Done** | Power-up behavior is implemented; coverage is split across `tests/evan-helper.powerups.spec.js` and `tests/evan-helper.powerups.activation.spec.js`. |
+| Build 8 — Install Prompt | **Done** | `install-prompt.js` and `tests/install-prompt.spec.js` are present and wired to onboarding state. |
+| Build 9 — Verification | **Partial** | The implementation exists, but the verification suite listed later in this document is stale and still references missing Build 3 specs while omitting several shipped spec files. |
+
+### Current deltas from the original draft
+
+- The Evan controller did not stay in one file. It was correctly split into `evan-helper.controller.targets.js`, `evan-helper.controller.runtime.js`, and `evan-helper.controller.js` to stay within the 200-line policy.
+- Preload and Evan styling landed in dedicated files: `game-modals.preload.css` and `game-modals.evan.css`, both linked from `src/pages/game.html`, instead of only expanding `game-modals.css`.
+- The final event surface is broader than the original Build 1 list: in addition to the planned preload/Evan/install events, the runtime now also uses `STARTUP_PRELOAD_FORCE_COMPLETE`, `STARTUP_PRELOAD_COMPLETE`, and `BRIEFING_DISMISSED`.
+- Build 4, 6, and 7 test coverage is split across additional spec files beyond the original draft. Use the current file list in Build 9, not the earlier one-file-per-build assumption.
+
+### Remaining closeout work
+
+1. Finish Build 3 test debt by either adding `tests/evan-helper.ui.spec.js` + `tests/evan-helper.controls.spec.js` and Evan-specific `tests/ui-boundary.spec.js` assertions, or explicitly retiring those checks from the plan.
+2. Use the refreshed Build 9 suite below when doing final onboarding/Evan verification; the old suite list is no longer accurate.
 
 ## Build decomposition for separate project tracks
 
@@ -432,6 +460,10 @@ Delete `startup-preload.js`, remove its script tag and preload markup from `game
 
 Introduce Evan's visible shell and reserve its layout slots without yet adding autonomous gameplay behavior.
 
+### Status
+
+**Partial.** Runtime shell, presenter, markup, styles, and token work are in place. The dedicated UI/controls/layout-spec follow-through described in this build has not all landed yet.
+
 ### Files to create
 
 - `src/scripts/evan-helper.presenter.js` (≤200 lines)
@@ -583,6 +615,10 @@ Remove Evan shell markup and Solve slot from `game.html`, delete `evan-helper.pr
 
 Wire first-run auto-demo, intro consumption, Skip handling, and Solve visibility.
 
+### Status
+
+**Done.** Runtime behavior is present, but the test coverage is now split across `tests/evan-helper.flow.spec.js` and `tests/evan-helper.flow-solve.spec.js`.
+
 ### Files to create
 
 - `src/scripts/game-onboarding.controller.js` (≤200 lines)
@@ -666,6 +702,10 @@ Delete `game-onboarding.controller.js` and its script tag; revert the `game-page
 ### Scope
 
 Implement Evan's first real gameplay capability: solving symbols only, without worm or power-up logic.
+
+### Status
+
+**Done.** The behavior shipped as a split controller (`targets` + `runtime` + main loop) rather than one file so the implementation stays under the line-limit policy.
 
 ### Files to create
 
@@ -774,6 +814,10 @@ Delete `evan-helper.controller.js` and its script tag. Evan shell and flow remai
 ### Scope
 
 Add worm prioritization and reward collection on top of symbol solving.
+
+### Status
+
+**Done.** The runtime behavior exists and the purple-worm guardrail coverage lives in a dedicated follow-up spec: `tests/evan-helper.worms.purple.spec.js`.
 
 ### Files to update
 
@@ -889,6 +933,10 @@ Revert the prioritization block added to `evan-helper.controller.js`. Phase-1 sy
 
 Add inventory-aware power-up handling, including second-click placement.
 
+### Status
+
+**Done.** Build 7 behavior is implemented, and the "resume after activation" / "invalid target does not freeze" cases live in `tests/evan-helper.powerups.activation.spec.js` rather than the main power-up spec file.
+
 ### Files to update
 
 - `src/scripts/evan-helper.controller.js` — extend with phase-3 power-up logic
@@ -981,6 +1029,10 @@ Revert the phase-3 power-up block from `evan-helper.controller.js`. Phase 1/2 be
 
 Add an install ask only after repeat engagement and only when the browser prompt is actually available. Reuse `window.UXModules.ToastNotificationManager` instead of building a custom chip.
 
+### Status
+
+**Done.** The runtime currently prefers `window.UXEnhancements?.toast` and falls back to `window.UXModules.ToastNotificationManager`, matching the repo's existing service-worker/update-notification path.
+
 ### Files to create
 
 - `src/scripts/install-prompt.js` (≤200 lines)
@@ -1047,23 +1099,28 @@ Delete `install-prompt.js` and its script tag. No other module is affected.
 
 Run all targeted gates and repo verification commands after all builds are complete.
 
+### Status
+
+**Partial.** The commands below were accurate for the original draft, but they need to match the repo's current spec layout before this plan can be treated as closed.
+
 ### Focused onboarding/Evan/install suite
 
 ```sh
 npx playwright test \
   tests/onboarding-gates.spec.js \
   tests/startup-preload.spec.js \
-  tests/evan-helper.ui.spec.js \
-  tests/evan-helper.controls.spec.js \
   tests/evan-helper.flow.spec.js \
+  tests/evan-helper.flow-solve.spec.js \
   tests/evan-helper.symbols.spec.js \
   tests/evan-helper.worms.spec.js \
+  tests/evan-helper.worms.purple.spec.js \
   tests/evan-helper.powerups.spec.js \
+  tests/evan-helper.powerups.activation.spec.js \
   tests/install-prompt.spec.js \
   --reporter=line --workers=1
 ```
 
-Expected: all targeted tests pass.
+Expected: all shipped onboarding/Evan/install specs pass. Build 3 still needs its dedicated UI/layout follow-up coverage before the overall plan is fully closed.
 
 ### Layout and tray safety suite
 
@@ -1077,6 +1134,8 @@ npx playwright test \
 ```
 
 Expected: all layout and tray safety tests pass, including new Evan-specific overlap assertions.
+
+Current repo note: `tests/ui-boundary.spec.js` does not yet include those Evan-specific overlap assertions, so treat them as remaining Build 3 work rather than already-landed coverage.
 
 ### Repository validation
 
@@ -1107,20 +1166,15 @@ If any file violates the limit, split it by concern using dot-notation (e.g., `e
 
 ---
 
-## Execution order recommendation
+## Remaining closeout order recommendation
 
-Execute in this order. Do not skip the verification pause between shell and behavior.
+The original build order above is now mostly historical. For current follow-up work, use this order:
 
-1. Build 1 — Onboarding Core
-2. Build 2 — Preload Shell
-3. Build 3 — Evan UI Shell
-4. Build 4 — Onboarding Flow
-5. ⛔ **Stop and verify the runtime shell end-to-end before any bot behavior.** Run smoke lane.
-6. Build 5 — Evan Symbols
-7. Build 6 — Evan Worms & Rewards
-8. Build 7 — Evan Power-Ups
-9. Build 8 — Install Prompt
-10. Build 9 — Verification
+1. Finish or retire the missing Build 3 UI/layout assertions.
+2. Run the refreshed focused onboarding/Evan/install suite from Build 9.
+3. Run the layout/tray safety suite after Evan overlap assertions are in place.
+4. Run `npm run typecheck` and `npm run verify`.
+5. Run `npm run test:competition:smoke` as the final stability lane.
 
 ---
 
@@ -1149,7 +1203,7 @@ These issues were found by cross-referencing the plan against the live codebase 
 
 ## Handoff note
 
-This plan is intentionally detailed enough to be broken into separate implementation projects/builds later.
+This plan is intentionally detailed enough to be broken into separate implementation projects/builds later, but as of 2026-04-07 it is also a status document: Builds 1, 2, 4, 5, 6, 7, and 8 are materially implemented in the repo; the main remaining gaps are Build 3 coverage debt and Build 9 verification refresh.
 
 The most important planning corrections and enhancements versus the earlier draft are:
 

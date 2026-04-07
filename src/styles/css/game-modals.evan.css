@@ -10,6 +10,10 @@
     pointer-events: none;
 }
 
+body.evan-input-locked #evan-assist-shell {
+    pointer-events: auto;
+}
+
 #evan-assist-shell:not([hidden]) {
     display: block;
 }
@@ -70,6 +74,10 @@
     text-transform: uppercase;
     letter-spacing: 1px;
     transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.evan-input-locked #evan-skip-button {
+    pointer-events: auto;
 }
 
 #evan-skip-button:hover,

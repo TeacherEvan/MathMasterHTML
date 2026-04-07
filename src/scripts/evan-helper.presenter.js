@@ -11,6 +11,57 @@
 
   if (hand) hand.style.transition = handTransition;
 
+  function setInputLock(locked) {
+    document.body.classList.toggle("evan-input-locked", locked);
+    if (locked && skipBtn && !skipBtn.hidden) {
+      skipBtn.focus({ preventScroll: true });
+    }
+  }
+
+  function isSkipInteractionTarget(target) {
+    return Boolean(
+      skipBtn &&
+        !skipBtn.hidden &&
+        target instanceof Element &&
+        target.closest("#evan-skip-button"),
+    );
+  }
+
+  function isAllowedSkipKey(event) {
+    if (!skipBtn || skipBtn.hidden) return false;
+    const isSkipFocused =
+      document.activeElement === skipBtn || event.target === skipBtn;
+    if (!isSkipFocused) return false;
+    return (
+      event.key === "Enter" || event.key === " " || event.key === "Spacebar"
+    );
+  }
+
+  function guardLockedUserInput(event) {
+    if (!document.body.classList.contains("evan-input-locked")) return;
+    if (event.type !== "keydown" && !event.isTrusted) return;
+    if (isSkipInteractionTarget(event.target)) return;
+
+    if (event.type === "keydown" && isAllowedSkipKey(event)) {
+      return;
+    }
+
+    if (skipBtn && !skipBtn.hidden && document.activeElement !== skipBtn) {
+      skipBtn.focus({ preventScroll: true });
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }
+
+  window.addEventListener("pointerdown", guardLockedUserInput, true);
+  window.addEventListener("click", guardLockedUserInput, true);
+  window.addEventListener("keydown", guardLockedUserInput, true);
+  document.addEventListener("pointerdown", guardLockedUserInput, true);
+  document.addEventListener("click", guardLockedUserInput, true);
+  document.addEventListener("keydown", guardLockedUserInput, true);
+
   function show() {
     if (!shell) return;
     shell.hidden = false;
@@ -23,14 +74,19 @@
     shell.hidden = true;
     shell.setAttribute("aria-hidden", "true");
     document.body.classList.remove("evan-help-active");
+    setInputLock(false);
   }
 
   function showSkip() {
-    if (skipBtn) skipBtn.hidden = false;
+    if (skipBtn) {
+      skipBtn.hidden = false;
+      setInputLock(true);
+    }
   }
 
   function hideSkip() {
     if (skipBtn) skipBtn.hidden = true;
+    setInputLock(false);
   }
 
   function showSolve() {

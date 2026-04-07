@@ -116,6 +116,57 @@ test.describe("Evan Flow Controller — Build 4", () => {
     expect(await page.evaluate(() => window.__evanStopReason)).toBe("skip");
   });
 
+  test("auto Evan run blocks user input except skip", async ({ page }) => {
+    await resetOnboardingState(page, "?level=beginner&evan=auto&preload=off");
+    await dismissBriefing(page);
+    await page.waitForFunction(
+      () => {
+        const btn = document.getElementById("evan-skip-button");
+        return btn && !btn.hidden && document.body.classList.contains("evan-input-locked");
+      },
+      { timeout: 8000 },
+    );
+
+    await page.evaluate(() => {
+      window.__evanHelpClicks = 0;
+      window.__evanSymbolClicks = 0;
+      document.getElementById("help-button")?.addEventListener("click", () => {
+        window.__evanHelpClicks++;
+      });
+      if (window.consoleManager) {
+        window.consoleManager.slots[0] = "x";
+      }
+      document.addEventListener("keydown", () => {
+        /* test probe only */
+      });
+      document.addEventListener(window.GameEvents.SYMBOL_CLICKED, () => {
+        window.__evanSymbolClicks++;
+      });
+    });
+
+    const helpBox = await page.locator("#help-button").boundingBox();
+    expect(helpBox).toBeTruthy();
+    await page.mouse.click(helpBox.x + helpBox.width / 2, helpBox.y + helpBox.height / 2);
+    await page.keyboard.press("1");
+    await page.waitForTimeout(200);
+
+    const blockedState = await page.evaluate(() => ({
+      helpClicks: window.__evanHelpClicks,
+      symbolClicks: window.__evanSymbolClicks,
+      activeElementId: document.activeElement?.id || null,
+    }));
+
+    expect(blockedState.helpClicks).toBe(0);
+    expect(blockedState.symbolClicks).toBe(0);
+    expect(blockedState.activeElementId).toBe("evan-skip-button");
+
+    await page.click("#evan-skip-button");
+    await page.waitForFunction(
+      () => !document.body.classList.contains("evan-input-locked"),
+      { timeout: 5000 },
+    );
+  });
+
   test("after skip, consumed state persists", async ({ page }) => {
     await resetOnboardingState(page, "?level=beginner&evan=auto&preload=off");
     await dismissBriefing(page);
