@@ -11,15 +11,22 @@
       LEVEL_SELECT: "/src/pages/game.html?level=",
       BACK: "/src/pages/index.html",
     },
+    COMPACT_BREAKPOINT: "(max-width: 768px)",
   });
 
   const elements = {
     backButton: document.querySelector(".back-button"),
     cards: Array.from(document.querySelectorAll(".level-card")),
+    levelButtons: Array.from(document.querySelectorAll(".level-button")),
+    routeButtons: Array.from(document.querySelectorAll(".route-switcher-button")),
   };
 
+  const compactMedia = window.matchMedia(CONFIG.COMPACT_BREAKPOINT);
+
   const state = {
-    cardHandlers: new Map(),
+    activeLevel: elements.cards[0]?.dataset.level || "beginner",
+    levelHandlers: new Map(),
+    routeHandlers: new Map(),
   };
 
   function createRipple(event, target) {
@@ -50,19 +57,40 @@
     }, CONFIG.RIPPLE.REMOVE_DELAY_MS);
   }
 
-  function selectLevel(levelKey, cardElement, interactionEvent) {
+  function selectLevel(levelKey, triggerElement, interactionEvent) {
     if (interactionEvent) {
-      createRipple(interactionEvent, cardElement);
+      createRipple(interactionEvent, triggerElement);
     }
 
-    cardElement.style.transform = "scale(0.98)";
+    triggerElement.style.transform = "scale(0.98)";
     setTimeout(() => {
-      cardElement.style.transform = "";
+      triggerElement.style.transform = "";
     }, 180);
 
     setTimeout(() => {
       window.location.href = `${CONFIG.NAVIGATION.LEVEL_SELECT}${levelKey}`;
     }, 300);
+  }
+
+  function syncCompactLayout() {
+    const compactMode = compactMedia.matches;
+
+    elements.cards.forEach((card) => {
+      const isActive = card.dataset.level === state.activeLevel;
+      card.classList.toggle("is-active", isActive);
+      card.hidden = compactMode ? !isActive : false;
+    });
+
+    elements.routeButtons.forEach((button) => {
+      const isActive = button.dataset.level === state.activeLevel;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-pressed", String(isActive));
+    });
+  }
+
+  function setActiveLevel(levelKey) {
+    state.activeLevel = levelKey;
+    syncCompactLayout();
   }
 
   function goBack(interactionEvent) {
@@ -95,7 +123,11 @@
 
     if (selectedCard) {
       const levelKey = selectedCard.dataset.level || "beginner";
-      selectLevel(levelKey, selectedCard, event);
+      const button = selectedCard.querySelector(".level-button");
+      setActiveLevel(levelKey);
+      if (button instanceof HTMLElement) {
+        selectLevel(levelKey, button, event);
+      }
       return;
     }
 
@@ -107,61 +139,62 @@
     }
   }
 
-  function handleTouchStart(event) {
-    const card = event.target.closest(".level-card");
-    if (card) {
-      card.style.transform = "scale(0.98)";
-    }
-  }
-
-  function handleTouchEnd(event) {
-    const card = event.target.closest(".level-card");
-    if (card) {
-      card.style.transform = "";
-    }
-  }
-
-  function attachCardHandlers() {
-    elements.cards.forEach((card, index) => {
-      const levelKey =
-        card.dataset.level ||
-        (index === 1 ? "warrior" : index === 2 ? "master" : "beginner");
+  function attachLevelHandlers() {
+    elements.levelButtons.forEach((button) => {
+      const levelKey = button.dataset.level || "beginner";
       const handler = (event) => {
-        selectLevel(levelKey, card, event);
+        selectLevel(levelKey, button, event);
       };
-      state.cardHandlers.set(card, handler);
-      card.addEventListener("click", handler);
+
+      state.levelHandlers.set(button, handler);
+      button.addEventListener("pointerdown", handler);
     });
   }
 
-  function detachCardHandlers() {
-    state.cardHandlers.forEach((handler, card) => {
-      card.removeEventListener("click", handler);
+  function attachRouteHandlers() {
+    elements.routeButtons.forEach((button) => {
+      const levelKey = button.dataset.level || "beginner";
+      const handler = () => {
+        setActiveLevel(levelKey);
+      };
+
+      state.routeHandlers.set(button, handler);
+      button.addEventListener("pointerdown", handler);
     });
-    state.cardHandlers.clear();
+  }
+
+  function detachHandlers() {
+    state.levelHandlers.forEach((handler, button) => {
+      button.removeEventListener("pointerdown", handler);
+    });
+    state.routeHandlers.forEach((handler, button) => {
+      button.removeEventListener("pointerdown", handler);
+    });
+    state.levelHandlers.clear();
+    state.routeHandlers.clear();
   }
 
   function initInteractions() {
     document.addEventListener("keydown", handleKeydown);
-    document.addEventListener("touchstart", handleTouchStart);
-    document.addEventListener("touchend", handleTouchEnd);
+    compactMedia.addEventListener("change", syncCompactLayout);
 
-    attachCardHandlers();
+    attachLevelHandlers();
+    attachRouteHandlers();
+    syncCompactLayout();
 
     if (elements.backButton) {
-      elements.backButton.addEventListener("click", goBack);
+      elements.backButton.addEventListener("pointerdown", goBack);
     }
   }
 
   function destroyInteractions() {
     document.removeEventListener("keydown", handleKeydown);
-    document.removeEventListener("touchstart", handleTouchStart);
-    document.removeEventListener("touchend", handleTouchEnd);
+    compactMedia.removeEventListener("change", syncCompactLayout);
 
-    detachCardHandlers();
+    detachHandlers();
 
     if (elements.backButton) {
-      elements.backButton.removeEventListener("click", goBack);
+      elements.backButton.removeEventListener("pointerdown", goBack);
     }
   }
 

@@ -44,9 +44,26 @@
 
     <!-- Main Level Selection Container -->
     <div class="level-container">
+        <div class="route-switcher" aria-label="Choose route preview">
+            <button class="route-switcher-button is-active" type="button" data-level="beginner" aria-pressed="true"
+                aria-controls="level-panel-beginner">
+                <span class="route-switcher-index">01</span>
+                <span class="route-switcher-copy">Foundations</span>
+            </button>
+            <button class="route-switcher-button" type="button" data-level="warrior" aria-pressed="false"
+                aria-controls="level-panel-warrior">
+                <span class="route-switcher-index">02</span>
+                <span class="route-switcher-copy">Mixed Ops</span>
+            </button>
+            <button class="route-switcher-button" type="button" data-level="master" aria-pressed="false"
+                aria-controls="level-panel-master">
+                <span class="route-switcher-index">03</span>
+                <span class="route-switcher-copy">Division</span>
+            </button>
+        </div>
         <div class="levels-grid">
             <!-- Easy Level - Addition/Subtraction -->
-            <div class="level-card level-easy" data-level="beginner">
+            <div class="level-card level-easy is-active" id="level-panel-beginner" data-level="beginner">
                 <p class="level-ordinal">Route 01 · Beginner</p>
                 <div class="level-icon" aria-hidden="true">01</div>
                 <h3 class="level-title">Foundations</h3>
@@ -74,11 +91,11 @@
                         <div class="progress-fill"></div>
                     </div>
                 </div>
-                <button class="level-button" type="button">Enter foundations</button>
+                <button class="level-button" type="button" data-level="beginner">Enter foundations</button>
             </div>
 
             <!-- Medium Level - Multiplication -->
-            <div class="level-card level-medium" data-level="warrior">
+            <div class="level-card level-medium" id="level-panel-warrior" data-level="warrior">
                 <p class="level-ordinal">Route 02 · Warrior</p>
                 <div class="level-icon" aria-hidden="true">02</div>
                 <h3 class="level-title">Mixed Ops</h3>
@@ -106,11 +123,11 @@
                         <div class="progress-fill"></div>
                     </div>
                 </div>
-                <button class="level-button" type="button">Enter mixed ops</button>
+                <button class="level-button" type="button" data-level="warrior">Enter mixed ops</button>
             </div>
 
             <!-- Hard Level - Division -->
-            <div class="level-card level-hard" data-level="master">
+            <div class="level-card level-hard" id="level-panel-master" data-level="master">
                 <p class="level-ordinal">Route 03 · Master</p>
                 <div class="level-icon" aria-hidden="true">03</div>
                 <h3 class="level-title">Division</h3>
@@ -138,7 +155,7 @@
                         <div class="progress-fill"></div>
                     </div>
                 </div>
-                <button class="level-button" type="button">Enter division</button>
+                <button class="level-button" type="button" data-level="master">Enter division</button>
             </div>
         </div>
     </div>
