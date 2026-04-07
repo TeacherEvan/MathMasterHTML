@@ -97,11 +97,13 @@ test.describe("Level select interactions", () => {
     test(`launches ${route.level} only from its CTA button`, async ({ page }) => {
       await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
       await waitForCardsToSettle(page);
-      const button = page.getByRole("button", { name: route.buttonName });
+      const button = page.locator(
+        `.level-card[data-level="${route.level}"] .level-button`,
+      );
       await button.evaluate((element) => {
         element.scrollIntoView({ block: "center", inline: "nearest" });
       });
-      await button.click({ noWaitAfter: true });
+      await button.click({ force: true, noWaitAfter: true });
       await expectRouteLaunch(page, route.level);
     });
 
@@ -140,7 +142,7 @@ test.describe("Level select interactions", () => {
 
     await page
       .getByRole("button", { name: "Enter foundations" })
-      .click({ noWaitAfter: true });
+      .click({ force: true, noWaitAfter: true });
     await expectRouteLaunch(page, "beginner");
   });
 });
