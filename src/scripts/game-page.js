@@ -52,7 +52,9 @@
 
     if (window.StartupPreload?.isBlocking()) {
       modal.style.display = "none";
-      const safetyTimeout = setTimeout(showModal, 8000);
+      const safetyTimeout = setTimeout(() => {
+        window.StartupPreload?._onComplete?.();
+      }, 8000);
       document.addEventListener(
         window.GameEvents.STARTUP_PRELOAD_COMPLETE,
         () => {

@@ -3,22 +3,15 @@
   const overlay = document.getElementById("startup-preload");
   const messageEl = document.getElementById("startup-preload-message");
   const progressEl = document.getElementById("startup-preload-progress");
-  const MIN_VISIBLE_MS = 1000;
 
   let complete = false;
   let progressBar = null;
-  let shownAt = 0;
-  let pendingCompleteId = null;
 
   function dispatchComplete() {
     document.dispatchEvent(new CustomEvent(GE.STARTUP_PRELOAD_COMPLETE));
   }
 
   function finishOverlay() {
-    if (pendingCompleteId !== null) {
-      clearTimeout(pendingCompleteId);
-      pendingCompleteId = null;
-    }
     if (overlay) {
       overlay.style.opacity = "0";
       setTimeout(() => {
@@ -32,12 +25,7 @@
   function markComplete() {
     if (complete) return;
     complete = true;
-    const remaining = Math.max(0, MIN_VISIBLE_MS - (Date.now() - shownAt));
-    if (remaining === 0) {
-      finishOverlay();
-      return;
-    }
-    pendingCompleteId = setTimeout(finishOverlay, remaining);
+    finishOverlay();
   }
 
   function init() {
@@ -52,8 +40,6 @@
       dispatchComplete();
       return;
     }
-
-    shownAt = Date.now();
     overlay.style.display = "flex";
     overlay.removeAttribute("aria-hidden");
 

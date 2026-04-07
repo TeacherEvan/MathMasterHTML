@@ -199,7 +199,20 @@ class UIBoundaryManager {
   getBoundingBox(element) {
     if (!element) return null;
 
+    const computed = window.getComputedStyle(element);
+    if (
+      element.hidden ||
+      computed.display === "none" ||
+      computed.visibility === "hidden"
+    ) {
+      return null;
+    }
+
     const rect = element.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return null;
+    }
+
     return {
       x: rect.left,
       y: rect.top,

@@ -192,6 +192,10 @@ console.log("📐 UIBoundaryManager positioning loading...");
 
     // Log overlaps
     for (const overlap of overlaps) {
+      if (overlap.overlapArea <= 0) {
+        continue;
+      }
+
       this._logOverlap(id, overlap.id, {
         overlapArea: overlap.overlapArea,
         action: entry.fixed ? "logged" : "repositioning",

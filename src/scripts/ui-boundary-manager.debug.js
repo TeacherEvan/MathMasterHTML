@@ -25,6 +25,14 @@ console.log("📐 UIBoundaryManager debug loading...");
     const adjustedPosition = { ...proposedPosition };
 
     const box = this.getBoundingBox(entry.element);
+    if (!box) {
+      return {
+        valid: false,
+        adjustedPosition,
+        violations: ["Element not measurable"],
+      };
+    }
+
     const testBox = {
       x: proposedPosition.x,
       y: proposedPosition.y,
@@ -68,17 +76,11 @@ console.log("📐 UIBoundaryManager debug loading...");
         violations.push("Top edge out of constraints");
         adjustedPosition.y = minY;
       }
-      if (
-        maxX !== undefined &&
-        adjustedPosition.x + box.width > maxX
-      ) {
+      if (maxX !== undefined && adjustedPosition.x + box.width > maxX) {
         violations.push("Right edge out of constraints");
         adjustedPosition.x = maxX - box.width;
       }
-      if (
-        maxY !== undefined &&
-        adjustedPosition.y + box.height > maxY
-      ) {
+      if (maxY !== undefined && adjustedPosition.y + box.height > maxY) {
         violations.push("Bottom edge out of constraints");
         adjustedPosition.y = maxY - box.height;
       }

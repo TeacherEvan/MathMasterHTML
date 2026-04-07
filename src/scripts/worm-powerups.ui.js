@@ -445,6 +445,39 @@
     }
   };
 
+  proto.ensureDisplayBoundaryRegistration = function () {
+    if (!this.displayElement || !window.uiBoundaryManager) {
+      return;
+    }
+
+    const displayRect = this.displayElement.getBoundingClientRect();
+    if (displayRect.width <= 0 || displayRect.height <= 0) {
+      return;
+    }
+
+    const registration = {
+      element: this.displayElement,
+      zone: null,
+      priority: 1,
+      fixed: false,
+      constraints: this.getDisplayBoundaryConstraints(displayRect),
+    };
+
+    if (window.uiBoundaryManager.elements?.has?.("power-up-display")) {
+      window.uiBoundaryManager.updateRegistration("power-up-display", {
+        ...registration,
+        resetOriginalPosition: true,
+      });
+      return;
+    }
+
+    window.uiBoundaryManager.register(
+      "power-up-display",
+      this.displayElement,
+      registration,
+    );
+  };
+
   /**
    * Hide tooltip
    * @private
@@ -536,10 +569,14 @@
       : "none";
 
     if (!hasAvailablePowerUps) {
+      if (window.uiBoundaryManager?.elements?.has?.("power-up-display")) {
+        window.uiBoundaryManager.unregister("power-up-display");
+      }
       return;
     }
 
     this.syncDisplayLayout();
+    this.ensureDisplayBoundaryRegistration();
   };
 
   /**
@@ -581,16 +618,6 @@
 
     document.body.appendChild(display);
     this.displayElement = display;
-
-    // Register with UIBoundaryManager if available
-    if (window.uiBoundaryManager) {
-      window.uiBoundaryManager.register("power-up-display", display, {
-        zone: null,
-        priority: 1, // Lower priority than score/timer
-        fixed: false,
-        constraints: this.getDisplayBoundaryConstraints(),
-      });
-    }
 
     this.syncDisplayLayout();
     console.log("📊 Power-up display created (centered in top bar zone)");

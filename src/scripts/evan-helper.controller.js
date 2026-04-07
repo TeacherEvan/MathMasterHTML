@@ -1,67 +1,21 @@
 (function () {
   const GE = window.GameEvents;
-  if (!GE) return;
+  const runtime = window.EvanControllerRuntime;
+  if (!GE || !runtime) return;
+  const { hasLiveRect, clearTimers, wait, waitForEvent, waitForGameReady } =
+    runtime;
 
   const DELAY_TARGET = 150,
     DELAY_POST = 180,
     DELAY_MUFFIN = 100;
   const DELAY_POWERUP_TIMEOUT = 500,
-    MAX_WORM_TAP_STREAK = 3,
-    SYMBOL_STALL_SPAWN_MS = 4000;
-
-  function hasLiveRect(el) {
-    return Boolean(window.EvanTargets?.isVisible?.(el));
-  }
-
-  let active = false,
-    pending = [],
-    wormTapStreak = 0,
-    missingSymbolSince = 0;
-
-  function clearPending() {
-    pending.forEach((id) => clearTimeout(id));
-    pending = [];
-  }
-
-  function wait(ms) {
-    return new Promise((r) => {
-      const id = setTimeout(r, ms);
-      pending.push(id);
-    });
-  }
+    MAX_WORM_TAP_STREAK = 1;
+  let active = false;
+  const pending = [];
+  let wormTapStreak = 0;
 
   function emit(name, detail) {
     document.dispatchEvent(new CustomEvent(name, { detail }));
-  }
-
-  function spawnNeededSymbol(symbols) {
-    const state = window.__symbolRainState;
-    const createFallingSymbol = window.SymbolRainHelpers?.createFallingSymbol;
-    if (!state || !createFallingSymbol || !Array.isArray(symbols)) return false;
-
-    const now = Date.now();
-    if (!missingSymbolSince) {
-      missingSymbolSince = now;
-      return false;
-    }
-    if (now - missingSymbolSince < SYMBOL_STALL_SPAWN_MS) return false;
-
-    createFallingSymbol(
-      {
-        symbols: state.symbols,
-        symbolRainContainer: state.symbolRainContainer,
-        config: state.config,
-        activeFallingSymbols: state.activeFallingSymbols,
-        symbolPool: state.symbolPool,
-        lastSymbolSpawnTimestamp: state.lastSymbolSpawnTimestamp,
-      },
-      {
-        column: Math.floor(Math.random() * Math.max(state.columnCount, 1)),
-        forcedSymbol: symbols[0],
-      },
-    );
-    missingSymbolSince = now;
-    return true;
   }
 
   async function clickSymbol(el, symbol) {
@@ -70,13 +24,24 @@
     const pos = T.centerOf(el);
     window.EvanPresenter?.moveHandTo?.(pos.x, pos.y);
     emit(GE.EVAN_ACTION_REQUESTED, { action: "symbolClick", symbol });
-    await wait(DELAY_TARGET);
-    if (!active || !hasLiveRect(el)) return;
-    if (T.findFallingSymbol(symbol) !== el) return;
+    await wait(pending, DELAY_TARGET);
+    const liveSymbol = String(el.textContent || "")
+      .trim()
+      .toLowerCase();
+    const expectedSymbol = String(symbol || "")
+      .trim()
+      .toLowerCase();
+    if (
+      !active ||
+      !hasLiveRect(el) ||
+      !liveSymbol ||
+      liveSymbol !== expectedSymbol
+    )
+      return;
     el.classList.add("clicked");
     emit(GE.SYMBOL_CLICKED, { symbol });
     emit(GE.EVAN_ACTION_COMPLETED, { action: "symbolClick", symbol });
-    await wait(DELAY_POST);
+    await wait(pending, DELAY_POST);
   }
 
   async function tapWormSegment(seg) {
@@ -85,12 +50,12 @@
     const pos = T.centerOf(seg);
     window.EvanPresenter?.moveHandTo?.(pos.x, pos.y);
     emit(GE.EVAN_ACTION_REQUESTED, { action: "wormTap", ...pos });
-    await wait(DELAY_TARGET);
+    await wait(pending, DELAY_TARGET);
     if (!active || !hasLiveRect(seg)) return;
     emit(GE.WORM_CURSOR_TAP, pos);
     emit(GE.EVAN_ACTION_COMPLETED, { action: "wormTap", ...pos });
     wormTapStreak++;
-    await wait(DELAY_POST);
+    await wait(pending, DELAY_POST);
   }
 
   async function collectMuffin(muffin) {
@@ -111,7 +76,7 @@
         new PointerEvent("pointerdown", { bubbles: true, cancelable: true }),
       );
       attempts++;
-      await wait(DELAY_MUFFIN);
+      await wait(pending, DELAY_MUFFIN);
     }
     emit(GE.EVAN_ACTION_COMPLETED, { action: "muffinCollect" });
     wormTapStreak = 0;
@@ -127,45 +92,36 @@
     window.EvanPresenter?.moveHandTo?.(pos.x, pos.y);
     emit(GE.EVAN_ACTION_REQUESTED, { action: "powerUp", type });
     sys.selectPowerUp(type);
-    await wait(DELAY_TARGET);
+    await wait(pending, DELAY_TARGET);
     if (!active || !sys.isPlacementMode) {
       sys.deselectPowerUp?.();
       return;
     }
-    const ok = await awaitEvent("powerUpActivated", DELAY_POWERUP_TIMEOUT, () =>
-      document.dispatchEvent(
-        new PointerEvent("pointerdown", {
-          bubbles: true,
-          cancelable: true,
-          clientX: pos.x,
-          clientY: pos.y,
-        }),
-      ),
+    const ok = await waitForEvent(
+      pending,
+      "powerUpActivated",
+      DELAY_POWERUP_TIMEOUT,
+      (event) => {
+        const detail = event?.detail;
+        if (!detail) return true;
+        if (detail.system && detail.system !== sys) return false;
+        if (detail.type && detail.type !== type) return false;
+        return true;
+      },
+      () =>
+        document.dispatchEvent(
+          new PointerEvent("pointerdown", {
+            bubbles: true,
+            cancelable: true,
+            clientX: pos.x,
+            clientY: pos.y,
+          }),
+        ),
     );
     if (!ok) sys.deselectPowerUp?.();
     emit(GE.EVAN_ACTION_COMPLETED, { action: "powerUp", type });
     wormTapStreak = 0;
-    await wait(DELAY_POST);
-  }
-
-  function awaitEvent(name, timeout, action) {
-    return new Promise((resolve) => {
-      let done = false;
-      const handler = () => {
-        if (done) return;
-        done = true;
-        resolve(true);
-      };
-      document.addEventListener(name, handler, { once: true });
-      if (action) action();
-      const id = setTimeout(() => {
-        if (done) return;
-        done = true;
-        document.removeEventListener(name, handler);
-        resolve(false);
-      }, timeout);
-      pending.push(id);
-    });
+    await wait(pending, DELAY_POST);
   }
 
   async function runLoop() {
@@ -173,20 +129,17 @@
     while (active) {
       const seg = T.findGreenWormSegment();
       const puType = T.getBestPowerUp(seg);
-      const neededSymbols = (T.getNeededSymbols?.() || []).filter(Boolean);
-      if (neededSymbols.length === 0) {
-        const neededSymbol = T.getNeededSymbol?.();
-        if (neededSymbol) {
-          neededSymbols.push(neededSymbol);
+      const neededSymbols = [];
+      const neededSymbol = T.getNeededSymbol?.();
+      if (neededSymbol) neededSymbols.push(neededSymbol);
+      for (const symbol of T.getNeededSymbols?.() || []) {
+        if (symbol && !neededSymbols.includes(symbol)) {
+          neededSymbols.push(symbol);
         }
       }
       const symbolTarget =
         T.findBestFallingSymbol?.(neededSymbols) ||
         (neededSymbols[0] ? T.findFallingSymbol?.(neededSymbols[0]) : null);
-
-      if (neededSymbols.length > 0 && !symbolTarget) {
-        spawnNeededSymbol(neededSymbols);
-      }
 
       if (puType) {
         await usePowerUp(puType);
@@ -207,47 +160,30 @@
       }
       if (!active) break;
 
-      if (neededSymbols.length > 0) {
-        if (symbolTarget) {
-          missingSymbolSince = 0;
-          wormTapStreak = 0;
-          await clickSymbol(symbolTarget, symbolTarget.textContent.trim());
-        } else {
-          spawnNeededSymbol(neededSymbols);
-          window.EvanPresenter?.parkHand?.();
-          await wait(DELAY_POST);
-        }
-      } else {
-        missingSymbolSince = 0;
+      if (symbolTarget) {
         wormTapStreak = 0;
+        await clickSymbol(symbolTarget, symbolTarget.textContent.trim());
+      } else {
+        if (!neededSymbols.length) {
+          wormTapStreak = 0;
+        }
         window.EvanPresenter?.parkHand?.();
-        await wait(DELAY_POST);
+        await wait(pending, DELAY_POST);
       }
     }
-  }
-
-  function waitForGameReady() {
-    return new Promise((resolve) => {
-      const check = () => {
-        if (window.GameSymbolHandlerCore) resolve();
-        else pending.push(setTimeout(check, 200));
-      };
-      check();
-    });
   }
 
   async function start() {
     if (active) return;
     active = true;
-    await waitForGameReady();
+    await waitForGameReady(pending);
     if (!active) return;
     runLoop();
   }
 
   function stop() {
     active = false;
-    clearPending();
-    missingSymbolSince = 0;
+    clearTimers(pending);
     wormTapStreak = 0;
     window.EvanPresenter?.parkHand?.();
   }
@@ -255,6 +191,5 @@
   document.addEventListener(GE.EVAN_HELP_STARTED, start);
   document.addEventListener(GE.EVAN_HELP_STOPPED, stop);
   document.addEventListener(GE.PROBLEM_COMPLETED, stop);
-
   window.EvanController = { start, stop };
 })();

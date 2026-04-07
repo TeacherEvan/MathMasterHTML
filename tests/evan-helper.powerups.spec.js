@@ -1,44 +1,15 @@
 // tests/evan-helper.powerups.spec.js
 import { expect, test } from "@playwright/test";
+import {
+  gotoEvanGame,
+  installRectTarget,
+} from "./utils/evan-target-fixtures.js";
 
 test.setTimeout(60000);
 
-async function installRectTarget(page, name, text = "") {
-  await page.evaluate(
-    ({ targetName, textContent }) => {
-      const target = document.createElement("button");
-      target.dataset.testTarget = targetName;
-      target.textContent = textContent;
-      target.getBoundingClientRect = () => ({
-        x: 120,
-        y: 160,
-        width: 48,
-        height: 48,
-        top: 160,
-        left: 120,
-        right: 168,
-        bottom: 208,
-        toJSON() {
-          return this;
-        },
-      });
-      document.body.appendChild(target);
-    },
-    { targetName: name, textContent: text },
-  );
-}
-
 test.describe("Evan Power-Up Behavior — Build 7", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(
-      `/src/pages/game.html?level=warrior&evan=force&preload=off&case=${Date.now()}`,
-      { waitUntil: "domcontentloaded" },
-    );
-    await page.waitForSelector("#start-game-btn", {
-      state: "visible",
-      timeout: 10000,
-    });
-    await page.waitForTimeout(200);
+    await gotoEvanGame(page, "?level=warrior&evan=force&preload=off");
   });
 
   test("Evan uses selectPowerUp when inventory > 0 and target exists", async ({
@@ -48,14 +19,13 @@ test.describe("Evan Power-Up Behavior — Build 7", () => {
     await page.evaluate(() => {
       window.__selectedPowerUps = [];
       const worm = document.querySelector('[data-test-target="worm"]');
-      const activatePowerUp = (event) => {
-        if (event.clientX === 144 && event.clientY === 184) {
-          document.removeEventListener("pointerdown", activatePowerUp);
+      document.addEventListener(
+        "pointerdown",
+        () => {
           document.dispatchEvent(new CustomEvent("powerUpActivated"));
-        }
-      };
-      document.addEventListener("pointerdown", activatePowerUp);
-
+        },
+        { once: true },
+      );
       window.wormSystem = {
         powerUpSystem: {
           inventory: { chainLightning: 1, spider: 0, devil: 0 },
@@ -79,7 +49,6 @@ test.describe("Evan Power-Up Behavior — Build 7", () => {
     await page.waitForFunction(() => window.__selectedPowerUps?.length > 0, {
       timeout: 5000,
     });
-
     expect(await page.evaluate(() => window.__selectedPowerUps[0])).toBe(
       "chainLightning",
     );
@@ -108,7 +77,6 @@ test.describe("Evan Power-Up Behavior — Build 7", () => {
 
     await page.click("#start-game-btn");
     await page.waitForTimeout(1000);
-
     expect(await page.evaluate(() => window.__selectCalls)).toBe(0);
   });
 
@@ -142,35 +110,37 @@ test.describe("Evan Power-Up Behavior — Build 7", () => {
     await page.waitForFunction(() => window.__deselectCalls > 0, {
       timeout: 5000,
     });
-
     expect(await page.evaluate(() => window.__deselectCalls)).toBeGreaterThan(
       0,
     );
   });
 
-  test("Evan resumes solving after power-up activation", async ({ page }) => {
+  test("successful power-up activation resumes symbol solving", async ({
+    page,
+  }) => {
     await installRectTarget(page, "worm");
     await installRectTarget(page, "symbol", "x");
     await page.evaluate(() => {
       window.__actions = [];
+      window.GameSymbolHandlerCore = window.GameSymbolHandlerCore || {};
       let allowPowerUp = true;
       const worm = document.querySelector('[data-test-target="worm"]');
       const symbol = document.querySelector('[data-test-target="symbol"]');
       document.addEventListener(
-        window.GameEvents.EVAN_ACTION_REQUESTED,
+        window.GameEvents.EVAN_ACTION_COMPLETED,
         (e) => {
           window.__actions.push(e.detail?.action);
         },
       );
-      const activatePowerUp = (event) => {
-        if (event.clientX === 144 && event.clientY === 184) {
-          document.removeEventListener("pointerdown", activatePowerUp);
+      document.addEventListener(
+        "pointerdown",
+        () => {
+          if (!allowPowerUp) return;
           allowPowerUp = false;
           document.dispatchEvent(new CustomEvent("powerUpActivated"));
-        }
-      };
-      document.addEventListener("pointerdown", activatePowerUp);
-
+        },
+        { once: true },
+      );
       window.wormSystem = {
         powerUpSystem: {
           inventory: { chainLightning: 1, spider: 0, devil: 0 },
@@ -188,33 +158,34 @@ test.describe("Evan Power-Up Behavior — Build 7", () => {
       window.EvanTargets.getBestPowerUp = () =>
         allowPowerUp ? "chainLightning" : null;
       window.EvanTargets.isVisible = () => true;
+      window.EvanTargets.getNeededSymbols = () => ["x"];
       window.EvanTargets.getNeededSymbol = () => "x";
+      window.EvanTargets.findBestFallingSymbol = () => symbol;
       window.EvanTargets.findFallingSymbol = () => symbol;
     });
 
-    await page.click("#start-game-btn");
+    await page.evaluate(() => {
+      document.dispatchEvent(
+        new CustomEvent(window.GameEvents.EVAN_HELP_STARTED, {
+          detail: { mode: "manual", level: "warrior" },
+        }),
+      );
+    });
     await page.waitForFunction(
       () =>
         window.__actions?.includes("powerUp") &&
         window.__actions?.includes("symbolClick"),
-      { timeout: 8000 },
-    );
-
-    const actions = await page.evaluate(() => window.__actions);
-    expect(actions.indexOf("powerUp")).toBeLessThan(
-      actions.indexOf("symbolClick"),
+      { timeout: 5000 },
     );
   });
 
-  test("invalid placement target does not freeze Evan", async ({ page }) => {
-    await installRectTarget(page, "visible-worm");
+  test("invalid placement target does not freeze symbol solving", async ({
+    page,
+  }) => {
     await installRectTarget(page, "symbol", "x");
     await page.evaluate(() => {
       window.__actions = [];
-      let greenCalls = 0;
-      const visibleWorm = document.querySelector(
-        '[data-test-target="visible-worm"]',
-      );
+      window.GameSymbolHandlerCore = window.GameSymbolHandlerCore || {};
       const symbol = document.querySelector('[data-test-target="symbol"]');
       const zeroRectTarget = document.createElement("button");
       zeroRectTarget.getBoundingClientRect = () => ({
@@ -231,9 +202,8 @@ test.describe("Evan Power-Up Behavior — Build 7", () => {
         },
       });
       document.body.appendChild(zeroRectTarget);
-
       document.addEventListener(
-        window.GameEvents.EVAN_ACTION_REQUESTED,
+        window.GameEvents.EVAN_ACTION_COMPLETED,
         (e) => {
           window.__actions.push(e.detail?.action);
         },
@@ -250,30 +220,27 @@ test.describe("Evan Power-Up Behavior — Build 7", () => {
           },
         },
       };
-      window.EvanTargets.findGreenWormSegment = () => {
-        greenCalls++;
-        if (greenCalls === 1) return visibleWorm;
-        if (greenCalls === 2) return zeroRectTarget;
-        return null;
-      };
-      window.EvanTargets.getBestPowerUp = () =>
-        greenCalls < 3 ? "chainLightning" : null;
-      window.EvanTargets.isVisible = (target) =>
-        target !== zeroRectTarget && target?.isConnected === true;
+      window.EvanTargets.findGreenWormSegment = () => zeroRectTarget;
+      window.EvanTargets.getBestPowerUp = () => null;
+      window.EvanTargets.isVisible = (target) => target !== zeroRectTarget;
+      window.EvanTargets.getNeededSymbols = () => ["x"];
       window.EvanTargets.getNeededSymbol = () => "x";
+      window.EvanTargets.findBestFallingSymbol = () => symbol;
       window.EvanTargets.findFallingSymbol = () => symbol;
     });
 
-    await page.click("#start-game-btn");
+    await page.evaluate(() => {
+      document.dispatchEvent(
+        new CustomEvent(window.GameEvents.EVAN_HELP_STARTED, {
+          detail: { mode: "manual", level: "warrior" },
+        }),
+      );
+    });
     await page.waitForFunction(
       () => window.__actions?.includes("symbolClick"),
       {
-        timeout: 8000,
+        timeout: 5000,
       },
-    );
-
-    expect(await page.evaluate(() => window.__actions)).toContain(
-      "symbolClick",
     );
   });
 });

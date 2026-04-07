@@ -129,7 +129,7 @@
 body.viewport-compact.viewport-landscape .game-hud {
   grid-template-columns: max-content max-content 1fr;
   grid-template-areas: "score timer powerup-zone";
-  gap: 6px;
+  gap: 10px;
 }
 
 body.viewport-compact.viewport-landscape .score-display,

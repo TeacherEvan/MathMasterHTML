@@ -60,27 +60,31 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
   }) => {
     await page.evaluate(() => {
       window.__postCompleteClicks = 0;
+      window.__symbolClicksBeforeComplete = 0;
       window.__problemDone = false;
       document.addEventListener(window.GameEvents.PROBLEM_COMPLETED, () => {
         window.__problemDone = true;
       });
       document.addEventListener(window.GameEvents.SYMBOL_CLICKED, () => {
-        if (window.__problemDone) window.__postCompleteClicks++;
+        if (window.__problemDone) {
+          window.__postCompleteClicks++;
+        } else {
+          window.__symbolClicksBeforeComplete++;
+        }
       });
     });
 
     await page.click("#start-game-btn");
+    await page.waitForFunction(() => window.__symbolClicksBeforeComplete > 0, {
+      timeout: 30000,
+    });
+    await page.evaluate(() => {
+      document.dispatchEvent(new CustomEvent(window.GameEvents.PROBLEM_COMPLETED));
+    });
 
-    const completed = await page
-      .waitForFunction(() => window.__problemDone === true, { timeout: 45000 })
-      .then(() => true)
-      .catch(() => false);
-
-    if (completed) {
-      await page.waitForTimeout(1000);
-      const postClicks = await page.evaluate(() => window.__postCompleteClicks);
-      expect(postClicks).toBe(0);
-    }
+    await page.waitForTimeout(1000);
+    const postClicks = await page.evaluate(() => window.__postCompleteClicks);
+    expect(postClicks).toBe(0);
   });
 
   test("after EVAN_HELP_STOPPED, no further SYMBOL_CLICKED events", async ({

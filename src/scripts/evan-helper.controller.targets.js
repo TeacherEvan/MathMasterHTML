@@ -70,7 +70,8 @@
     );
 
     for (const el of candidates) {
-      if (!el.isConnected || !normalized.has(normalize(el.textContent))) continue;
+      if (!el.isConnected || !normalized.has(normalize(el.textContent)))
+        continue;
       const r = el.getBoundingClientRect();
       if (r.width > 0 && r.height > 0 && r.bottom > bestBottom) {
         best = el;
@@ -110,8 +111,7 @@
     const hasPurple = hasPurpleWorm();
     const greenSeg =
       cachedGreenSeg !== undefined ? cachedGreenSeg : findGreenWormSegment();
-    const hasWorms = greenSeg !== null || hasPurple;
-    if (!hasWorms) return null;
+    if (!greenSeg) return null;
     if (hasPurple && inv.devil > 0) return "devil";
     const multiWorm =
       document.querySelectorAll(".worm-container:not(.purple-worm)").length > 1;

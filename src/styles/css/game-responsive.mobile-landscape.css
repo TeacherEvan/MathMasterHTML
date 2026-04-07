@@ -151,7 +151,7 @@ body.viewport-compact.viewport-landscape .game-hud {
   top: 4px;
   left: 6px;
   right: 6px;
-  gap: 6px;
+  gap: 10px;
 }
 
 body.viewport-compact.viewport-landscape .hud-block {
