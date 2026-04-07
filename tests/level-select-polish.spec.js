@@ -116,7 +116,7 @@ test.describe("Level select polish", () => {
     ).toBeLessThanOrEqual(72);
   });
 
-  test("stacks cleanly and preserves CTA clarity on narrow mobile", async ({
+  test("uses a compact route selector instead of stacked scrolling cards on narrow mobile", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 430, height: 932 });
@@ -126,50 +126,59 @@ test.describe("Level select polish", () => {
 
     await waitForCardsToSettle(page);
 
-    const header = page.locator(".header");
-    const levelsGrid = page.locator(".levels-grid");
-    const cards = page.locator(".level-card");
-    const firstCard = cards.nth(0);
-    const secondCard = cards.nth(1);
-    const thirdCard = cards.nth(2);
-    const ctas = cards.locator(".level-button");
+    const switcher = page.locator(".route-switcher");
+    const switcherButtons = switcher.locator(".route-switcher-button");
+    const activeCard = page.locator('.level-card[data-level="beginner"]');
+    const activeButton = activeCard.locator(".level-button");
 
-    const [
-      gridTemplateColumns,
-      firstCardBox,
-      secondCardBox,
-      thirdCardBox,
-      firstCtaBox,
-      secondCtaBox,
-      thirdCtaBox,
-    ] = await Promise.all([
-      levelsGrid.evaluate(
-        (element) => window.getComputedStyle(element).gridTemplateColumns,
-      ),
-      firstCard.boundingBox(),
-      secondCard.boundingBox(),
-      thirdCard.boundingBox(),
-      ctas.nth(0).boundingBox(),
-      ctas.nth(1).boundingBox(),
-      ctas.nth(2).boundingBox(),
-    ]);
+    await expect(switcher).toBeVisible();
+    await expect(switcherButtons).toHaveCount(3);
 
-    const resolvedFirstCardBox = expectDefined(firstCardBox);
-    const resolvedSecondCardBox = expectDefined(secondCardBox);
-    const resolvedThirdCardBox = expectDefined(thirdCardBox);
-    const resolvedFirstCtaBox = expectDefined(firstCtaBox);
-    const resolvedSecondCtaBox = expectDefined(secondCtaBox);
-    const resolvedThirdCtaBox = expectDefined(thirdCtaBox);
+    const [visibleLevels, docHeight, viewportHeight, activeCardBox, activeButtonBox] =
+      await Promise.all([
+        page.evaluate(() =>
+          Array.from(document.querySelectorAll(".level-card"))
+            .filter((card) => !card.hidden)
+            .map((card) => card.dataset.level),
+        ),
+        page.evaluate(() => document.documentElement.scrollHeight),
+        page.evaluate(() => window.innerHeight),
+        activeCard.boundingBox(),
+        activeButton.boundingBox(),
+      ]);
 
-    expect(gridTemplateColumns).not.toContain(" ");
-    expect(resolvedSecondCardBox.y).toBeGreaterThanOrEqual(
-      resolvedFirstCardBox.y + resolvedFirstCardBox.height - 2,
+    expect(visibleLevels).toEqual(["beginner"]);
+    expect(docHeight - viewportHeight).toBeLessThanOrEqual(180);
+
+    const resolvedActiveCardBox = expectDefined(activeCardBox);
+    const resolvedActiveButtonBox = expectDefined(activeButtonBox);
+    expectButtonWithinCard(resolvedActiveCardBox, resolvedActiveButtonBox);
+  });
+
+  test("switches the visible route panel when a compact selector button is pressed", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 430, height: 932 });
+    await page.goto("/src/pages/level-select.html", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await waitForCardsToSettle(page);
+
+    await page
+      .locator('.route-switcher-button[data-level="warrior"]')
+      .click();
+
+    await expect(
+      page.locator('.route-switcher-button[data-level="warrior"]'),
+    ).toHaveAttribute("aria-pressed", "true");
+
+    const visibleLevels = await page.evaluate(() =>
+      Array.from(document.querySelectorAll(".level-card"))
+        .filter((card) => !card.hidden)
+        .map((card) => card.dataset.level),
     );
-    expect(resolvedThirdCardBox.y).toBeGreaterThanOrEqual(
-      resolvedSecondCardBox.y + resolvedSecondCardBox.height - 2,
-    );
-    expectButtonWithinCard(resolvedFirstCardBox, resolvedFirstCtaBox);
-    expectButtonWithinCard(resolvedSecondCardBox, resolvedSecondCtaBox);
-    expectButtonWithinCard(resolvedThirdCardBox, resolvedThirdCtaBox);
+
+    expect(visibleLevels).toEqual(["warrior"]);
   });
 });

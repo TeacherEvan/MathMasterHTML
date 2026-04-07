@@ -8,6 +8,15 @@ const ROUTES = [
   { key: "3", level: "master", buttonName: "Enter division" },
 ];
 
+const DESKTOP_VIEWPORT = { width: 1440, height: 1100 };
+
+/**
+ * @param {import("@playwright/test").Page} page
+ */
+async function useDesktopViewport(page) {
+  await page.setViewportSize(DESKTOP_VIEWPORT);
+}
+
 /**
  * @param {import("@playwright/test").Page} page
  */
@@ -86,6 +95,7 @@ async function clickCardBody(page, level) {
 
 test.describe("Level select interactions", () => {
   test("does not launch a route when the panel body is clicked", async ({ page }) => {
+    await useDesktopViewport(page);
     await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
     await waitForCardsToSettle(page);
 
@@ -95,6 +105,7 @@ test.describe("Level select interactions", () => {
 
   for (const route of ROUTES) {
     test(`launches ${route.level} only from its CTA button`, async ({ page }) => {
+      await useDesktopViewport(page);
       await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
       await waitForCardsToSettle(page);
       const button = page.locator(
@@ -103,13 +114,14 @@ test.describe("Level select interactions", () => {
       await button.evaluate((element) => {
         element.scrollIntoView({ block: "center", inline: "nearest" });
       });
-      await button.click({ force: true, noWaitAfter: true });
+      await button.dispatchEvent("pointerdown");
       await expectRouteLaunch(page, route.level);
     });
 
     test(`launches ${route.level} from keyboard shortcut ${route.key}`, async ({
       page,
     }) => {
+      await useDesktopViewport(page);
       await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
       await waitForCardsToSettle(page);
       await page.keyboard.press(route.key);
@@ -120,6 +132,7 @@ test.describe("Level select interactions", () => {
   test("keeps CTA launch working with reduced motion enabled", async ({
     page,
   }) => {
+    await useDesktopViewport(page);
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
 
@@ -142,7 +155,7 @@ test.describe("Level select interactions", () => {
 
     await page
       .getByRole("button", { name: "Enter foundations" })
-      .click({ force: true, noWaitAfter: true });
+      .dispatchEvent("pointerdown");
     await expectRouteLaunch(page, "beginner");
   });
 });
