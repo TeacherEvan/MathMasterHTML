@@ -5,7 +5,22 @@ import { expect, test } from "@playwright/test";
  * @param {import("@playwright/test").Page} page
  */
 async function waitForCardsToSettle(page) {
-  await expect(page.locator(".level-card")).toHaveCount(3);
+  await page.waitForFunction(() => {
+    const cards = Array.from(document.querySelectorAll(".level-card"));
+    if (cards.length !== 3) return false;
+
+    return cards.every((card) => {
+      const style = window.getComputedStyle(card);
+      const opacity = Number.parseFloat(style.opacity || "1");
+      const transform = style.transform;
+
+      return (
+        opacity >= 0.99 &&
+        (transform === "none" ||
+          /^matrix\(1, 0, 0, 1, 0(?:\.0+)?, 0(?:\.0+)?\)$/.test(transform))
+      );
+    });
+  });
 }
 
 /**
@@ -113,25 +128,30 @@ test.describe("Level select polish", () => {
 
     const switcher = page.locator(".route-switcher");
     const switcherButtons = switcher.locator(".route-switcher-button");
-    const activeCard = page.locator('.level-card:not([hidden])');
+    const activeCard = page.locator('.level-card[data-level="beginner"]');
     const activeButton = activeCard.locator(".level-button");
 
     await expect(switcher).toBeVisible();
     await expect(switcherButtons).toHaveCount(3);
-    await expect(activeCard).toHaveCount(1);
 
-    const [docHeight, viewportHeight, activeCardBox, activeButtonBox] =
+    const [visibleLevels, docHeight, viewportHeight, activeCardBox, activeButtonBox] =
       await Promise.all([
+        page.evaluate(() =>
+          Array.from(document.querySelectorAll(".level-card"))
+            .filter((card) => !card.hidden)
+            .map((card) => card.dataset.level),
+        ),
         page.evaluate(() => document.documentElement.scrollHeight),
         page.evaluate(() => window.innerHeight),
         activeCard.boundingBox(),
         activeButton.boundingBox(),
       ]);
 
+    expect(visibleLevels).toEqual(["beginner"]);
+    expect(docHeight - viewportHeight).toBeLessThanOrEqual(180);
+
     const resolvedActiveCardBox = expectDefined(activeCardBox);
     const resolvedActiveButtonBox = expectDefined(activeButtonBox);
-
-    expect(docHeight - viewportHeight).toBeLessThanOrEqual(180);
     expectButtonWithinCard(resolvedActiveCardBox, resolvedActiveButtonBox);
   });
 
@@ -147,12 +167,50 @@ test.describe("Level select polish", () => {
 
     await page
       .locator('.route-switcher-button[data-level="warrior"]')
-      .dispatchEvent("pointerdown");
+      .click();
 
     await expect(
       page.locator('.route-switcher-button[data-level="warrior"]'),
     ).toHaveAttribute("aria-pressed", "true");
-    await expect(page.locator('.level-card[data-level="warrior"]')).toBeVisible();
-    await expect(page.locator('.level-card[data-level="beginner"]')).toBeHidden();
+
+    const visibleLevels = await page.evaluate(() =>
+      Array.from(document.querySelectorAll(".level-card"))
+        .filter((card) => !card.hidden)
+        .map((card) => card.dataset.level),
+    );
+
+    expect(visibleLevels).toEqual(["warrior"]);
+  });
+
+  test("switches the visible route panel when a compact selector button is activated from the keyboard", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 430, height: 932 });
+    await page.goto("/src/pages/level-select.html", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await waitForCardsToSettle(page);
+
+    const warriorButton = page.locator(
+      '.route-switcher-button[data-level="warrior"]',
+    );
+    const masterButton = page.locator(
+      '.route-switcher-button[data-level="master"]',
+    );
+
+    await warriorButton.focus();
+    await page.keyboard.press("Enter");
+    await expect(warriorButton).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      page.locator('.level-card[data-level="warrior"]'),
+    ).toBeVisible();
+
+    await masterButton.focus();
+    await page.keyboard.press("Space");
+    await expect(masterButton).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      page.locator('.level-card[data-level="master"]'),
+    ).toBeVisible();
   });
 });

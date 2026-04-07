@@ -11,47 +11,23 @@
       LEVEL_SELECT: "/src/pages/game.html?level=",
       BACK: "/src/pages/index.html",
     },
-    COMPACT_BREAKPOINT: "(max-width: 760px)",
+    COMPACT_BREAKPOINT: "(max-width: 768px)",
   });
 
   const elements = {
     backButton: document.querySelector(".back-button"),
     cards: Array.from(document.querySelectorAll(".level-card")),
     levelButtons: Array.from(document.querySelectorAll(".level-button")),
-    routeSwitcher: document.querySelector(".route-switcher"),
     routeButtons: Array.from(document.querySelectorAll(".route-switcher-button")),
   };
 
   const compactMedia = window.matchMedia(CONFIG.COMPACT_BREAKPOINT);
 
   const state = {
-    activeLevel:
-      document.querySelector(".route-switcher-button[aria-pressed='true']")
-        ?.dataset.level || elements.cards[0]?.dataset.level || "beginner",
+    activeLevel: elements.cards[0]?.dataset.level || "beginner",
     levelHandlers: new Map(),
     routeHandlers: new Map(),
-    lastPointerActivation: null,
   };
-
-  function markPointerActivation(target) {
-    state.lastPointerActivation = {
-      target,
-      timestamp: Date.now(),
-    };
-  }
-
-  function shouldIgnoreClick(event, target) {
-    if (event.detail === 0) {
-      return false;
-    }
-
-    const activation = state.lastPointerActivation;
-    return Boolean(
-      activation &&
-        activation.target === target &&
-        Date.now() - activation.timestamp < 750,
-    );
-  }
 
   function createRipple(event, target) {
     const ripple = document.createElement("div");
@@ -81,13 +57,23 @@
     }, CONFIG.RIPPLE.REMOVE_DELAY_MS);
   }
 
+  function selectLevel(levelKey, triggerElement, interactionEvent) {
+    if (interactionEvent) {
+      createRipple(interactionEvent, triggerElement);
+    }
+
+    triggerElement.style.transform = "scale(0.98)";
+    setTimeout(() => {
+      triggerElement.style.transform = "";
+    }, 180);
+
+    setTimeout(() => {
+      window.location.href = `${CONFIG.NAVIGATION.LEVEL_SELECT}${levelKey}`;
+    }, 300);
+  }
+
   function syncCompactLayout() {
     const compactMode = compactMedia.matches;
-
-    if (elements.routeSwitcher) {
-      elements.routeSwitcher.hidden = !compactMode;
-      elements.routeSwitcher.setAttribute("aria-hidden", String(!compactMode));
-    }
 
     elements.cards.forEach((card) => {
       const isActive = card.dataset.level === state.activeLevel;
@@ -103,27 +89,8 @@
   }
 
   function setActiveLevel(levelKey) {
-    if (!levelKey) {
-      return;
-    }
-
     state.activeLevel = levelKey;
     syncCompactLayout();
-  }
-
-  function selectLevel(levelKey, triggerElement, interactionEvent) {
-    if (interactionEvent) {
-      createRipple(interactionEvent, triggerElement);
-    }
-
-    triggerElement.style.transform = "scale(0.98)";
-    setTimeout(() => {
-      triggerElement.style.transform = "";
-    }, 180);
-
-    setTimeout(() => {
-      window.location.href = `${CONFIG.NAVIGATION.LEVEL_SELECT}${levelKey}`;
-    }, 300);
   }
 
   function goBack(interactionEvent) {
@@ -156,8 +123,8 @@
 
     if (selectedCard) {
       const levelKey = selectedCard.dataset.level || "beginner";
-      setActiveLevel(levelKey);
       const button = selectedCard.querySelector(".level-button");
+      setActiveLevel(levelKey);
       if (button instanceof HTMLElement) {
         selectLevel(levelKey, button, event);
       }
@@ -175,131 +142,59 @@
   function attachLevelHandlers() {
     elements.levelButtons.forEach((button) => {
       const levelKey = button.dataset.level || "beginner";
-      const pointerHandler = (event) => {
-        markPointerActivation(button);
-        selectLevel(levelKey, button, event);
-      };
-      const clickHandler = (event) => {
-        if (shouldIgnoreClick(event, button)) {
-          return;
-        }
-
+      const handler = (event) => {
         selectLevel(levelKey, button, event);
       };
 
-      state.levelHandlers.set(button, {
-        pointerHandler,
-        clickHandler,
-      });
-      button.addEventListener("pointerdown", pointerHandler);
-      button.addEventListener("click", clickHandler);
+      state.levelHandlers.set(button, handler);
+      button.addEventListener("pointerdown", handler);
     });
   }
 
   function attachRouteHandlers() {
     elements.routeButtons.forEach((button) => {
       const levelKey = button.dataset.level || "beginner";
-      const pointerHandler = (event) => {
-        markPointerActivation(button);
-        createRipple(event, button);
-        setActiveLevel(levelKey);
-      };
-      const clickHandler = (event) => {
-        if (shouldIgnoreClick(event, button)) {
-          return;
-        }
-
-        createRipple(event, button);
+      const handler = () => {
         setActiveLevel(levelKey);
       };
 
-      state.routeHandlers.set(button, {
-        pointerHandler,
-        clickHandler,
-      });
-      button.addEventListener("pointerdown", pointerHandler);
-      button.addEventListener("click", clickHandler);
+      state.routeHandlers.set(button, handler);
+      button.addEventListener("pointerdown", handler);
     });
   }
 
-  function detachLevelHandlers() {
-    state.levelHandlers.forEach((handlers, button) => {
-      button.removeEventListener("pointerdown", handlers.pointerHandler);
-      button.removeEventListener("click", handlers.clickHandler);
+  function detachHandlers() {
+    state.levelHandlers.forEach((handler, button) => {
+      button.removeEventListener("pointerdown", handler);
+    });
+    state.routeHandlers.forEach((handler, button) => {
+      button.removeEventListener("pointerdown", handler);
     });
     state.levelHandlers.clear();
-  }
-
-  function detachRouteHandlers() {
-    state.routeHandlers.forEach((handlers, button) => {
-      button.removeEventListener("pointerdown", handlers.pointerHandler);
-      button.removeEventListener("click", handlers.clickHandler);
-    });
     state.routeHandlers.clear();
-  }
-
-  function bindCompactMedia(listener) {
-    if (typeof compactMedia.addEventListener === "function") {
-      compactMedia.addEventListener("change", listener);
-      return;
-    }
-
-    compactMedia.addListener(listener);
-  }
-
-  function unbindCompactMedia(listener) {
-    if (typeof compactMedia.removeEventListener === "function") {
-      compactMedia.removeEventListener("change", listener);
-      return;
-    }
-
-    compactMedia.removeListener(listener);
   }
 
   function initInteractions() {
     document.addEventListener("keydown", handleKeydown);
-    bindCompactMedia(syncCompactLayout);
+    compactMedia.addEventListener("change", syncCompactLayout);
+
     attachLevelHandlers();
     attachRouteHandlers();
     syncCompactLayout();
 
     if (elements.backButton) {
-      const backPointerHandler = (event) => {
-        markPointerActivation(elements.backButton);
-        goBack(event);
-      };
-      const backClickHandler = (event) => {
-        if (shouldIgnoreClick(event, elements.backButton)) {
-          return;
-        }
-
-        goBack(event);
-      };
-
-      elements.backButton._levelSelectBackPointerHandler = backPointerHandler;
-      elements.backButton._levelSelectBackClickHandler = backClickHandler;
-      elements.backButton.addEventListener("pointerdown", backPointerHandler);
-      elements.backButton.addEventListener("click", backClickHandler);
+      elements.backButton.addEventListener("pointerdown", goBack);
     }
   }
 
   function destroyInteractions() {
     document.removeEventListener("keydown", handleKeydown);
-    unbindCompactMedia(syncCompactLayout);
-    detachLevelHandlers();
-    detachRouteHandlers();
+    compactMedia.removeEventListener("change", syncCompactLayout);
+
+    detachHandlers();
 
     if (elements.backButton) {
-      elements.backButton.removeEventListener(
-        "pointerdown",
-        elements.backButton._levelSelectBackPointerHandler,
-      );
-      elements.backButton.removeEventListener(
-        "click",
-        elements.backButton._levelSelectBackClickHandler,
-      );
-      delete elements.backButton._levelSelectBackPointerHandler;
-      delete elements.backButton._levelSelectBackClickHandler;
+      elements.backButton.removeEventListener("pointerdown", goBack);
     }
   }
 
