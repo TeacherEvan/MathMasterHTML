@@ -44,16 +44,53 @@ async function switchCompactRouteIfNeeded(page, level) {
   await expect(routeButton).toHaveAttribute("aria-pressed", "true");
 }
 
+/**
+ * @param {import("@playwright/test").Page} page
+ * @param {string} level
+ */
+async function clickCardBody(page, level) {
+  const card = page.locator(`.level-card[data-level="${level}"]`);
+  const ctaButton = card.locator(".level-button");
+
+  if ((await card.count()) !== 1 || (await ctaButton.count()) !== 1) {
+    throw new Error(`Could not resolve a stable body-click target for ${level}.`);
+  }
+
+  await card.evaluate((element) => {
+    element.scrollIntoView({ block: "center", inline: "nearest" });
+  });
+
+  const [cardBox, buttonBox] = await Promise.all([
+    card.boundingBox(),
+    ctaButton.boundingBox(),
+  ]);
+
+  if (!cardBox || !buttonBox) {
+    throw new Error(`Could not resolve a stable body-click target for ${level}.`);
+  }
+
+  const buttonTopWithinCard = buttonBox.y - cardBox.y;
+  const clickY = Math.max(
+    24,
+    Math.min(buttonTopWithinCard - 24, Math.round(buttonTopWithinCard * 0.5)),
+  );
+
+  if (clickY >= buttonTopWithinCard) {
+    throw new Error(`Could not resolve a stable body-click target for ${level}.`);
+  }
+
+  await page.mouse.click(
+    Math.round(cardBox.x + cardBox.width / 2),
+    Math.round(cardBox.y + clickY),
+  );
+}
+
 test.describe("Level select interactions", () => {
   test("does not launch a route when the panel body is clicked", async ({ page }) => {
     await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
     await waitForCardsToSettle(page);
 
-    await page
-      .locator('.level-card[data-level="beginner"] .level-description')
-      .click({ force: true });
-
-    await page.waitForTimeout(400);
+    await clickCardBody(page, "beginner");
     await expect(page).toHaveURL(/\/src\/pages\/level-select\.html(?:$|\?)/);
   });
 
@@ -62,8 +99,12 @@ test.describe("Level select interactions", () => {
       await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
       await waitForCardsToSettle(page);
       await switchCompactRouteIfNeeded(page, route.level);
-      const button = page.getByRole("button", { name: route.buttonName });
-      await button.scrollIntoViewIfNeeded();
+      const button = page.locator(
+        `.level-card[data-level="${route.level}"] .level-button`,
+      );
+      await button.evaluate((element) => {
+        element.scrollIntoView({ block: "center", inline: "nearest" });
+      });
       await button.click({ force: true, noWaitAfter: true });
       await expectRouteLaunch(page, route.level);
     });

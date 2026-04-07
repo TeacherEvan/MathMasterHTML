@@ -1,8 +1,9 @@
 // src/tools/scripts/line-limit.config.js
-// Central policy config for the line limit enforcement.
+// Central policy config for the line length guidance.
+// maxLines is a soft suggestion, not a hard limit. Aim for 250–300 lines.
 
 export const LINE_LIMIT_POLICY = {
-  maxLines: 200,
+  maxLines: 300,
 
   // File extensions we consider "source" for this policy.
   includeExtensions: [

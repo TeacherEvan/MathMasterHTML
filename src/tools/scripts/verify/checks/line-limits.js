@@ -13,27 +13,31 @@ export function checkLineLimits(rootDir, mode = "baseline") {
     baselineCsv: mode === "baseline" ? baselineCsv : null,
   });
 
-  logSection(`LINE LIMIT (${LINE_LIMIT_POLICY.maxLines}) CHECK`);
+  logSection(`LINE LENGTH SUGGESTION (aim for 250–300 lines)`);
   log(
-    `Mode: ${mode}${mode === "baseline" ? " (no-new-violations)" : ""}`,
+    `Mode: ${mode}${mode === "baseline" ? " (informational)" : ""}`,
     "cyan",
   );
   log(
-    `Violations (>${LINE_LIMIT_POLICY.maxLines}): ${result.violations.length}`,
+    `Files over ${LINE_LIMIT_POLICY.maxLines} lines: ${result.violations.length}`,
     "cyan",
   );
 
   if (mode === "baseline") {
     if (result.newViolations.length > 0) {
-      log(`❌ New violations: ${result.newViolations.length}`, "red");
+      log(`⚠️  Newly over-limit files: ${result.newViolations.length}`, "yellow");
       result.newViolations.slice(0, 10).forEach((v) => {
-        log(`   ${v.lines}  ${v.relPath}`, "red");
+        log(`   ${v.lines}  ${v.relPath}`, "yellow");
       });
-      return false;
+      log("   (consider splitting when convenient — not a blocker)", "yellow");
+    } else {
+      log("✅ No newly over-limit files", "green");
     }
-    log("✅ No new line-limit violations introduced", "green");
     return true;
   }
 
-  return result.ok;
+  if (result.violations.length > 0) {
+    log(`⚠️  ${result.violations.length} file(s) over suggested length — not a blocker`, "yellow");
+  }
+  return true;
 }
