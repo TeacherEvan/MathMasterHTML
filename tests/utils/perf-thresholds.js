@@ -236,12 +236,17 @@ function evaluateMetric(metricName, baselineValue, actualValue, metricPolicy) {
   const absoluteRegression = higherIsBetter ? baselineValue - actualValue : actualValue - baselineValue;
 
   let status = "pass";
-  if (
+  const catastrophicByRatio =
     metricPolicy.catastrophicRatio !== undefined &&
     deltaRatio > metricPolicy.catastrophicRatio &&
     (metricPolicy.catastrophicAbsolute === undefined ||
-      absoluteRegression > metricPolicy.catastrophicAbsolute)
-  ) {
+      absoluteRegression > metricPolicy.catastrophicAbsolute);
+  const catastrophicByAbsolute =
+    metricPolicy.catastrophicAbsolute !== undefined &&
+    metricPolicy.catastrophicRatio === undefined &&
+    absoluteRegression > metricPolicy.catastrophicAbsolute;
+
+  if (catastrophicByRatio || catastrophicByAbsolute) {
     status = "catastrophic";
   } else if (
     metricPolicy.warnRatio !== undefined &&
@@ -256,15 +261,6 @@ function evaluateMetric(metricName, baselineValue, actualValue, metricPolicy) {
     absoluteRegression > metricPolicy.warnAbsolute
   ) {
     status = "warn";
-  }
-
-  if (
-    status === "pass" &&
-    metricPolicy.catastrophicAbsolute !== undefined &&
-    metricPolicy.catastrophicRatio === undefined &&
-    absoluteRegression > metricPolicy.catastrophicAbsolute
-  ) {
-    status = "catastrophic";
   }
 
   return {
@@ -382,10 +378,14 @@ export function evaluatePerfThresholds({
   const highlightedMetrics =
     catastrophicMetrics.length > 0 ? catastrophicMetrics : warningMetrics;
   const summaryParts = highlightedMetrics.map((metric) => formatDelta(metric.name, metric));
+  const sampleMarker =
+    sampleStatus === "low"
+      ? ` [low-samples ${after.sampleCount}/${minRequiredSamples}]`
+      : "";
   const summary =
     summaryParts.length > 0
-      ? `${scenarioName}/${normalizedProject} ${status}: ${summaryParts.join(", ")}`
-      : `${scenarioName}/${normalizedProject} pass`;
+      ? `${scenarioName}/${normalizedProject} ${status}${sampleMarker}: ${summaryParts.join(", ")}`
+      : `${scenarioName}/${normalizedProject} ${status}${sampleMarker}`;
 
   if (status === "warn") {
     annotations.push({ type: "perf-warning", description: summary });
