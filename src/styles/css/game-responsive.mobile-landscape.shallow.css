@@ -25,24 +25,24 @@
   }
 
   body.viewport-compact.viewport-landscape #symbol-console {
-    grid-auto-columns: 22px;
-    grid-template-rows: 24px !important;
+    grid-auto-columns: 44px;
+    grid-template-rows: 44px !important;
     gap: 3px;
     padding: 3px 4px;
   }
 
   body.viewport-compact.viewport-landscape .console-slot {
-    width: 22px !important;
-    height: 24px !important;
-    min-width: 22px !important;
-    min-height: 24px !important;
-    font-size: 11px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    font-size: 16px !important;
   }
 
   body.viewport-compact.viewport-landscape #help-button,
   body.viewport-compact.viewport-landscape #clarify-button {
-    min-height: 24px;
+    min-height: 44px;
     font-size: 9px;
-    padding: 3px 5px;
+    padding: 6px 8px;
   }
 }

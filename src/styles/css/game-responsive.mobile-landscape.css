@@ -106,9 +106,9 @@ body.viewport-compact.viewport-landscape #symbol-console {
   max-width: none;
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 24px;
+  grid-auto-columns: 44px;
   grid-template-columns: none !important;
-  grid-template-rows: 28px !important;
+  grid-template-rows: 44px !important;
   justify-content: start;
   gap: 4px;
   padding: 4px 6px;
@@ -123,11 +123,11 @@ body.viewport-compact.viewport-landscape #symbol-console::-webkit-scrollbar {
 }
 
 body.viewport-compact.viewport-landscape .console-slot {
-  width: 24px !important;
-  height: 28px !important;
-  min-width: 24px !important;
-  min-height: 28px !important;
-  font-size: 12px !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  font-size: 16px !important;
   border-radius: 0.55rem;
 }
 
@@ -142,9 +142,9 @@ body.viewport-compact.viewport-landscape .panel-b-controls {
 
 body.viewport-compact.viewport-landscape #help-button,
 body.viewport-compact.viewport-landscape #clarify-button {
-  min-height: 28px;
+  min-height: 44px;
   font-size: 10px;
-  padding: 4px 6px;
+  padding: 6px 8px;
 }
 
 body.viewport-compact.viewport-landscape .game-hud {
@@ -173,8 +173,8 @@ body.viewport-compact.viewport-landscape .hud-value {
 body.viewport-compact.viewport-landscape #back-button,
 body.viewport-compact.viewport-landscape #audio-toggle {
   min-width: auto;
-  min-height: 2rem;
-  padding: 0.3rem 0.55rem;
+  min-height: 44px;
+  padding: 0.4rem 0.55rem;
   bottom: 6px;
   font-size: 0.66rem;
   letter-spacing: 0.1em;

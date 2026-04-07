@@ -8,9 +8,9 @@
     transform: none;
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: 24px;
+    grid-auto-columns: 44px;
     grid-template-columns: none;
-    grid-template-rows: 28px;
+    grid-template-rows: 44px;
     justify-content: start;
     align-items: stretch;
     gap: 4px;
@@ -21,9 +21,11 @@
   }
 
   body.viewport-compact.viewport-landscape .console-slot {
-    width: 24px;
-    height: 28px;
-    font-size: 12px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 16px;
     flex: 0 0 auto;
   }
 
@@ -89,9 +91,11 @@
 
 @media (max-width: 480px) {
   body.viewport-compact.viewport-landscape .console-slot {
-    width: 22px;
-    height: 24px;
-    font-size: 11px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 16px;
   }
 
   body.viewport-compact.viewport-landscape .console-slot:nth-child(2),

@@ -172,9 +172,9 @@ body.viewport-compact.viewport-landscape
     margin-top: 0;
     padding: 4px 6px;
     grid-auto-flow: column;
-    grid-auto-columns: 24px;
+    grid-auto-columns: 44px;
     grid-template-columns: none !important;
-    grid-template-rows: 28px !important;
+    grid-template-rows: 44px !important;
     gap: 4px;
     justify-content: start;
     border-radius: 0.95rem;
@@ -183,10 +183,10 @@ body.viewport-compact.viewport-landscape
   }
 
   body.viewport-compact.viewport-landscape .console-slot {
-    width: 24px !important;
-    height: 28px !important;
-    min-width: 24px !important;
-    min-height: 28px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
     border-radius: 0.55rem;
   }
 }

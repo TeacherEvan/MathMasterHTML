@@ -67,6 +67,9 @@ test.describe("Gameplay ultra-narrow embedded landscape layout", () => {
         panelB: measure("#panel-b"),
         panelC: measure("#panel-c"),
         console: measure("#symbol-console"),
+        consoleSlot: measure(".console-slot"),
+        help: measure("#help-button"),
+        clarify: measure("#clarify-button"),
         back: measure("#back-button"),
         audio: measure("#audio-toggle"),
       };
@@ -91,6 +94,12 @@ test.describe("Gameplay ultra-narrow embedded landscape layout", () => {
     expect(layout.console.overflowX).toMatch(/auto|scroll/);
     expect(layout.console.left).toBeGreaterThanOrEqual(layout.panelB.left - 1);
     expect(layout.console.right).toBeLessThanOrEqual(layout.panelB.right + 1);
+    expect(layout.consoleSlot.width).toBeGreaterThanOrEqual(44);
+    expect(layout.consoleSlot.height).toBeGreaterThanOrEqual(44);
+    expect(layout.help.height).toBeGreaterThanOrEqual(44);
+    expect(layout.clarify.height).toBeGreaterThanOrEqual(44);
+    expect(layout.back.height).toBeGreaterThanOrEqual(44);
+    expect(layout.audio.height).toBeGreaterThanOrEqual(44);
     expect(layout.back.right).toBeLessThanOrEqual(layout.viewport.width + 1);
     expect(layout.audio.right).toBeLessThanOrEqual(layout.viewport.width + 1);
     expect(layout.back.bottom).toBeLessThanOrEqual(layout.viewport.height + 1);
