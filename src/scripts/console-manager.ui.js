@@ -36,28 +36,15 @@ console.log("🎮 Console Manager UI loading");
 
     document.body.classList.add("console-modal-open");
     this.modal.style.display = "flex";
-    this.modal.setAttribute("aria-hidden", "false");
-    this._modalFocusCleanup =
-      window.UXModules?.AccessibilityManager?.trapFocus?.(
-        this.modal.querySelector(".modal-content"),
-        {
-          initialFocus: () =>
-            this.modal.querySelector(".symbol-choice") ||
-            this.modal.querySelector("#modal-close-btn"),
-        },
-      ) || null;
+    this._applySymbolModalAccessibility?.();
 
     console.log("📋 Symbol selection modal opened");
   };
 
   proto.hideSymbolSelectionModal = function() {
-    if (typeof this._modalFocusCleanup === "function") {
-      this._modalFocusCleanup();
-      this._modalFocusCleanup = null;
-    }
+    this._releaseSymbolModalAccessibility?.();
     document.body.classList.remove("console-modal-open");
     this.modal.style.display = "none";
-    this.modal.setAttribute("aria-hidden", "true");
     this.isPendingSelection = false;
     console.log("📋 Symbol selection modal closed");
   };
@@ -177,20 +164,11 @@ console.log("🎮 Console Manager UI loading");
       if (symbol) {
         slotElement.textContent = symbol;
         slotElement.classList.add("filled");
-        slotElement.setAttribute(
-          "aria-label",
-          `Console slot ${index + 1}, symbol ${symbol}`,
-        );
-        slotElement.setAttribute("aria-disabled", "false");
       } else {
         slotElement.textContent = "";
         slotElement.classList.remove("filled");
-        slotElement.setAttribute(
-          "aria-label",
-          `Console slot ${index + 1}, empty`,
-        );
-        slotElement.setAttribute("aria-disabled", "true");
       }
+      this._updateConsoleSlotAccessibility?.(slotElement, index, symbol);
     });
   };
 
