@@ -88,14 +88,34 @@ async function openConsoleSelectionModal(page) {
   await expect(page.locator(".symbol-choice[data-symbol='1']")).toBeVisible();
 }
 
-async function chooseConsoleReward(page, { symbol = "1", position = 0 } = {}) {
-  await page
-    .locator(`.symbol-choice[data-symbol="${symbol}"]`)
-    .dispatchEvent("pointerdown");
+async function activateConsoleButton(locator, activation = "pointerdown") {
+  if (activation === "click") {
+    await locator.click();
+    return;
+  }
+
+  if (activation === "keyboard") {
+    await locator.focus();
+    await locator.press("Enter");
+    return;
+  }
+
+  await locator.dispatchEvent("pointerdown");
+}
+
+async function chooseConsoleReward(
+  page,
+  { symbol = "1", position = 0, activation = "pointerdown" } = {},
+) {
+  await activateConsoleButton(
+    page.locator(`.symbol-choice[data-symbol="${symbol}"]`),
+    activation,
+  );
   await expect(page.locator("#position-choices")).toBeVisible();
-  await page
-    .locator(`.position-choice[data-position="${position}"]`)
-    .dispatchEvent("pointerdown");
+  await activateConsoleButton(
+    page.locator(`.position-choice[data-position="${position}"]`),
+    activation,
+  );
   await page.waitForFunction(
     () => window.consoleManager?.isPendingSelection === false,
   );
@@ -775,7 +795,11 @@ test.describe("Console Selection Panel — Dedicated No-Scroll Window", () => {
     );
 
     await openConsoleSelectionModal(page);
-    await chooseConsoleReward(page, { symbol: "1", position: 0 });
+    await chooseConsoleReward(page, {
+      symbol: "1",
+      position: 0,
+      activation: "click",
+    });
 
     await page.waitForFunction(
       (previousIndex) =>
@@ -789,7 +813,7 @@ test.describe("Console Selection Panel — Dedicated No-Scroll Window", () => {
       slotValue: window.consoleManager?.slots?.[0] ?? null,
     }));
 
-    expect(manualState.index).not.toBe(beforeIndex);
+    expect(manualState.index).toBe(beforeIndex + 1);
     expect(manualState.slotValue).toBe("1");
 
     const nextIndex = manualState.index;
@@ -813,6 +837,36 @@ test.describe("Console Selection Panel — Dedicated No-Scroll Window", () => {
 
     expect(autofillState.index).not.toBe(nextIndex);
     expect(autofillState.populatedSlots).toBeGreaterThan(0);
+  });
+
+  test("keyboard activation can complete a reward selection flow", async ({
+    page,
+  }) => {
+    const beforeIndex = await page.evaluate(
+      () => window.GameProblemManager?.currentProblemIndex ?? -1,
+    );
+
+    await openConsoleSelectionModal(page);
+    await chooseConsoleReward(page, {
+      symbol: "1",
+      position: 0,
+      activation: "keyboard",
+    });
+
+    await page.waitForFunction(
+      (previousIndex) =>
+        (window.GameProblemManager?.currentProblemIndex ?? -1) !==
+        previousIndex,
+      beforeIndex,
+    );
+
+    const rewardState = await page.evaluate(() => ({
+      index: window.GameProblemManager?.currentProblemIndex ?? -1,
+      slotValue: window.consoleManager?.slots?.[0] ?? null,
+    }));
+
+    expect(rewardState.index).toBe(beforeIndex + 1);
+    expect(rewardState.slotValue).toBe("1");
   });
 });
 
