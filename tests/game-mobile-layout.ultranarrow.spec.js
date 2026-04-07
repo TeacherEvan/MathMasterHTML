@@ -1,5 +1,25 @@
 import { expect, test } from "@playwright/test";
 
+async function dismissBriefing(page) {
+  const startButton = page.locator("#start-game-btn");
+  const howToPlayModal = page.locator("#how-to-play-modal");
+
+  await expect(startButton).toBeVisible({ timeout: 10000 });
+
+  for (let attempt = 0; attempt < 4; attempt++) {
+    await startButton.click({ force: true });
+
+    try {
+      await expect(howToPlayModal).toBeHidden({ timeout: 1500 });
+      return;
+    } catch (error) {
+      if (attempt === 3) {
+        throw error;
+      }
+    }
+  }
+}
+
 test.describe("Gameplay ultra-narrow embedded landscape layout", () => {
   test.use({
     viewport: { width: 294, height: 161 },
@@ -13,10 +33,7 @@ test.describe("Gameplay ultra-narrow embedded landscape layout", () => {
       waitUntil: "domcontentloaded",
     });
 
-    const startButton = page.locator("#start-game-btn");
-    if (await startButton.isVisible()) {
-      await startButton.click({ force: true });
-    }
+    await dismissBriefing(page);
 
     await page.waitForFunction(() => {
       const overlay = document.getElementById("rotation-overlay");
