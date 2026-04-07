@@ -16,6 +16,8 @@ console.log("🎮 Console Manager events loading");
     const slots = this.consoleElement.querySelectorAll(".console-slot");
 
     slots.forEach((slot, index) => {
+      slot.setAttribute("aria-label", `Console slot ${index + 1}, empty`);
+      slot.setAttribute("aria-disabled", "true");
       const handleConsoleClick = () => {
         const symbol = this.slots[index];
 
@@ -87,6 +89,13 @@ console.log("🎮 Console Manager events loading");
         this.skipSelection();
       });
     }
+
+    this.modal.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && this.isPendingSelection) {
+        event.preventDefault();
+        this.skipSelection();
+      }
+    });
 
     // Drag-to-reposition the floating modal panel
     const dragHandle = document.getElementById("modal-drag-handle");

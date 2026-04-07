@@ -6,12 +6,14 @@
   const state = {
     initialized: false,
     modal: null,
+    dialog: null,
     openButton: null,
     closeButton: null,
     playerName: null,
     overallSummary: null,
     levelStats: null,
     historyList: null,
+    focusCleanup: null,
   };
 
   function isOpen() {
@@ -27,7 +29,10 @@
     state.modal.hidden = false;
     state.modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("scoreboard-modal-open");
-    state.closeButton?.focus?.();
+    state.focusCleanup =
+      window.UXModules?.AccessibilityManager?.trapFocus?.(state.dialog, {
+        initialFocus: state.closeButton,
+      }) || null;
     return true;
   }
 
@@ -36,10 +41,14 @@
       return false;
     }
 
+    if (typeof state.focusCleanup === "function") {
+      state.focusCleanup();
+      state.focusCleanup = null;
+    }
+
     state.modal.hidden = true;
     state.modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("scoreboard-modal-open");
-    state.openButton?.focus?.();
     return true;
   }
 
@@ -53,6 +62,7 @@
     }
 
     state.modal = document.getElementById("scoreboard-modal");
+  state.dialog = state.modal?.querySelector("[role='dialog']") || null;
     state.openButton = document.getElementById("scoreboard-button");
     state.closeButton = document.getElementById("scoreboard-close-button");
     state.playerName = document.getElementById("scoreboard-player-name");
@@ -62,6 +72,7 @@
 
     if (
       !state.modal ||
+      !state.dialog ||
       !state.openButton ||
       !state.closeButton ||
       !state.playerName ||

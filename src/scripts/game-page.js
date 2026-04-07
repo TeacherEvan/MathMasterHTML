@@ -1,6 +1,7 @@
 (function () {
   const GE = window.GameEvents;
   const backButton = document.getElementById("back-button");
+  let briefingFocusCleanup = null;
 
   function goBack() {
     window.location.assign("level-select.html");
@@ -54,18 +55,43 @@
 
   function setupHowToPlayModal() {
     const modal = document.getElementById("how-to-play-modal");
+    const dialog = modal?.querySelector("[role='dialog']");
     const startButton = document.getElementById("start-game-btn");
 
-    if (!modal || !startButton) return;
+    if (!modal || !dialog || !startButton) return;
+
+    function releaseBriefingFocus(options = {}) {
+      if (typeof briefingFocusCleanup === "function") {
+        briefingFocusCleanup();
+      }
+      briefingFocusCleanup = null;
+
+      if (!options.focusSelector) {
+        return;
+      }
+
+      const target = document.querySelector(options.focusSelector);
+      if (target instanceof HTMLElement) {
+        target.focus({ preventScroll: true });
+      }
+    }
 
     function showModal() {
       modal.style.display = "flex";
+      modal.setAttribute("aria-hidden", "false");
+      briefingFocusCleanup =
+        window.UXModules?.AccessibilityManager?.trapFocus?.(dialog, {
+          initialFocus: startButton,
+          restoreFocus: false,
+        }) || null;
     }
 
     function onStartClick() {
       modal.style.animation = "modalFadeOut 0.3s ease-out";
       setTimeout(() => {
         modal.style.display = "none";
+        modal.setAttribute("aria-hidden", "true");
+        releaseBriefingFocus({ focusSelector: "#help-button" });
         notifyBriefingDismissed();
         enterFullscreen();
       }, 300);

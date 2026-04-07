@@ -149,11 +149,12 @@
     </div>
 
     <!-- How to Play Modal -->
-    <div id="how-to-play-modal" class="how-to-play-overlay" style="display: none;">
-        <div class="how-to-play-content">
+    <div id="how-to-play-modal" class="how-to-play-overlay" style="display: none;" aria-hidden="true">
+        <div class="how-to-play-content" role="dialog" aria-modal="true" aria-labelledby="how-to-play-title"
+            aria-describedby="how-to-play-copy" tabindex="-1">
             <p class="how-to-play-kicker">Field briefing // algebra calibration</p>
-            <h2>Unlock Your Mind</h2>
-            <div class="how-to-play-message">
+            <h2 id="how-to-play-title">Unlock Your Mind</h2>
+            <div id="how-to-play-copy" class="how-to-play-message">
                 <p>
                     Math Master turns each equation into a live reaction drill. Read the line, harvest the right
                     symbols, and keep the lock moving before the clock strips away your score.
@@ -248,15 +249,16 @@
     </div>
 
     <!-- Symbol Selection Modal -->
-    <div id="symbol-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
+    <div id="symbol-modal" class="modal-overlay" style="display: none;" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="symbol-modal-title"
+            aria-describedby="symbol-modal-description" tabindex="-1">
             <div class="modal-drag-handle" id="modal-drag-handle">
                 <span class="modal-drag-dots">⠿⠿⠿</span>
                 <span class="modal-panel-title">Console Setup</span>
                 <button class="modal-close-btn" id="modal-close-btn" aria-label="Close console setup">✕</button>
             </div>
-            <h2>Choose a Symbol</h2>
-            <p class="modal-instruction">Step 1 — pick a symbol:</p>
+            <h2 id="symbol-modal-title">Choose a Symbol</h2>
+            <p id="symbol-modal-description" class="modal-instruction">Step 1 — pick a symbol:</p>
             <div id="symbol-choices" class="symbol-grid">
                 <button class="symbol-choice" data-symbol="0">0</button>
                 <button class="symbol-choice" data-symbol="1">1</button>

@@ -36,6 +36,23 @@ async function gotoBlockingPreloadRuntime(page, search = "?level=beginner") {
 }
 
 test.describe("Startup Preload — Build 2", () => {
+  test("briefing dialog exposes semantics and moves focus to the start button", async ({
+    page,
+  }) => {
+    await gotoGameRuntime(page, "?level=beginner&preload=off");
+    await waitForStartupPreload(page);
+    await waitForBriefingVisible(page, 3000);
+
+    await expect(page.locator("#how-to-play-modal")).toHaveAttribute(
+      "aria-hidden",
+      "false",
+    );
+    await expect(
+      page.locator("#how-to-play-modal [role='dialog']"),
+    ).toHaveAttribute("aria-modal", "true");
+    await expect(page.locator("#start-game-btn")).toBeFocused();
+  });
+
   test("preload overlay is visible on initial page load", async ({ page }) => {
     await gotoBlockingPreloadRuntime(page, "?level=beginner");
 

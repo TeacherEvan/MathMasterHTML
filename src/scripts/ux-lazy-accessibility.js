@@ -78,32 +78,69 @@
       document.body.insertBefore(skipLink, document.body.firstChild);
     }
 
-    static trapFocus(element) {
-      const focusableElements = element.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-      );
-      const firstFocusable = focusableElements[0];
-      const lastFocusable = focusableElements[focusableElements.length - 1];
-
-      element.addEventListener("keydown", (e) => {
-        if (e.key === "Tab") {
-          if (e.shiftKey) {
-            if (document.activeElement === firstFocusable) {
-              lastFocusable.focus();
-              e.preventDefault();
-            }
-          } else {
-            if (document.activeElement === lastFocusable) {
-              firstFocusable.focus();
-              e.preventDefault();
-            }
-          }
-        }
-      });
-
-      if (firstFocusable) {
-        firstFocusable.focus();
+    static trapFocus(element, options = {}) {
+      if (!element) {
+        return () => {};
       }
+
+      const previousFocus =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
+      const focusableElements = Array.from(
+        element.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((node) => {
+        if (!(node instanceof HTMLElement)) {
+          return false;
+        }
+
+        return !node.hidden && !node.hasAttribute("disabled");
+      });
+      const firstFocusable = focusableElements[0] || null;
+      const lastFocusable =
+        focusableElements[focusableElements.length - 1] || null;
+      const onKeydown = (event) => {
+        if (event.key !== "Tab" || !firstFocusable || !lastFocusable) {
+          return;
+        }
+
+        if (event.shiftKey) {
+          if (document.activeElement === firstFocusable) {
+            lastFocusable.focus({ preventScroll: true });
+            event.preventDefault();
+          }
+          return;
+        }
+
+        if (document.activeElement === lastFocusable) {
+          firstFocusable.focus({ preventScroll: true });
+          event.preventDefault();
+        }
+      };
+
+      element.addEventListener("keydown", onKeydown);
+
+      const preferredTarget =
+        typeof options.initialFocus === "function"
+          ? options.initialFocus()
+          : options.initialFocus || firstFocusable || element;
+      if (preferredTarget instanceof HTMLElement) {
+        preferredTarget.focus({ preventScroll: true });
+      }
+
+      return () => {
+        element.removeEventListener("keydown", onKeydown);
+
+        if (options.restoreFocus === false) {
+          return;
+        }
+
+        if (previousFocus && previousFocus.isConnected) {
+          previousFocus.focus({ preventScroll: true });
+        }
+      };
     }
   }
 
