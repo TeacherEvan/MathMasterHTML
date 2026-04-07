@@ -85,11 +85,46 @@
     });
   }
 
+  function moveHandToTarget(target) {
+    const pos = window.EvanTargets?.centerOf?.(target) || { x: 0, y: 0 };
+    window.EvanPresenter?.moveHandTo?.(pos.x, pos.y);
+    return pos;
+  }
+
+  function collectNeededSymbols(targets) {
+    const neededSymbols = [];
+    const neededSymbol = targets.getNeededSymbol?.();
+    if (neededSymbol) neededSymbols.push(neededSymbol);
+    for (const symbol of targets.getNeededSymbols?.() || []) {
+      if (symbol && !neededSymbols.includes(symbol)) neededSymbols.push(symbol);
+    }
+    return { neededSymbol, neededSymbols };
+  }
+
+  function findSymbolTarget(targets, neededSymbols, getLiveTarget) {
+    return getLiveTarget(
+      targets.findBestFallingSymbol?.(neededSymbols) ||
+        (neededSymbols[0] ? targets.findFallingSymbol?.(neededSymbols[0]) : null),
+    );
+  }
+
+  function matchesPowerUpActivation(event, system, type) {
+    const detail = event?.detail;
+    if (!detail) return true;
+    if (detail.system && detail.system !== system) return false;
+    if (detail.type && detail.type !== type) return false;
+    return true;
+  }
+
   window.EvanControllerRuntime = {
     hasLiveRect,
     clearTimers,
     wait,
     waitForEvent,
     waitForGameReady,
+    moveHandToTarget,
+    collectNeededSymbols,
+    findSymbolTarget,
+    matchesPowerUpActivation,
   };
 })();
