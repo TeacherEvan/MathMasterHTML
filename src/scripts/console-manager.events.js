@@ -11,6 +11,49 @@ console.log("🎮 Console Manager events loading");
   const GameEvents = window.GameEvents || {
     SYMBOL_CLICKED: "symbolClicked",
   };
+  const POINTER_FOLLOWUP_CLICK_WINDOW_MS = 400;
+  const recentPointerActivations = new WeakMap();
+
+  function shouldIgnoreFollowupClick(element) {
+    const lastPointerActivation = recentPointerActivations.get(element);
+
+    if (typeof lastPointerActivation !== "number") {
+      return false;
+    }
+
+    recentPointerActivations.delete(element);
+    return performance.now() - lastPointerActivation <
+      POINTER_FOLLOWUP_CLICK_WINDOW_MS;
+  }
+
+  function bindPrimaryActivation(element, handler) {
+    if (!element) {
+      return;
+    }
+
+    if (window.PointerEvent) {
+      element.addEventListener(
+        "pointerdown",
+        (event) => {
+          recentPointerActivations.set(element, performance.now());
+          event.preventDefault();
+          handler(event);
+        },
+        { passive: false },
+      );
+
+      element.addEventListener("click", (event) => {
+        if (shouldIgnoreFollowupClick(element)) {
+          return;
+        }
+
+        handler(event);
+      });
+      return;
+    }
+
+    element.addEventListener("click", handler);
+  }
 
   proto.setupConsoleButtons = function() {
     const slots = this.consoleElement.querySelectorAll(".console-slot");
@@ -39,18 +82,7 @@ console.log("🎮 Console Manager events loading");
         }
       };
 
-      if (window.PointerEvent) {
-        slot.addEventListener(
-          "pointerdown",
-          (event) => {
-            event.preventDefault();
-            handleConsoleClick();
-          },
-          { passive: false },
-        );
-      } else {
-        slot.addEventListener("click", handleConsoleClick);
-      }
+      bindPrimaryActivation(slot, handleConsoleClick);
     });
 
     console.log(
@@ -59,40 +91,20 @@ console.log("🎮 Console Manager events loading");
   };
 
   proto.setupModalInteractions = function() {
-    const bindPress = (element, handler) => {
-      if (!element) {
-        return;
-      }
-
-      if (window.PointerEvent) {
-        element.addEventListener(
-          "pointerdown",
-          (event) => {
-            event.preventDefault();
-            handler(event);
-          },
-          { passive: false },
-        );
-        return;
-      }
-
-      element.addEventListener("click", handler);
-    };
-
     document.querySelectorAll(".symbol-choice").forEach((btn) => {
-      bindPress(btn, () => {
+      bindPrimaryActivation(btn, () => {
         this.selectSymbol(btn.dataset.symbol);
       });
     });
 
     document.querySelectorAll(".position-choice").forEach((btn) => {
-      bindPress(btn, () => {
+      bindPrimaryActivation(btn, () => {
         const position = Number.parseInt(btn.dataset.position, 10);
         this.selectPosition(position);
       });
     });
 
-    bindPress(document.getElementById("skip-button"), () => {
+    bindPrimaryActivation(document.getElementById("skip-button"), () => {
       this.skipSelection();
     });
 
