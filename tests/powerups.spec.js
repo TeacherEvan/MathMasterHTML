@@ -3,6 +3,7 @@
 import { expect, test } from "@playwright/test";
 import {
   stopEvanHelpIfActive,
+  waitForGameplayInputReady,
 } from "./utils/onboarding-runtime.js";
 
 async function pressPowerUp(page, type) {
@@ -23,6 +24,7 @@ async function setupPowerUpPage(page, inventory = null) {
   });
   await dismissHowToPlayModal(page);
   await stopEvanHelpIfActive(page);
+  await waitForGameplayInputReady(page);
 
   await page.waitForSelector("#solution-container", { timeout: 10000 });
   await page.waitForFunction(() => !!window.wormSystem?.powerUpSystem, null, {
@@ -287,6 +289,46 @@ test.describe("Power-Up Two-Click System", () => {
     // Warning tooltip should appear
     const tooltip = page.locator("#power-up-tooltip");
     await expect(tooltip).toContainText("available");
+  });
+
+  test("should block selection while coordinator input is locked", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      window.GameRuntimeCoordinator?.setInputLock?.("powerups-spec", true);
+    });
+
+    await expect
+      .poll(async () => {
+        return page.evaluate(() => {
+          return window.GameRuntimeCoordinator?.canAcceptGameplayInput?.();
+        });
+      })
+      .toBe(false);
+
+    await pressPowerUp(page, "spider");
+
+    const selectionState = await page.evaluate(() => {
+      return {
+        canAcceptGameplayInput:
+          window.GameRuntimeCoordinator?.canAcceptGameplayInput?.(),
+        placementMode: document.body.classList.contains(
+          "power-up-placement-mode",
+        ),
+        cursor: document.body.style.cursor,
+      };
+    });
+
+    expect(selectionState.canAcceptGameplayInput).toBe(false);
+    expect(selectionState.placementMode).toBe(false);
+    expect(selectionState.cursor).toBe("");
+
+    const tooltip = page.locator("#power-up-tooltip");
+    await expect(tooltip).toContainText("Gameplay is not ready yet.");
+
+    await page.evaluate(() => {
+      window.GameRuntimeCoordinator?.setInputLock?.("powerups-spec", false);
+    });
   });
 
   test("should switch selection when clicking different power-up", async ({

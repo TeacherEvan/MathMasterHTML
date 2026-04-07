@@ -55,7 +55,8 @@ export async function waitForOnboardingRuntime(page) {
         window.GameEvents &&
         window.GameOnboarding &&
         window.GameOnboardingStorage &&
-        window.StartupPreload,
+        window.StartupPreload &&
+        window.GameRuntimeCoordinator,
       );
     },
     { timeout: 10000 },
