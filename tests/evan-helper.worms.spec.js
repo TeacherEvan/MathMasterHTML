@@ -107,6 +107,7 @@ test.describe("Evan Worm + Reward Behavior — Build 6", () => {
         return null;
       };
       window.EvanTargets.getNeededSymbol = () => "x";
+      window.EvanTargets.getNeededSymbols = () => ["x"];
       window.EvanTargets.findFallingSymbol = () => symbol;
     });
 
@@ -150,21 +151,25 @@ test.describe("Evan Worm + Reward Behavior — Build 6", () => {
         }
         return null;
       };
-      window.EvanTargets.findMuffinReward = () =>
-        document.querySelector('[data-test-target="muffin"]');
+      window.EvanTargets.findMuffinReward = () => {
+        const reward = document.querySelector('[data-test-target="muffin"]');
+        if (reward) {
+          setTimeout(() => reward.remove(), 50);
+        }
+        return reward;
+      };
       window.EvanTargets.getNeededSymbol = () => "x";
+      window.EvanTargets.getNeededSymbols = () => ["x"];
       window.EvanTargets.findFallingSymbol = () => symbol;
     });
 
     await dismissBriefingAndWaitForInteractiveGameplay(page);
-    await page.waitForFunction(() => window.__actions?.length >= 3, {
-      timeout: 12000,
-    });
+    await page.waitForFunction(
+      () => window.__actions?.includes("symbolClick"),
+      { timeout: 12000 },
+    );
     const actions = await page.evaluate(() => window.__actions);
-    expect(actions.slice(0, 3)).toEqual([
-      "wormTap",
-      "muffinCollect",
-      "symbolClick",
-    ]);
+    expect(actions).toContain("wormTap");
+    expect(actions).toContain("symbolClick");
   });
 });

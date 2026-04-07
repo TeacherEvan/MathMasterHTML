@@ -8,6 +8,30 @@ console.log("🎮 Console Manager UI loading");
   }
 
   const proto = window.ConsoleManager.prototype;
+  const resolveConsoleLifecycleEventName = function(eventKey, fallbackName) {
+    const GameEvents = window.GameEvents;
+    return typeof GameEvents?.[eventKey] === "string"
+      ? GameEvents[eventKey]
+      : fallbackName;
+  };
+
+  const dispatchConsoleLifecycleEvent = function(eventKey, fallbackName) {
+    document.dispatchEvent(
+      new CustomEvent(
+        resolveConsoleLifecycleEventName(eventKey, fallbackName),
+      ),
+    );
+  };
+
+  proto.updateSelectionStatus = function() {
+    if (!this.selectionStatusElement) {
+      return;
+    }
+
+    this.selectionStatusElement.textContent = this.selectedSymbol
+      ? `Symbol ${this.selectedSymbol} selected. Choose a slot.`
+      : "Choose a symbol to unlock the slot grid.";
+  };
 
   proto.showSymbolSelectionModal = function() {
     if (this.isPendingSelection) {
@@ -22,31 +46,33 @@ console.log("🎮 Console Manager UI loading");
     document.querySelectorAll(".symbol-choice").forEach((btn) => {
       btn.classList.remove("selected");
     });
-    const positionInstruction = document.getElementById("position-instruction");
-    const positionChoices = document.getElementById("position-choices");
-
-    if (positionInstruction) {
-      positionInstruction.style.display = "none";
-    }
-    if (positionChoices) {
-      positionChoices.style.display = "none";
-    }
 
     this.updatePositionButtons();
+    this.updateSelectionStatus();
 
+    document.body.classList.add("console-selection-active");
     document.body.classList.add("console-modal-open");
-    this.modal.style.display = "flex";
+    this.modal.style.display = "grid";
     this._applySymbolModalAccessibility?.();
+    dispatchConsoleLifecycleEvent(
+      "CONSOLE_SELECTION_OPENED",
+      "consoleSelectionOpened",
+    );
 
-    console.log("📋 Symbol selection modal opened");
+    console.log("📋 Console selection panel opened");
   };
 
   proto.hideSymbolSelectionModal = function() {
     this._releaseSymbolModalAccessibility?.();
+    document.body.classList.remove("console-selection-active");
     document.body.classList.remove("console-modal-open");
     this.modal.style.display = "none";
     this.isPendingSelection = false;
-    console.log("📋 Symbol selection modal closed");
+    dispatchConsoleLifecycleEvent(
+      "CONSOLE_SELECTION_CLOSED",
+      "consoleSelectionClosed",
+    );
+    console.log("📋 Console selection panel closed");
   };
 
   proto.selectSymbol = function(symbol) {
@@ -61,15 +87,8 @@ console.log("🎮 Console Manager UI loading");
       }
     });
 
-    const positionInstruction = document.getElementById("position-instruction");
-    const positionChoices = document.getElementById("position-choices");
-
-    if (positionInstruction) {
-      positionInstruction.style.display = "block";
-    }
-    if (positionChoices) {
-      positionChoices.style.display = "grid";
-    }
+    this.updatePositionButtons();
+    this.updateSelectionStatus();
   };
 
   proto.selectPosition = function(position) {
@@ -92,8 +111,12 @@ console.log("🎮 Console Manager UI loading");
     this.fillSlot(position, this.selectedSymbol);
     this.hideSymbolSelectionModal();
 
+    const GameEvents = window.GameEvents || {
+      CONSOLE_SYMBOL_ADDED: "consoleSymbolAdded",
+    };
+
     document.dispatchEvent(
-      new CustomEvent("consoleSymbolAdded", {
+      new CustomEvent(GameEvents.CONSOLE_SYMBOL_ADDED, {
         detail: { symbol: this.selectedSymbol, position: position },
       }),
     );
@@ -101,6 +124,10 @@ console.log("🎮 Console Manager UI loading");
 
   proto.skipSelection = function() {
     console.log("⏭️ User skipped selection - filling random slot");
+
+    const GameEvents = window.GameEvents || {
+      CONSOLE_SYMBOL_ADDED: "consoleSymbolAdded",
+    };
 
     const emptySlots = [];
     this.slots.forEach((slot, index) => {
@@ -110,7 +137,7 @@ console.log("🎮 Console Manager UI loading");
     if (emptySlots.length === 0) {
       console.log("⚠️ No empty slots available");
       this.hideSymbolSelectionModal();
-      document.dispatchEvent(new CustomEvent("consoleSymbolAdded"));
+      document.dispatchEvent(new CustomEvent(GameEvents.CONSOLE_SYMBOL_ADDED));
       return;
     }
 
@@ -128,7 +155,7 @@ console.log("🎮 Console Manager UI loading");
     this.hideSymbolSelectionModal();
 
     document.dispatchEvent(
-      new CustomEvent("consoleSymbolAdded", {
+      new CustomEvent(GameEvents.CONSOLE_SYMBOL_ADDED, {
         detail: { symbol: randomSymbol, position: randomSlot },
       }),
     );
@@ -174,15 +201,16 @@ console.log("🎮 Console Manager UI loading");
 
   proto.updatePositionButtons = function() {
     const positionButtons = document.querySelectorAll(".position-choice");
+    const canChooseSlot = Boolean(this.selectedSymbol);
 
     positionButtons.forEach((btn, index) => {
       if (this.slots[index] !== null) {
-        btn.classList.remove("disabled");
-        btn.disabled = false;
+        btn.classList.toggle("disabled", !canChooseSlot);
+        btn.disabled = !canChooseSlot;
         btn.textContent = `Swap ${this.slots[index]}`;
       } else {
-        btn.classList.remove("disabled");
-        btn.disabled = false;
+        btn.classList.toggle("disabled", !canChooseSlot);
+        btn.disabled = !canChooseSlot;
         btn.textContent = index + 1;
       }
     });

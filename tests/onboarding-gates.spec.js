@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import {
+  dismissBriefingAndWaitForInteractiveGameplay,
   gotoGameRuntime,
   resetOnboardingState,
   seedOnboardingState,
@@ -77,7 +78,7 @@ test.describe("Onboarding gates — Build 1", () => {
     await page.waitForTimeout(300);
     expect(await page.evaluate(() => window.__evanStartCount)).toBe(0);
 
-    await page.click("#start-game-btn");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await waitForGameplayReady(page);
 
     await page.waitForFunction(() => window.__evanStartCount === 1, {
@@ -95,7 +96,7 @@ test.describe("Onboarding gates — Build 1", () => {
     }, "mathmaster_onboarding_v1");
 
     await gotoGameRuntime(page, "?level=beginner&preload=off");
-    await page.click("#start-game-btn");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await waitForGameplayReady(page);
 
     const count1 = await page.evaluate(
@@ -104,7 +105,7 @@ test.describe("Onboarding gates — Build 1", () => {
     expect(count1).toBeGreaterThanOrEqual(1);
 
     await gotoGameRuntime(page, "?level=beginner&preload=off");
-    await page.click("#start-game-btn");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await waitForGameplayReady(page);
 
     const count2 = await page.evaluate(

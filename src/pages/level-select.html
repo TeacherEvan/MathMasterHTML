@@ -29,7 +29,7 @@
     <div class="matrix-bg" id="matrixBg"></div>
 
     <!-- Header Section -->
-    <div class="header">
+    <header class="header">
         <p class="page-kicker">Training dossier</p>
         <h1 class="main-title">MATH MASTER</h1>
         <h2 class="subtitle">Choose a route</h2>
@@ -40,13 +40,31 @@
             <span>Press 1 / 2 / 3 to launch</span>
             <span>Progress stays on this device</span>
         </div>
-    </div>
+    </header>
 
     <!-- Main Level Selection Container -->
-    <div class="level-container">
+    <main class="level-container" aria-label="Route selection">
+        <div class="route-switcher" aria-label="Choose route preview">
+            <button class="route-switcher-button is-active" type="button" data-level="beginner"
+                aria-pressed="true" aria-controls="level-panel-beginner">
+                <span class="route-switcher-index">01</span>
+                <span class="route-switcher-copy">Foundations</span>
+            </button>
+            <button class="route-switcher-button" type="button" data-level="warrior" aria-pressed="false"
+                aria-controls="level-panel-warrior">
+                <span class="route-switcher-index">02</span>
+                <span class="route-switcher-copy">Mixed Ops</span>
+            </button>
+            <button class="route-switcher-button" type="button" data-level="master" aria-pressed="false"
+                aria-controls="level-panel-master">
+                <span class="route-switcher-index">03</span>
+                <span class="route-switcher-copy">Division</span>
+            </button>
+        </div>
+
         <div class="levels-grid">
             <!-- Easy Level - Addition/Subtraction -->
-            <div class="level-card level-easy" data-level="beginner">
+            <article class="level-card level-easy" id="level-panel-beginner" data-level="beginner">
                 <p class="level-ordinal">Route 01 · Beginner</p>
                 <div class="level-icon" aria-hidden="true">01</div>
                 <h3 class="level-title">Foundations</h3>
@@ -74,11 +92,11 @@
                         <div class="progress-fill"></div>
                     </div>
                 </div>
-                <button class="level-button" type="button">Enter foundations</button>
-            </div>
+                <button class="level-button" type="button" data-level="beginner">Enter foundations</button>
+            </article>
 
             <!-- Medium Level - Multiplication -->
-            <div class="level-card level-medium" data-level="warrior">
+            <article class="level-card level-medium" id="level-panel-warrior" data-level="warrior">
                 <p class="level-ordinal">Route 02 · Warrior</p>
                 <div class="level-icon" aria-hidden="true">02</div>
                 <h3 class="level-title">Mixed Ops</h3>
@@ -106,11 +124,11 @@
                         <div class="progress-fill"></div>
                     </div>
                 </div>
-                <button class="level-button" type="button">Enter mixed ops</button>
-            </div>
+                <button class="level-button" type="button" data-level="warrior">Enter mixed ops</button>
+            </article>
 
             <!-- Hard Level - Division -->
-            <div class="level-card level-hard" data-level="master">
+            <article class="level-card level-hard" id="level-panel-master" data-level="master">
                 <p class="level-ordinal">Route 03 · Master</p>
                 <div class="level-icon" aria-hidden="true">03</div>
                 <h3 class="level-title">Division</h3>
@@ -138,19 +156,19 @@
                         <div class="progress-fill"></div>
                     </div>
                 </div>
-                <button class="level-button" type="button">Enter division</button>
-            </div>
+                <button class="level-button" type="button" data-level="master">Enter division</button>
+            </article>
         </div>
-    </div>
+    </main>
 
     <!-- Navigation Footer -->
-    <div class="navigation">
+    <nav class="navigation" aria-label="Level select actions">
         <button class="back-button" type="button">← Return to Welcome</button>
         <div class="navigation-meta">
             <div class="creator-credit">Created by Teacher Evan</div>
             <button class="reset-progress-btn" type="button">Reset local progress</button>
         </div>
-    </div>
+    </nav>
 
     <!-- Floating Math Symbols -->
     <div class="math-symbol" style="top: 20%; left: 5%; animation-delay: 0s;">∑</div>

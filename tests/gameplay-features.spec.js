@@ -11,6 +11,11 @@
  *  6. Console slot shows refresh animation after a symbol is placed
  */
 import { expect, test } from "@playwright/test";
+import {
+  dismissBriefingAndWaitForInteractiveGameplay,
+  stopEvanHelpIfActive,
+  waitForInteractiveGameplay,
+} from "./utils/onboarding-runtime.js";
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 
@@ -18,26 +23,37 @@ async function startGame(page) {
   await page.goto("/game.html?level=beginner", {
     waitUntil: "domcontentloaded",
   });
-  const startBtn = page.locator("#start-game-btn");
-  const howToPlayModal = page.locator("#how-to-play-modal");
-  await expect(startBtn).toBeVisible({ timeout: 10000 });
 
-  for (let attempt = 0; attempt < 3; attempt++) {
-    await startBtn.click({ force: true });
+  const startupState = await page
+    .waitForFunction(() => {
+      const briefingModal = document.getElementById("how-to-play-modal");
+      const briefingModalVisible = Boolean(
+        briefingModal &&
+          window.getComputedStyle(briefingModal).display !== "none",
+      );
 
-    try {
-      await expect(howToPlayModal).toBeHidden({ timeout: 1500 });
-      break;
-    } catch (error) {
-      if (attempt === 2) {
-        throw error;
+      if (briefingModalVisible) {
+        return "briefing";
       }
-    }
+
+      if (window.GameRuntimeCoordinator?.isGameplayReady?.() === true) {
+        return "interactive";
+      }
+
+      return false;
+    }, { timeout: 15000 })
+    .then((handle) => handle.jsonValue());
+
+  if (startupState === "briefing") {
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+  } else {
+    await waitForInteractiveGameplay(page);
   }
 
   await page.waitForFunction(
     () => window.wormSystem && window.wormSystem.isInitialized === true,
   );
+  await stopEvanHelpIfActive(page);
   await page.waitForFunction(
     () => document.querySelectorAll(".hidden-symbol").length > 0,
   );
@@ -73,9 +89,13 @@ async function openConsoleSelectionModal(page) {
 }
 
 async function chooseConsoleReward(page, { symbol = "1", position = 0 } = {}) {
-  await page.locator(`.symbol-choice[data-symbol="${symbol}"]`).click();
+  await page
+    .locator(`.symbol-choice[data-symbol="${symbol}"]`)
+    .dispatchEvent("pointerdown");
   await expect(page.locator("#position-choices")).toBeVisible();
-  await page.locator(`.position-choice[data-position="${position}"]`).click();
+  await page
+    .locator(`.position-choice[data-position="${position}"]`)
+    .dispatchEvent("pointerdown");
   await page.waitForFunction(
     () => window.consoleManager?.isPendingSelection === false,
   );
@@ -704,7 +724,9 @@ test.describe("Console Selection Panel — Dedicated No-Scroll Window", () => {
       .locator(".console-selection-window")
       .evaluate((node) => node.getBoundingClientRect().height);
 
-    await page.locator(".symbol-choice[data-symbol='1']").click();
+    await page
+      .locator(".symbol-choice[data-symbol='1']")
+      .dispatchEvent("pointerdown");
     await expect(page.locator(".symbol-choice[data-symbol='1']")).toHaveClass(
       /selected/,
     );
@@ -772,7 +794,7 @@ test.describe("Console Selection Panel — Dedicated No-Scroll Window", () => {
 
     const nextIndex = manualState.index;
     await openConsoleSelectionModal(page);
-    await page.locator("#skip-button").click();
+    await page.locator("#skip-button").dispatchEvent("pointerdown");
 
     await page.waitForFunction(
       (previousIndex) =>

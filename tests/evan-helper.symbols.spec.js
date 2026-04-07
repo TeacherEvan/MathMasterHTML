@@ -20,11 +20,16 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
   test("SYMBOL_CLICKED events dispatched with correct symbol values", async ({
     page,
   }) => {
+    await installRectTarget(page, "symbol", "x");
     await page.evaluate(() => {
       window.__symbolClicks = [];
+      const symbolTarget = document.querySelector('[data-test-target="symbol"]');
       document.addEventListener(window.GameEvents.SYMBOL_CLICKED, (e) => {
         window.__symbolClicks.push(e.detail?.symbol);
       });
+      window.EvanTargets.getNeededSymbol = () => "x";
+      window.EvanTargets.getNeededSymbols = () => ["x"];
+      window.EvanTargets.findFallingSymbol = () => symbolTarget;
     });
 
     await dismissBriefingAndWaitForInteractiveGameplay(page);
@@ -148,7 +153,7 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
           injected = true;
           const fake = document.createElement("div");
           fake.className = "falling-symbol";
-          fake.textContent = symbol;
+          fake.textContent = "x";
           fake.getBoundingClientRect = () => ({
             x: 0,
             y: 0,

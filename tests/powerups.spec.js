@@ -1,6 +1,9 @@
 // tests/powerups.spec.js
 // Playwright tests for MathMaster Power-Up Two-Click System
 import { expect, test } from "@playwright/test";
+import {
+  stopEvanHelpIfActive,
+} from "./utils/onboarding-runtime.js";
 
 async function pressPowerUp(page, type) {
   await page
@@ -13,6 +16,38 @@ async function pressPowerUp(page, type) {
       pointerType: "mouse",
     });
 }
+
+async function setupPowerUpPage(page, inventory = null) {
+  await page.goto("/game.html?level=beginner", {
+    waitUntil: "domcontentloaded",
+  });
+  await dismissHowToPlayModal(page);
+  await stopEvanHelpIfActive(page);
+
+  await page.waitForSelector("#solution-container", { timeout: 10000 });
+  await page.waitForFunction(() => !!window.wormSystem?.powerUpSystem, null, {
+    timeout: 10000,
+  });
+
+  await page.evaluate((seedInventory) => {
+    const defaultInventory = {
+      chainLightning: 3,
+      spider: 2,
+      devil: 2,
+    };
+    const nextInventory = seedInventory || defaultInventory;
+    if (window.wormSystem && window.wormSystem.powerUpSystem) {
+      window.wormSystem.powerUpSystem.inventory.chainLightning =
+        nextInventory.chainLightning;
+      window.wormSystem.powerUpSystem.inventory.spider = nextInventory.spider;
+      window.wormSystem.powerUpSystem.inventory.devil = nextInventory.devil;
+      window.wormSystem.powerUpSystem.updateDisplay();
+    }
+  }, inventory);
+
+  await page.waitForSelector("#power-up-display", { timeout: 5000 });
+}
+
 
 async function dismissHowToPlayModal(page) {
   const modal = page.locator("#how-to-play-modal");
@@ -56,38 +91,6 @@ async function dismissHowToPlayModal(page) {
 
   await expect(modal).toBeHidden({ timeout: 5000 });
 }
-
-async function setupPowerUpPage(page, inventory = null) {
-  await page.goto("/game.html?level=beginner", {
-    waitUntil: "domcontentloaded",
-  });
-
-  await dismissHowToPlayModal(page);
-
-  await page.waitForSelector("#solution-container", { timeout: 10000 });
-  await page.waitForFunction(() => !!window.wormSystem?.powerUpSystem, null, {
-    timeout: 10000,
-  });
-
-  await page.evaluate((seedInventory) => {
-    const defaultInventory = {
-      chainLightning: 3,
-      spider: 2,
-      devil: 2,
-    };
-    const nextInventory = seedInventory || defaultInventory;
-    if (window.wormSystem && window.wormSystem.powerUpSystem) {
-      window.wormSystem.powerUpSystem.inventory.chainLightning =
-        nextInventory.chainLightning;
-      window.wormSystem.powerUpSystem.inventory.spider = nextInventory.spider;
-      window.wormSystem.powerUpSystem.inventory.devil = nextInventory.devil;
-      window.wormSystem.powerUpSystem.updateDisplay();
-    }
-  }, inventory);
-
-  await page.waitForSelector("#power-up-display", { timeout: 5000 });
-}
-
 /**
  * Test suite for the Two-Click Power-Up System
  *

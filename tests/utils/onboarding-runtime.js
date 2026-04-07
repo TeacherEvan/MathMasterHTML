@@ -1,4 +1,4 @@
-const GAME_RUNTIME_PATH = "/src/pages/game.html";
+const GAME_RUNTIME_PATH = "/game.html";
 const ONBOARDING_STORAGE_KEY = "mathmaster_onboarding_v1";
 const NAVIGATION_RETRY_COUNT = 3;
 
@@ -92,6 +92,45 @@ export async function waitForInteractiveGameplay(page) {
           window.GameSymbolHandlerCore &&
           document.querySelectorAll(".hidden-symbol").length > 0,
       );
+    },
+    { timeout: 15000 },
+  );
+}
+
+export async function waitForGameplayInputReady(page) {
+  await waitForInteractiveGameplay(page);
+  await page.waitForFunction(
+    () => window.GameRuntimeCoordinator?.canAcceptGameplayInput?.() !== false,
+    { timeout: 15000 },
+  );
+}
+
+export async function stopEvanHelpIfActive(page) {
+  const skipVisible = await page
+    .locator("#evan-skip-button")
+    .isVisible()
+    .catch(() => false);
+
+  if (!skipVisible) {
+    return;
+  }
+
+  await page.evaluate(() => {
+    document.getElementById("evan-skip-button")?.click();
+  });
+
+  await page.waitForFunction(
+    () => {
+      const coordinator = window.GameRuntimeCoordinator;
+      const skipButton = document.getElementById("evan-skip-button");
+      const skipHidden =
+        !skipButton || window.getComputedStyle(skipButton).display === "none";
+
+      if (coordinator?.canAcceptGameplayInput) {
+        return coordinator.canAcceptGameplayInput() && skipHidden;
+      }
+
+      return skipHidden;
     },
     { timeout: 15000 },
   );

@@ -12,22 +12,7 @@ const ROUTES = [
  * @param {import("@playwright/test").Page} page
  */
 async function waitForCardsToSettle(page) {
-  await page.waitForFunction(() => {
-    const cards = Array.from(document.querySelectorAll(".level-card"));
-    if (cards.length !== 3) return false;
-
-    return cards.every((card) => {
-      const style = window.getComputedStyle(card);
-      const opacity = Number.parseFloat(style.opacity || "1");
-      const transform = style.transform;
-
-      return (
-        opacity >= 0.99 &&
-        (transform === "none" ||
-          /^matrix\(1, 0, 0, 1, 0(?:\.0+)?, 0(?:\.0+)?\)$/.test(transform))
-      );
-    });
-  });
+  await expect(page.locator(".level-card")).toHaveCount(3);
 }
 
 /**
@@ -43,6 +28,22 @@ async function expectRouteLaunch(page, level) {
     .toBe(`/src/pages/game.html?level=${level}`);
 }
 
+/**
+ * @param {import("@playwright/test").Page} page
+ * @param {string} level
+ */
+async function switchCompactRouteIfNeeded(page, level) {
+  const routeButton = page.locator(`.route-switcher-button[data-level="${level}"]`);
+  const routeVisible = await routeButton.isVisible().catch(() => false);
+
+  if (!routeVisible) {
+    return;
+  }
+
+  await routeButton.click();
+  await expect(routeButton).toHaveAttribute("aria-pressed", "true");
+}
+
 test.describe("Level select interactions", () => {
   test("does not launch a route when the panel body is clicked", async ({ page }) => {
     await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
@@ -50,7 +51,7 @@ test.describe("Level select interactions", () => {
 
     await page
       .locator('.level-card[data-level="beginner"] .level-description')
-      .click();
+      .click({ force: true });
 
     await page.waitForTimeout(400);
     await expect(page).toHaveURL(/\/src\/pages\/level-select\.html(?:$|\?)/);
@@ -60,6 +61,7 @@ test.describe("Level select interactions", () => {
     test(`launches ${route.level} only from its CTA button`, async ({ page }) => {
       await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
       await waitForCardsToSettle(page);
+      await switchCompactRouteIfNeeded(page, route.level);
       const button = page.getByRole("button", { name: route.buttonName });
       await button.scrollIntoViewIfNeeded();
       await button.click({ force: true, noWaitAfter: true });
@@ -103,5 +105,42 @@ test.describe("Level select interactions", () => {
       .getByRole("button", { name: "Enter foundations" })
       .click({ force: true, noWaitAfter: true });
     await expectRouteLaunch(page, "beginner");
+  });
+
+  test("launches a focused CTA button with Enter", async ({ page }) => {
+    await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
+    await waitForCardsToSettle(page);
+
+    const button = page.getByRole("button", { name: "Enter foundations" });
+    await button.focus();
+    await page.keyboard.press("Enter");
+
+    await expectRouteLaunch(page, "beginner");
+  });
+
+  test("switches compact routes with keyboard activation", async ({ page }) => {
+    await page.setViewportSize({ width: 430, height: 932 });
+    await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
+    await waitForCardsToSettle(page);
+
+    const warriorRoute = page.locator('.route-switcher-button[data-level="warrior"]');
+    await warriorRoute.focus();
+    await page.keyboard.press("Space");
+
+    await expect(warriorRoute).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator('.level-card[data-level="warrior"]')).toBeVisible();
+  });
+
+  test("returns to welcome from the back button with Enter", async ({ page }) => {
+    await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
+    await waitForCardsToSettle(page);
+
+    const backButton = page.getByRole("button", {
+      name: "← Return to Welcome",
+    });
+    await backButton.focus();
+    await page.keyboard.press("Enter");
+
+    await expect(page).toHaveURL(/\/src\/pages\/index\.html(?:$|\?)/);
   });
 });
