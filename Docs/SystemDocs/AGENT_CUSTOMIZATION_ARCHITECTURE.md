@@ -27,7 +27,7 @@ The current documentation catalog lives in `Docs/SystemDocs/_INDEX.md`. Keep thi
 2. Update the matching `.instructions.md` file in the same change only when the agent-facing non-negotiables, source links, or validation expectations change.
 3. Add a new scoped instruction file only after repeated evidence that a task surface needs unique, non-obvious guidance.
 4. Remove duplicated behavior detail from `.github/` when the same detail becomes durable documentation in `Docs/`.
-5. Keep `Docs/SystemDocs/_INDEX.md` current, and update `README.md` only when its entry-point pointers need to change.
+5. Keep `Docs/SystemDocs/_INDEX.md` current, and update `README.md` only when its entrypoint or routing pointers need to change.
 
 ## Review Checklist
 

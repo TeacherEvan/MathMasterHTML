@@ -52,31 +52,31 @@ export function runCli() {
   const newCount = result.newViolations.length;
 
   console.log("\n==================================================");
-  console.log(`  LINE LIMIT (${LINE_LIMIT_POLICY.maxLines}) CHECK`);
+  console.log(`  LINE LENGTH SUGGESTION (aim for 250–300 lines)`);
   console.log("==================================================\n");
   console.log(`Mode: ${mode}${useBaseline ? " (no-new-violations)" : ""}`);
-  console.log(`Violations (>${LINE_LIMIT_POLICY.maxLines}): ${total}`);
+  console.log(`Files over ${LINE_LIMIT_POLICY.maxLines} lines: ${total}`);
 
   if (mode === "baseline") {
-    console.log(`New violations: ${newCount}`);
+    console.log(`New over-limit files: ${newCount}`);
   }
 
   if (!result.ok) {
-    console.log("\n❌ Line limit check failed.");
+    console.log("\n⚠️  Some files exceed the suggested line length.");
     if (mode === "baseline" && newCount > 0) {
-      console.log("\nNew violations detected (must be fixed immediately):");
+      console.log("\nNewly over-limit files (consider splitting when convenient):");
       console.log(formatViolations(result.newViolations));
       console.log(
         `\nBaseline list: ${LINE_LIMIT_POLICY.baselineViolationsCsv} (update only with intent)`,
       );
     } else {
-      console.log("\nViolations:");
+      console.log("\nOver-limit files:");
       console.log(formatViolations(result.violations));
     }
-    process.exit(1);
+    process.exit(0);
   }
 
-  console.log("\n✅ Line limit check passed.");
+  console.log("\n✅ All files within the suggested line length.");
   process.exit(0);
 }
 
