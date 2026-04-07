@@ -17,7 +17,6 @@ This repository now keeps a small living documentation set. Historical reports, 
 | Competition execution order | [`../COMPETITION_PHASE1_EXECUTION_MATRIX.md`](../COMPETITION_PHASE1_EXECUTION_MATRIX.md) |
 | Agent customization ownership and update protocol for docs/instructions structure changes | [`./AGENT_CUSTOMIZATION_ARCHITECTURE.md`](./AGENT_CUSTOMIZATION_ARCHITECTURE.md) |
 | Rolling work log | [`../../JOBCARD.md`](../../JOBCARD.md) |
-| Agent-specific repo instructions | [`../../.github/copilot-instructions.md`](../../.github/copilot-instructions.md) |
 
 ## Suggested reading order
 
@@ -34,4 +33,4 @@ This repository now keeps a small living documentation set. Historical reports, 
 - Put durable historical context in `REFACTORING_HISTORY.md`.
 - Keep `JOBCARD.md` for recent noteworthy work, not full technical design dumps.
 - Treat `src/assets/problems/**/*.md` as gameplay data, not developer documentation.
-- Keep workflow/config Markdown such as `.github/copilot-instructions.md` and `.github/superpower/**/*.md` separate from system docs.
+- Keep workflow/config Markdown such as `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, and `.github/superpower/**/*.md` separate from system docs and out of the primary docs catalog.
