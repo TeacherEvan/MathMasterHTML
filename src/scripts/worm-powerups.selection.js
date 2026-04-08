@@ -12,6 +12,11 @@
    * @param {string} type - Power-up type to select
    */
   proto.selectPowerUp = function (type) {
+    if (!window.GameRuntimeCoordinator?.canAcceptGameplayInput?.()) {
+      this._showTooltip("Gameplay is not ready yet.", "warning");
+      return;
+    }
+
     // If already selected, deselect (toggle)
     if (this.selectedPowerUp === type) {
       this.deselectPowerUp();

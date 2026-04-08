@@ -18,15 +18,21 @@ test.describe("Evan Helper — Controls (Build 3)", () => {
     await dismissBriefing(page);
   });
 
-  test("#evan-controls-slot exists inside .panel-b-controls", async ({
+  test("#evan-solve-button lives in Panel A beneath the lock", async ({
     page,
   }) => {
     const slotExists = await page.evaluate(() => {
       const slot = document.getElementById("evan-controls-slot");
-      const panelBControls = document.querySelector(".panel-b-controls");
-      if (!slot || !panelBControls) return false;
+      const panelA = document.getElementById("panel-a");
+      const lockDisplay = document.getElementById("lock-display");
+      if (!slot || !panelA || !lockDisplay) return false;
 
-      return panelBControls.contains(slot);
+      if (!panelA.contains(slot)) return false;
+
+      const lockRect = lockDisplay.getBoundingClientRect();
+      const slotRect = slot.getBoundingClientRect();
+
+      return slotRect.top >= lockRect.bottom - 4;
     });
 
     expect(slotExists).toBe(true);
@@ -59,6 +65,44 @@ test.describe("Evan Helper — Controls (Build 3)", () => {
     expect(isVisible).toBe(true);
 
     await expect(page.locator("#evan-solve-button")).toBeVisible();
+  });
+
+  test("manual solve shows a stop button beside audio toggle", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      window.EvanPresenter?.showSolve();
+    });
+
+    await page.click("#evan-solve-button");
+
+    await expect(page.locator("#evan-stop-button")).toBeVisible();
+    await expect(page.locator("#audio-toggle")).toBeVisible();
+
+    const layoutState = await page.evaluate(() => {
+      const stopButton = document.getElementById("evan-stop-button");
+      const audioToggle = document.getElementById("audio-toggle");
+      const shell = document.getElementById("evan-assist-shell");
+      if (!stopButton || !audioToggle || !shell) return null;
+
+      const stopRect = stopButton.getBoundingClientRect();
+      const audioRect = audioToggle.getBoundingClientRect();
+      const shellHidden = shell.hasAttribute("hidden");
+
+      return {
+        shellHidden,
+        stopCenterX: stopRect.left + stopRect.width / 2,
+        audioCenterX: audioRect.left + audioRect.width / 2,
+        horizontalGap: Math.abs(stopRect.left - audioRect.right),
+        verticalDelta: Math.abs(stopRect.top - audioRect.top),
+      };
+    });
+
+    expect(layoutState).not.toBeNull();
+    expect(layoutState.shellHidden).toBe(false);
+    expect(layoutState.stopCenterX).toBeGreaterThan(layoutState.audioCenterX);
+    expect(layoutState.horizontalGap).toBeLessThan(96);
+    expect(layoutState.verticalDelta).toBeLessThan(24);
   });
 
   test("#evan-controls-slot does not overlap #power-up-display on compact landscape", async ({

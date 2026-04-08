@@ -2,6 +2,7 @@
   const shell = document.getElementById("evan-assist-shell");
   const hand = document.getElementById("evan-hand");
   const skipBtn = document.getElementById("evan-skip-button");
+  const stopBtn = document.getElementById("evan-stop-button");
   const solveSlot = document.getElementById("evan-controls-slot");
 
   const reducedMotion = window.matchMedia(
@@ -11,20 +12,28 @@
 
   if (hand) hand.style.transition = handTransition;
 
+  function getActiveExitButton() {
+    if (stopBtn && !stopBtn.hidden) return stopBtn;
+    if (skipBtn && !skipBtn.hidden) return skipBtn;
+    return null;
+  }
+
+  function hasVisibleExitControl() {
+    return Boolean(getActiveExitButton());
+  }
+
   function setInputLock(locked) {
     window.GameRuntimeCoordinator?.setInputLock?.("evan-auto", locked);
     document.body.classList.toggle("evan-input-locked", locked);
-    if (locked && skipBtn && !skipBtn.hidden) {
-      skipBtn.focus({ preventScroll: true });
+    if (locked) {
+      getActiveExitButton()?.focus({ preventScroll: true });
     }
   }
 
-  function isSkipInteractionTarget(target) {
+  function isExitInteractionTarget(target) {
     return Boolean(
-      skipBtn &&
-        !skipBtn.hidden &&
-        target instanceof Element &&
-        target.closest("#evan-skip-button"),
+      target instanceof Element &&
+        target.closest("#evan-skip-button, #evan-stop-button"),
     );
   }
 
@@ -35,11 +44,12 @@
     );
   }
 
-  function isAllowedSkipKey(event) {
-    if (!skipBtn || skipBtn.hidden) return false;
-    const isSkipFocused =
-      document.activeElement === skipBtn || event.target === skipBtn;
-    if (!isSkipFocused) return false;
+  function isAllowedExitKey(event) {
+    const exitButton = getActiveExitButton();
+    if (!exitButton) return false;
+    const isExitFocused =
+      document.activeElement === exitButton || event.target === exitButton;
+    if (!isExitFocused) return false;
     return (
       event.key === "Enter" || event.key === " " || event.key === "Spacebar"
     );
@@ -51,15 +61,16 @@
       document.body.classList.contains("evan-input-locked");
     if (!isLocked) return;
     if (event.type !== "keydown" && !event.isTrusted) return;
-    if (isSkipInteractionTarget(event.target)) return;
+    if (isExitInteractionTarget(event.target)) return;
     if (isAllowedOverlayInteractionTarget(event.target)) return;
 
-    if (event.type === "keydown" && isAllowedSkipKey(event)) {
+    if (event.type === "keydown" && isAllowedExitKey(event)) {
       return;
     }
 
-    if (skipBtn && !skipBtn.hidden && document.activeElement !== skipBtn) {
-      skipBtn.focus({ preventScroll: true });
+    const exitButton = getActiveExitButton();
+    if (exitButton && document.activeElement !== exitButton) {
+      exitButton.focus({ preventScroll: true });
     }
 
     event.preventDefault();
@@ -86,19 +97,34 @@
     shell.hidden = true;
     shell.setAttribute("aria-hidden", "true");
     document.body.classList.remove("evan-help-active");
+    document.body.classList.remove("evan-stop-visible");
     setInputLock(false);
   }
 
   function showSkip() {
     if (skipBtn) {
       skipBtn.hidden = false;
-      setInputLock(true);
     }
+    setInputLock(true);
   }
 
   function hideSkip() {
     if (skipBtn) skipBtn.hidden = true;
-    setInputLock(false);
+    if (!hasVisibleExitControl()) setInputLock(false);
+  }
+
+  function showStop() {
+    if (stopBtn) {
+      stopBtn.hidden = false;
+      document.body.classList.add("evan-stop-visible");
+    }
+    setInputLock(true);
+  }
+
+  function hideStop() {
+    if (stopBtn) stopBtn.hidden = true;
+    document.body.classList.remove("evan-stop-visible");
+    if (!hasVisibleExitControl()) setInputLock(false);
   }
 
   function showSolve() {
@@ -128,9 +154,11 @@
     show();
     hideSolve();
     if (mode === "auto") {
+      hideStop();
       showSkip();
     } else {
       hideSkip();
+      showStop();
     }
     parkHand();
   });
@@ -138,6 +166,7 @@
   document.addEventListener(window.GameEvents?.EVAN_HELP_STOPPED, () => {
     hide();
     hideSkip();
+    hideStop();
     parkHand();
   });
 
@@ -146,6 +175,8 @@
     hide,
     showSkip,
     hideSkip,
+    showStop,
+    hideStop,
     showSolve,
     hideSolve,
     moveHandTo,

@@ -177,6 +177,7 @@
         <span id="evan-assist-label">Mr. Evan helping out</span>
         <div id="evan-hand" aria-hidden="true"></div>
         <button id="evan-skip-button" type="button" hidden aria-label="Skip Evan's help and take over">Skip</button>
+        <button id="evan-stop-button" type="button" hidden aria-label="Stop Evan's help and take over">Stop</button>
     </div>
 
     <!-- Rotation Overlay - Force Landscape -->
@@ -208,6 +209,10 @@
         <!-- Panel A: Lock and Problem -->
         <div id="panel-a" class="display-panel">
             <div id="lock-display"></div>
+            <div id="evan-controls-slot" hidden>
+                <button id="evan-solve-button" type="button"
+                    aria-label="Ask Evan to solve this problem">Solve</button>
+            </div>
             <div id="problem-container"></div>
         </div>
 
@@ -219,10 +224,6 @@
                 <button id="help-button" data-ripple aria-label="Get help with current problem">HELP</button>
                 <button id="clarify-button" data-ripple
                     aria-label="Ask for clarifications about ambiguous problem aspects">CLARIFY</button>
-                <div id="evan-controls-slot" hidden>
-                    <button id="evan-solve-button" type="button"
-                        aria-label="Ask Evan to solve this problem">Solve</button>
-                </div>
             </div>
             <div id="solution-container" class="custom-scrollbar"></div>
             <div id="worm-container"></div>
