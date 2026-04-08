@@ -20,7 +20,10 @@ body.viewport-compact.viewport-landscape #panel-c {
 body.viewport-compact.viewport-landscape #panel-a {
   grid-column: 1 !important;
   grid-row: 1 !important;
-  padding: 52px 6px 8px;
+  --compact-panel-inline-gap: 8px;
+  --compact-panel-a-top-safe-zone: 52px;
+  padding: var(--compact-panel-a-top-safe-zone) var(--compact-panel-inline-gap)
+    var(--compact-panel-inline-gap);
   align-items: stretch;
 }
 
@@ -36,7 +39,8 @@ body.viewport-compact.viewport-landscape .grid-container > .wall:nth-child(2) {
 body.viewport-compact.viewport-landscape #panel-b {
   grid-column: 3 !important;
   grid-row: 1 !important;
-  padding: calc(var(--panel-b-top-safe-zone, 72px) - 14px) 6px 8px;
+  padding: calc(var(--panel-b-top-safe-zone, 72px) - 14px)
+    var(--compact-panel-inline-gap) var(--compact-panel-inline-gap);
   gap: 6px;
   overflow: hidden;
 }
@@ -73,10 +77,10 @@ body.viewport-compact.viewport-landscape #problem-container {
 }
 
 body.viewport-compact.viewport-landscape #lock-display {
-  top: 86px !important;
-  right: 6px;
-  bottom: 6px;
-  left: 6px !important;
+  top: calc(var(--compact-panel-a-top-safe-zone) + 44px) !important;
+  right: var(--compact-panel-inline-gap);
+  bottom: var(--compact-panel-inline-gap);
+  left: var(--compact-panel-inline-gap) !important;
   width: auto;
   height: auto;
   min-height: 34px;
@@ -98,9 +102,9 @@ body.viewport-compact.viewport-landscape #solution-container {
 
 body.viewport-compact.viewport-landscape #symbol-console {
   position: absolute;
-  left: 6px !important;
-  right: 6px !important;
-  bottom: 6px !important;
+  left: var(--compact-panel-inline-gap) !important;
+  right: var(--compact-panel-inline-gap) !important;
+  bottom: var(--compact-panel-inline-gap) !important;
   transform: none !important;
   width: auto !important;
   max-width: none;
@@ -149,8 +153,8 @@ body.viewport-compact.viewport-landscape #clarify-button {
 
 body.viewport-compact.viewport-landscape .game-hud {
   top: 4px;
-  left: 6px;
-  right: 6px;
+  left: 8px;
+  right: 8px;
   gap: 10px;
 }
 
@@ -175,7 +179,7 @@ body.viewport-compact.viewport-landscape #audio-toggle {
   min-width: auto;
   min-height: 44px;
   padding: 0.4rem 0.55rem;
-  bottom: 6px;
+  bottom: 8px;
   font-size: 0.66rem;
   letter-spacing: 0.1em;
   border-radius: 0.8rem;

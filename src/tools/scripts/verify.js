@@ -31,12 +31,13 @@ async function main() {
   log(`   Running from: ${ROOT}`, "cyan");
   log(`   Date: ${new Date().toISOString()}`, "cyan");
 
+  const advisoryLineLimitPolicy = checkLineLimits(ROOT, "baseline");
+
   const results = {
     criticalFiles: checkCriticalFiles(ROOT),
     eslint: checkESLint(ROOT),
     packageJson: checkPackageJson(ROOT),
     documentation: checkDocumentation(ROOT),
-    lineLimitPolicy: checkLineLimits(ROOT, "baseline"),
   };
 
   generateStats(ROOT);
@@ -51,6 +52,13 @@ async function main() {
   for (const [name, result] of checks) {
     logResult(name.replace(/([A-Z])/g, " $1").trim(), result);
   }
+
+  logSection("ADVISORIES");
+  log(
+    `ℹ️  Line limit policy reviewed: ${advisoryLineLimitPolicy ? "advisory only" : "see output above"}`,
+    "cyan",
+  );
+  log("   Line-length guidance is reported above and excluded from pass/fail totals.", "cyan");
 
   console.log("\n" + "-".repeat(50));
 

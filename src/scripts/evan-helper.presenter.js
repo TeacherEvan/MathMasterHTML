@@ -61,12 +61,16 @@
       document.body.classList.contains("evan-input-locked");
     if (!isLocked) return;
     if (event.type !== "keydown" && !event.isTrusted) return;
-    if (isExitInteractionTarget(event.target)) return;
-    if (isAllowedOverlayInteractionTarget(event.target)) return;
 
-    if (event.type === "keydown" && isAllowedExitKey(event)) {
+    if (event.type === "keydown") {
+      if (isAllowedExitKey(event)) {
+        return;
+      }
+    } else if (isExitInteractionTarget(event.target)) {
       return;
     }
+
+    if (isAllowedOverlayInteractionTarget(event.target)) return;
 
     const exitButton = getActiveExitButton();
     if (exitButton && document.activeElement !== exitButton) {

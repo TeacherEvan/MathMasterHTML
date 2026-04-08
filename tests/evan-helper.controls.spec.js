@@ -1,20 +1,17 @@
 // tests/evan-helper.controls.spec.js - Evan Helper Controls Coverage (Build 3)
 import { expect, test } from "@playwright/test";
 import {
-  BASE_URL,
   dismissBriefing,
   ensurePowerUpDisplay,
   boxesOverlap,
 } from "./utils/game-helpers.js";
+import { resetOnboardingState } from "./utils/onboarding-runtime.js";
 
 test.setTimeout(30000);
 
 test.describe("Evan Helper — Controls (Build 3)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/game.html?level=beginner`, {
-      waitUntil: "domcontentloaded",
-      timeout: 15000,
-    });
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
     await dismissBriefing(page);
   });
 

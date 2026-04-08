@@ -7,7 +7,8 @@
   }
 
   body.viewport-compact.viewport-landscape #panel-a {
-    padding-top: 48px;
+    --compact-panel-a-top-safe-zone: 48px;
+    padding-top: var(--compact-panel-a-top-safe-zone);
   }
 
   body.viewport-compact.viewport-landscape #panel-b {
@@ -20,7 +21,7 @@
   }
 
   body.viewport-compact.viewport-landscape #lock-display {
-    top: 78px !important;
+    top: calc(var(--compact-panel-a-top-safe-zone) + 40px) !important;
     opacity: 0.5;
   }
 

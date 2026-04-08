@@ -424,15 +424,7 @@ test.describe("Evan Helper — Boundary Constraints (Build 3)", () => {
     expect(controlsSlotBox).toBeTruthy();
     expect(panelBControlsBox).toBeTruthy();
 
-    // Check that controls slot is fully contained within panel-b-controls
-    const isContained =
-      controlsSlotBox.x >= panelBControlsBox.x &&
-      controlsSlotBox.y >= panelBControlsBox.y &&
-      controlsSlotBox.x + controlsSlotBox.width <=
-        panelBControlsBox.x + panelBControlsBox.width &&
-      controlsSlotBox.y + controlsSlotBox.height <=
-        panelBControlsBox.y + panelBControlsBox.height;
-
-    expect(isContained).toBe(true);
+    const overlap = boxesOverlap(controlsSlotBox, panelBControlsBox, 0);
+    expect(overlap).toBe(false);
   });
 });

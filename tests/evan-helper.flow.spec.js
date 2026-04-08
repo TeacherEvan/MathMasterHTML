@@ -129,18 +129,20 @@ test.describe("Evan Flow Controller — Build 4", () => {
 
     await page.evaluate(() => {
       window.__evanHelpClicks = 0;
-      window.__evanSymbolClicks = 0;
+      window.__evanConsoleSlotClicks = 0;
       document.getElementById("help-button")?.addEventListener("click", () => {
         window.__evanHelpClicks++;
       });
       if (window.consoleManager) {
         window.consoleManager.slots[0] = "x";
       }
+      document
+        .querySelector('[data-slot="0"]')
+        ?.addEventListener("click", () => {
+          window.__evanConsoleSlotClicks++;
+        });
       document.addEventListener("keydown", () => {
         /* test probe only */
-      });
-      document.addEventListener(window.GameEvents.SYMBOL_CLICKED, () => {
-        window.__evanSymbolClicks++;
       });
     });
 
@@ -152,12 +154,12 @@ test.describe("Evan Flow Controller — Build 4", () => {
 
     const blockedState = await page.evaluate(() => ({
       helpClicks: window.__evanHelpClicks,
-      symbolClicks: window.__evanSymbolClicks,
+      consoleSlotClicks: window.__evanConsoleSlotClicks,
       activeElementId: document.activeElement?.id || null,
     }));
 
     expect(blockedState.helpClicks).toBe(0);
-    expect(blockedState.symbolClicks).toBe(0);
+    expect(blockedState.consoleSlotClicks).toBe(0);
     expect(blockedState.activeElementId).toBe("evan-skip-button");
 
     await page.click("#evan-skip-button");

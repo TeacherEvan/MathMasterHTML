@@ -1,7 +1,10 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
 import { profileScenario } from "./utils/perf-metrics.js";
-import { evaluatePerfThresholds } from "./utils/perf-thresholds.js";
+import {
+  evaluatePerfThresholds,
+  shouldFailPerfThresholds,
+} from "./utils/perf-thresholds.js";
 import {
   denseRainScenario,
   idleScenario,
@@ -51,6 +54,10 @@ async function runScenario(page, testInfo, { scenarioName, level, action }) {
 
   for (const annotation of thresholdReport.annotations) {
     testInfo.annotations.push(annotation);
+  }
+
+  if (shouldFailPerfThresholds(thresholdReport)) {
+    throw new Error(`Performance regression detected: ${thresholdReport.summary}`);
   }
 
   return snapshot;

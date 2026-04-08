@@ -32,6 +32,15 @@ This document collects the current performance rules, tooling, and validation pa
 
 ## Automated validation
 
+The automated scenario lane uses `tests/perf-baselines.json` as an empirical regression anchor for the Playwright harness. Those captured values are not the same thing as the product targets above: they tell us whether the current automation lane regressed relative to its own recent history.
+
+Practical interpretation:
+
+- the target table remains the engineering goal for the runtime
+- the baseline file tracks headless regression deltas for the same Playwright scenario lane
+- catastrophic regressions against the baseline should fail the lane
+- warnings against the baseline should attach diagnostics without blocking by themselves
+
 Recommended focused commands:
 
 ```bash
