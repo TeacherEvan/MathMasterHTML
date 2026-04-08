@@ -35,8 +35,17 @@
 
     const rect = target.getBoundingClientRect();
     const size = CONFIG.RIPPLE.SIZE_PX;
-    const hasPointerPosition =
+    const hasNumericPointerPosition =
       typeof event.clientX === "number" && typeof event.clientY === "number";
+    const hasZeroedKeyboardPosition =
+      hasNumericPointerPosition && event.clientX === 0 && event.clientY === 0;
+    const hasPointerPosition =
+      hasNumericPointerPosition &&
+      !hasZeroedKeyboardPosition &&
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
     const x = hasPointerPosition
       ? event.clientX - rect.left - size / 2
       : rect.width / 2 - size / 2;
@@ -147,7 +156,7 @@
       };
 
       state.levelHandlers.set(button, handler);
-      button.addEventListener("pointerdown", handler);
+      button.addEventListener("click", handler);
     });
   }
 
@@ -159,16 +168,16 @@
       };
 
       state.routeHandlers.set(button, handler);
-      button.addEventListener("pointerdown", handler);
+      button.addEventListener("click", handler);
     });
   }
 
   function detachHandlers() {
     state.levelHandlers.forEach((handler, button) => {
-      button.removeEventListener("pointerdown", handler);
+      button.removeEventListener("click", handler);
     });
     state.routeHandlers.forEach((handler, button) => {
-      button.removeEventListener("pointerdown", handler);
+      button.removeEventListener("click", handler);
     });
     state.levelHandlers.clear();
     state.routeHandlers.clear();
@@ -183,7 +192,7 @@
     syncCompactLayout();
 
     if (elements.backButton) {
-      elements.backButton.addEventListener("pointerdown", goBack);
+      elements.backButton.addEventListener("click", goBack);
     }
   }
 
@@ -194,7 +203,7 @@
     detachHandlers();
 
     if (elements.backButton) {
-      elements.backButton.removeEventListener("pointerdown", goBack);
+      elements.backButton.removeEventListener("click", goBack);
     }
   }
 

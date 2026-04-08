@@ -21,6 +21,7 @@ async function useDesktopViewport(page) {
  * @param {import("@playwright/test").Page} page
  */
 async function waitForCardsToSettle(page) {
+  await page.waitForLoadState("load");
   await expect(page.locator(".level-card")).toHaveCount(3);
 }
 
@@ -42,7 +43,16 @@ async function expectRouteLaunch(page, level) {
  * @param {string} level
  */
 async function switchCompactRouteIfNeeded(page, level) {
+  const levelButton = page.locator(
+    `.level-card[data-level="${level}"] .level-button`,
+  );
   const routeButton = page.locator(`.route-switcher-button[data-level="${level}"]`);
+  const levelButtonVisible = await levelButton.isVisible().catch(() => false);
+
+  if (levelButtonVisible) {
+    return;
+  }
+
   const routeVisible = await routeButton.isVisible().catch(() => false);
 
   if (!routeVisible) {
@@ -51,6 +61,7 @@ async function switchCompactRouteIfNeeded(page, level) {
 
   await routeButton.click();
   await expect(routeButton).toHaveAttribute("aria-pressed", "true");
+  await expect(levelButton).toBeVisible();
 }
 
 /**
@@ -113,10 +124,8 @@ test.describe("Level select interactions", () => {
       const button = page.locator(
         `.level-card[data-level="${route.level}"] .level-button`,
       );
-      await button.evaluate((element) => {
-        element.scrollIntoView({ block: "center", inline: "nearest" });
-      });
-      await button.dispatchEvent("pointerdown");
+      await button.scrollIntoViewIfNeeded();
+      await button.click({ noWaitAfter: true });
       await expectRouteLaunch(page, route.level);
     });
 
@@ -157,11 +166,12 @@ test.describe("Level select interactions", () => {
 
     await page
       .getByRole("button", { name: "Enter foundations" })
-      .dispatchEvent("pointerdown");
+      .click({ noWaitAfter: true });
     await expectRouteLaunch(page, "beginner");
   });
 
   test("launches a focused CTA button with Enter", async ({ page }) => {
+    await useDesktopViewport(page);
     await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
     await waitForCardsToSettle(page);
 
@@ -186,6 +196,7 @@ test.describe("Level select interactions", () => {
   });
 
   test("returns to welcome from the back button with Enter", async ({ page }) => {
+    await useDesktopViewport(page);
     await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
     await waitForCardsToSettle(page);
 
