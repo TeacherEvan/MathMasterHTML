@@ -1,0 +1,104 @@
+FAILED_ROWS=57
+FAILED_SPECS=17
+
+---
+evan-helper.controls.spec.js:21
+projects: firefox, iphone-13, pixel-7, webkit
+title: #evan-controls-slot exists inside .panel-b-controls
+message: Test not found in the worker process. Make sure test title does not change.
+
+---
+evan-helper.flow.spec.js:119
+projects: chromium, firefox, iphone-13, pixel-7, webkit
+title: auto Evan run blocks user input except skip
+message: Error: expect(received).toBe(expected) // Object.is equality Expected: 0 Received: 2 158 | 159 | expect(blockedState.helpClicks).toBe(0); > 160 | expect(blockedState.symbolClicks).toBe(0); | ^ 161 | expect(blockedState.activeElementId).toBe("evan-skip-button"); 162 | 163 | await page.click("#evan-skip-button"); at /home/ewaldt/Documents/VS/GAMES/MathMasterHTML/tests/evan-helper.flow.spec.js:160:39
+
+---
+install-prompt.spec.js:75
+projects: webkit
+title: install toast appears after threshold once briefing is dismissed
+message: Error: expect(locator).toContainText(expected) failed Locator: locator('.toast') Expected substring: "Install Math Master for offline play" Error: strict mode violation: locator('.toast') resolved to 2 elements: 1) <div role="alert" aria-live="polite" class="toast toast-info">…</div> aka getByText('ℹ Install Math Master for') 2) <div role="alert" aria-live="polite" class="toast toast-info">…</div> aka getByText('ℹ New version available!') Call log: - Expect "toContainText" with timeout 5000ms - 
+
+---
+level-select-interactions.spec.js:164
+projects: chromium, firefox, iphone-13, pixel-7, webkit
+title: launches a focused CTA button with Enter
+message: Error: expect(received).toBe(expected) // Object.is equality Expected: "/src/pages/game.html?level=beginner" Received: "/src/pages/level-select.html?level=" Call Log: - Timeout 5000ms exceeded while waiting on the predicate 30 | */ 31 | async function expectRouteLaunch(page, level) { > 32 | await expect | ^ 33 | .poll(() => { 34 | const url = new URL(page.url()); 35 | return `${url.pathname}?level=${url.searchParams.get("level") || ""}`; at expectRouteLaunch (/home/ewaldt/Documents/VS/GAMES/Math
+
+---
+level-select-interactions.spec.js:188
+projects: chromium, firefox, iphone-13, pixel-7, webkit
+title: returns to welcome from the back button with Enter
+message: Error: expect(page).toHaveURL(expected) failed Expected pattern: /\/src\/pages\/index\.html(?:$|\?)/ Received string: "http://localhost:8000/src/pages/level-select.html" Timeout: 5000ms Call log: - Expect "toHaveURL" with timeout 5000ms 9 × unexpected value "http://localhost:8000/src/pages/level-select.html" 196 | await page.keyboard.press("Enter"); 197 | > 198 | await expect(page).toHaveURL(/\/src\/pages\/index\.html(?:$|\?)/); | ^ 199 | }); 200 | }); 201 | at /home/ewaldt/Documents/VS/GAMES/Ma
+
+---
+level-select-interactions.spec.js:175
+projects: chromium, firefox, iphone-13, pixel-7, webkit
+title: switches compact routes with keyboard activation
+message: Error: expect(locator).toHaveAttribute(expected) failed Locator: locator('.route-switcher-button[data-level="warrior"]') Expected: "true" Received: "false" Timeout: 5000ms Call log: - Expect "toHaveAttribute" with timeout 5000ms - waiting for locator('.route-switcher-button[data-level="warrior"]') 8 × locator resolved to <button type="button" data-level="warrior" aria-pressed="false" class="route-switcher-button" aria-controls="level-panel-warrior">…</button> - unexpected value "false" 182 | awa
+
+---
+level-select-polish.spec.js:185
+projects: chromium, firefox, iphone-13, pixel-7, webkit
+title: switches the visible route panel when a compact selector button is activated from the keyboard
+message: Error: expect(locator).toHaveAttribute(expected) failed Locator: locator('.route-switcher-button[data-level="warrior"]') Expected: "true" Received: "false" Timeout: 5000ms Call log: - Expect "toHaveAttribute" with timeout 5000ms - waiting for locator('.route-switcher-button[data-level="warrior"]') 8 × locator resolved to <button type="button" data-level="warrior" aria-pressed="false" class="route-switcher-button" aria-controls="level-panel-warrior">…</button> - unexpected value "false" 202 | awa
+
+---
+level-select-polish.spec.js:119
+projects: chromium, firefox, iphone-13, pixel-7, webkit
+title: uses a compact route selector instead of stacked scrolling cards on narrow mobile
+message: Error: expect(received).toBeLessThanOrEqual(expected) Expected: <= 180 Received: 2188 149 | 150 | expect(visibleLevels).toEqual(["beginner"]); > 151 | expect(docHeight - viewportHeight).toBeLessThanOrEqual(180); | ^ 152 | 153 | const resolvedActiveCardBox = expectDefined(activeCardBox); 154 | const resolvedActiveButtonBox = expectDefined(activeButtonBox); at /home/ewaldt/Documents/VS/GAMES/MathMasterHTML/tests/level-select-polish.spec.js:151:40
+
+---
+managers.spec.js:228
+projects: chromium, firefox, iphone-13, pixel-7, webkit
+title: should open console selector and advance to next problem without blocking
+message: TimeoutError: page.waitForFunction: Timeout 5000ms exceeded. 250 | 251 | const symbolModal = page.locator("#symbol-modal"); > 252 | await page.waitForFunction( | ^ 253 | () => document.getElementById("symbol-modal")?.style.display === "flex", 254 | null, 255 | { timeout: 5000 }, at /home/ewaldt/Documents/VS/GAMES/MathMasterHTML/tests/managers.spec.js:252:18
+
+---
+performance-bench.spec.js:115
+projects: chromium
+title: captures a desktop perf smoke snapshot
+message: Error: expect(received).toBeGreaterThan(expected) Expected: > 50 Received: 48.63 164 | expect(snapshot.sampleCount).toBeGreaterThan(0); 165 | if (budget.enforceHardGate) { > 166 | expect(snapshot.fps).toBeGreaterThan(budget.minFps); | ^ 167 | expect(snapshot.frameBudgetViolationPercent).toBeLessThan( 168 | budget.maxFrameBudgetViolationPercent, 169 | ); at /home/ewaldt/Documents/VS/GAMES/MathMasterHTML/tests/performance-bench.spec.js:166:28
+
+---
+powerups.spec.js:462
+projects: chromium, firefox, iphone-13, webkit
+title: level select page works
+message: Error: expect(locator).toBeVisible() failed Locator: locator('.level-button, .level-card, [data-level]').first() Expected: visible Received: hidden Timeout: 5000ms Call log: - Expect "toBeVisible" with timeout 5000ms - waiting for locator('.level-button, .level-card, [data-level]').first() 8 × locator resolved to <button type="button" aria-pressed="true" data-level="beginner" aria-controls="level-panel-beginner" class="route-switcher-button is-active">…</button> - unexpected value "hidden" 466 |
+
+---
+ui-boundary.spec.js:87
+projects: iphone-13
+title: Lock display should not overlap with problem container
+message: Error: expect(received).toBeGreaterThanOrEqual(expected) Expected: >= 96 Received: 86 107 | // Allow some overlap tolerance since lock is centered 108 | // but its top should be below problem's bottom > 109 | expect(lockBox.y).toBeGreaterThanOrEqual(problemBottom - 10); // -10 for tolerance | ^ 110 | console.log( 111 | `✅ Lock display positioned correctly: Problem ends at Y=${problemBottom}px, Lock starts at Y=${lockBox.y}px`, 112 | ); at /home/ewaldt/Documents/VS/GAMES/MathMasterHTML/tests/ui-b
+
+---
+ui-boundary.spec.js:263
+projects: iphone-13
+title: Mobile layout should maintain separation
+message: Error: expect(received).toBeLessThanOrEqual(expected) Expected: <= 828 Received: 832 289 | expect(boxesOverlap(scoreBox, timerBox, 0)).toBe(false); 290 | expect(spacerDisplay).toBe("none"); > 291 | expect(hudBox.width).toBeLessThanOrEqual(viewport.width - 16); | ^ 292 | 293 | console.log("✅ Mobile layout maintains HUD separation"); 294 | }); at /home/ewaldt/Documents/VS/GAMES/MathMasterHTML/tests/ui-boundary.spec.js:291:26
+
+---
+ui-boundary.spec.js:311
+projects: iphone-13
+title: Problem and lock should have vertical separation
+message: Error: expect(received).toBeGreaterThanOrEqual(expected) Expected: >= -10 Received: -20 337 | 338 | // Should have some gap (allowing for layout variations) > 339 | expect(verticalGap).toBeGreaterThanOrEqual(-10); // Allow small tolerance | ^ 340 | console.log( 341 | `✅ Panel A vertical layout: Problem bottom=${problemBottom}px, Lock top=${lockBox.y}px, Gap=${verticalGap}px`, 342 | ); at /home/ewaldt/Documents/VS/GAMES/MathMasterHTML/tests/ui-boundary.spec.js:339:27
+
+---
+ui-boundary.spec.js:388
+projects: iphone-13, pixel-7, webkit
+title: With body.evan-layout-preview, #evan-controls-slot does not overlap .panel-b-controls outer edge
+message: Error: expect(received).toBe(expected) // Object.is equality Expected: true Received: false 434 | panelBControlsBox.y + panelBControlsBox.height; 435 | > 436 | expect(isContained).toBe(true); | ^ 437 | }); 438 | }); 439 | at /home/ewaldt/Documents/VS/GAMES/MathMasterHTML/tests/ui-boundary.spec.js:436:25
+
+---
+worm-rewards.spec.js:17
+projects: chromium, firefox, iphone-13, webkit
+title: muffin gives 1000 per click and resolves at 4 clicks
+message: Test timeout of 30000ms exceeded.
+
+---
+worm-rewards.spec.js:49
+projects: chromium, firefox
+title: purple rain kill grants 50000, 2 powerups, and muffin spawn
+message: Error: expect(received).toMatchObject(expected) - Expected - 1 + Received + 1 @@ -2,7 +2,7 @@ "powerUps": ObjectContaining { "chainLightning": Any<Number>, "devil": Any<Number>, "spider": Any<Number>, }, - "score": 60000, + "score": 64000, } Call Log: - Timeout 10000ms exceeded while waiting on the predicate 76 | const beforeTotal = 77 | before.powerUps.chainLightning + before.powerUps.spider + before.powerUps.devil; > 78 | await expect | ^ 79 | .poll( 80 | () => 81 | page.evaluate(() => ({ at /
