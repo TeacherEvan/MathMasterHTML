@@ -505,9 +505,9 @@ test.describe("Game Flow Integration", () => {
     await page.goto("/level-select.html");
 
     // Check level buttons exist
-    await expect(
-      page.locator(".level-button, .level-card, [data-level]").first(),
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".level-button, .level-card").first()).toBeVisible({
+      timeout: 5000,
+    });
   });
 
   test("index page has navigation", async ({ page }) => {

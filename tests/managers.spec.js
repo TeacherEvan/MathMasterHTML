@@ -250,15 +250,28 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
 
       const symbolModal = page.locator("#symbol-modal");
       await page.waitForFunction(
-        () => document.getElementById("symbol-modal")?.style.display === "flex",
+        () => document.getElementById("symbol-modal")?.style.display === "grid",
         null,
         { timeout: 5000 },
       );
       expect(unexpectedDialog).toBeNull();
       await page.waitForFunction(
-        () =>
-          document.getElementById("position-instruction")?.style.display ===
-          "none",
+        () => {
+          const status = document.getElementById("console-selection-status");
+          const positionButtons = Array.from(
+            document.querySelectorAll(".position-choice"),
+          );
+
+          return (
+            status?.textContent?.replace(/\s+/g, " ").trim() ===
+              "Choose a symbol to unlock the slot grid." &&
+            positionButtons.length > 0 &&
+            positionButtons.every(
+              (button) =>
+                button.disabled && button.classList.contains("disabled"),
+            )
+          );
+        },
         null,
         { timeout: 5000 },
       );
@@ -267,9 +280,23 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
         document.querySelector('.symbol-choice[data-symbol="1"]')?.click();
       });
       await page.waitForFunction(
-        () =>
-          document.getElementById("position-instruction")?.style.display ===
-          "block",
+        () => {
+          const status = document.getElementById("console-selection-status");
+          const positionButtons = Array.from(
+            document.querySelectorAll(".position-choice"),
+          );
+
+          return (
+            status?.textContent?.replace(/\s+/g, " ").trim() ===
+              "Symbol 1 selected. Choose a slot." &&
+            positionButtons.length > 0 &&
+            positionButtons.every(
+              (button) =>
+                button.disabled === false &&
+                button.classList.contains("disabled") === false,
+            )
+          );
+        },
         null,
         { timeout: 5000 },
       );
