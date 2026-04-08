@@ -136,6 +136,12 @@
   }
 }
 
+@media (max-width: 560px) {
+  .level-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 480px) {
   .header {
     padding-top: 1rem;
