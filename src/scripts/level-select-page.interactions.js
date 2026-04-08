@@ -35,8 +35,17 @@
 
     const rect = target.getBoundingClientRect();
     const size = CONFIG.RIPPLE.SIZE_PX;
-    const hasPointerPosition =
+    const hasNumericPointerPosition =
       typeof event.clientX === "number" && typeof event.clientY === "number";
+    const hasZeroedKeyboardPosition =
+      hasNumericPointerPosition && event.clientX === 0 && event.clientY === 0;
+    const hasPointerPosition =
+      hasNumericPointerPosition &&
+      !hasZeroedKeyboardPosition &&
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
     const x = hasPointerPosition
       ? event.clientX - rect.left - size / 2
       : rect.width / 2 - size / 2;
@@ -93,13 +102,37 @@
     syncCompactLayout();
   }
 
-  function goBack(interactionEvent) {
-    const rippleTarget =
-      interactionEvent?.currentTarget ||
-      interactionEvent?.target?.closest?.("button") ||
-      elements.backButton;
+  function addCompactMediaListener() {
+    if (typeof compactMedia.addEventListener === "function") {
+      compactMedia.addEventListener("change", syncCompactLayout);
+    } else if (typeof compactMedia.addListener === "function") {
+      compactMedia.addListener(syncCompactLayout);
+    }
+  }
 
-    if (rippleTarget) {
+  function removeCompactMediaListener() {
+    if (typeof compactMedia.removeEventListener === "function") {
+      compactMedia.removeEventListener("change", syncCompactLayout);
+    } else if (typeof compactMedia.removeListener === "function") {
+      compactMedia.removeListener(syncCompactLayout);
+    }
+  }
+
+  function goBack(interactionEvent) {
+    const currentTarget =
+      interactionEvent?.currentTarget instanceof HTMLElement
+        ? interactionEvent.currentTarget
+        : null;
+    const targetElement =
+      interactionEvent?.target instanceof Element ? interactionEvent.target : null;
+    const fallbackTarget =
+      elements.backButton instanceof HTMLElement ? elements.backButton : null;
+    const rippleTarget =
+      currentTarget ||
+      targetElement?.closest?.(".back-button") ||
+      fallbackTarget;
+
+    if (rippleTarget instanceof HTMLElement) {
       createRipple(interactionEvent || {}, rippleTarget);
     }
     setTimeout(() => {
@@ -147,7 +180,7 @@
       };
 
       state.levelHandlers.set(button, handler);
-      button.addEventListener("pointerdown", handler);
+      button.addEventListener("click", handler);
     });
   }
 
@@ -159,16 +192,16 @@
       };
 
       state.routeHandlers.set(button, handler);
-      button.addEventListener("pointerdown", handler);
+      button.addEventListener("click", handler);
     });
   }
 
   function detachHandlers() {
     state.levelHandlers.forEach((handler, button) => {
-      button.removeEventListener("pointerdown", handler);
+      button.removeEventListener("click", handler);
     });
     state.routeHandlers.forEach((handler, button) => {
-      button.removeEventListener("pointerdown", handler);
+      button.removeEventListener("click", handler);
     });
     state.levelHandlers.clear();
     state.routeHandlers.clear();
@@ -176,25 +209,25 @@
 
   function initInteractions() {
     document.addEventListener("keydown", handleKeydown);
-    compactMedia.addEventListener("change", syncCompactLayout);
+    addCompactMediaListener();
 
     attachLevelHandlers();
     attachRouteHandlers();
     syncCompactLayout();
 
     if (elements.backButton) {
-      elements.backButton.addEventListener("pointerdown", goBack);
+      elements.backButton.addEventListener("click", goBack);
     }
   }
 
   function destroyInteractions() {
     document.removeEventListener("keydown", handleKeydown);
-    compactMedia.removeEventListener("change", syncCompactLayout);
+    removeCompactMediaListener();
 
     detachHandlers();
 
     if (elements.backButton) {
-      elements.backButton.removeEventListener("pointerdown", goBack);
+      elements.backButton.removeEventListener("click", goBack);
     }
   }
 

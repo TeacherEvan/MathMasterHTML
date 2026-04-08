@@ -34,6 +34,7 @@ export const LINE_LIMIT_POLICY = {
   excludeDirNames: [
     "node_modules",
     ".git",
+    ".worktrees",
     "playwright-report",
     "test-results",
     ".snapshots",

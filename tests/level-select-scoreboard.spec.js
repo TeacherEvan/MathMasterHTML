@@ -102,16 +102,27 @@ test.describe("Level select scoreboard", () => {
       ),
     ).toHaveText("5,000");
 
-    page.on("dialog", async (dialog) => {
+    const resetButton = page.locator(".reset-progress-btn");
+
+    await resetButton.scrollIntoViewIfNeeded();
+    await expect(resetButton).toBeVisible();
+    await expect(resetButton).toBeEnabled();
+
+    page.once("dialog", async (dialog) => {
       await dialog.accept();
     });
 
-    await Promise.all([
-      page.waitForURL(/\/src\/pages\/level-select\.html(?:$|\?)/, {
-        waitUntil: "domcontentloaded",
-      }),
-      page.click(".reset-progress-btn"),
-    ]);
+    const navigation = page.waitForEvent("framenavigated", {
+      predicate: (frame) =>
+        frame === page.mainFrame() &&
+        /\/src\/pages\/level-select\.html(?:$|\?)/.test(frame.url()),
+    });
+
+    await resetButton.click();
+    await navigation;
+    await page.waitForLoadState("domcontentloaded");
+
+    await expect(resetButton).toBeVisible();
 
     const storageState = await page.evaluate(
       (storageKey) => ({

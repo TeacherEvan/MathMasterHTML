@@ -54,5 +54,6 @@ test-results.competition.json
 # Snapshots (if not needed in repo)
 # .snapshots/
 
-# Local one-off debug probes
+# Local one-off debug probes and perf artifacts
 .tmp-*
+.tmp/

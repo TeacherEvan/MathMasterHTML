@@ -1,6 +1,7 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
 import { profileScenario } from "./utils/perf-metrics.js";
+import { evaluatePerfThresholds } from "./utils/perf-thresholds.js";
 import {
   denseRainScenario,
   idleScenario,
@@ -35,6 +36,22 @@ async function runScenario(page, testInfo, { scenarioName, level, action }) {
   expect(after.scenario).toBe(scenarioName);
   expect(Number.isFinite(after.fps)).toBe(true);
   expect(after.sampleCount).toBeGreaterThan(0);
+
+  const thresholdReport = evaluatePerfThresholds({
+    scenarioName,
+    projectName: testInfo.project.name,
+    snapshot,
+  });
+
+  console.log(`⚠️ [perf-thresholds] ${thresholdReport.summary}`);
+  await testInfo.attach(`${scenarioName}-perf-thresholds`, {
+    contentType: "application/json",
+    body: Buffer.from(JSON.stringify(thresholdReport.attachment, null, 2)),
+  });
+
+  for (const annotation of thresholdReport.annotations) {
+    testInfo.annotations.push(annotation);
+  }
 
   return snapshot;
 }
