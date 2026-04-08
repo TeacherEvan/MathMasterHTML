@@ -1,3 +1,8 @@
+body.viewport-compact.viewport-landscape {
+  --compact-panel-inline-gap: 8px;
+  --compact-panel-a-top-safe-zone: 52px;
+}
+
 body.viewport-compact.viewport-landscape .grid-container {
   grid-template-columns: minmax(0, 0.94fr) 2px minmax(0, 1.02fr) 2px minmax(
       0,
@@ -20,8 +25,6 @@ body.viewport-compact.viewport-landscape #panel-c {
 body.viewport-compact.viewport-landscape #panel-a {
   grid-column: 1 !important;
   grid-row: 1 !important;
-  --compact-panel-inline-gap: 8px;
-  --compact-panel-a-top-safe-zone: 52px;
   padding: var(--compact-panel-a-top-safe-zone) var(--compact-panel-inline-gap)
     var(--compact-panel-inline-gap);
   align-items: stretch;
@@ -79,7 +82,7 @@ body.viewport-compact.viewport-landscape #problem-container {
 body.viewport-compact.viewport-landscape #lock-display {
   top: calc(var(--compact-panel-a-top-safe-zone) + 44px) !important;
   right: var(--compact-panel-inline-gap);
-  bottom: var(--compact-panel-inline-gap);
+  bottom: 60px;
   left: var(--compact-panel-inline-gap) !important;
   width: auto;
   height: auto;

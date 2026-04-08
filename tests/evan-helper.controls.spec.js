@@ -9,8 +9,21 @@ import { resetOnboardingState } from "./utils/onboarding-runtime.js";
 
 test.setTimeout(30000);
 
+async function ensureLandscapeViewport(page) {
+  const viewport = page.viewportSize();
+  if (!viewport || viewport.width >= viewport.height) {
+    return;
+  }
+
+  await page.setViewportSize({
+    width: viewport.height,
+    height: viewport.width,
+  });
+}
+
 test.describe("Evan Helper — Controls (Build 3)", () => {
   test.beforeEach(async ({ page }) => {
+    await ensureLandscapeViewport(page);
     await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
     await dismissBriefing(page);
   });

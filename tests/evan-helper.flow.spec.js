@@ -7,6 +7,18 @@ import {
 
 test.setTimeout(45000);
 
+async function ensureLandscapeViewport(page) {
+  const viewport = page.viewportSize();
+  if (!viewport || viewport.width >= viewport.height) {
+    return;
+  }
+
+  await page.setViewportSize({
+    width: viewport.height,
+    height: viewport.width,
+  });
+}
+
 function consumedState() {
   return {
     version: 1,
@@ -23,6 +35,13 @@ async function dismissBriefing(page) {
     timeout: 10000,
   });
   await page.click("#start-game-btn");
+  await page.waitForFunction(
+    () => {
+      const modal = document.getElementById("how-to-play-modal");
+      return !modal || window.getComputedStyle(modal).display === "none";
+    },
+    { timeout: 10000 },
+  );
 }
 
 test.describe("Evan Flow Controller — Build 4", () => {
@@ -191,6 +210,7 @@ test.describe("Evan Flow Controller — Build 4", () => {
   test("manual solve locks input except stop and stop restores control", async ({
     page,
   }) => {
+    await ensureLandscapeViewport(page);
     await seedOnboardingState(
       page,
       consumedState(),

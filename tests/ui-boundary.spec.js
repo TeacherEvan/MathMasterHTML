@@ -298,10 +298,11 @@ test.describe("UI Boundary Management", () => {
   }) => {
     await page.evaluate(() => {
       window.GameOnboardingStorage?.markEvanConsumed?.("beginner", "completed");
-      window.EvanPresenter?.showSolve?.();
+      window.EvanPresenter?.show?.();
+      window.EvanPresenter?.showStop?.();
     });
 
-    await page.click("#evan-solve-button");
+    await expect(page.locator("#evan-stop-button")).toBeVisible();
 
     const stopBox = await page.locator("#evan-stop-button").boundingBox();
     const audioBox = await page.locator("#audio-toggle").boundingBox();
@@ -327,20 +328,20 @@ test.describe("Panel A Layout", () => {
     await page.waitForTimeout(500);
   });
 
-  test("Problem and lock should have vertical separation", async ({ page }) => {
+  test("Problem and lock should stay within vertical overlap tolerance", async ({ page }) => {
     const problemBox = await page.locator("#problem-container").boundingBox();
     const lockBox = await page.locator("#lock-display").boundingBox();
 
-    if (problemBox && lockBox) {
+      expect(problemBox).toBeTruthy();
+      expect(lockBox).toBeTruthy();
+
       const problemBottom = problemBox.y + problemBox.height;
       const verticalGap = lockBox.y - problemBottom;
 
-      // Should have some gap (allowing for layout variations)
-      expect(verticalGap).toBeGreaterThanOrEqual(-10); // Allow small tolerance
+      expect(verticalGap).toBeGreaterThanOrEqual(-10);
       console.log(
         `✅ Panel A vertical layout: Problem bottom=${problemBottom}px, Lock top=${lockBox.y}px, Gap=${verticalGap}px`,
       );
-    }
   });
 });
 

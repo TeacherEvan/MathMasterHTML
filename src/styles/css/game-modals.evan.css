@@ -148,6 +148,22 @@ body.evan-stop-visible #audio-toggle {
     box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
 }
 
+body.viewport-compact #evan-controls-slot {
+    left: 8px;
+    right: 8px;
+    bottom: 56px;
+    justify-content: flex-end;
+}
+
+body.viewport-compact #evan-solve-button {
+    min-width: 0;
+    width: 100%;
+    max-width: 104px;
+    min-height: 44px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.7rem;
+}
+
 @keyframes evan-pulse {
     0%, 100% { opacity: 0.4; }
     50% { opacity: 1; }
@@ -177,6 +193,7 @@ body.evan-layout-preview #evan-assist-border {
 }
 
 body.viewport-compact.viewport-landscape #evan-controls-slot {
+    left: auto;
     right: 8px;
     bottom: 8px;
 }
@@ -190,7 +207,7 @@ body.viewport-compact.viewport-landscape #evan-skip-button {
     font-size: 0.7rem;
 }
 
-body.viewport-compact.viewport-landscape body.evan-stop-visible #audio-toggle {
+body.viewport-compact.viewport-landscape.evan-stop-visible #audio-toggle {
     right: 8.5rem;
 }
 
