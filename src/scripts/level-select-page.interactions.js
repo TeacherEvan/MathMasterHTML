@@ -102,6 +102,22 @@
     syncCompactLayout();
   }
 
+  function addCompactMediaListener() {
+    if (typeof compactMedia.addEventListener === "function") {
+      compactMedia.addEventListener("change", syncCompactLayout);
+    } else if (typeof compactMedia.addListener === "function") {
+      compactMedia.addListener(syncCompactLayout);
+    }
+  }
+
+  function removeCompactMediaListener() {
+    if (typeof compactMedia.removeEventListener === "function") {
+      compactMedia.removeEventListener("change", syncCompactLayout);
+    } else if (typeof compactMedia.removeListener === "function") {
+      compactMedia.removeListener(syncCompactLayout);
+    }
+  }
+
   function goBack(interactionEvent) {
     const currentTarget =
       interactionEvent?.currentTarget instanceof HTMLElement
@@ -193,7 +209,7 @@
 
   function initInteractions() {
     document.addEventListener("keydown", handleKeydown);
-    compactMedia.addEventListener("change", syncCompactLayout);
+    addCompactMediaListener();
 
     attachLevelHandlers();
     attachRouteHandlers();
@@ -206,7 +222,7 @@
 
   function destroyInteractions() {
     document.removeEventListener("keydown", handleKeydown);
-    compactMedia.removeEventListener("change", syncCompactLayout);
+    removeCompactMediaListener();
 
     detachHandlers();
 
