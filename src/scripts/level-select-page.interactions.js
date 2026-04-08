@@ -103,12 +103,20 @@
   }
 
   function goBack(interactionEvent) {
+    const currentTarget =
+      interactionEvent?.currentTarget instanceof HTMLElement
+        ? interactionEvent.currentTarget
+        : null;
+    const targetElement =
+      interactionEvent?.target instanceof Element ? interactionEvent.target : null;
+    const fallbackTarget =
+      elements.backButton instanceof HTMLElement ? elements.backButton : null;
     const rippleTarget =
-      interactionEvent?.currentTarget ||
-      interactionEvent?.target?.closest?.("button") ||
-      elements.backButton;
+      currentTarget ||
+      targetElement?.closest?.(".back-button") ||
+      fallbackTarget;
 
-    if (rippleTarget) {
+    if (rippleTarget instanceof HTMLElement) {
       createRipple(interactionEvent || {}, rippleTarget);
     }
     setTimeout(() => {

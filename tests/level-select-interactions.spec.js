@@ -59,42 +59,10 @@ async function switchCompactRouteIfNeeded(page, level) {
     return;
   }
 
-  await activateControl(page, routeButton);
+  await routeButton.scrollIntoViewIfNeeded();
+  await routeButton.click();
   await expect(routeButton).toHaveAttribute("aria-pressed", "true");
   await expect(levelButton).toBeVisible();
-}
-
-/**
- * @param {import("@playwright/test").Page} page
- * @param {import("@playwright/test").Locator} control
- * @param {{ noWaitAfter?: boolean }} [options]
- */
-async function activateControl(page, control, options = {}) {
-  const usesTouch = await page.evaluate(
-    () =>
-      navigator.maxTouchPoints > 0 ||
-      window.matchMedia("(pointer: coarse)").matches ||
-      "ontouchstart" in window,
-  );
-
-  if (usesTouch) {
-    await control.tap({ force: true });
-    return;
-  }
-
-  await control.scrollIntoViewIfNeeded();
-
-  const bounds = await control.boundingBox();
-
-  if (!bounds) {
-    throw new Error("Could not resolve click bounds for control activation.");
-  }
-
-  await page.mouse.click(
-    Math.round(bounds.x + bounds.width / 2),
-    Math.round(bounds.y + bounds.height / 2),
-    options,
-  );
 }
 
 /**
@@ -157,7 +125,8 @@ test.describe("Level select interactions", () => {
       const button = page.locator(
         `.level-card[data-level="${route.level}"] .level-button`,
       );
-      await activateControl(page, button, { noWaitAfter: true });
+      await button.scrollIntoViewIfNeeded();
+      await button.click({ noWaitAfter: true });
       await expectRouteLaunch(page, route.level);
     });
 
@@ -240,4 +209,18 @@ test.describe("Level select interactions", () => {
 
     await expect(page).toHaveURL(/\/src\/pages\/index\.html(?:$|\?)/);
   });
+
+  for (const key of ["Escape", "Backspace"]) {
+    test(`returns to welcome from keyboard back navigation with ${key}`, async ({
+      page,
+    }) => {
+      await useDesktopViewport(page);
+      await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
+      await waitForCardsToSettle(page);
+
+      await page.keyboard.press(key);
+
+      await expect(page).toHaveURL(/\/src\/pages\/index\.html(?:$|\?)/);
+    });
+  }
 });
