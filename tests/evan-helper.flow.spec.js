@@ -185,4 +185,57 @@ test.describe("Evan Flow Controller — Build 4", () => {
       ),
     ).toBe(true);
   });
+
+  test("manual solve locks input except stop and stop restores control", async ({
+    page,
+  }) => {
+    await seedOnboardingState(
+      page,
+      consumedState(),
+      "?level=beginner&evan=auto&preload=off",
+    );
+    await dismissBriefing(page);
+
+    await page.waitForSelector("#evan-solve-button", {
+      state: "visible",
+      timeout: 8000,
+    });
+
+    await page.evaluate(() => {
+      window.__manualHelpClicks = 0;
+      document.getElementById("help-button")?.addEventListener("click", () => {
+        window.__manualHelpClicks += 1;
+      });
+    });
+
+    await page.click("#evan-solve-button");
+
+    await page.waitForFunction(
+      () => {
+        const stopButton = document.getElementById("evan-stop-button");
+        return stopButton && !stopButton.hidden && document.body.classList.contains("evan-input-locked");
+      },
+      { timeout: 8000 },
+    );
+
+    const helpBox = await page.locator("#help-button").boundingBox();
+    expect(helpBox).toBeTruthy();
+    await page.mouse.click(helpBox.x + helpBox.width / 2, helpBox.y + helpBox.height / 2);
+    await page.waitForTimeout(200);
+
+    const blockedState = await page.evaluate(() => ({
+      helpClicks: window.__manualHelpClicks,
+      activeElementId: document.activeElement?.id || null,
+    }));
+
+    expect(blockedState.helpClicks).toBe(0);
+    expect(blockedState.activeElementId).toBe("evan-stop-button");
+
+    await page.click("#evan-stop-button");
+
+    await page.waitForFunction(
+      () => !document.body.classList.contains("evan-input-locked"),
+      { timeout: 5000 },
+    );
+  });
 });

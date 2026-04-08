@@ -65,6 +65,13 @@
     });
   }
 
+  const stopBtn = document.getElementById("evan-stop-button");
+  if (stopBtn) {
+    stopBtn.addEventListener("click", () => {
+      stopEvanHelp("manual-stop");
+    });
+  }
+
   const solveBtn = document.getElementById("evan-solve-button");
   if (solveBtn) {
     solveBtn.addEventListener("click", () => {
@@ -75,7 +82,11 @@
   document.addEventListener(GE.EVAN_HELP_STARTED, (event) => {
     if (event.detail?.mode === "manual") {
       window.EvanPresenter?.hideSkip?.();
+      window.EvanPresenter?.showStop?.();
+      return;
     }
+
+    window.EvanPresenter?.hideStop?.();
   });
 
   document.addEventListener(GE.EVAN_HELP_STOPPED, (event) => {

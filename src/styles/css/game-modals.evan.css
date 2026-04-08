@@ -60,7 +60,7 @@ body.evan-input-locked #evan-assist-shell {
 #evan-skip-button {
     position: fixed;
     bottom: 12px;
-    right: 12px;
+    right: 12.25rem;
     pointer-events: auto;
     font-family: var(--font-display, "Orbitron", monospace);
     font-size: 0.85rem;
@@ -80,18 +80,54 @@ body.evan-input-locked #evan-skip-button {
     pointer-events: auto;
 }
 
+#evan-stop-button {
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    pointer-events: auto;
+    font-family: var(--font-display, "Orbitron", monospace);
+    font-size: 0.85rem;
+    font-weight: 700;
+    min-width: 9.5rem;
+    min-height: 3rem;
+    padding: 8px 20px;
+    border: 2px solid var(--evan-border-color, #ff3333);
+    border-radius: 999px;
+    background: rgba(14, 6, 6, 0.92);
+    color: #ffd8d8;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+#evan-stop-button:hover,
+#evan-stop-button:focus-visible {
+    background: rgba(255, 51, 51, 0.2);
+    box-shadow: 0 0 12px rgba(255, 51, 51, 0.35);
+}
+
+body.evan-stop-visible #audio-toggle {
+    right: 11rem;
+}
+
 #evan-skip-button:hover,
 #evan-skip-button:focus-visible {
     background: rgba(255, 215, 0, 0.15);
     box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
 }
 
-/* Solve button inside panel-b-controls */
 #evan-controls-slot {
-    display: inline-block;
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 140;
+    display: inline-flex;
 }
 
 #evan-solve-button {
+    min-width: 8.25rem;
+    min-height: 2.75rem;
     font-family: var(--font-display, "Orbitron", monospace);
     font-size: 0.75rem;
     font-weight: 700;
@@ -140,6 +176,24 @@ body.evan-layout-preview #evan-assist-border {
     display: none;
 }
 
+body.viewport-compact.viewport-landscape #evan-controls-slot {
+    right: 8px;
+    bottom: 8px;
+}
+
+body.viewport-compact.viewport-landscape #evan-stop-button,
+body.viewport-compact.viewport-landscape #evan-skip-button {
+    bottom: 6px;
+    min-width: auto;
+    min-height: 44px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.7rem;
+}
+
+body.viewport-compact.viewport-landscape body.evan-stop-visible #audio-toggle {
+    right: 8.5rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
     #evan-assist-border {
         animation: none;
@@ -149,6 +203,7 @@ body.evan-layout-preview #evan-assist-border {
         transition: none !important;
     }
     #evan-skip-button,
+    #evan-stop-button,
     #evan-solve-button {
         transition: none;
     }
