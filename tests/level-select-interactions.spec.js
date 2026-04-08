@@ -59,9 +59,42 @@ async function switchCompactRouteIfNeeded(page, level) {
     return;
   }
 
-  await routeButton.click();
+  await activateControl(page, routeButton);
   await expect(routeButton).toHaveAttribute("aria-pressed", "true");
   await expect(levelButton).toBeVisible();
+}
+
+/**
+ * @param {import("@playwright/test").Page} page
+ * @param {import("@playwright/test").Locator} control
+ * @param {{ noWaitAfter?: boolean }} [options]
+ */
+async function activateControl(page, control, options = {}) {
+  const usesTouch = await page.evaluate(
+    () =>
+      navigator.maxTouchPoints > 0 ||
+      window.matchMedia("(pointer: coarse)").matches ||
+      "ontouchstart" in window,
+  );
+
+  if (usesTouch) {
+    await control.tap({ force: true });
+    return;
+  }
+
+  await control.scrollIntoViewIfNeeded();
+
+  const bounds = await control.boundingBox();
+
+  if (!bounds) {
+    throw new Error("Could not resolve click bounds for control activation.");
+  }
+
+  await page.mouse.click(
+    Math.round(bounds.x + bounds.width / 2),
+    Math.round(bounds.y + bounds.height / 2),
+    options,
+  );
 }
 
 /**
@@ -124,8 +157,7 @@ test.describe("Level select interactions", () => {
       const button = page.locator(
         `.level-card[data-level="${route.level}"] .level-button`,
       );
-      await button.scrollIntoViewIfNeeded();
-      await button.click({ noWaitAfter: true });
+      await activateControl(page, button, { noWaitAfter: true });
       await expectRouteLaunch(page, route.level);
     });
 
