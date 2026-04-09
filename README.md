@@ -44,6 +44,19 @@ Focused Playwright lanes and subsystem-specific checks live in the docs index an
 | `Docs/` | Living project documentation |
 | `.github/copilot-instructions.md` | Repo-wide agent routing and reminder layer that points to authoritative docs |
 
+## Runtime script families
+
+| Area | Key files |
+| --- | --- |
+| Game flow | `src/scripts/game*.js`, `src/scripts/game-init.js`, `src/scripts/game-page.js` |
+| Symbol rain | `src/scripts/3rdDISPLAY.js`, `src/scripts/symbol-rain*.js` |
+| Worm system | `src/scripts/worm.js`, `src/scripts/worm-system.*.js`, `src/scripts/worm-powerups*.js`, `src/scripts/worm-system.rewards.muffin.js` |
+| Lock progression | `src/scripts/lock-manager*.js`, `lock/` |
+| Score/timer HUD | `src/scripts/score-timer-manager.js`, `src/scripts/score-timer.*.js` |
+| Local persistence | `src/scripts/player-storage.js`, `src/scripts/player-storage.helpers.js` |
+| Performance/quality | `src/scripts/performance-monitor*.js`, `src/scripts/dynamic-quality-adjuster.js`, `src/scripts/quality-tier-manager*.js` |
+| Shared constants/utilities | `src/scripts/constants*.js`, `src/scripts/utils*.js` |
+
 ## Living docs
 
 - Start with `Docs/SystemDocs/_INDEX.md` for the current documentation map and reading order.

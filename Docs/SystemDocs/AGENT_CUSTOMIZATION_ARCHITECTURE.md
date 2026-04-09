@@ -9,7 +9,7 @@ This document defines how MathMasterHTML separates durable developer-facing know
 | Developer-facing source of truth | `Docs/SystemDocs/*.md`, `Docs/Worms/*.md`, `README.md` | Runtime behavior, workflow rules, testing scenarios, and durable subsystem knowledge |
 | Workspace routing | `.github/copilot-instructions.md` | Repo-wide reminders plus links that route agents to the authoritative docs |
 | Scoped agent wrappers | `.github/instructions/gameplay-runtime.instructions.md`, `.github/instructions/worm-runtime.instructions.md`, `.github/instructions/playwright-tests.instructions.md` | File-scoped guardrails, source links, and validation expectations for common task surfaces |
-| Execution artifacts | `docs/superpowers/plans/*.md`, `.github/superpower/plan/`, `.github/superpower/context/`, `JOBCARD.md` | Task-specific planning and execution context; not authoritative behavior or workflow ownership |
+| Execution artifacts | `.github/superpower/plan/`, `.github/superpower/brainstorm/`, `.github/superpower/context/`, `.github/superpower/ux/`, `JOBCARD.md` | Task-specific planning and execution context; not authoritative behavior or workflow ownership |
 
 ## Source Of Truth Rules
 
@@ -28,6 +28,8 @@ The current documentation catalog lives in `Docs/SystemDocs/_INDEX.md`. Keep thi
 3. Add a new scoped instruction file only after repeated evidence that a task surface needs unique, non-obvious guidance.
 4. Remove duplicated behavior detail from `.github/` when the same detail becomes durable documentation in `Docs/`.
 5. Keep `Docs/SystemDocs/_INDEX.md` current, and update `README.md` only when its entrypoint or routing pointers need to change.
+
+Legacy note: the old `docs/superpowers/plans/` location is retired. Current plan and design artifacts live under `.github/superpower/`.
 
 ## Review Checklist
 
