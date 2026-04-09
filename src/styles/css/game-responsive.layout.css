@@ -42,6 +42,144 @@ body.viewport-standard.viewport-portrait #panel-c {
   grid-row: 1 / span 3 !important;
 }
 
+body.viewport-compact.viewport-portrait .grid-container {
+  grid-template-columns: minmax(0, 0.96fr) 3px minmax(0, 1.04fr) !important;
+  grid-template-rows: minmax(0, 0.52fr) 3px minmax(0, 0.48fr) !important;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+body.viewport-compact.viewport-portrait #panel-a,
+body.viewport-compact.viewport-portrait #panel-b,
+body.viewport-compact.viewport-portrait #panel-c {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}
+
+body.viewport-compact.viewport-portrait #panel-a {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  padding: 56px 6px 6px;
+  align-items: stretch;
+}
+
+body.viewport-compact.viewport-portrait .grid-container > .wall:nth-child(2) {
+  display: block !important;
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  width: auto !important;
+  height: 3px;
+}
+
+body.viewport-compact.viewport-portrait .grid-container > .wall:nth-child(4) {
+  display: block !important;
+  grid-column: 2 !important;
+  grid-row: 1 / span 3 !important;
+  width: 3px !important;
+  height: auto;
+}
+
+body.viewport-compact.viewport-portrait #panel-b {
+  grid-column: 1 !important;
+  grid-row: 3 !important;
+  padding: calc(var(--panel-b-top-safe-zone, 88px) - 8px) 6px 6px;
+  gap: 6px;
+  overflow: hidden;
+}
+
+body.viewport-compact.viewport-portrait #panel-c {
+  grid-column: 3 !important;
+  grid-row: 1 / span 3 !important;
+  padding: 6px 6px 56px;
+}
+
+body.viewport-compact.viewport-portrait #problem-container {
+  position: relative;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  min-height: 32px;
+  padding: 6px 8px;
+  text-align: center;
+  white-space: normal;
+  letter-spacing: 0.1em;
+  z-index: 2;
+}
+
+body.viewport-compact.viewport-portrait #lock-display {
+  top: 102px !important;
+  right: 6px;
+  bottom: 6px;
+  left: 6px !important;
+  width: auto;
+  height: auto;
+  min-height: 34px;
+  max-height: none;
+  transform: none !important;
+  transform-origin: center;
+  opacity: 0.58;
+  z-index: 1;
+}
+
+body.viewport-compact.viewport-portrait .panel-b-controls {
+  position: relative;
+  top: auto;
+  right: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-content: stretch;
+  gap: 6px;
+}
+
+body.viewport-compact.viewport-portrait #help-button,
+body.viewport-compact.viewport-portrait #clarify-button {
+  min-height: 44px;
+  width: 100%;
+}
+
+body.viewport-compact.viewport-portrait #solution-container {
+  min-height: 0;
+  max-height: none;
+  padding: 0 0 4px;
+  margin: 0 !important;
+  background: rgba(0, 0, 0, 0.45);
+  flex: 1 1 auto;
+}
+
+body.viewport-compact.viewport-portrait #symbol-console {
+  position: absolute !important;
+  left: 6px !important;
+  right: 6px !important;
+  bottom: 6px !important;
+  width: auto !important;
+  max-width: none;
+  margin-top: 0;
+  padding: 4px 6px;
+  grid-auto-flow: column;
+  grid-auto-columns: 44px;
+  grid-template-columns: none !important;
+  grid-template-rows: 44px !important;
+  gap: 4px;
+  justify-content: start;
+  border-radius: 0.95rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+body.viewport-compact.viewport-portrait .console-slot {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  border-radius: 0.55rem;
+}
+
 body.viewport-compact .grid-container {
   display: grid !important;
 }

@@ -22,14 +22,15 @@
         href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@500;700;800&family=Exo+2:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&family=Orbitron:wght@400;700;900&display=swap">
 
     <link rel="stylesheet" href="/src/styles/css/level-select.css">
+    <link rel="stylesheet" href="/src/styles/css/service-worker-register.css">
 </head>
 
 <body>
     <!-- Matrix Rain Background -->
-    <div class="matrix-bg" id="matrixBg"></div>
+    <div class="matrix-bg" id="matrixBg" aria-hidden="true"></div>
 
     <!-- Header Section -->
-    <div class="header">
+    <header class="header" role="banner">
         <p class="page-kicker">Training dossier</p>
         <h1 class="main-title">MATH MASTER</h1>
         <h2 class="subtitle">Choose a route</h2>
@@ -40,10 +41,10 @@
             <span>Press 1 / 2 / 3 to launch</span>
             <span>Progress stays on this device</span>
         </div>
-    </div>
+    </header>
 
     <!-- Main Level Selection Container -->
-    <div class="level-container">
+    <main class="level-container" role="main">
         <div class="route-switcher" aria-label="Choose route preview">
             <button class="route-switcher-button is-active" type="button" data-level="beginner" aria-pressed="true"
                 aria-controls="level-panel-beginner">
@@ -170,26 +171,26 @@
                 <button class="level-button" type="button" data-level="master">Enter division</button>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- Navigation Footer -->
-    <div class="navigation">
+    <footer class="navigation">
         <button class="back-button" type="button">← Return to Welcome</button>
         <div class="navigation-meta">
             <div class="creator-credit">Created by Teacher Evan</div>
             <button class="reset-progress-btn" type="button">Reset local progress</button>
         </div>
-    </div>
+    </footer>
 
     <!-- Floating Math Symbols -->
-    <div class="math-symbol" style="top: 20%; left: 5%; animation-delay: 0s;">∑</div>
-    <div class="math-symbol" style="top: 30%; right: 8%; animation-delay: 1s;">∫</div>
-    <div class="math-symbol" style="top: 50%; left: 3%; animation-delay: 2s;">∞</div>
-    <div class="math-symbol" style="top: 65%; right: 5%; animation-delay: 3s;">√</div>
-    <div class="math-symbol" style="top: 75%; left: 90%; animation-delay: 4s;">π</div>
-    <div class="math-symbol" style="top: 85%; left: 15%; animation-delay: 5s;">α</div>
-    <div class="math-symbol" style="top: 10%; right: 25%; animation-delay: 6s;">β</div>
-    <div class="math-symbol" style="top: 40%; left: 80%; animation-delay: 7s;">γ</div>
+    <div class="math-symbol" aria-hidden="true" style="top: 20%; left: 5%; animation-delay: 0s;">∑</div>
+    <div class="math-symbol" aria-hidden="true" style="top: 30%; right: 8%; animation-delay: 1s;">∫</div>
+    <div class="math-symbol" aria-hidden="true" style="top: 50%; left: 3%; animation-delay: 2s;">∞</div>
+    <div class="math-symbol" aria-hidden="true" style="top: 65%; right: 5%; animation-delay: 3s;">√</div>
+    <div class="math-symbol" aria-hidden="true" style="top: 75%; left: 90%; animation-delay: 4s;">π</div>
+    <div class="math-symbol" aria-hidden="true" style="top: 85%; left: 15%; animation-delay: 5s;">α</div>
+    <div class="math-symbol" aria-hidden="true" style="top: 10%; right: 25%; animation-delay: 6s;">β</div>
+    <div class="math-symbol" aria-hidden="true" style="top: 40%; left: 80%; animation-delay: 7s;">γ</div>
 
     <script src="/src/scripts/level-select-page.effects.js" defer></script>
     <script src="/src/scripts/level-select-page.interactions.js" defer></script>

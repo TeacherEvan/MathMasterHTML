@@ -242,8 +242,7 @@ class DisplayManager {
       isCompactViewport,
       isCompactLandscapeTouch,
       isCompactShortViewport,
-      shouldShowRotationOverlay:
-        hasCoarsePointer && isPortrait && isCompactNarrowViewport,
+      shouldShowRotationOverlay: false,
     };
   }
 

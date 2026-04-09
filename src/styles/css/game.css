@@ -1,12 +1,5 @@
 /* Existing CSS content from css/game.css will be here */
 
-/* CRITICAL FIX: Remove default browser focus outlines that cause white border glitch */
-/* This prevents the white border from appearing when clicking buttons/symbols */
-* {
-    outline: none !important;
-    /* Remove all default focus outlines */
-}
-
 /* Modern focus-visible alternative for accessibility (keyboard navigation only) */
 *:focus-visible {
     outline: 2px solid #00ff00 !important;
@@ -66,6 +59,18 @@ body.automation {
     right: 0;
     bottom: 0;
     left: 0;
+}
+
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
 }
 
 /* New styles for the three-panel layout */
@@ -212,6 +217,12 @@ body.automation {
 .falling-symbol:hover {
     color: #0ff;
     text-shadow: 0 0 10px #0ff;
+}
+
+.falling-symbol.keyboard-target {
+    color: #f4efc9;
+    text-shadow: 0 0 14px rgba(244, 239, 201, 0.7);
+    transform: scale(1.18);
 }
 
 /* Active state for instant touch feedback */

@@ -20,13 +20,14 @@ body {
   background: #000;
   color: var(--welcome-text);
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   cursor: default;
   position: relative;
 }
 
 body.welcome-page {
-  height: 100vh;
+  min-height: 100dvh;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   justify-items: center;
@@ -109,8 +110,8 @@ body.welcome-page::after {
   text-align: center;
   gap: clamp(18px, 2.4vh, 30px);
   min-height: 0;
-  max-height: calc(100vh - clamp(118px, 18vh, 176px));
-  overflow: hidden;
+  max-height: none;
+  overflow: visible;
   padding: clamp(24px, 4vw, 42px);
   border: 1px solid var(--welcome-border);
   border-radius: 32px;

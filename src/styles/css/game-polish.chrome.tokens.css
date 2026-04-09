@@ -127,7 +127,8 @@ body::before {
 #clarify-button:focus-visible,
 .start-game-button:focus-visible,
 .console-slot:focus-visible,
-.power-up-item:focus-visible {
+.power-up-item:focus-visible,
+#panel-c:focus-visible {
   outline: 2px solid var(--shell-signal) !important;
   outline-offset: 3px;
 }
@@ -160,6 +161,25 @@ body::before {
     margin-bottom: 0;
     font-size: 0.72rem;
   }
+}
+
+body.viewport-compact.viewport-portrait #back-button,
+body.viewport-compact.viewport-portrait #audio-toggle {
+  min-width: auto;
+  min-height: 44px;
+  padding: 0.45rem 0.7rem;
+  font: 700 0.7rem/1 var(--font-body);
+  letter-spacing: 0.12em;
+  border-radius: 0.85rem;
+}
+
+body.viewport-compact.viewport-portrait .audio-toggle__eyebrow {
+  display: none;
+}
+
+body.viewport-compact.viewport-portrait .audio-toggle__label {
+  margin-bottom: 0;
+  font-size: 0.72rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

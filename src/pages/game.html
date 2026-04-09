@@ -41,6 +41,7 @@
     <link rel="stylesheet" href="/src/styles/css/modern-ux-enhancements.css">
     <link rel="stylesheet" href="/src/styles/css/lod-animations.css">
     <link rel="stylesheet" href="/src/styles/css/perf-smoke-mode.css">
+    <link rel="stylesheet" href="/src/styles/css/service-worker-register.css">
     <style>
         #back-button {
             position: fixed;
@@ -206,9 +207,9 @@
     </div>
 
     <!-- Main Game Container -->
-    <div class="grid-container">
+    <main class="grid-container" role="main">
         <!-- Panel A: Lock and Problem -->
-        <div id="panel-a" class="display-panel">
+        <div id="panel-a" class="display-panel" role="region" aria-label="Panel A problem and lock">
             <div id="lock-display"></div>
             <div id="evan-controls-slot" hidden>
                 <button id="evan-solve-button" type="button"
@@ -220,7 +221,7 @@
         <div class="wall"></div>
 
         <!-- Panel B: Solution and Worms -->
-        <div id="panel-b" class="display-panel">
+        <div id="panel-b" class="display-panel" role="region" aria-label="Panel B solution and controls">
             <div class="panel-b-controls" aria-label="Panel B controls">
                 <button id="help-button" data-ripple aria-label="Get help with current problem">HELP</button>
                 <button id="clarify-button" data-ripple
@@ -245,10 +246,16 @@
         <div class="wall"></div>
 
         <!-- Panel C: Raining Symbols -->
-        <div id="panel-c" class="display-panel">
+        <div id="panel-c" class="display-panel" role="region" aria-label="Panel C falling symbols" tabindex="0"
+            aria-describedby="panel-c-keyboard-hint panel-c-keyboard-status">
+            <p id="panel-c-keyboard-hint" class="visually-hidden">
+                Press Enter or Space to collect the next visible matching symbol. Use arrow keys to cycle visible
+                matching symbols when more than one is available.
+            </p>
+            <span id="panel-c-keyboard-status" class="visually-hidden" role="status" aria-live="polite"></span>
             <div id="symbol-rain-container"></div>
         </div>
-    </div>
+    </main>
 
     <!-- Console Selection Panel -->
     <div id="symbol-modal" class="console-selection-shell modal-overlay" style="display: none;" aria-hidden="true">

@@ -4,9 +4,11 @@
 
   const modules = window.IndexPageModules || {};
   const PRIMARY_CTA_SELECTOR = "#begin-training-button";
+  const POINTER_ACTIVATION_WINDOW_MS = 700;
   const state = {
     resizeTimer: null,
     isDestroyed: false,
+    lastPrimaryPointerActivationAt: 0,
   };
 
   function isPrimaryCtaElement(element) {
@@ -56,13 +58,33 @@
 
   function handleClick(event) {
     if (isPrimaryCtaElement(event.target)) {
-      modules.effects?.activatePrimaryCta?.("pointer");
-      modules.ripple?.createRippleFromEvent?.(event);
+      if (
+        window.PointerEvent &&
+        Date.now() - state.lastPrimaryPointerActivationAt <
+          POINTER_ACTIVATION_WINDOW_MS
+      ) {
+        return;
+      }
+
+      modules.effects?.activatePrimaryCta?.("keyboard");
+      modules.ripple?.createCenteredRipple?.();
       return;
     }
 
     if (modules.scoreboard?.handlePageClick?.(event)) {
       return;
+    }
+  }
+
+  function handlePointerDown(event) {
+    if (!window.PointerEvent || state.isDestroyed) {
+      return;
+    }
+
+    if (isPrimaryCtaElement(event.target)) {
+      state.lastPrimaryPointerActivationAt = Date.now();
+      modules.effects?.activatePrimaryCta?.("pointer");
+      modules.ripple?.createRippleFromEvent?.(event);
     }
   }
 
@@ -82,6 +104,9 @@
     window.addEventListener("resize", handleResize);
     document.addEventListener("visibilitychange", handleVisibilityChange);
     document.addEventListener("keydown", handleKeydown);
+    document.body.addEventListener("pointerdown", handlePointerDown, {
+      passive: true,
+    });
     document.body.addEventListener("click", handleClick, { passive: true });
   }
 
@@ -94,6 +119,7 @@
     document.removeEventListener("visibilitychange", handleVisibilityChange);
     document.removeEventListener("keydown", handleKeydown);
     if (document.body) {
+      document.body.removeEventListener("pointerdown", handlePointerDown);
       document.body.removeEventListener("click", handleClick);
     }
   }

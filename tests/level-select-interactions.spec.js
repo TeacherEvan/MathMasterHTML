@@ -171,6 +171,37 @@ test.describe("Level select interactions", () => {
     await expectRouteLaunch(page, "beginner");
   });
 
+  test("animates route progress with transforms instead of width changes", async ({
+    page,
+  }) => {
+    await useDesktopViewport(page);
+    await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
+
+    await page.waitForFunction(() => {
+      const progressBars = Array.from(document.querySelectorAll(".progress-fill"));
+      return (
+        progressBars.length === 3 &&
+        progressBars.every((bar) =>
+          typeof bar.style.transform === "string" &&
+          bar.style.transform.startsWith("scaleX("),
+        )
+      );
+    });
+
+    const progressState = await page.evaluate(() => {
+      return Array.from(document.querySelectorAll(".progress-fill")).map((bar) => ({
+        transition: bar.style.transition,
+        transform: bar.style.transform,
+        width: bar.style.width,
+      }));
+    });
+
+    expect(progressState.length).toBe(3);
+    expect(progressState.every((bar) => bar.transition.includes("transform"))).toBe(true);
+    expect(progressState.every((bar) => bar.transform.startsWith("scaleX("))).toBe(true);
+    expect(progressState.every((bar) => bar.width === "")).toBe(true);
+  });
+
   test("launches a focused CTA button with Enter", async ({ page }) => {
     await useDesktopViewport(page);
     await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });

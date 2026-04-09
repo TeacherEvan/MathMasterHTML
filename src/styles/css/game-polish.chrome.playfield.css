@@ -156,7 +156,7 @@ body.viewport-compact.viewport-landscape
 body.viewport-compact.viewport-landscape
   #power-up-display[data-layout="row-compact"]
   .power-up-item {
-  min-height: 30px;
+  min-height: 44px;
   padding: 4px 6px;
   border-radius: 0.7rem;
 }

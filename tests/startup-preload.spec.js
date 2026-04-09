@@ -49,6 +49,19 @@ test.describe("Startup Preload — Build 2", () => {
 
     await expect(page.locator("#sw-refresh-update-debug")).toBeVisible();
 
+    const debugButtonMetrics = await page.evaluate(() => {
+      const button = document.getElementById("sw-refresh-update-debug");
+      if (!button) return null;
+
+      const style = window.getComputedStyle(button);
+      const rect = button.getBoundingClientRect();
+      return {
+        className: button.className,
+        minHeight: style.minHeight,
+        height: rect.height,
+      };
+    });
+
     const state = await page.evaluate(async () => {
       return window._SWDiagnostic?.getState?.();
     });
@@ -57,6 +70,10 @@ test.describe("Startup Preload — Build 2", () => {
     expect(state.enabled).toBe(true);
     expect(state.mode).toBe("refresh-update");
     expect(Array.isArray(state.cacheNames)).toBe(true);
+    expect(debugButtonMetrics).toBeTruthy();
+    expect(debugButtonMetrics.className).toContain("sw-refresh-update-debug");
+    expect(debugButtonMetrics.minHeight).toBe("44px");
+    expect(debugButtonMetrics.height).toBeGreaterThanOrEqual(44);
   });
 
   test("briefing dialog exposes semantics and moves focus to the start button", async ({

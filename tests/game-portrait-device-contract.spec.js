@@ -18,7 +18,7 @@ test.describe("Gameplay portrait device contract", () => {
       screen: { width: 412, height: 915 },
     });
 
-    test("marks narrow portrait phones for rotation without falling into a hybrid layout state", async ({
+    test("keeps gameplay visible on narrow portrait phones without the rotate gate", async ({
       page,
     }) => {
       await page.goto("/src/pages/game.html?level=beginner", {
@@ -33,26 +33,65 @@ test.describe("Gameplay portrait device contract", () => {
       await page.waitForFunction(() => {
         const overlay = document.getElementById("rotation-overlay");
         return (
-          document.body.classList.contains("viewport-rotate-required") &&
+          document.body.classList.contains("viewport-rotate-not-required") &&
           document.body.classList.contains("viewport-portrait") &&
           overlay &&
           window.getComputedStyle(overlay).display === "none"
         );
       });
 
-      const layout = await page.evaluate(() => ({
-        bodyClasses: document.body.className,
-        activeResolution:
-          window.displayManager?.getCurrentResolution?.()?.name ?? null,
-        shouldShowRotationOverlay:
-          window.displayManager?.getCurrentResolution?.()
-            ?.shouldShowRotationOverlay ?? null,
-      }));
+      const layout = await page.evaluate(() => {
+        const measure = (selector) => {
+          const element = document.querySelector(selector);
+          if (!element) {
+            return null;
+          }
 
-      expect(layout.bodyClasses).toContain("viewport-rotate-required");
+          const rect = element.getBoundingClientRect();
+          return {
+            top: rect.top,
+            bottom: rect.bottom,
+            left: rect.left,
+            right: rect.right,
+            width: rect.width,
+            height: rect.height,
+          };
+        };
+
+        return {
+          viewport: { width: window.innerWidth, height: window.innerHeight },
+          bodyClasses: document.body.className,
+          activeResolution:
+            window.displayManager?.getCurrentResolution?.()?.name ?? null,
+          shouldShowRotationOverlay:
+            window.displayManager?.getCurrentResolution?.()
+              ?.shouldShowRotationOverlay ?? null,
+          panelA: measure("#panel-a"),
+          panelB: measure("#panel-b"),
+          panelC: measure("#panel-c"),
+          console: measure("#symbol-console"),
+        };
+      });
+
+      expect(layout.bodyClasses).toContain("viewport-rotate-not-required");
       expect(layout.bodyClasses).toContain("viewport-compact");
       expect(layout.activeResolution).toBe("mobile");
-      expect(layout.shouldShowRotationOverlay).toBe(true);
+      expect(layout.shouldShowRotationOverlay).toBe(false);
+      expect(layout.panelA.bottom).toBeLessThanOrEqual(
+        layout.viewport.height + 1,
+      );
+      expect(layout.panelB.bottom).toBeLessThanOrEqual(
+        layout.viewport.height + 1,
+      );
+      expect(layout.panelC.bottom).toBeLessThanOrEqual(
+        layout.viewport.height + 1,
+      );
+      expect(layout.panelB.top).toBeGreaterThan(layout.panelA.bottom - 4);
+      expect(layout.panelC.left).toBeGreaterThan(layout.panelA.right - 4);
+      expect(layout.console.left).toBeGreaterThanOrEqual(
+        layout.panelB.left - 1,
+      );
+      expect(layout.console.right).toBeLessThanOrEqual(layout.panelB.right + 1);
     });
   });
 

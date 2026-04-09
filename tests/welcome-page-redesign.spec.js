@@ -185,4 +185,30 @@ test.describe("Welcome page redesign", () => {
       .poll(() => page.url())
       .toMatch(/\/src\/pages\/level-select\.html/);
   });
+
+  test("allows vertical overflow instead of clipping the welcome shell on short screens", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 520 });
+    await page.goto(getWelcomeUrl(), { waitUntil: "domcontentloaded" });
+
+    const overflowState = await page.evaluate(() => {
+      const bodyStyle = window.getComputedStyle(document.body);
+      const container = document.querySelector(".welcome-container");
+      const containerStyle = container
+        ? window.getComputedStyle(container)
+        : null;
+
+      return {
+        bodyOverflowY: bodyStyle.overflowY,
+        containerOverflow: containerStyle?.overflow ?? null,
+        containerMaxHeight: containerStyle?.maxHeight ?? null,
+      };
+    });
+
+    expect(overflowState.bodyOverflowY).not.toBe("hidden");
+    expect(overflowState.containerOverflow).not.toBe("hidden");
+    expect(overflowState.containerMaxHeight).toBe("none");
+    await expect(page.getByRole("button", { name: "Begin Training" })).toBeVisible();
+  });
 });

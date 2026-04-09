@@ -132,12 +132,14 @@
 
       bar.style.transition = prefersReducedMotion
         ? "none"
-        : "width 900ms cubic-bezier(0.16, 1, 0.3, 1)";
-      bar.style.width = prefersReducedMotion ? `${percentage}%` : "0%";
+        : "transform 900ms cubic-bezier(0.16, 1, 0.3, 1)";
+      bar.style.transform = prefersReducedMotion
+        ? `scaleX(${percentage / 100})`
+        : "scaleX(0)";
 
       if (!prefersReducedMotion) {
         setTimeout(() => {
-          bar.style.width = `${percentage}%`;
+          bar.style.transform = `scaleX(${percentage / 100})`;
         }, index * 140);
       }
     });

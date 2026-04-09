@@ -256,4 +256,30 @@ test.describe("Level select polish", () => {
       page.locator('.level-card[data-level="master"]'),
     ).toBeVisible();
   });
+
+  test("exposes semantic landmarks and hides decorative symbols from assistive tech", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/src/pages/level-select.html", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await expect(page.locator("header.header")).toBeVisible();
+    await expect(page.locator("main.level-container")).toBeVisible();
+    await expect(page.locator("footer.navigation")).toBeVisible();
+
+    const decorativeState = await page.evaluate(() => {
+      const matrix = document.getElementById("matrixBg");
+      const symbols = Array.from(document.querySelectorAll(".math-symbol"));
+      return {
+        matrixHidden: matrix?.getAttribute("aria-hidden"),
+        symbolStates: symbols.map((element) => element.getAttribute("aria-hidden")),
+      };
+    });
+
+    expect(decorativeState.matrixHidden).toBe("true");
+    expect(decorativeState.symbolStates.length).toBeGreaterThan(0);
+    expect(decorativeState.symbolStates.every((value) => value === "true")).toBe(true);
+  });
 });

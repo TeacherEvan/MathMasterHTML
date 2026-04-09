@@ -48,30 +48,13 @@ function ensureRefreshUpdateDiagnosticButton() {
 
   const button = document.createElement("button");
   button.id = "sw-refresh-update-debug";
+  button.className = "sw-refresh-update-debug";
   button.type = "button";
   button.textContent = "Refresh Update";
   button.setAttribute(
     "aria-label",
     "Refresh to the latest application version",
   );
-  Object.assign(button.style, {
-    position: "fixed",
-    left: "12px",
-    bottom: "12px",
-    zIndex: "11000",
-    minHeight: "40px",
-    padding: "0.55rem 0.8rem",
-    borderRadius: "999px",
-    border: "1px solid rgba(255, 215, 0, 0.38)",
-    background: "rgba(5, 10, 7, 0.92)",
-    color: "#f4efc9",
-    fontFamily: 'var(--font-display, "Orbitron", monospace)',
-    fontSize: "0.68rem",
-    fontWeight: "700",
-    letterSpacing: "0.08em",
-    textTransform: "uppercase",
-    boxShadow: "0 0 18px rgba(0, 0, 0, 0.28)",
-  });
 
   button.addEventListener("click", async () => {
     button.disabled = true;

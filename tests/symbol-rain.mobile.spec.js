@@ -250,6 +250,68 @@ test.describe("Symbol rain mobile interactions", () => {
     );
   });
 
+  test("Panel C supports keyboard collection of a visible matching symbol", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !["pixel-7", "iphone-13"].includes(testInfo.project.name),
+      "This keyboard accessibility contract is enforced on the mobile projects.",
+    );
+
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    const before = await getCurrentStepSnapshot(page);
+    const targetSymbol = before.hiddenSymbols[0];
+
+    expect(targetSymbol).toBeTruthy();
+
+    await page.waitForFunction(
+      (symbols) => {
+        const liveSymbols = Array.from(
+          document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
+        )
+          .map((element) => element.textContent?.trim())
+          .filter(Boolean);
+
+        return symbols.some((symbol) => liveSymbols.includes(symbol));
+      },
+      before.hiddenSymbols,
+      { timeout: 5000 },
+    );
+
+    const panelC = page.locator("#panel-c");
+    await panelC.focus();
+    await expect(panelC).toBeFocused();
+    await page.keyboard.press("Enter");
+
+    await page.waitForFunction(
+      ({ stepIndex, previousHiddenCount, symbol }) => {
+        if (stepIndex == null) {
+          return false;
+        }
+
+        const remaining = Array.from(
+          document.querySelectorAll(
+            `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`,
+          ),
+        )
+          .map((element) => element.textContent?.trim())
+          .filter(Boolean);
+
+        return (
+          remaining.length < previousHiddenCount || !remaining.includes(symbol)
+        );
+      },
+      {
+        stepIndex: before.stepIndex,
+        previousHiddenCount: before.hiddenSymbols.length,
+        symbol: targetSymbol,
+      },
+      { timeout: 5000 },
+    );
+  });
+
   test("keeps the active hidden symbol raining as a live Panel C target on mobile", async ({
     page,
   }, testInfo) => {
