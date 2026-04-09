@@ -140,6 +140,47 @@ test.describe("Power-Up Two-Click System", () => {
     );
   });
 
+  test("should keep the power-up tray visible even when inventory is empty", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      if (window.wormSystem && window.wormSystem.powerUpSystem) {
+        window.wormSystem.powerUpSystem.inventory.chainLightning = 0;
+        window.wormSystem.powerUpSystem.inventory.spider = 0;
+        window.wormSystem.powerUpSystem.inventory.devil = 0;
+        window.wormSystem.powerUpSystem.updateDisplay();
+      }
+    });
+
+    const display = page.locator("#power-up-display");
+    await expect(display).toBeVisible();
+    await expect(page.locator('[data-testid="powerup-chainLightning"]')).toContainText(
+      "0",
+    );
+    await expect(page.locator('[data-testid="powerup-spider"]')).toContainText(
+      "0",
+    );
+    await expect(page.locator('[data-testid="powerup-devil"]')).toContainText(
+      "0",
+    );
+
+    const displayState = await page.evaluate(() => {
+      const display = document.getElementById("power-up-display");
+      if (!display) return null;
+      const style = window.getComputedStyle(display);
+      return {
+        hidden: display.hidden,
+        ariaHidden: display.getAttribute("aria-hidden"),
+        display: style.display,
+      };
+    });
+
+    expect(displayState).not.toBeNull();
+    expect(displayState.hidden).toBe(false);
+    expect(displayState.ariaHidden).toBe("false");
+    expect(displayState.display).toBe("flex");
+  });
+
   test("should select power-up on first click", async ({ page }) => {
     // Click on spider power-up
     await pressPowerUp(page, "spider");

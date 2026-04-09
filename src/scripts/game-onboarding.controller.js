@@ -14,14 +14,47 @@
   let helpActive = false;
   let gameplayReadyHandled = false;
 
+  function shouldSuppressAutoRunOnMobile() {
+    if (bootstrap.evanMode === "force") {
+      return false;
+    }
+
+    const compactViewport = document.body?.classList.contains(
+      "viewport-compact",
+    );
+    const coarsePointer =
+      window.matchMedia?.("(pointer: coarse)")?.matches === true;
+    const smallestEdge = Math.min(
+      window.innerWidth || Number.POSITIVE_INFINITY,
+      window.innerHeight || Number.POSITIVE_INFINITY,
+    );
+
+    return compactViewport || (coarsePointer && smallestEdge <= 915);
+  }
+
   function shouldAutoRun() {
+    if (bootstrap.evanMode === "off") {
+      return false;
+    }
+
+    if (bootstrap.evanMode === "force") {
+      return true;
+    }
+
+    if (shouldSuppressAutoRunOnMobile()) {
+      return false;
+    }
+
     return storage.shouldAutoRunEvan(level, bootstrap.evanMode);
   }
 
   function onBriefingDismissed() {
     if (shouldAutoRun()) {
       startEvanHelp("auto");
-    } else if (storage.getState().evanConsumed[level]) {
+    } else if (
+      storage.getState().evanConsumed[level] ||
+      shouldSuppressAutoRunOnMobile()
+    ) {
       window.EvanPresenter?.showSolve?.();
     } else {
       window.EvanPresenter?.hideSolve?.();

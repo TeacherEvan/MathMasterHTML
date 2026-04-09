@@ -1,11 +1,11 @@
 /**
  * Service Worker - Production-Grade PWA Support
  * Enables offline gameplay and improves performance
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 
-const CACHE_NAME = "math-master-v1.0.0";
-const RUNTIME_CACHE = "math-master-runtime-v1.0.0";
+const CACHE_NAME = "math-master-v1.0.1-mobile-recovery";
+const RUNTIME_CACHE = "math-master-runtime-v1.0.1-mobile-recovery";
 
 // Assets to cache immediately on install
 const STATIC_ASSETS = [
@@ -149,12 +149,33 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  if (isFreshnessCriticalRequest(request, url)) {
+    event.respondWith(
+      networkFirst(request)
+        .catch(() => staleWhileRevalidate(request))
+        .catch(() => fallbackResponse(request)),
+    );
+    return;
+  }
+
   event.respondWith(
     staleWhileRevalidate(request)
       .catch(() => cacheFirst(request))
       .catch(() => fallbackResponse(request)),
   );
 });
+
+function isFreshnessCriticalRequest(request, url) {
+  if (
+    request.destination === "script" ||
+    request.destination === "style" ||
+    request.destination === "audio"
+  ) {
+    return true;
+  }
+
+  return /\.(js|css|ogg|mp3|wav)$/i.test(url.pathname);
+}
 
 // ============================================
 // CACHING STRATEGIES

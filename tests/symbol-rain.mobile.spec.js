@@ -174,7 +174,7 @@ test.describe("Symbol rain mobile interactions", () => {
     });
   });
 
-  test("default boot keeps rain visible even while Evan auto-help locks gameplay input", async ({
+  test("forced Evan boot keeps rain visible while gameplay input is locked", async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -182,7 +182,7 @@ test.describe("Symbol rain mobile interactions", () => {
       "This contract is only enforced on the mobile projects.",
     );
 
-    await resetOnboardingState(page, "?level=beginner&preload=off");
+    await resetOnboardingState(page, "?level=beginner&evan=force&preload=off");
     await dismissBriefingAndWaitForInteractiveGameplay(page);
 
     await expect(page.locator("#evan-skip-button")).toBeVisible();
@@ -203,7 +203,7 @@ test.describe("Symbol rain mobile interactions", () => {
     expect(state.rainVisible).toBe(true);
   });
 
-  test("skipping Evan restores live Panel C target interaction on default boot", async ({
+  test("skipping forced Evan restores live Panel C target interaction", async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -211,7 +211,7 @@ test.describe("Symbol rain mobile interactions", () => {
       "This contract is only enforced on the mobile projects.",
     );
 
-    await resetOnboardingState(page, "?level=beginner&preload=off");
+    await resetOnboardingState(page, "?level=beginner&evan=force&preload=off");
     await dismissBriefingAndWaitForInteractiveGameplay(page);
     await stopEvanHelpIfActive(page);
 

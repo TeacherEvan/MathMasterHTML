@@ -88,6 +88,19 @@ test.describe("Evan Helper — UI Elements (Build 3)", () => {
     expect(shellHidden).toBe(false);
   });
 
+  test("default-motion: Evan hand uses a smoother transition curve", async ({
+    page,
+  }) => {
+    const handTransition = await page.evaluate(() => {
+      const hand = document.getElementById("evan-hand");
+      if (!hand) return null;
+      return window.getComputedStyle(hand).transition;
+    });
+
+    expect(handTransition).toContain("0.32s");
+    expect(handTransition).toContain("cubic-bezier");
+  });
+
   test('#evan-assist-label text reads "Mr. Evan helping out"', async ({
     page,
   }) => {

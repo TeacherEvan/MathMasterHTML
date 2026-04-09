@@ -10,7 +10,9 @@
   const reducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   ).matches;
-  const handTransition = reducedMotion ? "none" : "transform 0.2s ease";
+  const handTransition = reducedMotion
+    ? "none"
+    : "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1)";
 
   function getActiveExitButton() {
     if (stopBtn && !stopBtn.hidden) return stopBtn;

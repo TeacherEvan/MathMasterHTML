@@ -36,6 +36,29 @@ async function gotoBlockingPreloadRuntime(page, search = "?level=beginner") {
 }
 
 test.describe("Startup Preload — Build 2", () => {
+  test("?swDebug=refresh-update exposes the refresh-to-update diagnostic hook", async ({
+    page,
+  }) => {
+    await gotoGameRuntime(page, "?level=beginner&preload=off&swDebug=refresh-update");
+    await waitForStartupPreload(page);
+
+    await page.waitForFunction(
+      () => window._SWDiagnostic?.enabled === true,
+      { timeout: 10000 },
+    );
+
+    await expect(page.locator("#sw-refresh-update-debug")).toBeVisible();
+
+    const state = await page.evaluate(async () => {
+      return window._SWDiagnostic?.getState?.();
+    });
+
+    expect(state).toBeTruthy();
+    expect(state.enabled).toBe(true);
+    expect(state.mode).toBe("refresh-update");
+    expect(Array.isArray(state.cacheNames)).toBe(true);
+  });
+
   test("briefing dialog exposes semantics and moves focus to the start button", async ({
     page,
   }) => {

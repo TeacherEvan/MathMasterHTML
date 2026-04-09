@@ -14,9 +14,9 @@
     findSymbolTarget,
     matchesPowerUpActivation,
   } = runtime;
-  const DELAY_TARGET = 150;
-  const DELAY_POST = 180;
-  const DELAY_MUFFIN = 100;
+  const DELAY_TARGET = 220;
+  const DELAY_POST = 240;
+  const DELAY_MUFFIN = 140;
   const DELAY_POWERUP_TIMEOUT = 500;
   const MAX_WORM_TAP_STREAK = 1;
   const pending = [];

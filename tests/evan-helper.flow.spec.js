@@ -45,10 +45,10 @@ async function dismissBriefing(page) {
 }
 
 test.describe("Evan Flow Controller — Build 4", () => {
-  test("first visit — EVAN_HELP_STARTED dispatched after briefing", async ({
+  test("?evan=force — EVAN_HELP_STARTED dispatched after briefing", async ({
     page,
   }) => {
-    await resetOnboardingState(page, "?level=beginner&evan=auto&preload=off");
+    await resetOnboardingState(page, "?level=beginner&evan=force&preload=off");
     await page.evaluate(() => {
       window.__evanStarted = false;
       document.addEventListener(
@@ -106,10 +106,10 @@ test.describe("Evan Flow Controller — Build 4", () => {
     expect(await page.evaluate(() => window.__evanStarted)).toBe(true);
   });
 
-  test("skip dispatches EVAN_HELP_STOPPED with reason skip", async ({
+  test("forced Evan skip dispatches EVAN_HELP_STOPPED with reason skip", async ({
     page,
   }) => {
-    await resetOnboardingState(page, "?level=beginner&evan=auto&preload=off");
+    await resetOnboardingState(page, "?level=beginner&evan=force&preload=off");
     await page.evaluate(() => {
       window.__evanStopReason = null;
       document.addEventListener(
@@ -135,8 +135,8 @@ test.describe("Evan Flow Controller — Build 4", () => {
     expect(await page.evaluate(() => window.__evanStopReason)).toBe("skip");
   });
 
-  test("auto Evan run blocks user input except skip", async ({ page }) => {
-    await resetOnboardingState(page, "?level=beginner&evan=auto&preload=off");
+  test("forced Evan run blocks user input except skip", async ({ page }) => {
+    await resetOnboardingState(page, "?level=beginner&evan=force&preload=off");
     await dismissBriefing(page);
     await page.waitForFunction(
       () => {
@@ -188,7 +188,7 @@ test.describe("Evan Flow Controller — Build 4", () => {
     );
   });
 
-  test("auto Evan explains the temporary demo lock and clears it after skip on mobile", async ({
+  test("mobile default boot keeps gameplay unlocked and exposes manual Evan solve", async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -198,6 +198,30 @@ test.describe("Evan Flow Controller — Build 4", () => {
 
     await ensureLandscapeViewport(page);
     await resetOnboardingState(page, "?level=beginner&evan=auto&preload=off");
+    await dismissBriefing(page);
+
+    const panelC = page.locator("#panel-c");
+    const solveButton = page.locator("#evan-solve-button");
+
+    await page.waitForFunction(
+      () => window.GameRuntimeCoordinator?.canAcceptGameplayInput?.() === true,
+      { timeout: 8000 },
+    );
+
+    await expect(solveButton).toBeVisible();
+    await expect(panelC).toHaveAttribute("aria-disabled", "false");
+  });
+
+  test("forced Evan explains the temporary demo lock and clears it after skip on mobile", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !["pixel-7", "iphone-13"].includes(testInfo.project.name),
+      "This startup UX contract is enforced on the mobile projects.",
+    );
+
+    await ensureLandscapeViewport(page);
+    await resetOnboardingState(page, "?level=beginner&evan=force&preload=off");
     await dismissBriefing(page);
 
     const status = page.locator("#evan-assist-status");
@@ -226,7 +250,12 @@ test.describe("Evan Flow Controller — Build 4", () => {
     await expect(panelC).toHaveAttribute("aria-disabled", "false");
   });
 
-  test("after skip, consumed state persists", async ({ page }) => {
+  test("after skip, consumed state persists", async ({ page }, testInfo) => {
+    test.skip(
+      testInfo.project.use?.isMobile === true,
+      "Mobile default boot no longer auto-runs Evan.",
+    );
+
     await resetOnboardingState(page, "?level=beginner&evan=auto&preload=off");
     await dismissBriefing(page);
     await page.waitForFunction(

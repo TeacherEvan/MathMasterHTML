@@ -558,22 +558,13 @@
       createItem(type, this.EMOJIS[type], this.inventory[type]),
     ).join("");
 
-    this.displayElement.hidden = !hasAvailablePowerUps;
-    this.displayElement.setAttribute(
-      "aria-hidden",
-      hasAvailablePowerUps ? "false" : "true",
-    );
-    this.displayElement.style.display = hasAvailablePowerUps ? "flex" : "none";
-    this.displayElement.style.pointerEvents = hasAvailablePowerUps
-      ? "auto"
-      : "none";
-
-    if (!hasAvailablePowerUps) {
-      if (window.uiBoundaryManager?.elements?.has?.("power-up-display")) {
-        window.uiBoundaryManager.unregister("power-up-display");
-      }
-      return;
-    }
+    this.displayElement.hidden = false;
+    this.displayElement.setAttribute("aria-hidden", "false");
+    this.displayElement.style.display = "flex";
+    this.displayElement.style.pointerEvents = "auto";
+    this.displayElement.dataset.hasInventory = hasAvailablePowerUps
+      ? "true"
+      : "false";
 
     this.syncDisplayLayout();
     this.ensureDisplayBoundaryRegistration();
@@ -589,9 +580,9 @@
     display.className = "power-up-display";
     display.dataset.testid = "power-up-display";
     display.setAttribute("aria-label", "Power-up inventory");
-    display.hidden = true;
-    display.setAttribute("aria-hidden", "true");
-    display.style.display = "none";
+    display.hidden = false;
+    display.setAttribute("aria-hidden", "false");
+    display.style.display = "flex";
 
     // Make it draggable with boundary validation
     this.makeDraggable(display);

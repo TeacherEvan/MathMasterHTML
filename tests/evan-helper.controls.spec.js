@@ -48,7 +48,9 @@ test.describe("Evan Helper — Controls (Build 3)", () => {
     expect(slotExists).toBe(true);
   });
 
-  test("#evan-solve-button is initially hidden", async ({ page }) => {
+  test("#evan-solve-button default visibility matches the startup policy", async ({
+    page,
+  }, testInfo) => {
     const isHidden = await page.evaluate(() => {
       const button = document.getElementById("evan-solve-button");
       if (!button) return true;
@@ -56,6 +58,12 @@ test.describe("Evan Helper — Controls (Build 3)", () => {
       const slot = document.getElementById("evan-controls-slot");
       return slot?.hidden === true;
     });
+
+    if (testInfo.project.use?.isMobile === true) {
+      expect(isHidden).toBe(false);
+      await expect(page.locator("#evan-solve-button")).toBeVisible();
+      return;
+    }
 
     expect(isHidden).toBe(true);
   });
