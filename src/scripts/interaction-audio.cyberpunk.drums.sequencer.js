@@ -17,7 +17,7 @@
 
   const { DRUM_PATTERNS, STEP_DURATION, LOOKAHEAD_MS, SCHEDULE_AHEAD_S } =
     drumConfig;
-  const DEFAULT_DRUM_GAIN = 0.05;
+  const DEFAULT_DRUM_GAIN = 0.14;
   const originalInit = proto.init;
   const originalDestroy = proto.destroy;
 

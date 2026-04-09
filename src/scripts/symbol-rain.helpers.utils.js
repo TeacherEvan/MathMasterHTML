@@ -17,9 +17,27 @@ console.log("🎯 SymbolRain helpers: utils loading...");
   };
 
   helpers.calculateColumns = function calculateColumns(container, config) {
-    const containerWidth = container.offsetWidth;
-    const containerHeight = container.offsetHeight;
-    const columnCount = Math.floor(containerWidth / config.columnWidth);
+    const containerRect = container?.getBoundingClientRect?.() || {
+      width: 0,
+      height: 0,
+    };
+    const parentElement = container?.parentElement;
+    const containerWidth =
+      containerRect.width ||
+      container?.clientWidth ||
+      container?.offsetWidth ||
+      parentElement?.clientWidth ||
+      0;
+    const containerHeight =
+      containerRect.height ||
+      container?.clientHeight ||
+      container?.offsetHeight ||
+      parentElement?.clientHeight ||
+      0;
+    const columnCount = Math.max(
+      0,
+      Math.floor(containerWidth / config.columnWidth),
+    );
     return { columnCount, containerHeight };
   };
 

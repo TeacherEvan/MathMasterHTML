@@ -1,0 +1,121 @@
+/* Late gameplay control overrides that stabilize button/console geometry after legacy responsive layers. */
+
+:root {
+  --panel-b-control-gap: 0.8rem;
+  --panel-b-control-min-height: 44px;
+  --console-slot-size: 46px;
+  --console-shell-gap: 0.5rem;
+  --console-shell-padding: 0.75rem;
+}
+
+.panel-b-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: var(--panel-b-control-gap);
+  margin-bottom: 0.9rem;
+  position: relative;
+  z-index: 10030;
+}
+
+#help-button,
+#clarify-button {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--panel-b-control-min-height);
+  margin: 0;
+  justify-self: stretch;
+}
+
+#symbol-console {
+  position: absolute !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: clamp(10px, 2vh, 20px) !important;
+  transform: translateX(-50%) !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, var(--console-slot-size)) !important;
+  grid-template-rows: repeat(3, var(--console-slot-size)) !important;
+  grid-auto-flow: row !important;
+  grid-auto-columns: var(--console-slot-size);
+  gap: var(--console-shell-gap) !important;
+  padding: var(--console-shell-padding) !important;
+  width: auto !important;
+  max-width: calc(100% - 16px);
+  justify-content: center !important;
+  align-items: stretch;
+  overflow: visible !important;
+  z-index: 10030 !important;
+}
+
+.console-slot {
+  width: var(--console-slot-size) !important;
+  height: var(--console-slot-size) !important;
+  min-width: var(--console-slot-size) !important;
+  min-height: var(--console-slot-size) !important;
+  margin: 0 !important;
+  flex: 0 0 auto;
+}
+
+.console-slot:nth-child(2),
+.console-slot:nth-child(4),
+.console-slot:nth-child(6) {
+  margin-right: 0 !important;
+}
+
+.console-slot:hover,
+.console-slot.filled:hover {
+  transform: translateY(-2px);
+}
+
+.console-slot:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 900px), (max-height: 560px), (hover: none) and (pointer: coarse) {
+  :root {
+    --console-slot-size: 44px;
+    --console-shell-gap: 0.35rem;
+    --console-shell-padding: 0.5rem;
+  }
+}
+
+body.viewport-compact.viewport-portrait .panel-b-controls {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.4rem;
+}
+
+body.viewport-compact.viewport-landscape .panel-b-controls {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+body.viewport-compact.viewport-portrait #help-button,
+body.viewport-compact.viewport-portrait #clarify-button,
+body.viewport-compact.viewport-landscape #help-button,
+body.viewport-compact.viewport-landscape #clarify-button {
+  min-height: 44px;
+  font-size: clamp(0.62rem, 1.8vw, 0.74rem);
+  padding: 0.45rem 0.65rem;
+}
+
+body.viewport-compact.viewport-portrait #symbol-console,
+body.viewport-compact.viewport-landscape #symbol-console {
+  left: 6px !important;
+  right: 6px !important;
+  bottom: 6px !important;
+  transform: none !important;
+  max-width: none;
+  grid-template-columns: none !important;
+  grid-template-rows: var(--console-slot-size) !important;
+  grid-auto-flow: column !important;
+  justify-content: start !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none;
+}
+
+body.viewport-compact.viewport-portrait #symbol-console::-webkit-scrollbar,
+body.viewport-compact.viewport-landscape #symbol-console::-webkit-scrollbar {
+  display: none;
+}

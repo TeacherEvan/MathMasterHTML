@@ -30,18 +30,33 @@ function consumedState() {
 }
 
 async function dismissBriefing(page) {
-  await page.waitForSelector("#start-game-btn", {
-    state: "visible",
-    timeout: 10000,
-  });
-  await page.click("#start-game-btn");
-  await page.waitForFunction(
-    () => {
-      const modal = document.getElementById("how-to-play-modal");
-      return !modal || window.getComputedStyle(modal).display === "none";
-    },
-    { timeout: 10000 },
-  );
+  await ensureLandscapeViewport(page);
+  const startButton = page.locator("#start-game-btn");
+  const howToPlayModal = page.locator("#how-to-play-modal");
+
+  await expect(startButton).toBeVisible({ timeout: 10000 });
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    await page.evaluate(() => {
+      document.getElementById("start-game-btn")?.click();
+    });
+
+    try {
+      await page.waitForFunction(
+        () => {
+          const modal = document.getElementById("how-to-play-modal");
+          return !modal || window.getComputedStyle(modal).display === "none";
+        },
+        { timeout: 1500 },
+      );
+      await expect(howToPlayModal).toBeHidden({ timeout: 1500 });
+      return;
+    } catch (error) {
+      if (attempt === 3) {
+        throw error;
+      }
+    }
+  }
 }
 
 test.describe("Evan Flow Controller — Build 4", () => {

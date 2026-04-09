@@ -8,9 +8,9 @@
 
     const panel = document.getElementById("panel-c");
     const keyboardStatus = document.getElementById("panel-c-keyboard-status");
-    let isPointerCurrentlyDown = false;
-    let _lastClickedFallingSymbol = null;
+    const recentSymbolActivations = new WeakMap();
     let activeKeyboardTarget = null;
+    const POINTER_REACTIVATION_WINDOW_MS = 400;
 
     const normalizeSymbol = (value) =>
       String(value || "")
@@ -131,16 +131,40 @@
       }, 520);
     };
 
-    const resetPointerState = () => {
-      isPointerCurrentlyDown = false;
-      _lastClickedFallingSymbol = null;
+    const handleSymbolCollection = (fallingSymbolElement) => {
+      const lastActivation = recentSymbolActivations.get(fallingSymbolElement);
+      if (
+        typeof lastActivation === "number" &&
+        performance.now() - lastActivation < POINTER_REACTIVATION_WINDOW_MS
+      ) {
+        return;
+      }
+
+      recentSymbolActivations.set(fallingSymbolElement, performance.now());
+      if (
+        !fallingSymbolElement.isConnected ||
+        fallingSymbolElement.classList.contains("clicked")
+      ) {
+        return;
+      }
+
+      SymbolRainHelpers.handleSymbolClick(
+        {
+          activeFallingSymbols: state.activeFallingSymbols,
+          symbolPool: state.symbolPool,
+          activeFaceReveals: state.activeFaceReveals,
+        },
+        fallingSymbolElement,
+        { target: fallingSymbolElement },
+      );
     };
 
     symbolRainContainer.addEventListener(
       "pointerdown",
       (event) => {
-        if (isPointerCurrentlyDown) return;
-        isPointerCurrentlyDown = true;
+        if (event.isPrimary === false) {
+          return;
+        }
 
         const fallingSymbolElement = event.target.closest(".falling-symbol");
         if (
@@ -148,32 +172,11 @@
           symbolRainContainer.contains(fallingSymbolElement)
         ) {
           event.preventDefault();
-          _lastClickedFallingSymbol = fallingSymbolElement;
-          SymbolRainHelpers.handleSymbolClick(
-            {
-              activeFallingSymbols: state.activeFallingSymbols,
-              symbolPool: state.symbolPool,
-              activeFaceReveals: state.activeFaceReveals,
-            },
-            fallingSymbolElement,
-            event,
-          );
+          handleSymbolCollection(fallingSymbolElement);
         }
       },
       { passive: false },
     );
-
-    window.addEventListener("pointerup", resetPointerState, {
-      passive: true,
-    });
-
-    window.addEventListener("pointercancel", resetPointerState, {
-      passive: true,
-    });
-
-    window.addEventListener("blur", resetPointerState, {
-      passive: true,
-    });
 
     if (!window.PointerEvent) {
       symbolRainContainer.addEventListener("click", (event) => {
@@ -182,15 +185,7 @@
           fallingSymbolElement &&
           symbolRainContainer.contains(fallingSymbolElement)
         ) {
-          SymbolRainHelpers.handleSymbolClick(
-            {
-              activeFallingSymbols: state.activeFallingSymbols,
-              symbolPool: state.symbolPool,
-              activeFaceReveals: state.activeFaceReveals,
-            },
-            fallingSymbolElement,
-            event,
-          );
+          handleSymbolCollection(fallingSymbolElement);
         }
       });
     }

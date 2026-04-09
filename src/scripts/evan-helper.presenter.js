@@ -13,6 +13,32 @@
   const handTransition = reducedMotion
     ? "none"
     : "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1)";
+  let handFrameId = null;
+  let queuedHandPosition = null;
+
+  function cancelQueuedHandMove() {
+    if (handFrameId === null) {
+      return;
+    }
+
+    cancelAnimationFrame(handFrameId);
+    handFrameId = null;
+  }
+
+  function flushHandMove() {
+    if (!hand || !queuedHandPosition) {
+      handFrameId = null;
+      return;
+    }
+
+    if (hand.style.transition !== handTransition) {
+      hand.style.transition = handTransition;
+    }
+
+    hand.style.transform = `translate3d(${queuedHandPosition.x}px, ${queuedHandPosition.y}px, 0)`;
+    queuedHandPosition = null;
+    handFrameId = null;
+  }
 
   function getActiveExitButton() {
     if (stopBtn && !stopBtn.hidden) return stopBtn;
@@ -117,9 +143,6 @@
   window.addEventListener("pointerdown", guardLockedUserInput, true);
   window.addEventListener("click", guardLockedUserInput, true);
   window.addEventListener("keydown", guardLockedUserInput, true);
-  document.addEventListener("pointerdown", guardLockedUserInput, true);
-  document.addEventListener("click", guardLockedUserInput, true);
-  document.addEventListener("keydown", guardLockedUserInput, true);
 
   function show() {
     if (!shell) return;
@@ -182,16 +205,20 @@
 
   function moveHandTo(x, y) {
     if (!hand) return;
-    if (hand.style.transition !== handTransition) {
-      hand.style.transition = handTransition;
+    queuedHandPosition = { x, y };
+    if (handFrameId !== null) {
+      return;
     }
-    hand.style.transform = "translate(" + x + "px, " + y + "px)";
+
+    handFrameId = requestAnimationFrame(flushHandMove);
   }
 
   function parkHand() {
     if (!hand) return;
+    cancelQueuedHandMove();
+    queuedHandPosition = null;
     hand.style.transition = "none";
-    hand.style.transform = "translate(-200px, -200px)";
+    hand.style.transform = "translate3d(-200px, -200px, 0)";
   }
 
   document.addEventListener(window.GameEvents?.EVAN_HELP_STARTED, (e) => {

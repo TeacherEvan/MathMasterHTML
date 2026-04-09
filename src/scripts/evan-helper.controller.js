@@ -138,7 +138,6 @@
           await clickSymbol(symbolTarget, neededSymbol || neededSymbols[0] || symbolTarget.textContent.trim());
         } else {
           if (!neededSymbols.length) wormTapStreak = 0;
-          window.EvanPresenter?.parkHand?.();
           await wait(pending, DELAY_POST);
         }
       }

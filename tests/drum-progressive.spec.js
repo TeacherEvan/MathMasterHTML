@@ -121,7 +121,7 @@ test.describe("Progressive Drum Beat", () => {
     expect(result.complexities).toEqual([0, 1, 2, 3, 4, 5]);
   });
 
-  test("drum gain initializes above the subtle background baseline", async ({
+  test("drum gain initializes at an audible fallback baseline", async ({
     page,
   }) => {
     await gotoDrumTestPage(page);
@@ -141,7 +141,7 @@ test.describe("Progressive Drum Beat", () => {
 
     expect(result.hasAudio).toBe(true);
     expect(result.disabled).toBe(false);
-    expect(result.gainValue).toBeCloseTo(0.05, 3);
+    expect(result.gainValue).toBeCloseTo(0.14, 3);
   });
 
   test("mute state reduces drum gain", async ({ page }) => {

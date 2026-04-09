@@ -2,6 +2,7 @@
 
 function initSymbolRain() {
   try {
+    const MAX_LAYOUT_RETRIES = 24;
     const GameEvents = window.GameEvents || {
       DISPLAY_RESOLUTION_CHANGED: "displayResolutionChanged",
       PROBLEM_COMPLETED: "problemCompleted",
@@ -69,6 +70,9 @@ function initSymbolRain() {
       isMobileMode: isCompactDisplayMode(),
       spatialGrid: SymbolRainHelpers.createSpatialGrid(SymbolRainConfig),
       symbolPool: SymbolRainHelpers.createSymbolPool(SymbolRainConfig),
+      bootstrapFrameId: null,
+      layoutRetryId: null,
+      layoutRetryCount: 0,
     };
 
     window.__symbolRainState = state;
@@ -83,6 +87,10 @@ function initSymbolRain() {
         );
       state.cachedContainerHeight = containerHeight;
       state.columnCount = columnCount;
+    }
+
+    function hasUsableLayout() {
+      return state.columnCount > 0 && state.cachedContainerHeight > 0;
     }
 
     function populateInitialSymbols() {
@@ -103,13 +111,52 @@ function initSymbolRain() {
       );
     }
 
-    SymbolRainInteractions.bindInteractions(symbolRainContainer, state);
+    function startControllers() {
+      SymbolRainAnimation.startAnimation(state);
+      SymbolRainAnimation.startSpeedController(state);
+      SymbolRainSpawn.startGuaranteedSpawnController(state);
+    }
 
-    calculateColumns();
-    populateInitialSymbols();
-    SymbolRainAnimation.startAnimation(state);
-    SymbolRainAnimation.startSpeedController(state);
-    SymbolRainSpawn.startGuaranteedSpawnController(state);
+    function scheduleBootstrap() {
+      if (state.bootstrapFrameId !== null) {
+        return;
+      }
+
+      state.bootstrapFrameId = requestAnimationFrame(() => {
+        state.bootstrapFrameId = null;
+        state.isMobileMode = isCompactDisplayMode();
+        calculateColumns();
+
+        if (!hasUsableLayout()) {
+          if (state.layoutRetryCount >= MAX_LAYOUT_RETRIES) {
+            console.warn(
+              "⚠️ Symbol Rain layout never stabilized; skipping startup",
+            );
+            return;
+          }
+
+          state.layoutRetryCount += 1;
+          clearTimeout(state.layoutRetryId);
+          state.layoutRetryId = window.setTimeout(() => {
+            state.layoutRetryId = null;
+            scheduleBootstrap();
+          }, 80);
+          return;
+        }
+
+        clearTimeout(state.layoutRetryId);
+        state.layoutRetryId = null;
+        state.layoutRetryCount = 0;
+        startControllers();
+
+        if (state.isInitialPopulation && state.activeFallingSymbols.length === 0) {
+          populateInitialSymbols();
+        }
+      });
+    }
+
+    SymbolRainInteractions.bindInteractions(symbolRainContainer, state);
+    scheduleBootstrap();
 
     document.addEventListener(GameEvents.PROBLEM_COMPLETED, () => {
       SymbolRainAnimation.resetSpeed(state);
@@ -121,10 +168,14 @@ function initSymbolRain() {
 
     const debouncedResize = debounce(() => {
       state.isMobileMode = isCompactDisplayMode();
-      calculateColumns();
+      scheduleBootstrap();
     }, 250);
 
     window.addEventListener("resize", debouncedResize);
+    window.SharedResizeObserver?.subscribe?.(debouncedResize, {
+      immediate: true,
+      source: "symbol-rain",
+    });
 
     document.addEventListener(
       GameEvents.DISPLAY_RESOLUTION_CHANGED,
@@ -132,6 +183,7 @@ function initSymbolRain() {
         state.isMobileMode =
           event.detail?.isCompactViewport === true ||
           document.body.classList.contains("viewport-compact");
+        scheduleBootstrap();
       },
     );
 

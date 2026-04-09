@@ -21,7 +21,6 @@ console.log("🎮 Console Manager events loading");
       return false;
     }
 
-    recentPointerActivations.delete(element);
     return performance.now() - lastPointerActivation <
       POINTER_FOLLOWUP_CLICK_WINDOW_MS;
   }
@@ -55,7 +54,7 @@ console.log("🎮 Console Manager events loading");
           return;
         }
 
-        if (shouldIgnoreFollowupClick(element)) {
+        if (event.detail !== 0 && shouldIgnoreFollowupClick(element)) {
           return;
         }
 

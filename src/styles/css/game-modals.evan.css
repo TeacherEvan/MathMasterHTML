@@ -66,10 +66,12 @@ body.evan-input-locked #evan-assist-shell {
     left: 0;
     width: var(--evan-hand-size, 2.4rem);
     height: var(--evan-hand-size, 2.4rem);
-    transform: translate(-200px, -200px);
+    transform: translate3d(-200px, -200px, 0);
     pointer-events: none;
     font-size: var(--evan-hand-size, 2.4rem);
     line-height: 1;
+    will-change: transform;
+    backface-visibility: hidden;
 }
 
 #evan-hand::after {
@@ -231,8 +233,8 @@ body.viewport-compact.viewport-landscape #evan-assist-status {
 }
 
 body.evan-input-locked #panel-c {
-    opacity: 0.72;
-    filter: saturate(0.72);
+    opacity: 0.9;
+    filter: saturate(0.9);
 }
 
 body.viewport-compact.viewport-landscape #evan-skip-button {
