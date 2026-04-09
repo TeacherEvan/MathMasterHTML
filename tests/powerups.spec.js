@@ -463,24 +463,37 @@ test.describe("Power-Up Mobile Control Separation", () => {
     const layout = await page.evaluate(() => {
       const display = document.getElementById("power-up-display");
       const controls = document.querySelector(".panel-b-controls");
+      const panelB = document.getElementById("panel-b");
+      const problem = document.getElementById("problem-container");
       const displayRect = display?.getBoundingClientRect();
       const controlsRect = controls?.getBoundingClientRect();
+      const panelBRect = panelB?.getBoundingClientRect();
+      const problemRect = problem?.getBoundingClientRect();
 
-      if (!displayRect || !controlsRect) {
+      if (!displayRect || !controlsRect || !panelBRect || !problemRect) {
         return null;
       }
 
       return {
         displayTop: displayRect.top,
         displayBottom: displayRect.bottom,
+        displayLeft: displayRect.left,
+        displayRight: displayRect.right,
         controlsTop: controlsRect.top,
         controlsBottom: controlsRect.bottom,
         gap: controlsRect.top - displayRect.bottom,
+        panelBTop: panelBRect.top,
+        panelBLeft: panelBRect.left,
+        panelBRight: panelBRect.right,
+        problemBottom: problemRect.bottom,
       };
     });
 
     expect(layout).not.toBeNull();
-    expect(layout.displayTop).toBeLessThan(120);
+    expect(layout.displayTop).toBeGreaterThanOrEqual(layout.panelBTop);
+    expect(layout.displayLeft).toBeGreaterThanOrEqual(layout.panelBLeft - 1);
+    expect(layout.displayRight).toBeLessThanOrEqual(layout.panelBRight + 1);
+    expect(layout.displayTop).toBeGreaterThan(layout.problemBottom);
     expect(layout.displayBottom).toBeLessThanOrEqual(layout.controlsTop);
     expect(layout.gap).toBeGreaterThanOrEqual(0);
   });

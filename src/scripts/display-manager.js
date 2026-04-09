@@ -231,6 +231,8 @@ class DisplayManager {
       isCompactNarrowViewport ||
       isCompactLandscapeTouch ||
       isCompactShortViewport;
+    const shouldShowRotationOverlay =
+      hasCoarsePointer && isCompactViewport && isPortrait;
 
     return {
       width,
@@ -242,8 +244,25 @@ class DisplayManager {
       isCompactViewport,
       isCompactLandscapeTouch,
       isCompactShortViewport,
-      shouldShowRotationOverlay: false,
+      shouldShowRotationOverlay,
     };
+  }
+
+  async requestLandscapeOrientation() {
+    const viewportState = this.getViewportState();
+    const orientation = window.screen?.orientation;
+
+    if (!viewportState.shouldShowRotationOverlay || !orientation?.lock) {
+      return false;
+    }
+
+    try {
+      await orientation.lock("landscape");
+      return true;
+    } catch (error) {
+      console.log("📱 Landscape orientation request rejected", error);
+      return false;
+    }
   }
 
   isCompactViewport(viewport = {}) {

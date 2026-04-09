@@ -242,9 +242,15 @@
       }
     }
 
-    const minTop = isCompactViewport
-      ? hudSafeTop
-      : Math.max(hudSafeTop, panelRect.top + config.DESKTOP_TOP_OFFSET);
+    const minTop = Math.max(
+      hudSafeTop,
+      panelRect.top +
+        (isCompactLandscape
+          ? config.COMPACT_LANDSCAPE_TOP_OFFSET
+          : isCompactViewport
+            ? config.COMPACT_TOP_OFFSET
+            : config.DESKTOP_TOP_OFFSET),
+    );
     const controlsBottomLimit =
       controlsRect?.top !== undefined
         ? controlsRect.top - config.PANEL_B_CONTROLS_CLEARANCE

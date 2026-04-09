@@ -172,6 +172,27 @@ test.describe("Symbol rain mobile interactions", () => {
       state: "visible",
       timeout: 4000,
     });
+
+    const visibilitySamples = await page.evaluate(async () => {
+      const samples = [];
+
+      for (let index = 0; index < 6; index += 1) {
+        const visibleSymbols = Array.from(
+          document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
+        ).filter((element) => {
+          const rect = element.getBoundingClientRect();
+          return rect.bottom > 0 && rect.top < window.innerHeight;
+        });
+
+        samples.push(visibleSymbols.length);
+        await new Promise((resolve) => window.setTimeout(resolve, 120));
+      }
+
+      return samples;
+    });
+
+    expect(visibilitySamples.some((count) => count >= 2)).toBe(true);
+    expect(visibilitySamples.at(-1)).toBeGreaterThan(0);
   });
 
   test("forced Evan boot keeps rain visible while gameplay input is locked", async ({

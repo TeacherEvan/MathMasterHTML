@@ -4,6 +4,36 @@ test.describe("Gameplay portrait device contract", () => {
   test.describe("portrait phone rotation contract", () => {
     const pixel7 = devices["Pixel 7"];
 
+    test.beforeEach(async ({ page }) => {
+      await page.addInitScript(() => {
+        const orientationState = { requests: [] };
+        window.__orientationLockState = orientationState;
+
+        try {
+          const descriptor = Object.getOwnPropertyDescriptor(screen, "orientation");
+          const mockOrientation = {
+            type: "portrait-primary",
+            angle: 0,
+            lock: async (value) => {
+              orientationState.requests.push(value);
+            },
+            unlock: () => {},
+            addEventListener: () => {},
+            removeEventListener: () => {},
+          };
+
+          if (!descriptor || descriptor.configurable) {
+            Object.defineProperty(screen, "orientation", {
+              configurable: true,
+              value: mockOrientation,
+            });
+          }
+        } catch {
+          window.__orientationLockState.unmocked = true;
+        }
+      });
+    });
+
     test.skip(
       ({ browserName }) => browserName === "firefox",
       "Firefox does not support Playwright mobile-context emulation for this contract suite.",
@@ -18,27 +48,27 @@ test.describe("Gameplay portrait device contract", () => {
       screen: { width: 412, height: 915 },
     });
 
-    test("keeps gameplay visible on narrow portrait phones without the rotate gate", async ({
+    test("requires rotation on narrow portrait phones and requests landscape from the start gesture", async ({
       page,
     }) => {
       await page.goto("/src/pages/game.html?level=beginner", {
         waitUntil: "domcontentloaded",
       });
 
+      await page.waitForFunction(() => {
+        const overlay = document.getElementById("rotation-overlay");
+        return (
+          document.body.classList.contains("viewport-rotate-required") &&
+          document.body.classList.contains("viewport-portrait") &&
+          overlay &&
+          overlay instanceof HTMLElement
+        );
+      });
+
       const startButton = page.locator("#start-game-btn");
       if (await startButton.isVisible()) {
         await startButton.click({ force: true });
       }
-
-      await page.waitForFunction(() => {
-        const overlay = document.getElementById("rotation-overlay");
-        return (
-          document.body.classList.contains("viewport-rotate-not-required") &&
-          document.body.classList.contains("viewport-portrait") &&
-          overlay &&
-          window.getComputedStyle(overlay).display === "none"
-        );
-      });
 
       const layout = await page.evaluate(() => {
         const measure = (selector) => {
@@ -66,6 +96,8 @@ test.describe("Gameplay portrait device contract", () => {
           shouldShowRotationOverlay:
             window.displayManager?.getCurrentResolution?.()
               ?.shouldShowRotationOverlay ?? null,
+          orientationRequests:
+            window.__orientationLockState?.requests?.slice() ?? [],
           panelA: measure("#panel-a"),
           panelB: measure("#panel-b"),
           panelC: measure("#panel-c"),
@@ -73,10 +105,11 @@ test.describe("Gameplay portrait device contract", () => {
         };
       });
 
-      expect(layout.bodyClasses).toContain("viewport-rotate-not-required");
+      expect(layout.bodyClasses).toContain("viewport-rotate-required");
       expect(layout.bodyClasses).toContain("viewport-compact");
       expect(layout.activeResolution).toBe("mobile");
-      expect(layout.shouldShowRotationOverlay).toBe(false);
+      expect(layout.shouldShowRotationOverlay).toBe(true);
+      expect(layout.orientationRequests).toContain("landscape");
       expect(layout.panelA.bottom).toBeLessThanOrEqual(
         layout.viewport.height + 1,
       );

@@ -9,25 +9,32 @@
 
   function enterFullscreen() {
     const elem = document.documentElement;
-    if (!elem) return;
+    if (!elem) return Promise.resolve(false);
 
     if (navigator.webdriver === true) {
       console.log("🧪 Skipping auto-fullscreen while running automation");
-      return;
+      return Promise.resolve(false);
     }
 
     if (elem.requestFullscreen) {
-      elem.requestFullscreen().catch((err) => {
-        console.log(
-          "⚠️ Fullscreen request failed (user may need to interact first):",
-          err,
-        );
-      });
+      return elem.requestFullscreen()
+        .then(() => true)
+        .catch((err) => {
+          console.log(
+            "⚠️ Fullscreen request failed (user may need to interact first):",
+            err,
+          );
+          return false;
+        });
     } else if (elem.webkitRequestFullscreen) {
       elem.webkitRequestFullscreen();
+      return Promise.resolve(true);
     } else if (elem.msRequestFullscreen) {
       elem.msRequestFullscreen();
+      return Promise.resolve(true);
     }
+
+    return Promise.resolve(false);
   }
 
   function requestStartupPreloadCompletion(reason) {
@@ -93,7 +100,9 @@
         modal.setAttribute("aria-hidden", "true");
         releaseBriefingFocus({ focusSelector: "#help-button" });
         notifyBriefingDismissed();
-        enterFullscreen();
+        enterFullscreen().finally(() => {
+          window.displayManager?.requestLandscapeOrientation?.();
+        });
       }, 300);
     }
 

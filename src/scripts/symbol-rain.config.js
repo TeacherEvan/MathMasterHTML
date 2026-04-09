@@ -45,7 +45,9 @@
     desktopCollisionBuffer: 40,
     desktopHorizontalBuffer: 35,
     // Mobile collision (pixels)
+    mobileSymbolHeight: 42,
     mobileSymbolWidth: 60,
+    mobileCollisionBuffer: 28,
     mobileHorizontalBuffer: 80,
     mobileFaceRevealBuffer: 120,
   };

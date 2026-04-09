@@ -48,18 +48,38 @@ console.log("🎯 SymbolRain helpers: spatial loading...");
     symbolObj,
   ) {
     if (isMobileMode) {
+      const symbolHeight = config.mobileSymbolHeight;
       const symbolWidth = config.mobileSymbolWidth;
+      const collisionBuffer = config.mobileCollisionBuffer;
       const baseHorizontalBuffer = config.mobileHorizontalBuffer;
       const faceRevealBuffer = symbolObj.isInFaceReveal
         ? config.mobileFaceRevealBuffer
         : 0;
       const horizontalBuffer = baseHorizontalBuffer + faceRevealBuffer;
 
+      const symbolLeft = symbolObj.x;
+      const symbolRight = symbolLeft + symbolWidth;
+      const symbolTop = symbolObj.y;
+      const symbolBottom = symbolTop + symbolHeight;
+
       const neighbors = spatialGrid.getNeighbors(symbolObj.x, symbolObj.y);
       for (const other of neighbors) {
         if (other === symbolObj) continue;
-        const distance = symbolObj.x - other.x;
-        if (distance > 0 && distance < symbolWidth + horizontalBuffer) {
+
+        const otherLeft = other.x;
+        const otherRight = otherLeft + symbolWidth;
+        const otherTop = other.y;
+        const otherBottom = otherTop + symbolHeight;
+
+        const horizontalOverlap = !(
+          symbolRight + horizontalBuffer < otherLeft ||
+          symbolLeft > otherRight + horizontalBuffer
+        );
+        const distance = otherTop - symbolTop;
+        const verticalConflict =
+          symbolBottom > otherTop && distance < symbolHeight + collisionBuffer;
+
+        if (horizontalOverlap && verticalConflict) {
           return true;
         }
       }
@@ -107,14 +127,31 @@ console.log("🎯 SymbolRain helpers: spatial loading...");
     symbolObj,
   ) {
     if (isMobileMode) {
+      const symbolHeight = config.mobileSymbolHeight;
       const symbolWidth = config.mobileSymbolWidth;
+
+      const symbolLeft = symbolObj.x;
+      const symbolRight = symbolLeft + symbolWidth;
+      const symbolTop = symbolObj.y;
+      const symbolBottom = symbolTop + symbolHeight;
 
       const neighbors = spatialGrid.getNeighbors(symbolObj.x, symbolObj.y);
       for (const other of neighbors) {
         if (other === symbolObj) continue;
 
-        const distance = Math.abs(symbolObj.x - other.x);
-        if (distance < symbolWidth) {
+        const otherLeft = other.x;
+        const otherRight = otherLeft + symbolWidth;
+        const otherTop = other.y;
+        const otherBottom = otherTop + symbolHeight;
+
+        const horizontalOverlap = !(
+          symbolRight <= otherLeft || symbolLeft >= otherRight
+        );
+        const verticalOverlap = !(
+          symbolBottom <= otherTop || symbolTop >= otherBottom
+        );
+
+        if (horizontalOverlap && verticalOverlap) {
           return other;
         }
       }

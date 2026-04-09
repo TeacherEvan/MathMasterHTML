@@ -29,6 +29,21 @@
     routeHandlers: new Map(),
   };
 
+  function requestLandscapeOrientationForCompactPortrait() {
+    const orientation = window.screen?.orientation;
+    const compactPortrait =
+      compactMedia.matches && window.innerHeight > window.innerWidth;
+    const coarsePointer = window.matchMedia?.(
+      "(hover: none) and (pointer: coarse)",
+    )?.matches;
+
+    if (!compactPortrait || !coarsePointer || !orientation?.lock) {
+      return;
+    }
+
+    orientation.lock("landscape").catch(() => {});
+  }
+
   function createRipple(event, target) {
     const ripple = document.createElement("div");
     ripple.className = "ripple";
@@ -70,6 +85,8 @@
     if (interactionEvent) {
       createRipple(interactionEvent, triggerElement);
     }
+
+    requestLandscapeOrientationForCompactPortrait();
 
     triggerElement.style.transform = "scale(0.98)";
     setTimeout(() => {
