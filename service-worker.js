@@ -1,11 +1,12 @@
 /**
  * Service Worker - Production-Grade PWA Support
  * Enables offline gameplay and improves performance
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 
-const CACHE_NAME = "math-master-v1.0.1-mobile-recovery";
-const RUNTIME_CACHE = "math-master-runtime-v1.0.1-mobile-recovery";
+const CACHE_NAME = "math-master-v1.0.2-android-runtime-recovery";
+const RUNTIME_CACHE = "math-master-runtime-v1.0.2-android-runtime-recovery";
+const ANDROID_RUNTIME_RECOVERY_VERSION = "20260409-android-runtime-recovery-1";
 
 // Assets to cache immediately on install
 const STATIC_ASSETS = [
@@ -23,6 +24,10 @@ const STATIC_ASSETS = [
   "/src/styles/css/game-animations.css",
   "/src/styles/css/game-responsive.css",
   "/src/styles/css/game-modals.css",
+  `/src/styles/css/game.css?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/styles/css/game-responsive.css?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/styles/css/game-modals.preload.css?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/styles/css/lock-responsive.css?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
   "/src/styles/css/console.css",
   "/src/styles/css/worm-base.css",
   "/src/styles/css/worm-effects.css",
@@ -44,8 +49,22 @@ const STATIC_ASSETS = [
   "/src/scripts/ux-enhancements.js",
   "/src/scripts/lazy-component-loader.js",
   "/src/scripts/display-manager.js",
+  `/src/scripts/display-manager.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/display-manager.mobile.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
   "/src/scripts/performance-monitor.js",
   "/src/scripts/3rdDISPLAY.js",
+  `/src/scripts/symbol-rain.helpers.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/symbol-rain.helpers.utils.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/symbol-rain.helpers.spatial.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/symbol-rain.helpers.face-reveal.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/symbol-rain.helpers.pool.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/symbol-rain.helpers.spawn.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/symbol-rain.helpers.interactions.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/symbol-rain.config.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/symbol-rain.spawn.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/symbol-rain.animation.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/symbol-rain.interactions.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/3rdDISPLAY.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
   "/src/scripts/problem-loader.js",
   "/src/scripts/symbol-validator.js",
   "/src/scripts/worm-factory.js",
@@ -57,6 +76,9 @@ const STATIC_ASSETS = [
   "/src/scripts/lock-manager.js",
   "/src/scripts/console-manager.js",
   "/src/scripts/game.js",
+  `/src/scripts/startup-preload.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/game-page.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/service-worker-register.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
 ];
 
 // Assets to cache on first use (lazy cache)
@@ -186,8 +208,7 @@ function isFreshnessCriticalRequest(request, url) {
  * Best for static assets that rarely change
  */
 async function cacheFirst(request) {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
+  const cached = await matchCachedAsset(request);
 
   if (cached) {
     console.log("[ServiceWorker] Serving from cache:", request.url);
@@ -208,6 +229,7 @@ async function networkFirst(request) {
     // Cache successful responses
     if (response && response.status === 200) {
       const cache = await caches.open(RUNTIME_CACHE);
+      const url = new URL(request.url);
 
       // Check if this URL matches lazy cache patterns
       let shouldCache = false;
@@ -218,7 +240,7 @@ async function networkFirst(request) {
         }
       }
 
-      if (shouldCache) {
+      if (shouldCache || isFreshnessCriticalRequest(request, url)) {
         console.log("[ServiceWorker] Caching new resource:", request.url);
         cache.put(request, response.clone());
       }
@@ -228,9 +250,7 @@ async function networkFirst(request) {
   } catch (error) {
     console.log("[ServiceWorker] Network failed, trying cache:", request.url);
 
-    // Try runtime cache
-    const cache = await caches.open(RUNTIME_CACHE);
-    const cached = await cache.match(request);
+    const cached = await matchCachedAsset(request);
 
     if (cached) {
       return cached;
@@ -246,7 +266,7 @@ async function networkFirst(request) {
  */
 async function staleWhileRevalidate(request) {
   const cache = await caches.open(RUNTIME_CACHE);
-  const cached = await cache.match(request);
+  const cached = await matchCachedAsset(request);
 
   const networkPromise = fetch(request)
     .then((response) => {
@@ -265,6 +285,17 @@ async function staleWhileRevalidate(request) {
   const networkResponse = await networkPromise;
   if (networkResponse) return networkResponse;
   throw new Error("Network failed and no cache available");
+}
+
+async function matchCachedAsset(request) {
+  const runtimeCache = await caches.open(RUNTIME_CACHE);
+  const runtimeCached = await runtimeCache.match(request);
+  if (runtimeCached) {
+    return runtimeCached;
+  }
+
+  const staticCache = await caches.open(CACHE_NAME);
+  return staticCache.match(request);
 }
 
 /**

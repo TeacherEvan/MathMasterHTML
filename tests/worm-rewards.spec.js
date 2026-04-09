@@ -1,20 +1,22 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
+import {
+  dismissBriefingAndWaitForInteractiveGameplay,
+  resetOnboardingState,
+} from "./utils/onboarding-runtime.js";
 
 test.describe("Worm rewards", () => {
   const readScore = () =>
     Number.parseInt(document.getElementById("score-value")?.textContent || "0", 10) || 0;
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/game.html?level=beginner", { waitUntil: "domcontentloaded" });
-    const startButton = page.locator("#start-game-btn");
-    await expect(startButton).toBeVisible({ timeout: 10000 });
-    await startButton.click({ force: true });
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await page.waitForFunction(() => window.wormSystem?.isInitialized === true);
     await page.evaluate(() => window.ScoreTimerManager?.pause?.());
   });
 
-  test("muffin gives 1000 per click and resolves at 4 clicks", async ({ page }) => {
+  test("muffin gives 1000 and resolves on the first click", async ({ page }) => {
     await page.evaluate(() => {
       document.dispatchEvent(
         new CustomEvent("wormExploded", {
@@ -35,15 +37,44 @@ test.describe("Worm rewards", () => {
 
     const before = await page.evaluate(readScore);
     await muffin.dispatchEvent("pointerdown");
-    await muffin.dispatchEvent("pointerdown");
-    await muffin.dispatchEvent("pointerdown");
-    await muffin.dispatchEvent("pointerdown");
+
+    await expect(muffin).toHaveClass(/muffin-hit/);
+    await expect(page.locator(".worm-muffin-reward")).toHaveCount(0);
+    await expect(page.locator(".muffin-shoutout")).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(readScore), { timeout: 10000 })
+      .toBeGreaterThanOrEqual(before + 1000);
+  });
+
+  test("muffin button resolves from keyboard activation", async ({ page }) => {
+    await page.evaluate(() => {
+      document.dispatchEvent(
+        new CustomEvent("wormExploded", {
+          detail: {
+            wormId: "test-worm-keyboard",
+            x: 240,
+            y: 240,
+            isRainKill: false,
+            isChainReaction: false,
+            wasPurple: false,
+          },
+        }),
+      );
+    });
+
+    const muffin = page.locator(".worm-muffin-reward");
+    await expect(muffin).toBeVisible();
+
+    const before = await page.evaluate(readScore);
+    await muffin.focus();
+    await expect(muffin).toBeFocused();
+    await page.keyboard.press("Enter");
 
     await expect(page.locator(".worm-muffin-reward")).toHaveCount(0);
     await expect(page.locator(".muffin-shoutout")).toBeVisible();
     await expect
       .poll(() => page.evaluate(readScore), { timeout: 10000 })
-      .toBeGreaterThanOrEqual(before + 4000);
+      .toBeGreaterThanOrEqual(before + 1000);
   });
 
   test("purple rain kill grants 50000, 2 powerups, and muffin spawn", async ({

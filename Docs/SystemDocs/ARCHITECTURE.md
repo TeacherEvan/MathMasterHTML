@@ -205,7 +205,7 @@ The loaders parse those files at runtime and convert each problem into a step li
 
 - every worm explosion spawns a muffin reward button
 - each muffin click grants bonus points
-- the muffin resolves after four clicks with a shoutout and mini-fireworks
+- the muffin resolves after one click with a shoutout, a pop/vibrate hit animation, and mini-fireworks
 - purple rain-kills additionally grant a large score bonus and extra power-ups
 
 ## Score, timer, and persistence

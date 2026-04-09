@@ -102,6 +102,29 @@ test.describe("Startup Preload — Build 2", () => {
     );
   });
 
+  test("preload overlay reflects dispatched progress updates", async ({ page }) => {
+    await gotoBlockingPreloadRuntime(page, "?level=beginner");
+
+    await page.evaluate(() => {
+      document.dispatchEvent(
+        new CustomEvent(window.GameEvents.PRELOAD_PROGRESS, {
+          detail: {
+            progress: 35,
+            message: "Registering service worker...",
+          },
+        }),
+      );
+    });
+
+    await expect(page.locator("#startup-preload-message")).toHaveText(
+      "Registering service worker...",
+    );
+    await expect(page.locator("#startup-preload-progress")).toHaveAttribute(
+      "aria-valuenow",
+      "35",
+    );
+  });
+
   test("overlay hides after PRELOAD_READY is dispatched", async ({ page }) => {
     await gotoGameRuntime(page, "?level=beginner");
     await waitForStartupPreload(page);

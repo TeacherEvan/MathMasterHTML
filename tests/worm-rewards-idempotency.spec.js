@@ -1,12 +1,14 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
+import {
+  dismissBriefingAndWaitForInteractiveGameplay,
+  resetOnboardingState,
+} from "./utils/onboarding-runtime.js";
 
 test.describe("Worm rewards idempotency", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/game.html?level=beginner", { waitUntil: "domcontentloaded" });
-    const startButton = page.locator("#start-game-btn");
-    await expect(startButton).toBeVisible({ timeout: 10000 });
-    await startButton.click({ force: true });
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await page.waitForFunction(() => window.wormSystem?.isInitialized === true);
     await page.evaluate(() => window.ScoreTimerManager?.pause?.());
   });
@@ -101,7 +103,7 @@ test.describe("Worm rewards idempotency", () => {
     expect(result.muffins).toBe(1);
   });
 
-  test("muffin pointerdown burst cannot award over 4 clicks", async ({ page }) => {
+  test("muffin pointerdown burst cannot award over 1 click", async ({ page }) => {
     const result = await page.evaluate(() => {
       document.dispatchEvent(
         new CustomEvent("wormExploded", {
@@ -145,15 +147,14 @@ test.describe("Worm rewards idempotency", () => {
         return {
           muffinClickAwards,
           muffinPointsAwarded,
-          muffins: document.querySelectorAll(".worm-muffin-reward").length,
         };
       } finally {
         window.ScoreTimerManager.addBonusPoints = originalAdd;
       }
     });
 
-    expect(result.muffinClickAwards).toBe(4);
-    expect(result.muffinPointsAwarded).toBe(4000);
-    expect(result.muffins).toBe(0);
+    expect(result.muffinClickAwards).toBe(1);
+    expect(result.muffinPointsAwarded).toBe(1000);
+    await expect(page.locator(".worm-muffin-reward")).toHaveCount(0);
   });
 });

@@ -88,7 +88,7 @@ Automation mode (`navigator.webdriver === true`) caps `maxWorms` at `8`.
 
 - every worm explosion spawns a muffin button
 - each muffin click grants 1000 bonus points
-- the muffin resolves after four clicks with a shoutout and mini-fireworks
+- the muffin resolves after one click with a shoutout, a pop/vibrate hit animation, and mini-fireworks
 - purple rain-kills also grant 50,000 bonus points and 2 extra power-ups
 - idempotency is enforced with processed-worm tracking so duplicate rewards are not applied
 

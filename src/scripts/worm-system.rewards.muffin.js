@@ -1,6 +1,7 @@
 (function() {
-  const MUFFIN_CLICKS_REQUIRED = 4;
+  const MUFFIN_CLICKS_REQUIRED = 1;
   const MUFFIN_CLICK_POINTS = 1000;
+  const MUFFIN_HIT_ANIMATION_MS = 180;
   const PURPLE_KILL_POINTS = 50000;
   const PURPLE_KILL_POWERUPS = 2;
   const processedRewardWormIds = new Set();
@@ -62,6 +63,12 @@
     container.appendChild(muffin);
 
     const handleClick = (event) => {
+      if (muffin.disabled) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
       event.preventDefault();
       event.stopPropagation();
       const currentClicks = Number(muffin.dataset.clicks || 0);
@@ -71,8 +78,10 @@
         currentClicks + 1,
       );
       muffin.dataset.clicks = String(clicks);
+      muffin.classList.remove("muffin-hit");
+      void muffin.offsetWidth;
       muffin.classList.add("muffin-hit");
-      setTimeout(() => muffin.classList.remove("muffin-hit"), 120);
+      setTimeout(() => muffin.classList.remove("muffin-hit"), MUFFIN_HIT_ANIMATION_MS);
 
       addPoints(MUFFIN_CLICK_POINTS, {
         source: "muffin-click",
@@ -84,13 +93,25 @@
         muffin.disabled = true;
         muffin.style.pointerEvents = "none";
         muffin.removeEventListener("pointerdown", handleClick);
-        showShoutout(x, y, MUFFIN_CLICK_POINTS * MUFFIN_CLICKS_REQUIRED);
-        spawnFireworks(x, y);
-        muffin.remove();
+        muffin.removeEventListener("keydown", handleKeyboardActivate);
+        window.setTimeout(() => {
+          showShoutout(x, y, MUFFIN_CLICK_POINTS * MUFFIN_CLICKS_REQUIRED);
+          spawnFireworks(x, y);
+          muffin.remove();
+        }, MUFFIN_HIT_ANIMATION_MS);
       }
     };
 
+    const handleKeyboardActivate = (event) => {
+      if (event.key !== "Enter" && event.key !== " " && event.key !== "Spacebar") {
+        return;
+      }
+
+      handleClick(event);
+    };
+
     muffin.addEventListener("pointerdown", handleClick, { passive: false });
+    muffin.addEventListener("keydown", handleKeyboardActivate);
   }
 
   function onWormExploded(event) {

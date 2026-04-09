@@ -37,6 +37,28 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+async function findVisibleMatchingSymbol(page, symbols, timeoutMs = 3500) {
+  const candidates = Array.isArray(symbols) ? symbols.filter(Boolean) : [symbols].filter(Boolean);
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    const visibleSymbols = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"))
+        .map((element) => element.textContent?.trim())
+        .filter(Boolean),
+    );
+
+    const match = candidates.find((symbol) => visibleSymbols.includes(symbol));
+    if (match) {
+      return match;
+    }
+
+    await page.waitForTimeout(100);
+  }
+
+  return null;
+}
+
 async function clickLiveMatchingSymbol(page, symbolText, timeoutMs = 3500) {
   const deadline = Date.now() + timeoutMs;
   const exactText = new RegExp(`^${escapeRegExp(symbolText)}$`);
@@ -296,7 +318,7 @@ test.describe("Symbol rain mobile interactions", () => {
     await stopEvanHelpIfActive(page);
 
     const before = await getCurrentStepSnapshot(page);
-    const targetSymbol = before.hiddenSymbols[0];
+    const targetSymbol = await findVisibleMatchingSymbol(page, before.hiddenSymbols);
 
     expect(targetSymbol).toBeTruthy();
 

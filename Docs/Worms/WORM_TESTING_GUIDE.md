@@ -63,8 +63,8 @@ npx playwright test tests/performance-bench.spec.js tests/perf-scenarios.spec.js
 
 - explode a worm
 - expected: a muffin reward appears
-- click the muffin four times
-- expected: 1000 bonus points per click, then a shoutout and mini-fireworks on the fourth click
+- click the muffin once
+- expected: 1000 bonus points, a quick pop/vibrate hit animation, then a shoutout and mini-fireworks immediately
 
 ### 7. Purple bonus payout
 
