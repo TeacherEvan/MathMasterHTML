@@ -2,6 +2,7 @@
   const GE = window.GameEvents;
   const backButton = document.getElementById("back-button");
   let briefingFocusCleanup = null;
+  let briefingStartRequested = false;
 
   function goBack() {
     window.location.assign("level-select.html");
@@ -64,8 +65,18 @@
     const modal = document.getElementById("how-to-play-modal");
     const dialog = modal?.querySelector("[role='dialog']");
     const startButton = document.getElementById("start-game-btn");
+    let pendingRotationDismissal = false;
+    let briefingDismissed = false;
 
     if (!modal || !dialog || !startButton) return;
+
+    function isRotationStillRequired() {
+      return Boolean(
+        window.displayManager?.getCurrentResolution?.()
+          ?.shouldShowRotationOverlay ??
+          document.body.classList.contains("viewport-rotate-required"),
+      );
+    }
 
     function releaseBriefingFocus(options = {}) {
       if (typeof briefingFocusCleanup === "function") {
@@ -83,6 +94,17 @@
       }
     }
 
+    function finalizeBriefingDismissal() {
+      if (briefingDismissed) {
+        return;
+      }
+
+      briefingDismissed = true;
+      pendingRotationDismissal = false;
+      releaseBriefingFocus({ focusSelector: "#help-button" });
+      notifyBriefingDismissed();
+    }
+
     function showModal() {
       modal.style.display = "flex";
       modal.setAttribute("aria-hidden", "false");
@@ -93,20 +115,46 @@
         }) || null;
     }
 
+    function handleViewportResolutionChange(event) {
+      if (!pendingRotationDismissal) {
+        return;
+      }
+
+      const shouldShowRotationOverlay =
+        event.detail?.shouldShowRotationOverlay ?? isRotationStillRequired();
+
+      if (!shouldShowRotationOverlay) {
+        finalizeBriefingDismissal();
+      }
+    }
+
     function onStartClick() {
+      if (briefingStartRequested || briefingDismissed) {
+        return;
+      }
+
+      briefingStartRequested = true;
+      enterFullscreen();
+      window.displayManager?.requestLandscapeOrientation?.();
       modal.style.animation = "modalFadeOut 0.3s ease-out";
       setTimeout(() => {
         modal.style.display = "none";
         modal.setAttribute("aria-hidden", "true");
-        releaseBriefingFocus({ focusSelector: "#help-button" });
-        notifyBriefingDismissed();
-        enterFullscreen().finally(() => {
-          window.displayManager?.requestLandscapeOrientation?.();
-        });
+
+        if (isRotationStillRequired()) {
+          pendingRotationDismissal = true;
+          return;
+        }
+
+        finalizeBriefingDismissal();
       }, 300);
     }
 
     startButton.addEventListener("click", onStartClick);
+    document.addEventListener(
+      GE?.DISPLAY_RESOLUTION_CHANGED,
+      handleViewportResolutionChange,
+    );
 
     if (window.StartupPreload?.isBlocking()) {
       modal.style.display = "none";

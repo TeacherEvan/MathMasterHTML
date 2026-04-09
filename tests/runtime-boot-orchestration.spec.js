@@ -19,6 +19,12 @@ async function gotoBlockingPreloadRuntime(page, search = "?level=beginner") {
 }
 
 test.describe("Runtime boot orchestration", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    if (testInfo.project.name === "pixel-7") {
+      await page.setViewportSize({ width: 915, height: 412 });
+    }
+  });
+
   test("coordinator stays blocked until preload and briefing are both complete", async ({
     page,
   }) => {

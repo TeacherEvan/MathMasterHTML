@@ -83,6 +83,65 @@ async function clickLiveMatchingSymbol(page, symbolText, timeoutMs = 3500) {
 }
 
 test.describe("Symbol rain mobile interactions", () => {
+  test("only slows a mobile symbol when the blocking neighbor is below it", async ({
+    page,
+  }) => {
+    await page.goto("/src/pages/game.html?level=beginner", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await page.waitForFunction(
+      () => Boolean(window.SymbolRainHelpers && window.SymbolRainConfig),
+      { timeout: 10000 },
+    );
+
+    const collisionState = await page.evaluate(() => {
+      const spatialGrid = window.SymbolRainHelpers.createSpatialGrid(
+        window.SymbolRainConfig,
+      );
+      const current = {
+        x: 120,
+        y: 100,
+        isInFaceReveal: false,
+      };
+      const above = {
+        x: 126,
+        y: 82,
+        isInFaceReveal: false,
+      };
+      const below = {
+        x: 126,
+        y: 118,
+        isInFaceReveal: false,
+      };
+
+      spatialGrid.update([current, above]);
+      const aboveConflict = window.SymbolRainHelpers.checkCollision(
+        {
+          config: window.SymbolRainConfig,
+          isMobileMode: true,
+          spatialGrid,
+        },
+        current,
+      );
+
+      spatialGrid.update([current, below]);
+      const belowConflict = window.SymbolRainHelpers.checkCollision(
+        {
+          config: window.SymbolRainConfig,
+          isMobileMode: true,
+          spatialGrid,
+        },
+        current,
+      );
+
+      return { aboveConflict, belowConflict };
+    });
+
+    expect(collisionState.aboveConflict).toBe(false);
+    expect(collisionState.belowConflict).toBe(true);
+  });
+
   test("keeps responding to successive taps after pointer release", async ({
     page,
   }) => {

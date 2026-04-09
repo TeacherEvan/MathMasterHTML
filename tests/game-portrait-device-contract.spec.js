@@ -15,7 +15,11 @@ test.describe("Gameplay portrait device contract", () => {
             type: "portrait-primary",
             angle: 0,
             lock: async (value) => {
-              orientationState.requests.push(value);
+              const modal = document.getElementById("how-to-play-modal");
+              orientationState.requests.push({
+                value,
+                modalDisplay: modal ? window.getComputedStyle(modal).display : null,
+              });
             },
             unlock: () => {},
             addEventListener: () => {},
@@ -60,8 +64,9 @@ test.describe("Gameplay portrait device contract", () => {
         return (
           document.body.classList.contains("viewport-rotate-required") &&
           document.body.classList.contains("viewport-portrait") &&
-          overlay &&
-          overlay instanceof HTMLElement
+          overlay instanceof HTMLElement &&
+          overlay.getAttribute("role") === "dialog" &&
+          overlay.getAttribute("aria-hidden") === "false"
         );
       });
 
@@ -70,7 +75,9 @@ test.describe("Gameplay portrait device contract", () => {
         await startButton.click({ force: true });
       }
 
-      const layout = await page.evaluate(() => {
+      await page.waitForTimeout(400);
+
+      const portraitState = await page.evaluate(() => {
         const measure = (selector) => {
           const element = document.querySelector(selector);
           if (!element) {
@@ -98,6 +105,21 @@ test.describe("Gameplay portrait device contract", () => {
               ?.shouldShowRotationOverlay ?? null,
           orientationRequests:
             window.__orientationLockState?.requests?.slice() ?? [],
+          runtimeState: window.GameRuntimeCoordinator?.getState?.() ?? null,
+          activeElementId: document.activeElement?.id ?? null,
+          overlayA11y: (() => {
+            const overlay = document.getElementById("rotation-overlay");
+            if (!(overlay instanceof HTMLElement)) {
+              return null;
+            }
+
+            return {
+              role: overlay.getAttribute("role"),
+              ariaModal: overlay.getAttribute("aria-modal"),
+              ariaLive: overlay.getAttribute("aria-live"),
+              ariaHidden: overlay.getAttribute("aria-hidden"),
+            };
+          })(),
           panelA: measure("#panel-a"),
           panelB: measure("#panel-b"),
           panelC: measure("#panel-c"),
@@ -105,26 +127,55 @@ test.describe("Gameplay portrait device contract", () => {
         };
       });
 
-      expect(layout.bodyClasses).toContain("viewport-rotate-required");
-      expect(layout.bodyClasses).toContain("viewport-compact");
-      expect(layout.activeResolution).toBe("mobile");
-      expect(layout.shouldShowRotationOverlay).toBe(true);
-      expect(layout.orientationRequests).toContain("landscape");
-      expect(layout.panelA.bottom).toBeLessThanOrEqual(
-        layout.viewport.height + 1,
+      expect(portraitState.bodyClasses).toContain("viewport-rotate-required");
+      expect(portraitState.bodyClasses).toContain("viewport-compact");
+      expect(portraitState.activeResolution).toBe("mobile");
+      expect(portraitState.shouldShowRotationOverlay).toBe(true);
+      expect(portraitState.orientationRequests).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ value: "landscape" }),
+        ]),
       );
-      expect(layout.panelB.bottom).toBeLessThanOrEqual(
-        layout.viewport.height + 1,
+      expect(portraitState.runtimeState).toEqual(
+        expect.objectContaining({
+          briefingDismissed: false,
+          gameplayReady: false,
+          inputLocked: true,
+          inputLocks: expect.objectContaining({
+            "rotation-required": true,
+          }),
+        }),
       );
-      expect(layout.panelC.bottom).toBeLessThanOrEqual(
-        layout.viewport.height + 1,
+      expect(portraitState.overlayA11y).toEqual(
+        expect.objectContaining({
+          role: "dialog",
+          ariaModal: "true",
+          ariaLive: "assertive",
+          ariaHidden: "false",
+        }),
       );
-      expect(layout.panelB.top).toBeGreaterThan(layout.panelA.bottom - 4);
-      expect(layout.panelC.left).toBeGreaterThan(layout.panelA.right - 4);
-      expect(layout.console.left).toBeGreaterThanOrEqual(
-        layout.panelB.left - 1,
+      expect(portraitState.panelA.bottom).toBeLessThanOrEqual(
+        portraitState.viewport.height + 1,
       );
-      expect(layout.console.right).toBeLessThanOrEqual(layout.panelB.right + 1);
+      expect(portraitState.panelB.bottom).toBeLessThanOrEqual(
+        portraitState.viewport.height + 1,
+      );
+      expect(portraitState.panelC.bottom).toBeLessThanOrEqual(
+        portraitState.viewport.height + 1,
+      );
+      expect(portraitState.panelB.top).toBeGreaterThan(
+        portraitState.panelA.bottom - 4,
+      );
+      expect(portraitState.panelC.left).toBeGreaterThan(
+        portraitState.panelA.right - 4,
+      );
+      expect(portraitState.console.left).toBeGreaterThanOrEqual(
+        portraitState.panelB.left - 1,
+      );
+      expect(portraitState.console.right).toBeLessThanOrEqual(
+        portraitState.panelB.right + 1,
+      );
+
     });
   });
 

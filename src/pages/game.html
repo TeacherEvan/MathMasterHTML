@@ -183,9 +183,9 @@
     </div>
 
     <!-- Rotation Overlay - Force Landscape -->
-    <div id="rotation-overlay">
+    <div id="rotation-overlay" role="dialog" aria-modal="true" aria-live="assertive" aria-labelledby="rotation-overlay-text" aria-hidden="true" tabindex="-1">
         <div class="rotate-icon">📱➡️</div>
-        <div class="rotate-text">Please rotate your device to landscape mode</div>
+        <div class="rotate-text" id="rotation-overlay-text">Please rotate your device to landscape mode</div>
     </div>
 
     <button id="back-button" data-ripple aria-label="Go back to level selection">← Back</button>

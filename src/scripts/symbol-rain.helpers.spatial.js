@@ -69,7 +69,6 @@ console.log("🎯 SymbolRain helpers: spatial loading...");
         const otherLeft = other.x;
         const otherRight = otherLeft + symbolWidth;
         const otherTop = other.y;
-        const otherBottom = otherTop + symbolHeight;
 
         const horizontalOverlap = !(
           symbolRight + horizontalBuffer < otherLeft ||
@@ -77,7 +76,9 @@ console.log("🎯 SymbolRain helpers: spatial loading...");
         );
         const distance = otherTop - symbolTop;
         const verticalConflict =
-          symbolBottom > otherTop && distance < symbolHeight + collisionBuffer;
+          distance > 0 &&
+          symbolBottom > otherTop &&
+          distance < symbolHeight + collisionBuffer;
 
         if (horizontalOverlap && verticalConflict) {
           return true;

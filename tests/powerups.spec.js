@@ -18,6 +18,19 @@ async function pressPowerUp(page, type) {
     });
 }
 
+async function ensureLandscapeGameplayViewport(page) {
+  const viewport = page.viewportSize();
+
+  if (!viewport || viewport.width >= viewport.height) {
+    return;
+  }
+
+  await page.setViewportSize({
+    width: viewport.height,
+    height: viewport.width,
+  });
+}
+
 async function setupPowerUpPage(page, inventory = null) {
   await page.goto("/game.html?level=beginner", {
     waitUntil: "domcontentloaded",
@@ -52,6 +65,8 @@ async function setupPowerUpPage(page, inventory = null) {
 
 
 async function dismissHowToPlayModal(page) {
+  await ensureLandscapeGameplayViewport(page);
+
   const modal = page.locator("#how-to-play-modal");
   const startButton = page.locator("#start-game-btn");
 
@@ -450,52 +465,48 @@ test.describe("Power-Up Compact Layout", () => {
   });
 });
 
-test.describe("Power-Up Mobile Control Separation", () => {
+test.describe("Power-Up Portrait Rotation Contract", () => {
   test.use({ viewport: { width: 412, height: 915 } });
 
-  test.beforeEach(async ({ page }) => {
-    await setupPowerUpPage(page);
-  });
-
-  test("keeps the tray above the Help and Clarify controls on portrait mobile", async ({
+  test("keeps portrait phones behind the rotate gate before power-up gameplay can start", async ({
     page,
-  }) => {
-    const layout = await page.evaluate(() => {
-      const display = document.getElementById("power-up-display");
-      const controls = document.querySelector(".panel-b-controls");
-      const panelB = document.getElementById("panel-b");
-      const problem = document.getElementById("problem-container");
-      const displayRect = display?.getBoundingClientRect();
-      const controlsRect = controls?.getBoundingClientRect();
-      const panelBRect = panelB?.getBoundingClientRect();
-      const problemRect = problem?.getBoundingClientRect();
+  }, testInfo) => {
+    test.skip(
+      !["pixel-7", "iphone-13"].includes(testInfo.project.name),
+      "This portrait mobile contract is only enforced on touch-phone projects.",
+    );
 
-      if (!displayRect || !controlsRect || !panelBRect || !problemRect) {
-        return null;
-      }
-
-      return {
-        displayTop: displayRect.top,
-        displayBottom: displayRect.bottom,
-        displayLeft: displayRect.left,
-        displayRight: displayRect.right,
-        controlsTop: controlsRect.top,
-        controlsBottom: controlsRect.bottom,
-        gap: controlsRect.top - displayRect.bottom,
-        panelBTop: panelBRect.top,
-        panelBLeft: panelBRect.left,
-        panelBRight: panelBRect.right,
-        problemBottom: problemRect.bottom,
-      };
+    await page.goto("/game.html?level=beginner", {
+      waitUntil: "domcontentloaded",
     });
 
-    expect(layout).not.toBeNull();
-    expect(layout.displayTop).toBeGreaterThanOrEqual(layout.panelBTop);
-    expect(layout.displayLeft).toBeGreaterThanOrEqual(layout.panelBLeft - 1);
-    expect(layout.displayRight).toBeLessThanOrEqual(layout.panelBRight + 1);
-    expect(layout.displayTop).toBeGreaterThan(layout.problemBottom);
-    expect(layout.displayBottom).toBeLessThanOrEqual(layout.controlsTop);
-    expect(layout.gap).toBeGreaterThanOrEqual(0);
+    await page.waitForFunction(() => {
+      const coordinator = window.GameRuntimeCoordinator?.getState?.();
+      return Boolean(
+        document.body.classList.contains("viewport-rotate-required") &&
+          coordinator?.inputLocked === true,
+      );
+    });
+
+    const state = await page.evaluate(() => ({
+      bodyClasses: document.body.className,
+      runtimeState: window.GameRuntimeCoordinator?.getState?.() ?? null,
+      overlayHidden:
+        document.getElementById("rotation-overlay")?.getAttribute("aria-hidden"),
+    }));
+
+    expect(state.bodyClasses).toContain("viewport-rotate-required");
+    expect(state.runtimeState).toEqual(
+      expect.objectContaining({
+        briefingDismissed: false,
+        gameplayReady: false,
+        inputLocked: true,
+        inputLocks: expect.objectContaining({
+          "rotation-required": true,
+        }),
+      }),
+    );
+    expect(state.overlayHidden).toBe("false");
   });
 });
 

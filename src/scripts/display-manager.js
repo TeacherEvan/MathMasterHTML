@@ -160,6 +160,9 @@ class DisplayManager {
       problemContainer: document.getElementById("problem-container"),
       backButton: document.getElementById("back-button"),
       helpButton: document.getElementById("help-button"),
+      startGameButton: document.getElementById("start-game-btn"),
+      rotationOverlay: document.getElementById("rotation-overlay"),
+      howToPlayModal: document.getElementById("how-to-play-modal"),
       resolutionIndicator: document.getElementById("resolution-indicator"),
     };
     console.log("📦 DOM elements cached for performance");
@@ -288,6 +291,47 @@ class DisplayManager {
     );
   }
 
+  syncRotationInputLock(detected) {
+    window.GameRuntimeCoordinator?.setInputLock?.(
+      "rotation-required",
+      detected.shouldShowRotationOverlay,
+    );
+  }
+
+  syncRotationOverlayAccessibility(detected) {
+    const overlay = this.domCache.rotationOverlay;
+
+    if (!(overlay instanceof HTMLElement)) {
+      return;
+    }
+
+    overlay.setAttribute(
+      "aria-hidden",
+      String(!detected.shouldShowRotationOverlay),
+    );
+
+    if (detected.shouldShowRotationOverlay) {
+      overlay.focus({ preventScroll: true });
+      return;
+    }
+
+    if (document.activeElement !== overlay) {
+      return;
+    }
+
+    const howToPlayModal = this.domCache.howToPlayModal;
+    const briefingVisible =
+      howToPlayModal instanceof HTMLElement &&
+      window.getComputedStyle(howToPlayModal).display !== "none";
+    const focusTarget = briefingVisible
+      ? this.domCache.startGameButton
+      : this.domCache.helpButton;
+
+    if (focusTarget instanceof HTMLElement) {
+      focusTarget.focus({ preventScroll: true });
+    }
+  }
+
   detectAndApply() {
     const detected = this.detectResolution();
     this.currentResolution = detected;
@@ -302,6 +346,8 @@ class DisplayManager {
 
     // Apply shared viewport/body contract
     this.updateViewportClasses(detected);
+    this.syncRotationInputLock(detected);
+    this.syncRotationOverlayAccessibility(detected);
 
     // Apply CSS variables for dynamic scaling
     document.documentElement.style.setProperty(
