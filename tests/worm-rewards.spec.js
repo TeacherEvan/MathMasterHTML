@@ -46,36 +46,41 @@ test.describe("Worm rewards", () => {
       .toBeGreaterThanOrEqual(before + 1000);
   });
 
-  test("muffin button resolves from keyboard activation", async ({ page }) => {
-    await page.evaluate(() => {
-      document.dispatchEvent(
-        new CustomEvent("wormExploded", {
-          detail: {
-            wormId: "test-worm-keyboard",
-            x: 240,
-            y: 240,
-            isRainKill: false,
-            isChainReaction: false,
-            wasPurple: false,
-          },
-        }),
-      );
+  for (const { name, key } of [
+    { name: "Enter", key: "Enter" },
+    { name: "Space", key: " " },
+  ]) {
+    test(`muffin button resolves from ${name} keyboard activation`, async ({ page }) => {
+      await page.evaluate((wormId) => {
+        document.dispatchEvent(
+          new CustomEvent("wormExploded", {
+            detail: {
+              wormId,
+              x: 240,
+              y: 240,
+              isRainKill: false,
+              isChainReaction: false,
+              wasPurple: false,
+            },
+          }),
+        );
+      }, `test-worm-keyboard-${name.toLowerCase()}`);
+
+      const muffin = page.locator(".worm-muffin-reward");
+      await expect(muffin).toBeVisible();
+
+      const before = await page.evaluate(readScore);
+      await muffin.focus();
+      await expect(muffin).toBeFocused();
+      await page.keyboard.press(key);
+
+      await expect(page.locator(".worm-muffin-reward")).toHaveCount(0);
+      await expect(page.locator(".muffin-shoutout")).toBeVisible();
+      await expect
+        .poll(() => page.evaluate(readScore), { timeout: 10000 })
+        .toBeGreaterThanOrEqual(before + 1000);
     });
-
-    const muffin = page.locator(".worm-muffin-reward");
-    await expect(muffin).toBeVisible();
-
-    const before = await page.evaluate(readScore);
-    await muffin.focus();
-    await expect(muffin).toBeFocused();
-    await page.keyboard.press("Enter");
-
-    await expect(page.locator(".worm-muffin-reward")).toHaveCount(0);
-    await expect(page.locator(".muffin-shoutout")).toBeVisible();
-    await expect
-      .poll(() => page.evaluate(readScore), { timeout: 10000 })
-      .toBeGreaterThanOrEqual(before + 1000);
-  });
+  }
 
   test("purple rain kill grants 50000, 2 powerups, and muffin spawn", async ({
     page,

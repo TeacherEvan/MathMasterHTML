@@ -47,6 +47,9 @@ class UIBoundaryManager {
 
     // Interval ID for periodic checks
     this._checkIntervalId = null;
+    this._onOrientationChange = null;
+    this._onDisplayResolutionChanged = null;
+    this._displayResolutionChangedEventName = null;
 
     // Bind methods
     this._onResize = this._onResize.bind(this);
@@ -61,10 +64,20 @@ class UIBoundaryManager {
    */
   _init() {
     // Listen for window resize
-    window.addEventListener("resize", this._onResize);
-    window.addEventListener("orientationchange", () => {
+    const GameEvents = window.GameEvents || {
+      DISPLAY_RESOLUTION_CHANGED: "displayResolutionChanged",
+    };
+    this._displayResolutionChangedEventName =
+      GameEvents.DISPLAY_RESOLUTION_CHANGED;
+    this._onOrientationChange = () => {
       setTimeout(this._onResize, 100);
-    });
+    };
+    this._onDisplayResolutionChanged = () => {
+      this._onResize();
+    };
+
+    window.addEventListener("resize", this._onResize);
+    window.addEventListener("orientationchange", this._onOrientationChange);
 
     // Start periodic overlap checks if enabled
     if (this.config.enablePeriodic) {
@@ -72,12 +85,10 @@ class UIBoundaryManager {
     }
 
     // Listen for display resolution changes
-    const GameEvents = window.GameEvents || {
-      DISPLAY_RESOLUTION_CHANGED: "displayResolutionChanged",
-    };
-    document.addEventListener(GameEvents.DISPLAY_RESOLUTION_CHANGED, () => {
-      this._onResize();
-    });
+    document.addEventListener(
+      this._displayResolutionChangedEventName,
+      this._onDisplayResolutionChanged,
+    );
 
     console.log("📐 UIBoundaryManager initialized", this.config);
   }

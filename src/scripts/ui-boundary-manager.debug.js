@@ -158,6 +158,18 @@ console.log("📐 UIBoundaryManager debug loading...");
    */
   proto.destroy = function destroy() {
     window.removeEventListener("resize", this._onResize);
+    if (this._onOrientationChange) {
+      window.removeEventListener("orientationchange", this._onOrientationChange);
+    }
+    if (
+      this._displayResolutionChangedEventName &&
+      this._onDisplayResolutionChanged
+    ) {
+      document.removeEventListener(
+        this._displayResolutionChangedEventName,
+        this._onDisplayResolutionChanged,
+      );
+    }
     this.stopPeriodicCheck();
     this.elements.clear();
     console.log("📐 UIBoundaryManager destroyed");
