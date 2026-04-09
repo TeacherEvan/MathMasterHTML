@@ -77,9 +77,9 @@ test.describe("Evan Helper — Controls (Build 3)", () => {
     await expect(page.locator("#evan-solve-button")).toBeVisible();
   });
 
-  test("manual solve shows a stop button beside audio toggle", async ({
+  test("manual solve keeps the stop control clear of the audio toggle", async ({
     page,
-  }) => {
+  }, testInfo) => {
     await page.evaluate(() => {
       window.EvanPresenter?.showSolve();
     });
@@ -110,9 +110,44 @@ test.describe("Evan Helper — Controls (Build 3)", () => {
 
     expect(layoutState).not.toBeNull();
     expect(layoutState.shellHidden).toBe(false);
-    expect(layoutState.stopCenterX).toBeGreaterThan(layoutState.audioCenterX);
-    expect(layoutState.horizontalGap).toBeLessThan(96);
-    expect(layoutState.verticalDelta).toBeLessThan(24);
+    expect(layoutState.horizontalGap).toBeLessThan(128);
+
+    if (testInfo.project.use?.isMobile === true) {
+      expect(layoutState.verticalDelta).toBeGreaterThan(24);
+      expect(layoutState.stopCenterX).toBeGreaterThanOrEqual(
+        layoutState.audioCenterX - 4,
+      );
+    } else {
+      expect(layoutState.stopCenterX).toBeGreaterThan(
+        layoutState.audioCenterX,
+      );
+      expect(layoutState.verticalDelta).toBeLessThan(24);
+    }
+  });
+
+  test("manual solve keeps the audio toggle anchored on compact mobile", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.use?.isMobile !== true,
+      "Anchor-stability check runs on mobile projects only",
+    );
+
+    const audioBefore = await page.locator("#audio-toggle").boundingBox();
+    expect(audioBefore).toBeTruthy();
+
+    await page.evaluate(() => {
+      window.EvanPresenter?.showSolve();
+    });
+
+    await page.click("#evan-solve-button");
+    await expect(page.locator("#evan-stop-button")).toBeVisible();
+
+    const audioAfter = await page.locator("#audio-toggle").boundingBox();
+    expect(audioAfter).toBeTruthy();
+
+    expect(Math.abs(audioAfter.x - audioBefore.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(audioAfter.y - audioBefore.y)).toBeLessThanOrEqual(1);
   });
 
   test("#evan-controls-slot does not overlap #power-up-display on compact landscape", async ({

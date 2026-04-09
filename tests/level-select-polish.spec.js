@@ -155,6 +155,49 @@ test.describe("Level select polish", () => {
     expectButtonWithinCard(resolvedActiveCardBox, resolvedActiveButtonBox);
   });
 
+  test("keeps one unmistakable launch CTA on narrow mobile", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 412, height: 915 });
+    await page.goto("/src/pages/level-select.html", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await waitForCardsToSettle(page);
+
+    const activeCard = page.locator('.level-card[data-level="beginner"]');
+    const cta = activeCard.locator(".level-button");
+    const ctaHint = activeCard.locator(".level-cta-caption");
+
+    await expect(cta).toBeVisible();
+    await expect(ctaHint).toBeVisible();
+
+    const visibleNoiseCount = await page.evaluate(() => {
+      return Array.from(
+        document.querySelectorAll(
+          ".best-score-stat, .total-score-stat, .stat[data-mobile-priority='low']",
+        ),
+      ).filter((element) => {
+        const style = window.getComputedStyle(element);
+        return style.display !== "none" && style.visibility !== "hidden";
+      }).length;
+    });
+
+    expect(visibleNoiseCount).toBe(0);
+
+    const [activeCardBox, ctaBox] = await Promise.all([
+      activeCard.boundingBox(),
+      cta.boundingBox(),
+    ]);
+
+    const resolvedActiveCardBox = expectDefined(activeCardBox);
+    const resolvedCtaBox = expectDefined(ctaBox);
+
+    expect(resolvedActiveCardBox.y).toBeGreaterThanOrEqual(0);
+    expect(resolvedCtaBox.y + resolvedCtaBox.height).toBeLessThanOrEqual(915);
+    expect(resolvedCtaBox.height).toBeGreaterThanOrEqual(48);
+  });
+
   test("switches the visible route panel when a compact selector button is pressed", async ({
     page,
   }) => {

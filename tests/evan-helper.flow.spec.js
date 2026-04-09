@@ -188,6 +188,44 @@ test.describe("Evan Flow Controller — Build 4", () => {
     );
   });
 
+  test("auto Evan explains the temporary demo lock and clears it after skip on mobile", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !["pixel-7", "iphone-13"].includes(testInfo.project.name),
+      "This startup UX contract is enforced on the mobile projects.",
+    );
+
+    await ensureLandscapeViewport(page);
+    await resetOnboardingState(page, "?level=beginner&evan=auto&preload=off");
+    await dismissBriefing(page);
+
+    const status = page.locator("#evan-assist-status");
+    const panelC = page.locator("#panel-c");
+
+    await page.waitForFunction(
+      () => {
+        const btn = document.getElementById("evan-skip-button");
+        return btn && !btn.hidden && document.body.classList.contains("evan-input-locked");
+      },
+      { timeout: 8000 },
+    );
+
+    await expect(status).toBeVisible();
+    await expect(status).toContainText("Skip to take over");
+    await expect(panelC).toHaveAttribute("aria-disabled", "true");
+
+    await page.click("#evan-skip-button");
+
+    await page.waitForFunction(
+      () => !document.body.classList.contains("evan-input-locked"),
+      { timeout: 5000 },
+    );
+
+    await expect(status).toBeHidden();
+    await expect(panelC).toHaveAttribute("aria-disabled", "false");
+  });
+
   test("after skip, consumed state persists", async ({ page }) => {
     await resetOnboardingState(page, "?level=beginner&evan=auto&preload=off");
     await dismissBriefing(page);

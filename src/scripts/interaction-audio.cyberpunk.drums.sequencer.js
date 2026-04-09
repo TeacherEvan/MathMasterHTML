@@ -17,6 +17,7 @@
 
   const { DRUM_PATTERNS, STEP_DURATION, LOOKAHEAD_MS, SCHEDULE_AHEAD_S } =
     drumConfig;
+  const DEFAULT_DRUM_GAIN = 0.05;
   const originalInit = proto.init;
   const originalDestroy = proto.destroy;
 
@@ -38,7 +39,7 @@
       };
       this._boundDrumMuteStateChange = (event) => {
         if (this._drumGain && this.context) {
-          const nextGain = event.detail?.muted ? 0 : 0.03;
+          const nextGain = event.detail?.muted ? 0 : DEFAULT_DRUM_GAIN;
           this._drumGain.gain.cancelScheduledValues(this.context.currentTime);
           this._drumGain.gain.setValueAtTime(
             nextGain,
@@ -64,7 +65,7 @@
     const context = this._ensureContext();
     if (!context || !this.masterGain) return null;
     this._drumGain = context.createGain();
-    this._drumGain.gain.value = this.isMuted ? 0 : 0.03;
+    this._drumGain.gain.value = this.isMuted ? 0 : DEFAULT_DRUM_GAIN;
     this._drumGain.connect(this.masterGain);
     return this._drumGain;
   };

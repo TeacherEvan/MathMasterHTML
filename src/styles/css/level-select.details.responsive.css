@@ -1,5 +1,35 @@
 /* Responsive Design */
+@keyframes level-cta-pulse {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+
+  70% {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+
+.level-description-mobile,
+.level-cta-caption {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  .level-description-desktop {
+    display: none;
+  }
+
+  .level-description-mobile {
+    display: inline;
+  }
+
   .header {
     padding: 1.15rem 1rem 0;
     gap: 0.45rem;
@@ -55,6 +85,7 @@
       "title icon"
       "description stats"
       "progress progress"
+      "cta cta"
       "button button";
     padding: 1rem;
     gap: 0.7rem 0.85rem;
@@ -90,6 +121,12 @@
     align-self: start;
   }
 
+  .level-card .best-score-stat,
+  .level-card .total-score-stat,
+  .level-card .stat[data-mobile-priority="low"] {
+    display: none;
+  }
+
   .stat {
     padding: 0.62rem 0.58rem;
     border-radius: 14px;
@@ -115,10 +152,39 @@
 
   .level-button {
     grid-area: button;
-    min-height: 2.8rem;
+    min-height: 3rem;
     padding: 0.8rem 1rem;
     font-size: 0.68rem;
     letter-spacing: 0.18em;
+  }
+
+  .level-card.is-active .level-button {
+    position: relative;
+    box-shadow:
+      0 0 0 2px rgba(255, 255, 255, 0.16),
+      0 0 18px color-mix(in srgb, var(--level-accent) 45%, transparent);
+  }
+
+  .level-card.is-active .level-button::after {
+    content: "";
+    position: absolute;
+    inset: -0.25rem;
+    border-radius: inherit;
+    border: 2px solid color-mix(in srgb, var(--level-accent) 82%, white);
+    animation: level-cta-pulse 1.6s ease-out infinite;
+    pointer-events: none;
+  }
+
+  .level-cta-caption {
+    grid-area: cta;
+    display: block;
+    margin: 0;
+    font-family: var(--level-font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--level-accent) 78%, var(--level-text-0));
   }
 
   .navigation {
@@ -169,6 +235,7 @@
       "description"
       "stats"
       "progress"
+      "cta"
       "button";
     gap: 0.65rem;
     padding: 0.9rem;
@@ -184,5 +251,11 @@
 
   .navigation {
     padding: 0 1rem 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-card.is-active .level-button::after {
+    animation: none;
   }
 }

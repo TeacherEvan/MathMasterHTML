@@ -1,16 +1,16 @@
 (function () {
   const shell = document.getElementById("evan-assist-shell");
   const hand = document.getElementById("evan-hand");
+  const status = document.getElementById("evan-assist-status");
   const skipBtn = document.getElementById("evan-skip-button");
   const stopBtn = document.getElementById("evan-stop-button");
   const solveSlot = document.getElementById("evan-controls-slot");
+  const panelC = document.getElementById("panel-c");
 
   const reducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   ).matches;
   const handTransition = reducedMotion ? "none" : "transform 0.2s ease";
-
-  if (hand) hand.style.transition = handTransition;
 
   function getActiveExitButton() {
     if (stopBtn && !stopBtn.hidden) return stopBtn;
@@ -22,9 +22,36 @@
     return Boolean(getActiveExitButton());
   }
 
+  function updatePanelCLockedState(locked) {
+    if (!panelC) return;
+
+    const nextLocked = Boolean(locked);
+    panelC.setAttribute("aria-disabled", String(nextLocked));
+
+    if (nextLocked && status && !status.hidden) {
+      panelC.setAttribute("aria-describedby", "evan-assist-status");
+      return;
+    }
+
+    panelC.removeAttribute("aria-describedby");
+  }
+
+  function setAssistStatus(message) {
+    if (!status) return;
+
+    const nextMessage = typeof message === "string" ? message.trim() : "";
+    status.hidden = nextMessage.length === 0;
+    status.textContent = nextMessage;
+    updatePanelCLockedState(
+      window.GameRuntimeCoordinator?.getState?.().inputLocked ??
+        document.body.classList.contains("evan-input-locked"),
+    );
+  }
+
   function setInputLock(locked) {
     window.GameRuntimeCoordinator?.setInputLock?.("evan-auto", locked);
     document.body.classList.toggle("evan-input-locked", locked);
+    updatePanelCLockedState(locked);
     if (locked) {
       getActiveExitButton()?.focus({ preventScroll: true });
     }
@@ -82,6 +109,9 @@
     event.stopImmediatePropagation();
   }
 
+  if (hand) hand.style.transition = handTransition;
+  updatePanelCLockedState(false);
+
   window.addEventListener("pointerdown", guardLockedUserInput, true);
   window.addEventListener("click", guardLockedUserInput, true);
   window.addEventListener("keydown", guardLockedUserInput, true);
@@ -102,6 +132,7 @@
     shell.setAttribute("aria-hidden", "true");
     document.body.classList.remove("evan-help-active");
     document.body.classList.remove("evan-stop-visible");
+    setAssistStatus("");
     setInputLock(false);
   }
 
@@ -109,11 +140,15 @@
     if (skipBtn) {
       skipBtn.hidden = false;
     }
+    setAssistStatus("Evan demo in progress. Skip to take over.");
     setInputLock(true);
   }
 
   function hideSkip() {
     if (skipBtn) skipBtn.hidden = true;
+    if (!stopBtn || stopBtn.hidden) {
+      setAssistStatus("");
+    }
     if (!hasVisibleExitControl()) setInputLock(false);
   }
 
@@ -122,12 +157,16 @@
       stopBtn.hidden = false;
       document.body.classList.add("evan-stop-visible");
     }
+    setAssistStatus("Evan is solving. Press Stop to take over.");
     setInputLock(true);
   }
 
   function hideStop() {
     if (stopBtn) stopBtn.hidden = true;
     document.body.classList.remove("evan-stop-visible");
+    if (!skipBtn || skipBtn.hidden) {
+      setAssistStatus("");
+    }
     if (!hasVisibleExitControl()) setInputLock(false);
   }
 

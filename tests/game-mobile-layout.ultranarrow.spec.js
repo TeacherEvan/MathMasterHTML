@@ -66,6 +66,7 @@ test.describe("Gameplay ultra-narrow embedded landscape layout", () => {
           height: rect.height,
           display: style.display,
           position: style.position,
+          transform: style.transform,
           gridAutoFlow: style.gridAutoFlow,
           gridTemplateColumns: style.gridTemplateColumns,
           gridTemplateRows: style.gridTemplateRows,
@@ -115,8 +116,17 @@ test.describe("Gameplay ultra-narrow embedded landscape layout", () => {
     expect(layout.consoleSlot.height).toBeGreaterThanOrEqual(44);
     expect(layout.help.height).toBeGreaterThanOrEqual(44);
     expect(layout.clarify.height).toBeGreaterThanOrEqual(44);
+    expect(layout.help.right).toBeLessThanOrEqual(layout.viewport.width + 1);
+    expect(layout.clarify.right).toBeLessThanOrEqual(
+      layout.viewport.width + 1,
+    );
+    expect(Math.abs(layout.help.top - layout.clarify.top)).toBeLessThanOrEqual(
+      8,
+    );
     expect(layout.back.height).toBeGreaterThanOrEqual(44);
     expect(layout.audio.height).toBeGreaterThanOrEqual(44);
+    expect(layout.back.transform).toBe("none");
+    expect(layout.audio.transform).toBe("none");
     expect(layout.back.right).toBeLessThanOrEqual(layout.viewport.width + 1);
     expect(layout.audio.right).toBeLessThanOrEqual(layout.viewport.width + 1);
     expect(layout.back.bottom).toBeLessThanOrEqual(layout.viewport.height + 1);

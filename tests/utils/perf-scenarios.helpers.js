@@ -4,6 +4,10 @@ const WRONG_SYMBOL = "@";
 const FALLING_SYMBOL_SELECTOR = "#panel-c .falling-symbol:not(.clicked)";
 const HIDDEN_SYMBOL_SELECTOR = "#solution-container .hidden-symbol";
 
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 async function getCurrentStepSnapshot(page) {
   return page.evaluate((hiddenSelector) => {
     const firstHiddenSymbol = document.querySelector(hiddenSelector);
@@ -66,21 +70,37 @@ async function waitForFallingSymbolText(page, matcher, timeoutMs = 5000) {
 
 async function clickFallingSymbolByText(page, symbolText, timeoutMs = 5000) {
   const deadline = Date.now() + timeoutMs;
+  const exactText = new RegExp(`^${escapeRegExp(symbolText)}$`);
 
   while (Date.now() < deadline) {
-    const symbolIndex = await page.evaluate(
-      ({ selector, symbol }) => {
-        return Array.from(document.querySelectorAll(selector)).findIndex(
-          (element) => element.textContent?.trim() === symbol,
-        );
-      },
-      { selector: FALLING_SYMBOL_SELECTOR, symbol: symbolText },
-    );
+    const matchingSymbols = page
+      .locator(FALLING_SYMBOL_SELECTOR)
+      .filter({ hasText: exactText });
 
-    if (symbolIndex >= 0) {
-      const symbolLocator = page.locator(FALLING_SYMBOL_SELECTOR).nth(symbolIndex);
+    if ((await matchingSymbols.count()) > 0) {
+      const symbolLocator = matchingSymbols.last();
+
       try {
-        await symbolLocator.click({ force: true, timeout: 1000 });
+        await symbolLocator.dispatchEvent("pointerdown", {
+          bubbles: true,
+          cancelable: true,
+          pointerType: "touch",
+          isPrimary: true,
+          button: 0,
+          buttons: 1,
+        });
+        await page.evaluate(() => {
+          window.dispatchEvent(
+            new PointerEvent("pointerup", {
+              bubbles: true,
+              cancelable: true,
+              pointerType: "touch",
+              isPrimary: true,
+              button: 0,
+              buttons: 0,
+            }),
+          );
+        });
         return true;
       } catch {
         // Falling symbols move quickly; retry until timeout if this instance moved away.

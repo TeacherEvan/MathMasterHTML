@@ -293,9 +293,9 @@ test.describe("UI Boundary Management", () => {
     console.log("✅ Mobile layout maintains HUD separation");
   });
 
-  test("Manual Evan stop button should sit beside audio without overlap", async ({
+  test("Manual Evan stop button should stay clear of audio without overlap", async ({
     page,
-  }) => {
+  }, testInfo) => {
     await page.evaluate(() => {
       window.GameOnboardingStorage?.markEvanConsumed?.("beginner", "completed");
       window.EvanPresenter?.show?.();
@@ -310,7 +310,19 @@ test.describe("UI Boundary Management", () => {
     expect(stopBox).toBeTruthy();
     expect(audioBox).toBeTruthy();
     expect(boxesOverlap(stopBox, audioBox, 0)).toBe(false);
-    expect(stopBox.x).toBeGreaterThan(audioBox.x + audioBox.width - 4);
+
+    if (testInfo.project.use?.isMobile === true) {
+      const viewport = page.viewportSize();
+      expect(viewport).not.toBeNull();
+      expect(stopBox.x + stopBox.width).toBeLessThanOrEqual(
+        viewport.width + 1,
+      );
+      expect(stopBox.y + stopBox.height).toBeLessThanOrEqual(
+        viewport.height + 1,
+      );
+    } else {
+      expect(stopBox.x).toBeGreaterThan(audioBox.x + audioBox.width - 4);
+    }
   });
 });
 

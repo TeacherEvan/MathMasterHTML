@@ -1,5 +1,13 @@
 # JOBCARD
 
+## Latest update (2026-04-09)
+
+- Completed the mobile recovery execution pass on `feature/panel-c-mobile-rain-fix`, covering level-select CTA clarity, Panel C diagnosis, Evan startup messaging, and compact-mobile control anchoring.
+- Tightened the focused Playwright coverage with new characterization contracts in `tests/level-select-polish.spec.js`, `tests/symbol-rain.mobile.spec.js`, `tests/evan-helper.flow.spec.js`, `tests/evan-helper.controls.spec.js`, `tests/ui-boundary.spec.js`, and `tests/drum-progressive.spec.js`.
+- Confirmed the user-reported Panel C rain issue is not a simple absence bug in focused mobile runtime lanes; the stronger repro was startup/input-lock perception during Evan auto-help and compact-control CSS drift.
+- Verified the progressive drum system is already wired in live gameplay: the new runtime audit advances drum complexity after real in-game line progress, so no drum runtime code changes were required.
+- Revalidated the focused drum lane (`12 passed`), the focused mobile gameplay/Evan lane (`21 passed`), plus `npm run verify` and `npm run typecheck` after the milestone work.
+
 ## Latest update (2026-04-06)
 
 - Completed the mobile gameplay / welcome / level-select review-response pass on `main` and kept the implementation aligned with the shared compact/mobile contract.

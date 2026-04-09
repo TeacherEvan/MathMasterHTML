@@ -40,6 +40,26 @@ body.evan-input-locked #evan-assist-shell {
     opacity: 0.8;
 }
 
+#evan-assist-status {
+    position: fixed;
+    right: 12px;
+    bottom: 64px;
+    max-width: min(18rem, calc(100vw - 24px));
+    padding: 0.6rem 0.75rem;
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    border-radius: 14px;
+    background: rgba(5, 10, 7, 0.92);
+    color: #f4efc9;
+    font-family: var(--font-display, "Orbitron", monospace);
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.45;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.28);
+    pointer-events: none;
+}
+
 #evan-hand {
     position: fixed;
     top: 0;
@@ -155,6 +175,12 @@ body.viewport-compact #evan-controls-slot {
     justify-content: flex-end;
 }
 
+body.viewport-compact #evan-assist-status {
+    right: 8px;
+    bottom: 58px;
+    max-width: min(15rem, calc(100vw - 16px));
+}
+
 body.viewport-compact #evan-solve-button {
     min-width: 0;
     width: 100%;
@@ -198,7 +224,17 @@ body.viewport-compact.viewport-landscape #evan-controls-slot {
     bottom: 8px;
 }
 
-body.viewport-compact.viewport-landscape #evan-stop-button,
+body.viewport-compact.viewport-landscape #evan-assist-status {
+    right: 8px;
+    bottom: 58px;
+    max-width: min(12rem, calc(100vw - 16px));
+}
+
+body.evan-input-locked #panel-c {
+    opacity: 0.72;
+    filter: saturate(0.72);
+}
+
 body.viewport-compact.viewport-landscape #evan-skip-button {
     bottom: 6px;
     min-width: auto;
@@ -207,8 +243,21 @@ body.viewport-compact.viewport-landscape #evan-skip-button {
     font-size: 0.7rem;
 }
 
+body.viewport-compact.viewport-landscape #evan-stop-button {
+    right: 8px;
+    bottom: 58px;
+    min-width: auto;
+    min-height: 44px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.7rem;
+}
+
 body.viewport-compact.viewport-landscape.evan-stop-visible #audio-toggle {
-    right: 8.5rem;
+    right: clamp(14px, 2vw, 24px);
+}
+
+body.viewport-compact.viewport-landscape.evan-stop-visible #evan-assist-status {
+    bottom: 108px;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,10 +1,86 @@
 import { devices, expect, test } from "@playwright/test";
+import {
+  dismissBriefingAndWaitForInteractiveGameplay,
+  resetOnboardingState,
+  stopEvanHelpIfActive,
+} from "./utils/onboarding-runtime.js";
 
 test.use({
   ...devices["Pixel 7"],
   viewport: { width: 915, height: 412 },
   screen: { width: 915, height: 412 },
 });
+
+async function getCurrentStepSnapshot(page) {
+  return page.evaluate(() => {
+    const firstHidden = document.querySelector(
+      "#solution-container .hidden-symbol",
+    );
+    if (!firstHidden) {
+      return { stepIndex: null, hiddenSymbols: [] };
+    }
+
+    const stepIndex = firstHidden.getAttribute("data-step-index");
+    const hiddenSymbols = Array.from(
+      document.querySelectorAll(
+        `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`,
+      ),
+    )
+      .map((element) => element.textContent?.trim())
+      .filter(Boolean);
+
+    return { stepIndex, hiddenSymbols };
+  });
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+async function clickLiveMatchingSymbol(page, symbolText, timeoutMs = 3500) {
+  const deadline = Date.now() + timeoutMs;
+  const exactText = new RegExp(`^${escapeRegExp(symbolText)}$`);
+
+  while (Date.now() < deadline) {
+    const symbolLocator = page
+      .locator("#panel-c .falling-symbol:not(.clicked)")
+      .filter({ hasText: exactText })
+      .last();
+
+    if ((await symbolLocator.count()) > 0) {
+
+      try {
+        await symbolLocator.dispatchEvent("pointerdown", {
+          bubbles: true,
+          cancelable: true,
+          pointerType: "touch",
+          isPrimary: true,
+          button: 0,
+          buttons: 1,
+        });
+        await page.evaluate(() => {
+          window.dispatchEvent(
+            new PointerEvent("pointerup", {
+              bubbles: true,
+              cancelable: true,
+              pointerType: "touch",
+              isPrimary: true,
+              button: 0,
+              buttons: 0,
+            }),
+          );
+        });
+        return true;
+      } catch {
+        // Symbols move quickly on mobile; retry until the deadline expires.
+      }
+    }
+
+    await page.waitForTimeout(100);
+  }
+
+  return false;
+}
 
 test.describe("Symbol rain mobile interactions", () => {
   test("keeps responding to successive taps after pointer release", async ({
@@ -78,5 +154,152 @@ test.describe("Symbol rain mobile interactions", () => {
 
     const tapCount = await page.evaluate(() => window.__rainTapCount);
     expect(tapCount).toBe(2);
+  });
+
+  test("shows a live falling symbol in Panel C after gameplay becomes interactive", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !["pixel-7", "iphone-13"].includes(testInfo.project.name),
+      "This contract is only enforced on the mobile projects.",
+    );
+
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    await expect(page.locator("#panel-c")).toBeVisible();
+    await page.locator("#panel-c .falling-symbol").first().waitFor({
+      state: "visible",
+      timeout: 4000,
+    });
+  });
+
+  test("default boot keeps rain visible even while Evan auto-help locks gameplay input", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !["pixel-7", "iphone-13"].includes(testInfo.project.name),
+      "This contract is only enforced on the mobile projects.",
+    );
+
+    await resetOnboardingState(page, "?level=beginner&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    await expect(page.locator("#evan-skip-button")).toBeVisible();
+
+    const state = await page.evaluate(async () => {
+      const firstSymbol = document.querySelector("#panel-c .falling-symbol");
+      return {
+        gameplayInputReady:
+          window.GameRuntimeCoordinator?.canAcceptGameplayInput?.() ?? null,
+        inputLocked:
+          window.GameRuntimeCoordinator?.getState?.().inputLocked ?? null,
+        rainVisible: Boolean(firstSymbol),
+      };
+    });
+
+    expect(state.gameplayInputReady).toBe(false);
+    expect(state.inputLocked).toBe(true);
+    expect(state.rainVisible).toBe(true);
+  });
+
+  test("skipping Evan restores live Panel C target interaction on default boot", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !["pixel-7", "iphone-13"].includes(testInfo.project.name),
+      "This contract is only enforced on the mobile projects.",
+    );
+
+    await resetOnboardingState(page, "?level=beginner&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+    await stopEvanHelpIfActive(page);
+
+    const before = await getCurrentStepSnapshot(page);
+    const targetSymbol = before.hiddenSymbols[0];
+
+    expect(targetSymbol).toBeTruthy();
+
+    const clicked = await clickLiveMatchingSymbol(page, targetSymbol);
+    expect(clicked).toBe(true);
+
+    await page.waitForFunction(
+      ({ stepIndex, previousHiddenCount, symbol }) => {
+        if (stepIndex == null) {
+          return false;
+        }
+
+        const remaining = Array.from(
+          document.querySelectorAll(
+            `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`,
+          ),
+        )
+          .map((element) => element.textContent?.trim())
+          .filter(Boolean);
+
+        return (
+          remaining.length < previousHiddenCount || !remaining.includes(symbol)
+        );
+      },
+      {
+        stepIndex: before.stepIndex,
+        previousHiddenCount: before.hiddenSymbols.length,
+        symbol: targetSymbol,
+      },
+      { timeout: 5000 },
+    );
+  });
+
+  test("keeps the active hidden symbol raining as a live Panel C target on mobile", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !["pixel-7", "iphone-13"].includes(testInfo.project.name),
+      "This contract is only enforced on the mobile projects.",
+    );
+
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    await page.locator("#panel-c .falling-symbol").first().waitFor({
+      state: "visible",
+      timeout: 10000,
+    });
+
+    for (let revealIndex = 0; revealIndex < 5; revealIndex += 1) {
+      const before = await getCurrentStepSnapshot(page);
+      const targetSymbol = before.hiddenSymbols[0];
+
+      expect(targetSymbol).toBeTruthy();
+
+      const clicked = await clickLiveMatchingSymbol(page, targetSymbol);
+      expect(clicked).toBe(true);
+
+      await page.waitForFunction(
+        ({ stepIndex, previousHiddenCount, symbol }) => {
+          if (stepIndex == null) {
+            return false;
+          }
+
+          const remaining = Array.from(
+            document.querySelectorAll(
+              `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`,
+            ),
+          )
+            .map((element) => element.textContent?.trim())
+            .filter(Boolean);
+
+          return (
+            remaining.length < previousHiddenCount || !remaining.includes(symbol)
+          );
+        },
+        {
+          stepIndex: before.stepIndex,
+          previousHiddenCount: before.hiddenSymbols.length,
+          symbol: targetSymbol,
+        },
+        { timeout: 5000 },
+      );
+    }
   });
 });
