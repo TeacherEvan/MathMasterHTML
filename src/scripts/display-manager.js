@@ -215,6 +215,10 @@ class DisplayManager {
       maxTouchPoints > 0 ||
       window.matchMedia?.("(any-pointer: coarse)")?.matches === true;
     const isAndroid = /Android/i.test(userAgent);
+    const isTabletClassAndroidUa =
+      /Tablet|\bSM-T\w+\b|\bNexus (7|9|10)\b|\bPixel C\b|\bLenovo TB-[A-Z0-9]+\b/i.test(
+        userAgent,
+      );
     const isPhoneClassMobileUa = /Mobile/i.test(userAgent);
     const isWebView = /\bwv\b|; wv\)|Version\/\d+\.\d+.*Chrome\//i.test(
       userAgent,
@@ -223,10 +227,14 @@ class DisplayManager {
     return {
       hasTouchRuntime,
       isAndroid,
+      isTabletClassAndroidUa,
       isPhoneClassMobileUa,
       isWebView,
       isAndroidPhoneLikeRuntime:
-        hasTouchRuntime && isAndroid && (isPhoneClassMobileUa || isWebView),
+        hasTouchRuntime &&
+        isAndroid &&
+        !isTabletClassAndroidUa &&
+        (isPhoneClassMobileUa || isWebView),
     };
   }
 
@@ -259,6 +267,7 @@ class DisplayManager {
     const isCompactAndroidWebViewFallback =
       platformHints.isAndroidPhoneLikeRuntime &&
       !hasCoarsePointer &&
+      isLandscape &&
       width <= compactMaxWidth &&
       height <= compactLandscapeWidth;
     const isCompactViewport =
