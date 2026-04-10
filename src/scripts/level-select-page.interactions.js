@@ -158,6 +158,16 @@
   }
 
   function handleKeydown(event) {
+    if (window.LevelSelectPage?.isSettingsOpen?.()) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        window.LevelSelectPage.closeSettings?.();
+      } else if (event.key === "Backspace") {
+        event.preventDefault();
+      }
+      return;
+    }
+
     const selectedCard = (() => {
       switch (event.key) {
         case "1":

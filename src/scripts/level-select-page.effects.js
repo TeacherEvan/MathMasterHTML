@@ -25,7 +25,8 @@
 
   function prefersReducedMotion() {
     return Boolean(
-      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches,
+      window.UserSettings?.getSettings?.()?.display?.reducedMotion ||
+        window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches,
     );
   }
 
@@ -88,6 +89,10 @@
 
   function initEffects() {
     window.addEventListener("resize", handleResize);
+    document.addEventListener(
+      window.GameEvents?.USER_SETTINGS_CHANGED || "userSettingsChanged",
+      createMatrixRain,
+    );
 
     if (document.readyState === "loading") {
       window.addEventListener("load", handleLoad, { once: true });
@@ -100,6 +105,10 @@
     clearTimeout(state.resizeTimer);
     window.removeEventListener("load", handleLoad);
     window.removeEventListener("resize", handleResize);
+    document.removeEventListener(
+      window.GameEvents?.USER_SETTINGS_CHANGED || "userSettingsChanged",
+      createMatrixRain,
+    );
   }
 
   window.LevelSelectPage = window.LevelSelectPage || {};

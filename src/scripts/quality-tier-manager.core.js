@@ -14,6 +14,7 @@ class QualityTierManager {
     this.currentTier = null;
     this.settings = null;
     this.detectedTier = null;
+    this.userOverrideTier = null;
     this.listeners = new Set();
 
     this.init();
@@ -21,14 +22,29 @@ class QualityTierManager {
 
   init() {
     this.detectedTier = this.detectTier();
-    this.currentTier = this.detectedTier;
+    this.userOverrideTier = this.getUserOverrideTier();
+    this.currentTier = this.userOverrideTier || this.detectedTier;
     this.settings = this.getSettingsForTier(this.currentTier);
     this.applySettings();
 
     // Listen for reduced motion preference changes
     this.setupReducedMotionListener();
+    this.setupUserSettingsListener();
 
     console.log(`🎮 Quality Tier: ${this.currentTier.toUpperCase()}`);
+  }
+
+  getUserOverrideTier() {
+    const qualityMode =
+      window.UserSettings?.getSettings?.()?.display?.qualityMode || "auto";
+
+    if (qualityMode === "auto") {
+      return null;
+    }
+
+    return Object.values(QUALITY_TIERS).includes(qualityMode)
+      ? qualityMode
+      : null;
   }
 
   /**
@@ -141,6 +157,7 @@ class QualityTierManager {
         tier: this.currentTier,
         settings: { ...this.settings },
         detectedTier: this.detectedTier,
+        userOverrideTier: this.userOverrideTier,
       },
     });
     document.dispatchEvent(event);
@@ -172,6 +189,24 @@ class QualityTierManager {
         this.setTier(this.detectedTier);
       }
     });
+  }
+
+  setupUserSettingsListener() {
+    document.addEventListener(
+      window.GameEvents?.USER_SETTINGS_CHANGED || "userSettingsChanged",
+      (event) => {
+        const changedKeys = Array.isArray(event.detail?.changedKeys)
+          ? event.detail.changedKeys
+          : [];
+
+        if (!changedKeys.includes("display.qualityMode")) {
+          return;
+        }
+
+        this.userOverrideTier = this.getUserOverrideTier();
+        this.setTier(this.userOverrideTier || this.detectedTier);
+      },
+    );
   }
 
   /**

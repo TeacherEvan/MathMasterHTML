@@ -2,3 +2,266 @@
 
 @import url("/src/styles/css/level-select.polish.css");
 @import url("/src/styles/css/level-select.details.responsive.css");
+
+.settings-button,
+.settings-reset-button,
+.settings-dialog-close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.35rem;
+	min-height: 2.95rem;
+	padding: 0.9rem 1.05rem;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: rgba(255, 255, 255, 0.03);
+	color: var(--level-text-0);
+	font-family: var(--level-font-mono);
+	font-size: 0.72rem;
+	font-weight: 600;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition:
+		transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+		border-color 220ms cubic-bezier(0.16, 1, 0.3, 1),
+		color 220ms cubic-bezier(0.16, 1, 0.3, 1),
+		background 220ms cubic-bezier(0.16, 1, 0.3, 1),
+		box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-button {
+	color: var(--level-brass);
+	border-color: color-mix(
+		in srgb,
+		var(--level-brass) 24%,
+		rgba(255, 255, 255, 0.08)
+	);
+}
+
+.settings-button:hover,
+.settings-button:focus-visible,
+.settings-reset-button:hover,
+.settings-reset-button:focus-visible,
+.settings-dialog-close:hover,
+.settings-dialog-close:focus-visible {
+	transform: translateY(-1px);
+	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+}
+
+.settings-button:hover,
+.settings-button:focus-visible {
+	border-color: var(--level-brass);
+	background: color-mix(
+		in srgb,
+		var(--level-brass) 10%,
+		rgba(255, 255, 255, 0.03)
+	);
+}
+
+.settings-button:focus-visible,
+.settings-reset-button:focus-visible,
+.settings-dialog-close:focus-visible,
+.settings-field select:focus-visible,
+.settings-toggle input:focus-visible {
+	outline: 2px solid var(--level-focus);
+	outline-offset: 3px;
+}
+
+.settings-dialog-shell {
+	position: fixed;
+	inset: 0;
+	z-index: 3;
+	display: grid;
+	place-items: center;
+	padding: 1rem;
+	overflow-y: auto;
+}
+
+.settings-dialog-shell[hidden] {
+	display: none !important;
+}
+
+.settings-dialog-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(6, 9, 8, 0.72);
+	backdrop-filter: blur(10px);
+}
+
+.settings-dialog {
+	position: relative;
+	z-index: 1;
+	width: min(36rem, calc(100vw - 2rem));
+	max-height: calc(100vh - 2rem);
+	padding: clamp(1.25rem, 3vw, 1.8rem);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 28px;
+	background: linear-gradient(
+		180deg,
+		rgba(24, 29, 26, 0.98) 0%,
+		rgba(12, 15, 13, 0.98) 100%
+	);
+	box-shadow: 0 26px 64px rgba(0, 0, 0, 0.46);
+	overflow-y: auto;
+}
+
+.settings-dialog-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.settings-dialog-kicker {
+	margin: 0 0 0.4rem;
+	color: var(--level-phosphor);
+	font-family: var(--level-font-mono);
+	font-size: 0.72rem;
+	font-weight: 600;
+	letter-spacing: 0.24em;
+	text-transform: uppercase;
+}
+
+.settings-dialog-title {
+	margin: 0;
+	color: var(--level-text-0);
+	font-size: clamp(1.3rem, 3vw, 1.8rem);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.settings-dialog-copy {
+	margin: 0.9rem 0 0;
+	color: var(--level-text-1);
+	line-height: 1.55;
+}
+
+.settings-form {
+	display: grid;
+	gap: 0.95rem;
+	margin-top: 1.2rem;
+}
+
+.settings-field,
+.settings-toggle {
+	display: grid;
+	gap: 0.5rem;
+	padding: 0.95rem 1rem;
+	border-radius: 18px;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	background: rgba(255, 255, 255, 0.03);
+}
+
+.settings-field-label {
+	color: var(--level-text-0);
+	font-family: var(--level-font-mono);
+	font-size: 0.72rem;
+	font-weight: 600;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+}
+
+.settings-field select {
+	min-height: 2.9rem;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 14px;
+	background: rgba(9, 12, 11, 0.85);
+	color: var(--level-text-0);
+	font: inherit;
+	padding: 0.75rem 0.85rem;
+}
+
+.settings-toggle {
+	grid-template-columns: 1fr auto;
+	align-items: center;
+}
+
+.settings-toggle input {
+	width: 1.2rem;
+	height: 1.2rem;
+	accent-color: var(--level-phosphor);
+}
+
+.settings-dialog-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 1.2rem;
+}
+
+.settings-reset-button {
+	color: var(--level-ember);
+	border-color: color-mix(
+		in srgb,
+		var(--level-ember) 24%,
+		rgba(255, 255, 255, 0.08)
+	);
+}
+
+.settings-reset-button:hover,
+.settings-reset-button:focus-visible {
+	border-color: var(--level-ember);
+	background: color-mix(
+		in srgb,
+		var(--level-ember) 10%,
+		rgba(255, 255, 255, 0.03)
+	);
+}
+
+.settings-dialog-close {
+	color: var(--level-text-1);
+}
+
+body.settings-open {
+	overflow: hidden;
+}
+
+body.user-reduced-motion .matrix-column,
+body.user-reduced-motion .math-symbol,
+body.user-reduced-motion .ripple,
+body.user-reduced-motion .level-card,
+body.user-reduced-motion .level-button,
+body.user-reduced-motion .back-button,
+body.user-reduced-motion .reset-progress-btn,
+body.user-reduced-motion .settings-button,
+body.user-reduced-motion .settings-reset-button,
+body.user-reduced-motion .settings-dialog-close {
+	animation: none !important;
+	transition-duration: 0.01ms !important;
+}
+
+@media (max-width: 760px) {
+	.settings-dialog-shell {
+		place-items: start center;
+	}
+
+	.settings-button {
+		width: 100%;
+	}
+
+	.settings-dialog {
+		width: min(100%, 32rem);
+		max-height: calc(100vh - 1.5rem);
+		margin-block: 0.75rem;
+	}
+
+	.settings-dialog-header {
+		flex-direction: column;
+	}
+
+	.settings-dialog-close,
+	.settings-reset-button {
+		width: 100%;
+	}
+
+	.settings-dialog-actions {
+		justify-content: stretch;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.settings-dialog-backdrop,
+	.settings-dialog {
+		transition: none !important;
+	}
+}

@@ -62,6 +62,8 @@ Additions should follow the existing split convention instead of rebuilding mono
 - Problem data comes from `src/assets/problems/**/*.md`.
 - Lock visuals are injected from `lock/` HTML fragments.
 - Touch-first interactions use `pointerdown`, not delayed `click` handlers.
+- Player settings are owned by the level-select runtime and `window.UserSettings`, not by ad hoc per-feature storage keys.
+- Service-worker recovery UI belongs on safe non-gameplay surfaces such as level select/settings, not in the middle of an active run.
 
 ### 5. Prefer current code over historical docs
 
@@ -74,6 +76,14 @@ Some removed reports captured point-in-time snapshots. When in doubt, verify beh
 3. Run `npm run verify` and `npm run typecheck` before and after meaningful changes.
 4. Add targeted Playwright coverage for behavior changes.
 5. Update the relevant living docs if behavior, file structure, or developer workflow changed.
+
+## Settings and update conventions
+
+- Persist player preferences through `mathmaster_user_settings_v1` and `window.UserSettings`.
+- Use `userSettingsLoaded`, `userSettingsChanged`, and `appUpdateAvailable` from `src/scripts/constants.events.js` for cross-module communication.
+- Keep level select as the primary user-facing settings entrypoint.
+- Keep `/service-worker.js` stable, version only Math Master-owned cache names, and prefer deferred refresh prompts over forced reloads.
+- Treat `Refresh now` and `Clear cache` as recovery actions that should stay available outside gameplay.
 
 ## Debugging checklist
 

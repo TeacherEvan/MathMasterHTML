@@ -30,9 +30,12 @@
     cards: Array.from(document.querySelectorAll(".level-card")),
   };
 
-  const prefersReducedMotion = Boolean(
-    window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches,
-  );
+  function prefersReducedMotion() {
+    return Boolean(
+      window.UserSettings?.getSettings?.()?.display?.reducedMotion ||
+        window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches,
+    );
+  }
 
   function safeGetLocalStorage(key) {
     try {
@@ -130,14 +133,14 @@
         });
       }
 
-      bar.style.transition = prefersReducedMotion
+      bar.style.transition = prefersReducedMotion()
         ? "none"
         : "transform 900ms cubic-bezier(0.16, 1, 0.3, 1)";
-      bar.style.transform = prefersReducedMotion
+      bar.style.transform = prefersReducedMotion()
         ? `scaleX(${percentage / 100})`
         : "scaleX(0)";
 
-      if (!prefersReducedMotion) {
+      if (!prefersReducedMotion()) {
         setTimeout(() => {
           bar.style.transform = `scaleX(${percentage / 100})`;
         }, index * 140);
@@ -163,7 +166,7 @@
 
   function animateCards() {
     elements.cards.forEach((card, index) => {
-      if (prefersReducedMotion) {
+      if (prefersReducedMotion()) {
         card.style.opacity = "1";
         card.style.transform = "none";
         return;
@@ -190,7 +193,7 @@
     animateCards();
     setTimeout(
       animateProgress,
-      prefersReducedMotion ? 0 : CONFIG.ANIMATE_DELAY_MS,
+      prefersReducedMotion() ? 0 : CONFIG.ANIMATE_DELAY_MS,
     );
   }
 

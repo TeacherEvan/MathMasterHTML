@@ -178,9 +178,66 @@
         <button class="back-button" type="button">← Return to Welcome</button>
         <div class="navigation-meta">
             <div class="creator-credit">Created by Teacher Evan</div>
+            <button class="settings-button" type="button" aria-haspopup="dialog" aria-controls="level-select-settings-dialog"
+                aria-expanded="false">Open settings</button>
             <button class="reset-progress-btn" type="button">Reset local progress</button>
         </div>
     </footer>
+
+    <div class="settings-dialog-shell" id="level-select-settings-shell" hidden>
+        <div class="settings-dialog-backdrop" data-settings-close="backdrop"></div>
+        <section class="settings-dialog" id="level-select-settings-dialog" role="dialog" aria-modal="true"
+            aria-labelledby="level-select-settings-title" tabindex="-1">
+            <div class="settings-dialog-header">
+                <div>
+                    <p class="settings-dialog-kicker">Runtime controls</p>
+                    <h3 class="settings-dialog-title" id="level-select-settings-title">Game settings</h3>
+                </div>
+                <button class="settings-dialog-close" type="button">Close settings</button>
+            </div>
+            <p class="settings-dialog-copy">Changes save on this device and apply to the level select flow immediately.</p>
+            <section class="settings-update-panel" aria-label="Application update controls">
+                <p class="settings-update-title">Application updates</p>
+                <p class="settings-update-message">No update pending. Cache recovery stays available here if this device gets stuck on stale assets.</p>
+                <div class="settings-update-actions">
+                    <button class="settings-update-refresh" type="button" hidden>Refresh now</button>
+                    <button class="settings-update-clear-cache" type="button">Clear cache</button>
+                </div>
+            </section>
+            <form class="settings-form">
+                <label class="settings-field">
+                    <span class="settings-field-label">Display quality</span>
+                    <select id="settings-quality" name="qualityMode" aria-label="Display quality">
+                        <option value="auto">Auto</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </label>
+
+                <label class="settings-toggle" for="settings-reduced-motion">
+                    <span class="settings-field-label">Reduce motion</span>
+                    <input id="settings-reduced-motion" type="checkbox" aria-label="Reduce motion">
+                </label>
+
+                <label class="settings-field">
+                    <span class="settings-field-label">Language</span>
+                    <select id="settings-language" name="locale" aria-label="Language">
+                        <option value="en-US">English</option>
+                        <option value="es-ES">Español</option>
+                    </select>
+                </label>
+
+                <label class="settings-toggle" for="settings-muted">
+                    <span class="settings-field-label">Mute sound effects</span>
+                    <input id="settings-muted" type="checkbox" aria-label="Mute sound effects">
+                </label>
+            </form>
+            <div class="settings-dialog-actions">
+                <button class="settings-reset-button" type="button">Reset settings</button>
+            </div>
+        </section>
+    </div>
 
     <!-- Floating Math Symbols -->
     <div class="math-symbol" aria-hidden="true" style="top: 20%; left: 5%; animation-delay: 0s;">∑</div>
@@ -194,11 +251,18 @@
 
     <script src="/src/scripts/level-select-page.effects.js" defer></script>
     <script src="/src/scripts/level-select-page.interactions.js" defer></script>
+    <script src="/src/scripts/user-settings.helpers.js" defer></script>
+    <script src="/src/scripts/user-settings.js" defer></script>
+    <script src="/src/scripts/user-settings.locale.js" defer></script>
+    <script src="/src/scripts/app-update-ui.js" defer></script>
+    <script src="/src/scripts/level-select-page.settings.js" defer></script>
     <script src="/src/scripts/player-storage.helpers.js" defer></script>
     <script src="/src/scripts/player-storage.js" defer></script>
     <script src="/src/scripts/level-select-page.progress.js" defer></script>
     <script src="/src/scripts/level-select-page.js" defer></script>
 
     <!-- Service Worker Registration -->
+    <script src="/src/scripts/constants.events.js"></script>
+    <script src="/src/scripts/build-version.js"></script>
     <script src="/src/scripts/service-worker-register.js"></script>
 </body>

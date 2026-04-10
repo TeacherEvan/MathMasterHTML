@@ -1,6 +1,9 @@
 // src/scripts/level-select-page.js
 (function() {
   "use strict";
+  if (window.LevelSelectPage?.initSettings) {
+    window.LevelSelectPage.initSettings();
+  }
   if (window.LevelSelectPage?.initEffects) {
     window.LevelSelectPage.initEffects();
   }

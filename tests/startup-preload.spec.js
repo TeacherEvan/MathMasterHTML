@@ -36,6 +36,148 @@ async function gotoBlockingPreloadRuntime(page, search = "?level=beginner") {
 }
 
 test.describe("Startup Preload — Build 2", () => {
+  test("boot applies settings before onboarding locale is shown after preload completion", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "mathmaster_user_settings_v1",
+        JSON.stringify({
+          version: 1,
+          display: {
+            qualityMode: "auto",
+            reducedMotion: false,
+            fullscreenPreferred: false,
+          },
+          language: {
+            locale: "es-ES",
+          },
+          sound: {
+            muted: false,
+            musicEnabled: true,
+            effectsEnabled: true,
+          },
+          updatedAt: Date.now(),
+        }),
+      );
+    });
+
+    await gotoBlockingPreloadRuntime(page, "?level=beginner");
+
+    await page.evaluate(() => {
+      document.dispatchEvent(new CustomEvent(window.GameEvents.PRELOAD_READY));
+    });
+
+    await waitForBriefingVisible(page, 3000);
+
+    await expect
+      .poll(() =>
+        page.evaluate(() => ({
+          lang: document.documentElement.lang,
+          title: document.getElementById("how-to-play-title")?.textContent?.trim(),
+          button: document.getElementById("start-game-btn")?.textContent?.trim(),
+        })),
+      )
+      .toMatchObject({
+        lang: "es-ES",
+        title: "Desbloquea tu mente",
+        button: "Comenzar calibración",
+      });
+  });
+
+  test("update detection marks app update state without reloading the active runtime", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const registrationListeners = new Map();
+      const workerListeners = new Map();
+      let reloadCalls = 0;
+
+      const fakeWorker = {
+        state: "installing",
+        addEventListener(type, callback) {
+          workerListeners.set(type, callback);
+        },
+        postMessage() {},
+      };
+
+      const fakeRegistration = {
+        scope: "/",
+        waiting: null,
+        installing: fakeWorker,
+        active: {},
+        addEventListener(type, callback) {
+          registrationListeners.set(type, callback);
+        },
+        async update() {},
+      };
+
+      window.__startupSwTest = {
+        isRegistrationReady() {
+          return registrationListeners.has("updatefound");
+        },
+        getReloadCalls() {
+          return reloadCalls;
+        },
+        triggerUpdateFound() {
+          registrationListeners.get("updatefound")?.();
+        },
+        triggerInstalled() {
+          fakeWorker.state = "installed";
+          workerListeners.get("statechange")?.();
+        },
+      };
+
+      try {
+        const originalReload = window.location.reload.bind(window.location);
+        window.location.reload = () => {
+          reloadCalls += 1;
+          return originalReload();
+        };
+      } catch {
+        // Ignore runtimes that prevent overriding location.reload.
+      }
+
+      Object.defineProperty(navigator, "serviceWorker", {
+        configurable: true,
+        value: {
+          controller: {},
+          async register() {
+            return fakeRegistration;
+          },
+          async getRegistration() {
+            return fakeRegistration;
+          },
+          addEventListener() {},
+        },
+      });
+    });
+
+    await gotoGameRuntime(page, "?level=beginner&preload=off");
+    await waitForStartupPreload(page);
+
+    await expect
+      .poll(() => page.evaluate(() => window.__startupSwTest.isRegistrationReady()))
+      .toBe(true);
+
+    await page.evaluate(() => {
+      window.__startupSwTest.triggerUpdateFound();
+      window.__startupSwTest.triggerInstalled();
+    });
+
+    await expect
+      .poll(() =>
+        page.evaluate(() => ({
+          available: window.MathMasterAppUpdate?.available === true,
+          reloadCalls: window.__startupSwTest.getReloadCalls(),
+        })),
+      )
+      .toEqual({
+        available: true,
+        reloadCalls: 0,
+      });
+  });
+
   test("?swDebug=refresh-update exposes the refresh-to-update diagnostic hook", async ({
     page,
   }) => {
@@ -117,7 +259,7 @@ test.describe("Startup Preload — Build 2", () => {
     });
 
     await expect(page.locator("#startup-preload-message")).toHaveText(
-      "Registering service worker...",
+      /Registering service worker(?:\.\.\.|…)/,
     );
     await expect(page.locator("#startup-preload-progress")).toHaveAttribute(
       "aria-valuenow",

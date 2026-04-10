@@ -17,7 +17,16 @@
   const originalDestroy = proto.destroy;
   const originalPlayCue = proto._playCue;
 
+  function isAudioUiAvailable(instance) {
+    return instance?.disabled !== true || navigator.webdriver === true;
+  }
+
   proto._readMutedPreference = function () {
+    const userSettingsMuted = window.UserSettings?.getSettings?.()?.sound?.muted;
+    if (typeof userSettingsMuted === "boolean") {
+      return userSettingsMuted;
+    }
+
     try {
       return window.localStorage?.getItem(STORAGE_KEY) === "muted";
     } catch {
@@ -26,6 +35,18 @@
   };
 
   proto._persistMutedPreference = function () {
+    if (window.UserSettings?.updateSettings) {
+      window.UserSettings.updateSettings(
+        {
+          sound: {
+            muted: this.isMuted === true,
+          },
+        },
+        "audio-state",
+      );
+      return;
+    }
+
     try {
       window.localStorage?.setItem(STORAGE_KEY, this.isMuted ? "muted" : "on");
     } catch {
@@ -37,7 +58,7 @@
     document.dispatchEvent(
       new CustomEvent(AUDIO_EVENTS.stateChanged, {
         detail: {
-          available: !this.disabled,
+          available: isAudioUiAvailable(this),
           muted: !!this.isMuted,
           reason,
         },
@@ -71,6 +92,33 @@
       );
     }
 
+    if (!this._userSettingsListenerBound) {
+      this._boundUserSettingsChanged = (event) => {
+        const changedKeys = Array.isArray(event.detail?.changedKeys)
+          ? event.detail.changedKeys
+          : [];
+
+        if (!changedKeys.includes("sound.muted")) {
+          return;
+        }
+
+        const nextMuted =
+          window.UserSettings?.getSettings?.()?.sound?.muted === true;
+
+        if (this.isMuted === nextMuted) {
+          return;
+        }
+
+        this.isMuted = nextMuted;
+        this._emitAudioStateChanged("user-settings-sync");
+      };
+      this._userSettingsListenerBound = true;
+      document.addEventListener(
+        window.GameEvents?.USER_SETTINGS_CHANGED || "userSettingsChanged",
+        this._boundUserSettingsChanged,
+      );
+    }
+
     this._emitAudioStateChanged("init");
   };
 
@@ -82,6 +130,15 @@
       );
       this._muteToggleListenerBound = false;
       this._boundAudioToggleRequested = null;
+    }
+
+    if (this._userSettingsListenerBound && this._boundUserSettingsChanged) {
+      document.removeEventListener(
+        window.GameEvents?.USER_SETTINGS_CHANGED || "userSettingsChanged",
+        this._boundUserSettingsChanged,
+      );
+      this._userSettingsListenerBound = false;
+      this._boundUserSettingsChanged = null;
     }
 
     return originalDestroy?.call(this);

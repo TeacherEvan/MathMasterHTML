@@ -1,12 +1,14 @@
 /**
  * Service Worker - Production-Grade PWA Support
  * Enables offline gameplay and improves performance
- * Version: 1.0.2
+ * Version: 20260410-settings-cache-foundation-1
  */
 
-const CACHE_NAME = "math-master-v1.0.2-android-runtime-recovery";
-const RUNTIME_CACHE = "math-master-runtime-v1.0.2-android-runtime-recovery";
-const ANDROID_RUNTIME_RECOVERY_VERSION = "20260409-android-runtime-recovery-1";
+const BUILD_VERSION = "20260410-settings-cache-foundation-1";
+const CACHE_PREFIX = "math-master";
+const CACHE_NAME = `${CACHE_PREFIX}-static-${BUILD_VERSION}`;
+const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_VERSION}`;
+const APP_CACHE_PREFIXES = [`${CACHE_PREFIX}-static-`, `${CACHE_PREFIX}-runtime-`];
 
 // Assets to cache immediately on install
 const STATIC_ASSETS = [
@@ -24,10 +26,10 @@ const STATIC_ASSETS = [
   "/src/styles/css/game-animations.css",
   "/src/styles/css/game-responsive.css",
   "/src/styles/css/game-modals.css",
-  `/src/styles/css/game.css?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/styles/css/game-responsive.css?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/styles/css/game-modals.preload.css?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/styles/css/lock-responsive.css?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/styles/css/game.css?v=${BUILD_VERSION}`,
+  `/src/styles/css/game-responsive.css?v=${BUILD_VERSION}`,
+  `/src/styles/css/game-modals.preload.css?v=${BUILD_VERSION}`,
+  `/src/styles/css/lock-responsive.css?v=${BUILD_VERSION}`,
   "/src/styles/css/console.css",
   "/src/styles/css/worm-base.css",
   "/src/styles/css/worm-effects.css",
@@ -49,22 +51,22 @@ const STATIC_ASSETS = [
   "/src/scripts/ux-enhancements.js",
   "/src/scripts/lazy-component-loader.js",
   "/src/scripts/display-manager.js",
-  `/src/scripts/display-manager.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/scripts/display-manager.mobile.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/display-manager.js?v=${BUILD_VERSION}`,
+  `/src/scripts/display-manager.mobile.js?v=${BUILD_VERSION}`,
   "/src/scripts/performance-monitor.js",
   "/src/scripts/3rdDISPLAY.js",
-  `/src/scripts/symbol-rain.helpers.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/scripts/symbol-rain.helpers.utils.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/scripts/symbol-rain.helpers.spatial.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/scripts/symbol-rain.helpers.face-reveal.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/scripts/symbol-rain.helpers.pool.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/scripts/symbol-rain.helpers.spawn.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/scripts/symbol-rain.helpers.interactions.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/scripts/symbol-rain.config.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/scripts/symbol-rain.spawn.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/scripts/symbol-rain.animation.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/scripts/symbol-rain.interactions.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/scripts/3rdDISPLAY.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/symbol-rain.helpers.js?v=${BUILD_VERSION}`,
+  `/src/scripts/symbol-rain.helpers.utils.js?v=${BUILD_VERSION}`,
+  `/src/scripts/symbol-rain.helpers.spatial.js?v=${BUILD_VERSION}`,
+  `/src/scripts/symbol-rain.helpers.face-reveal.js?v=${BUILD_VERSION}`,
+  `/src/scripts/symbol-rain.helpers.pool.js?v=${BUILD_VERSION}`,
+  `/src/scripts/symbol-rain.helpers.spawn.js?v=${BUILD_VERSION}`,
+  `/src/scripts/symbol-rain.helpers.interactions.js?v=${BUILD_VERSION}`,
+  `/src/scripts/symbol-rain.config.js?v=${BUILD_VERSION}`,
+  `/src/scripts/symbol-rain.spawn.js?v=${BUILD_VERSION}`,
+  `/src/scripts/symbol-rain.animation.js?v=${BUILD_VERSION}`,
+  `/src/scripts/symbol-rain.interactions.js?v=${BUILD_VERSION}`,
+  `/src/scripts/3rdDISPLAY.js?v=${BUILD_VERSION}`,
   "/src/scripts/problem-loader.js",
   "/src/scripts/symbol-validator.js",
   "/src/scripts/worm-factory.js",
@@ -76,9 +78,9 @@ const STATIC_ASSETS = [
   "/src/scripts/lock-manager.js",
   "/src/scripts/console-manager.js",
   "/src/scripts/game.js",
-  `/src/scripts/startup-preload.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/scripts/game-page.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
-  `/src/scripts/service-worker-register.js?v=${ANDROID_RUNTIME_RECOVERY_VERSION}`,
+  `/src/scripts/startup-preload.js?v=${BUILD_VERSION}`,
+  `/src/scripts/game-page.js?v=${BUILD_VERSION}`,
+  `/src/scripts/service-worker-register.js?v=${BUILD_VERSION}`,
 ];
 
 // Assets to cache on first use (lazy cache)
@@ -87,6 +89,10 @@ const LAZY_CACHE_PATTERNS = [
   /\/lock-components\/.+\.html$/,
   /\/(src\/assets\/images\/Images|Images)\/.+\.(jpg|png|gif|svg)$/,
 ];
+
+function isMathMasterCacheName(cacheName) {
+  return APP_CACHE_PREFIXES.some((prefix) => cacheName.startsWith(prefix));
+}
 
 // ============================================
 // INSTALL EVENT - Cache static assets
@@ -110,8 +116,7 @@ self.addEventListener("install", (event) => {
         }
       })
       .then(() => {
-        console.log("[ServiceWorker] Install complete - skip waiting");
-        return self.skipWaiting(); // Activate immediately
+        console.log("[ServiceWorker] Install complete - waiting for activation");
       })
       .catch((error) => {
         console.error("[ServiceWorker] Install failed:", error);
@@ -131,10 +136,16 @@ self.addEventListener("activate", (event) => {
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE) {
+            if (
+              isMathMasterCacheName(cacheName) &&
+              cacheName !== CACHE_NAME &&
+              cacheName !== RUNTIME_CACHE
+            ) {
               console.log("[ServiceWorker] Deleting old cache:", cacheName);
               return caches.delete(cacheName);
             }
+
+            return Promise.resolve(false);
           }),
         );
       })
@@ -394,11 +405,17 @@ self.addEventListener("message", (event) => {
         .keys()
         .then((cacheNames) => {
           return Promise.all(
-            cacheNames.map((cacheName) => caches.delete(cacheName)),
+            cacheNames.map((cacheName) => {
+              if (!isMathMasterCacheName(cacheName)) {
+                return Promise.resolve(false);
+              }
+
+              return caches.delete(cacheName);
+            }),
           );
         })
         .then(() => {
-          console.log("[ServiceWorker] All caches cleared");
+          console.log("[ServiceWorker] Math Master caches cleared");
           event.ports[0].postMessage({ success: true });
         }),
     );

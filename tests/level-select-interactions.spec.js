@@ -10,6 +10,32 @@ const ROUTES = [
 
 const DESKTOP_VIEWPORT = { width: 1440, height: 1100 };
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    if (!("serviceWorker" in navigator)) {
+      return;
+    }
+
+    const fakeRegistration = {
+      scope: "/",
+      waiting: null,
+      installing: null,
+      active: null,
+      update: async () => {},
+      addEventListener: () => {},
+      unregister: async () => true,
+    };
+
+    try {
+      navigator.serviceWorker.register = async () => fakeRegistration;
+      navigator.serviceWorker.getRegistration = async () => null;
+      navigator.serviceWorker.getRegistrations = async () => [];
+    } catch {
+      // Ignore environments that do not allow overriding these methods.
+    }
+  });
+});
+
 /**
  * @param {import("@playwright/test").Page} page
  */
@@ -23,6 +49,22 @@ async function useDesktopViewport(page) {
 async function waitForCardsToSettle(page) {
   await page.waitForLoadState("load");
   await expect(page.locator(".level-card")).toHaveCount(3);
+  await expect(page.locator(".level-button")).toHaveCount(3);
+}
+
+/**
+ * @param {import("@playwright/test").Page} page
+ * @param {string} level
+ */
+async function waitForRouteButton(page, level) {
+  const button = page.locator(
+    `.level-card[data-level="${level}"] .level-button`,
+  );
+
+  await expect(button).toBeVisible();
+  await expect(button).toBeEnabled();
+
+  return button;
 }
 
 /**
@@ -63,6 +105,7 @@ async function switchCompactRouteIfNeeded(page, level) {
   await routeButton.click();
   await expect(routeButton).toHaveAttribute("aria-pressed", "true");
   await expect(levelButton).toBeVisible();
+  await expect(levelButton).toBeEnabled();
 }
 
 /**
@@ -122,11 +165,8 @@ test.describe("Level select interactions", () => {
       await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
       await waitForCardsToSettle(page);
       await switchCompactRouteIfNeeded(page, route.level);
-      const button = page.locator(
-        `.level-card[data-level="${route.level}"] .level-button`,
-      );
-      await button.scrollIntoViewIfNeeded();
-      await button.click({ noWaitAfter: true });
+      const button = await waitForRouteButton(page, route.level);
+      await button.dispatchEvent("click");
       await expectRouteLaunch(page, route.level);
     });
 
@@ -136,7 +176,12 @@ test.describe("Level select interactions", () => {
       await useDesktopViewport(page);
       await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
       await waitForCardsToSettle(page);
-      await page.keyboard.press(route.key);
+      await waitForRouteButton(page, route.level);
+      const routeSwitcherButton = page.locator(
+        `.route-switcher-button[data-level="${route.level}"]`,
+      );
+      await routeSwitcherButton.focus();
+      await routeSwitcherButton.press(route.key);
       await expectRouteLaunch(page, route.level);
     });
   }
@@ -209,7 +254,8 @@ test.describe("Level select interactions", () => {
 
     const button = page.getByRole("button", { name: "Enter foundations" });
     await button.focus();
-    await page.keyboard.press("Enter");
+    await expect(button).toBeFocused();
+    await button.press("Enter");
 
     await expectRouteLaunch(page, "beginner");
   });
@@ -221,7 +267,8 @@ test.describe("Level select interactions", () => {
 
     const warriorRoute = page.locator('.route-switcher-button[data-level="warrior"]');
     await warriorRoute.focus();
-    await page.keyboard.press("Space");
+    await expect(warriorRoute).toBeFocused();
+    await warriorRoute.press("Space");
 
     await expect(warriorRoute).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator('.level-card[data-level="warrior"]')).toBeVisible();
@@ -236,9 +283,28 @@ test.describe("Level select interactions", () => {
       name: "← Return to Welcome",
     });
     await backButton.focus();
-    await page.keyboard.press("Enter");
+    await expect(backButton).toBeFocused();
+    await backButton.press("Enter");
 
     await expect(page).toHaveURL(/\/src\/pages\/index\.html(?:$|\?)/);
+  });
+
+  test("opens settings with Enter and closes them with Escape", async ({ page }) => {
+    await useDesktopViewport(page);
+    await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
+    await waitForCardsToSettle(page);
+
+    const settingsButton = page.getByRole("button", { name: "Open settings" });
+    await settingsButton.focus();
+    await expect(settingsButton).toBeFocused();
+    await settingsButton.press("Enter");
+
+    const dialog = page.getByRole("dialog", { name: "Game settings" });
+    await expect(dialog).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(page).toHaveURL(/\/src\/pages\/level-select\.html(?:$|\?)/);
   });
 
   for (const key of ["Escape", "Backspace"]) {
@@ -249,7 +315,12 @@ test.describe("Level select interactions", () => {
       await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
       await waitForCardsToSettle(page);
 
-      await page.keyboard.press(key);
+      const backButton = page.getByRole("button", {
+        name: "← Return to Welcome",
+      });
+      await backButton.focus();
+
+      await backButton.press(key);
 
       await expect(page).toHaveURL(/\/src\/pages\/index\.html(?:$|\?)/);
     });

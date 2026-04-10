@@ -33,6 +33,7 @@ This document describes the current runtime architecture of MathMasterHTML.
 | Lock progression | `lock-manager*.js`, `lock/` | Loads lock fragments and advances the lock sequence |
 | Score/timer HUD | `score-timer-manager.js`, `score-timer.runtime.js`, `score-timer.boundary.js`, `score-timer.utils.js` | Owns countdown, score decay, step locking, and bonus application |
 | Local progression | `player-storage.js`, `player-storage.helpers.js` | Persists score/profile state in localStorage |
+| User settings | `user-settings.helpers.js`, `user-settings.js`, `user-settings.locale.js`, `level-select-page.settings.js` | Persists display, language, and sound preferences and rebroadcasts them through shared events |
 | Performance/quality | `performance-monitor*.js`, `dynamic-quality-adjuster.js`, `quality-tier-manager*.js` | Owns metrics, adaptive quality, and perf tooling |
 
 ## Expanded subsystem inventory
@@ -56,6 +57,7 @@ This document describes the current runtime architecture of MathMasterHTML.
 | Power-ups | `worm-powerups.core.js`, `worm-powerups.selection.js`, `worm-powerups.ui*.js`, `worm-powerups.effects*.js`, `worm-system.powerups*.js` | Drops, inventory state, placement UI, and effect execution |
 | Rewards and progression feedback | `worm-system.rewards.muffin.js`, `utils-achievements*.js`, `utils-combo*.js` | Reward surfaces, achievements, combo tracking, and feedback UI |
 | Audio | `interaction-audio.cyberpunk*.js`, `interaction-audio.cyberpunk.drums.*.js` | Core audio, gameplay sound effects, drum sequencing, and control/state surfaces |
+| Update and recovery UI | `app-update-ui.js`, `service-worker-register.js`, `service-worker-register.css` | Surfaces deferred app updates and manual cache recovery outside active gameplay |
 
 ### Panel C and infrastructure
 
@@ -138,7 +140,7 @@ Example worm split:
 
 `src/pages/game.html` loads runtime surfaces in a strict order so globals and event contracts exist before dependent systems initialize.
 
-1. Performance and quality bootstrap
+1. Settings, locale, and quality bootstrap
 2. Utilities and constants
 3. Audio system
 4. Managers and shared UI systems
@@ -146,9 +148,11 @@ Example worm split:
 6. Symbol rain
 7. Game core dependencies
 8. Worm runtime
-9. Gameplay infrastructure such as lock, console, score, and storage
+9. Gameplay infrastructure such as lock, console, score, storage, and onboarding bootstrap
 10. Main game logic and page glue
-11. Service worker registration
+11. Service worker registration and install/update hooks
+
+The early settings load is intentional: onboarding copy and audio state must already reflect persisted preferences before the briefing becomes interactive.
 
 `game.js` then dynamically loads the core gameplay chain in order:
 
@@ -214,6 +218,16 @@ The loaders parse those files at runtime and convert each problem into a step li
 - `problemLineCompleted` locks the current step score and advances the timer state.
 - `problemCompleted` persists the final score for the current problem.
 - `PlayerStorage` stores player data in versioned localStorage under `mathmaster_player_profile_v1`.
+- `UserSettings` stores player preferences in versioned localStorage under `mathmaster_user_settings_v1`.
+- `UserSettings` publishes `userSettingsLoaded` and `userSettingsChanged` so display, locale, and audio consumers can react without direct module coupling.
+
+## Service worker update model
+
+- The service worker stays on the stable URL `/service-worker.js`.
+- App-owned caches are namespaced by build version with a Math Master prefix and cleaned up independently of unrelated browser caches.
+- Navigation documents use network-first behavior so fresh HTML wins when the client is online.
+- Update availability is surfaced through `appUpdateAvailable`; the runtime does not force-refresh an active game session when a new worker arrives.
+- Level select is the preferred recovery surface for `Refresh now` and `Clear cache` actions.
 
 ## Performance and quality architecture
 

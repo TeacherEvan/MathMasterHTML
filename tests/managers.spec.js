@@ -1,9 +1,25 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
-import { gotoGameRuntime } from "./utils/onboarding-runtime.js";
+import {
+  gotoGameRuntime,
+  waitForGameplayReady,
+} from "./utils/onboarding-runtime.js";
 
 const PLAYER_PROFILE_STORAGE_KEY = "mathmaster_player_profile_v1";
 const GAME_LOAD_TIMEOUT_MS = 15_000;
+
+async function ensureLandscapeGameplayViewport(page) {
+  const viewport = page.viewportSize();
+
+  if (!viewport || viewport.width >= viewport.height) {
+    return;
+  }
+
+  await page.setViewportSize({
+    width: viewport.height,
+    height: viewport.width,
+  });
+}
 
 async function clickHelpButton(page, count = 1) {
   const clicked = await page.evaluate((times) => {
@@ -24,6 +40,8 @@ async function clickHelpButton(page, count = 1) {
 
 test.describe("ProblemManager and SymbolManager Integration", () => {
   test.beforeEach(async ({ page }) => {
+    await ensureLandscapeGameplayViewport(page);
+
     // Navigate directly to the runtime page and disable unrelated onboarding flows.
     await gotoGameRuntime(page, "?level=beginner&evan=off&preload=off");
 
@@ -49,12 +67,8 @@ test.describe("ProblemManager and SymbolManager Integration", () => {
       }
     }
 
-    // Wait for modal fade and countdown start before running integration assertions.
-    await page.waitForFunction(
-      () => window.ScoreTimerManager?._gameStarted === true,
-      null,
-      { timeout: 8000 },
-    );
+    // Wait for the shared runtime coordinator instead of a private timer flag.
+    await waitForGameplayReady(page);
     await page.waitForTimeout(600);
     await page.waitForFunction(
       () => window.GameProblemManager?.problems?.length > 0,

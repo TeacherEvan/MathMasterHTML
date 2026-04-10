@@ -3,6 +3,32 @@ import { expect, test } from "@playwright/test";
 
 const PROFILE_KEY = "mathmaster_player_profile_v1";
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    if (!("serviceWorker" in navigator)) {
+      return;
+    }
+
+    const fakeRegistration = {
+      scope: "/",
+      waiting: null,
+      installing: null,
+      active: null,
+      update: async () => {},
+      addEventListener: () => {},
+      unregister: async () => true,
+    };
+
+    try {
+      navigator.serviceWorker.register = async () => fakeRegistration;
+      navigator.serviceWorker.getRegistration = async () => null;
+      navigator.serviceWorker.getRegistrations = async () => [];
+    } catch {
+      // Ignore environments that do not allow overriding these methods.
+    }
+  });
+});
+
 test.describe("Level select scoreboard", () => {
   test("renders persisted scoreboard stats from local player storage", async ({
     page,
@@ -104,7 +130,6 @@ test.describe("Level select scoreboard", () => {
 
     const resetButton = page.locator(".reset-progress-btn");
 
-    await resetButton.scrollIntoViewIfNeeded();
     await expect(resetButton).toBeVisible();
     await expect(resetButton).toBeEnabled();
 

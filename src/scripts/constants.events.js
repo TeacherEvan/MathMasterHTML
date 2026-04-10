@@ -31,5 +31,8 @@
     GAMEPLAY_INPUT_LOCK_CHANGED: "gameplayInputLockChanged",
     BRIEFING_DISMISSED: "briefingDismissed",
     STARTUP_PRELOAD_COMPLETE: "startupPreloadComplete",
+    USER_SETTINGS_LOADED: "userSettingsLoaded",
+    USER_SETTINGS_CHANGED: "userSettingsChanged",
+    APP_UPDATE_AVAILABLE: "appUpdateAvailable",
   });
 })();

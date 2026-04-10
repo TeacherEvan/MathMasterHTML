@@ -8,9 +8,34 @@ function dispatchPreload(progress, message) {
   }
 }
 
+function getAppUpdateEventName() {
+  return window.GameEvents?.APP_UPDATE_AVAILABLE || "appUpdateAvailable";
+}
+
+function dispatchAppUpdateAvailable(registration, source = "updatefound") {
+  const detail = {
+    source,
+    scope: registration?.scope || null,
+    buildVersion: window.MathMasterBuildVersion || null,
+    hasController: Boolean(navigator.serviceWorker?.controller),
+  };
+
+  window.MathMasterAppUpdate = {
+    available: true,
+    ...detail,
+  };
+
+  document.dispatchEvent(
+    new CustomEvent(getAppUpdateEventName(), {
+      detail,
+    }),
+  );
+}
+
 const swDebugMode = new URLSearchParams(window.location.search).get(
   "swDebug",
 );
+let serviceWorkerRegistrationStarted = false;
 
 function isRefreshUpdateDiagnosticEnabled() {
   return swDebugMode === "refresh-update" || swDebugMode === "reset";
@@ -111,11 +136,25 @@ if (document.readyState === "loading") {
   ensureRefreshUpdateDiagnosticButton();
 }
 
+function startServiceWorkerRegistration() {
+  if (serviceWorkerRegistrationStarted) {
+    return;
+  }
+
+  serviceWorkerRegistrationStarted = true;
+  registerServiceWorker();
+}
+
 if ("serviceWorker" in navigator) {
   dispatchPreload(15, "Booting runtime\u2026");
-  window.addEventListener("load", () => {
-    registerServiceWorker();
-  });
+
+  if (document.readyState === "complete") {
+    startServiceWorkerRegistration();
+  } else {
+    window.addEventListener("load", startServiceWorkerRegistration, {
+      once: true,
+    });
+  }
 } else {
   dispatchPreload(60, "Service worker skipped.");
   if (window.GameEvents?.PRELOAD_READY) {
@@ -139,8 +178,8 @@ async function registerServiceWorker() {
     );
 
     if (registration.waiting && navigator.serviceWorker.controller) {
-      activateWaitingWorker(registration);
-      return;
+      console.log("📦 Waiting service worker available");
+      dispatchAppUpdateAvailable(registration, "waiting");
     }
 
     dispatchPreload(60, "Assets cached.");
@@ -155,7 +194,7 @@ async function registerServiceWorker() {
           navigator.serviceWorker.controller
         ) {
           console.log("📦 New version available");
-          activateWaitingWorker(registration);
+          dispatchAppUpdateAvailable(registration, "installed");
         }
       });
     });

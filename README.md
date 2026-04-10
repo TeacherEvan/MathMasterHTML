@@ -54,8 +54,17 @@ Focused Playwright lanes and subsystem-specific checks live in the docs index an
 | Lock progression | `src/scripts/lock-manager*.js`, `lock/` |
 | Score/timer HUD | `src/scripts/score-timer-manager.js`, `src/scripts/score-timer.*.js` |
 | Local persistence | `src/scripts/player-storage.js`, `src/scripts/player-storage.helpers.js` |
+| Settings and locale | `src/scripts/user-settings*.js`, `src/scripts/level-select-page.settings.js`, `src/scripts/app-update-ui.js` |
 | Performance/quality | `src/scripts/performance-monitor*.js`, `src/scripts/dynamic-quality-adjuster.js`, `src/scripts/quality-tier-manager*.js` |
+| Update and install flow | `service-worker.js`, `src/scripts/service-worker-register.js`, `src/scripts/install-prompt.js` |
 | Shared constants/utilities | `src/scripts/constants*.js`, `src/scripts/utils*.js` |
+
+## Settings and update flow
+
+- Player-facing settings live on level select and persist in versioned local storage under `mathmaster_user_settings_v1`.
+- The current v1 settings surface controls display quality, reduced motion, UI/onboarding locale, and master mute.
+- Level select is also the safe update entrypoint: waiting service-worker updates surface through the settings panel with `Refresh now` and `Clear cache` actions instead of forcing a live gameplay refresh.
+- The service worker keeps a stable URL at `/service-worker.js`, uses build-scoped Math Master cache names, and clears only Math Master-owned caches during recovery.
 
 ## Living docs
 

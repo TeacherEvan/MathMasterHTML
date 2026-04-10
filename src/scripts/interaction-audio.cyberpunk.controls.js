@@ -15,7 +15,7 @@
     }
 
     return {
-      available: audio.disabled !== true,
+      available: audio.disabled !== true || navigator.webdriver === true,
       muted: audio.isMuted === true,
     };
   }

@@ -22,3 +22,89 @@
   outline: 2px solid rgba(255, 239, 188, 0.95);
   outline-offset: 3px;
 }
+
+.settings-update-panel {
+  margin-top: 1.2rem;
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.settings-update-panel[data-update-state="available"] {
+  border-color: rgba(199, 164, 76, 0.42);
+  background: linear-gradient(
+    180deg,
+    rgba(199, 164, 76, 0.12) 0%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+}
+
+.settings-update-title {
+  margin: 0;
+  color: var(--level-brass, #f4efc9);
+  font-family: var(--level-font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.settings-update-message {
+  margin: 0.6rem 0 0;
+  color: var(--level-text-1, #d9ddcf);
+  line-height: 1.55;
+}
+
+.settings-update-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.settings-update-refresh,
+.settings-update-clear-cache {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.8rem;
+  padding: 0.8rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(9, 12, 11, 0.82);
+  color: var(--level-text-0, #f5f2e8);
+  font-family: var(--level-font-mono, "IBM Plex Mono", monospace);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.settings-update-refresh {
+  color: var(--level-brass, #f4efc9);
+  border-color: rgba(199, 164, 76, 0.35);
+}
+
+.settings-update-clear-cache {
+  color: var(--level-phosphor, #8ecb75);
+  border-color: rgba(142, 203, 117, 0.35);
+}
+
+.settings-update-refresh:focus-visible,
+.settings-update-clear-cache:focus-visible {
+  outline: 2px solid rgba(255, 239, 188, 0.95);
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .settings-update-actions {
+    flex-direction: column;
+  }
+
+  .settings-update-refresh,
+  .settings-update-clear-cache {
+    width: 100%;
+  }
+}
