@@ -4,7 +4,7 @@
   "baselineMode": "comparative-regression",
   "notes": [
     "These baselines are empirical Playwright snapshots from the current automation harness.",
-    "They are used to detect regressions relative to the same lane and are not equivalent to the product targets documented in Docs/SystemDocs/PERFORMANCE.md."
+    "They are used to detect regressions relative to the same lane and are not equivalent to the product targets documented in Plan Genesis.md."
   ],
   "runCount": 3,
   "scenarioCount": 5,

@@ -69,7 +69,7 @@ test.describe("Level select polish", () => {
     await expect(header.locator(".page-kicker")).toHaveText("Training dossier");
     await expect(header.locator(".main-title")).toHaveText("MATH MASTER");
     await expect(header.locator(".subtitle")).toHaveText("Choose a route");
-    await expect(headerSubtitle).toContainText("Three tracks. One keyboard.");
+    await expect(headerSubtitle).toContainText("Three tracks. Local scores.");
 
     await waitForCardsToSettle(page);
 

@@ -12,12 +12,24 @@
         warrior: false,
         master: false,
       },
+      tutorialConsumed: false,
       installPromptDismissedAt: null,
       updatedAt: 0,
     };
   }
 
   let state = defaultState();
+  let hydrated = false;
+
+  function ensureHydrated() {
+    if (hydrated) {
+      return;
+    }
+
+    const persisted = readStorage();
+    state = persisted || defaultState();
+    hydrated = true;
+  }
 
   function normalizeState(input) {
     const base = defaultState();
@@ -34,6 +46,7 @@
         warrior: Boolean(candidate.evanConsumed?.warrior),
         master: Boolean(candidate.evanConsumed?.master),
       },
+      tutorialConsumed: Boolean(candidate.tutorialConsumed),
       installPromptDismissedAt:
         candidate.installPromptDismissedAt === null ||
         Number.isFinite(candidate.installPromptDismissedAt)
@@ -62,6 +75,7 @@
 
   function writeStorage() {
     try {
+      hydrated = true;
       state.updatedAt = Date.now();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
@@ -70,27 +84,35 @@
   }
 
   function initSession() {
-    const persisted = readStorage();
-    state = persisted || defaultState();
+    ensureHydrated();
     state.sessionCount++;
     writeStorage();
   }
 
   function getState() {
+    ensureHydrated();
     return normalizeState(state);
   }
 
   function shouldAutoRunEvan(level, override) {
+    ensureHydrated();
     if (override === "off") return false;
     if (override === "force") return true;
     return !state.evanConsumed[level];
   }
 
   function shouldShowInstallPrompt() {
+    ensureHydrated();
     return state.sessionCount >= 3 && state.installPromptDismissedAt === null;
   }
 
+  function hasConsumedTutorial() {
+    ensureHydrated();
+    return Boolean(state.tutorialConsumed);
+  }
+
   function markEvanConsumed(level, reason = "completed") {
+    ensureHydrated();
     if (!VALID_LEVELS.has(level) || !VALID_REASONS.has(reason)) {
       return;
     }
@@ -101,7 +123,15 @@
     writeStorage();
   }
 
+  function markTutorialConsumed() {
+    ensureHydrated();
+    if (state.tutorialConsumed) return;
+    state.tutorialConsumed = true;
+    writeStorage();
+  }
+
   function markInstallPromptDismissed() {
+    ensureHydrated();
     state.installPromptDismissedAt = Date.now();
     writeStorage();
   }
@@ -111,7 +141,9 @@
     getState,
     shouldAutoRunEvan,
     shouldShowInstallPrompt,
+    hasConsumedTutorial,
     markEvanConsumed,
+    markTutorialConsumed,
     markInstallPromptDismissed,
   };
 })();

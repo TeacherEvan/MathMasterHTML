@@ -13,11 +13,13 @@ async function captureWelcomeMotionSnapshot(page) {
     const title = document.querySelector(".main-title");
     const subtitle = document.querySelector(".subtitle");
     const logoCircle = document.querySelector(".logo-circle");
+    const logoBeam = document.querySelector(".logo-beam");
 
     if (
       !(title instanceof HTMLElement) ||
       !(subtitle instanceof HTMLElement) ||
-      !(logoCircle instanceof HTMLElement)
+      !(logoCircle instanceof HTMLElement) ||
+      !(logoBeam instanceof HTMLElement)
     ) {
       return null;
     }
@@ -30,6 +32,7 @@ async function captureWelcomeMotionSnapshot(page) {
       subtitleColor: window.getComputedStyle(subtitle).color,
       logoTransform: window.getComputedStyle(logoCircle).transform,
       logoShadow: window.getComputedStyle(logoCircle).boxShadow,
+      logoBeamTransform: window.getComputedStyle(logoBeam).transform,
     };
   });
 }

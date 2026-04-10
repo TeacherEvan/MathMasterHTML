@@ -1,10 +1,50 @@
 (function () {
   const GE = window.GameEvents;
   const backButton = document.getElementById("back-button");
+  const preloadSafetyTimeoutMs = Number(
+    window.__STARTUP_PRELOAD_SAFETY_TIMEOUT_MS,
+  );
+  const resolvedPreloadSafetyTimeoutMs =
+    Number.isFinite(preloadSafetyTimeoutMs) && preloadSafetyTimeoutMs > 0
+      ? preloadSafetyTimeoutMs
+      : 8000;
   let briefingFocusCleanup = null;
   let briefingStartRequested = false;
 
-  function goBack() {
+  function canLeaveActiveGameplay() {
+    const runtimeState = window.GameRuntimeCoordinator?.getState?.();
+    if (!runtimeState) {
+      return true;
+    }
+
+    const activelyPlaying =
+      runtimeState.briefingDismissed === true &&
+      runtimeState.gameplayReady === true;
+
+    const completed = document.body.classList.contains("problem-completed");
+    return !activelyPlaying || completed;
+  }
+
+  function syncBackButtonState() {
+    const canLeave = canLeaveActiveGameplay();
+    if (backButton) {
+      backButton.dataset.exitGuard = canLeave ? "ready" : "blocked";
+      backButton.setAttribute(
+        "aria-label",
+        canLeave
+          ? "Go back to level selection"
+          : "Go back to level selection unavailable until the current problem is complete",
+      );
+    }
+    return canLeave;
+  }
+
+  function goBack(event) {
+    if (!syncBackButtonState()) {
+      event?.preventDefault?.();
+      return;
+    }
+
     window.location.assign("level-select.html");
   }
 
@@ -160,7 +200,7 @@
       modal.style.display = "none";
       const safetyTimeout = setTimeout(() => {
         requestStartupPreloadCompletion("timeout");
-      }, 8000);
+      }, resolvedPreloadSafetyTimeoutMs);
       document.addEventListener(
         GE.STARTUP_PRELOAD_COMPLETE,
         () => {
@@ -178,7 +218,18 @@
     backButton.addEventListener("click", goBack);
   }
 
+  document.addEventListener(GE?.GAMEPLAY_READY_CHANGED, () => {
+    syncBackButtonState();
+  });
+
+  document.addEventListener(window.GameEvents.PROBLEM_COMPLETED, () => {
+    document.body.classList.add("problem-completed");
+    syncBackButtonState();
+  });
+
   document.addEventListener("DOMContentLoaded", () => {
+    document.body.classList.remove("problem-completed");
+    syncBackButtonState();
     setupHowToPlayModal();
   });
 })();

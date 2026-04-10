@@ -37,6 +37,10 @@
       return false;
     }
 
+    if (bootstrap.level === "h2p") {
+      return true;
+    }
+
     if (bootstrap.evanMode === "force") {
       return true;
     }
@@ -136,6 +140,10 @@
   });
 
   document.addEventListener(GE.PROBLEM_COMPLETED, () => {
+    if (bootstrap.level === "h2p") {
+      storage.markTutorialConsumed?.();
+    }
+
     if (helpActive) {
       stopEvanHelp("completed");
     }

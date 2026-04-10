@@ -9,6 +9,10 @@
     dialog: null,
     openButton: null,
     closeButton: null,
+    profileForm: null,
+    nameInput: null,
+    nameSaveButton: null,
+    nameFeedback: null,
     playerName: null,
     overallSummary: null,
     levelStats: null,
@@ -20,12 +24,30 @@
     return Boolean(state.modal && !state.modal.hidden);
   }
 
+  function setNameFeedback(message, tone = "neutral") {
+    if (!state.nameFeedback) {
+      return;
+    }
+
+    state.nameFeedback.textContent = message;
+    state.nameFeedback.dataset.tone = tone;
+  }
+
+  function syncProfileEditor(displayName) {
+    if (state.nameInput) {
+      state.nameInput.value = displayName;
+    }
+
+    setNameFeedback("Saved on this device only.", "neutral");
+  }
+
   function openScoreboard() {
     if (!state.modal || !render?.renderSummary) {
       return false;
     }
 
-    render.renderSummary(state);
+    const summary = render.renderSummary(state);
+    syncProfileEditor(render.getDisplayName?.(summary?.profile));
     state.modal.hidden = false;
     state.modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("scoreboard-modal-open");
@@ -49,6 +71,21 @@
     state.modal.hidden = true;
     state.modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("scoreboard-modal-open");
+    state.openButton?.focus?.({ preventScroll: true });
+    return true;
+  }
+
+  function savePlayerName() {
+    if (!window.PlayerStorage?.setPlayerName) {
+      return false;
+    }
+
+    const savedName = window.PlayerStorage.setPlayerName(state.nameInput?.value);
+    if (state.nameInput) {
+      state.nameInput.value = savedName;
+    }
+    render.renderSummary(state);
+    setNameFeedback(`Saved as ${savedName}.`, "success");
     return true;
   }
 
@@ -62,9 +99,13 @@
     }
 
     state.modal = document.getElementById("scoreboard-modal");
-  state.dialog = state.modal?.querySelector("[role='dialog']") || null;
+    state.dialog = state.modal?.querySelector("[role='dialog']") || null;
     state.openButton = document.getElementById("scoreboard-button");
     state.closeButton = document.getElementById("scoreboard-close-button");
+    state.profileForm = document.getElementById("scoreboard-profile-form");
+    state.nameInput = document.getElementById("scoreboard-name-input");
+    state.nameSaveButton = document.getElementById("scoreboard-name-save");
+    state.nameFeedback = document.getElementById("scoreboard-name-feedback");
     state.playerName = document.getElementById("scoreboard-player-name");
     state.overallSummary = document.getElementById("scoreboard-overall-summary");
     state.levelStats = document.getElementById("scoreboard-level-stats");
@@ -75,6 +116,10 @@
       !state.dialog ||
       !state.openButton ||
       !state.closeButton ||
+      !state.profileForm ||
+      !state.nameInput ||
+      !state.nameSaveButton ||
+      !state.nameFeedback ||
       !state.playerName ||
       !state.overallSummary ||
       !state.levelStats ||
@@ -91,6 +136,15 @@
     state.closeButton.addEventListener("click", (event) => {
       event.preventDefault();
       closeScoreboard();
+    });
+
+    state.profileForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      savePlayerName();
+    });
+
+    state.nameInput.addEventListener("input", () => {
+      setNameFeedback("Saved on this device only.", "neutral");
     });
 
     state.initialized = true;
@@ -125,6 +179,10 @@
   function handleKeydown(event) {
     const isActionKey = event.key === "Enter" || event.key === " ";
     const activeElement = document.activeElement;
+    const isTextEntryTarget =
+      activeElement instanceof HTMLElement &&
+      (activeElement.matches("input, textarea, select") ||
+        activeElement.isContentEditable);
     const activeInsideScoreboard =
       activeElement instanceof Element
         ? activeElement.closest("[data-no-nav='true']")
@@ -136,7 +194,14 @@
       return true;
     }
 
-    if (isActionKey && activeInsideScoreboard) {
+    if (isActionKey && activeInsideScoreboard && !isTextEntryTarget) {
+      if (
+        activeElement?.id !== "scoreboard-button" &&
+        activeElement?.id !== "scoreboard-close-button"
+      ) {
+        return false;
+      }
+
       event.preventDefault();
       if (activeElement?.id === "scoreboard-button") {
         openScoreboard();

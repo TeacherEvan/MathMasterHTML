@@ -41,7 +41,13 @@
         <figure class="logo-container" aria-labelledby="welcome-logo-caption">
             <div class="logo-circle">
                 <div class="logo-content">
-                    <div class="logo-symbol">⚖</div>
+                    <div class="logo-assembly" aria-hidden="true">
+                        <span class="logo-axis"></span>
+                        <span class="logo-beam"></span>
+                        <span class="logo-pan logo-pan-left"></span>
+                        <span class="logo-pan logo-pan-right"></span>
+                        <span class="logo-node"></span>
+                    </div>
                     <div class="logo-variables">
                         <span class="variable-x" data-letter="X">X</span>
                         <span class="variable-y" data-letter="Y">Y</span>
@@ -79,6 +85,19 @@
                 <button id="scoreboard-close-button" class="scoreboard-close-button" type="button" data-no-nav="true"
                     aria-label="Close scoreboard">✕</button>
             </div>
+
+            <form id="scoreboard-profile-form" class="scoreboard-profile-form" data-no-nav="true">
+                <label class="scoreboard-profile-label" for="scoreboard-name-input" data-no-nav="true">Player name</label>
+                <div class="scoreboard-profile-controls" data-no-nav="true">
+                    <input id="scoreboard-name-input" class="scoreboard-name-input" name="playerName" type="text"
+                        inputmode="text" autocomplete="nickname" maxlength="18" placeholder="Player"
+                        aria-describedby="scoreboard-name-feedback" data-no-nav="true">
+                    <button id="scoreboard-name-save" class="scoreboard-name-save" type="submit"
+                        data-no-nav="true">Save</button>
+                </div>
+                <p id="scoreboard-name-feedback" class="scoreboard-name-feedback" data-tone="neutral" aria-live="polite"
+                    data-no-nav="true">Saved on this device only.</p>
+            </form>
 
             <section class="scoreboard-section" data-no-nav="true">
                 <h3 data-no-nav="true">Overall progress</h3>

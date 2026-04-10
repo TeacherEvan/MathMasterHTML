@@ -3,43 +3,28 @@ console.log("🎯 GameProblemLoader helpers loading...");
 
 (function attachGameProblemLoader() {
   const problemPaths = {
-    beginner: "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.md",
-    warrior: "/src/assets/problems/Assets/Warrior_Lvl/warrior_problems.md",
-    master: "/src/assets/problems/Assets/Master_Lvl/master_problems.md",
+    h2p: "/src/assets/problems/Assets/Tutorial_Lvl/h2p_problems.json",
+    beginner: "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.json",
+    warrior: "/src/assets/problems/Assets/Warrior_Lvl/warrior_problems.json",
+    master: "/src/assets/problems/Assets/Master_Lvl/master_problems.json",
   };
 
-  function parseProblemsFromMarkdown(markdownContent) {
-    const parsedProblems = [];
+  function normalizeProblems(payload) {
+    const source = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.problems)
+        ? payload.problems
+        : [];
 
-    // Split by problem (starting with a number followed by dot and backtick)
-    const problemRegex = /(\d+)\.\s+`([^`]+)`\s*\n((?:\s*-[^\n]+\n?)+)/g;
-    let match;
-
-    while ((match = problemRegex.exec(markdownContent)) !== null) {
-      try {
-        const _problemNumber = match[1];
-        const problemText = match[2];
-        const stepsText = match[3];
-
-        const steps = stepsText
-          .split("\n")
-          .filter((line) => line.trim().startsWith("-"))
-          .map((line) => line.trim().replace(/^-\s*/, ""));
-
-        if (steps.length > 0) {
-          parsedProblems.push({
-            problem: problemText,
-            steps: steps,
-            currentStep: 0,
-            currentSymbol: 0,
-          });
-        }
-      } catch {
-        // Skip malformed problems silently
-      }
-    }
-
-    return parsedProblems;
+    return source
+      .filter((entry) => entry && typeof entry.problem === "string")
+      .map((entry) => ({
+        problem: entry.problem,
+        steps: Array.isArray(entry.steps) ? entry.steps : [],
+        currentStep: 0,
+        currentSymbol: 0,
+      }))
+      .filter((entry) => entry.steps.length > 0);
   }
 
   function getProblemPath(level) {
@@ -57,10 +42,10 @@ console.log("🎯 GameProblemLoader helpers loading...");
           if (!response.ok) {
             throw new Error(`Failed to load problems: ${response.statusText}`);
           }
-          return response.text();
+          return response.json();
         })
         .then((data) => {
-          const problems = parseProblemsFromMarkdown(data);
+          const problems = normalizeProblems(data);
           onLoaded?.(problems);
         })
         .catch((error) => {

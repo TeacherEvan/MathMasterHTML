@@ -81,6 +81,14 @@
     }, CONFIG.RIPPLE.REMOVE_DELAY_MS);
   }
 
+  function resolveLevelDestination(levelKey) {
+    const storage = window.GameOnboardingStorage;
+    if (levelKey === "beginner" && storage && !storage.hasConsumedTutorial?.()) {
+      return "h2p";
+    }
+    return levelKey;
+  }
+
   function selectLevel(levelKey, triggerElement, interactionEvent) {
     if (interactionEvent) {
       createRipple(interactionEvent, triggerElement);
@@ -94,7 +102,8 @@
     }, 180);
 
     setTimeout(() => {
-      window.location.href = `${CONFIG.NAVIGATION.LEVEL_SELECT}${levelKey}`;
+      const destination = resolveLevelDestination(levelKey);
+      window.location.href = `${CONFIG.NAVIGATION.LEVEL_SELECT}${destination}`;
     }, 300);
   }
 

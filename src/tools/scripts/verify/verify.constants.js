@@ -12,14 +12,19 @@ export const CRITICAL_FILES = [
   "src/scripts/utils.js",
   "src/styles/css/worm-base.css",
   "src/styles/css/game.css",
-  "Docs/SystemDocs/_INDEX.md",
   ".github/copilot-instructions.md",
+  "JOBCARD.md",
+  "Plan Genesis.md",
+  "Plan Beta.md",
+  "Plan Alpha.md",
 ];
 
 export const REQUIRED_DOCS = [
-  "SystemDocs/ARCHITECTURE.md",
-  "SystemDocs/DEVELOPMENT_GUIDE.md",
-  "Worms/WORM_DEVELOPER_GUIDE.md",
+  ".github/copilot-instructions.md",
+  "JOBCARD.md",
+  "Plan Genesis.md",
+  "Plan Beta.md",
+  "Plan Alpha.md",
 ];
 
 export const JS_DIRECTORIES = [

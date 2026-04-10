@@ -58,9 +58,10 @@
     // ========================================
     PATHS: {
       ASSETS_BASE: "/src/assets/problems/Assets",
-      BEGINNER: "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.md",
-      WARRIOR: "/src/assets/problems/Assets/Warrior_Lvl/warrior_problems.md",
-      MASTER: "/src/assets/problems/Assets/Master_Lvl/master_problems.md",
+      H2P: "/src/assets/problems/Assets/Tutorial_Lvl/h2p_problems.json",
+      BEGINNER: "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.json",
+      WARRIOR: "/src/assets/problems/Assets/Warrior_Lvl/warrior_problems.json",
+      MASTER: "/src/assets/problems/Assets/Master_Lvl/master_problems.json",
       LOCK_COMPONENTS: "/src/assets/components/lock-components/",
     },
   };

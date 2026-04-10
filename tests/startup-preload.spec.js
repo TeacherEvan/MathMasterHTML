@@ -21,15 +21,29 @@ async function waitForStartupPreload(page) {
   );
 }
 
-async function gotoBlockingPreloadRuntime(page, search = "?level=beginner") {
-  await page.addInitScript(() => {
-    if (
-      navigator.serviceWorker &&
-      typeof navigator.serviceWorker.register === "function"
-    ) {
-      navigator.serviceWorker.register = () => new Promise(() => {});
-    }
-  });
+async function gotoBlockingPreloadRuntime(
+  page,
+  search = "?level=beginner",
+  options = {},
+) {
+  const safetyTimeoutMs = Number(options.safetyTimeoutMs ?? 60000);
+
+  await page.addInitScript(({ timeoutMs }) => {
+    window.__STARTUP_PRELOAD_SAFETY_TIMEOUT_MS = timeoutMs;
+
+    Object.defineProperty(navigator, "serviceWorker", {
+      configurable: true,
+      value: {
+        register() {
+          return new Promise(() => {});
+        },
+        async getRegistration() {
+          return null;
+        },
+        addEventListener() {},
+      },
+    });
+  }, { timeoutMs: safetyTimeoutMs });
 
   await gotoGameRuntime(page, search);
   await waitForStartupPreload(page);
@@ -352,7 +366,9 @@ test.describe("Startup Preload — Build 2", () => {
   test("safety timeout shows briefing if preload stalls longer than 8s", async ({
     page,
   }) => {
-    await gotoBlockingPreloadRuntime(page, "?level=beginner");
+    await gotoBlockingPreloadRuntime(page, "?level=beginner", {
+      safetyTimeoutMs: 8000,
+    });
 
     await waitForBriefingVisible(page, 12000);
     await page.waitForFunction(
@@ -360,5 +376,35 @@ test.describe("Startup Preload — Build 2", () => {
     );
     await expect(page.locator("#startup-preload")).toBeHidden();
     await expect(page.locator("#start-game-btn")).toBeVisible();
+  });
+
+  test("background warmup stays idle until gameplay is ready", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      ["iphone-13", "pixel-7"].includes(testInfo.project.name),
+      "Portrait phone projects can stop at the rotation gate before gameplay-ready.",
+    );
+
+    await gotoGameRuntime(page, "?level=beginner&preload=off");
+    await waitForStartupPreload(page);
+    await waitForBriefingVisible(page, 3000);
+
+    await expect
+      .poll(() => page.evaluate(() => window.GameBackgroundWarmup?.getState?.()))
+      .toMatchObject({
+        started: false,
+        currentLevel: null,
+      });
+
+    await page.click("#start-game-btn");
+
+    await expect
+      .poll(() => page.evaluate(() => window.GameBackgroundWarmup?.getState?.()))
+      .toMatchObject({
+        started: true,
+        currentLevel: "beginner",
+        queuedLevels: ["warrior", "master"],
+      });
   });
 });

@@ -1,40 +1,87 @@
 // src/tools/scripts/verify/checks/documentation.js
 
-import { existsSync, readdirSync } from "fs";
+import { existsSync, readFileSync, readdirSync } from "fs";
 import { join } from "path";
 import { REQUIRED_DOCS } from "../verify.constants.js";
 import { log, logSection } from "../verify.logging.js";
 
-export function checkDocumentation(rootDir) {
-  logSection("DOCUMENTATION CHECK");
+const ALLOWED_MARKDOWN_FILES = new Set(REQUIRED_DOCS);
+const IGNORED_DIRECTORIES = new Set([
+  ".git",
+  "node_modules",
+  "playwright-report",
+  "test-results",
+]);
 
-  const docsPath = join(rootDir, "Docs");
-  if (!existsSync(docsPath)) {
-    log("❌ Docs folder not found!", "red");
-    return false;
-  }
+function collectMarkdownFiles(rootDir, relativeDir = "") {
+  const currentDir = join(rootDir, relativeDir);
+  const entries = readdirSync(currentDir, { withFileTypes: true });
+  const markdownFiles = [];
 
-  for (const doc of REQUIRED_DOCS) {
-    const docPath = join(docsPath, doc);
-    if (!existsSync(docPath)) {
-      log(`⚠️  Missing recommended doc: ${doc}`, "yellow");
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      if (IGNORED_DIRECTORIES.has(entry.name)) {
+        continue;
+      }
+
+      markdownFiles.push(
+        ...collectMarkdownFiles(rootDir, join(relativeDir, entry.name)),
+      );
+      continue;
+    }
+
+    if (entry.name.endsWith(".md")) {
+      markdownFiles.push(join(relativeDir, entry.name).replaceAll("\\", "/"));
     }
   }
 
-  const allDocs = readdirSync(docsPath).filter((f) => f.endsWith(".md"));
-  log(`📚 Documentation files: ${allDocs.length}`, "cyan");
+  return markdownFiles;
+}
 
-  if (existsSync(join(docsPath, "SystemDocs", "_INDEX.md"))) {
-    log("✅ _INDEX.md exists (agent-friendly)", "green");
-  } else {
-    log("⚠️  _INDEX.md missing (recommended for agents)", "yellow");
+export function checkDocumentation(rootDir) {
+  logSection("DOCUMENTATION CHECK");
+
+  for (const doc of REQUIRED_DOCS) {
+    const docPath = join(rootDir, doc);
+    if (!existsSync(docPath)) {
+      log(`❌ Missing required doc: ${doc}`, "red");
+      return false;
+    }
   }
 
-  if (existsSync(join(rootDir, ".github", "copilot-instructions.md"))) {
-    log("✅ copilot-instructions.md exists", "green");
-  } else {
-    log("⚠️  .github/copilot-instructions.md missing", "yellow");
+  const markdownFiles = collectMarkdownFiles(rootDir).sort();
+  log(`📚 Markdown files detected: ${markdownFiles.length}`, "cyan");
+
+  const unexpectedFiles = markdownFiles.filter(
+    (file) => !ALLOWED_MARKDOWN_FILES.has(file),
+  );
+
+  if (unexpectedFiles.length > 0) {
+    log("❌ Unexpected markdown files found:", "red");
+    for (const file of unexpectedFiles) {
+      log(`   - ${file}`, "red");
+    }
+    return false;
   }
+
+  if (markdownFiles.length !== ALLOWED_MARKDOWN_FILES.size) {
+    log(
+      `❌ Expected exactly ${ALLOWED_MARKDOWN_FILES.size} markdown files but found ${markdownFiles.length}`,
+      "red",
+    );
+    return false;
+  }
+
+  for (const file of markdownFiles) {
+    const lineCount = readFileSync(join(rootDir, file), "utf8").split("\n").length;
+    if (lineCount > 1000) {
+      log(`❌ ${file} exceeds 1000 lines (${lineCount})`, "red");
+      return false;
+    }
+  }
+
+  log("✅ Only the approved five markdown files are present", "green");
+  log("✅ All surviving markdown files are within the 1000-line limit", "green");
 
   return true;
 }

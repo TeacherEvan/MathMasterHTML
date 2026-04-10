@@ -22,9 +22,35 @@
   const pending = [];
   let active = false;
   let wormTapStreak = 0;
+  const tutorial = window.GameTutorialLevel;
 
   const getLiveTarget = (target) => (hasLiveRect(target) ? target : null);
   const emit = (name, detail) => document.dispatchEvent(new CustomEvent(name, { detail }));
+
+  function getTutorialBeatState() {
+    if (!tutorial?.isH2PLevel?.()) {
+      return null;
+    }
+
+    return tutorial.getBeatState?.() || null;
+  }
+
+  function isFixtureTarget(target, name) {
+    return target?.dataset?.testTarget === name;
+  }
+
+  function filterCompletedTutorialFixture(target, beatName, fixtureName) {
+    const beatState = getTutorialBeatState();
+    if (!target || !beatState?.[beatName]) {
+      return target;
+    }
+
+    if (isFixtureTarget(target, fixtureName)) {
+      return null;
+    }
+
+    return target;
+  }
 
   async function clickSymbol(element, symbol) {
     const target = getLiveTarget(element);
@@ -56,6 +82,7 @@
 
     emit(GE.WORM_CURSOR_TAP, pos);
     emit(GE.EVAN_ACTION_COMPLETED, { action: "wormTap", ...pos });
+    tutorial?.markBeatDone?.("wormDone");
     wormTapStreak++;
     await wait(pending, DELAY_POST);
   }
@@ -72,6 +99,7 @@
     }
 
     emit(GE.EVAN_ACTION_COMPLETED, { action: "muffinCollect" });
+    tutorial?.markBeatDone?.("muffinDone");
     wormTapStreak = 0;
   }
 
@@ -112,6 +140,9 @@
 
     if (!ok) sys.deselectPowerUp?.();
     emit(GE.EVAN_ACTION_COMPLETED, { action: "powerUp", type });
+    if (ok) {
+      tutorial?.markBeatDone?.("powerUpDone");
+    }
     wormTapStreak = 0;
     await wait(pending, DELAY_POST);
     return ok;
@@ -120,17 +151,25 @@
   async function runLoop() {
     const targets = window.EvanTargets;
     while (active) {
-      const seg = getLiveTarget(targets.findGreenWormSegment?.());
+      const seg = filterCompletedTutorialFixture(
+        getLiveTarget(targets.findGreenWormSegment?.()),
+        "wormDone",
+        "worm-segment",
+      );
       const puType = targets.getBestPowerUp(seg);
       const { neededSymbol, neededSymbols } = collectNeededSymbols(targets);
       const symbolTarget = findSymbolTarget(targets, neededSymbols, getLiveTarget);
+      const muffin = filterCompletedTutorialFixture(
+        getLiveTarget(targets.findMuffinReward?.()),
+        "muffinDone",
+        "muffin",
+      );
 
       if (puType) {
         await usePowerUp(puType);
       } else if (seg && (wormTapStreak < MAX_WORM_TAP_STREAK || !symbolTarget)) {
         await tapWormSegment(seg);
       } else {
-        const muffin = getLiveTarget(targets.findMuffinReward?.());
         if (muffin) {
           await collectMuffin(muffin);
         } else if (symbolTarget) {
@@ -149,6 +188,7 @@
   async function start() {
     if (active) return;
     active = true;
+    tutorial?.resetTutorialState?.();
     await waitForGameReady(pending);
     if (active) queueMicrotask(() => { if (active) void runLoop(); });
   }

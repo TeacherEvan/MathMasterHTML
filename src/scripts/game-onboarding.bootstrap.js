@@ -3,7 +3,7 @@
 
   const VALID_EVAN_MODES = ["off", "force", "auto"];
   const VALID_PRELOAD_MODES = ["off", "auto"];
-  const VALID_LEVELS = ["beginner", "warrior", "master"];
+  const VALID_LEVELS = ["h2p", "beginner", "warrior", "master"];
 
   const rawEvan = params.get("evan");
   const rawPreload = params.get("preload");

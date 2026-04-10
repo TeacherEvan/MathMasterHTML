@@ -55,6 +55,70 @@
   font-size: clamp(1.5rem, 3vw, 2.25rem);
 }
 
+.scoreboard-profile-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 16px 18px;
+  border: 1px solid rgba(124, 255, 124, 0.18);
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.scoreboard-profile-label {
+  color: #9ddf9d;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.scoreboard-profile-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.scoreboard-name-input,
+.scoreboard-name-save {
+  min-height: 46px;
+  border-radius: 14px;
+  font: inherit;
+}
+
+.scoreboard-name-input {
+  border: 1px solid rgba(124, 255, 124, 0.28);
+  background: rgba(4, 12, 4, 0.82);
+  color: #fff;
+  padding: 0 14px;
+}
+
+.scoreboard-name-input::placeholder {
+  color: #7da57d;
+}
+
+.scoreboard-name-save {
+  border: 1px solid rgba(124, 255, 124, 0.42);
+  background: linear-gradient(180deg, rgba(24, 72, 24, 0.96), rgba(12, 38, 12, 0.98));
+  color: #f2fff2;
+  cursor: pointer;
+  padding: 0 18px;
+  font-weight: 700;
+}
+
+.scoreboard-name-feedback {
+  margin: 0;
+  color: #b8d8b8;
+  font-size: 0.9rem;
+}
+
+.scoreboard-name-feedback[data-tone="success"] {
+  color: #7cff7c;
+}
+
+.scoreboard-name-feedback[data-tone="neutral"] {
+  color: #b8d8b8;
+}
+
 .scoreboard-close-button {
   border: 1px solid rgba(124, 255, 124, 0.5);
   border-radius: 999px;
@@ -189,4 +253,10 @@
 
 body.scoreboard-modal-open {
   cursor: default;
+}
+
+@media (max-width: 640px) {
+  .scoreboard-profile-controls {
+    grid-template-columns: 1fr;
+  }
 }

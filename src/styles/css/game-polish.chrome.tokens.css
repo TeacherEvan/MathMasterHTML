@@ -70,6 +70,7 @@ body::before {
 }
 
 #back-button {
+  z-index: 10030;
   left: clamp(14px, 2vw, 24px);
   bottom: clamp(14px, 2vh, 24px);
 }

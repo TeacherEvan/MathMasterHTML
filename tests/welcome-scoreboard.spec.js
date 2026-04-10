@@ -52,8 +52,11 @@ test.describe("Welcome scoreboard", () => {
       }
     }, PROFILE_KEY);
 
-    await page.goto("/index.html");
-    await page.click("#scoreboard-button");
+    await page.goto("/src/pages/index.html");
+    await page.locator("#scoreboard-button").click({
+      force: true,
+      noWaitAfter: true,
+    });
 
     await expect(page).toHaveURL(/\/src\/pages\/index\.html/);
     await expect(page.locator("#scoreboard-modal")).toBeVisible();
@@ -82,12 +85,43 @@ test.describe("Welcome scoreboard", () => {
       localStorage.removeItem(storageKey);
     }, PROFILE_KEY);
 
-    await page.goto("/index.html");
-    await page.click("#scoreboard-button");
+    await page.goto("/src/pages/index.html");
+    await page.locator("#scoreboard-button").click({
+      force: true,
+      noWaitAfter: true,
+    });
 
     await expect(page.locator("#scoreboard-modal")).toBeVisible();
     await expect(page.locator("#scoreboard-history-list")).toContainText(
       "No local score history yet",
     );
+  });
+
+  test("lets players save a local name from the welcome scoreboard", async ({
+    page,
+  }) => {
+    await page.addInitScript((storageKey) => {
+      localStorage.removeItem(storageKey);
+    }, PROFILE_KEY);
+
+    await page.goto("/src/pages/index.html");
+    await page.locator("#scoreboard-button").click({
+      force: true,
+      noWaitAfter: true,
+    });
+
+    await page.locator("#scoreboard-name-input").fill("Ada");
+    await page.locator("#scoreboard-name-input").press("Enter");
+
+    await expect(page.locator("#scoreboard-player-name")).toHaveText("Ada");
+    await expect(page.locator("#scoreboard-name-feedback")).toContainText(
+      "Saved as Ada.",
+    );
+
+    const storedProfile = await page.evaluate((storageKey) => {
+      return JSON.parse(localStorage.getItem(storageKey) || "null");
+    }, PROFILE_KEY);
+
+    expect(storedProfile?.name).toBe("Ada");
   });
 });

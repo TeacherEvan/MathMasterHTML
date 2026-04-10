@@ -17,21 +17,25 @@ const ProblemManager = {
   async loadProblems(level) {
     let problemPath = "";
     switch (level) {
+      case "h2p":
+        problemPath =
+          "/src/assets/problems/Assets/Tutorial_Lvl/h2p_problems.json";
+        break;
       case "beginner":
         problemPath =
-          "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.md";
+          "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.json";
         break;
       case "warrior":
         problemPath =
-          "/src/assets/problems/Assets/Warrior_Lvl/warrior_problems.md";
+          "/src/assets/problems/Assets/Warrior_Lvl/warrior_problems.json";
         break;
       case "master":
         problemPath =
-          "/src/assets/problems/Assets/Master_Lvl/master_problems.md";
+          "/src/assets/problems/Assets/Master_Lvl/master_problems.json";
         break;
       default:
         problemPath =
-          "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.md";
+          "/src/assets/problems/Assets/Beginner_Lvl/beginner_problems.json";
     }
 
     try {
@@ -39,8 +43,8 @@ const ProblemManager = {
       if (!response.ok) {
         throw new Error(`Failed to load problems: ${response.statusText}`);
       }
-      const data = await response.text();
-      this._problems = this._parseProblemsFromMarkdown(data);
+      const data = await response.json();
+      this._problems = this._normalizeProblems(data);
     } catch {
       // Fallback problem
       this._problems = [
@@ -55,38 +59,26 @@ const ProblemManager = {
   },
 
   /**
-   * Parse problems from markdown content
-   * @param {string} markdownContent - Markdown text
+   * Normalize problems from JSON content
+   * @param {Array|Object} payload - JSON payload
    * @returns {Array} Parsed problems
    */
-  _parseProblemsFromMarkdown(markdownContent) {
-    const parsedProblems = [];
-    const problemRegex = /(\d+)\.\s+`([^`]+)`\s*\n((?:\s*-[^\n]+\n?)+)/g;
-    let match;
+  _normalizeProblems(payload) {
+    const source = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.problems)
+        ? payload.problems
+        : [];
 
-    while ((match = problemRegex.exec(markdownContent)) !== null) {
-      try {
-        const problemText = match[2];
-        const stepsText = match[3];
-        const steps = stepsText
-          .split("\n")
-          .filter((line) => line.trim().startsWith("-"))
-          .map((line) => line.trim().replace(/^-\s*/, ""));
-
-        if (steps.length > 0) {
-          parsedProblems.push({
-            problem: problemText,
-            steps: steps,
-            currentStep: 0,
-            currentSymbol: 0,
-          });
-        }
-      } catch {
-        // Skip malformed problems silently
-      }
-    }
-
-    return parsedProblems;
+    return source
+      .filter((entry) => entry && typeof entry.problem === "string")
+      .map((entry) => ({
+        problem: entry.problem,
+        steps: Array.isArray(entry.steps) ? entry.steps : [],
+        currentStep: 0,
+        currentSymbol: 0,
+      }))
+      .filter((entry) => entry.steps.length > 0);
   },
 
   /**

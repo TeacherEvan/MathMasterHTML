@@ -97,6 +97,14 @@
       .join("");
   }
 
+  function getDisplayName(profile) {
+    if (typeof profile?.name === "string" && profile.name.trim().length > 0) {
+      return profile.name.trim();
+    }
+
+    return "Player";
+  }
+
   function renderSummary(elements) {
     const summary = getSummary();
     const profile = summary.profile || { name: "Player", levels: {} };
@@ -106,10 +114,7 @@
       lastPlayed: null,
     };
 
-    elements.playerName.textContent =
-      typeof profile.name === "string" && profile.name.trim().length > 0
-        ? profile.name
-        : "Player";
+    elements.playerName.textContent = getDisplayName(profile);
     elements.overallSummary.innerHTML = `
       <div class="scoreboard-stat-row"><dt>Total score</dt><dd>${formatScore(overall.totalScore)}</dd></div>
       <div class="scoreboard-stat-row"><dt>Problems solved</dt><dd>${formatScore(overall.problemsCompleted)}</dd></div>
@@ -118,9 +123,11 @@
 
     renderLevelStats(elements.levelStats, profile.levels || {});
     renderHistory(elements.historyList, summary.recentHistory);
+    return summary;
   }
 
   window.IndexPageScoreboardRender = {
+    getDisplayName,
     renderSummary,
   };
 })();

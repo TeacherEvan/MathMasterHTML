@@ -4,6 +4,40 @@ async function dismissBriefing(page) {
   const startButton = page.locator("#start-game-btn");
   const howToPlayModal = page.locator("#how-to-play-modal");
 
+  await page.waitForFunction(
+    () => {
+      const modal = document.getElementById("how-to-play-modal");
+      const start = document.getElementById("start-game-btn");
+      const modalVisible = Boolean(
+        modal && window.getComputedStyle(modal).display !== "none",
+      );
+      const startVisible = Boolean(
+        start &&
+          window.getComputedStyle(start).display !== "none" &&
+          start.getClientRects().length > 0,
+      );
+      const gameplayReady =
+        window.GameRuntimeCoordinator?.isGameplayReady?.() === true;
+
+      return gameplayReady || (modalVisible && startVisible);
+    },
+    { timeout: 10000 },
+  );
+
+  const briefingState = await page.evaluate(() => {
+    const modal = document.getElementById("how-to-play-modal");
+    return {
+      modalVisible: Boolean(
+        modal && window.getComputedStyle(modal).display !== "none",
+      ),
+      gameplayReady: window.GameRuntimeCoordinator?.isGameplayReady?.() === true,
+    };
+  });
+
+  if (briefingState.gameplayReady && !briefingState.modalVisible) {
+    return;
+  }
+
   await expect(startButton).toBeVisible({ timeout: 10000 });
 
   for (let attempt = 0; attempt < 4; attempt++) {

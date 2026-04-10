@@ -1,24 +1,65 @@
 # Math Master Algebra - AI Agent Instructions
 
-This file is the repo-wide routing layer only. Durable runtime, testing, and workflow details belong in `Docs/` and `README.md`.
+This file is the repo-wide routing and guardrail layer.
 
 ## Repo-Wide Defaults
 
 - Active runtime pages live in `src/pages/`; root HTML files stay redirect entrypoints.
-- Preserve the browser-native script-tag runtime boundaries.
-- Panel A and Panel B sizing is owned by `src/scripts/display-manager.js`, not CSS overrides.
-- Default validation baseline: `npm run verify` and `npm run typecheck`.
+- Preserve the browser-native script-tag runtime and event-driven boundaries.
+- Panel A and Panel B sizing belongs to `src/scripts/display-manager.js`, not CSS overrides.
+- Problem data is runtime content stored as JSON under `src/assets/problems/Assets/`.
+- Default validation baseline is `npm run verify` and `npm run typecheck`.
 
-## Instruction Architecture
+## Markdown Policy
 
-See `Docs/SystemDocs/AGENT_CUSTOMIZATION_ARCHITECTURE.md` for the ownership model and update protocol.
+Only five Markdown files may exist in this repository:
 
-This file stays minimal and repo-wide. It routes agents to the authoritative docs instead of restating subsystem behavior.
+1. `.github/copilot-instructions.md`
+2. `JOBCARD.md`
+3. `Plan Genesis.md`
+4. `Plan Beta.md`
+5. `Plan Alpha.md`
 
-## Key References
+Do not add any other `.md` files. Consolidate new durable content into one of the three plan files based on scope:
 
-- `README.md` for repo entrypoints and command overview.
-- `Docs/SystemDocs/_INDEX.md` for the current documentation map.
-- `Docs/SystemDocs/DEVELOPMENT_GUIDE.md` for workflow and documentation upkeep rules.
-- `Docs/SystemDocs/ARCHITECTURE.md` for runtime boundaries and event-driven structure.
-- `Docs/SystemDocs/PERFORMANCE.md` for performance constraints and validation targets.
+- `Plan Genesis.md`: runtime architecture, workflow, testing, performance, and subsystem contracts.
+- `Plan Beta.md`: roadmap, execution sequencing, validation lanes, backlog, and feature delivery policy.
+- `Plan Alpha.md`: design system, UX intent, product rules, accessibility, and brand direction.
+
+## Authoritative Docs
+
+- `Plan Genesis.md` is the operational source of truth for runtime and engineering work.
+- `Plan Beta.md` is the source of truth for roadmap and execution priorities.
+- `Plan Alpha.md` is the source of truth for product, design, and experience rules.
+- `JOBCARD.md` is the rolling work log.
+
+## Scoped Guidance
+
+### When editing `src/scripts/**/*.js` or `src/pages/**/*.html`
+
+- Preserve script load order and `window.*` registration semantics.
+- Keep cross-module integration event-driven.
+- Prefer `Plan Genesis.md` first, then `Plan Alpha.md` for UX-sensitive behavior.
+
+### When editing `tests/**/*.spec.js`
+
+- Test the active runtime pages in `src/pages/` unless the redirect entrypoint itself is under test.
+- Assert visible outcomes and shared event contracts rather than private implementation details.
+- Use `Plan Genesis.md` for lane expectations and `Plan Beta.md` for execution priorities.
+
+### When editing worm runtime or worm-related CSS
+
+- Preserve split-by-concern worm files and reward behavior.
+- Keep green worm, purple worm, muffin, and power-up rules aligned with `Plan Genesis.md`.
+
+## Validation
+
+- `npm run verify`
+- `npm run typecheck`
+- Run the smallest focused Playwright lane for the changed surface.
+
+## Documentation Upkeep
+
+- Fold duplicate or stale notes into the surviving five Markdown files.
+- Prefer updating an existing plan section over creating a new heading dump.
+- Keep every surviving Markdown file below 1000 lines.

@@ -1,10 +1,10 @@
 /**
  * Service Worker - Production-Grade PWA Support
  * Enables offline gameplay and improves performance
- * Version: 20260410-settings-cache-foundation-1
+ * Version: 20260411-main-sync-review-1
  */
 
-const BUILD_VERSION = "20260410-settings-cache-foundation-1";
+const BUILD_VERSION = "20260411-main-sync-review-1";
 const CACHE_PREFIX = "math-master";
 const CACHE_NAME = `${CACHE_PREFIX}-static-${BUILD_VERSION}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_VERSION}`;
@@ -78,6 +78,17 @@ const STATIC_ASSETS = [
   "/src/scripts/lock-manager.js",
   "/src/scripts/console-manager.js",
   "/src/scripts/game.js",
+  "/src/scripts/game-onboarding.storage.js",
+  "/src/scripts/game-onboarding.bootstrap.js",
+  "/src/scripts/evan-helper.presenter.js",
+  "/src/scripts/game-tutorial-level.js",
+  "/src/scripts/game-onboarding.controller.js",
+  "/src/scripts/evan-helper.controller.targets.js",
+  "/src/scripts/evan-helper.controller.runtime.js",
+  "/src/scripts/evan-helper.controller.js",
+  "/src/scripts/game-background-warmup.js",
+  "/src/scripts/build-version.js",
+  "/src/scripts/install-prompt.js",
   `/src/scripts/startup-preload.js?v=${BUILD_VERSION}`,
   `/src/scripts/game-page.js?v=${BUILD_VERSION}`,
   `/src/scripts/service-worker-register.js?v=${BUILD_VERSION}`,
@@ -85,7 +96,7 @@ const STATIC_ASSETS = [
 
 // Assets to cache on first use (lazy cache)
 const LAZY_CACHE_PATTERNS = [
-  /\/src\/assets\/problems\/Assets\/.+\.md$/,
+  /\/src\/assets\/problems\/Assets\/.+\.json$/,
   /\/lock-components\/.+\.html$/,
   /\/(src\/assets\/images\/Images|Images)\/.+\.(jpg|png|gif|svg)$/,
 ];

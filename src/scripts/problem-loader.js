@@ -15,22 +15,20 @@ class ProblemLoader {
     this.problems = [];
     this.currentProblemIndex = 0;
 
-    // Problem regex pattern for markdown parsing
-    this.PROBLEM_REGEX = /(\d+)\.\s+`([^`]+)`\s*\n((?:\s*-[^\n]+\n?)+)/g;
-
     console.log("📚 ProblemLoader initialized");
   }
 
   /**
    * Get problem file path based on difficulty level
-   * @param {string} level - Difficulty level (beginner, warrior, master)
+   * @param {string} level - Difficulty level (h2p, beginner, warrior, master)
    * @returns {string} Path to problem file
    */
   getProblemPath(level) {
     const levelMap = {
-      beginner: `${this.assetBasePath}/Beginner_Lvl/beginner_problems.md`,
-      warrior: `${this.assetBasePath}/Warrior_Lvl/warrior_problems.md`,
-      master: `${this.assetBasePath}/Master_Lvl/master_problems.md`,
+      h2p: `${this.assetBasePath}/Tutorial_Lvl/h2p_problems.json`,
+      beginner: `${this.assetBasePath}/Beginner_Lvl/beginner_problems.json`,
+      warrior: `${this.assetBasePath}/Warrior_Lvl/warrior_problems.json`,
+      master: `${this.assetBasePath}/Master_Lvl/master_problems.json`,
     };
 
     return levelMap[level] || levelMap["beginner"];
@@ -52,8 +50,8 @@ class ProblemLoader {
         throw new Error(`Failed to load problems: ${response.statusText}`);
       }
 
-      const data = await response.text();
-      this.problems = this.parseProblemsFromMarkdown(data);
+      const data = await response.json();
+      this.problems = this.normalizeProblems(data);
 
       console.log(
         `📖 Loaded ${this.problems.length} problems for ${level} level`,
@@ -70,45 +68,30 @@ class ProblemLoader {
   }
 
   /**
-   * Parse problems from markdown content
-   * @param {string} markdownContent - Raw markdown content
+   * Normalize problems from JSON payload
+   * @param {Array|Object} payload - Raw JSON payload
    * @returns {Array} Array of parsed problems
    */
-  parseProblemsFromMarkdown(markdownContent) {
-    const parsedProblems = [];
-    let match;
+  normalizeProblems(payload) {
+    const source = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.problems)
+        ? payload.problems
+        : [];
 
-    // Reset regex state
-    this.PROBLEM_REGEX.lastIndex = 0;
-
-    while ((match = this.PROBLEM_REGEX.exec(markdownContent)) !== null) {
-      try {
-        const problemNumber = match[1];
-        const problemText = match[2];
-        const stepsText = match[3];
-
-        // Extract all solution steps (lines starting with -)
-        const steps = stepsText
-          .split("\n")
-          .filter((line) => line.trim().startsWith("-"))
-          .map((line) => line.trim().replace(/^-\s*/, ""));
-
-        if (steps.length > 0) {
-          parsedProblems.push({
-            number: parseInt(problemNumber, 10),
-            problem: problemText,
-            steps: steps,
-            currentStep: 0,
-            currentSymbol: 0,
-          });
-        }
-      } catch (e) {
-        console.error("❌ Error parsing problem:", e);
-      }
-    }
+    const parsedProblems = source
+      .filter((entry) => entry && typeof entry.problem === "string")
+      .map((entry, index) => ({
+        number: Number.isFinite(entry.number) ? entry.number : index + 1,
+        problem: entry.problem,
+        steps: Array.isArray(entry.steps) ? entry.steps : [],
+        currentStep: 0,
+        currentSymbol: 0,
+      }))
+      .filter((entry) => entry.steps.length > 0);
 
     console.log(
-      `📚 Parsed ${parsedProblems.length} problems with multi-step solutions`,
+      `📚 Parsed ${parsedProblems.length} problems from JSON data`,
     );
     return parsedProblems;
   }

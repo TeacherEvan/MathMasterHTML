@@ -21,6 +21,8 @@ console.log("💾 PlayerStorage loading...");
     migrateProfile,
   } = helpers;
 
+  const MAX_PLAYER_NAME_LENGTH = 18;
+
   function safeParse(json) {
     if (!json) return null;
     try {
@@ -28,6 +30,14 @@ console.log("💾 PlayerStorage loading...");
     } catch {
       return null;
     }
+  }
+
+  function normalizePlayerName(value) {
+    if (typeof value !== "string") {
+      return "";
+    }
+
+    return value.replace(/\s+/g, " ").trim().slice(0, MAX_PLAYER_NAME_LENGTH);
   }
 
   const PlayerStorage = {
@@ -53,14 +63,27 @@ console.log("💾 PlayerStorage loading...");
 
     ensurePlayerName() {
       const profile = this._read() || createDefaultProfile();
-      if (profile.name && String(profile.name).trim().length > 0)
-        return profile.name;
+      const storedName = normalizePlayerName(profile.name);
+      if (storedName) {
+        return storedName;
+      }
 
       profile.name = "Player";
       profile.updatedAt = Date.now();
       this._write(profile);
       console.log('💾 No player name stored - using default name "Player"');
       return profile.name;
+    },
+
+    setPlayerName(name) {
+      const profile = this._read() || createDefaultProfile();
+      const normalizedName = normalizePlayerName(name) || "Player";
+
+      profile.name = normalizedName;
+      profile.updatedAt = Date.now();
+      this._write(profile);
+
+      return normalizedName;
     },
 
     getProfile() {

@@ -16,6 +16,11 @@
     return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
   }
 
+  function findTestTarget(name) {
+    const target = document.querySelector(`[data-test-target="${name}"]`);
+    return isVisible(target) ? target : null;
+  }
+
   function getNeededSymbols() {
     const stepIndex = window.GameSymbolHandlerCore?.getCurrentStepIndex?.();
     const selector =
@@ -56,7 +61,16 @@
         bestBottom = r.bottom;
       }
     }
-    return best;
+    if (best) {
+      return best;
+    }
+
+    const fixture = findTestTarget("symbol");
+    if (!fixture) {
+      return null;
+    }
+
+    return normalize(fixture.textContent) === normalizedSymbol ? fixture : null;
   }
 
   function findBestFallingSymbol(symbols) {
@@ -79,7 +93,16 @@
       }
     }
 
-    return best;
+    if (best) {
+      return best;
+    }
+
+    const fixture = findTestTarget("symbol");
+    if (!fixture) {
+      return null;
+    }
+
+    return normalized.has(normalize(fixture.textContent)) ? fixture : null;
   }
 
   function findGreenWormSegment() {
@@ -89,7 +112,7 @@
     for (const seg of segments) {
       if (isVisible(seg)) return seg;
     }
-    return null;
+    return findTestTarget("worm-segment") || null;
   }
 
   function findMuffinReward() {
@@ -97,11 +120,14 @@
     for (const m of muffins) {
       if (isVisible(m) && !m.disabled) return m;
     }
-    return null;
+    return findTestTarget("muffin") || null;
   }
 
   function hasPurpleWorm() {
-    return document.querySelector(".worm-container.purple-worm") !== null;
+    return (
+      document.querySelector(".worm-container.purple-worm") !== null ||
+      findTestTarget("purple-worm") !== null
+    );
   }
 
   function getBestPowerUp(cachedGreenSeg) {
