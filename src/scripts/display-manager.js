@@ -215,7 +215,7 @@ class DisplayManager {
       maxTouchPoints > 0 ||
       window.matchMedia?.("(any-pointer: coarse)")?.matches === true;
     const isAndroid = /Android/i.test(userAgent);
-    const isTabletClassAndroidUa =
+    const isKnownTabletClassAndroidUa =
       /Tablet|\bSM-T\w+\b|\bNexus (7|9|10)\b|\bPixel C\b|\bLenovo TB-[A-Z0-9]+\b/i.test(
         userAgent,
       );
@@ -223,17 +223,28 @@ class DisplayManager {
     const isWebView = /\bwv\b|; wv\)|Version\/\d+\.\d+.*Chrome\//i.test(
       userAgent,
     );
+    const devicePixelRatio = Math.max(window.devicePixelRatio || 1, 1);
+    const screenWidth = Math.min(window.screen?.width || window.innerWidth, window.innerWidth);
+    const screenHeight = Math.min(window.screen?.height || window.innerHeight, window.innerHeight);
+    const shortestRuntimeSide = Math.min(screenWidth, screenHeight);
+    const densityNormalizedShortestSide = shortestRuntimeSide / devicePixelRatio;
+    const isTabletLikeAndroidRuntime =
+      hasTouchRuntime &&
+      isAndroid &&
+      (isKnownTabletClassAndroidUa || densityNormalizedShortestSide >= 320);
 
     return {
       hasTouchRuntime,
       isAndroid,
-      isTabletClassAndroidUa,
+      isKnownTabletClassAndroidUa,
+      isTabletLikeAndroidRuntime,
       isPhoneClassMobileUa,
       isWebView,
+      densityNormalizedShortestSide,
       isAndroidPhoneLikeRuntime:
         hasTouchRuntime &&
         isAndroid &&
-        !isTabletClassAndroidUa &&
+        !isTabletLikeAndroidRuntime &&
         (isPhoneClassMobileUa || isWebView),
     };
   }
