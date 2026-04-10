@@ -205,6 +205,31 @@ class DisplayManager {
     };
   }
 
+  getMobilePlatformHints() {
+    const userAgent = navigator.userAgent || "";
+    const maxTouchPoints =
+      typeof navigator.maxTouchPoints === "number"
+        ? navigator.maxTouchPoints
+        : 0;
+    const hasTouchRuntime =
+      maxTouchPoints > 0 ||
+      window.matchMedia?.("(any-pointer: coarse)")?.matches === true;
+    const isAndroid = /Android/i.test(userAgent);
+    const isPhoneClassMobileUa = /Mobile/i.test(userAgent);
+    const isWebView = /\bwv\b|; wv\)|Version\/\d+\.\d+.*Chrome\//i.test(
+      userAgent,
+    );
+
+    return {
+      hasTouchRuntime,
+      isAndroid,
+      isPhoneClassMobileUa,
+      isWebView,
+      isAndroidPhoneLikeRuntime:
+        hasTouchRuntime && isAndroid && (isPhoneClassMobileUa || isWebView),
+    };
+  }
+
   getViewportState({
     width = window.innerWidth,
     height = window.innerHeight,
@@ -220,6 +245,7 @@ class DisplayManager {
       compactLandscapeWidth,
       compactLandscapeMaxHeight,
     } = this.compactViewportConfig;
+    const platformHints = this.getMobilePlatformHints();
     const isLandscape = width >= height;
     const isPortrait = height > width;
     const isCompactNarrowViewport = width <= mobileMaxWidth;
@@ -230,23 +256,34 @@ class DisplayManager {
       height <= compactLandscapeMaxHeight;
     const isCompactShortViewport =
       width <= compactMaxWidth && height <= compactMaxHeight;
+    const isCompactAndroidWebViewFallback =
+      platformHints.isAndroidPhoneLikeRuntime &&
+      !hasCoarsePointer &&
+      width <= compactMaxWidth &&
+      height <= compactLandscapeWidth;
     const isCompactViewport =
       isCompactNarrowViewport ||
       isCompactLandscapeTouch ||
-      isCompactShortViewport;
+      isCompactShortViewport ||
+      isCompactAndroidWebViewFallback;
     const shouldShowRotationOverlay =
-      hasCoarsePointer && isCompactViewport && isPortrait;
+      (hasCoarsePointer || platformHints.isAndroidPhoneLikeRuntime) &&
+      isCompactViewport &&
+      isPortrait &&
+      width <= mobileMaxWidth;
 
     return {
       width,
       height,
       hasCoarsePointer,
+      ...platformHints,
       isLandscape,
       isPortrait,
       isCompactNarrowViewport,
       isCompactViewport,
       isCompactLandscapeTouch,
       isCompactShortViewport,
+      isCompactAndroidWebViewFallback,
       shouldShowRotationOverlay,
     };
   }

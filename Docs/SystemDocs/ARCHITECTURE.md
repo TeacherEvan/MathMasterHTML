@@ -49,6 +49,8 @@ This document describes the current runtime architecture of MathMasterHTML.
 | Lock progression | `lock-manager.js`, `lock-manager.loader.js`, `lock-manager.animations.js`, `lock-manager.events.js`, `lock-manager.templates.js` | Lock fragment loading, animation sequencing, and progression reactions |
 | Page-specific layers | `game-page.js`, `index-page*.js`, `level-select-page*.js` | Page boot logic, page-only interactions, and screen-specific polish |
 
+Compact/mobile classification is owned by `display-manager*.js`. Android WebView-like touch runtimes may misreport pointer media queries, so the display manager is the shared place for fallback detection; Panel C symbol rain consumes that compact viewport contract instead of adding its own user-agent detection.
+
 ### Enemies, rewards, and effects
 
 | Area | Notable families | Responsibility |

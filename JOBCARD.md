@@ -2,6 +2,14 @@
 
 ## Latest update (2026-04-10)
 
+- Completed the Android WebView Panel C recovery pass on `feature/android-webview-panel-c-recovery`, fixing compact/mobile misclassification when Android WebView-like touch runtimes report desktop-like pointer media queries.
+- Added focused Chromium regression coverage in `tests/game-portrait-device-contract.spec.js` and `tests/symbol-rain.mobile.spec.js` to model a WebView-like Android UA, touch input, a wider embedded viewport, and a lying coarse-pointer media query.
+- Kept the runtime fix scoped to `src/scripts/display-manager.js`, where compact viewport ownership already lives, so Panel C symbol rain continues consuming the shared display contract instead of adding its own platform heuristics.
+- Documented the boundary in `Docs/SystemDocs/ARCHITECTURE.md` so future mobile/runtime work keeps Android WebView fallback logic inside the display manager.
+- Revalidated the focused WebView contracts (`2 passed`), the broader mobile gameplay lane (`30 passed`, `9 skipped`), plus `npm run verify` and `npm run typecheck` after the milestone work.
+
+## Previous update (2026-04-10)
+
 - Completed the settings and deferred-update execution pass on `feature/settings-cache-implementation`, adding a production settings surface for display quality, language, sound mute, reduced motion, and cache recovery on level select.
 - Added the versioned `window.UserSettings` runtime, early locale boot wiring, persisted quality/audio integration, and build-version/update signaling so stale deployments surface a deferred refresh flow instead of interrupting active gameplay.
 - Hardened the Math Master service-worker lifecycle with build-scoped caches, app-only cleanup, and a safe `Refresh now` / `Clear cache` recovery path outside gameplay.

@@ -179,6 +179,69 @@ test.describe("Gameplay portrait device contract", () => {
     });
   });
 
+  test("treats Android WebView-like touch runtimes as compact when coarse-pointer media queries lie", async ({
+    browser,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "chromium",
+      "Manual WebView context contract runs on the chromium project only.",
+    );
+
+    const context = await browser.newContext({
+      viewport: { width: 980, height: 735 },
+      screen: { width: 980, height: 735 },
+      userAgent:
+        "Mozilla/5.0 (Linux; Android 14; Pixel 7 Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/123.0.0.0 Mobile Safari/537.36",
+      isMobile: true,
+      hasTouch: true,
+      deviceScaleFactor: 2.625,
+    });
+
+    const page = await context.newPage();
+
+    await page.addInitScript(() => {
+      const originalMatchMedia = window.matchMedia.bind(window);
+      window.matchMedia = (query) => {
+        if (query === "(hover: none) and (pointer: coarse)") {
+          return {
+            matches: false,
+            media: query,
+            onchange: null,
+            addListener() {},
+            removeListener() {},
+            addEventListener() {},
+            removeEventListener() {},
+            dispatchEvent() {
+              return false;
+            },
+          };
+        }
+
+        return originalMatchMedia(query);
+      };
+    });
+
+    await page.goto("/src/pages/game.html?level=beginner", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await page.waitForFunction(
+      () => Boolean(window.displayManager?.getCurrentResolution?.()),
+      { timeout: 10000 },
+    );
+
+    const state = await page.evaluate(() => ({
+      resolution: window.displayManager?.getCurrentResolution?.() ?? null,
+      bodyClasses: document.body.className,
+    }));
+
+    expect(state.resolution?.name).toBe("mobile");
+    expect(state.resolution?.isCompactViewport).toBe(true);
+    expect(state.bodyClasses).toContain("viewport-compact");
+
+    await context.close();
+  });
+
   test.describe("portrait tablet layout contract", () => {
     const iPadMini = devices["iPad Mini"];
 

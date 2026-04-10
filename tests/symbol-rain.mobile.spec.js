@@ -276,6 +276,74 @@ test.describe("Symbol rain mobile interactions", () => {
     expect(visibilitySamples.at(-1)).toBeGreaterThan(0);
   });
 
+  test("keeps live Panel C targets visible in an Android WebView-like runtime", async ({
+    browser,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "chromium",
+      "Manual WebView context contract runs on the chromium project only.",
+    );
+
+    const context = await browser.newContext({
+      viewport: { width: 980, height: 735 },
+      screen: { width: 980, height: 735 },
+      userAgent:
+        "Mozilla/5.0 (Linux; Android 14; Pixel 7 Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/123.0.0.0 Mobile Safari/537.36",
+      isMobile: true,
+      hasTouch: true,
+      deviceScaleFactor: 2.625,
+    });
+
+    const page = await context.newPage();
+
+    await page.addInitScript(() => {
+      const originalMatchMedia = window.matchMedia.bind(window);
+      window.matchMedia = (query) => {
+        if (query === "(hover: none) and (pointer: coarse)") {
+          return {
+            matches: false,
+            media: query,
+            onchange: null,
+            addListener() {},
+            removeListener() {},
+            addEventListener() {},
+            removeEventListener() {},
+            dispatchEvent() {
+              return false;
+            },
+          };
+        }
+
+        return originalMatchMedia(query);
+      };
+    });
+
+    await page.goto("/src/pages/game.html?level=beginner&evan=off&preload=off", {
+      waitUntil: "domcontentloaded",
+    });
+
+    const startButton = page.locator("#start-game-btn");
+    if (await startButton.isVisible()) {
+      await startButton.click({ force: true });
+    }
+
+    await page.waitForFunction(() => {
+      const state = window.displayManager?.getCurrentResolution?.();
+
+      return (
+        state?.isCompactViewport === true &&
+        document.body.classList.contains("viewport-compact")
+      );
+    }, { timeout: 10000 });
+
+    await page.locator("#panel-c .falling-symbol").first().waitFor({
+      state: "visible",
+      timeout: 10000,
+    });
+
+    await context.close();
+  });
+
   test("forced Evan boot keeps rain visible while gameplay input is locked", async ({
     page,
   }, testInfo) => {
