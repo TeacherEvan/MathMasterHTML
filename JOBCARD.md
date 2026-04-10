@@ -1,5 +1,13 @@
 # JOBCARD
 
+## Latest update (2026-04-10)
+
+- Completed the settings and deferred-update execution pass on `feature/settings-cache-implementation`, adding a production settings surface for display quality, language, sound mute, reduced motion, and cache recovery on level select.
+- Added the versioned `window.UserSettings` runtime, early locale boot wiring, persisted quality/audio integration, and build-version/update signaling so stale deployments surface a deferred refresh flow instead of interrupting active gameplay.
+- Hardened the Math Master service-worker lifecycle with build-scoped caches, app-only cleanup, and a safe `Refresh now` / `Clear cache` recovery path outside gameplay.
+- Expanded automated coverage with new settings, localization, and service-worker update specs, and stabilized the optional competition smoke manager flow so mobile projects wait on the shared gameplay-ready contract.
+- Revalidated `npm run verify`, `npm run typecheck`, the targeted settings/update Playwright lane, and `npm run test:competition:smoke` after the milestone work.
+
 ## Latest update (2026-04-09)
 
 - Completed the mobile recovery execution pass on `feature/panel-c-mobile-rain-fix`, covering level-select CTA clarity, Panel C diagnosis, Evan startup messaging, and compact-mobile control anchoring.
