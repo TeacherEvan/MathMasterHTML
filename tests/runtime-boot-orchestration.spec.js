@@ -20,7 +20,7 @@ async function gotoBlockingPreloadRuntime(page, search = "?level=beginner") {
 
 test.describe("Runtime boot orchestration", () => {
   test.beforeEach(async ({ page }, testInfo) => {
-    if (testInfo.project.name === "pixel-7") {
+    if (testInfo.project.use?.isMobile) {
       await page.setViewportSize({ width: 915, height: 412 });
     }
   });
@@ -121,6 +121,45 @@ test.describe("Runtime boot orchestration", () => {
       "briefingDismissed",
       "gameplayReadyChanged",
     ]);
+  });
+
+  test("symbol rain stays idle until gameplay is ready", async ({ page }) => {
+    await gotoGameRuntime(page, "?level=beginner&preload=off");
+    await waitForRuntimeCoordinator(page);
+
+    await expect(page.locator("#start-game-btn")).toBeVisible();
+
+    const beforeStart = await page.evaluate(() => ({
+      gameplayReady: window.GameRuntimeCoordinator?.isGameplayReady?.() === true,
+      isAnimationRunning:
+        window.__symbolRainState?.isAnimationRunning === true,
+      activeFallingSymbols:
+        window.__symbolRainState?.activeFallingSymbols?.length ?? null,
+    }));
+
+    expect(beforeStart.gameplayReady).toBe(false);
+    expect(beforeStart.isAnimationRunning).toBe(false);
+    expect(beforeStart.activeFallingSymbols).toBe(0);
+
+    await page.click("#start-game-btn");
+
+    await page.waitForFunction(
+      () => window.GameRuntimeCoordinator?.isGameplayReady?.() === true,
+      null,
+      { timeout: 10000 },
+    );
+
+    await page.waitForFunction(
+      () => window.__symbolRainState?.isAnimationRunning === true,
+      null,
+      { timeout: 10000 },
+    );
+
+    await page.waitForFunction(
+      () => (window.__symbolRainState?.activeFallingSymbols?.length || 0) > 0,
+      null,
+      { timeout: 10000 },
+    );
   });
 
   test("auto Evan input lock is separate from gameplay readiness", async ({

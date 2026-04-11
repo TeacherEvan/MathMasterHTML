@@ -33,9 +33,8 @@ console.log("🎯 GameProblemLoader helpers loading...");
 
   window.GameProblemLoader = {
     loadProblems({ level, onLoaded, onError, showSkeleton }) {
-      showSkeleton?.();
-
       const problemPath = getProblemPath(level);
+      showSkeleton?.({ level, problemPath });
 
       fetch(problemPath)
         .then((response) => {

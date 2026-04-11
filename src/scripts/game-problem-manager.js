@@ -59,7 +59,12 @@ console.log("📚 Game problem manager module loading...");
 
     window.GameProblemLoader?.loadProblems({
       level,
-      showSkeleton: window.showProblemLoadingSkeleton,
+      showSkeleton: (context) => {
+        window.showProblemLoadingSkeleton?.(problemContainer, {
+          level,
+          problemPath: context?.problemPath,
+        });
+      },
       onLoaded: (loadedProblems) => {
         problems = loadedProblems;
         if (problems.length > 0) {

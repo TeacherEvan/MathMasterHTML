@@ -50,6 +50,35 @@ function initSymbolRain() {
       );
     };
 
+    function isGameplayReady() {
+      return window.GameRuntimeCoordinator?.isGameplayReady?.() === true;
+    }
+
+    function queueBootstrapWhenGameplayReady() {
+      if (state.bootstrapDeferred) {
+        return;
+      }
+
+      const gameplayReadyEvent = GameEvents?.GAMEPLAY_READY_CHANGED;
+      if (!gameplayReadyEvent) {
+        return;
+      }
+
+      state.bootstrapDeferred = true;
+      document.addEventListener(
+        gameplayReadyEvent,
+        (event) => {
+          if (!event.detail?.gameplayReady) {
+            return;
+          }
+
+          state.bootstrapDeferred = false;
+          scheduleBootstrap();
+        },
+        { once: true },
+      );
+    }
+
     const state = {
       config: SymbolRainConfig,
       symbols: SymbolRainSymbols,
@@ -73,6 +102,7 @@ function initSymbolRain() {
       bootstrapFrameId: null,
       layoutRetryId: null,
       layoutRetryCount: 0,
+      bootstrapDeferred: false,
     };
 
     window.__symbolRainState = state;
@@ -118,12 +148,22 @@ function initSymbolRain() {
     }
 
     function scheduleBootstrap() {
+      if (state.bootstrapDeferred && !isGameplayReady()) {
+        return;
+      }
+
       if (state.bootstrapFrameId !== null) {
         return;
       }
 
       state.bootstrapFrameId = requestAnimationFrame(() => {
         state.bootstrapFrameId = null;
+
+        if (!isGameplayReady()) {
+          queueBootstrapWhenGameplayReady();
+          return;
+        }
+
         state.isMobileMode = isCompactDisplayMode();
         calculateColumns();
 

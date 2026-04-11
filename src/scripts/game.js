@@ -13,6 +13,18 @@ const gameModules = [
 ];
 
 let loadedModules = 0;
+const startupPreloadMessageEl = document.getElementById("startup-preload-message");
+
+function setStartupPreloadMessage(message) {
+  if (startupPreloadMessageEl && typeof message === "string") {
+    startupPreloadMessageEl.textContent = message;
+  }
+}
+
+function getModuleLabel(src) {
+  const parts = src.split("/");
+  return parts[parts.length - 1] || src;
+}
 
 function loadModule(src) {
   return new Promise((resolve, reject) => {
@@ -30,9 +42,19 @@ function loadModule(src) {
 
 async function loadGameModules() {
   try {
+    setStartupPreloadMessage("Loading gameplay shell...");
     for (const module of gameModules) {
+      setStartupPreloadMessage(
+        "Loading gameplay shell " +
+          (loadedModules + 1) +
+          "/" +
+          gameModules.length +
+          " - " +
+          getModuleLabel(module),
+      );
       await loadModule(module);
     }
+    setStartupPreloadMessage("Gameplay shell loaded. Preparing briefing...");
     console.log("✅ All game modules loaded successfully");
   } catch (error) {
     console.error("❌ Failed to load game modules:", error);

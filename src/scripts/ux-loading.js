@@ -39,6 +39,56 @@
     static hideLoadingSpinner(element) {
       this.hideLoadingSkeleton(element);
     }
+
+    static showProblemLoadingState(
+      element,
+      { level = "problem", problemPath = null, title = null, detail = null } = {},
+    ) {
+      if (!element) {
+        return;
+      }
+
+      const resolvedLevel =
+        typeof level === "string" && level.trim().length > 0
+          ? level.trim()
+          : "problem";
+      const resolvedTitle =
+        typeof title === "string" && title.trim().length > 0
+          ? title.trim()
+          : "Loading " + resolvedLevel + " problem set...";
+      const resolvedDetail =
+        typeof detail === "string" && detail.trim().length > 0
+          ? detail.trim()
+          : problemPath
+            ? "Fetching " + problemPath.split("/").pop()
+            : "Preparing step targets...";
+
+      element.dataset.originalContent = element.innerHTML;
+      element.innerHTML = "";
+
+      const container = document.createElement("div");
+      container.className =
+        "loading-spinner-container loading-spinner-container--problem";
+      container.setAttribute("role", "status");
+      container.setAttribute("aria-live", "polite");
+      container.setAttribute("aria-label", resolvedTitle);
+
+      const spinner = document.createElement("div");
+      spinner.className = "loading-spinner";
+
+      const titleEl = document.createElement("p");
+      titleEl.className = "loading-message";
+      titleEl.textContent = resolvedTitle;
+
+      const detailEl = document.createElement("p");
+      detailEl.className = "loading-message-detail";
+      detailEl.textContent = resolvedDetail;
+
+      container.appendChild(spinner);
+      container.appendChild(titleEl);
+      container.appendChild(detailEl);
+      element.appendChild(container);
+    }
   }
 
   class ProgressBarManager {
@@ -93,4 +143,15 @@
   window.UXModules = window.UXModules || {};
   window.UXModules.LoadingStateManager = LoadingStateManager;
   window.UXModules.ProgressBarManager = ProgressBarManager;
+  window.showProblemLoadingSkeleton = function showProblemLoadingSkeleton(
+    element,
+    context = {},
+  ) {
+    return LoadingStateManager.showProblemLoadingState(element, context);
+  };
+  window.hideProblemLoadingSkeleton = function hideProblemLoadingSkeleton(
+    element,
+  ) {
+    return LoadingStateManager.hideLoadingSkeleton(element);
+  };
 })();

@@ -8,7 +8,7 @@
     "lint": "eslint src/scripts lock src/tools/middle-screen",
     "lint:fix": "eslint src/scripts lock src/tools/middle-screen --fix",
     "verify": "node src/tools/scripts/verify.js",
-    "verify:quick": "npm run lint && echo '✅ Lint passed!'",
+    "verify:quick": "npm run lint && echo '\u2705 Lint passed!'",
     "typecheck": "npx tsc --noEmit --project tsconfig.typecheck.json",
     "test": "npx playwright test",
     "test:competition": "npm run test:competition:matrix",
@@ -21,7 +21,16 @@
     "test:ui": "npx playwright test --ui",
     "test:headed": "npx playwright test --headed",
     "test:report": "npx playwright show-report",
-    "test:manual": "echo 'Open http://localhost:8000/game.html?level=beginner and press P to view performance monitor'"
+    "test:manual": "echo 'Open http://localhost:8000/game.html?level=beginner and press P to view performance monitor'",
+    "test:split:list": "node tests/run-playwright-group.js --list",
+    "test:split:check": "node tests/run-playwright-group.js --check",
+    "test:split:boot": "node tests/run-playwright-group.js boot",
+    "test:split:ui": "node tests/run-playwright-group.js ui",
+    "test:split:gameplay": "node tests/run-playwright-group.js gameplay",
+    "test:split:evan": "node tests/run-playwright-group.js evan",
+    "test:split:drums": "node tests/run-playwright-group.js drums",
+    "test:split:e2e": "node tests/run-playwright-group.js e2e",
+    "test:split:perf": "node tests/run-playwright-group.js perf"
   },
   "keywords": [
     "math",

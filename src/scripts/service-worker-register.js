@@ -146,7 +146,7 @@ function startServiceWorkerRegistration() {
 }
 
 if ("serviceWorker" in navigator) {
-  dispatchPreload(15, "Booting runtime\u2026");
+  dispatchPreload(15, "Booting runtime shell...");
 
   if (document.readyState === "complete") {
     startServiceWorkerRegistration();
@@ -164,7 +164,7 @@ if ("serviceWorker" in navigator) {
 
 async function registerServiceWorker() {
   try {
-    dispatchPreload(35, "Registering service worker\u2026");
+    dispatchPreload(35, "Registering service worker cache...");
     const registration = await navigator.serviceWorker.register(
       "/service-worker.js",
       {
@@ -182,7 +182,7 @@ async function registerServiceWorker() {
       dispatchAppUpdateAvailable(registration, "waiting");
     }
 
-    dispatchPreload(60, "Assets cached.");
+    dispatchPreload(60, "Game assets cached.");
 
     registration.addEventListener("updatefound", () => {
       const newWorker = registration.installing;
@@ -207,7 +207,7 @@ async function registerServiceWorker() {
       60 * 60 * 1000,
     );
 
-    dispatchPreload(100, "Ready.");
+    dispatchPreload(100, "Ready to play.");
     if (window.GameEvents?.PRELOAD_READY) {
       document.dispatchEvent(new CustomEvent(window.GameEvents.PRELOAD_READY));
     }
