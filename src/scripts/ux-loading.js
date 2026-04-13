@@ -1,8 +1,18 @@
 (function() {
   class LoadingStateManager {
+    static storeOriginalContent(element) {
+      if (!element || element.dataset.originalContent !== undefined) {
+        return false;
+      }
+
+      element.dataset.originalContent = element.innerHTML;
+      return true;
+    }
+
     static showLoadingSkeleton(element, skeletonType = "custom") {
-      const originalContent = element.innerHTML;
-      element.dataset.originalContent = originalContent;
+      if (!this.storeOriginalContent(element)) {
+        return;
+      }
 
       const skeleton = document.createElement("div");
       skeleton.className = `loading-skeleton ${skeletonType}-loading-skeleton`;
@@ -22,6 +32,10 @@
     }
 
     static showLoadingSpinner(element, message = "Loading...") {
+      if (!this.storeOriginalContent(element)) {
+        return;
+      }
+
       const spinner = document.createElement("div");
       spinner.className = "loading-spinner-container";
       spinner.innerHTML = `
@@ -31,7 +45,6 @@
       spinner.setAttribute("role", "status");
       spinner.setAttribute("aria-label", message);
 
-      element.dataset.originalContent = element.innerHTML;
       element.innerHTML = "";
       element.appendChild(spinner);
     }
@@ -44,7 +57,7 @@
       element,
       { level = "problem", problemPath = null, title = null, detail = null } = {},
     ) {
-      if (!element) {
+      if (!this.storeOriginalContent(element)) {
         return;
       }
 
@@ -63,7 +76,6 @@
             ? "Fetching " + problemPath.split("/").pop()
             : "Preparing step targets...";
 
-      element.dataset.originalContent = element.innerHTML;
       element.innerHTML = "";
 
       const container = document.createElement("div");

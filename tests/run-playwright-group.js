@@ -1,6 +1,9 @@
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+
+const TESTS_DIR = "tests";
+const TOP_LEVEL_SPEC_SUFFIX = ".spec.js";
 
 const GROUPS = Object.freeze({
   boot: [
@@ -77,12 +80,17 @@ function validateGroups() {
   const seen = new Map();
   const duplicates = [];
   const missing = [];
+  const outOfScope = [];
+  const topLevelSpecs = getTopLevelSpecs();
+  const topLevelSpecSet = new Set(topLevelSpecs);
 
   for (const [groupName, specs] of Object.entries(GROUPS)) {
     for (const spec of specs) {
       const absolutePath = resolve(process.cwd(), spec);
       if (!existsSync(absolutePath)) {
         missing.push(groupName + ": " + spec);
+      } else if (!topLevelSpecSet.has(spec)) {
+        outOfScope.push(groupName + ": " + spec);
       }
 
       if (seen.has(spec)) {
@@ -93,17 +101,45 @@ function validateGroups() {
     }
   }
 
-  if (missing.length > 0 || duplicates.length > 0) {
+  const ungrouped = topLevelSpecs.filter((spec) => !seen.has(spec));
+
+  if (
+    missing.length > 0 ||
+    duplicates.length > 0 ||
+    outOfScope.length > 0 ||
+    ungrouped.length > 0
+  ) {
     if (missing.length > 0) {
       console.error("Missing spec files:\n" + missing.join("\n"));
     }
     if (duplicates.length > 0) {
       console.error("Duplicate spec assignments:\n" + duplicates.join("\n"));
     }
+    if (outOfScope.length > 0) {
+      console.error(
+        "Out-of-scope split assignments (expected top-level tests/*.spec.js only):\n" +
+          outOfScope.join("\n"),
+      );
+    }
+    if (ungrouped.length > 0) {
+      console.error(
+        "Ungrouped top-level Playwright specs:\n" + ungrouped.join("\n"),
+      );
+    }
     return false;
   }
 
   return true;
+}
+
+function getTopLevelSpecs() {
+  const testsDir = resolve(process.cwd(), TESTS_DIR);
+  return readdirSync(testsDir, { withFileTypes: true })
+    .filter(
+      (entry) => entry.isFile() && entry.name.endsWith(TOP_LEVEL_SPEC_SUFFIX),
+    )
+    .map((entry) => TESTS_DIR + "/" + entry.name)
+    .sort();
 }
 
 function printGroups() {

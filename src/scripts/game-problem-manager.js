@@ -90,6 +90,8 @@ console.log("📚 Game problem manager module loading...");
       return;
     }
 
+    window.hideProblemLoadingSkeleton?.(problemContainer);
+
     // Reset indices
     currentSolutionStepIndex = 0;
     invalidateStepCache(); // PERFORMANCE: Invalidate cache on new problem

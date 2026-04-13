@@ -33,7 +33,6 @@
     // Face reveal
     faceRevealInterval: 5000,
     faceRevealDuration: 1500,
-    faceRevealBufferMultiplier: 2.5,
     // Layout
     columnWidth: 50,
     gridCellSize: 100,
