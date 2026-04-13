@@ -39,17 +39,12 @@
     gridCellSize: 100,
     poolSize: 60,
     maxActiveSymbols: 200,
-    // Desktop collision (pixels)
-    desktopSymbolHeight: 30,
-    desktopSymbolWidth: 30,
-    desktopCollisionBuffer: 40,
-    desktopHorizontalBuffer: 35,
-    // Mobile collision (pixels)
-    mobileSymbolHeight: 42,
-    mobileSymbolWidth: 60,
-    mobileCollisionBuffer: 28,
-    mobileHorizontalBuffer: 80,
-    mobileFaceRevealBuffer: 120,
+    // Unified Base collision (pixels)
+    symbolHeight: 42,
+    symbolWidth: 60,
+    collisionBuffer: 28,
+    horizontalBuffer: 80,
+    faceRevealBuffer: 120,
   };
 
   if (window.__PERF_SMOKE_MODE === true) {

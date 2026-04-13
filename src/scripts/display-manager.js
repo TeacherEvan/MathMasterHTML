@@ -447,20 +447,21 @@ class DisplayManager {
     console.log(`📱 Mobile mode: ${isMobile ? "YES" : "NO"}`);
 
     // PERFORMANCE: Use cached DOM elements
-    // Solution container - DECREASE to 30% on mobile for better vertical fit (25% smaller)
+    // Solution container
     const solutionContainer = this.domCache.solutionContainer;
     if (solutionContainer) {
       if (isMobile) {
         solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.30)`;
         solutionContainer.style.lineHeight = "1.2";
-        solutionContainer.style.letterSpacing = "0.2px"; // REDUCED: 60% reduction (0.5px → 0.2px) for tighter spacing
+        solutionContainer.style.letterSpacing = "0.2px"; // REDUCED: 60% reduction for tighter spacing
         console.log(
           `📱 Solution container font reduced to 30% with 0.2px letter-spacing`,
         );
       } else {
         solutionContainer.style.fontSize = `calc(${config.fontSize} * 0.8)`;
         solutionContainer.style.lineHeight = "1.4";
-        solutionContainer.style.letterSpacing = "1px"; // Normal spacing for desktop
+        // Unified default compact spacing across logic
+        solutionContainer.style.letterSpacing = "1px"; 
       }
     }
 
