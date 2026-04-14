@@ -50,6 +50,24 @@ function initSymbolRain() {
       );
     };
 
+    const responsiveConfig = {
+      compact: {
+        spawnRate: 0.05,
+        burstSpawnRate: 0.05,
+        guaranteedSpawnInterval: 1000,
+        symbolsPerWave: 4,
+        maxActiveSymbols: 30,
+      },
+      standard: {
+        spawnRate: 0.5,
+        burstSpawnRate: 0.15,
+        guaranteedSpawnInterval: 5000,
+        symbolsPerWave: 14,
+        maxActiveSymbols: 200,
+      },
+    };
+    const preservePerfSmokeConfig = window.__PERF_SMOKE_MODE === true;
+
     function isGameplayReady() {
       return window.GameRuntimeCoordinator?.isGameplayReady?.() === true;
     }
@@ -109,6 +127,23 @@ function initSymbolRain() {
 
     const debounce = SymbolRainHelpers.debounce;
 
+    function syncResponsiveConfig() {
+      if (preservePerfSmokeConfig) {
+        return;
+      }
+
+      const profile = state.isMobileMode
+        ? responsiveConfig.compact
+        : responsiveConfig.standard;
+      state.config.spawnRate = profile.spawnRate;
+      state.config.burstSpawnRate = profile.burstSpawnRate;
+      state.config.guaranteedSpawnInterval = profile.guaranteedSpawnInterval;
+      state.config.symbolsPerWave = profile.symbolsPerWave;
+      state.config.maxActiveSymbols = profile.maxActiveSymbols;
+    }
+
+    syncResponsiveConfig();
+
     function calculateColumns() {
       const { columnCount, containerHeight } =
         SymbolRainHelpers.calculateColumns(
@@ -165,6 +200,7 @@ function initSymbolRain() {
         }
 
         state.isMobileMode = isCompactDisplayMode();
+        syncResponsiveConfig();
         calculateColumns();
 
         if (!hasUsableLayout()) {
@@ -208,6 +244,7 @@ function initSymbolRain() {
 
     const debouncedResize = debounce(() => {
       state.isMobileMode = isCompactDisplayMode();
+      syncResponsiveConfig();
       scheduleBootstrap();
     }, 250);
 
@@ -223,6 +260,7 @@ function initSymbolRain() {
         state.isMobileMode =
           event.detail?.isCompactViewport === true ||
           document.body.classList.contains("viewport-compact");
+        syncResponsiveConfig();
         scheduleBootstrap();
       },
     );

@@ -8,7 +8,7 @@ console.log("🎯 SymbolRain helpers: interactions loading...");
   };
 
   helpers.handleSymbolClick = function handleSymbolClick(
-    { activeFallingSymbols, symbolPool, activeFaceReveals },
+    { activeFallingSymbols, symbolPool, activeFaceReveals, spatialGrid },
     symbolElement,
     event,
   ) {
@@ -44,6 +44,7 @@ console.log("🎯 SymbolRain helpers: interactions loading...");
             symbolObj,
             activeFaceReveals,
             symbolPool,
+            spatialGrid,
           });
         }
         return;

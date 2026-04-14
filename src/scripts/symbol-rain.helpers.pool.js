@@ -35,12 +35,16 @@ console.log("🎯 SymbolRain helpers: pool loading...");
     symbolObj,
     activeFaceReveals,
     symbolPool,
+    spatialGrid,
   }) {
     if (activeFaceReveals.has(symbolObj)) {
       activeFaceReveals.delete(symbolObj);
       if (helpers.resetFaceRevealStyles) {
         helpers.resetFaceRevealStyles(symbolObj.element);
       }
+    }
+    if (spatialGrid && spatialGrid.remove) {
+      spatialGrid.remove(symbolObj);
     }
     symbolObj.element.remove();
     symbolPool.release(symbolObj.element);

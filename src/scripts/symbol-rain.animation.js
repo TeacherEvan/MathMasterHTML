@@ -69,6 +69,7 @@
           symbolObj,
           activeFaceReveals: state.activeFaceReveals,
           symbolPool: state.symbolPool,
+          spatialGrid: state.spatialGrid,
         });
         continue;
       }
@@ -136,6 +137,7 @@
         symbolObj,
         activeFaceReveals: state.activeFaceReveals,
         symbolPool: state.symbolPool,
+        spatialGrid: state.spatialGrid,
       });
     }
     state.activeFallingSymbols.length = 0;

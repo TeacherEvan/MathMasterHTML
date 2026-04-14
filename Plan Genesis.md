@@ -189,6 +189,14 @@ npx playwright test tests/worm-stability.spec.js tests/worm-cursor-evasion.spec.
 - visibility-based throttling for background tabs
 - `requestIdleCallback` or deferred work for non-critical startup
 
+### Panel C Symbol-Rain Guardrails
+
+- Compact/mobile symbol-rain tuning belongs in `src/scripts/3rdDISPLAY.js` and should follow the existing `viewport-compact` contract instead of one-time `window.innerWidth` checks.
+- Let Panel C bootstrap wait for real layout stabilization; do not replace zero-height container measurements with synthetic fallback heights.
+- Keyboard-target eligibility in Panel C must use actual panel/container intersection, not global viewport checks alone.
+- If symbol-rain uses incremental spatial-grid bookkeeping, every symbol removal path, including click collection, must remove the symbol from the grid.
+- Compact/mobile spawn throttling can be reduced, but keep guaranteed target circulation fast enough that live matching symbols remain available during gameplay.
+
 ## Settings and Update Model
 
 - Preferences live in `mathmaster_user_settings_v1`.

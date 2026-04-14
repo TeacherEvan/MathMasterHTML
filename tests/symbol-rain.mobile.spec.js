@@ -258,11 +258,22 @@ test.describe("Symbol rain mobile interactions", () => {
       const samples = [];
 
       for (let index = 0; index < 6; index += 1) {
+        const panel = document.getElementById("panel-c");
+        const panelRect = panel?.getBoundingClientRect();
         const visibleSymbols = Array.from(
           document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
         ).filter((element) => {
+          if (!panelRect) {
+            return false;
+          }
+
           const rect = element.getBoundingClientRect();
-          return rect.bottom > 0 && rect.top < window.innerHeight;
+          return (
+            rect.bottom > panelRect.top &&
+            rect.top < panelRect.bottom &&
+            rect.right > panelRect.left &&
+            rect.left < panelRect.right
+          );
         });
 
         samples.push(visibleSymbols.length);
@@ -335,6 +346,23 @@ test.describe("Symbol rain mobile interactions", () => {
         document.body.classList.contains("viewport-compact")
       );
     }, { timeout: 10000 });
+
+    const runtimeConfig = await page.evaluate(() => ({
+      burstSpawnRate: window.__symbolRainState?.config?.burstSpawnRate,
+      guaranteedSpawnInterval:
+        window.__symbolRainState?.config?.guaranteedSpawnInterval,
+      isMobileMode: window.__symbolRainState?.isMobileMode,
+      maxActiveSymbols: window.__symbolRainState?.config?.maxActiveSymbols,
+      spawnRate: window.__symbolRainState?.config?.spawnRate,
+      symbolsPerWave: window.__symbolRainState?.config?.symbolsPerWave,
+    }));
+
+    expect(runtimeConfig.isMobileMode).toBe(true);
+    expect(runtimeConfig.spawnRate).toBe(0.05);
+    expect(runtimeConfig.burstSpawnRate).toBe(0.05);
+    expect(runtimeConfig.guaranteedSpawnInterval).toBe(1000);
+    expect(runtimeConfig.symbolsPerWave).toBe(4);
+    expect(runtimeConfig.maxActiveSymbols).toBe(30);
 
     await page.locator("#panel-c .falling-symbol").first().waitFor({
       state: "visible",
@@ -453,6 +481,26 @@ test.describe("Symbol rain mobile interactions", () => {
     const panelC = page.locator("#panel-c");
     await panelC.focus();
     await expect(panelC).toBeFocused();
+    await page.waitForFunction(() => {
+      const panel = document.getElementById("panel-c");
+      const target = document.querySelector(
+        "#panel-c .falling-symbol.keyboard-target",
+      );
+
+      if (!panel || !target) {
+        return false;
+      }
+
+      const panelRect = panel.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+
+      return (
+        targetRect.bottom > panelRect.top &&
+        targetRect.top < panelRect.bottom &&
+        targetRect.right > panelRect.left &&
+        targetRect.left < panelRect.right
+      );
+    }, { timeout: 5000 });
     await page.keyboard.press("Enter");
 
     await page.waitForFunction(

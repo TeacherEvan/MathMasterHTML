@@ -15,14 +15,35 @@ console.log("🎯 SymbolRain helpers: spatial loading...");
       },
 
       update(activeSymbols) {
-        spatialGrid.clear();
-        activeSymbols.forEach((symbolObj) => {
+        for (let i = 0; i < activeSymbols.length; i++) {
+          const symbolObj = activeSymbols[i];
           const key = this.getCellKey(symbolObj.x, symbolObj.y);
-          if (!spatialGrid.has(key)) {
-            spatialGrid.set(key, []);
+          if (symbolObj.spatialKey !== key) {
+            if (symbolObj.spatialKey && spatialGrid.has(symbolObj.spatialKey)) {
+              const arr = spatialGrid.get(symbolObj.spatialKey);
+              if (arr.length > 0) {
+                const idx = arr.indexOf(symbolObj);
+                if (idx !== -1) arr.splice(idx, 1);
+              }
+            }
+            if (!spatialGrid.has(key)) {
+              spatialGrid.set(key, []);
+            }
+            spatialGrid.get(key).push(symbolObj);
+            symbolObj.spatialKey = key;
           }
-          spatialGrid.get(key).push(symbolObj);
-        });
+        }
+      },
+
+      remove(symbolObj) {
+        if (symbolObj.spatialKey && spatialGrid.has(symbolObj.spatialKey)) {
+          const arr = spatialGrid.get(symbolObj.spatialKey);
+          if (arr.length > 0) {
+            const idx = arr.indexOf(symbolObj);
+            if (idx !== -1) arr.splice(idx, 1);
+          }
+          symbolObj.spatialKey = null;
+        }
       },
 
       getNeighbors(x, y) {

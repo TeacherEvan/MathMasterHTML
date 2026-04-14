@@ -47,6 +47,14 @@
       const neededSymbols = new Set(
         getCurrentNeededSymbols().map((value) => normalizeSymbol(value)),
       );
+      const containerRect =
+        symbolRainContainer?.getBoundingClientRect?.() ||
+        panel?.getBoundingClientRect?.() ||
+        null;
+
+      if (!containerRect) {
+        return [];
+      }
 
       return state.activeFallingSymbols
         .filter(({ element }) => element?.isConnected)
@@ -60,7 +68,13 @@
             return false;
           }
 
-          if (rect.bottom <= 0 || rect.top >= window.innerHeight) {
+          const intersectsContainer =
+            rect.bottom > containerRect.top &&
+            rect.top < containerRect.bottom &&
+            rect.right > containerRect.left &&
+            rect.left < containerRect.right;
+
+          if (!intersectsContainer) {
             return false;
           }
 
@@ -116,6 +130,7 @@
           activeFallingSymbols: state.activeFallingSymbols,
           symbolPool: state.symbolPool,
           activeFaceReveals: state.activeFaceReveals,
+          spatialGrid: state.spatialGrid,
         },
         target.element,
         { target: target.element },
@@ -153,6 +168,7 @@
           activeFallingSymbols: state.activeFallingSymbols,
           symbolPool: state.symbolPool,
           activeFaceReveals: state.activeFaceReveals,
+          spatialGrid: state.spatialGrid,
         },
         fallingSymbolElement,
         { target: fallingSymbolElement },

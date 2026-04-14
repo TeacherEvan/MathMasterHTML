@@ -1,6 +1,15 @@
 # JOBCARD
 
-## Latest update (2026-04-13)
+## Latest update (2026-04-14)
+
+- Reworked Panel C compact/mobile throttling to sync from `src/scripts/3rdDISPLAY.js` using the existing `viewport-compact` runtime contract instead of a one-time width gate.
+- Restored real symbol-rain layout stabilization by removing the synthetic container-height fallback and keeping bootstrap retries responsible for zero-height startup states.
+- Tightened Panel C keyboard and visibility checks to use actual panel-local intersection so off-screen symbols are no longer treated as visible targets.
+- Fixed incremental symbol-rain spatial-grid cleanup so clicked symbols are removed from the grid as well as from the DOM/pool.
+- Extended `tests/symbol-rain.mobile.spec.js` with compact runtime-config assertions and stronger Panel C-local visibility coverage.
+- Focused validation passed with `npm run verify`, `npm run typecheck`, and `npx playwright test tests/symbol-rain.mobile.spec.js --project=chromium --project=pixel-7 --reporter=line`.
+
+## Previous update (2026-04-13)
 
 - Cleared problem-loading skeleton state before rendering the live problem so stale `dataset.originalContent` snapshots cannot overwrite gameplay content later.
 - Made loading skeleton and spinner capture idempotent in `src/scripts/ux-loading.js` to prevent double-show races from storing spinner markup as the restore target.
