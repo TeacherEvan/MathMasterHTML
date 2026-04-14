@@ -65,7 +65,7 @@ test.describe("Onboarding gates — Build 1", () => {
 
   test("auto Evan waits for shared gameplay readiness instead of briefing alone", async ({
     page,
-  }) => {
+  }, testInfo) => {
     await resetOnboardingState(page, "?level=beginner&evan=auto&preload=off");
 
     await page.evaluate(() => {
@@ -80,6 +80,16 @@ test.describe("Onboarding gates — Build 1", () => {
 
     await dismissBriefingAndWaitForInteractiveGameplay(page);
     await waitForGameplayReady(page);
+
+    const autoRunSuppressedOnMobile = ["iphone-13", "pixel-7"].includes(
+      testInfo.project.name,
+    );
+
+    if (autoRunSuppressedOnMobile) {
+      expect(await page.evaluate(() => window.__evanStartCount)).toBe(0);
+      await expect(page.locator("#evan-solve-button")).toBeVisible();
+      return;
+    }
 
     await page.waitForFunction(() => window.__evanStartCount === 1, {
       timeout: 5000,

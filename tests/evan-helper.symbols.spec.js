@@ -10,7 +10,7 @@ test.setTimeout(60000);
 
 test.describe("Evan Symbol Behavior — Build 5", () => {
   test.beforeEach(async ({ page }) => {
-    await resetOnboardingState(page, "?level=beginner&evan=auto&preload=off");
+    await resetOnboardingState(page, "?level=beginner&evan=force&preload=off");
     await page.waitForSelector("#start-game-btn", {
       state: "visible",
       timeout: 10000,

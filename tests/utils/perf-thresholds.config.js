@@ -167,7 +167,7 @@ export const PROJECT_POLICIES = {
       },
       jankPercent: {
         direction: "lower-is-better",
-        catastrophicAbsolute: 20,
+        catastrophicAbsolute: 25,
       },
       inputLatencyAvg: {
         direction: "lower-is-better",

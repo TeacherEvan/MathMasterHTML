@@ -91,6 +91,17 @@ test.describe("Evan Helper — UI Elements (Build 3)", () => {
   test("default-motion: Evan hand uses a smoother transition curve", async ({
     page,
   }) => {
+    await page.evaluate(() => {
+      window.EvanPresenter?.show();
+      window.EvanPresenter?.moveHandTo(24, 24);
+    });
+
+    await expect(page.locator("#evan-assist-shell")).toBeVisible();
+    await page.waitForFunction(() => {
+      const hand = document.getElementById("evan-hand");
+      return hand?.style.transform.includes("24px") === true;
+    });
+
     const handTransition = await page.evaluate(() => {
       const hand = document.getElementById("evan-hand");
       if (!hand) return null;

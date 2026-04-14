@@ -3,9 +3,9 @@ import { expect, test } from "@playwright/test";
 
 const LEVEL_SELECT_URL = "/src/pages/level-select.html";
 const ROUTES = [
-  { key: "1", level: "beginner", buttonName: "Enter foundations" },
-  { key: "2", level: "warrior", buttonName: "Enter mixed ops" },
-  { key: "3", level: "master", buttonName: "Enter division" },
+  { key: "1", level: "beginner", buttonName: "Start foundations" },
+  { key: "2", level: "warrior", buttonName: "Start mixed ops" },
+  { key: "3", level: "master", buttonName: "Start division" },
 ];
 
 const DESKTOP_VIEWPORT = { width: 1440, height: 1100 };
@@ -33,6 +33,20 @@ test.beforeEach(async ({ page }) => {
     } catch {
       // Ignore environments that do not allow overriding these methods.
     }
+  });
+
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "mathmaster_onboarding_v1",
+      JSON.stringify({
+        version: 1,
+        sessionCount: 1,
+        evanConsumed: { beginner: false, warrior: false, master: false },
+        tutorialConsumed: true,
+        installPromptDismissedAt: null,
+        updatedAt: Date.now(),
+      }),
+    );
   });
 });
 
@@ -211,7 +225,7 @@ test.describe("Level select interactions", () => {
     });
 
     await page
-      .getByRole("button", { name: "Enter foundations" })
+      .getByRole("button", { name: ROUTES[0].buttonName })
       .click({ noWaitAfter: true });
     await expectRouteLaunch(page, "beginner");
   });
@@ -252,7 +266,7 @@ test.describe("Level select interactions", () => {
     await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
     await waitForCardsToSettle(page);
 
-    const button = page.getByRole("button", { name: "Enter foundations" });
+    const button = page.getByRole("button", { name: ROUTES[0].buttonName });
     await button.focus();
     await expect(button).toBeFocused();
     await button.press("Enter");

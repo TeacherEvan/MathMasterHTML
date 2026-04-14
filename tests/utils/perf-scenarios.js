@@ -1,6 +1,7 @@
 // @ts-check
 
 import { enablePerfMetrics } from "./perf-metrics.js";
+import { ensureLandscapeGameplayViewport } from "./onboarding-runtime.js";
 import {
   dispatchCorrectSymbolClicks,
   dispatchCorrectSymbolEvents,
@@ -22,11 +23,16 @@ export async function preparePerfGame(page, opts = {}) {
   const level = opts.level ?? DEFAULT_LEVEL;
   const warmupMs = opts.warmupMs ?? 1000;
 
-  await page.goto(`/src/pages/game.html?level=${level}`, {
+  await page.addInitScript(() => {
+    localStorage.removeItem("mathmaster_onboarding_v1");
+  });
+
+  await page.goto(`/src/pages/game.html?level=${level}&evan=off&preload=off`, {
     waitUntil: "domcontentloaded",
   });
 
   await enablePerfMetrics(page, { warmupMs });
+  await ensureLandscapeGameplayViewport(page);
 
   const startButton = page.locator("#start-game-btn");
   await startButton.waitFor({ state: "visible", timeout: 10000 });

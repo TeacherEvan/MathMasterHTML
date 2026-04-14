@@ -1,5 +1,6 @@
 // tests/utils/game-helpers.js - Shared game test helpers
 import { expect } from "@playwright/test";
+import { ensureLandscapeGameplayViewport } from "./onboarding-runtime.js";
 
 export const BASE_URL = "http://localhost:8000";
 
@@ -8,6 +9,8 @@ export const BASE_URL = "http://localhost:8000";
  * and waiting for the modal to close.
  */
 export async function dismissBriefing(page) {
+  await ensureLandscapeGameplayViewport(page);
+
   await page.waitForSelector("#start-game-btn", {
     state: "visible",
     timeout: 10000,

@@ -70,6 +70,31 @@ export async function waitForRuntimeCoordinator(page) {
   );
 }
 
+export async function ensureLandscapeGameplayViewport(page) {
+  const viewport = page.viewportSize();
+
+  if (!viewport || viewport.width >= viewport.height) {
+    return;
+  }
+
+  await page.setViewportSize({
+    width: viewport.height,
+    height: viewport.width,
+  });
+
+  await page.waitForFunction(
+    () => {
+      const currentResolution = window.displayManager?.getCurrentResolution?.();
+      const shouldShowRotationOverlay =
+        currentResolution?.shouldShowRotationOverlay ??
+        document.body.classList.contains("viewport-rotate-required");
+
+      return window.innerWidth >= window.innerHeight && !shouldShowRotationOverlay;
+    },
+    { timeout: 10000 },
+  );
+}
+
 export async function waitForGameplayReady(page) {
   await waitForRuntimeCoordinator(page);
   await page.waitForFunction(
@@ -138,6 +163,9 @@ export async function stopEvanHelpIfActive(page) {
 }
 
 export async function dismissBriefingAndWaitForInteractiveGameplay(page) {
+  await waitForOnboardingRuntime(page);
+  await ensureLandscapeGameplayViewport(page);
+
   await page.waitForSelector("#start-game-btn", {
     state: "visible",
     timeout: 10000,

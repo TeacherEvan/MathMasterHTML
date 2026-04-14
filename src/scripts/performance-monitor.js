@@ -18,7 +18,7 @@ class PerformanceMonitor {
     // Input-latency tracking
     this._inputLatencyBuffer = [];
     this._inputLatencySize = 50;
-    this._pendingClickTimestamp = null;
+    this._pendingClickTimestamps = [];
 
     console.log("📊 Performance Monitor initialized");
   }
@@ -48,19 +48,26 @@ class PerformanceMonitor {
 
   /** @private */
   _initInputLatencyTracking() {
-    document.addEventListener("symbolClicked", (e) => {
-      if (!this._isExtendedEnabled()) return;
-      this._pendingClickTimestamp = e.timeStamp ?? performance.now();
-    });
+    document.addEventListener(
+      "symbolClicked",
+      (e) => {
+        if (!this._isExtendedEnabled()) return;
+        this._pendingClickTimestamps.push(e.timeStamp ?? performance.now());
+        if (this._pendingClickTimestamps.length > this._inputLatencySize) {
+          this._pendingClickTimestamps.shift();
+        }
+      },
+      { capture: true },
+    );
     document.addEventListener("symbolRevealed", () => {
       if (!this._isExtendedEnabled()) return;
-      if (this._pendingClickTimestamp !== null) {
-        const latency = performance.now() - this._pendingClickTimestamp;
+      const clickTimestamp = this._pendingClickTimestamps.shift();
+      if (typeof clickTimestamp === "number") {
+        const latency = performance.now() - clickTimestamp;
         this._inputLatencyBuffer.push(latency);
         if (this._inputLatencyBuffer.length > this._inputLatencySize) {
           this._inputLatencyBuffer.shift();
         }
-        this._pendingClickTimestamp = null;
       }
     });
   }
