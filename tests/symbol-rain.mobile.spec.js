@@ -37,8 +37,15 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function normalizeSymbolText(value) {
+  const normalized = String(value || "").trim();
+  return normalized === "x" ? "X" : normalized;
+}
+
 async function findVisibleMatchingSymbol(page, symbols, timeoutMs = 3500) {
-  const candidates = Array.isArray(symbols) ? symbols.filter(Boolean) : [symbols].filter(Boolean);
+  const candidates = (Array.isArray(symbols) ? symbols : [symbols])
+    .filter(Boolean)
+    .map((symbol) => normalizeSymbolText(symbol));
   const deadline = Date.now() + timeoutMs;
 
   while (Date.now() < deadline) {
@@ -48,7 +55,13 @@ async function findVisibleMatchingSymbol(page, symbols, timeoutMs = 3500) {
         .filter(Boolean),
     );
 
-    const match = candidates.find((symbol) => visibleSymbols.includes(symbol));
+    const normalizedVisibleSymbols = visibleSymbols.map((symbol) =>
+      normalizeSymbolText(symbol),
+    );
+
+    const match = candidates.find((symbol) =>
+      normalizedVisibleSymbols.includes(symbol),
+    );
     if (match) {
       return match;
     }
@@ -61,41 +74,51 @@ async function findVisibleMatchingSymbol(page, symbols, timeoutMs = 3500) {
 
 async function clickLiveMatchingSymbol(page, symbolText, timeoutMs = 3500) {
   const deadline = Date.now() + timeoutMs;
-  const exactText = new RegExp(`^${escapeRegExp(symbolText)}$`);
+  const normalizedTarget = normalizeSymbolText(symbolText);
 
   while (Date.now() < deadline) {
-    const symbolLocator = page
-      .locator("#panel-c .falling-symbol:not(.clicked)")
-      .filter({ hasText: exactText })
-      .last();
+    const clicked = await page.evaluate((targetSymbol) => {
+      const normalize = (value) => {
+        const normalized = String(value || "").trim();
+        return normalized === "x" ? "X" : normalized;
+      };
+      const candidates = Array.from(
+        document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
+      );
+      const matching = candidates.filter(
+        (element) => normalize(element.textContent) === targetSymbol,
+      );
+      const target = matching.at(-1);
 
-    if ((await symbolLocator.count()) > 0) {
+      if (!target) {
+        return false;
+      }
 
-      try {
-        await symbolLocator.dispatchEvent("pointerdown", {
+      target.dispatchEvent(
+        new PointerEvent("pointerdown", {
           bubbles: true,
           cancelable: true,
           pointerType: "touch",
           isPrimary: true,
           button: 0,
           buttons: 1,
-        });
-        await page.evaluate(() => {
-          window.dispatchEvent(
-            new PointerEvent("pointerup", {
-              bubbles: true,
-              cancelable: true,
-              pointerType: "touch",
-              isPrimary: true,
-              button: 0,
-              buttons: 0,
-            }),
-          );
-        });
-        return true;
-      } catch {
-        // Symbols move quickly on mobile; retry until the deadline expires.
-      }
+        }),
+      );
+      window.dispatchEvent(
+        new PointerEvent("pointerup", {
+          bubbles: true,
+          cancelable: true,
+          pointerType: "touch",
+          isPrimary: true,
+          button: 0,
+          buttons: 0,
+        }),
+      );
+      return true;
+    }, normalizedTarget);
+
+    if (clicked) {
+      return true;
     }
 
     await page.waitForTimeout(100);
