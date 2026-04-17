@@ -19,10 +19,10 @@
 
 ## Previous update (2026-04-10)
 
-- Consolidated the repository to a five-Markdown policy: `.github/copilot-instructions.md`, `JOBCARD.md`, `Plan Genesis.md`, `Plan Beta.md`, and `Plan Alpha.md`.
+- Consolidated the repository to the current Markdown policy: `.github/copilot-instructions.md`, `JOBCARD.md`, `Plan Genesis.md`, `Plan Beta.md`, and `Plan Alpha.md`, plus repo-local custom agent files in `.github/agents/*.agent.md`.
 - Merged the old README, system docs, worm guides, competition docs, task brief, and superpower planning artifacts into the three surviving plan files based on content ownership.
 - Converted runtime problem assets from Markdown to JSON so gameplay data no longer violates the Markdown ceiling.
-- Updated verification logic to enforce the five-file policy and guard against future Markdown sprawl.
+- Updated verification logic to enforce that policy and guard against future Markdown sprawl.
 
 ## Recent milestones
 
@@ -51,4 +51,4 @@
 - Event-driven integration remains the runtime rule.
 - Root HTML files remain redirect entrypoints; active runtime pages live in `src/pages/`.
 - Panel A and B sizing belongs to `src/scripts/display-manager.js`.
-- Only five Markdown files are allowed in this repository.
+- Only the five project Markdown files plus repo-local custom agent files in `.github/agents/*.agent.md` are allowed in this repository.

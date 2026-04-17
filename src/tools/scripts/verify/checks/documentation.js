@@ -6,12 +6,18 @@ import { REQUIRED_DOCS } from "../verify.constants.js";
 import { log, logSection } from "../verify.logging.js";
 
 const ALLOWED_MARKDOWN_FILES = new Set(REQUIRED_DOCS);
+// Direct child agent definitions are allowed; nested markdown stays disallowed.
+const CUSTOM_AGENT_FILE_RE = /^\.github\/agents\/[^/]+\.agent\.md$/;
 const IGNORED_DIRECTORIES = new Set([
   ".git",
   "node_modules",
   "playwright-report",
   "test-results",
 ]);
+
+function isAllowedMarkdownFile(file) {
+  return ALLOWED_MARKDOWN_FILES.has(file) || CUSTOM_AGENT_FILE_RE.test(file);
+}
 
 function collectMarkdownFiles(rootDir, relativeDir = "") {
   const currentDir = join(rootDir, relativeDir);
@@ -50,10 +56,16 @@ export function checkDocumentation(rootDir) {
   }
 
   const markdownFiles = collectMarkdownFiles(rootDir).sort();
+  const customAgentFiles = markdownFiles.filter(
+    (file) => CUSTOM_AGENT_FILE_RE.test(file),
+  );
   log(`📚 Markdown files detected: ${markdownFiles.length}`, "cyan");
+  if (customAgentFiles.length > 0) {
+    log(`🤖 Repo-local custom agents detected: ${customAgentFiles.length}`, "cyan");
+  }
 
   const unexpectedFiles = markdownFiles.filter(
-    (file) => !ALLOWED_MARKDOWN_FILES.has(file),
+    (file) => !isAllowedMarkdownFile(file),
   );
 
   if (unexpectedFiles.length > 0) {
@@ -64,23 +76,20 @@ export function checkDocumentation(rootDir) {
     return false;
   }
 
-  if (markdownFiles.length !== ALLOWED_MARKDOWN_FILES.size) {
-    log(
-      `❌ Expected exactly ${ALLOWED_MARKDOWN_FILES.size} markdown files but found ${markdownFiles.length}`,
-      "red",
-    );
-    return false;
-  }
-
   for (const file of markdownFiles) {
-    const lineCount = readFileSync(join(rootDir, file), "utf8").split("\n").length;
+    const lineCount = readFileSync(join(rootDir, file), "utf8")
+      .split("\n")
+      .length;
     if (lineCount > 1000) {
       log(`❌ ${file} exceeds 1000 lines (${lineCount})`, "red");
       return false;
     }
   }
 
-  log("✅ Only the approved five markdown files are present", "green");
+  log(
+    "✅ Only the approved project docs and repo-local custom agents are present",
+    "green",
+  );
   log("✅ All surviving markdown files are within the 1000-line limit", "green");
 
   return true;

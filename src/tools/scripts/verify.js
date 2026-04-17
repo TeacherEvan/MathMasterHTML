@@ -13,6 +13,7 @@ import {
   checkESLint,
   checkLineLimits,
   checkPackageJson,
+  checkToolingTests,
   generateStats,
 } from "./verify/verify.checks.js";
 import { log, logResult, logSection } from "./verify/verify.logging.js";
@@ -36,6 +37,7 @@ async function main() {
   const results = {
     criticalFiles: checkCriticalFiles(ROOT),
     eslint: checkESLint(ROOT),
+    toolingTests: checkToolingTests(ROOT),
     packageJson: checkPackageJson(ROOT),
     documentation: checkDocumentation(ROOT),
   };

@@ -6,3 +6,4 @@ export { checkESLint } from "./checks/eslint.js";
 export { checkLineLimits } from "./checks/line-limits.js";
 export { checkPackageJson } from "./checks/package-json.js";
 export { generateStats } from "./checks/stats.js";
+export { checkToolingTests } from "./checks/tooling-tests.js";

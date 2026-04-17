@@ -220,7 +220,7 @@ npx playwright test tests/worm-stability.spec.js tests/worm-cursor-evasion.spec.
 3. Reuse centralized constants and shared event names.
 4. Respect sizing ownership in JavaScript-managed surfaces.
 5. Prefer focused Playwright lanes over vague manual claims.
-6. Update one of the surviving five Markdown files whenever durable behavior changes.
+6. Update one of the approved project Markdown files whenever durable behavior changes; repo-local custom agent files in `.github/agents/*.agent.md` remain allowed.
 
 ## Debugging Checklist
 
