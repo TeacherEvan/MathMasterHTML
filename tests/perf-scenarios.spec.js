@@ -3,7 +3,6 @@ import { expect, test } from "@playwright/test";
 import { profileScenario } from "./utils/perf-metrics.js";
 import {
   evaluatePerfThresholds,
-  resolvePerfPolicy,
   shouldFailPerfThresholds,
 } from "./utils/perf-thresholds.js";
 import {
@@ -21,64 +20,36 @@ import {
  * @param {{ scenarioName: string, level?: string, action: () => Promise<unknown> }} options
  */
 async function runScenario(page, testInfo, { scenarioName, level, action }) {
-  const collectSnapshot = async (attemptLabel = "primary") => {
-    await preparePerfGame(page, { level });
+  await preparePerfGame(page, { level });
 
-    const { before, after } = await profileScenario(page, action, {
-      scenarioName,
-    });
+  const { before, after } = await profileScenario(page, action, {
+    scenarioName,
+  });
 
-    const snapshot = { before, after };
-    const serialized = JSON.stringify(snapshot, null, 2);
-    const thresholdReport = evaluatePerfThresholds({
-      scenarioName,
-      projectName: testInfo.project.name,
-      snapshot,
-    });
+  const snapshot = { before, after };
+  const serialized = JSON.stringify(snapshot, null, 2);
+  const thresholdReport = evaluatePerfThresholds({
+    scenarioName,
+    projectName: testInfo.project.name,
+    snapshot,
+  });
 
-    console.log(`📊 [perf:${scenarioName}]\n${serialized}`);
-    console.log(`⚠️ [perf-thresholds] ${thresholdReport.summary}`);
+  console.log(`📊 [perf:${scenarioName}]\n${serialized}`);
+  console.log(`⚠️ [perf-thresholds] ${thresholdReport.summary}`);
 
-    await testInfo.attach(`${scenarioName}-perf-snapshot-${attemptLabel}`, {
-      contentType: "application/json",
-      body: Buffer.from(serialized),
-    });
-    await testInfo.attach(`${scenarioName}-perf-thresholds-${attemptLabel}`, {
-      contentType: "application/json",
-      body: Buffer.from(JSON.stringify(thresholdReport.attachment, null, 2)),
-    });
+  await testInfo.attach(`${scenarioName}-perf-snapshot`, {
+    contentType: "application/json",
+    body: Buffer.from(serialized),
+  });
+  await testInfo.attach(`${scenarioName}-perf-thresholds`, {
+    contentType: "application/json",
+    body: Buffer.from(JSON.stringify(thresholdReport.attachment, null, 2)),
+  });
 
-    expect(before.scenario).toBe(scenarioName);
-    expect(after.scenario).toBe(scenarioName);
-    expect(Number.isFinite(after.fps)).toBe(true);
-    expect(after.sampleCount).toBeGreaterThan(0);
-
-    return { snapshot, thresholdReport };
-  };
-
-  const policy = resolvePerfPolicy(testInfo.project.name);
-  let { snapshot, thresholdReport } = await collectSnapshot();
-
-  if (
-    shouldFailPerfThresholds(thresholdReport) &&
-    policy.mode === "catastrophic-only"
-  ) {
-    console.log(
-      `⚠️ [perf-retry] Retrying ${scenarioName}/${policy.projectName} after catastrophic-only failure to confirm the regression under a fresh run`,
-    );
-
-    const retryResult = await collectSnapshot("retry");
-    if (!shouldFailPerfThresholds(retryResult.thresholdReport)) {
-      testInfo.annotations.push({
-        type: "perf-data",
-        description: `${scenarioName}/${policy.projectName} recovered on confirmation run`,
-      });
-      return retryResult.snapshot;
-    }
-
-    snapshot = retryResult.snapshot;
-    thresholdReport = retryResult.thresholdReport;
-  }
+  expect(before.scenario).toBe(scenarioName);
+  expect(after.scenario).toBe(scenarioName);
+  expect(Number.isFinite(after.fps)).toBe(true);
+  expect(after.sampleCount).toBeGreaterThan(0);
 
   for (const annotation of thresholdReport.annotations) {
     testInfo.annotations.push(annotation);
