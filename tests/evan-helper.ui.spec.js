@@ -112,10 +112,10 @@ test.describe("Evan Helper — UI Elements (Build 3)", () => {
     expect(handTransition).toContain("cubic-bezier");
   });
 
-  test('#evan-assist-label text reads "Mr. Evan helping out"', async ({
+  test('#evan-assist-label text reads "Evan assist active"', async ({
     page,
   }) => {
     const labelText = await page.locator("#evan-assist-label").textContent();
-    expect(labelText).toBe("Mr. Evan helping out");
+    expect(labelText).toBe("Evan assist active");
   });
 });

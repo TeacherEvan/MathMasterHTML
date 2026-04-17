@@ -40,8 +40,7 @@
   /* Buttons need fat targets */
   #back-button,
   #audio-toggle {
-    transform: scale(0.9) translateY(10px);
-    transform-origin: bottom left;
-    margin-bottom: 5px;
+    transform: none;
+    margin-bottom: 0;
   }
 }

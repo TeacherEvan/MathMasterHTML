@@ -1,8 +1,3 @@
-.scoreboard-button {
-  min-width: 240px;
-  margin-top: 24px;
-}
-
 .scoreboard-modal[hidden] {
   display: none;
 }

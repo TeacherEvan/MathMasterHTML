@@ -195,3 +195,78 @@
     letter-spacing: 0.14em;
   }
 }
+
+.game-over-modal {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--shell-bg) 40%, transparent),
+    color-mix(in oklch, var(--shell-bg) 70%, black 30%)
+  );
+}
+
+.game-over-content {
+  border: 1px solid color-mix(in oklch, var(--shell-alert) 42%, transparent);
+  border-radius: 1.75rem;
+  background: var(--shell-surface-raised);
+  box-shadow:
+    var(--shell-shadow-panel),
+    0 30px 72px rgba(0, 0, 0, 0.52);
+}
+
+.game-over-title {
+  color: var(--shell-alert);
+  text-shadow:
+    0 0 14px color-mix(in oklch, var(--shell-alert) 32%, transparent),
+    0 0 28px color-mix(in oklch, var(--shell-alert) 16%, transparent);
+}
+
+.game-over-message,
+.game-over-penalty {
+  font-family: var(--font-body);
+  color: color-mix(in oklch, var(--shell-copy) 84%, var(--shell-alert) 16%);
+  text-shadow: none;
+}
+
+.game-over-button {
+  border: 1px solid color-mix(in oklch, var(--shell-alert) 36%, transparent);
+  border-radius: 999px;
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklch, var(--shell-alert) 18%, var(--shell-panel-strong) 82%),
+    color-mix(in oklch, var(--shell-panel) 72%, black 28%)
+  );
+  color: var(--shell-copy);
+  box-shadow: var(--shell-shadow-control);
+}
+
+.game-over-button:hover {
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklch, var(--shell-alert) 24%, var(--shell-panel-strong) 76%),
+    color-mix(in oklch, var(--shell-panel) 68%, black 32%)
+  );
+  border-color: color-mix(in oklch, var(--shell-alert) 52%, transparent);
+  box-shadow:
+    var(--shell-ring-soft),
+    0 18px 32px rgba(0, 0, 0, 0.34);
+}
+
+.game-over-button.secondary {
+  border-color: var(--shell-border-strong);
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklch, var(--shell-panel-strong) 84%, transparent),
+    color-mix(in oklch, var(--shell-bg) 92%, black 8%)
+  );
+  color: var(--shell-copy-muted);
+}
+
+.game-over-button.secondary:hover {
+  border-color: var(--shell-signal);
+  color: var(--shell-copy);
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklch, var(--shell-signal) 12%, var(--shell-panel-strong) 88%),
+    color-mix(in oklch, var(--shell-bg) 90%, black 10%)
+  );
+}

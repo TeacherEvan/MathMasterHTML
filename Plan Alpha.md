@@ -59,6 +59,7 @@ The identity moment is the rhythm between falling symbol rain and line-by-line a
 - Android WebView is the top acceptance target
 - touch-first ergonomics beat desktop-first assumptions
 - desktop should feel like the expanded premium version, not the design source of truth
+- if a desktop-specific capability weakens mobile gameplay, trim the desktop affordance first
 
 ## Color System
 
@@ -126,6 +127,38 @@ The level-select screen remains the benchmark for premium clarity: route identit
 - local profile naming is acceptable and device-scoped
 - tutorial content should stay deterministic
 - generated algebra is not the current UX priority
+
+## Design Context
+
+### Users
+
+- Primary users are solo algebra learners, especially teens and adult self-learners, with classroom and tutoring use as secondary contexts.
+- The core job is to turn equation solving into a fast, high-feedback practice loop that feels active and rewarding instead of static or school-like.
+- Mobile is the priority platform. Design decisions should assume touch-first play in constrained handheld contexts before considering desktop expansion.
+- Desktop remains supported, but desktop-only affordances can be reduced when they compromise mobile clarity, pacing, or control quality.
+
+### Brand Personality
+
+- Futuristic
+- Smooth
+- Disciplined
+
+The interface should feel confident, premium, and slightly ominous: more elite training chamber than classroom worksheet. It should preserve the existing training-console identity while adding a darker, more cinematic edge.
+
+### Aesthetic Direction
+
+- Dark-first premium sci-fi console is the canonical direction, with light mode supported only when it remains intentional and equally readable.
+- Matrix DNA stays present through symbol rain, phosphor signal cues, and system-like typography, but the overall feel should remain cleaner and more controlled than retro-terminal cosplay.
+- Visual tone should lean toward dark-force energy: severe, cinematic, restrained, and powerful rather than loud, messy, or neon-for-neon's-sake.
+- Existing route accents remain the functional palette: phosphor for active/success states, brass for emphasis and progression, ember for danger or elite-route intensity.
+
+### Design Principles
+
+- Mobile gameplay authority: protect touch ergonomics, readability, and reaction flow before preserving desktop-specific polish.
+- Cinematic restraint: create atmosphere with composition, contrast, and motion discipline rather than clutter, gimmicks, or generic sci-fi effects.
+- Functional intensity: every glow, accent, animation, and texture should reinforce state, progress, or tension in the training loop.
+- Premium clarity under pressure: interfaces must stay legible and navigable even during active play, with concise copy and strong hierarchy.
+- Practical accessibility: reduced motion, clear focus states, non-color cues, and touch-safe targets are part of the visual quality bar, not add-ons.
 
 ## Consolidation Record
 

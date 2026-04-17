@@ -191,12 +191,16 @@ body.viewport-compact .grid-container {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: #000;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--shell-bg, oklch(0.14 0.018 122)) 56%, transparent),
+    color-mix(in oklch, var(--shell-bg, oklch(0.14 0.018 122)) 82%, black 18%)
+  );
   z-index: 999999;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: #00ff00;
+  color: var(--shell-copy, #e7fff0);
   font-family: inherit;
   text-align: center;
   padding: 20px;
@@ -211,7 +215,7 @@ body.viewport-compact .grid-container {
 #rotation-overlay .rotate-text {
   font-size: 24px;
   font-weight: 700;
-  text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+  text-shadow: 0 0 14px color-mix(in oklch, var(--shell-signal, oklch(0.84 0.12 82)) 24%, transparent);
   font-family: "Exo 2", sans-serif;
 }
 

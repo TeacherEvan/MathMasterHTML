@@ -36,39 +36,34 @@
   }
 
   #symbol-console {
-    /* Mobile: Span full viewport width, not confined to Panel B */
-    position: fixed;
+    position: absolute;
     bottom: 10px;
-    left: 10px;
-    right: 10px;
-    transform: none;
-
-    /* Change from 3×3 grid to horizontal 2×1 pairs */
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    align-items: center;
-    gap: 8px;
-    padding: 10px;
-
-    /* Ensure it spans across all panels */
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    display: grid;
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(3, 44px);
+    justify-content: center;
+    align-items: stretch;
+    gap: 6px;
+    padding: 8px;
+    width: auto;
+    max-width: calc(100% - 20px);
     z-index: 10000;
   }
 
   .console-slot {
-    /* Make slots slightly larger for touch on mobile */
-    width: 45px;
-    height: 45px;
-    font-size: 22px;
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
     flex: 0 0 auto;
   }
 
-  /* Group slots in pairs visually with spacing */
   .console-slot:nth-child(2),
   .console-slot:nth-child(4),
   .console-slot:nth-child(6) {
-    margin-right: 15px;
-    /* Space after every 2nd, 4th, 6th slot to create pairs */
+    margin-right: 0;
   }
 
 }
@@ -156,11 +151,10 @@
     font-size: 20px;
   }
 
-  /* Reduce pair spacing on very small screens */
   .console-slot:nth-child(2),
   .console-slot:nth-child(4),
   .console-slot:nth-child(6) {
-    margin-right: 10px;
+    margin-right: 0;
   }
 
   .console-selection-shell {
@@ -169,7 +163,7 @@
 
   .console-selection-window {
     width: calc(100vw - 12px);
-    height: min(340px, calc(100vh - 12px));
+    height: min(400px, calc(100vh - 12px));
     gap: 8px;
     padding: 10px;
     border-radius: 12px;

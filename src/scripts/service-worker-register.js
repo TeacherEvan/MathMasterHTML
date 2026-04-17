@@ -164,7 +164,7 @@ if ("serviceWorker" in navigator) {
 
 async function registerServiceWorker() {
   try {
-    dispatchPreload(35, "Registering service worker cache...");
+    dispatchPreload(35, "Registering service worker...");
     const registration = await navigator.serviceWorker.register(
       "/service-worker.js",
       {

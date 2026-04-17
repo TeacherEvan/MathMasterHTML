@@ -13,6 +13,7 @@
   --welcome-text: #e7fff0;
   --welcome-muted: #b7d8c1;
   --welcome-gold: #ffe08f;
+  --welcome-ember: rgba(199, 107, 82, 0.9);
 }
 
 body {
@@ -36,21 +37,21 @@ body.welcome-page {
   padding: clamp(18px, 3vw, 32px);
   background:
     radial-gradient(
-      circle at top center,
-      rgba(18, 72, 48, 0.24),
-      transparent 38%
+      90% 70% at 14% 8%,
+      rgba(122, 255, 187, 0.12),
+      transparent 52%
     ),
     radial-gradient(
-      circle at 15% 20%,
-      rgba(255, 208, 107, 0.12),
-      transparent 28%
+      74% 58% at 88% 14%,
+      rgba(255, 224, 143, 0.1),
+      transparent 44%
     ),
     radial-gradient(
-      circle at 85% 18%,
-      rgba(93, 185, 255, 0.14),
-      transparent 24%
+      56% 44% at 76% 78%,
+      rgba(199, 107, 82, 0.1),
+      transparent 46%
     ),
-    linear-gradient(180deg, #020705 0%, #050d0a 48%, #040605 100%);
+    linear-gradient(180deg, #020403 0%, #070d0b 46%, #050706 100%);
 }
 
 body.welcome-page::before,
@@ -86,7 +87,7 @@ body.welcome-page::after {
 
 .welcome-header,
 .welcome-container {
-  width: min(100%, 960px);
+  width: min(100%, 1040px);
   position: relative;
   z-index: 10;
 }
@@ -105,10 +106,9 @@ body.welcome-page::after {
 .welcome-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  gap: clamp(14px, 2vh, 22px);
   text-align: center;
-  gap: clamp(18px, 2.4vh, 30px);
   min-height: 0;
   max-height: none;
   overflow: visible;
@@ -116,13 +116,33 @@ body.welcome-page::after {
   border: 1px solid var(--welcome-border);
   border-radius: 32px;
   background:
-    linear-gradient(180deg, rgba(10, 20, 16, 0.92), rgba(5, 10, 8, 0.84)),
+    linear-gradient(160deg, rgba(17, 27, 22, 0.96), rgba(7, 11, 9, 0.92)),
     var(--welcome-surface);
   box-shadow:
-    0 24px 70px rgba(0, 0, 0, 0.42),
+    0 28px 84px rgba(0, 0, 0, 0.5),
     inset 0 0 0 1px rgba(220, 255, 233, 0.04),
     0 0 0 1px rgba(122, 255, 187, 0.08);
-  backdrop-filter: blur(18px);
+}
+
+.logo-container {
+  align-self: center;
+}
+
+.quote {
+  align-self: center;
+  text-align: center;
+}
+
+.button-container {
+  align-self: center;
+}
+
+.welcome-hint {
+  text-align: center;
+}
+
+.creator-credit {
+  text-align: center;
 }
 
 /* Description */

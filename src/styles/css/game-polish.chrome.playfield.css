@@ -73,6 +73,13 @@
   box-shadow: var(--shell-shadow-panel);
 }
 
+.worm-spawn-area {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
 .console-slot {
   min-width: 44px;
   min-height: 44px;

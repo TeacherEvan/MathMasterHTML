@@ -27,6 +27,33 @@
   justify-self: stretch;
 }
 
+#help-button {
+  border-color: var(--shell-border-signal);
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklch, var(--shell-signal) 18%, var(--shell-panel-strong) 82%),
+    color-mix(in oklch, var(--shell-panel) 74%, black 26%)
+  );
+  color: var(--shell-copy);
+}
+
+#clarify-button {
+  border-color: var(--shell-border-strong);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--shell-panel-strong) 72%, transparent),
+    color-mix(in oklch, var(--shell-bg) 92%, black 8%)
+  );
+  color: var(--shell-copy-muted);
+  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--shell-copy) 4%, transparent);
+}
+
+#clarify-button:hover,
+#clarify-button:focus-visible {
+  color: var(--shell-copy);
+  border-color: color-mix(in oklch, var(--shell-copy-muted) 54%, transparent);
+}
+
 #symbol-console {
   position: absolute !important;
   left: 50% !important;
