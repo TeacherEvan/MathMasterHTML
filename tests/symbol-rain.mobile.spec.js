@@ -381,16 +381,52 @@ test.describe("Symbol rain mobile interactions", () => {
     }));
 
     expect(runtimeConfig.isMobileMode).toBe(true);
-    expect(runtimeConfig.spawnRate).toBe(0.05);
-    expect(runtimeConfig.burstSpawnRate).toBe(0.05);
-    expect(runtimeConfig.guaranteedSpawnInterval).toBe(1000);
-    expect(runtimeConfig.symbolsPerWave).toBe(4);
-    expect(runtimeConfig.maxActiveSymbols).toBe(30);
+    expect(runtimeConfig.spawnRate).toBe(0.08);
+    expect(runtimeConfig.burstSpawnRate).toBe(0.08);
+    expect(runtimeConfig.guaranteedSpawnInterval).toBe(800);
+    expect(runtimeConfig.symbolsPerWave).toBe(5);
+    expect(runtimeConfig.maxActiveSymbols).toBe(36);
 
     await page.locator("#panel-c .falling-symbol").first().waitFor({
       state: "visible",
       timeout: 10000,
     });
+
+    await context.close();
+  });
+
+  test("keeps standard Panel C tuning in the default desktop runtime", async ({
+    browser,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "chromium",
+      "This scope contract runs on the desktop chromium project only.",
+    );
+
+    const context = await browser.newContext({
+      ...devices["Desktop Chrome"],
+    });
+    const page = await context.newPage();
+
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    const runtimeConfig = await page.evaluate(() => ({
+      burstSpawnRate: window.__symbolRainState?.config?.burstSpawnRate,
+      guaranteedSpawnInterval:
+        window.__symbolRainState?.config?.guaranteedSpawnInterval,
+      isMobileMode: window.__symbolRainState?.isMobileMode,
+      maxActiveSymbols: window.__symbolRainState?.config?.maxActiveSymbols,
+      spawnRate: window.__symbolRainState?.config?.spawnRate,
+      symbolsPerWave: window.__symbolRainState?.config?.symbolsPerWave,
+    }));
+
+    expect(runtimeConfig.isMobileMode).toBe(false);
+    expect(runtimeConfig.spawnRate).toBe(0.5);
+    expect(runtimeConfig.burstSpawnRate).toBe(0.15);
+    expect(runtimeConfig.guaranteedSpawnInterval).toBe(5000);
+    expect(runtimeConfig.symbolsPerWave).toBe(14);
+    expect(runtimeConfig.maxActiveSymbols).toBe(200);
 
     await context.close();
   });
@@ -553,6 +589,89 @@ test.describe("Symbol rain mobile interactions", () => {
     );
   });
 
+  test("Panel C reacquires a keyboard target when focus comes before a live match", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !["pixel-7", "iphone-13"].includes(testInfo.project.name),
+      "This keyboard accessibility contract is enforced on the mobile projects.",
+    );
+
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    const before = await getCurrentStepSnapshot(page);
+    expect(before.hiddenSymbols.length).toBeGreaterThan(0);
+
+    await page.evaluate((symbols) => {
+      const normalize = (value) => String(value || "").trim().toLowerCase();
+      const state = window.__symbolRainState;
+      const helpers = window.SymbolRainHelpers;
+
+      if (!state || !helpers?.cleanupSymbolObject) {
+        return;
+      }
+
+      const normalizedSymbols = new Set(symbols.map((symbol) => normalize(symbol)));
+
+      for (let index = state.activeFallingSymbols.length - 1; index >= 0; index -= 1) {
+        const symbolObj = state.activeFallingSymbols[index];
+        if (!normalizedSymbols.has(normalize(symbolObj?.symbol))) {
+          continue;
+        }
+
+        state.activeFallingSymbols.splice(index, 1);
+        helpers.cleanupSymbolObject({
+          symbolObj,
+          activeFaceReveals: state.activeFaceReveals,
+          symbolPool: state.symbolPool,
+          spatialGrid: state.spatialGrid,
+        });
+      }
+    }, before.hiddenSymbols);
+
+    const panelC = page.locator("#panel-c");
+    await panelC.focus();
+    await expect(panelC).toBeFocused();
+
+    await page.waitForFunction(
+      (symbols) => {
+        const panel = document.getElementById("panel-c");
+        const target = document.querySelector(
+          "#panel-c .falling-symbol.keyboard-target",
+        );
+
+        if (!panel || !target) {
+          return false;
+        }
+
+        const normalize = (value) => String(value || "").trim().toLowerCase();
+        const normalizedSymbols = new Set(symbols.map((symbol) => normalize(symbol)));
+        const panelRect = panel.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+
+        return (
+          normalizedSymbols.has(normalize(target.textContent)) &&
+          targetRect.bottom > panelRect.top &&
+          targetRect.top < panelRect.bottom &&
+          targetRect.right > panelRect.left &&
+          targetRect.left < panelRect.right
+        );
+      },
+      before.hiddenSymbols,
+      { timeout: 8000 },
+    );
+
+    await page.keyboard.press("Enter");
+
+    await expect
+      .poll(async () => {
+        const after = await getCurrentStepSnapshot(page);
+        return after.hiddenSymbols.length;
+      }, { timeout: 5000 })
+      .toBeLessThan(before.hiddenSymbols.length);
+  });
+
   test("keeps the active hidden symbol raining as a live Panel C target on mobile", async ({
     page,
   }, testInfo) => {
@@ -571,7 +690,7 @@ test.describe("Symbol rain mobile interactions", () => {
 
     for (let revealIndex = 0; revealIndex < 5; revealIndex += 1) {
       const before = await getCurrentStepSnapshot(page);
-      const targetSymbol = before.hiddenSymbols[0];
+      const targetSymbol = await findVisibleMatchingSymbol(page, before.hiddenSymbols);
 
       expect(targetSymbol).toBeTruthy();
 

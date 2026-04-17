@@ -196,3 +196,8 @@
       3px 3px 0px #000;
   }
 }
+
+.worm-entity {
+  /* only transition GPU properties */
+  transition: transform 200ms linear, opacity 150ms var(--ease-out-quint);
+}

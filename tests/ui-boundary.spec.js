@@ -441,3 +441,17 @@ test.describe("Evan Helper — Boundary Constraints (Build 3)", () => {
     expect(overlap).toBe(false);
   });
 });
+
+test('Buttons meet 44x44px touch target protocol', async ({ page }) => {
+  await page.goto('/src/pages/index.html');
+  const buttons = page.locator('button, [role="button"], .action-target');
+  const count = await buttons.count();
+  
+  for (let i = 0; i < count; i++) {
+    const box = await buttons.nth(i).boundingBox();
+    if(box) {
+        expect(box.height).toBeGreaterThanOrEqual(44);
+        expect(box.width).toBeGreaterThanOrEqual(44);
+    }
+  }
+});

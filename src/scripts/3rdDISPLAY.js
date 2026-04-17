@@ -52,11 +52,12 @@ function initSymbolRain() {
 
     const responsiveConfig = {
       compact: {
-        spawnRate: 0.05,
-        burstSpawnRate: 0.05,
-        guaranteedSpawnInterval: 1000,
-        symbolsPerWave: 4,
-        maxActiveSymbols: 30,
+        spawnRate: 0.08,
+        burstSpawnRate: 0.08,
+        guaranteedSpawnInterval: 800,
+        symbolsPerWave: 5,
+        maxActiveSymbols: 36,
+        minVisibleSymbols: 3,
       },
       standard: {
         spawnRate: 0.5,
@@ -64,6 +65,7 @@ function initSymbolRain() {
         guaranteedSpawnInterval: 5000,
         symbolsPerWave: 14,
         maxActiveSymbols: 200,
+        minVisibleSymbols: 0,
       },
     };
     const preservePerfSmokeConfig = window.__PERF_SMOKE_MODE === true;
@@ -140,6 +142,7 @@ function initSymbolRain() {
       state.config.guaranteedSpawnInterval = profile.guaranteedSpawnInterval;
       state.config.symbolsPerWave = profile.symbolsPerWave;
       state.config.maxActiveSymbols = profile.maxActiveSymbols;
+      state.config.minVisibleSymbols = profile.minVisibleSymbols;
     }
 
     syncResponsiveConfig();

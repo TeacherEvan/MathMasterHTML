@@ -163,3 +163,139 @@ Beta absorbed the old content from:
 - `.github/superpower/context/*.md`
 
 The deleted superpower artifacts were historical planning material, not durable source-of-truth docs.
+## Active Implementation Plan: Sci-Fi Console UI Hardening
+
+> **For agentic workers:** REQUIRED: Use the `subagent-driven-development` agent (recommended) or `executing-plans` agent to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Implement the "Premium Sci-Fi Console" UX specification focused on strictly bounded layout, 44x44 touch safety, and GPU-only CSS transitions to guarantee <22ms mobile frame times.
+
+**Architecture:** We will strip layout-triggering properties (`transition: all`, `width`, `height` in hover states) from the core animation files. We will enforce fluid typography and button heights using `clamp()` and `min-height: 44px`.
+
+**Tech Stack:** Native CSS, Playwright for visual regression and accessibility.
+
+---
+
+### Task 1: Strict CSS GPU & Touch Safety Rules
+
+**Files:**
+- Modify: `src/styles/css/game-animations.core.css`
+- Modify: `src/styles/css/index.actions.css`
+- Test: `tests/ui-boundary.spec.js`
+
+- [ ] **Step 1: Write the failing test**
+
+```javascript
+// Append to tests/ui-boundary.spec.js
+test('Buttons meet 44x44px touch target protocol', async ({ page }) => {
+  await page.goto('/src/pages/index.html');
+  const buttons = page.locator('button, [role="button"]');
+  const count = await buttons.count();
+  
+  for (let i = 0; i < count; i++) {
+    const box = await buttons.nth(i).boundingBox();
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.width).toBeGreaterThanOrEqual(44);
+  }
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx playwright test tests/ui-boundary.spec.js --project=chromium`
+Expected: FAIL because some legacy buttons on index or game layouts may be `36px` or less.
+
+- [ ] **Step 3: Write minimal implementation**
+
+```css
+/* In index.actions.css and forms using buttons */
+button, 
+.action-target, 
+[role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+  /* Decisive easing only */
+  transition: transform 150ms var(--ease-out-quint), opacity 150ms linear;
+}
+
+button:active {
+  transform: scale(0.96);
+}
+```
+
+```css
+/* In game-animations.core.css, remove and replace any 'transition: all' */
+.worm-entity {
+  /* only transition GPU properties */
+  transition: transform 200ms linear, opacity 150ms var(--ease-out-quint);
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx playwright test tests/ui-boundary.spec.js --project=chromium`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add tests/ui-boundary.spec.js src/styles/css/index.actions.css src/styles/css/game-animations.core.css
+git commit -m "fix: enforce 44px touch targets and GPU-only transitions"
+```
+
+### Task 2: Implement Reduced-Motion UX Requirements
+
+**Files:**
+- Modify: `src/styles/css/lod-animations.reduced-motion.css`
+- Test: `tests/focused-mobile-a11y-checks.spec.js` (create if doesn't exist)
+
+- [ ] **Step 1: Write the failing test**
+
+```javascript
+/* In a new or existing a11y spec */
+test('Reduced motion disables transform animations', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/src/pages/game.html?level=beginner');
+  
+  const elementContent = await page.evaluate(() => {
+    const styles = window.getComputedStyle(document.body);
+    return styles.getPropertyValue('--ease-out-quint');
+  });
+  
+  // Actually test standard UI components
+  const button = page.locator('button').first();
+  await button.hover();
+  
+  // It shouldn't animate transform or we should force zero-duration.
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx playwright test tests/focused-mobile-a11y-checks.spec.js --project=chromium`
+Expected: FAIL
+
+- [ ] **Step 3: Write minimal implementation**
+
+```css
+/* Append to lod-animations.reduced-motion.css */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx playwright test tests/focused-mobile-a11y-checks.spec.js --project=chromium`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/styles/css/lod-animations.reduced-motion.css
+git commit -m "feat: complete a11y full reduced-motion coverage"
+```

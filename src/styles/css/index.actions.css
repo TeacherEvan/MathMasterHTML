@@ -123,3 +123,16 @@
   font-size: 0.9rem;
   text-shadow: 1px 1px 0 #000;
 }
+
+button, 
+.action-target, 
+[role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+  /* Decisive easing only */
+  transition: transform 150ms var(--ease-out-quint), opacity 150ms linear;
+}
+
+button:active {
+  transform: scale(0.96);
+}

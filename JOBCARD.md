@@ -1,6 +1,18 @@
 # JOBCARD
 
-## Latest update (2026-04-14)
+## Latest update (2026-04-17)
+
+- Fixed Panel C keyboard targeting so focus now reacquires a live matching symbol as soon as one enters the panel instead of waiting for a manual refocus or arrow-cycle.
+- Prioritized guaranteed Panel C spawns around the current hidden solution symbols so gameplay keeps circulating live matching targets instead of relying only on global alphabet recirculation.
+- Scoped the priority-spawn backfill to compact/mobile gameplay and made it crowding-aware so it can reclaim a lower-priority symbol when the compact rain is saturated.
+- Added a compact visible-symbol floor so narrow Panel C lanes repopulate before the rain drains to zero during gameplay.
+- Rebalanced compact/mobile Panel C throttling in `src/scripts/3rdDISPLAY.js` to restore a visible rain cadence without jumping back to desktop density.
+- Added a regression lane proving Panel C can regain a keyboard target when focus arrives before any live matching symbol is visible.
+- Added a desktop-scope assertion proving the standard Panel C runtime stays on the non-compact tuning path.
+- Restacked the welcome-page matrix layer behind the atmospheric overlays so the hero title and emblem stop fighting the background artwork.
+- Focused validation passed with `npx playwright test tests/welcome-page-redesign.spec.js tests/welcome-page-motion.spec.js tests/symbol-rain.mobile.spec.js --project=chromium --project=pixel-7 --reporter=line` and `npm run typecheck`.
+
+## Previous update (2026-04-14)
 
 - Reworked Panel C compact/mobile throttling to sync from `src/scripts/3rdDISPLAY.js` using the existing `viewport-compact` runtime contract instead of a one-time width gate.
 - Restored real symbol-rain layout stabilization by removing the synthetic container-height fallback and keeping bootstrap retries responsible for zero-height startup states.

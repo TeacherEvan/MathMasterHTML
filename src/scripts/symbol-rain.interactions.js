@@ -10,6 +10,7 @@
     const keyboardStatus = document.getElementById("panel-c-keyboard-status");
     const recentSymbolActivations = new WeakMap();
     let activeKeyboardTarget = null;
+    let keyboardSyncFrameId = null;
     const POINTER_REACTIVATION_WINDOW_MS = 400;
 
     const normalizeSymbol = (value) =>
@@ -28,6 +29,13 @@
         activeKeyboardTarget.classList.remove("keyboard-target");
       }
       activeKeyboardTarget = null;
+    };
+
+    const cancelKeyboardSync = () => {
+      if (keyboardSyncFrameId !== null) {
+        cancelAnimationFrame(keyboardSyncFrameId);
+        keyboardSyncFrameId = null;
+      }
     };
 
     const getCurrentNeededSymbols = () => {
@@ -95,6 +103,49 @@
       return target;
     };
 
+    const syncKeyboardTarget = () => {
+      const candidates = getVisibleKeyboardCandidates();
+
+      if (!candidates.length) {
+        if (activeKeyboardTarget) {
+          clearKeyboardTarget();
+          updateKeyboardStatus(
+            "Panel C focused. Wait for a matching symbol, then press Enter or Space.",
+          );
+        }
+        return null;
+      }
+
+      const activeCandidate = candidates.find(
+        ({ symbol }) => symbol.element === activeKeyboardTarget,
+      );
+
+      if (activeCandidate) {
+        return activeCandidate.symbol;
+      }
+
+      return setKeyboardTarget(candidates[0].symbol);
+    };
+
+    const scheduleKeyboardSync = () => {
+      if (!panel || keyboardSyncFrameId !== null) {
+        return;
+      }
+
+      const loop = () => {
+        keyboardSyncFrameId = null;
+
+        if (!panel.matches(":focus")) {
+          return;
+        }
+
+        syncKeyboardTarget();
+        keyboardSyncFrameId = requestAnimationFrame(loop);
+      };
+
+      keyboardSyncFrameId = requestAnimationFrame(loop);
+    };
+
     const cycleKeyboardTarget = (direction = 1) => {
       const candidates = getVisibleKeyboardCandidates();
       if (!candidates.length) {
@@ -104,7 +155,7 @@
       }
 
       const currentIndex = candidates.findIndex(
-        ({ element }) => element === activeKeyboardTarget,
+        ({ symbol }) => symbol.element === activeKeyboardTarget,
       );
       const nextIndex =
         currentIndex === -1
@@ -117,7 +168,7 @@
     const triggerKeyboardTarget = () => {
       const target =
         getVisibleKeyboardCandidates().find(
-          ({ element }) => element === activeKeyboardTarget,
+          ({ symbol }) => symbol.element === activeKeyboardTarget,
         )?.symbol || cycleKeyboardTarget(1);
 
       if (!target?.element) {
@@ -213,9 +264,12 @@
             "Panel C focused. Wait for a matching symbol, then press Enter or Space.",
           );
         }
+
+        scheduleKeyboardSync();
       });
 
       panel.addEventListener("blur", () => {
+        cancelKeyboardSync();
         clearKeyboardTarget();
       });
 
