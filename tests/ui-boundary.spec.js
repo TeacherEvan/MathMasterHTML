@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import {
   BASE_URL,
   boxesOverlap,
+  dismissBriefing,
   ensurePowerUpDisplay,
 } from "./utils/game-helpers.js";
 
@@ -11,20 +12,14 @@ test.setTimeout(60000);
 
 test.describe("UI Boundary Management", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to game page with retry
-    await page.goto(`${BASE_URL}/game.html?level=beginner`, {
+    // Navigate straight to the runtime and bypass preload; these assertions only
+    // care about gameplay layout, not the preload gate.
+    await page.goto(`${BASE_URL}/src/pages/game.html?level=beginner&preload=off`, {
       waitUntil: "domcontentloaded",
       timeout: 30000,
     });
 
-    // Wait for modal to be visible before clicking
-    await page.waitForSelector("#start-game-btn", {
-      state: "visible",
-      timeout: 10000,
-    });
-
-    // Dismiss the how-to-play modal
-    await page.locator("#start-game-btn").click({ force: true });
+    await dismissBriefing(page);
     await page.waitForTimeout(500);
   });
 
@@ -328,15 +323,12 @@ test.describe("UI Boundary Management", () => {
 
 test.describe("Panel A Layout", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/game.html?level=beginner`, {
+    await page.goto(`${BASE_URL}/src/pages/game.html?level=beginner&preload=off`, {
       waitUntil: "domcontentloaded",
       timeout: 30000,
     });
-    await page.waitForSelector("#start-game-btn", {
-      state: "visible",
-      timeout: 10000,
-    });
-    await page.locator("#start-game-btn").click({ force: true });
+
+    await dismissBriefing(page);
     await page.waitForTimeout(500);
   });
 

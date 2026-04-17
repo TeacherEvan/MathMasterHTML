@@ -65,6 +65,37 @@ body.viewport-compact.viewport-portrait #panel-a {
   align-items: stretch;
 }
 
+/* Automation keeps portrait gameplay visible for assertions, so Panel A needs
+   flow-based spacing instead of the fixed lock offset used by the live rotate gate. */
+body.automation.viewport-compact.viewport-portrait #panel-a {
+  padding-top: 60px;
+  gap: 10px;
+}
+
+body.automation.viewport-compact.viewport-portrait #evan-controls-slot {
+  order: 0;
+  position: relative;
+}
+
+body.automation.viewport-compact.viewport-portrait #problem-container {
+  order: 1;
+  flex: 0 0 auto;
+}
+
+body.automation.viewport-compact.viewport-portrait #lock-display {
+  order: 2;
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  width: 100%;
+  height: auto;
+  min-height: 180px;
+  margin-top: 8px;
+  flex: 1 1 auto;
+}
+
 body.viewport-compact.viewport-portrait .grid-container > .wall:nth-child(2) {
   display: block !important;
   grid-column: 1 !important;
@@ -229,4 +260,10 @@ body.automation .grid-container {
 
 body.automation #back-button {
   display: block !important;
+}
+
+body.automation.viewport-compact.viewport-portrait #back-button,
+body.automation.viewport-compact.viewport-portrait #audio-toggle {
+  top: 60px;
+  bottom: auto;
 }

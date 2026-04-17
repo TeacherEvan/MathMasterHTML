@@ -1,6 +1,6 @@
 body.viewport-compact.viewport-landscape {
   --compact-panel-inline-gap: 8px;
-  --compact-panel-a-top-safe-zone: 52px;
+  --compact-panel-a-top-safe-zone: 56px;
 }
 
 body.viewport-compact.viewport-landscape .grid-container {
@@ -80,7 +80,7 @@ body.viewport-compact.viewport-landscape #problem-container {
 }
 
 body.viewport-compact.viewport-landscape #lock-display {
-  top: calc(var(--compact-panel-a-top-safe-zone) + 44px) !important;
+  top: calc(var(--compact-panel-a-top-safe-zone) + 48px) !important;
   right: var(--compact-panel-inline-gap);
   bottom: 60px;
   left: var(--compact-panel-inline-gap) !important;

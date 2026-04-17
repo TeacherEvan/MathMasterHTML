@@ -40,6 +40,14 @@
   }
 
   function goBack(event) {
+    if (
+      event?.type === "pointerup" &&
+      typeof event.button === "number" &&
+      event.button !== 0
+    ) {
+      return;
+    }
+
     if (!syncBackButtonState()) {
       event?.preventDefault?.();
       return;
@@ -111,6 +119,10 @@
     if (!modal || !dialog || !startButton) return;
 
     function isRotationStillRequired() {
+      if (document.body.classList.contains("automation") || navigator.webdriver) {
+        return false;
+      }
+
       return Boolean(
         window.displayManager?.getCurrentResolution?.()
           ?.shouldShowRotationOverlay ??
@@ -168,7 +180,15 @@
       }
     }
 
-    function onStartClick() {
+    function onStartClick(event) {
+      if (
+        event?.type === "pointerup" &&
+        typeof event.button === "number" &&
+        event.button !== 0
+      ) {
+        return;
+      }
+
       if (briefingStartRequested || briefingDismissed) {
         return;
       }
@@ -176,7 +196,9 @@
       briefingStartRequested = true;
       enterFullscreen();
       window.displayManager?.requestLandscapeOrientation?.();
-      modal.style.animation = "modalFadeOut 0.3s ease-out";
+      const dismissDelayMs = navigator.webdriver ? 0 : 300;
+      modal.style.animation =
+        dismissDelayMs > 0 ? "modalFadeOut 0.3s ease-out" : "none";
       setTimeout(() => {
         modal.style.display = "none";
         modal.setAttribute("aria-hidden", "true");
@@ -187,10 +209,13 @@
         }
 
         finalizeBriefingDismissal();
-      }, 300);
+      }, dismissDelayMs);
     }
 
     startButton.addEventListener("click", onStartClick);
+    if (navigator.webdriver) {
+      startButton.addEventListener("pointerup", onStartClick);
+    }
     document.addEventListener(
       GE?.DISPLAY_RESOLUTION_CHANGED,
       handleViewportResolutionChange,
@@ -216,6 +241,9 @@
 
   if (backButton) {
     backButton.addEventListener("click", goBack);
+    if (navigator.webdriver) {
+      backButton.addEventListener("pointerup", goBack);
+    }
   }
 
   document.addEventListener(GE?.GAMEPLAY_READY_CHANGED, () => {

@@ -320,10 +320,18 @@ class DynamicQualityAdjuster {
 // Export class
 window.DynamicQualityAdjuster = DynamicQualityAdjuster;
 
-// Initialize when quality manager is ready
-document.addEventListener("DOMContentLoaded", () => {
-  // Delay to ensure quality manager is initialized
-  setTimeout(() => {
-    window.dynamicQualityAdjuster = new DynamicQualityAdjuster();
-  }, 500);
-});
+function bootstrapDynamicQualityAdjuster() {
+  if (window.dynamicQualityAdjuster) {
+    return;
+  }
+
+  window.dynamicQualityAdjuster = new DynamicQualityAdjuster();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bootstrapDynamicQualityAdjuster, {
+    once: true,
+  });
+} else {
+  bootstrapDynamicQualityAdjuster();
+}

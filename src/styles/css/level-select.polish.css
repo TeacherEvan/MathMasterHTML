@@ -368,8 +368,7 @@ button {
 }
 
 .level-card:not(.is-active) .progress-container,
-.level-card:not(.is-active) .level-cta-caption,
-.level-card:not(.is-active) .level-button {
+.level-card:not(.is-active) .level-cta-caption {
   display: none;
 }
 
