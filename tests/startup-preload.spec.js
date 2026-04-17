@@ -192,6 +192,58 @@ test.describe("Startup Preload — Build 2", () => {
       });
   });
 
+  test("service worker InvalidStateError does not block preload completion", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "serviceWorker", {
+        configurable: true,
+        value: {
+          async register() {
+            throw new DOMException(
+              "Failed to register a ServiceWorker: The document is in an invalid state.",
+              "InvalidStateError",
+            );
+          },
+          async getRegistration() {
+            return null;
+          },
+          addEventListener() {},
+        },
+      });
+    });
+
+    await gotoGameRuntime(page, "?level=beginner&preload=off");
+    await waitForStartupPreload(page);
+
+    await expect
+      .poll(() =>
+        page.evaluate(() => ({
+          blocking: window.StartupPreload?.isBlocking?.() ?? true,
+          complete: window.StartupPreload?.isComplete?.() ?? false,
+          failure: window._SWDiagnostic?.getState
+            ? window._SWDiagnostic.lastFailure ?? null
+            : null,
+        })),
+      )
+      .toMatchObject({
+        blocking: false,
+        complete: true,
+      });
+
+    await expect
+      .poll(() =>
+        page.evaluate(async () => {
+          const state = await window._SWDiagnostic?.getState?.();
+          return state?.lastFailure ?? null;
+        }),
+      )
+      .toMatchObject({
+        reason: "invalid-document-state",
+        name: "InvalidStateError",
+      });
+  });
+
   test("?swDebug=refresh-update exposes the refresh-to-update diagnostic hook", async ({
     page,
   }) => {

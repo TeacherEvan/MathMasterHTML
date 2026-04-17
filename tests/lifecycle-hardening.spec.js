@@ -2,6 +2,7 @@
 import { expect, test } from "@playwright/test";
 import { injectLifecycleTracker } from "./utils/lifecycle-tracker.js";
 import { preparePerfGame } from "./utils/perf-scenarios.js";
+import { gotoGameRuntime } from "./utils/onboarding-runtime.js";
 
 test.describe("Lifecycle hardening", () => {
   test.beforeEach(async ({ page }, testInfo) => {
@@ -20,6 +21,41 @@ test.describe("Lifecycle hardening", () => {
     });
 
     expect(result.hasDestroy).toBe(true);
+  });
+
+  test("DynamicQualityAdjuster does not reduce quality before gameplay is ready", async ({
+    page,
+  }) => {
+    await gotoGameRuntime(page, "?level=beginner");
+
+    const result = await page.evaluate(() => {
+      const adjuster = window.dynamicQualityAdjuster;
+      const qualityManager = window.qualityManager;
+
+      if (!adjuster || !qualityManager) {
+        return { hasAdjuster: false };
+      }
+
+      const beforeTier = qualityManager.getTier();
+
+      adjuster.startedAt = performance.now() - 10_000;
+      adjuster.lastGameplayReadyAt = null;
+      adjuster.adjustmentCooldown = false;
+      adjuster.fpsHistory = new Array(adjuster.config.MIN_SAMPLES).fill(12);
+
+      adjuster.checkAndAdjust();
+
+      return {
+        hasAdjuster: true,
+        gameplayReady: window.GameRuntimeCoordinator?.isGameplayReady?.() ?? null,
+        beforeTier,
+        afterTier: qualityManager.getTier(),
+      };
+    });
+
+    expect(result.hasAdjuster).toBe(true);
+    expect(result.gameplayReady).toBe(false);
+    expect(result.afterTier).toBe(result.beforeTier);
   });
 
   test("PerformanceMonitor can be destroyed", async ({ page }) => {

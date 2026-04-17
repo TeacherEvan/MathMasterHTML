@@ -1,10 +1,10 @@
 /**
  * Service Worker - Production-Grade PWA Support
  * Enables offline gameplay and improves performance
- * Version: 20260411-main-sync-review-1
+ * Version: 20260417-startup-quality-fix-1
  */
 
-const BUILD_VERSION = "20260411-main-sync-review-1";
+const BUILD_VERSION = "20260417-startup-quality-fix-1";
 const CACHE_PREFIX = "math-master";
 const CACHE_NAME = `${CACHE_PREFIX}-static-${BUILD_VERSION}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_VERSION}`;
@@ -465,8 +465,8 @@ self.addEventListener("push", (event) => {
   const title = data.title || "Math Master";
   const options = {
     body: data.body || "You have a new notification",
-    icon: "/Images/icon-192.png",
-    badge: "/Images/badge-72.png",
+    icon: "/src/assets/images/icon-192.png",
+    badge: "/src/assets/images/badge-72.png",
     vibrate: [200, 100, 200],
     data: data.data || {},
   };

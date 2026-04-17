@@ -10,6 +10,7 @@ class DynamicQualityAdjuster {
   constructor() {
     this.fpsHistory = [];
     this.lastCheckTime = performance.now();
+    this.startedAt = this.lastCheckTime;
     this.adjustmentCooldown = false;
     this.isActive = true;
 
@@ -22,7 +23,12 @@ class DynamicQualityAdjuster {
       CHECK_INTERVAL: 1000, // Check every 1 second
       COOLDOWN_DURATION: 5000, // 5 second cooldown after change
       MIN_SAMPLES: 30, // Minimum samples before adjusting
+      STARTUP_GRACE_MS: 2500, // Ignore cold-start stalls while the page boots
+      GAMEPLAY_READY_GRACE_MS: 1200, // Give gameplay a moment to settle after briefing
     };
+
+    this.lastGameplayReadyAt = null;
+    this.wasGameplayReady = false;
 
     // Quality tier order (worst to best)
     this.tierOrder = ["ultra-low", "low", "medium", "high"];
@@ -56,6 +62,15 @@ class DynamicQualityAdjuster {
       }
 
       const now = performance.now();
+      this.updateGameplayReadyState(now);
+
+      if (this.shouldSuspendSampling(now)) {
+        this.resetSamplingWindow(now);
+        lastFrameTime = now;
+        requestAnimationFrame(measureFrame);
+        return;
+      }
+
       const delta = now - lastFrameTime;
       lastFrameTime = now;
 
@@ -80,12 +95,62 @@ class DynamicQualityAdjuster {
     requestAnimationFrame(measureFrame);
   }
 
+  updateGameplayReadyState(now = performance.now()) {
+    const gameplayReady =
+      window.GameRuntimeCoordinator?.isGameplayReady?.() === true;
+
+    if (gameplayReady && !this.wasGameplayReady) {
+      this.lastGameplayReadyAt = now;
+      this.resetSamplingWindow(now);
+    }
+
+    this.wasGameplayReady = gameplayReady;
+  }
+
+  shouldSuspendSampling(now = performance.now()) {
+    if (document.hidden) return true;
+
+    if (now - this.startedAt < this.config.STARTUP_GRACE_MS) {
+      return true;
+    }
+
+    const coordinator = window.GameRuntimeCoordinator;
+    const hasGameplayCoordinator = Boolean(coordinator?.isGameplayReady);
+    const gameplayReady = coordinator?.isGameplayReady?.() === true;
+
+    if (hasGameplayCoordinator && !gameplayReady) {
+      return true;
+    }
+
+    if (
+      gameplayReady &&
+      typeof this.lastGameplayReadyAt === "number" &&
+      now - this.lastGameplayReadyAt < this.config.GAMEPLAY_READY_GRACE_MS
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  resetSamplingWindow(now = performance.now()) {
+    this.fpsHistory = [];
+    this.lastCheckTime = now;
+  }
+
   /**
    * Check current FPS and adjust quality if needed
    */
   checkAndAdjust() {
     if (this.adjustmentCooldown) return;
     if (this.fpsHistory.length < this.config.MIN_SAMPLES) return;
+
+    const now = performance.now();
+    this.updateGameplayReadyState(now);
+    if (this.shouldSuspendSampling(now)) {
+      this.resetSamplingWindow(now);
+      return;
+    }
 
     const avgFps = this.getAverageFps();
     const minFps = this.getMinFps();

@@ -36,12 +36,84 @@ const swDebugMode = new URLSearchParams(window.location.search).get(
   "swDebug",
 );
 let serviceWorkerRegistrationStarted = false;
+let serviceWorkerRetryScheduled = false;
+let lastServiceWorkerFailure = null;
+
+function getServiceWorkerSupportState() {
+  const protocol = window.location?.protocol || "";
+  const isHttpLikeProtocol = protocol === "https:" || protocol === "http:";
+  const isSupported = "serviceWorker" in navigator;
+  const isSecure = window.isSecureContext !== false;
+  const isPrerendering = document.prerendering === true;
+  const isVisible = document.visibilityState !== "hidden";
+
+  return {
+    protocol,
+    isSupported,
+    isSecure,
+    isHttpLikeProtocol,
+    isPrerendering,
+    isVisible,
+    canRegisterNow:
+      isSupported && isSecure && isHttpLikeProtocol && !isPrerendering && isVisible,
+  };
+}
+
+function updateLastServiceWorkerFailure(reason, error = null) {
+  lastServiceWorkerFailure = {
+    reason,
+    name: error?.name || null,
+    message: error?.message || null,
+    protocol: window.location?.protocol || null,
+    readyState: document.readyState,
+    visibilityState: document.visibilityState,
+  };
+}
+
+function finalizeWithoutServiceWorker(reason, error = null) {
+  updateLastServiceWorkerFailure(reason, error);
+  dispatchPreload(60, "Service worker skipped.");
+  if (window.GameEvents?.PRELOAD_FAILED) {
+    document.dispatchEvent(new CustomEvent(window.GameEvents.PRELOAD_FAILED));
+  }
+}
+
+function queueServiceWorkerRetry(reason = "deferred") {
+  if (serviceWorkerRetryScheduled || serviceWorkerRegistrationStarted) {
+    return;
+  }
+
+  serviceWorkerRetryScheduled = true;
+  updateLastServiceWorkerFailure(reason);
+
+  const retry = () => {
+    if (serviceWorkerRegistrationStarted) {
+      return;
+    }
+
+    const supportState = getServiceWorkerSupportState();
+    if (!supportState.canRegisterNow) {
+      return;
+    }
+
+    serviceWorkerRetryScheduled = false;
+    window.removeEventListener("pageshow", retry);
+    document.removeEventListener("visibilitychange", retry);
+    document.removeEventListener("prerenderingchange", retry);
+    startServiceWorkerRegistration();
+  };
+
+  window.addEventListener("pageshow", retry, { once: true });
+  document.addEventListener("visibilitychange", retry);
+  document.addEventListener("prerenderingchange", retry, { once: true });
+}
 
 function isRefreshUpdateDiagnosticEnabled() {
   return swDebugMode === "refresh-update" || swDebugMode === "reset";
 }
 
 async function getDiagnosticState() {
+  const supportState = getServiceWorkerSupportState();
   const registration =
     "serviceWorker" in navigator
       ? await navigator.serviceWorker.getRegistration().catch(() => null)
@@ -54,11 +126,13 @@ async function getDiagnosticState() {
   return {
     enabled: isRefreshUpdateDiagnosticEnabled(),
     mode: swDebugMode,
+    supportState,
     controlled: Boolean(navigator.serviceWorker?.controller),
     active: Boolean(registration?.active),
     waiting: Boolean(registration?.waiting),
     installing: Boolean(registration?.installing),
     cacheNames,
+    lastFailure: lastServiceWorkerFailure,
   };
 }
 
@@ -141,6 +215,17 @@ function startServiceWorkerRegistration() {
     return;
   }
 
+  const supportState = getServiceWorkerSupportState();
+  if (!supportState.canRegisterNow) {
+    if (!supportState.isSupported || !supportState.isSecure || !supportState.isHttpLikeProtocol) {
+      finalizeWithoutServiceWorker("unsupported-context");
+      return;
+    }
+
+    queueServiceWorkerRetry("document-not-active");
+    return;
+  }
+
   serviceWorkerRegistrationStarted = true;
   registerServiceWorker();
 }
@@ -212,11 +297,20 @@ async function registerServiceWorker() {
       document.dispatchEvent(new CustomEvent(window.GameEvents.PRELOAD_READY));
     }
   } catch (error) {
-    console.error("❌ Service Worker registration failed:", error);
-    dispatchPreload(60, "Service worker skipped.");
-    if (window.GameEvents?.PRELOAD_FAILED) {
-      document.dispatchEvent(new CustomEvent(window.GameEvents.PRELOAD_FAILED));
+    if (error?.name === "InvalidStateError") {
+      console.warn("⚠️ Service worker registration skipped in invalid document state", error);
+      serviceWorkerRegistrationStarted = false;
+
+      const supportState = getServiceWorkerSupportState();
+      if (supportState.isSupported && supportState.isSecure && supportState.isHttpLikeProtocol) {
+        queueServiceWorkerRetry("invalid-document-state");
+        finalizeWithoutServiceWorker("invalid-document-state", error);
+        return;
+      }
     }
+
+    console.error("❌ Service Worker registration failed:", error);
+    finalizeWithoutServiceWorker("registration-failed", error);
   }
 }
 
