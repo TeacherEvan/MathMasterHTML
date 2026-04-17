@@ -85,11 +85,19 @@
         )
       ) {
         symbolObj.y += state.symbolFallSpeed;
-        symbolObj.element.style.translate = `${symbolObj.x}px ${symbolObj.y}px`;
+        SymbolRainHelpers.setSymbolPosition(
+          symbolObj.element,
+          symbolObj.x,
+          symbolObj.y,
+        );
       } else {
         symbolObj.y +=
           state.symbolFallSpeed * state.config.collisionSpeedFactor;
-        symbolObj.element.style.translate = `${symbolObj.x}px ${symbolObj.y}px`;
+        SymbolRainHelpers.setSymbolPosition(
+          symbolObj.element,
+          symbolObj.x,
+          symbolObj.y,
+        );
       }
 
       state.activeFallingSymbols[writeIndex++] = symbolObj;

@@ -64,14 +64,15 @@
         return [];
       }
 
-      return state.activeFallingSymbols
-        .filter(({ element }) => element?.isConnected)
-        .filter(({ element }) => !element.classList.contains("clicked"))
-        .map((symbol) => ({
-          symbol,
-          rect: symbol.element.getBoundingClientRect(),
+      return Array.from(
+        symbolRainContainer.querySelectorAll(".falling-symbol:not(.clicked)"),
+      )
+        .filter((element) => element?.isConnected)
+        .map((element) => ({
+          element,
+          rect: element.getBoundingClientRect(),
         }))
-        .filter(({ rect, symbol }) => {
+        .filter(({ rect, element }) => {
           if (rect.width <= 0 || rect.height <= 0) {
             return false;
           }
@@ -86,7 +87,7 @@
             return false;
           }
 
-          return neededSymbols.has(normalizeSymbol(symbol.element.textContent));
+          return neededSymbols.has(normalizeSymbol(element.textContent));
         })
         .sort((left, right) => right.rect.bottom - left.rect.bottom);
     };
@@ -117,14 +118,14 @@
       }
 
       const activeCandidate = candidates.find(
-        ({ symbol }) => symbol.element === activeKeyboardTarget,
+        ({ element }) => element === activeKeyboardTarget,
       );
 
       if (activeCandidate) {
-        return activeCandidate.symbol;
+        return activeCandidate;
       }
 
-      return setKeyboardTarget(candidates[0].symbol);
+      return setKeyboardTarget(candidates[0]);
     };
 
     const scheduleKeyboardSync = () => {
@@ -155,21 +156,21 @@
       }
 
       const currentIndex = candidates.findIndex(
-        ({ symbol }) => symbol.element === activeKeyboardTarget,
+        ({ element }) => element === activeKeyboardTarget,
       );
       const nextIndex =
         currentIndex === -1
           ? 0
           : (currentIndex + direction + candidates.length) % candidates.length;
 
-      return setKeyboardTarget(candidates[nextIndex].symbol);
+      return setKeyboardTarget(candidates[nextIndex]);
     };
 
     const triggerKeyboardTarget = () => {
       const target =
         getVisibleKeyboardCandidates().find(
-          ({ symbol }) => symbol.element === activeKeyboardTarget,
-        )?.symbol || cycleKeyboardTarget(1);
+          ({ element }) => element === activeKeyboardTarget,
+        ) || cycleKeyboardTarget(1);
 
       if (!target?.element) {
         updateKeyboardStatus("No matching Panel C symbol is available yet.");

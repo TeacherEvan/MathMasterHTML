@@ -23,6 +23,8 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
       this.activeVoices = 0;
       this.maxVoices = 8;
       this.lastCueTimes = new Map();
+      this._pendingCueNames = new Set();
+      this._unlockPromise = null;
       this._listenersBound = false;
       this._boundHandlePointerDown = this._handlePointerDown.bind(this);
       this._boundUnlockAudio = this._unlockAudio.bind(this);
@@ -131,6 +133,8 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
 
       this.context = null;
       this.lastCueTimes.clear();
+      this._pendingCueNames.clear();
+      this._unlockPromise = null;
       this.activeVoices = 0;
     }
 
@@ -157,11 +161,32 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
 
     _unlockAudio() {
       const context = this._ensureContext();
-      if (!context || context.state !== "suspended") return;
+      if (!context) {
+        return Promise.resolve(null);
+      }
 
-      context.resume().catch((error) => {
-        console.log("🔇 Audio resume deferred:", error?.message || error);
-      });
+      if (context.state === "running") {
+        return Promise.resolve(context);
+      }
+
+      if (typeof context.resume !== "function") {
+        return Promise.resolve(context);
+      }
+
+      if (!this._unlockPromise) {
+        this._unlockPromise = context
+          .resume()
+          .then(() => context)
+          .catch((error) => {
+            console.log("🔇 Audio resume deferred:", error?.message || error);
+            return null;
+          })
+          .finally(() => {
+            this._unlockPromise = null;
+          });
+      }
+
+      return this._unlockPromise;
     }
 
     _handlePointerDown(event) {
@@ -174,7 +199,7 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
         this.playStartButton?.();
         return;
       }
-      if (target.closest(".worm-container")) {
+      if (target.closest("#worm-container, .worm-container")) {
         this.playWormTap?.(target.closest(".purple-worm") ? "purple" : "green");
         return;
       }
@@ -198,7 +223,25 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
 
     _playCue(name, layers, minIntervalMs = 20) {
       const context = this._ensureContext();
-      if (!context || context.state !== "running" || !this.masterGain) return;
+      if (!context || !this.masterGain) return;
+
+      if (context.state !== "running") {
+        if (this._pendingCueNames.has(name)) {
+          return;
+        }
+
+        this._pendingCueNames.add(name);
+        this._unlockAudio().then((unlockedContext) => {
+          this._pendingCueNames.delete(name);
+          if (!unlockedContext || unlockedContext.state !== "running") {
+            return;
+          }
+
+          this._playCue(name, layers, minIntervalMs);
+        });
+        return;
+      }
+
       const nowMs = performance.now();
       const lastCueAt = this.lastCueTimes.get(name) ?? -Infinity;
       if (nowMs - lastCueAt < minIntervalMs) return;

@@ -3,6 +3,21 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
 
 (function attachSymbolRainSpawnHelpers() {
   const helpers = (window.SymbolRainHelpers = window.SymbolRainHelpers || {});
+  const supportsIndividualTranslate =
+    typeof CSS !== "undefined" &&
+    typeof CSS.supports === "function" &&
+    CSS.supports("translate", "1px 1px");
+
+  helpers.setSymbolPosition = function setSymbolPosition(symbol, x, y) {
+    if (supportsIndividualTranslate) {
+      symbol.style.translate = `${x}px ${y}px`;
+      symbol.style.transform = "";
+      return;
+    }
+
+    symbol.style.translate = "";
+    symbol.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+  };
 
   helpers.createFallingSymbol = function createFallingSymbol(
     {
@@ -13,7 +28,12 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
       symbolPool,
       lastSymbolSpawnTimestamp,
     },
-    { column, isInitialPopulation = false, forcedSymbol = null },
+    {
+      column,
+      isInitialPopulation = false,
+      forcedSymbol = null,
+      initialY = null,
+    },
   ) {
     if (activeFallingSymbols.length >= (config.maxActiveSymbols || 200)) {
       return null;
@@ -27,11 +47,13 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
     const horizontalOffset = (Math.random() - 0.5) * 40;
     const x =
       column * config.columnWidth + config.columnWidth / 2 + horizontalOffset;
-    const y = isInitialPopulation
-      ? Math.random() * symbolRainContainer.offsetHeight
-      : -50;
+    const y = Number.isFinite(initialY)
+      ? initialY
+      : isInitialPopulation
+        ? Math.random() * symbolRainContainer.offsetHeight
+        : -50;
 
-    symbol.style.translate = `${x}px ${y}px`;
+    helpers.setSymbolPosition(symbol, x, y);
 
     symbolRainContainer.appendChild(symbol);
 

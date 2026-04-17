@@ -222,7 +222,7 @@
   }
 
   function spawnNeededSymbols(state, currentTimestamp) {
-    if (!state.isMobileMode || state.columnCount <= 0) {
+    if (state.columnCount <= 0) {
       return;
     }
 
