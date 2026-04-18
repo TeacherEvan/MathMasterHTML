@@ -392,6 +392,34 @@ test.describe("Symbol rain mobile interactions", () => {
       timeout: 10000,
     });
 
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() => {
+            const panel = document.getElementById("panel-c");
+            const panelRect = panel?.getBoundingClientRect();
+            if (!panelRect) {
+              return 0;
+            }
+
+            return Array.from(
+              document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
+            ).filter((element) => {
+              const rect = element.getBoundingClientRect();
+              const intersectsPanel =
+                rect.bottom > panelRect.top &&
+                rect.top < panelRect.bottom &&
+                rect.right > panelRect.left &&
+                rect.left < panelRect.right;
+              const reachesCatchZone =
+                rect.top >= panelRect.top + panelRect.height * 0.7;
+              return intersectsPanel && reachesCatchZone;
+            }).length;
+          }),
+        { timeout: 8000 },
+      )
+      .toBeGreaterThan(0);
+
     await context.close();
   });
 
