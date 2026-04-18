@@ -6,6 +6,8 @@ import {
   waitForGameplayInputReady,
 } from "./utils/onboarding-runtime.js";
 
+const COMPACT_TRAY_MAX_TOP = 80;
+
 async function pressPowerUp(page, type) {
   await page
     .locator(`[data-testid="powerup-${type}"]`)
@@ -482,7 +484,7 @@ test.describe("Power-Up Compact Layout", () => {
     await expect
       .poll(
         async () =>
-          page.evaluate(() => {
+          page.evaluate((maxTop) => {
             const display = document.getElementById("power-up-display");
             const panelB = document.getElementById("panel-b");
             const controls = document.querySelector(".panel-b-controls");
@@ -499,9 +501,9 @@ test.describe("Power-Up Compact Layout", () => {
               rect.left >= panelRect.left &&
               rect.right <= panelRect.right &&
               rect.bottom <= controlsRect.top &&
-              rect.top < 80
+              rect.top < maxTop
             );
-          }),
+          }, COMPACT_TRAY_MAX_TOP),
         { timeout: 5000 },
       )
       .toBe(true);

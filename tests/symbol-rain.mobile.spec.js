@@ -5,6 +5,8 @@ import {
   stopEvanHelpIfActive,
 } from "./utils/onboarding-runtime.js";
 
+const PANEL_C_CATCH_ZONE_THRESHOLD = 0.7;
+
 test.use({
   ...devices["Pixel 7"],
   viewport: { width: 915, height: 412 },
@@ -395,7 +397,7 @@ test.describe("Symbol rain mobile interactions", () => {
     await expect
       .poll(
         async () =>
-          page.evaluate(() => {
+          page.evaluate((catchZoneThreshold) => {
             const panel = document.getElementById("panel-c");
             const panelRect = panel?.getBoundingClientRect();
             if (!panelRect) {
@@ -412,10 +414,11 @@ test.describe("Symbol rain mobile interactions", () => {
                 rect.right > panelRect.left &&
                 rect.left < panelRect.right;
               const reachesCatchZone =
-                rect.top >= panelRect.top + panelRect.height * 0.7;
+                rect.top >=
+                panelRect.top + panelRect.height * catchZoneThreshold;
               return intersectsPanel && reachesCatchZone;
             }).length;
-          }),
+          }, PANEL_C_CATCH_ZONE_THRESHOLD),
         { timeout: 8000 },
       )
       .toBeGreaterThan(0);
