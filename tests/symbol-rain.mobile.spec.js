@@ -5,6 +5,8 @@ import {
   stopEvanHelpIfActive,
 } from "./utils/onboarding-runtime.js";
 
+const PANEL_C_CATCH_ZONE_THRESHOLD = 0.7;
+
 test.use({
   ...devices["Pixel 7"],
   viewport: { width: 915, height: 412 },
@@ -391,6 +393,35 @@ test.describe("Symbol rain mobile interactions", () => {
       state: "visible",
       timeout: 10000,
     });
+
+    await expect
+      .poll(
+        async () =>
+          page.evaluate((catchZoneThreshold) => {
+            const panel = document.getElementById("panel-c");
+            const panelRect = panel?.getBoundingClientRect();
+            if (!panelRect) {
+              return 0;
+            }
+
+            return Array.from(
+              document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
+            ).filter((element) => {
+              const rect = element.getBoundingClientRect();
+              const intersectsPanel =
+                rect.bottom > panelRect.top &&
+                rect.top < panelRect.bottom &&
+                rect.right > panelRect.left &&
+                rect.left < panelRect.right;
+              const reachesCatchZone =
+                rect.top >=
+                panelRect.top + panelRect.height * catchZoneThreshold;
+              return intersectsPanel && reachesCatchZone;
+            }).length;
+          }, PANEL_C_CATCH_ZONE_THRESHOLD),
+        { timeout: 8000 },
+      )
+      .toBeGreaterThan(0);
 
     await context.close();
   });

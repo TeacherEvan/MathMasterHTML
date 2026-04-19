@@ -60,6 +60,7 @@
       const symbolObj = state.activeFallingSymbols[readIndex];
       const isOffScreen = symbolObj.y > containerHeight + 50;
       const isStuckAtBottom =
+        !state.isMobileMode &&
         symbolObj.y > containerHeight - 100 &&
         state.activeFallingSymbols.length > 30;
       const isTouching = state.symbolsToRemove.has(symbolObj);

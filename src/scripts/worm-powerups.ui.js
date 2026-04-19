@@ -100,6 +100,13 @@
       this._displayLayoutHandler = () => this.syncDisplayLayout();
       window.addEventListener("resize", this._displayLayoutHandler);
       window.addEventListener("orientationchange", this._displayLayoutHandler);
+      document.addEventListener("fullscreenchange", this._displayLayoutHandler);
+      const sharedResizeObserver =
+        window.__ensureSharedResizeObserver?.() || window.SharedResizeObserver;
+      sharedResizeObserver?.subscribe?.(this._displayLayoutHandler, {
+        immediate: true,
+        source: "worm-powerups-ui",
+      });
     }
   };
 

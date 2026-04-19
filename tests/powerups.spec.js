@@ -6,6 +6,8 @@ import {
   waitForGameplayInputReady,
 } from "./utils/onboarding-runtime.js";
 
+const COMPACT_TRAY_MAX_TOP = 80;
+
 async function pressPowerUp(page, type) {
   await page
     .locator(`[data-testid="powerup-${type}"]`)
@@ -462,6 +464,49 @@ test.describe("Power-Up Compact Layout", () => {
     expect(layout.centerOffset).toBeLessThan(20);
     expect(layout.computedTop).not.toBe("auto");
     expect(layout.distanceToTop).toBeLessThan(layout.distanceToBottom);
+  });
+
+  test("re-anchors the power-up tray after fullscreen lifecycle changes", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      const display = document.getElementById("power-up-display");
+      if (!display) {
+        return;
+      }
+
+      display.dataset.dragged = "false";
+      display.style.left = "8px";
+      display.style.top = `${Math.round(window.innerHeight * 0.6)}px`;
+      document.dispatchEvent(new Event("fullscreenchange"));
+    });
+
+    await expect
+      .poll(
+        async () =>
+          page.evaluate((maxTop) => {
+            const display = document.getElementById("power-up-display");
+            const panelB = document.getElementById("panel-b");
+            const controls = document.querySelector(".panel-b-controls");
+
+            if (!display || !panelB || !controls) {
+              return false;
+            }
+
+            const rect = display.getBoundingClientRect();
+            const panelRect = panelB.getBoundingClientRect();
+            const controlsRect = controls.getBoundingClientRect();
+
+            return (
+              rect.left >= panelRect.left &&
+              rect.right <= panelRect.right &&
+              rect.bottom <= controlsRect.top &&
+              rect.top < maxTop
+            );
+          }, COMPACT_TRAY_MAX_TOP),
+        { timeout: 5000 },
+      )
+      .toBe(true);
   });
 });
 
