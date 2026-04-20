@@ -1,6 +1,21 @@
 # JOBCARD
 
-## Latest update (2026-04-17)
+## Latest update (2026-04-20)
+
+- Fixed mobile automation briefing dismissal so Playwright phone emulation can start gameplay and use the back button even when the browser only delivers trusted `pointerup` events to fixed controls.
+- Narrowed the automation-specific control handling in `src/scripts/game-page.js` so live users stay on the existing click/fullscreen/orientation path while Playwright mobile lanes use the safer automation fallback.
+- Reworked compact portrait automation Panel A spacing so score, problem, and lock assertions no longer rely on the live rotate-gated fixed offsets during visible portrait gameplay.
+- Moved automation portrait top/bottom fixed controls out of Panel B/console hit zones so exit-guard coverage can click the real back button instead of colliding with gameplay controls.
+- Restored inactive level-select CTA button visibility on desktop by removing `.level-button` from the inactive-card hidden rule.
+- Removed the delayed `DynamicQualityAdjuster` bootstrap race and switched to a singleton DOM-ready bootstrap so lifecycle tests can observe `window.dynamicQualityAdjuster` deterministically.
+- Hardened `tests/ui-boundary.spec.js` to navigate directly to the active runtime page with `preload=off` and reuse the shared briefing-dismiss helper instead of waiting on the redirect/preload-gated start button.
+- Serialized the local mixed `iphone-13` + `tests/perf-scenarios.spec.js` Playwright lane in `playwright.config.js` to keep focused mobile validation stable without changing broader repo parallelism.
+- Processed review feedback by removing the warmed same-page catastrophic perf confirmation retry from `tests/perf-scenarios.spec.js`; perf failures are again evaluated from a single fresh run.
+- Kept the shared root redirect entrypoints query/hash-safe by routing `game.html`, `index.html`, and `level-select.html` through `src/scripts/redirect-entrypoint.js`, then added focused Playwright coverage for that contract.
+- Restored `power-up-display` boundary-manager mobility so overlap detection can still auto-reposition the tray instead of only logging collisions.
+- Focused validation passed with `npx playwright test tests/evan-helper.worms.purple.spec.js tests/gameplay-exit-guard.spec.js tests/ui-boundary.spec.js tests/perf-scenarios.spec.js --project=pixel-7 --project=iphone-13 --grep "Evan does not directly click \.purple-worm elements|purple worm with devil inventory does not block symbol solving|back button is blocked while gameplay is active and unresolved|back button is restored after problemCompleted fires|Problem container should not overlap with score display|Lock display should not overlap with problem container|Problem and lock should stay within vertical overlap tolerance|idle scenario captures a stable baseline" --reporter=line`, `npm run verify`, and `npm run typecheck`.
+
+## Previous update (2026-04-17)
 
 - Fixed Panel C keyboard targeting so focus now reacquires a live matching symbol as soon as one enters the panel instead of waiting for a manual refocus or arrow-cycle.
 - Prioritized guaranteed Panel C spawns around the current hidden solution symbols so gameplay keeps circulating live matching targets instead of relying only on global alphabet recirculation.

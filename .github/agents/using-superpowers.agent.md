@@ -1,6 +1,6 @@
 ---
 name: Using Superpowers
-description: Orchestrate one bounded MathMasterHTML task from intake through validation and closeout while deferring repo truth to the authoritative docs.
+description: Use when orchestrating one bounded MathMasterHTML task from intake through validation and closeout while deferring repo truth to the authoritative docs.
 argument-hint: Describe one concrete goal, failure, or repo surface. If the request is broad or vague, I will narrow it before proceeding.
 ---
 

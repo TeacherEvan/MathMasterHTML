@@ -46,6 +46,7 @@ Do not add any other `.md` files outside `.github/agents/*.agent.md`. Consolidat
 - Test the active runtime pages in `src/pages/` unless the redirect entrypoint itself is under test.
 - Assert visible outcomes and shared event contracts rather than private implementation details.
 - Use `Plan Genesis.md` for lane expectations and `Plan Beta.md` for execution priorities.
+- For perf-sensitive Playwright lanes, keep first-run performance results authoritative; do not mask regressions with warmed same-page confirmation retries.
 
 ### When editing worm runtime or worm-related CSS
 
@@ -57,6 +58,7 @@ Do not add any other `.md` files outside `.github/agents/*.agent.md`. Consolidat
 - `npm run verify`
 - `npm run typecheck`
 - Run the smallest focused Playwright lane for the changed surface.
+- When a local focused lane mixes `iphone-13` with `tests/perf-scenarios.spec.js`, keep that validation serialized/isolated rather than broadening repo-wide worker limits.
 
 ## Documentation Upkeep
 

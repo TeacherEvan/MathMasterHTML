@@ -17,27 +17,20 @@ input:focus:not(:focus-visible),
 
 /* FULLSCREEN FIX: Ensure black background in fullscreen mode across all browsers */
 /* This prevents the white border that appears around the viewport in fullscreen */
-html:fullscreen,
-html:-webkit-full-screen,
-html:-moz-full-screen,
-html:-ms-fullscreen {
+html:fullscreen {
     background: #000 !important;
     margin: 0 !important;
     padding: 0 !important;
 }
 
-body:fullscreen,
-body:-webkit-full-screen,
-body:-moz-full-screen,
-body:-ms-fullscreen {
+body:fullscreen {
     background: #000 !important;
     margin: 0 !important;
     padding: 0 !important;
 }
 
 /* Fullscreen backdrop (the area behind the fullscreen element) */
-::backdrop,
-::-webkit-backdrop {
+::backdrop {
     background: #000 !important;
 }
 
@@ -240,6 +233,16 @@ body.automation {
 }
 
 @keyframes symbolClick {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
 
 /* Mobile optimizations moved to game-responsive.css */
 /* Modal styles moved to game-modals.css */
