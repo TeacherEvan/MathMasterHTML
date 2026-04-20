@@ -32,6 +32,31 @@ function dispatchAppUpdateAvailable(registration, source = "updatefound") {
   );
 }
 
+const APP_CACHE_PREFIXES = ["math-master-static-", "math-master-runtime-"];
+
+function isMathMasterCacheName(cacheName) {
+  return APP_CACHE_PREFIXES.some((prefix) => cacheName.startsWith(prefix));
+}
+
+async function clearMathMasterCaches() {
+  if (!window.caches?.keys || !window.caches?.delete) {
+    return false;
+  }
+
+  const cacheNames = await window.caches.keys().catch(() => []);
+  const deletions = await Promise.all(
+    cacheNames.map((cacheName) => {
+      if (!isMathMasterCacheName(cacheName)) {
+        return false;
+      }
+
+      return window.caches.delete(cacheName).catch(() => false);
+    }),
+  );
+
+  return deletions.some(Boolean);
+}
+
 const swDebugMode = new URLSearchParams(window.location.search).get(
   "swDebug",
 );
@@ -339,13 +364,21 @@ function activateWaitingWorker(registration) {
 }
 
 window.clearServiceWorkerCache = async function ({ silent = false } = {}) {
+  const cacheCleared = await clearMathMasterCaches();
+
   if ("serviceWorker" in navigator) {
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration && registration.active) {
       const messageChannel = new MessageChannel();
 
       const result = new Promise((resolve) => {
+        const timeoutId = window.setTimeout(() => {
+          messageChannel.port1.close();
+          resolve(false);
+        }, 3000);
+
         messageChannel.port1.onmessage = (event) => {
+          window.clearTimeout(timeoutId);
           messageChannel.port1.close();
           resolve(Boolean(event.data.success));
         };
@@ -358,7 +391,7 @@ window.clearServiceWorkerCache = async function ({ silent = false } = {}) {
         [messageChannel.port2],
       );
 
-      const success = await result;
+      const success = (await result) || cacheCleared;
       if (success) {
         console.log("✅ Service Worker cache cleared");
         if (!silent && window.UXEnhancements && window.UXEnhancements.toast) {
@@ -370,7 +403,7 @@ window.clearServiceWorkerCache = async function ({ silent = false } = {}) {
     }
   }
 
-  return false;
+  return cacheCleared;
 };
 
 console.log("📱 Service Worker registration script loaded");

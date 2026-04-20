@@ -49,8 +49,13 @@ const ProblemManager = {
       // Fallback problem
       this._problems = [
         {
-          problem: "4x = 24",
-          steps: ["x = 6"],
+          problem: "1x + 1 + 1 + 1 = 1",
+          steps: [
+            "1x + 1 + 1 + 1 = 1",
+            "1x + 3 = 1",
+            "1x = 1 - 3",
+            "x = -2",
+          ],
           currentStep: 0,
           currentSymbol: 0,
         },

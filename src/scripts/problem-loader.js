@@ -103,8 +103,13 @@ class ProblemLoader {
   getFallbackProblem() {
     return {
       number: 1,
-      problem: "4x = 24",
-      steps: ["4x = 24", "x = 24 ÷ 4", "x = 6"],
+      problem: "1x + 1 + 1 + 1 = 1",
+      steps: [
+        "1x + 1 + 1 + 1 = 1",
+        "1x + 3 = 1",
+        "1x = 1 - 3",
+        "x = -2",
+      ],
       currentStep: 0,
       currentSymbol: 0,
     };

@@ -10,11 +10,12 @@
       : 8000;
   let briefingFocusCleanup = null;
   let briefingStartRequested = false;
+  let pageInitialized = false;
 
   function canLeaveActiveGameplay() {
     const runtimeState = window.GameRuntimeCoordinator?.getState?.();
     if (!runtimeState) {
-      return true;
+      return !document.body.classList.contains("gameplay-active-unresolved");
     }
 
     const activelyPlaying =
@@ -22,7 +23,9 @@
       runtimeState.gameplayReady === true;
 
     const completed = document.body.classList.contains("problem-completed");
-    return !activelyPlaying || completed;
+    const startingGameplay =
+      document.body.classList.contains("gameplay-active-unresolved");
+    return (!activelyPlaying && !startingGameplay) || completed;
   }
 
   function syncBackButtonState() {
@@ -119,14 +122,25 @@
     if (!modal || !dialog || !startButton) return;
 
     function isRotationStillRequired() {
-      if (document.body.classList.contains("automation") || navigator.webdriver) {
-        return false;
+      const currentResolution = window.displayManager?.getCurrentResolution?.();
+      const viewportLooksPortrait =
+        window.innerHeight > window.innerWidth ||
+        document.documentElement.clientHeight > document.documentElement.clientWidth;
+
+      if (currentResolution) {
+        if (!currentResolution.shouldShowRotationOverlay) {
+          return false;
+        }
+
+        return (
+          document.body.classList.contains("viewport-rotate-required") &&
+          viewportLooksPortrait
+        );
       }
 
-      return Boolean(
-        window.displayManager?.getCurrentResolution?.()
-          ?.shouldShowRotationOverlay ??
-          document.body.classList.contains("viewport-rotate-required"),
+      return (
+        document.body.classList.contains("viewport-rotate-required") &&
+        viewportLooksPortrait
       );
     }
 
@@ -155,6 +169,7 @@
       pendingRotationDismissal = false;
       releaseBriefingFocus({ focusSelector: "#help-button" });
       notifyBriefingDismissed();
+      syncBackButtonState();
     }
 
     function showModal() {
@@ -194,6 +209,7 @@
       }
 
       briefingStartRequested = true;
+      document.body.classList.add("gameplay-active-unresolved");
       enterFullscreen();
       window.displayManager?.requestLandscapeOrientation?.();
       const dismissDelayMs = navigator.webdriver ? 0 : 300;
@@ -216,6 +232,7 @@
     if (navigator.webdriver) {
       startButton.addEventListener("pointerup", onStartClick);
     }
+
     document.addEventListener(
       GE?.DISPLAY_RESOLUTION_CHANGED,
       handleViewportResolutionChange,
@@ -252,12 +269,27 @@
 
   document.addEventListener(window.GameEvents.PROBLEM_COMPLETED, () => {
     document.body.classList.add("problem-completed");
+    document.body.classList.remove("gameplay-active-unresolved");
     syncBackButtonState();
   });
 
-  document.addEventListener("DOMContentLoaded", () => {
+  function initializeGamePage() {
+    if (pageInitialized) {
+      return;
+    }
+
+    pageInitialized = true;
     document.body.classList.remove("problem-completed");
+    document.body.classList.remove("gameplay-active-unresolved");
     syncBackButtonState();
     setupHowToPlayModal();
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeGamePage, {
+      once: true,
+    });
+  } else {
+    initializeGamePage();
+  }
 })();
