@@ -253,6 +253,25 @@ async function getVisiblePanelCSymbols(page) {
   });
 }
 
+async function getActivePanelCSymbols(page) {
+  return page.evaluate(() => {
+    const state = window.__symbolRainState;
+    if (!state?.activeFallingSymbols?.length) {
+      return [];
+    }
+
+    return Array.from(
+      new Set(
+        state.activeFallingSymbols
+          .filter((symbolObj) => symbolObj?.element?.isConnected)
+          .filter((symbolObj) => !symbolObj.element.classList.contains("clicked"))
+          .map((symbolObj) => String(symbolObj.symbol || "").trim())
+          .filter(Boolean),
+      ),
+    );
+  });
+}
+
 test.describe("Symbol rain live targets", () => {
   const chromiumProjects = new Set(["chromium", "qa-matrix-chromium"]);
   const soakProjects = new Set(["qa-matrix-chromium", "qa-soak-webkit"]);
@@ -393,13 +412,16 @@ test.describe("Symbol rain live targets", () => {
     const soakDeadline = Date.now() + 60000;
     let iterationCount = 0;
     const observedVisibleSymbols = new Set();
+    const useActiveSymbolState = testInfo.project.name === "qa-soak-webkit";
 
     while (Date.now() < soakDeadline) {
       const windowDeadline = Math.min(Date.now() + 5000, soakDeadline);
       const visibleThisWindow = new Set();
 
       while (Date.now() < windowDeadline) {
-        const currentVisibleSymbols = await getVisiblePanelCSymbols(page);
+        const currentVisibleSymbols = useActiveSymbolState
+          ? await getActivePanelCSymbols(page)
+          : await getVisiblePanelCSymbols(page);
         currentVisibleSymbols.forEach((symbol) => {
           visibleThisWindow.add(symbol);
           observedVisibleSymbols.add(symbol);
