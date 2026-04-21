@@ -11,6 +11,7 @@ const gameModules = [
   "/src/scripts/game-symbol-handler.js",
   "/src/scripts/game-state-manager.js",
 ];
+const GAME_MODULE_VERSION = "20260421-panel-c-integrity-fix-1";
 
 let loadedModules = 0;
 const startupPreloadMessageEl = document.getElementById("startup-preload-message");
@@ -29,7 +30,8 @@ function getModuleLabel(src) {
 function loadModule(src) {
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = src;
+    const separator = src.includes("?") ? "&" : "?";
+    script.src = `${src}${separator}v=${GAME_MODULE_VERSION}`;
     script.onload = () => {
       loadedModules++;
       console.log(`✅ Loaded ${src} (${loadedModules}/${gameModules.length})`);
