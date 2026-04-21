@@ -55,6 +55,11 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
     {
+      name: "qa-soak-webkit",
+      testMatch: ["symbol-rain.live-targets.spec.js"],
+      use: { ...devices["Desktop Safari"] },
+    },
+    {
       name: "qa-matrix-iphone-13",
       use: {
         ...devices["iPhone 13"],

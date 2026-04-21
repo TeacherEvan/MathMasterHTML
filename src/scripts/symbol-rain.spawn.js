@@ -210,10 +210,9 @@
       neededSymbols.map((symbolChar) => normalizeSymbol(symbolChar)),
     );
     const hasVisibleRain = getVisibleActiveSymbolCount(state) > 0;
-    const priorityInterval = Math.min(
-      hasVisibleRain ? state.config.guaranteedSpawnInterval : 0,
-      600,
-    );
+    const priorityInterval = hasVisibleRain
+      ? state.config.guaranteedSpawnInterval
+      : 0;
 
     neededSymbols.forEach((symbolChar) => {
       const lastSpawnTimestamp = state.lastSymbolSpawnTimestamp[symbolChar] || 0;

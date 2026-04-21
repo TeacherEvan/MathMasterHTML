@@ -150,12 +150,118 @@ async function clickLiveMatchingSymbol(page, symbolText, timeoutMs = 5000) {
   return false;
 }
 
+async function hasVisibleMatchingSymbol(page, symbolText) {
+  const normalizedTarget = normalizeSymbolText(symbolText);
+
+  return page.evaluate((targetSymbol) => {
+    const normalize = (value) => {
+      const normalized = String(value || "").trim();
+      return normalized === "x" ? "X" : normalized;
+    };
+
+    return Array.from(
+      document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
+    ).some((element) => {
+      if (normalize(element.textContent) !== targetSymbol) {
+        return false;
+      }
+
+      const rect = element.getBoundingClientRect();
+      const panel = element.closest("#panel-c");
+      const panelRect = panel?.getBoundingClientRect();
+      if (!panelRect) {
+        return false;
+      }
+
+      return (
+        rect.bottom > panelRect.top &&
+        rect.top < panelRect.bottom &&
+        rect.right > panelRect.left &&
+        rect.left < panelRect.right
+      );
+    });
+  }, normalizedTarget);
+}
+
+async function getVisibleMatchingSymbols(page, symbolTexts) {
+  const normalizedTargets = [...new Set((Array.isArray(symbolTexts) ? symbolTexts : [symbolTexts])
+    .filter(Boolean)
+    .map((symbol) => normalizeSymbolText(symbol)))];
+
+  return page.evaluate((targetSymbols) => {
+    const normalize = (value) => {
+      const normalized = String(value || "").trim();
+      return normalized === "x" ? "X" : normalized;
+    };
+
+    const visibleSymbols = new Set();
+
+    Array.from(document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"))
+      .forEach((element) => {
+        const symbolText = normalize(element.textContent);
+        if (!targetSymbols.includes(symbolText)) {
+          return;
+        }
+
+        const rect = element.getBoundingClientRect();
+        const panel = element.closest("#panel-c");
+        const panelRect = panel?.getBoundingClientRect();
+        if (!panelRect) {
+          return;
+        }
+
+        const intersectsPanel =
+          rect.bottom > panelRect.top &&
+          rect.top < panelRect.bottom &&
+          rect.right > panelRect.left &&
+          rect.left < panelRect.right;
+
+        if (intersectsPanel) {
+          visibleSymbols.add(symbolText);
+        }
+      });
+
+    return Array.from(visibleSymbols);
+  }, normalizedTargets);
+}
+
+async function getVisiblePanelCSymbols(page) {
+  return page.evaluate(() => {
+    const symbols = new Set();
+
+    Array.from(document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"))
+      .forEach((element) => {
+        const rect = element.getBoundingClientRect();
+        const panel = element.closest("#panel-c");
+        const panelRect = panel?.getBoundingClientRect();
+        if (!panelRect) {
+          return;
+        }
+
+        const intersectsPanel =
+          rect.bottom > panelRect.top &&
+          rect.top < panelRect.bottom &&
+          rect.right > panelRect.left &&
+          rect.left < panelRect.right;
+
+        if (intersectsPanel) {
+          symbols.add(String(element.textContent || "").trim());
+        }
+      });
+
+    return Array.from(symbols).filter(Boolean);
+  });
+}
+
 test.describe("Symbol rain live targets", () => {
+  const chromiumProjects = new Set(["chromium", "qa-matrix-chromium"]);
+  const soakProjects = new Set(["qa-matrix-chromium", "qa-soak-webkit"]);
+
   test("keeps the active hidden symbol raining as a live Panel C target on desktop gameplay", async ({
     page,
   }, testInfo) => {
     test.skip(
-      testInfo.project.name !== "chromium",
+      !chromiumProjects.has(testInfo.project.name),
       "This desktop contract only runs on the Chromium gameplay project.",
     );
 
@@ -203,11 +309,118 @@ test.describe("Symbol rain live targets", () => {
     }
   });
 
+  test("re-spawns a missing Panel C target on the 5 second guarantee interval", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !chromiumProjects.has(testInfo.project.name),
+      "This desktop contract only runs on the Chromium gameplay project.",
+    );
+
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    const before = await getCurrentStepSnapshot(page);
+    const targetSymbol = before.hiddenSymbols[0];
+
+    expect(targetSymbol).toBeTruthy();
+
+    await page.evaluate((symbolText) => {
+      const normalize = (value) => {
+        const normalized = String(value || "").trim();
+        return normalized === "x" ? "X" : normalized;
+      };
+
+      const state = window.__symbolRainState;
+      const helpers = window.SymbolRainHelpers;
+
+      if (!state || !helpers?.cleanupSymbolObject) {
+        return;
+      }
+
+      const normalizedTarget = normalize(symbolText);
+
+      for (
+        let index = state.activeFallingSymbols.length - 1;
+        index >= 0;
+        index -= 1
+      ) {
+        const symbolObj = state.activeFallingSymbols[index];
+        if (normalize(symbolObj?.symbol) !== normalizedTarget) {
+          continue;
+        }
+
+        state.activeFallingSymbols.splice(index, 1);
+        helpers.cleanupSymbolObject({
+          symbolObj,
+          activeFaceReveals: state.activeFaceReveals,
+          symbolPool: state.symbolPool,
+          spatialGrid: state.spatialGrid,
+        });
+      }
+
+      state.config.spawnRate = 0;
+      state.config.burstSpawnRate = 0;
+
+      const currentTime = Date.now();
+      state.lastSymbolSpawnTimestamp[symbolText] = currentTime;
+      state.lastSymbolSpawnTimestamp.X = currentTime;
+      state.lastSymbolSpawnTimestamp.x = currentTime;
+    }, targetSymbol);
+
+    await page.waitForTimeout(1000);
+
+    await expect
+      .poll(async () => hasVisibleMatchingSymbol(page, targetSymbol), {
+        timeout: 10000,
+      })
+      .toBe(true);
+  });
+
+  test("keeps Panel C targets flowing for 60 seconds @soak", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !soakProjects.has(testInfo.project.name),
+      "This soak contract only runs on the Chromium and WebKit gameplay projects.",
+    );
+
+    test.setTimeout(90000);
+
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    const soakDeadline = Date.now() + 60000;
+    let iterationCount = 0;
+    const observedVisibleSymbols = new Set();
+
+    while (Date.now() < soakDeadline) {
+      const windowDeadline = Math.min(Date.now() + 5000, soakDeadline);
+      const visibleThisWindow = new Set();
+
+      while (Date.now() < windowDeadline) {
+        const currentVisibleSymbols = await getVisiblePanelCSymbols(page);
+        currentVisibleSymbols.forEach((symbol) => {
+          visibleThisWindow.add(symbol);
+          observedVisibleSymbols.add(symbol);
+        });
+
+        await page.waitForTimeout(250);
+      }
+      iterationCount += 1;
+
+      expect(visibleThisWindow.size).toBeGreaterThan(0);
+    }
+
+    expect(observedVisibleSymbols.size).toBeGreaterThan(1);
+    expect(iterationCount).toBeGreaterThan(0);
+  });
+
   test("re-syncs cached container height after a Panel C-only reflow", async ({
     page,
   }, testInfo) => {
     test.skip(
-      testInfo.project.name !== "chromium",
+      !chromiumProjects.has(testInfo.project.name),
       "This desktop contract only runs on the Chromium gameplay project.",
     );
 
