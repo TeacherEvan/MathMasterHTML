@@ -25,6 +25,33 @@ function createInitScriptRunKey(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+async function clearRuntimeBrowserState(page) {
+  await page.evaluate(async () => {
+    try {
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker
+          .getRegistrations()
+          .catch(() => []);
+
+        await Promise.all(
+          registrations.map((registration) => registration.unregister()),
+        );
+      }
+    } catch {
+      // Ignore browsers or test harnesses that block SW inspection here.
+    }
+
+    try {
+      if ("caches" in window) {
+        const cacheKeys = await caches.keys().catch(() => []);
+        await Promise.all(cacheKeys.map((cacheKey) => caches.delete(cacheKey)));
+      }
+    } catch {
+      // Ignore cache APIs that are unavailable in a given browser context.
+    }
+  });
+}
+
 async function gotoRuntimeWithRetry(page, url) {
   let lastError = null;
 
@@ -187,6 +214,7 @@ export async function dismissBriefingAndWaitForInteractiveGameplay(page) {
 }
 
 export async function gotoGameRuntime(page, search = "") {
+  await clearRuntimeBrowserState(page);
   await gotoRuntimeWithRetry(page, getRuntimeUrl(search));
   await waitForOnboardingRuntime(page);
 }

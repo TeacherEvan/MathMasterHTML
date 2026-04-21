@@ -60,6 +60,11 @@ export default defineConfig({
       use: { ...devices["Desktop Safari"] },
     },
     {
+      name: "qa-soak-firefox",
+      testMatch: ["symbol-rain.live-targets.spec.js"],
+      use: { ...devices["Desktop Firefox"] },
+    },
+    {
       name: "qa-matrix-iphone-13",
       use: {
         ...devices["iPhone 13"],

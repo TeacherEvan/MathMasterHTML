@@ -3,7 +3,7 @@
 ## Latest update (2026-04-22)
 
 - Added a 60-second `@soak` Symbol Rain lane that checks every tracked Panel C symbol in 5-second windows across the full minute.
-- Wired the new lane into `npm run test:competition:soak:symbol-rain` so it can be run independently under the Chromium and WebKit competition projects.
+- Wired the new lane into `npm run test:competition:soak:symbol-rain` so it can be run independently under the Chromium, WebKit, and Firefox competition projects.
 - Kept the short 5-second respawn regression alongside the soak lane so the fast contract and long-run contract stay separate.
 
 ## Latest update (2026-04-21 18:21 +07)

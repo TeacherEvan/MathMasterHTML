@@ -274,7 +274,7 @@ async function getActivePanelCSymbols(page) {
 
 test.describe("Symbol rain live targets", () => {
   const chromiumProjects = new Set(["chromium", "qa-matrix-chromium"]);
-  const soakProjects = new Set(["qa-matrix-chromium", "qa-soak-webkit"]);
+  const soakProjects = new Set(["qa-matrix-chromium", "qa-soak-webkit", "qa-soak-firefox"]);
 
   test("keeps the active hidden symbol raining as a live Panel C target on desktop gameplay", async ({
     page,
@@ -412,7 +412,7 @@ test.describe("Symbol rain live targets", () => {
     const soakDeadline = Date.now() + 60000;
     let iterationCount = 0;
     const observedVisibleSymbols = new Set();
-    const useActiveSymbolState = testInfo.project.name === "qa-soak-webkit";
+    const useActiveSymbolState = testInfo.project.name !== "qa-matrix-chromium";
 
     while (Date.now() < soakDeadline) {
       const windowDeadline = Math.min(Date.now() + 5000, soakDeadline);

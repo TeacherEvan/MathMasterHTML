@@ -59,7 +59,7 @@ Do not add any other `.md` files outside `.github/agents/*.agent.md`. Consolidat
 - `npm run verify`
 - `npm run typecheck`
 - Run the smallest focused Playwright lane for the changed surface.
-- For Symbol Rain flow regressions, run `npm run test:competition:soak:symbol-rain` for the dedicated 60-second Chromium and WebKit soak lane.
+- For Symbol Rain flow regressions, run `npm run test:competition:soak:symbol-rain` for the dedicated 60-second Chromium, WebKit, and Firefox soak lane.
 - When a local focused lane mixes `iphone-13` with `tests/perf-scenarios.spec.js`, keep that validation serialized/isolated rather than broadening repo-wide worker limits.
 
 ## Documentation Upkeep
