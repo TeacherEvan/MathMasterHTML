@@ -22,39 +22,18 @@
 
   function hasVisibleLiveSymbol(state, targetSymbol) {
     const normalizedTarget = normalizeSymbol(targetSymbol);
-    const minVisibleY = -1 * (state.config.symbolHeight || 42);
-    const maxVisibleY = state.cachedContainerHeight + (state.config.symbolHeight || 42);
 
     return state.activeFallingSymbols.some((symbolObj) => {
-      if (!symbolObj?.element?.isConnected) {
-        return false;
-      }
-
-      if (symbolObj.element.classList.contains("clicked")) {
-        return false;
-      }
-
       if (normalizeSymbol(symbolObj.symbol) !== normalizedTarget) {
         return false;
       }
 
-      return symbolObj.y >= minVisibleY && symbolObj.y <= maxVisibleY;
+      return SymbolRainHelpers.isSymbolVisibleInRainWindow(state, symbolObj);
     });
   }
 
   function isVisibleInRainWindow(state, symbolObj) {
-    if (!symbolObj?.element?.isConnected) {
-      return false;
-    }
-
-    if (symbolObj.element.classList.contains("clicked")) {
-      return false;
-    }
-
-    const minVisibleY = -1 * (state.config.symbolHeight || 42);
-    const maxVisibleY = state.cachedContainerHeight + (state.config.symbolHeight || 42);
-
-    return symbolObj.y >= minVisibleY && symbolObj.y <= maxVisibleY;
+    return SymbolRainHelpers.isSymbolVisibleInRainWindow(state, symbolObj);
   }
 
   function getVisibleActiveSymbolCount(state) {

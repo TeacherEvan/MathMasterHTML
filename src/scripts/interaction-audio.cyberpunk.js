@@ -5,6 +5,8 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
   const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
   const automationAudioOverride =
     window.__MM_ENABLE_AUDIO_IN_TESTS === true;
+  const MASTER_GAIN_BASELINE = 0.16;
+  const MASTER_GAIN_RAMP_SECONDS = 0.045;
   const GameEvents = window.GameEvents || {
     PROBLEM_LINE_COMPLETED: "problemLineCompleted",
     SYMBOL_CLICKED: "symbolClicked",
@@ -31,7 +33,12 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
       this._boundPlaySymbolClick = () => this.playSymbolClick?.();
       this._boundPlaySymbolReveal = () => this.playSymbolReveal?.();
       this._boundPlayLineCompleted = (event) => {
-        this.playLineCompleted?.(event.detail?.lineNumber ?? 1);
+        const detail = event.detail || {};
+        const lineNumber = detail.lineNumber ?? 1;
+        this.playLineCompleted?.(lineNumber, detail);
+        if (detail.source === "greenWormCompletion") {
+          this.playRowCompleteCue?.(lineNumber, detail);
+        }
       };
       this._boundPlayLockAdvance = (event) => {
         this.playLockAdvance?.(event.detail?.level ?? 1);
@@ -144,7 +151,7 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
 
       this.context = new AudioContextCtor();
       this.masterGain = this.context.createGain();
-      this.masterGain.gain.value = 0.055;
+      this.masterGain.gain.value = this._getTargetMasterGainValue();
 
       const compressor = this.context.createDynamicsCompressor();
       compressor.threshold.value = -24;
@@ -155,8 +162,38 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
 
       this.masterGain.connect(compressor);
       compressor.connect(this.context.destination);
+      this._applyMasterGainTarget(this._getTargetMasterGainValue(), 0);
 
       return this.context;
+    }
+
+    _getTargetMasterGainValue() {
+      return this.isMuted ? 0 : MASTER_GAIN_BASELINE;
+    }
+
+    _applyMasterGainTarget(
+      targetGain,
+      rampSeconds = MASTER_GAIN_RAMP_SECONDS,
+    ) {
+      if (!this.context || !this.masterGain?.gain) {
+        return;
+      }
+
+      const now = this.context.currentTime;
+      const gainNode = this.masterGain.gain;
+      const currentValue = Number.isFinite(gainNode.value)
+        ? gainNode.value
+        : targetGain;
+
+      gainNode.cancelScheduledValues(now);
+      gainNode.setValueAtTime(currentValue, now);
+
+      if (rampSeconds <= 0) {
+        gainNode.setValueAtTime(targetGain, now);
+        return;
+      }
+
+      gainNode.linearRampToValueAtTime(targetGain, now + rampSeconds);
     }
 
     _unlockAudio() {

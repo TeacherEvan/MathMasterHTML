@@ -68,6 +68,7 @@
 
   proto.setMuted = function (nextMuted, reason = "manual") {
     this.isMuted = !!nextMuted;
+    this._applyMasterGainTarget?.(this._getTargetMasterGainValue?.() ?? 0);
     this._persistMutedPreference();
     this._emitAudioStateChanged(reason);
     return this.isMuted;
@@ -110,6 +111,7 @@
         }
 
         this.isMuted = nextMuted;
+        this._applyMasterGainTarget?.(this._getTargetMasterGainValue?.() ?? 0);
         this._emitAudioStateChanged("user-settings-sync");
       };
       this._userSettingsListenerBound = true;

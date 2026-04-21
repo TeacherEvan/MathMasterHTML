@@ -26,15 +26,17 @@ console.log("🔤 Game symbol handler stolen module loading...");
     );
 
     for (const stolenSymbol of stolenSymbols) {
-      const stolenText = stolenSymbol.textContent;
+      const stolenText =
+        window.GameSymbolHelpers?.getSymbolValue?.(stolenSymbol) ||
+        stolenSymbol.dataset.expected ||
+        stolenSymbol.textContent;
       const normalizedStolen = normalizeSymbol(stolenText);
 
       if (normalizedStolen === normalizedClicked) {
         const wasBlueSymbol = stolenSymbol.dataset.wasRevealed === "true";
 
-        stolenSymbol.classList.remove("stolen", "hidden-symbol");
-        stolenSymbol.classList.add("revealed-symbol");
-        stolenSymbol.style.visibility = "visible";
+        window.GameSymbolHelpers?.setRevealedSymbolState?.(stolenSymbol);
+        stolenSymbol.classList.remove("stolen");
         delete stolenSymbol.dataset.stolen;
         invalidateWormSymbolCache();
 

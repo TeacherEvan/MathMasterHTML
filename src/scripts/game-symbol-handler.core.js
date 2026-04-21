@@ -19,6 +19,7 @@ console.log("🔤 Game symbol handler core loading...");
     PURPLE_WORM_TRIGGERED: "purpleWormTriggered",
     SYMBOL_REVEALED: "symbolRevealed",
   };
+  const DEFAULT_LINE_COMPLETION_SOURCE = "symbolClick";
 
   let totalCorrectAnswers = 0;
   let consecutiveWrongAnswers = 0;
@@ -46,7 +47,17 @@ console.log("🔤 Game symbol handler core loading...");
     }
   }
 
-  function handleCorrectAnswer(clickedSymbol) {
+  function resolveLineCompletionSource(explicitSource) {
+    if (typeof explicitSource === "string" && explicitSource.trim()) {
+      return explicitSource.trim();
+    }
+
+    return window.GameTutorialLevel?.isH2PLevel?.()
+      ? "tutorial"
+      : DEFAULT_LINE_COMPLETION_SOURCE;
+  }
+
+  function handleCorrectAnswer(clickedSymbol, source) {
     const currentSolutionStepIndex = getCurrentStepIndex();
     totalCorrectAnswers++;
 
@@ -87,7 +98,7 @@ console.log("🔤 Game symbol handler core loading...");
       normalizeSymbol,
       onSymbolRevealed: notifySymbolRevealed,
     });
-    checkLineCompletion();
+    checkLineCompletion(resolveLineCompletionSource(source));
   }
 
   function handleIncorrectAnswer() {
@@ -110,7 +121,7 @@ console.log("🔤 Game symbol handler core loading...");
     setTimeout(() => document.body.classList.remove("incorrect-flash"), 400);
   }
 
-  function checkLineCompletion() {
+  function checkLineCompletion(source = DEFAULT_LINE_COMPLETION_SOURCE) {
     const currentProblem = getCurrentProblem();
     const currentSolutionStepIndex = getCurrentStepIndex();
 
@@ -134,6 +145,7 @@ console.log("🔤 Game symbol handler core loading...");
             lineNumber: currentSolutionStepIndex + 1,
             lineText: currentProblem.steps[currentSolutionStepIndex],
             totalLines: currentProblem.steps.length,
+            source: resolveLineCompletionSource(source),
             isLastStep:
               currentSolutionStepIndex >= currentProblem.steps.length - 1,
           },
@@ -163,7 +175,10 @@ console.log("🔤 Game symbol handler core loading...");
     } else {
       const fallbackSymbol = solutionContainer?.querySelector(".hidden-symbol");
       if (fallbackSymbol) {
-        symbolToReveal = fallbackSymbol.textContent;
+        symbolToReveal =
+          window.GameSymbolHelpers?.getSymbolValue?.(fallbackSymbol) ||
+          fallbackSymbol.dataset.expected ||
+          fallbackSymbol.textContent;
       }
     }
 
@@ -176,7 +191,7 @@ console.log("🔤 Game symbol handler core loading...");
         normalizeSymbol,
         onSymbolRevealed: notifySymbolRevealed,
       });
-      checkLineCompletion();
+      checkLineCompletion(resolveLineCompletionSource("tutorial"));
       return true;
     }
 

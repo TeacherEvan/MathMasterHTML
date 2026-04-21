@@ -49,7 +49,9 @@
         let targetSymbol = null;
         if (revealedSymbols && revealedSymbols.length > 0) {
           const idx = Math.floor(Math.random() * revealedSymbols.length);
-          targetSymbol = revealedSymbols[idx].textContent;
+          targetSymbol =
+            window.GameSymbolHelpers?.getSymbolValue?.(revealedSymbols[idx]) ||
+            revealedSymbols[idx].textContent;
         }
         this.queueWormSpawn("panelB", { targetSymbol });
       }

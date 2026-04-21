@@ -13,6 +13,9 @@ const SymbolManager = {
   _cachedStepSymbols: null,
   _cachedStepIndex: -1,
   _cacheInvalidated: true,
+  _getSymbolValue(element) {
+    return String(element?.dataset?.expected || element?.textContent || "").trim();
+  },
 
   /**
    * Initialize with solution container
@@ -61,7 +64,7 @@ const SymbolManager = {
     const hiddenSymbols = Array.from(currentStepSymbols).filter((el) =>
       el.classList.contains("hidden-symbol"),
     );
-    return hiddenSymbols.map((span) => span.textContent);
+    return hiddenSymbols.map((span) => this._getSymbolValue(span));
   },
 
   /**
@@ -93,12 +96,17 @@ const SymbolManager = {
     );
 
     for (const span of hiddenSymbols) {
-      const spanSymbol = span.textContent;
+      const spanSymbol = this._getSymbolValue(span);
       const normalizedSpan = window.normalizeSymbol(spanSymbol);
 
       if (normalizedSpan === normalizedTarget) {
-        span.classList.remove("hidden-symbol");
-        span.classList.add("revealed-symbol");
+        if (window.GameSymbolHelpers?.setRevealedSymbolState) {
+          window.GameSymbolHelpers.setRevealedSymbolState(span);
+        } else {
+          span.textContent = spanSymbol;
+          span.classList.remove("hidden-symbol");
+          span.classList.add("revealed-symbol");
+        }
         this.invalidateCache();
 
         // Dispatch event

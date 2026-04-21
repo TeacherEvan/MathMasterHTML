@@ -19,6 +19,10 @@ class SymbolValidator {
         console.log('✔️ SymbolValidator initialized');
     }
 
+    getSymbolValue(element) {
+        return String(element?.dataset?.expected || element?.textContent || '').trim();
+    }
+
     /**
      * Normalize symbol for comparison (handles x/X equivalence)
      * @param {string} symbol - Symbol to normalize
@@ -112,8 +116,7 @@ class SymbolValidator {
 
         for (const element of symbolElements) {
             // Skip space symbols
-            if (element.textContent.trim() === '' || 
-                element.classList.contains('space-symbol')) {
+            if (element.classList.contains('space-symbol')) {
                 continue;
             }
 
@@ -140,8 +143,7 @@ class SymbolValidator {
 
         for (const element of symbolElements) {
             // Skip space symbols
-            if (element.textContent.trim() === '' || 
-                element.classList.contains('space-symbol')) {
+            if (element.classList.contains('space-symbol')) {
                 continue;
             }
 
@@ -168,8 +170,7 @@ class SymbolValidator {
             const element = symbolElements[i];
             
             // Skip space symbols
-            if (element.textContent.trim() === '' || 
-                element.classList.contains('space-symbol')) {
+            if (element.classList.contains('space-symbol')) {
                 continue;
             }
 
@@ -178,7 +179,7 @@ class SymbolValidator {
                 return {
                     element: element,
                     index: i,
-                    symbol: element.textContent
+                    symbol: this.getSymbolValue(element)
                 };
             }
         }

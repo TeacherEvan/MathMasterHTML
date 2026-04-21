@@ -83,7 +83,7 @@ console.log("🔤 Game symbol handler events loading...");
         normalizeSymbol,
       })
     ) {
-      handleCorrectAnswer(symbol);
+      handleCorrectAnswer(symbol, "greenWormCompletion");
     }
   });
 

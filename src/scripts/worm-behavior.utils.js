@@ -24,6 +24,9 @@ function getAvailableSymbolsForWorm(behavior, worm, symbolsSource) {
 
 function resolveTargetElement(behavior, worm, symbolsSource) {
   const system = behavior.system;
+  const getSolutionSymbolValue = (element) =>
+    window.GameSymbolHelpers?.getSymbolValue?.(element) ||
+    String(element?.dataset?.expected || element?.textContent || "").trim();
   const availableSymbols = getAvailableSymbolsForWorm(
     behavior,
     worm,
@@ -39,7 +42,7 @@ function resolveTargetElement(behavior, worm, symbolsSource) {
   if (worm.targetSymbol) {
     const normalizedTarget = system.utils.normalizeSymbol(worm.targetSymbol);
     targetElement = availableSymbols.find((el) => {
-      const elSymbol = system.utils.normalizeSymbol(el.textContent);
+      const elSymbol = system.utils.normalizeSymbol(getSolutionSymbolValue(el));
       return elSymbol === normalizedTarget;
     });
   }
@@ -64,7 +67,7 @@ function resolveTargetElement(behavior, worm, symbolsSource) {
 
     if (nearestSymbol) {
       targetElement = nearestSymbol;
-      worm.targetSymbol = nearestSymbol.textContent;
+      worm.targetSymbol = getSolutionSymbolValue(nearestSymbol);
     }
   }
 

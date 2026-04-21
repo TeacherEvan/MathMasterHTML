@@ -90,7 +90,9 @@
     const revealedSymbols = this.getCachedRevealedSymbols();
     if (revealedSymbols && revealedSymbols.length > 0) {
       const randomIndex = Math.floor(Math.random() * revealedSymbols.length);
-      targetSymbol = revealedSymbols[randomIndex].textContent;
+      targetSymbol =
+        window.GameSymbolHelpers?.getSymbolValue?.(revealedSymbols[randomIndex]) ||
+        revealedSymbols[randomIndex].textContent;
     }
 
     // Create worm data

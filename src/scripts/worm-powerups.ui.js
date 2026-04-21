@@ -423,7 +423,14 @@
               (panelRect?.top || 0) +
               config.PANEL_B_CONTROLS_CLEARANCE,
           )
-        : config.PANEL_B_BASE_SAFE_ZONE;
+        : Math.max(
+            config.PANEL_B_BASE_SAFE_ZONE,
+            anchoredPosition.top +
+              displayHeight -
+              (panelRect?.top || 0) +
+              config.PANEL_B_CONTROLS_CLEARANCE +
+              4,
+          );
     document.documentElement.style.setProperty(
       "--panel-b-top-safe-zone",
       `${panelBSafeZone}px`,

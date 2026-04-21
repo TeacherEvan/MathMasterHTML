@@ -28,7 +28,8 @@ async function getCurrentStepSnapshot(page) {
         `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`,
       ),
     )
-      .map((element) => element.textContent?.trim())
+      .map((element) => element.dataset.expected || element.textContent || "")
+      .map((value) => String(value).trim())
       .filter(Boolean);
 
     return { stepIndex, hiddenSymbols };
@@ -312,6 +313,68 @@ test.describe("Symbol rain mobile interactions", () => {
     expect(visibilitySamples.at(-1)).toBeGreaterThan(0);
   });
 
+  test("treats only the real rain window as visible after Panel C reflow", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !["pixel-7", "iphone-13"].includes(testInfo.project.name),
+      "This contract is only enforced on the mobile projects.",
+    );
+
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    await page.locator("#panel-c .falling-symbol").first().waitFor({
+      state: "visible",
+      timeout: 10000,
+    });
+
+    const result = await page.evaluate(async () => {
+      const state = window.__symbolRainState;
+      const panel = document.getElementById("panel-c");
+      const rain = document.getElementById("symbol-rain-container");
+
+      if (!state || !panel || !rain) {
+        return null;
+      }
+
+      panel.style.height = "340px";
+      await new Promise((resolve) => window.setTimeout(resolve, 500));
+
+      const panelRect = panel.getBoundingClientRect();
+      const rainRect = rain.getBoundingClientRect();
+      const staleVisibleSymbols = Array.from(
+        document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
+      ).filter((element) => {
+        const rect = element.getBoundingClientRect();
+        const intersectsPanel =
+          rect.bottom > panelRect.top &&
+          rect.top < panelRect.bottom &&
+          rect.right > panelRect.left &&
+          rect.left < panelRect.right;
+        const intersectsRain =
+          rect.bottom > rainRect.top &&
+          rect.top < rainRect.bottom &&
+          rect.right > rainRect.left &&
+          rect.left < rainRect.right;
+
+        return intersectsPanel && !intersectsRain;
+      }).length;
+
+      return {
+        cachedContainerHeight: state.cachedContainerHeight,
+        actualRainHeight: rainRect.height,
+        staleVisibleSymbols,
+      };
+    });
+
+    expect(result).not.toBeNull();
+    expect(
+      Math.abs(result.cachedContainerHeight - result.actualRainHeight),
+    ).toBeLessThanOrEqual(2);
+    expect(result.staleVisibleSymbols).toBe(0);
+  });
+
   test("keeps live Panel C targets visible in an Android WebView-like runtime", async ({
     browser,
   }, testInfo) => {
@@ -522,7 +585,8 @@ test.describe("Symbol rain mobile interactions", () => {
             `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`,
           ),
         )
-          .map((element) => element.textContent?.trim())
+          .map((element) => element.dataset.expected || element.textContent || "")
+          .map((value) => String(value).trim())
           .filter(Boolean);
 
         return (
@@ -604,7 +668,8 @@ test.describe("Symbol rain mobile interactions", () => {
             `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`,
           ),
         )
-          .map((element) => element.textContent?.trim())
+          .map((element) => element.dataset.expected || element.textContent || "")
+          .map((value) => String(value).trim())
           .filter(Boolean);
 
         return (
@@ -739,7 +804,8 @@ test.describe("Symbol rain mobile interactions", () => {
               `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`,
             ),
           )
-            .map((element) => element.textContent?.trim())
+            .map((element) => element.dataset.expected || element.textContent || "")
+            .map((value) => String(value).trim())
             .filter(Boolean);
 
           return (

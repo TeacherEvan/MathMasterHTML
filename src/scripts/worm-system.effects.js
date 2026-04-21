@@ -117,9 +117,8 @@
 
     // Return stolen symbol to its original position
     if (worm.targetElement) {
-      worm.targetElement.classList.remove("stolen", "hidden-symbol");
-      worm.targetElement.classList.add("revealed-symbol");
-      worm.targetElement.style.visibility = "visible";
+      window.GameSymbolHelpers?.setRevealedSymbolState?.(worm.targetElement);
+      worm.targetElement.classList.remove("stolen");
       delete worm.targetElement.dataset.stolen;
 
       console.log(`✅ Symbol "${worm.stolenSymbol}" returned to Panel B`);

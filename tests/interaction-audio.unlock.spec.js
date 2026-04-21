@@ -130,4 +130,36 @@ test.describe("Interaction audio unlock", () => {
     expect(result.oscillatorStarts).toBeGreaterThan(0);
     expect(result.pendingCueCount).toBe(0);
   });
+
+  test("uses the upgraded master gain baseline when unmuted", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__MM_ENABLE_AUDIO_IN_TESTS = true;
+    });
+
+    await page.goto("/src/pages/game.html?level=beginner&preload=off");
+    await page.waitForFunction(
+      () => Boolean(window.CyberpunkInteractionAudio?._ensureContext),
+      { timeout: 10000 },
+    );
+
+    const result = await page.evaluate(() => {
+      const audio = window.CyberpunkInteractionAudio;
+      if (!audio) {
+        return { hasAudio: false, gain: null };
+      }
+
+      audio.context = null;
+      audio.masterGain = null;
+      audio.disabled = false;
+      audio._ensureContext();
+
+      return {
+        hasAudio: true,
+        gain: audio.masterGain?.gain?.value ?? null,
+      };
+    });
+
+    expect(result.hasAudio).toBe(true);
+    expect(result.gain).toBeGreaterThanOrEqual(0.14);
+  });
 });

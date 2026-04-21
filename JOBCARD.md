@@ -1,5 +1,15 @@
 # JOBCARD
 
+## Latest update (2026-04-21)
+
+- Sealed the hidden-answer leak by moving unrevealed solution truth to `data-expected`, blanking hidden symbol text until reveal, and preserving that contract across help reveal, worm theft, and worm restore paths.
+- Raised the desktop Panel B safe zone from the power-up tray's real anchored height so the startup tray clears `.panel-b-controls` and `#solution-container` without changing `display-manager.js` sizing ownership.
+- Added a Panel C-local resize refresh path in `src/scripts/3rdDISPLAY.js` so cached rain metrics re-sync when the panel or rain container changes size without a window resize.
+- Unified symbol-rain and Evan helper visibility checks around the actual `#symbol-rain-container` intersection contract instead of mixing panel bounds with cached Y-only heuristics.
+- Extended `problemLineCompleted` with additive provenance detail, marked the worm-correct path as `greenWormCompletion`, raised the master gain baseline to `0.16`, and added a distinct row-complete cyber cue for that provenance only.
+- Moved the review-reception agent file into `.github/agents/receiving-code-review.agent.md` so the repo Markdown allowlist stays green.
+- Focused validation passed with `npx playwright test tests/solution-cheat-protection.spec.js tests/ui-boundary.spec.js tests/symbol-rain.live-targets.spec.js tests/symbol-rain.mobile.spec.js tests/evan-helper.symbols.spec.js tests/interaction-audio.unlock.spec.js tests/interaction-audio.row-complete.spec.js --project=chromium --reporter=line`, `npx playwright test tests/game-mobile-layout.spec.js tests/game-mobile-layout.ultranarrow.spec.js --reporter=line`, `npm run verify`, and `npm run typecheck`.
+
 ## Latest update (2026-04-20)
 
 - Fixed mobile automation briefing dismissal so Playwright phone emulation can start gameplay and use the back button even when the browser only delivers trusted `pointerup` events to fixed controls.

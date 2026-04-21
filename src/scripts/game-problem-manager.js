@@ -149,6 +149,8 @@ console.log("📚 Game problem manager module loading...");
         if (symbol === " ") {
           symbolSpan.classList.add("space-symbol");
         } else {
+          symbolSpan.dataset.expected = symbol;
+          symbolSpan.textContent = "";
           symbolSpan.classList.add("hidden-symbol");
         }
 

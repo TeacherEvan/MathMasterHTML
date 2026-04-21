@@ -127,6 +127,21 @@
   background: transparent; /* Hide text boxes */
   border-radius: 2px;
   text-shadow: none;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
+}
+
+.hidden-symbol::selection {
+  color: transparent;
+  background: transparent;
+  text-shadow: none;
+}
+
+.hidden-symbol::-moz-selection {
+  color: transparent;
+  background: transparent;
+  text-shadow: none;
 }
 
 .revealed-symbol {

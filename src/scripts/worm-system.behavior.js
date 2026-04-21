@@ -9,6 +9,28 @@
   const GameEvents = window.GameEvents || {
     ROW_RESET_BY_WORM: "rowResetByWorm",
   };
+  const getSolutionSymbolValue = (element) =>
+    window.GameSymbolHelpers?.getSymbolValue?.(element) ||
+    String(element?.dataset?.expected || element?.textContent || "").trim();
+  const hideSolutionSymbol = (element) => {
+    if (window.GameSymbolHelpers?.setHiddenSymbolState) {
+      return window.GameSymbolHelpers.setHiddenSymbolState(element);
+    }
+
+    const symbolValue = getSolutionSymbolValue(element);
+    if (symbolValue && element && !element.dataset.expected) {
+      element.dataset.expected = symbolValue;
+    }
+
+    if (element) {
+      element.textContent = "";
+      element.classList.remove("revealed-symbol");
+      element.classList.add("hidden-symbol");
+      element.style.visibility = "visible";
+    }
+
+    return symbolValue;
+  };
 
   proto.stealSymbol = function(worm) {
     // ERROR HANDLING: Validate worm parameter
@@ -77,7 +99,7 @@
     if (worm.targetSymbol) {
       const normalizedTarget = normalizeSymbol(worm.targetSymbol);
       targetSymbol = availableSymbols.find((el) => {
-        const elSymbol = normalizeSymbol(el.textContent);
+        const elSymbol = normalizeSymbol(getSolutionSymbolValue(el));
         return elSymbol === normalizedTarget;
       });
     }
@@ -89,14 +111,14 @@
     }
 
     // ERROR HANDLING: Verify targetSymbol exists and has required properties
-    if (!targetSymbol || !targetSymbol.textContent) {
+    const symbolValue = getSolutionSymbolValue(targetSymbol);
+    if (!targetSymbol || !symbolValue) {
       Logger.warn("⚠️", `Worm ${worm.id} could not find valid target symbol`);
       worm.roamingEndTime = Date.now() + this.ROAM_RESUME_DURATION;
       worm.isRushingToTarget = false;
       return;
     }
 
-    const symbolValue = targetSymbol.textContent;
     const wasBlueSymbol = targetSymbol.classList.contains("revealed-symbol");
 
     console.log(
@@ -108,8 +130,7 @@
     // Mark symbol as stolen and hide it
     targetSymbol.dataset.stolen = "true";
     targetSymbol.classList.add("stolen");
-    targetSymbol.classList.remove("revealed-symbol");
-    targetSymbol.classList.add("hidden-symbol"); // Hide it again until user re-clicks in rain
+    hideSolutionSymbol(targetSymbol);
     targetSymbol.style.visibility = "hidden";
 
     // Update worm data
@@ -133,8 +154,7 @@
           )
           : [];
         Array.from(rowSymbols).forEach((el) => {
-          el.classList.remove("revealed-symbol");
-          el.classList.add("hidden-symbol");
+          hideSolutionSymbol(el);
         });
         console.log(
           `🔴 Worm stole blue symbol from row ${stepIndex} - reverted ${rowSymbols.length} more revealed symbol(s) to red`,
@@ -220,7 +240,7 @@
     if (worm.targetSymbol) {
       const normalizedTarget = normalizeSymbol(worm.targetSymbol);
       targetElement = availableSymbols.find((el) => {
-        const elSymbol = normalizeSymbol(el.textContent);
+        const elSymbol = normalizeSymbol(getSolutionSymbolValue(el));
         return elSymbol === normalizedTarget;
       });
     }
@@ -246,7 +266,7 @@
 
       if (nearestSymbol) {
         targetElement = nearestSymbol;
-        worm.targetSymbol = nearestSymbol.textContent;
+        worm.targetSymbol = getSolutionSymbolValue(nearestSymbol);
       }
     }
 

@@ -1,4 +1,6 @@
 (function () {
+  const SymbolRainHelpers = window.SymbolRainHelpers || {};
+
   function normalize(value) {
     return String(value || "")
       .trim()
@@ -14,6 +16,21 @@
   function centerOf(el) {
     const r = el.getBoundingClientRect();
     return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+
+  function isInRainWindow(el) {
+    if (!isVisible(el)) return false;
+
+    const rainContainer = document.getElementById("symbol-rain-container");
+    const rainRect = SymbolRainHelpers.getRainWindowRect?.(rainContainer);
+    if (!rainRect) {
+      return true;
+    }
+
+    return SymbolRainHelpers.rectIntersectsRainWindow?.(
+      el.getBoundingClientRect(),
+      rainRect,
+    );
   }
 
   function findTestTarget(name) {
@@ -56,7 +73,7 @@
         continue;
       }
       const r = el.getBoundingClientRect();
-      if (r.width > 0 && r.height > 0 && r.bottom > bestBottom) {
+      if (r.width > 0 && r.height > 0 && isInRainWindow(el) && r.bottom > bestBottom) {
         best = el;
         bestBottom = r.bottom;
       }
@@ -87,7 +104,7 @@
       if (!el.isConnected || !normalized.has(normalize(el.textContent)))
         continue;
       const r = el.getBoundingClientRect();
-      if (r.width > 0 && r.height > 0 && r.bottom > bestBottom) {
+      if (r.width > 0 && r.height > 0 && isInRainWindow(el) && r.bottom > bestBottom) {
         best = el;
         bestBottom = r.bottom;
       }

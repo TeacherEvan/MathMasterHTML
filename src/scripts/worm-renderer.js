@@ -130,9 +130,8 @@ class WormRenderer {
     }
 
     if (worm.targetElement) {
-      worm.targetElement.classList.remove("stolen", "hidden-symbol");
-      worm.targetElement.classList.add("revealed-symbol");
-      worm.targetElement.style.visibility = "visible";
+      window.GameSymbolHelpers?.setRevealedSymbolState?.(worm.targetElement);
+      worm.targetElement.classList.remove("stolen");
       delete worm.targetElement.dataset.stolen;
 
       this.logger.log(`✅ Symbol "${worm.stolenSymbol}" returned to Panel B`);
