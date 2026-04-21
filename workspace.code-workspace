@@ -74,6 +74,8 @@
 		"javascript.implicitProjectConfig.checkJs": false,
 		"cSpell.words": [
 			"rgba"
-		]
+		],
+		"todo-tree.tree.showBadges": true,
+		"todo-tree.tree.showCountsInTree": true
 	}
 }

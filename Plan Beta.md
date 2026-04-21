@@ -195,9 +195,9 @@ The deleted superpower artifacts were historical planning material, not durable 
 - Modify: `tests/gameplay-features.spec.js` or create `tests/solution-cheat-protection.spec.js`
 - Read for reference: `src/styles/css/game-effects.css`
 
-- [ ] Write a failing Playwright test that loads `src/pages/game.html?level=beginner&evan=off&preload=off`, dismisses briefing, selects `#solution-container`, and asserts unrevealed solution text is not recoverable via `window.getSelection().toString()`.
-- [ ] Assert `.hidden-symbol` elements do not resolve to `user-select: auto`.
-- [ ] Run: `npx playwright test tests/solution-cheat-protection.spec.js --project=chromium --reporter=line`
+- [x] Write a failing Playwright test that loads `src/pages/game.html?level=beginner&evan=off&preload=off`, dismisses briefing, selects `#solution-container`, and asserts unrevealed solution text is not recoverable via `window.getSelection().toString()`.
+- [x] Assert `.hidden-symbol` elements do not resolve to `user-select: auto`.
+- [x] Run: `npx playwright test tests/solution-cheat-protection.spec.js --project=chromium --reporter=line`
 - [ ] Confirm the test fails before implementation.
 
 #### Task 0.2: Add startup overlap coverage for Panel B and power-ups
@@ -206,9 +206,9 @@ The deleted superpower artifacts were historical planning material, not durable 
 - Modify: `tests/ui-boundary.spec.js`
 - Read for reference: `src/styles/css/game.css`, `src/styles/css/game-polish.chrome.controls.css`, `src/styles/css/game-polish.chrome.playfield.css`
 
-- [ ] Add a failing assertion proving `#power-up-display` does not overlap `.panel-b-controls`.
-- [ ] Add a failing assertion proving `#power-up-display` does not overlap `#solution-container`.
-- [ ] Run: `npx playwright test tests/ui-boundary.spec.js --project=chromium --grep "Powerup display|panel-b-controls|solution" --reporter=line`
+- [x] Add a failing assertion proving `#power-up-display` does not overlap `.panel-b-controls`.
+- [x] Add a failing assertion proving `#power-up-display` does not overlap `#solution-container`.
+- [x] Run: `npx playwright test tests/ui-boundary.spec.js --project=chromium --grep "Powerup display|panel-b-controls|solution" --reporter=line`
 - [ ] Confirm the new overlap assertions fail before implementation.
 
 #### Task 0.3: Add Panel C stale-geometry and Evan bounds coverage
@@ -218,10 +218,10 @@ The deleted superpower artifacts were historical planning material, not durable 
 - Modify: `tests/symbol-rain.mobile.spec.js`
 - Modify: `tests/evan-helper.symbols.spec.js`
 
-- [ ] Add a failing test that forces a Panel C-only height change, then asserts `window.__symbolRainState.cachedContainerHeight` re-syncs to the actual `#symbol-rain-container` height.
-- [ ] Add a failing test that proves visible-symbol checks use the actual rain window after reflow, not stale cached geometry.
-- [ ] Add a failing Evan helper test proving off-window falling symbols are ignored even if their rect still has positive width and height.
-- [ ] Run: `npx playwright test tests/symbol-rain.live-targets.spec.js tests/symbol-rain.mobile.spec.js tests/evan-helper.symbols.spec.js --project=chromium --reporter=line`
+- [x] Add a failing test that forces a Panel C-only height change, then asserts `window.__symbolRainState.cachedContainerHeight` re-syncs to the actual `#symbol-rain-container` height.
+- [x] Add a failing test that proves visible-symbol checks use the actual rain window after reflow, not stale cached geometry.
+- [x] Add a failing Evan helper test proving off-window falling symbols are ignored even if their rect still has positive width and height.
+- [x] Run: `npx playwright test tests/symbol-rain.live-targets.spec.js tests/symbol-rain.mobile.spec.js tests/evan-helper.symbols.spec.js --project=chromium --reporter=line`
 - [ ] Confirm the new Panel C and Evan assertions fail before implementation.
 
 #### Task 0.4: Add audio provenance coverage
@@ -230,9 +230,9 @@ The deleted superpower artifacts were historical planning material, not durable 
 - Modify: `tests/interaction-audio.unlock.spec.js`
 - Create if needed: `tests/interaction-audio.row-complete.spec.js`
 
-- [ ] Add a failing test that dispatches `problemLineCompleted` with and without provenance detail and verifies audio can branch only on the intended source.
-- [ ] Add a failing test that checks the unmuted master gain target is above the current `0.055` baseline once the audio upgrade is applied.
-- [ ] Run: `npx playwright test tests/interaction-audio.unlock.spec.js tests/interaction-audio.row-complete.spec.js --project=chromium --reporter=line`
+- [x] Add a failing test that dispatches `problemLineCompleted` with and without provenance detail and verifies audio can branch only on the intended source.
+- [x] Add a failing test that checks the unmuted master gain target is above the current `0.055` baseline once the audio upgrade is applied.
+- [x] Run: `npx playwright test tests/interaction-audio.unlock.spec.js tests/interaction-audio.row-complete.spec.js --project=chromium --reporter=line`
 - [ ] Confirm the audio assertions fail before implementation.
 
 ### Phase 1: Seal The Hidden-Answer Leak
@@ -243,10 +243,10 @@ The deleted superpower artifacts were historical planning material, not durable 
 - Modify: `src/styles/css/game-effects.css`
 - Modify if required by test design: `src/scripts/game-symbol-helpers.js` and/or `src/scripts/game-symbol-handler.core.js`
 
-- [ ] Implement the minimal fix that prevents unrevealed solution symbols from being recovered through normal selection.
-- [ ] Prefer a root-cause fix that keeps unrevealed content non-readable before reveal, not only visually transparent.
-- [ ] Keep the existing hidden-symbol lookup contract used by symbol-rain and Evan helper flows intact.
-- [ ] Re-run: `npx playwright test tests/solution-cheat-protection.spec.js --project=chromium --reporter=line`
+- [x] Implement the minimal fix that prevents unrevealed solution symbols from being recovered through normal selection.
+- [x] Prefer a root-cause fix that keeps unrevealed content non-readable before reveal, not only visually transparent.
+- [x] Keep the existing hidden-symbol lookup contract used by symbol-rain and Evan helper flows intact.
+- [x] Re-run: `npx playwright test tests/solution-cheat-protection.spec.js --project=chromium --reporter=line`
 - [ ] Stop if the fix breaks live symbol lookup or reveal behavior.
 
 **Rollback boundary:** revert only hidden-symbol confidentiality changes if symbol lookup contracts regress.
@@ -262,11 +262,11 @@ The deleted superpower artifacts were historical planning material, not durable 
 - Modify if needed: `src/styles/css/score-timer.css`
 - Modify if needed: `src/scripts/worm-powerups.ui.js`
 
-- [ ] Choose one authoritative placement path for `#power-up-display` and make the other layers styling-only.
-- [ ] Preserve `display-manager.js` as the owner of sizing classification.
-- [ ] Ensure the final geometry clears both `.panel-b-controls` and `#solution-container` on live startup.
-- [ ] Re-run: `npx playwright test tests/ui-boundary.spec.js --project=chromium --grep "Powerup display|panel-b-controls|solution" --reporter=line`
-- [ ] Re-run: `npx playwright test tests/game-mobile-layout.spec.js tests/game-mobile-layout.ultranarrow.spec.js --reporter=line`
+- [x] Choose one authoritative placement path for `#power-up-display` and make the other layers styling-only.
+- [x] Preserve `display-manager.js` as the owner of sizing classification.
+- [x] Ensure the final geometry clears both `.panel-b-controls` and `#solution-container` on live startup.
+- [x] Re-run: `npx playwright test tests/ui-boundary.spec.js --project=chromium --grep "Powerup display|panel-b-controls|solution" --reporter=line`
+- [x] Re-run: `npx playwright test tests/game-mobile-layout.spec.js tests/game-mobile-layout.ultranarrow.spec.js --reporter=line`
 
 **Rollback boundary:** revert only overlap-placement changes if mobile or startup layout contracts regress.
 
@@ -278,9 +278,9 @@ The deleted superpower artifacts were historical planning material, not durable 
 - Modify: `src/scripts/3rdDISPLAY.js`
 - Modify if needed: `src/scripts/symbol-rain.helpers.utils.js`
 
-- [ ] Add a Panel C-local geometry refresh path that updates cached container metrics when the rain window changes size without relying only on `window.resize`.
-- [ ] Guard against resize loops and keep startup bootstrap behavior intact.
-- [ ] Re-run: `npx playwright test tests/symbol-rain.live-targets.spec.js tests/symbol-rain.mobile.spec.js --project=chromium --reporter=line`
+- [x] Add a Panel C-local geometry refresh path that updates cached container metrics when the rain window changes size without relying only on `window.resize`.
+- [x] Guard against resize loops and keep startup bootstrap behavior intact.
+- [x] Re-run: `npx playwright test tests/symbol-rain.live-targets.spec.js tests/symbol-rain.mobile.spec.js --project=chromium --reporter=line`
 
 #### Task 3.2: Use one real rain-window visibility contract everywhere
 
@@ -289,18 +289,18 @@ The deleted superpower artifacts were historical planning material, not durable 
 - Modify: `src/scripts/symbol-rain.animation.js`
 - Modify if needed: `src/scripts/symbol-rain.helpers.utils.js`
 
-- [ ] Centralize the visibility/intersection rule so live-symbol availability, cleanup, and spawn eligibility all use the actual Panel C rain window.
-- [ ] Ensure symbols outside the real rain window are not treated as satisfying visible-target guarantees.
-- [ ] Re-run: `npx playwright test tests/symbol-rain.live-targets.spec.js tests/symbol-rain.mobile.spec.js --project=chromium --reporter=line`
+- [x] Centralize the visibility/intersection rule so live-symbol availability, cleanup, and spawn eligibility all use the actual Panel C rain window.
+- [x] Ensure symbols outside the real rain window are not treated as satisfying visible-target guarantees.
+- [x] Re-run: `npx playwright test tests/symbol-rain.live-targets.spec.js tests/symbol-rain.mobile.spec.js --project=chromium --reporter=line`
 
 #### Task 3.3: Make Evan consume the same bounds contract
 
 **Files:**
 - Modify: `src/scripts/evan-helper.controller.targets.js`
 
-- [ ] Update Evan target selection to ignore symbols outside the real Panel C rain window, not only zero-area or disconnected elements.
-- [ ] Keep fixture-based tests working for `data-test-target` helpers.
-- [ ] Re-run: `npx playwright test tests/evan-helper.symbols.spec.js --project=chromium --reporter=line`
+- [x] Update Evan target selection to ignore symbols outside the real Panel C rain window, not only zero-area or disconnected elements.
+- [x] Keep fixture-based tests working for `data-test-target` helpers.
+- [x] Re-run: `npx playwright test tests/evan-helper.symbols.spec.js --project=chromium --reporter=line`
 
 **Rollback boundary:** revert only Evan changes if helper targeting regresses while Panel C runtime remains correct.
 
@@ -312,9 +312,9 @@ The deleted superpower artifacts were historical planning material, not durable 
 - Modify: `src/scripts/game-symbol-handler.core.js`
 - Modify if needed: `src/scripts/constants.events.js`
 
-- [ ] Add a backward-compatible provenance field to the `problemLineCompleted` detail payload.
-- [ ] Do not break existing worm, lock, timer, or audio listeners that already consume this event.
-- [ ] Re-run the smallest relevant consumers after the payload change.
+- [x] Add a backward-compatible provenance field to the `problemLineCompleted` detail payload.
+- [x] Do not break existing worm, lock, timer, or audio listeners that already consume this event.
+- [x] Re-run the smallest relevant consumers after the payload change.
 
 #### Task 4.2: Improve gain behavior and add row-complete cue routing
 
@@ -324,10 +324,10 @@ The deleted superpower artifacts were historical planning material, not durable 
 - Modify: `src/scripts/interaction-audio.cyberpunk.gameplay.js`
 - Modify if needed: `src/scripts/interaction-audio.cyberpunk.drums.sequencer.js`
 
-- [ ] Raise the effective audio level conservatively and use scheduled/ramped gain changes to avoid audible pops.
-- [ ] Add a distinct row-complete cue path that only fires for the intended provenance detail.
-- [ ] Keep mute behavior and drum progression intact.
-- [ ] Re-run: `npx playwright test tests/interaction-audio.unlock.spec.js tests/interaction-audio.row-complete.spec.js --project=chromium --reporter=line`
+- [x] Raise the effective audio level conservatively and use scheduled/ramped gain changes to avoid audible pops.
+- [x] Add a distinct row-complete cue path that only fires for the intended provenance detail.
+- [x] Keep mute behavior and drum progression intact.
+- [x] Re-run: `npx playwright test tests/interaction-audio.unlock.spec.js tests/interaction-audio.row-complete.spec.js --project=chromium --reporter=line`
 
 **Rollback boundary:** revert audio cue/gain changes if mute, unlock, or drum progression behavior regresses.
 
@@ -337,10 +337,10 @@ The deleted superpower artifacts were historical planning material, not durable 
 
 **Commands:**
 
-- [ ] `npx playwright test tests/solution-cheat-protection.spec.js tests/ui-boundary.spec.js tests/symbol-rain.live-targets.spec.js tests/symbol-rain.mobile.spec.js tests/evan-helper.symbols.spec.js tests/interaction-audio.unlock.spec.js tests/interaction-audio.row-complete.spec.js --project=chromium --reporter=line`
-- [ ] `npx playwright test tests/game-mobile-layout.spec.js tests/game-mobile-layout.ultranarrow.spec.js --reporter=line`
-- [ ] `npm run verify`
-- [ ] `npm run typecheck`
+- [x] `npx playwright test tests/solution-cheat-protection.spec.js tests/ui-boundary.spec.js tests/symbol-rain.live-targets.spec.js tests/symbol-rain.mobile.spec.js tests/evan-helper.symbols.spec.js tests/interaction-audio.unlock.spec.js tests/interaction-audio.row-complete.spec.js --project=chromium --reporter=line`
+- [x] `npx playwright test tests/game-mobile-layout.spec.js tests/game-mobile-layout.ultranarrow.spec.js --reporter=line`
+- [x] `npm run verify`
+- [x] `npm run typecheck`
 
 #### Task 5.2: Fold durable changes into approved docs only
 
@@ -349,18 +349,18 @@ The deleted superpower artifacts were historical planning material, not durable 
 - Modify if needed: `Plan Alpha.md`
 - Modify: `JOBCARD.md`
 
-- [ ] Record the durable Panel C visibility contract and event-detail addition in `Plan Genesis.md`.
+- [x] Record the durable Panel C visibility contract and event-detail addition in `Plan Genesis.md`.
 - [ ] Record any lasting gameplay-integrity or overlap rule in `Plan Alpha.md` only if it changes product/design truth.
-- [ ] Add the implementation and validation summary to `JOBCARD.md`.
+- [x] Add the implementation and validation summary to `JOBCARD.md`.
 
 ### Verification Gate Before Claiming Completion
 
 - [ ] All new failing tests added before implementation were observed red, then green.
-- [ ] Focused Playwright lanes for touched surfaces are green.
-- [ ] `npm run verify` is green.
-- [ ] `npm run typecheck` is green.
-- [ ] No new Markdown files were created.
-- [ ] Durable notes were folded into existing approved docs only.
+- [x] Focused Playwright lanes for touched surfaces are green.
+- [x] `npm run verify` is green.
+- [x] `npm run typecheck` is green.
+- [x] No new Markdown files were created.
+- [x] Durable notes were folded into existing approved docs only.
 ## Active Implementation Plan: Sci-Fi Console UI Hardening
 
 > **For agentic workers:** REQUIRED: Use the `subagent-driven-development` agent (recommended) or `executing-plans` agent to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

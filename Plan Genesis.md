@@ -123,6 +123,11 @@ Do not reorder scripts casually. If a runtime dependency changes, validate the f
 
 ## Current Worm Truth
 
+### Panel C and Audio Contracts
+
+- Symbol-rain visibility and Evan target selection both use the actual `#symbol-rain-container` intersection contract, not stale cached geometry or panel-local bounds alone.
+- `problemLineCompleted` may include additive provenance detail, and listeners should keep existing behavior when the field is absent.
+
 ### Spawn Rules
 
 - `problemLineCompleted` increments `rowsCompleted`.

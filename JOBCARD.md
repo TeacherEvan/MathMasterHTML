@@ -1,5 +1,11 @@
 # JOBCARD
 
+## Latest update (2026-04-21 18:21 +07)
+
+- Added `README.md` to the verify allowlist so the repo documentation check matches the markdown policy.
+- Kept the completed Plan Beta implementation markers aligned with the verified Playwright lanes and repo health checks.
+- Confirmed `npm run verify` and `npm run typecheck` are green after the docs-policy fix.
+
 ## Latest update (2026-04-21 17:08 +07)
 
 - Expanded `README.md` with quick start, runtime notes, scripts, and core page references.
