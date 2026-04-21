@@ -12,13 +12,14 @@ This file is the repo-wide routing and guardrail layer.
 
 ## Markdown Policy
 
-Only five project Markdown files plus repo-local custom agent files in `.github/agents/*.agent.md` may exist in this repository:
+Only ten project Markdown files plus repo-local custom agent files in `.github/agents/*.agent.md` may exist in this repository:
 
 1. `.github/copilot-instructions.md`
 2. `JOBCARD.md`
 3. `Plan Genesis.md`
 4. `Plan Beta.md`
 5. `Plan Alpha.md`
+6. `README.md`
 
 Do not add any other `.md` files outside `.github/agents/*.agent.md`. Consolidate new durable content into one of the three plan files based on scope:
 
@@ -62,7 +63,7 @@ Do not add any other `.md` files outside `.github/agents/*.agent.md`. Consolidat
 
 ## Documentation Upkeep
 
-- Fold duplicate or stale notes into the five project Markdown files.
+- Fold duplicate or stale notes into the ten project Markdown files.
 - Keep repo-local custom agent definitions in `.github/agents/*.agent.md` instead of adding new freeform docs.
 - Prefer updating an existing plan section over creating a new heading dump.
 - Keep every surviving Markdown file below 1000 lines.

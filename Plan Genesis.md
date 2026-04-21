@@ -3,6 +3,7 @@
 ## Purpose
 
 Plan Genesis is the durable engineering source of truth for MathMasterHTML. It absorbs the old entrypoint guide, architecture guide, development guide, performance guide, worm developer guide, worm testing guide, and agent-customization ownership notes.
+It complements the root README with the deeper engineering overview under the markdown policy.
 
 ## Repo Reality
 

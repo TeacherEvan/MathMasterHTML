@@ -1,5 +1,23 @@
 # JOBCARD
 
+## Latest update (2026-04-21 17:08 +07)
+
+- Expanded `README.md` with quick start, runtime notes, scripts, and core page references.
+- Kept the codebase overview aligned with the existing plan docs and browser-native runtime contract.
+- Logged the documentation pass here with a clear timestamp for traceability.
+
+## Latest update (2026-04-21 16:05 +07)
+
+- Raised the repository markdown allowance to 10 so `README.md` could be added without violating the docs policy.
+- Created a concise root README for the codebase and kept the durable overview in the existing plan files.
+- Logged this policy/doc update here with a clear timestamp for traceability.
+
+## Latest update (2026-04-21 15:05 +07)
+
+- Removed the duplicate Database Client install by uninstalling `cweijan.vscode-postgresql-client2` and keeping `cweijan.vscode-mysql-client2`.
+- Kept the repo compliant with the markdown allowlist by using this jobcard for the log and the existing plan docs for durable overview text.
+- Logged the completed work here with a clear timestamp for traceability.
+
 ## Latest update (2026-04-21)
 
 - Sealed the hidden-answer leak by moving unrevealed solution truth to `data-expected`, blanking hidden symbol text until reveal, and preserving that contract across help reveal, worm theft, and worm restore paths.
@@ -88,4 +106,4 @@
 - Event-driven integration remains the runtime rule.
 - Root HTML files remain redirect entrypoints; active runtime pages live in `src/pages/`.
 - Panel A and B sizing belongs to `src/scripts/display-manager.js`.
-- Only the five project Markdown files plus repo-local custom agent files in `.github/agents/*.agent.md` are allowed in this repository.
+- Only the ten project Markdown files plus repo-local custom agent files in `.github/agents/*.agent.md` are allowed in this repository.
