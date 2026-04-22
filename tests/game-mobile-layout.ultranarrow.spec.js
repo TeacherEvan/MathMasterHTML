@@ -118,12 +118,17 @@ test.describe("Gameplay ultra-narrow embedded landscape layout", () => {
         panelA: measure("#panel-a"),
         panelB: measure("#panel-b"),
         panelC: measure("#panel-c"),
+        solution: measure("#solution-container"),
         console: measure("#symbol-console"),
         consoleSlot: measure(".console-slot"),
         help: measure("#help-button"),
         clarify: measure("#clarify-button"),
         back: measure("#back-button"),
         audio: measure("#audio-toggle"),
+        solutionPaddingBottom: Number.parseFloat(
+          window.getComputedStyle(document.querySelector("#solution-container"))
+            .paddingBottom,
+        ),
       };
     });
 
@@ -146,6 +151,10 @@ test.describe("Gameplay ultra-narrow embedded landscape layout", () => {
     expect(layout.console.overflowX).toMatch(/auto|scroll/);
     expect(layout.console.left).toBeGreaterThanOrEqual(layout.panelB.left - 1);
     expect(layout.console.right).toBeLessThanOrEqual(layout.panelB.right + 1);
+    expect(layout.panelB.bottom - layout.console.bottom).toBeLessThanOrEqual(8);
+    expect(layout.solutionPaddingBottom).toBeGreaterThanOrEqual(
+      layout.console.height + (layout.panelB.bottom - layout.console.bottom) - 2,
+    );
     expect(layout.consoleSlot.width).toBeGreaterThanOrEqual(44);
     expect(layout.consoleSlot.height).toBeGreaterThanOrEqual(44);
     expect(layout.help.height).toBeGreaterThanOrEqual(44);

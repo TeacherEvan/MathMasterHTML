@@ -6,6 +6,13 @@
   --console-slot-size: 46px;
   --console-shell-gap: 0.25rem;
   --console-shell-padding: 0.75rem;
+  --console-border-inset: 4px;
+  --console-row-reserve: calc(
+    var(--console-slot-size) +
+    (var(--console-shell-padding) * 2) +
+    var(--console-border-inset) +
+    6px
+  );
 }
 
 .panel-b-controls {
@@ -128,9 +135,9 @@ body.viewport-compact.viewport-landscape #clarify-button {
 
 body.viewport-compact.viewport-portrait #symbol-console,
 body.viewport-compact.viewport-landscape #symbol-console {
-  left: 6px !important;
-  right: 6px !important;
-  bottom: 6px !important;
+  left: var(--console-border-inset) !important;
+  right: var(--console-border-inset) !important;
+  bottom: var(--console-border-inset) !important;
   transform: none !important;
   max-width: none;
   grid-template-columns: none !important;
@@ -140,6 +147,11 @@ body.viewport-compact.viewport-landscape #symbol-console {
   overflow-x: auto !important;
   overflow-y: hidden !important;
   scrollbar-width: none;
+}
+
+body.viewport-compact.viewport-portrait #solution-container,
+body.viewport-compact.viewport-landscape #solution-container {
+  padding-bottom: var(--console-row-reserve) !important;
 }
 
 body.viewport-compact.viewport-portrait #symbol-console::-webkit-scrollbar,

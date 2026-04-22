@@ -174,6 +174,35 @@ test.describe("Deferred Install Prompt — Build 8", () => {
     expect(await page.evaluate(() => window.__installDismissed)).toBe(true);
   });
 
+  test("rapid repeated taps only trigger the install prompt once", async ({
+    page,
+  }) => {
+    await seedOnboardingState(page, thresholdState(), "?level=beginner&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+    await simulateBeforeInstallPrompt(page);
+    await expect(page.locator(".toast")).toBeVisible();
+
+    await page.locator(".toast").evaluate((element) => {
+      for (let tap = 0; tap < 5; tap += 1) {
+        element.dispatchEvent(new PointerEvent("pointerdown", {
+          bubbles: true,
+          cancelable: true,
+          pointerType: "touch",
+          isPrimary: true,
+        }));
+        element.click();
+      }
+    });
+
+    await page.waitForFunction(
+      () => window.GameOnboardingStorage.getState().installPromptDismissedAt !== null,
+      { timeout: 5000 },
+    );
+
+    expect(await page.evaluate(() => window.__promptCalls)).toBe(1);
+    await expect(page.locator(".toast")).toHaveCount(0);
+  });
+
   test("InstallPromptManager exposes tryShow", async ({ page }) => {
     await gotoGameRuntime(page, "?level=beginner&preload=off");
     const hasTryShow = await page.evaluate(

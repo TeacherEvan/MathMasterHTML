@@ -85,10 +85,30 @@
     });
   }
 
+  function clampPointToPanelC(point) {
+    const panel = document.getElementById("panel-c");
+    const rect = panel?.getBoundingClientRect?.();
+    if (!rect) {
+      return point;
+    }
+
+    const inset = 8;
+    const minX = rect.left + inset;
+    const maxX = rect.right - inset;
+    const minY = rect.top + inset;
+    const maxY = rect.bottom - inset;
+
+    return {
+      x: Math.min(Math.max(point.x, minX), maxX),
+      y: Math.min(Math.max(point.y, minY), maxY),
+    };
+  }
+
   function moveHandToTarget(target) {
     const pos = window.EvanTargets?.centerOf?.(target) || { x: 0, y: 0 };
-    window.EvanPresenter?.moveHandTo?.(pos.x, pos.y);
-    return pos;
+    const safePos = clampPointToPanelC(pos);
+    window.EvanPresenter?.moveHandTo?.(safePos.x, safePos.y);
+    return safePos;
   }
 
   function collectNeededSymbols(targets) {

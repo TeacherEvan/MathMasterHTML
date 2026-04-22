@@ -27,6 +27,20 @@
   const getLiveTarget = (target) => (hasLiveRect(target) ? target : null);
   const emit = (name, detail) => document.dispatchEvent(new CustomEvent(name, { detail }));
 
+  function getSymbolRainClickContext() {
+    const state = window.__symbolRainState;
+    if (!state) {
+      return null;
+    }
+
+    return {
+      activeFallingSymbols: state.activeFallingSymbols,
+      symbolPool: state.symbolPool,
+      activeFaceReveals: state.activeFaceReveals,
+      spatialGrid: state.spatialGrid,
+    };
+  }
+
   function getTutorialBeatState() {
     if (!tutorial?.isH2PLevel?.()) {
       return null;
@@ -65,8 +79,24 @@
     if (!active || !getLiveTarget(target) || !liveSymbol) return;
     if (expectedSymbol && liveSymbol !== expectedSymbol) return;
 
-    target.classList.add("clicked");
-    emit(GE.SYMBOL_CLICKED, { symbol });
+    const symbolRainHelpers = window.SymbolRainHelpers;
+    const symbolRainClickContext = getSymbolRainClickContext();
+
+    if (
+      symbolRainHelpers?.handleSymbolClick &&
+      symbolRainClickContext &&
+      target.closest("#panel-c")
+    ) {
+      symbolRainHelpers.handleSymbolClick(
+        symbolRainClickContext,
+        target,
+        { target },
+      );
+    } else {
+      target.classList.add("clicked");
+      emit(GE.SYMBOL_CLICKED, { symbol });
+    }
+
     emit(GE.EVAN_ACTION_COMPLETED, { action: "symbolClick", symbol });
     await wait(pending, DELAY_POST);
   }

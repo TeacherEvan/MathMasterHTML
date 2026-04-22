@@ -5,6 +5,7 @@
 
   let deferredPrompt = null;
   let shown = false;
+  let promptInFlight = false;
   let toastManager = null;
   let toastEl = null;
 
@@ -60,14 +61,23 @@
   }
 
   async function promptNow() {
+    if (promptInFlight) {
+      return;
+    }
+
     if (!deferredPrompt) {
+      promptInFlight = false;
       shown = false;
       return;
     }
+
+    promptInFlight = true;
+
     try {
       await deferredPrompt.prompt();
       await deferredPrompt.userChoice;
     } catch {
+      promptInFlight = false;
       shown = false;
       dismissToast();
       return;
@@ -77,6 +87,7 @@
 
   function finish() {
     dismissToast();
+    promptInFlight = false;
     shown = false;
     storage.markInstallPromptDismissed();
     document.dispatchEvent(new CustomEvent(GE.INSTALL_PROMPT_DISMISSED));

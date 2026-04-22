@@ -229,4 +229,110 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
     expect(result).not.toBeNull();
     expect(result.chosenText).toBeNull();
   });
+
+  test("Evan keeps the hand inside Panel C and clears live rain state after collecting", async ({
+    page,
+  }) => {
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    await page.evaluate(() => {
+      window.__evanEdgeCollection = {
+        clicks: [],
+        handInsidePanel: false,
+        removedFromRainState: false,
+      };
+
+      const panel = document.getElementById("panel-c");
+      const state = window.__symbolRainState;
+      if (!panel || !state) {
+        return;
+      }
+
+      const panelRect = panel.getBoundingClientRect();
+      const fake = document.createElement("button");
+      fake.className = "falling-symbol";
+      fake.textContent = "x";
+      fake.getBoundingClientRect = () => ({
+        x: panelRect.right - 10,
+        y: panelRect.top + panelRect.height * 0.45,
+        width: 44,
+        height: 44,
+        top: panelRect.top + panelRect.height * 0.45,
+        left: panelRect.right - 10,
+        right: panelRect.right + 34,
+        bottom: panelRect.top + panelRect.height * 0.45 + 44,
+        toJSON() {
+          return this;
+        },
+      });
+      panel.appendChild(fake);
+      window.__evanEdgeCollection.target = fake;
+
+      const symbolObj = {
+        symbol: "x",
+        element: fake,
+        column: 0,
+        y: 0,
+      };
+      state.activeFallingSymbols.push(symbolObj);
+
+      document.addEventListener(window.GameEvents.SYMBOL_CLICKED, (event) => {
+        window.__evanEdgeCollection.clicks.push(event.detail?.symbol ?? null);
+      });
+
+      window.EvanTargets.getNeededSymbol = () => "x";
+      window.EvanTargets.getNeededSymbols = () => ["x"];
+      window.EvanTargets.findBestFallingSymbol = () => fake;
+      window.EvanTargets.findFallingSymbol = () => fake;
+      window.EvanTargets.findGreenWormSegment = () => null;
+      window.EvanTargets.findMuffinReward = () => null;
+      window.EvanTargets.getBestPowerUp = () => null;
+    });
+
+    await page.waitForFunction(() => window.__evanEdgeCollection.clicks.length > 0, {
+      timeout: 30000,
+    });
+
+    await page.waitForFunction(() => {
+      const state = window.__symbolRainState;
+      if (!state) {
+        return false;
+      }
+
+      return !state.activeFallingSymbols.some(
+        (symbolObj) => symbolObj?.element === window.__evanEdgeCollection.target,
+      );
+    }, { timeout: 3000 });
+
+    const result = await page.evaluate(() => {
+      const panel = document.getElementById("panel-c");
+      const hand = document.getElementById("evan-hand");
+      const state = window.__symbolRainState;
+      const transform = hand?.style.transform || "";
+      const match = transform.match(/translate3d\(([-\d.]+)px,\s*([-\d.]+)px/);
+      const panelRect = panel?.getBoundingClientRect();
+      const handX = match ? Number(match[1]) : null;
+      const handY = match ? Number(match[2]) : null;
+      const handInsidePanel =
+        panelRect &&
+        handX !== null &&
+        handY !== null &&
+        handX >= panelRect.left &&
+        handX <= panelRect.right &&
+        handY >= panelRect.top &&
+        handY <= panelRect.bottom;
+
+      return {
+        clicks: window.__evanEdgeCollection.clicks.slice(),
+        handInsidePanel,
+        removedFromRainState: !state.activeFallingSymbols.some(
+          (symbolObj) => symbolObj?.element === window.__evanEdgeCollection.target,
+        ),
+      };
+    });
+
+    expect(result.clicks).toContain("x");
+    expect(result.handInsidePanel).toBe(true);
+    expect(result.removedFromRainState).toBe(true);
+  });
 });
