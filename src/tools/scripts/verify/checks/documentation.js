@@ -10,6 +10,7 @@ const ALLOWED_MARKDOWN_FILES = new Set(REQUIRED_DOCS);
 const CUSTOM_AGENT_FILE_RE = /^\.github\/agents\/[^/]+\.agent\.md$/;
 const IGNORED_DIRECTORIES = new Set([
   ".git",
+  ".worktrees",
   "node_modules",
   "playwright-report",
   "test-results",

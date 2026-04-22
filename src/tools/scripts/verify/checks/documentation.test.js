@@ -144,3 +144,26 @@ test("rejects oversized allowed agent markdown files", () => {
     rmSync(rootDir, { recursive: true, force: true });
   }
 });
+
+test("ignores nested worktree markdown copies during documentation checks", () => {
+  const rootDir = mkdtempSync(join(tmpdir(), "mathmaster-docs-"));
+
+  try {
+    writeRequiredDocs(rootDir);
+
+    writeMarkdown(
+      rootDir,
+      [".worktrees", "feature-copy", "README.md"],
+      "# Worktree README copy\n",
+    );
+    writeMarkdown(
+      rootDir,
+      [".worktrees", "feature-copy", ".github", "agents", "using-superpowers.agent.md"],
+      "# Worktree Agent Copy\n",
+    );
+
+    assert.equal(checkDocumentation(rootDir), true);
+  } finally {
+    rmSync(rootDir, { recursive: true, force: true });
+  }
+});
