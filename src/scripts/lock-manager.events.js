@@ -48,27 +48,7 @@ console.log("🔒 LockManager events loading...");
         }`,
       );
 
-      if (lockManager.completedLinesCount === 2 && !isMasterLevel) {
-        console.log(
-          "🔒 Second line completed - forcing load of line-3-transformer.html",
-        );
-        lockManager.isLoadingComponent = true;
-        lockManager
-          .loadLockComponent("line-3-transformer.html")
-          .then(() => {
-            setTimeout(() => {
-              lockManager.activateLockLevel(3);
-              lockManager.currentLockLevel = 3;
-              lockManager.isLoadingComponent = false;
-            }, 300);
-          })
-          .catch((error) => {
-            console.error("❌ Failed to load line-3-transformer.html:", error);
-            lockManager.isLoadingComponent = false;
-          });
-      } else {
-        lockManager.progressLockLevel();
-      }
+      lockManager.progressLockLevel();
     });
   };
 

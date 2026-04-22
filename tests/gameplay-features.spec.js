@@ -692,6 +692,69 @@ test.describe("Row Reset — Worm Steals Blue Symbol", () => {
 test.describe("Console Selection Panel — Dedicated No-Scroll Window", () => {
   test.beforeEach(async ({ page }) => startGame(page));
 
+  test("reward selection waits until worms and muffins are cleared", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      window.wormSystem.killAllWorms();
+      window.wormSystem.spawnManager?.clearQueue?.();
+
+      const worm = window.wormSystem._spawnWormWithConfig({
+        logMessage: "console gating worm",
+        position: { x: 280, y: 220 },
+        wormIdPrefix: "console-gate-worm",
+        classNames: [],
+        baseSpeed: 0,
+        roamDuration: 30000,
+        fromConsole: false,
+      });
+
+      if (!worm) {
+        throw new Error("Failed to create gating worm");
+      }
+
+      worm.vx = 0;
+      worm.vy = 0;
+      worm.currentSpeed = 0;
+      worm.baseSpeed = 0;
+
+      const muffin = document.createElement("button");
+      muffin.type = "button";
+      muffin.className = "worm-muffin-reward";
+      muffin.textContent = "🧁";
+      muffin.style.left = "320px";
+      muffin.style.top = "220px";
+      (window.wormSystem.crossPanelContainer || document.body).appendChild(
+        muffin,
+      );
+
+      document.dispatchEvent(new CustomEvent("problemCompleted"));
+    });
+
+    await page.waitForTimeout(300);
+
+    expect(
+      await page.evaluate(() => {
+        const modal = document.getElementById("symbol-modal");
+        return modal ? window.getComputedStyle(modal).display : null;
+      }),
+    ).toBe("none");
+
+    await page.evaluate(() => {
+      window.wormSystem.killAllWorms();
+      document
+        .querySelectorAll(".worm-muffin-reward")
+        .forEach((reward) => reward.remove());
+    });
+
+    await page.waitForFunction(() => {
+      const modal = document.getElementById("symbol-modal");
+      return !!modal && window.getComputedStyle(modal).display !== "none";
+    });
+
+    await expect(page.locator(".console-selection-window")).toBeVisible();
+  });
+
   test("selection panel opens as a dedicated window without internal scrolling", async ({
     page,
   }) => {
@@ -753,6 +816,30 @@ test.describe("Console Selection Panel — Dedicated No-Scroll Window", () => {
     expect(panelState.positionButtonCount).toBeGreaterThan(0);
     expect(panelState.positionButtonsDisabled).toBe(true);
     expect(panelState.positionButtonsHaveDisabledClass).toBe(true);
+  });
+
+  test("selection modal stacks above panel B controls", async ({ page }) => {
+    await openConsoleSelectionModal(page);
+
+    const layerState = await page.evaluate(() => {
+      const modal = document.getElementById("symbol-modal");
+      const controls = document.querySelector(".panel-b-controls");
+      const consoleShell = document.getElementById("symbol-console");
+
+      if (!modal || !controls || !consoleShell) {
+        return null;
+      }
+
+      return {
+        modalZ: Number(window.getComputedStyle(modal).zIndex || 0),
+        controlsZ: Number(window.getComputedStyle(controls).zIndex || 0),
+        consoleZ: Number(window.getComputedStyle(consoleShell).zIndex || 0),
+      };
+    });
+
+    expect(layerState).toBeTruthy();
+    expect(layerState.modalZ).toBeGreaterThan(layerState.controlsZ);
+    expect(layerState.modalZ).toBeGreaterThan(layerState.consoleZ);
   });
 
   test("selecting a symbol updates the panel state without expanding the window", async ({

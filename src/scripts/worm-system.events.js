@@ -16,6 +16,41 @@
     WORM_CURSOR_UPDATE: "wormCursorUpdate",
   };
 
+  proto.findActiveWormAtPoint = function (x, y) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      return null;
+    }
+
+    const hitElement = document.elementFromPoint(x, y);
+    const hitContainer = hitElement?.closest?.(".worm-container");
+    if (hitContainer) {
+      const hitWorm = this.worms.find(
+        (worm) => worm?.active && worm.element === hitContainer,
+      );
+      if (hitWorm) {
+        return hitWorm;
+      }
+    }
+
+    return (
+      this.worms.find((worm) => {
+        if (!worm?.active || !worm.element?.isConnected) {
+          return false;
+        }
+
+        const rect = worm.element.getBoundingClientRect();
+        return (
+          rect.width > 0 &&
+          rect.height > 0 &&
+          x >= rect.left &&
+          x <= rect.right &&
+          y >= rect.top &&
+          y <= rect.bottom
+        );
+      }) || null
+    );
+  };
+
   // PERFORMANCE: Setup event listeners once (called from initialize)
   proto.setupEventListeners = function () {
     if (this.eventListenersInitialized) {
@@ -122,6 +157,21 @@
     this._eventHandlers[GameEvents.WORM_CURSOR_TAP] = (event) => {
       const detail = /** @type {CustomEvent} */ (event).detail;
       this.cursorState = detail;
+
+      const tapX = Number(detail?.clientX ?? detail?.x);
+      const tapY = Number(detail?.clientY ?? detail?.y);
+      const hitWorm = this.findActiveWormAtPoint(tapX, tapY);
+
+      if (!hitWorm) {
+        return;
+      }
+
+      this.handleWormInteraction(hitWorm, {
+        preventDefault() {},
+        stopPropagation() {},
+        clientX: tapX,
+        clientY: tapY,
+      });
     };
 
     for (const [eventName, handler] of Object.entries(this._eventHandlers)) {

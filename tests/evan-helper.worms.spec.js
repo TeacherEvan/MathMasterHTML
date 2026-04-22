@@ -172,4 +172,57 @@ test.describe("Evan Worm + Reward Behavior — Build 6", () => {
     expect(actions).toContain("wormTap");
     expect(actions).toContain("symbolClick");
   });
+
+  test("Evan worm taps explode an active green worm", async ({ page }) => {
+    await page.evaluate(() => {
+      window.wormSystem.killAllWorms();
+      window.wormSystem.spawnManager?.clearQueue?.();
+
+      const worm = window.wormSystem._spawnWormWithConfig({
+        logMessage: "test worm for Evan tap",
+        position: { x: 240, y: 240 },
+        wormIdPrefix: "evan-worm",
+        classNames: [],
+        baseSpeed: 0,
+        roamDuration: 30000,
+        fromConsole: false,
+      });
+
+      if (!worm) {
+        throw new Error("Failed to create test worm");
+      }
+
+      worm.vx = 0;
+      worm.vy = 0;
+      worm.currentSpeed = 0;
+      worm.baseSpeed = 0;
+      worm.element.style.setProperty("--worm-x", "240px");
+      worm.element.style.setProperty("--worm-y", "240px");
+
+      window.__evanWormId = worm.id;
+      window.EvanTargets.findGreenWormSegment = () =>
+        worm.element.querySelector(".worm-segment");
+      window.EvanTargets.findMuffinReward = () => null;
+      window.EvanTargets.getNeededSymbol = () => null;
+      window.EvanTargets.getNeededSymbols = () => [];
+      window.EvanTargets.findFallingSymbol = () => null;
+    });
+
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+    await page.waitForFunction(() => {
+      const worm = window.wormSystem.worms.find(
+        (entry) => entry.id === window.__evanWormId,
+      );
+      return Boolean(worm) && worm.active === false;
+    });
+
+    expect(
+      await page.evaluate(() => {
+        const worm = window.wormSystem.worms.find(
+          (entry) => entry.id === window.__evanWormId,
+        );
+        return worm?.active;
+      }),
+    ).toBe(false);
+  });
 });

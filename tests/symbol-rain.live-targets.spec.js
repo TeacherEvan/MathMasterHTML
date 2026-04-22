@@ -13,13 +13,10 @@ const MID_GAME_TARGET_PANEL_C_WAIT_MS = 45000;
 const MID_GAME_MIN_VISIBLE_PANEL_C_TARGETS = 20;
 
 async function attachPanelCProof(page, testInfo, name, metadata = {}) {
-  const panelC = page.locator("#panel-c");
-  const screenshotPath = testInfo.outputPath(`${name}.png`);
-
-  await panelC.screenshot({ path: screenshotPath });
+  const screenshot = await page.screenshot();
 
   await testInfo.attach(name, {
-    path: screenshotPath,
+    body: screenshot,
     contentType: "image/png",
   });
 

@@ -34,7 +34,13 @@
 
   function isStableVisibleLiveSymbol(state, targetSymbol) {
     const normalizedTarget = normalizeSymbol(targetSymbol);
-    const rainRect = SymbolRainHelpers.getRainWindowRect(state?.symbolRainContainer);
+    const getRainWindowRect = SymbolRainHelpers?.getRainWindowRect;
+
+    if (typeof getRainWindowRect !== "function") {
+      return hasVisibleLiveSymbol(state, targetSymbol);
+    }
+
+    const rainRect = getRainWindowRect(state?.symbolRainContainer);
 
     if (!rainRect) {
       return false;

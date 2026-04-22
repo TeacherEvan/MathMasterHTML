@@ -30,6 +30,7 @@ console.log("🎮 Console Manager core loading");
       this.selectionWindowElement = null;
       this.selectionStatusElement = null;
       this.isPendingSelection = false;
+      this.selectionGateTimer = null;
       this.currentLevel =
         typeof getLevelFromURL === "function"
           ? getLevelFromURL()
@@ -85,12 +86,59 @@ console.log("🎮 Console Manager core loading");
       };
 
       document.addEventListener(GameEvents.PROBLEM_COMPLETED, () => {
-        console.log("🎉 Problem completed! Opening console selection panel");
+        console.log("🎉 Problem completed! Queueing console selection panel");
         this.incrementProblemsCompleted();
-        this.showSymbolSelectionModal();
+        this.queueSymbolSelectionModal();
       });
 
       console.log("🎮 Console Manager ready!");
+    }
+
+    hasBlockingBoardRewards() {
+      return Array.from(
+        document.querySelectorAll("button.worm-muffin-reward"),
+      ).some((reward) => reward.isConnected);
+    }
+
+    hasActiveBoardWorms() {
+      const worms = window.wormSystem?.worms;
+      if (!Array.isArray(worms)) {
+        return false;
+      }
+
+      return worms.some((worm) => worm?.active);
+    }
+
+    isBoardClearForSelection() {
+      return !this.hasActiveBoardWorms() && !this.hasBlockingBoardRewards();
+    }
+
+    queueSymbolSelectionModal() {
+      if (this.isPendingSelection) {
+        return;
+      }
+
+      if (this.selectionGateTimer) {
+        window.clearTimeout(this.selectionGateTimer);
+        this.selectionGateTimer = null;
+      }
+
+      const tryOpen = () => {
+        if (this.isPendingSelection) {
+          this.selectionGateTimer = null;
+          return;
+        }
+
+        if (!this.isBoardClearForSelection()) {
+          this.selectionGateTimer = window.setTimeout(tryOpen, 120);
+          return;
+        }
+
+        this.selectionGateTimer = null;
+        this.showSymbolSelectionModal();
+      };
+
+      tryOpen();
     }
 
     getFilledSlotsCount() {
