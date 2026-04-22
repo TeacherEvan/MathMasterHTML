@@ -32,6 +32,21 @@ async function getCurrentStepSnapshot(page) {
   });
 }
 
+async function getCurrentNeededSymbols(page) {
+  return page.evaluate(() => {
+    const stepIndex = window.GameSymbolHandlerCore?.getCurrentStepIndex?.();
+    const selector =
+      Number.isInteger(stepIndex) && stepIndex >= 0
+        ? `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`
+        : "#solution-container .hidden-symbol";
+
+    return Array.from(document.querySelectorAll(selector))
+      .map((element) => element.dataset.expected || element.textContent || "")
+      .map((value) => String(value).trim())
+      .filter(Boolean);
+  });
+}
+
 async function findVisibleMatchingSymbol(page, symbols, timeoutMs = 5000) {
   const candidates = (Array.isArray(symbols) ? symbols : [symbols])
     .filter(Boolean)
@@ -296,6 +311,20 @@ test.describe("Symbol rain live targets", () => {
 
       expect(targetSymbol).toBeTruthy();
 
+      const screenshotPath = testInfo.outputPath(
+        `live-target-visible-${normalizeSymbolText(targetSymbol)}.png`,
+      );
+
+      await page.screenshot({
+        path: screenshotPath,
+        fullPage: true,
+      });
+
+      await testInfo.attach("live-target-visible", {
+        path: screenshotPath,
+        contentType: "image/png",
+      });
+
       const clicked = await clickLiveMatchingSymbol(page, targetSymbol);
       expect(clicked).toBe(true);
 
@@ -401,7 +430,7 @@ test.describe("Symbol rain live targets", () => {
   }, testInfo) => {
     test.skip(
       !soakProjects.has(testInfo.project.name),
-      "This soak contract only runs on the Chromium and WebKit gameplay projects.",
+      "This soak contract only runs on the Chromium, WebKit, and Firefox gameplay projects.",
     );
 
     test.setTimeout(90000);
@@ -409,23 +438,75 @@ test.describe("Symbol rain live targets", () => {
     await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
     await dismissBriefingAndWaitForInteractiveGameplay(page);
 
+    const expectedTrackedSymbols = [
+      ...new Set(
+        (await getCurrentNeededSymbols(page)).map((symbol) =>
+          normalizeSymbolText(symbol),
+        ),
+      ),
+    ].filter(Boolean);
+
+    expect(expectedTrackedSymbols.length).toBeGreaterThan(0);
+
     const soakDeadline = Date.now() + 60000;
+    const soakStart = Date.now();
     let iterationCount = 0;
     const observedVisibleSymbols = new Set();
+    const proofTimeline = [];
     const useActiveSymbolState = testInfo.project.name !== "qa-matrix-chromium";
 
     while (Date.now() < soakDeadline) {
       const windowDeadline = Math.min(Date.now() + 5000, soakDeadline);
       const visibleThisWindow = new Set();
+      let capturedWindowScreenshot = false;
 
       while (Date.now() < windowDeadline) {
         const currentVisibleSymbols = useActiveSymbolState
           ? await getActivePanelCSymbols(page)
           : await getVisiblePanelCSymbols(page);
-        currentVisibleSymbols.forEach((symbol) => {
+
+        const trackedVisibleSymbols = currentVisibleSymbols
+          .map((symbol) => normalizeSymbolText(symbol))
+          .filter((symbol) => expectedTrackedSymbols.includes(symbol))
+          ;
+
+        trackedVisibleSymbols.forEach((symbol) => {
           visibleThisWindow.add(symbol);
           observedVisibleSymbols.add(symbol);
         });
+
+        if (!capturedWindowScreenshot && trackedVisibleSymbols.length > 0) {
+          capturedWindowScreenshot = true;
+
+          const elapsedSeconds = Math.min(
+            60,
+            Math.max(1, Math.ceil((Date.now() - soakStart) / 1000)),
+          );
+
+          const windowVisibleSymbols = Array.from(visibleThisWindow).sort();
+          proofTimeline.push({
+            windowIndex: iterationCount + 1,
+            elapsedSeconds,
+            visibleTrackedSymbols: windowVisibleSymbols,
+          });
+
+          const screenshotPath = testInfo.outputPath(
+            `panel-c-window-${String(elapsedSeconds).padStart(2, "0")}s-${String(iterationCount + 1).padStart(2, "0")}.png`,
+          );
+
+          await page.screenshot({
+            path: screenshotPath,
+            fullPage: true,
+          });
+
+          await testInfo.attach(
+            `panel-c-window-${String(elapsedSeconds).padStart(2, "0")}s`,
+            {
+              path: screenshotPath,
+              contentType: "image/png",
+            },
+          );
+        }
 
         await page.waitForTimeout(250);
       }
@@ -434,7 +515,15 @@ test.describe("Symbol rain live targets", () => {
       expect(visibleThisWindow.size).toBeGreaterThan(0);
     }
 
-    expect(observedVisibleSymbols.size).toBeGreaterThan(1);
+    expect(Array.from(observedVisibleSymbols).sort()).toEqual(
+      [...expectedTrackedSymbols].sort(),
+    );
+
+    await testInfo.attach("panel-c-flow-timeline", {
+      body: Buffer.from(JSON.stringify(proofTimeline, null, 2)),
+      contentType: "application/json",
+    });
+
     expect(iterationCount).toBeGreaterThan(0);
   });
 

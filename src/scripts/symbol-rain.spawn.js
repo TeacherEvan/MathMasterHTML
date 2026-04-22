@@ -331,32 +331,6 @@
       const currentTimestamp = Date.now();
 
       spawnNeededSymbols(state, currentTimestamp);
-
-      state.symbols.forEach((symbolChar) => {
-        if (
-          currentTimestamp - state.lastSymbolSpawnTimestamp[symbolChar] >
-          state.config.guaranteedSpawnInterval
-        ) {
-          const randomColumnIndex = Math.floor(
-            Math.random() * state.columnCount,
-          );
-          SymbolRainHelpers.createFallingSymbol(
-            {
-              symbols: state.symbols,
-              symbolRainContainer: state.symbolRainContainer,
-              config: state.config,
-              activeFallingSymbols: state.activeFallingSymbols,
-              symbolPool: state.symbolPool,
-              lastSymbolSpawnTimestamp: state.lastSymbolSpawnTimestamp,
-            },
-            {
-              column: randomColumnIndex,
-              isInitialPopulation: false,
-              forcedSymbol: symbolChar,
-            },
-          );
-        }
-      });
     }, 1000);
   }
 
