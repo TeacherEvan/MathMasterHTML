@@ -1,5 +1,12 @@
 # JOBCARD
 
+## Latest update (2026-04-23)
+
+- Pinned the compact Panel B console against the panel border while reserving bottom clearance inside `#solution-container` so the final answer row is no longer obscured by the shortcut console.
+- Routed Evan auto-collection through `SymbolRainHelpers.handleSymbolClick` with `window.__symbolRainState` and clamped Evan hand movement to Panel C bounds so edge targets stay collectible without the helper drifting out of bounds.
+- Added an in-flight latch to the deferred install prompt so repeated fast taps on the toast cannot fire multiple native prompts during gameplay.
+- Added focused regressions in `tests/game-mobile-layout.ultranarrow.spec.js`, `tests/evan-helper.symbols.spec.js`, and `tests/install-prompt.spec.js`, then confirmed adjacent contracts with `tests/symbol-rain.mobile.spec.js`, `tests/game-portrait-device-contract.spec.js`, `npm run verify`, and `npm run typecheck`.
+
 ## Latest update (2026-04-22)
 
 - Added a 60-second `@soak` Symbol Rain lane that checks every tracked Panel C symbol in 5-second windows across the full minute.
