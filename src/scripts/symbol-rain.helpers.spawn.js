@@ -33,6 +33,7 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
       isInitialPopulation = false,
       forcedSymbol = null,
       initialY = null,
+      horizontalOffset = null,
     },
   ) {
     if (activeFallingSymbols.length >= (config.maxActiveSymbols || 200)) {
@@ -44,9 +45,11 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
     symbol.textContent =
       forcedSymbol || symbols[Math.floor(Math.random() * symbols.length)];
 
-    const horizontalOffset = (Math.random() - 0.5) * 40;
+    const resolvedHorizontalOffset = Number.isFinite(horizontalOffset)
+      ? horizontalOffset
+      : (Math.random() - 0.5) * 40;
     const x =
-      column * config.columnWidth + config.columnWidth / 2 + horizontalOffset;
+      column * config.columnWidth + config.columnWidth / 2 + resolvedHorizontalOffset;
     const y = Number.isFinite(initialY)
       ? initialY
       : isInitialPopulation

@@ -102,6 +102,28 @@
     return availableColumnIndices;
   }
 
+  function getLeastOccupiedAvailableColumn(state, availableColumns) {
+    let selectedColumn = availableColumns[0];
+    let selectedLoad = Number.POSITIVE_INFINITY;
+
+    for (const columnIndex of availableColumns) {
+      let columnLoad = 0;
+
+      for (const symbolObj of state.activeFallingSymbols) {
+        if (symbolObj.column === columnIndex && isVisibleInRainWindow(state, symbolObj)) {
+          columnLoad += 1;
+        }
+      }
+
+      if (columnLoad < selectedLoad) {
+        selectedColumn = columnIndex;
+        selectedLoad = columnLoad;
+      }
+    }
+
+    return selectedColumn;
+  }
+
   function releaseSymbolForPrioritySpawn(state, neededSymbolSet) {
     const maxActiveSymbols = state.config.maxActiveSymbols || 200;
     const hasCapacity = state.activeFallingSymbols.length < maxActiveSymbols;
@@ -160,13 +182,28 @@
     return getAvailablePriorityColumns(state);
   }
 
-  function getVisiblePrioritySpawnY(state) {
+  function getVisiblePrioritySpawnY(state, slotIndex = 0) {
     if (!Number.isFinite(state.cachedContainerHeight) || state.cachedContainerHeight <= 0) {
       return 0;
     }
 
-    const preferredY = state.cachedContainerHeight * 0.18;
     const symbolHeight = state.config.symbolHeight || 42;
+    const minY = Math.max(0, symbolHeight * 0.9);
+    const maxY = Math.max(minY, state.cachedContainerHeight - symbolHeight * 2.4);
+    const verticalBandCount = Math.max(
+      1,
+      Math.min(
+        6,
+        Math.floor((maxY - minY) / Math.max(symbolHeight * 1.1, 1)) + 1,
+      ),
+    );
+
+    if (verticalBandCount === 1) {
+      return Math.max(0, Math.min(minY, state.cachedContainerHeight - symbolHeight));
+    }
+
+    const bandIndex = Math.abs(slotIndex) % verticalBandCount;
+    const preferredY = minY + ((maxY - minY) / (verticalBandCount - 1)) * bandIndex;
 
     return Math.max(0, Math.min(preferredY, state.cachedContainerHeight - symbolHeight));
   }
@@ -187,9 +224,9 @@
       return false;
     }
 
-    const randomColumnIndex = availableColumns[
-      Math.floor(Math.random() * availableColumns.length)
-    ];
+    const selectedColumnIndex = options.preferLeastOccupiedColumn
+      ? getLeastOccupiedAvailableColumn(state, availableColumns)
+      : availableColumns[Math.floor(Math.random() * availableColumns.length)];
     const createdSymbol = SymbolRainHelpers.createFallingSymbol(
       {
         symbols: state.symbols,
@@ -200,10 +237,11 @@
         lastSymbolSpawnTimestamp: state.lastSymbolSpawnTimestamp,
       },
       {
-        column: randomColumnIndex,
+        column: selectedColumnIndex,
         isInitialPopulation: false,
         forcedSymbol: symbolChar,
         initialY: options.initialY,
+        horizontalOffset: options.horizontalOffset,
       },
     );
 
@@ -220,10 +258,7 @@
       return;
     }
 
-    const minVisibleSymbols = Math.min(
-      state.columnCount,
-      state.config.minVisibleSymbols || 0,
-    );
+    const minVisibleSymbols = state.config.minVisibleSymbols || 0;
 
     if (minVisibleSymbols <= 0) {
       return;
@@ -246,16 +281,31 @@
 
     state.lastCompactBackfillTimestamp = currentTimestamp;
 
+    let spawnIndex = 0;
+
     while (visibleCount < minVisibleSymbols) {
       const symbolChar =
         prioritizedMissingSymbols.shift() ||
         state.symbols[Math.floor(Math.random() * state.symbols.length)];
 
-      if (!spawnPrioritySymbol(state, symbolChar, neededSymbolSet, currentTimestamp)) {
+      if (
+        !spawnPrioritySymbol(
+          state,
+          symbolChar,
+          neededSymbolSet,
+          currentTimestamp,
+          {
+            initialY: getVisiblePrioritySpawnY(state, spawnIndex),
+            preferLeastOccupiedColumn: true,
+            horizontalOffset: 0,
+          },
+        )
+      ) {
         break;
       }
 
       visibleCount += 1;
+      spawnIndex += 1;
     }
   }
 
@@ -288,7 +338,11 @@
           symbolChar,
           neededSymbolSet,
           currentTimestamp,
-          { initialY: getVisiblePrioritySpawnY(state) },
+          {
+            initialY: getVisiblePrioritySpawnY(state, symbolChar.charCodeAt(0) || 0),
+            preferLeastOccupiedColumn: true,
+            horizontalOffset: 0,
+          },
         )
       ) {
         break;

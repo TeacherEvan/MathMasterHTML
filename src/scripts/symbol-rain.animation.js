@@ -37,14 +37,16 @@
       const symbolObj = state.activeFallingSymbols[i];
       if (state.symbolsToRemove.has(symbolObj)) continue;
 
-      const touchingSymbol = SymbolRainHelpers.checkTouching(
-        {
-          config: state.config,
-          isMobileMode: state.isMobileMode,
-          spatialGrid: state.spatialGrid,
-        },
-        symbolObj,
-      );
+      const touchingSymbol = state.isMobileMode
+        ? SymbolRainHelpers.checkTouching(
+            {
+              config: state.config,
+              isMobileMode: state.isMobileMode,
+              spatialGrid: state.spatialGrid,
+            },
+            symbolObj,
+          )
+        : null;
       if (touchingSymbol) {
         state.symbolsToRemove.add(symbolObj);
         state.symbolsToRemove.add(touchingSymbol);
