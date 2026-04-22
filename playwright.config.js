@@ -16,10 +16,12 @@ export default defineConfig({
   // Keep Playwright focused on browser E2E specs.
   // Unit/integration suites under these folders use Jest-style mocks and APIs.
   testIgnore: ["**/unit/**", "**/integration/**", "**/performance/**"],
+  outputDir: "test-results/default",
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
+  preserveOutput: "failures-only",
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */

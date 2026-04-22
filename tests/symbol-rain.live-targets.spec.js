@@ -9,6 +9,12 @@ function normalizeSymbolText(value) {
   return normalized === "x" ? "X" : normalized;
 }
 
+const SOAK_SAMPLE_INTERVAL_MS = 250;
+const SOAK_WINDOW_MS = 5000;
+const SOAK_REQUIRED_CONSECUTIVE_VISIBLE_SAMPLES = 4;
+const SOAK_MIN_VISIBLE_TRACKED_SYMBOLS = 1;
+const SOAK_MIN_VISIBLE_PANEL_C_SYMBOLS = 1;
+
 async function getCurrentStepSnapshot(page) {
   return page.evaluate(() => {
     const firstHidden = document.querySelector(
@@ -268,23 +274,63 @@ async function getVisiblePanelCSymbols(page) {
   });
 }
 
-async function getActivePanelCSymbols(page) {
-  return page.evaluate(() => {
-    const state = window.__symbolRainState;
-    if (!state?.activeFallingSymbols?.length) {
-      return [];
-    }
+async function sampleVisiblePanelCState(page, trackedSymbols = []) {
+  const normalizedTrackedSymbols = [
+    ...new Set(
+      trackedSymbols
+        .filter(Boolean)
+        .map((symbol) => normalizeSymbolText(symbol)),
+    ),
+  ];
 
-    return Array.from(
-      new Set(
-        state.activeFallingSymbols
-          .filter((symbolObj) => symbolObj?.element?.isConnected)
-          .filter((symbolObj) => !symbolObj.element.classList.contains("clicked"))
-          .map((symbolObj) => String(symbolObj.symbol || "").trim())
-          .filter(Boolean),
-      ),
-    );
-  });
+  return page.evaluate((targetSymbols) => {
+    const normalize = (value) => {
+      const normalized = String(value || "").trim();
+      return normalized === "x" ? "X" : normalized;
+    };
+
+    const visiblePanelCSymbols = new Set();
+    const visibleTrackedSymbols = new Set();
+
+    Array.from(
+      document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
+    ).forEach((element) => {
+      const rect = element.getBoundingClientRect();
+      const panel = element.closest("#panel-c");
+      const panelRect = panel?.getBoundingClientRect();
+      if (!panelRect) {
+        return;
+      }
+
+      const intersectsPanel =
+        rect.bottom > panelRect.top &&
+        rect.top < panelRect.bottom &&
+        rect.right > panelRect.left &&
+        rect.left < panelRect.right;
+
+      if (!intersectsPanel) {
+        return;
+      }
+
+      const symbolText = normalize(element.textContent);
+      if (!symbolText) {
+        return;
+      }
+
+      visiblePanelCSymbols.add(symbolText);
+
+      if (targetSymbols.includes(symbolText)) {
+        visibleTrackedSymbols.add(symbolText);
+      }
+    });
+
+    return {
+      visiblePanelCSymbolCount: visiblePanelCSymbols.size,
+      visiblePanelCSymbols: Array.from(visiblePanelCSymbols),
+      visibleTrackedCount: visibleTrackedSymbols.size,
+      visibleTrackedSymbols: Array.from(visibleTrackedSymbols),
+    };
+  }, normalizedTrackedSymbols);
 }
 
 test.describe("Symbol rain live targets", () => {
@@ -453,40 +499,62 @@ test.describe("Symbol rain live targets", () => {
     let iterationCount = 0;
     const observedVisibleSymbols = new Set();
     const proofTimeline = [];
-    const useActiveSymbolState = testInfo.project.name !== "qa-matrix-chromium";
 
     while (Date.now() < soakDeadline) {
-      const windowDeadline = Math.min(Date.now() + 5000, soakDeadline);
+      const windowDeadline = Math.min(Date.now() + SOAK_WINDOW_MS, soakDeadline);
       const visibleThisWindow = new Set();
       let capturedWindowScreenshot = false;
+      let consecutiveVisibleSamples = 0;
+      let maxConsecutiveVisibleSamples = 0;
 
       while (Date.now() < windowDeadline) {
-        const currentVisibleSymbols = useActiveSymbolState
-          ? await getActivePanelCSymbols(page)
-          : await getVisiblePanelCSymbols(page);
-
-        const trackedVisibleSymbols = currentVisibleSymbols
+        const visibilitySnapshot = await sampleVisiblePanelCState(
+          page,
+          expectedTrackedSymbols,
+        );
+        const trackedVisibleSymbols = visibilitySnapshot.visibleTrackedSymbols
           .map((symbol) => normalizeSymbolText(symbol))
-          .filter((symbol) => expectedTrackedSymbols.includes(symbol))
-          ;
+          .filter((symbol) => expectedTrackedSymbols.includes(symbol));
 
         trackedVisibleSymbols.forEach((symbol) => {
           visibleThisWindow.add(symbol);
           observedVisibleSymbols.add(symbol);
         });
 
-        if (!capturedWindowScreenshot && trackedVisibleSymbols.length > 0) {
+        const meetsVisibilityThreshold =
+          visibilitySnapshot.visibleTrackedCount >=
+            SOAK_MIN_VISIBLE_TRACKED_SYMBOLS &&
+          visibilitySnapshot.visiblePanelCSymbolCount >=
+            SOAK_MIN_VISIBLE_PANEL_C_SYMBOLS;
+
+        consecutiveVisibleSamples = meetsVisibilityThreshold
+          ? consecutiveVisibleSamples + 1
+          : 0;
+        maxConsecutiveVisibleSamples = Math.max(
+          maxConsecutiveVisibleSamples,
+          consecutiveVisibleSamples,
+        );
+
+        if (
+          !capturedWindowScreenshot &&
+          consecutiveVisibleSamples >= SOAK_REQUIRED_CONSECUTIVE_VISIBLE_SAMPLES
+        ) {
           capturedWindowScreenshot = true;
+
+          expect(visibilitySnapshot.visiblePanelCSymbolCount).toBeGreaterThan(0);
 
           const elapsedSeconds = Math.min(
             60,
             Math.max(1, Math.ceil((Date.now() - soakStart) / 1000)),
           );
 
-          const windowVisibleSymbols = Array.from(visibleThisWindow).sort();
+          const windowVisibleSymbols = [...trackedVisibleSymbols].sort();
           proofTimeline.push({
             windowIndex: iterationCount + 1,
             elapsedSeconds,
+            visiblePanelCSymbolCount: visibilitySnapshot.visiblePanelCSymbolCount,
+            visiblePanelCSymbols: [...visibilitySnapshot.visiblePanelCSymbols].sort(),
+            visibleTrackedCount: visibilitySnapshot.visibleTrackedCount,
             visibleTrackedSymbols: windowVisibleSymbols,
           });
 
@@ -508,11 +576,16 @@ test.describe("Symbol rain live targets", () => {
           );
         }
 
-        await page.waitForTimeout(250);
+        await page.waitForTimeout(SOAK_SAMPLE_INTERVAL_MS);
       }
       iterationCount += 1;
 
-      expect(visibleThisWindow.size).toBeGreaterThan(0);
+      expect(maxConsecutiveVisibleSamples).toBeGreaterThanOrEqual(
+        SOAK_REQUIRED_CONSECUTIVE_VISIBLE_SAMPLES,
+      );
+      expect(visibleThisWindow.size).toBeGreaterThanOrEqual(
+        SOAK_MIN_VISIBLE_TRACKED_SYMBOLS,
+      );
     }
 
     expect(Array.from(observedVisibleSymbols).sort()).toEqual(

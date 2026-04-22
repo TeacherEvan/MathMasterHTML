@@ -6,8 +6,10 @@ const smokeFiles = ["lock-components.spec.js", "managers.spec.js"];
 export default defineConfig({
   testDir: "./tests",
   testIgnore: ["**/unit/**", "**/integration/**", "**/performance/**"],
+  outputDir: "test-results/competition",
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
+  preserveOutput: "failures-only",
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : 1,
   reporter: [
