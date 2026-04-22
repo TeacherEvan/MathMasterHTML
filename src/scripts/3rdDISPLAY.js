@@ -66,7 +66,7 @@ function initSymbolRain() {
         guaranteedSpawnInterval: 5000,
         symbolsPerWave: 14,
         maxActiveSymbols: 200,
-        minVisibleSymbols: 0,
+        minVisibleSymbols: 22,
       },
     };
     const preservePerfSmokeConfig = window.__PERF_SMOKE_MODE === true;

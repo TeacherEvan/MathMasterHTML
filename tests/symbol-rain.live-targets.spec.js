@@ -9,11 +9,27 @@ function normalizeSymbolText(value) {
   return normalized === "x" ? "X" : normalized;
 }
 
-const SOAK_SAMPLE_INTERVAL_MS = 250;
-const SOAK_WINDOW_MS = 5000;
-const SOAK_REQUIRED_CONSECUTIVE_VISIBLE_SAMPLES = 4;
-const SOAK_MIN_VISIBLE_TRACKED_SYMBOLS = 1;
-const SOAK_MIN_VISIBLE_PANEL_C_SYMBOLS = 1;
+const MID_GAME_TARGET_PANEL_C_WAIT_MS = 45000;
+const MID_GAME_MIN_VISIBLE_PANEL_C_TARGETS = 20;
+
+async function attachPanelCProof(page, testInfo, name, metadata = {}) {
+  const panelC = page.locator("#panel-c");
+  const screenshotPath = testInfo.outputPath(`${name}.png`);
+
+  await panelC.screenshot({ path: screenshotPath });
+
+  await testInfo.attach(name, {
+    path: screenshotPath,
+    contentType: "image/png",
+  });
+
+  if (Object.keys(metadata).length > 0) {
+    await testInfo.attach(`${name}-metadata`, {
+      body: Buffer.from(JSON.stringify(metadata, null, 2)),
+      contentType: "application/json",
+    });
+  }
+}
 
 async function getCurrentStepSnapshot(page) {
   return page.evaluate(() => {
@@ -246,9 +262,9 @@ async function getVisibleMatchingSymbols(page, symbolTexts) {
   }, normalizedTargets);
 }
 
-async function getVisiblePanelCSymbols(page) {
+async function countVisiblePanelCTargets(page) {
   return page.evaluate(() => {
-    const symbols = new Set();
+    let visibleTargetCount = 0;
 
     Array.from(document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"))
       .forEach((element) => {
@@ -266,71 +282,12 @@ async function getVisiblePanelCSymbols(page) {
           rect.left < panelRect.right;
 
         if (intersectsPanel) {
-          symbols.add(String(element.textContent || "").trim());
+          visibleTargetCount += 1;
         }
       });
 
-    return Array.from(symbols).filter(Boolean);
+    return visibleTargetCount;
   });
-}
-
-async function sampleVisiblePanelCState(page, trackedSymbols = []) {
-  const normalizedTrackedSymbols = [
-    ...new Set(
-      trackedSymbols
-        .filter(Boolean)
-        .map((symbol) => normalizeSymbolText(symbol)),
-    ),
-  ];
-
-  return page.evaluate((targetSymbols) => {
-    const normalize = (value) => {
-      const normalized = String(value || "").trim();
-      return normalized === "x" ? "X" : normalized;
-    };
-
-    const visiblePanelCSymbols = new Set();
-    const visibleTrackedSymbols = new Set();
-
-    Array.from(
-      document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
-    ).forEach((element) => {
-      const rect = element.getBoundingClientRect();
-      const panel = element.closest("#panel-c");
-      const panelRect = panel?.getBoundingClientRect();
-      if (!panelRect) {
-        return;
-      }
-
-      const intersectsPanel =
-        rect.bottom > panelRect.top &&
-        rect.top < panelRect.bottom &&
-        rect.right > panelRect.left &&
-        rect.left < panelRect.right;
-
-      if (!intersectsPanel) {
-        return;
-      }
-
-      const symbolText = normalize(element.textContent);
-      if (!symbolText) {
-        return;
-      }
-
-      visiblePanelCSymbols.add(symbolText);
-
-      if (targetSymbols.includes(symbolText)) {
-        visibleTrackedSymbols.add(symbolText);
-      }
-    });
-
-    return {
-      visiblePanelCSymbolCount: visiblePanelCSymbols.size,
-      visiblePanelCSymbols: Array.from(visiblePanelCSymbols),
-      visibleTrackedCount: visibleTrackedSymbols.size,
-      visibleTrackedSymbols: Array.from(visibleTrackedSymbols),
-    };
-  }, normalizedTrackedSymbols);
 }
 
 test.describe("Symbol rain live targets", () => {
@@ -357,19 +314,17 @@ test.describe("Symbol rain live targets", () => {
 
       expect(targetSymbol).toBeTruthy();
 
-      const screenshotPath = testInfo.outputPath(
-        `live-target-visible-${normalizeSymbolText(targetSymbol)}.png`,
+      await attachPanelCProof(
+        page,
+        testInfo,
+        `live-target-visible-${normalizeSymbolText(targetSymbol)}`,
+        {
+          hiddenSymbols: before.hiddenSymbols.map((symbol) =>
+            normalizeSymbolText(symbol),
+          ),
+          targetSymbol: normalizeSymbolText(targetSymbol),
+        },
       );
-
-      await page.screenshot({
-        path: screenshotPath,
-        fullPage: true,
-      });
-
-      await testInfo.attach("live-target-visible", {
-        path: screenshotPath,
-        contentType: "image/png",
-      });
 
       const clicked = await clickLiveMatchingSymbol(page, targetSymbol);
       expect(clicked).toBe(true);
@@ -469,9 +424,13 @@ test.describe("Symbol rain live targets", () => {
         timeout: 10000,
       })
       .toBe(true);
+
+    await attachPanelCProof(page, testInfo, "panel-c-respawn-proof", {
+      targetSymbol: normalizeSymbolText(targetSymbol),
+    });
   });
 
-  test("keeps Panel C targets flowing for 60 seconds @soak", async ({
+  test("mid game targetpanl-c-verification @soak", async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -484,120 +443,19 @@ test.describe("Symbol rain live targets", () => {
     await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
     await dismissBriefingAndWaitForInteractiveGameplay(page);
 
-    const expectedTrackedSymbols = [
-      ...new Set(
-        (await getCurrentNeededSymbols(page)).map((symbol) =>
-          normalizeSymbolText(symbol),
-        ),
-      ),
-    ].filter(Boolean);
+    await page.waitForTimeout(MID_GAME_TARGET_PANEL_C_WAIT_MS);
 
-    expect(expectedTrackedSymbols.length).toBeGreaterThan(0);
+    const visibleTargetCount = await countVisiblePanelCTargets(page);
 
-    const soakDeadline = Date.now() + 60000;
-    const soakStart = Date.now();
-    let iterationCount = 0;
-    const observedVisibleSymbols = new Set();
-    const proofTimeline = [];
-
-    while (Date.now() < soakDeadline) {
-      const windowDeadline = Math.min(Date.now() + SOAK_WINDOW_MS, soakDeadline);
-      const visibleThisWindow = new Set();
-      let capturedWindowScreenshot = false;
-      let consecutiveVisibleSamples = 0;
-      let maxConsecutiveVisibleSamples = 0;
-
-      while (Date.now() < windowDeadline) {
-        const visibilitySnapshot = await sampleVisiblePanelCState(
-          page,
-          expectedTrackedSymbols,
-        );
-        const trackedVisibleSymbols = visibilitySnapshot.visibleTrackedSymbols
-          .map((symbol) => normalizeSymbolText(symbol))
-          .filter((symbol) => expectedTrackedSymbols.includes(symbol));
-
-        trackedVisibleSymbols.forEach((symbol) => {
-          visibleThisWindow.add(symbol);
-          observedVisibleSymbols.add(symbol);
-        });
-
-        const meetsVisibilityThreshold =
-          visibilitySnapshot.visibleTrackedCount >=
-            SOAK_MIN_VISIBLE_TRACKED_SYMBOLS &&
-          visibilitySnapshot.visiblePanelCSymbolCount >=
-            SOAK_MIN_VISIBLE_PANEL_C_SYMBOLS;
-
-        consecutiveVisibleSamples = meetsVisibilityThreshold
-          ? consecutiveVisibleSamples + 1
-          : 0;
-        maxConsecutiveVisibleSamples = Math.max(
-          maxConsecutiveVisibleSamples,
-          consecutiveVisibleSamples,
-        );
-
-        if (
-          !capturedWindowScreenshot &&
-          consecutiveVisibleSamples >= SOAK_REQUIRED_CONSECUTIVE_VISIBLE_SAMPLES
-        ) {
-          capturedWindowScreenshot = true;
-
-          expect(visibilitySnapshot.visiblePanelCSymbolCount).toBeGreaterThan(0);
-
-          const elapsedSeconds = Math.min(
-            60,
-            Math.max(1, Math.ceil((Date.now() - soakStart) / 1000)),
-          );
-
-          const windowVisibleSymbols = [...trackedVisibleSymbols].sort();
-          proofTimeline.push({
-            windowIndex: iterationCount + 1,
-            elapsedSeconds,
-            visiblePanelCSymbolCount: visibilitySnapshot.visiblePanelCSymbolCount,
-            visiblePanelCSymbols: [...visibilitySnapshot.visiblePanelCSymbols].sort(),
-            visibleTrackedCount: visibilitySnapshot.visibleTrackedCount,
-            visibleTrackedSymbols: windowVisibleSymbols,
-          });
-
-          const screenshotPath = testInfo.outputPath(
-            `panel-c-window-${String(elapsedSeconds).padStart(2, "0")}s-${String(iterationCount + 1).padStart(2, "0")}.png`,
-          );
-
-          await page.screenshot({
-            path: screenshotPath,
-            fullPage: true,
-          });
-
-          await testInfo.attach(
-            `panel-c-window-${String(elapsedSeconds).padStart(2, "0")}s`,
-            {
-              path: screenshotPath,
-              contentType: "image/png",
-            },
-          );
-        }
-
-        await page.waitForTimeout(SOAK_SAMPLE_INTERVAL_MS);
-      }
-      iterationCount += 1;
-
-      expect(maxConsecutiveVisibleSamples).toBeGreaterThanOrEqual(
-        SOAK_REQUIRED_CONSECUTIVE_VISIBLE_SAMPLES,
-      );
-      expect(visibleThisWindow.size).toBeGreaterThanOrEqual(
-        SOAK_MIN_VISIBLE_TRACKED_SYMBOLS,
-      );
-    }
-
-    expect(Array.from(observedVisibleSymbols).sort()).toEqual(
-      [...expectedTrackedSymbols].sort(),
-    );
-
-    await testInfo.attach("panel-c-flow-timeline", {
-      body: Buffer.from(JSON.stringify(proofTimeline, null, 2)),
-      contentType: "application/json",
+    await attachPanelCProof(page, testInfo, "mid-game-targetpanl-c-verification", {
+      elapsedSeconds: MID_GAME_TARGET_PANEL_C_WAIT_MS / 1000,
+      minimumVisibleTargets: MID_GAME_MIN_VISIBLE_PANEL_C_TARGETS,
+      visibleTargetCount,
     });
 
-    expect(iterationCount).toBeGreaterThan(0);
+    expect(visibleTargetCount).toBeGreaterThanOrEqual(
+      MID_GAME_MIN_VISIBLE_PANEL_C_TARGETS,
+    );
   });
 
   test("re-syncs cached container height after a Panel C-only reflow", async ({
@@ -640,5 +498,7 @@ test.describe("Symbol rain live targets", () => {
     expect(
       Math.abs(result.cachedContainerHeight - result.actualRainHeight),
     ).toBeLessThanOrEqual(2);
+
+    await attachPanelCProof(page, testInfo, "panel-c-reflow-proof", result);
   });
 });

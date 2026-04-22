@@ -32,8 +32,51 @@
     });
   }
 
+  function isStableVisibleLiveSymbol(state, targetSymbol) {
+    const normalizedTarget = normalizeSymbol(targetSymbol);
+    const rainRect = SymbolRainHelpers.getRainWindowRect(state?.symbolRainContainer);
+
+    if (!rainRect) {
+      return false;
+    }
+
+    return state.activeFallingSymbols.some((symbolObj) => {
+      if (normalizeSymbol(symbolObj.symbol) !== normalizedTarget) {
+        return false;
+      }
+
+      if (!symbolObj?.element?.isConnected || symbolObj.element.classList.contains("clicked")) {
+        return false;
+      }
+
+      const rect = symbolObj.element.getBoundingClientRect();
+      const overlapHeight = Math.min(rect.bottom, rainRect.bottom) - Math.max(rect.top, rainRect.top);
+      const visibleHeightThreshold = Math.min(
+        rect.height,
+        Math.max(rect.height * 0.6, (state.config.symbolHeight || 42) * 0.6),
+      );
+      const centerY = rect.top + rect.height / 2;
+      const safeTop = rainRect.top + (state.config.symbolHeight || 42) * 0.35;
+      const safeBottom = rainRect.bottom - (state.config.symbolHeight || 42) * 0.9;
+
+      return (
+        overlapHeight >= visibleHeightThreshold &&
+        centerY >= safeTop &&
+        centerY <= safeBottom
+      );
+    });
+  }
+
   function isVisibleInRainWindow(state, symbolObj) {
     return SymbolRainHelpers.isSymbolVisibleInRainWindow(state, symbolObj);
+  }
+
+  function getMissingStableNeededSymbols(state) {
+    const neededSymbols = [...new Set(getCurrentNeededSymbols())];
+
+    return neededSymbols.filter(
+      (symbolChar) => !isStableVisibleLiveSymbol(state, symbolChar),
+    );
   }
 
   function getVisibleActiveSymbolCount(state) {
@@ -117,7 +160,24 @@
     return getAvailablePriorityColumns(state);
   }
 
-  function spawnPrioritySymbol(state, symbolChar, neededSymbolSet, currentTimestamp) {
+  function getVisiblePrioritySpawnY(state) {
+    if (!Number.isFinite(state.cachedContainerHeight) || state.cachedContainerHeight <= 0) {
+      return 0;
+    }
+
+    const preferredY = state.cachedContainerHeight * 0.18;
+    const symbolHeight = state.config.symbolHeight || 42;
+
+    return Math.max(0, Math.min(preferredY, state.cachedContainerHeight - symbolHeight));
+  }
+
+  function spawnPrioritySymbol(
+    state,
+    symbolChar,
+    neededSymbolSet,
+    currentTimestamp,
+    options = {},
+  ) {
     const availableColumns = releaseSymbolForPrioritySpawn(
       state,
       neededSymbolSet,
@@ -143,6 +203,7 @@
         column: randomColumnIndex,
         isInitialPopulation: false,
         forcedSymbol: symbolChar,
+        initialY: options.initialY,
       },
     );
 
@@ -154,8 +215,8 @@
     return true;
   }
 
-  function maintainCompactRainFloor(state, currentTimestamp) {
-    if (!state.isMobileMode || state.columnCount <= 0) {
+  function maintainVisibleRainFloor(state, currentTimestamp) {
+    if (state.columnCount <= 0) {
       return;
     }
 
@@ -177,13 +238,11 @@
       return;
     }
 
-    const neededSymbols = [...new Set(getCurrentNeededSymbols())];
+    const neededSymbols = getMissingStableNeededSymbols(state);
     const neededSymbolSet = new Set(
-      neededSymbols.map((symbolChar) => normalizeSymbol(symbolChar)),
+      getCurrentNeededSymbols().map((symbolChar) => normalizeSymbol(symbolChar)),
     );
-    const prioritizedMissingSymbols = neededSymbols.filter(
-      (symbolChar) => !hasVisibleLiveSymbol(state, symbolChar),
-    );
+    const prioritizedMissingSymbols = [...neededSymbols];
 
     state.lastCompactBackfillTimestamp = currentTimestamp;
 
@@ -197,6 +256,43 @@
       }
 
       visibleCount += 1;
+    }
+  }
+
+  function maintainNeededSymbolVisibility(state, currentTimestamp) {
+    if (state.columnCount <= 0) {
+      return;
+    }
+
+    if (currentTimestamp - (state.lastNeededSymbolVisibilitySyncAt || 0) < 150) {
+      return;
+    }
+
+    const missingSymbols = getMissingStableNeededSymbols(state);
+    if (!missingSymbols.length) {
+      return;
+    }
+
+    const neededSymbols = [...new Set(getCurrentNeededSymbols())];
+
+    const neededSymbolSet = new Set(
+      neededSymbols.map((symbolChar) => normalizeSymbol(symbolChar)),
+    );
+
+    state.lastNeededSymbolVisibilitySyncAt = currentTimestamp;
+
+    for (const symbolChar of missingSymbols) {
+      if (
+        !spawnPrioritySymbol(
+          state,
+          symbolChar,
+          neededSymbolSet,
+          currentTimestamp,
+          { initialY: getVisiblePrioritySpawnY(state) },
+        )
+      ) {
+        break;
+      }
     }
   }
 
@@ -217,7 +313,7 @@
     neededSymbols.forEach((symbolChar) => {
       const lastSpawnTimestamp = state.lastSymbolSpawnTimestamp[symbolChar] || 0;
 
-      if (hasVisibleLiveSymbol(state, symbolChar)) {
+      if (isStableVisibleLiveSymbol(state, symbolChar)) {
         return;
       }
 
@@ -236,7 +332,10 @@
       return;
     }
 
-    maintainCompactRainFloor(state, Date.now());
+    const currentTimestamp = Date.now();
+
+    maintainNeededSymbolVisibility(state, currentTimestamp);
+    maintainVisibleRainFloor(state, currentTimestamp);
 
     for (let columnIndex = 0; columnIndex < state.columnCount; columnIndex++) {
       if (
