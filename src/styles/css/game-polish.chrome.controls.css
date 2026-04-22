@@ -4,7 +4,7 @@
   --panel-b-control-gap: 0.8rem;
   --panel-b-control-min-height: 44px;
   --console-slot-size: 46px;
-  --console-shell-gap: 0.5rem;
+  --console-shell-gap: 0.25rem;
   --console-shell-padding: 0.75rem;
 }
 
@@ -58,7 +58,7 @@
   position: absolute !important;
   left: 50% !important;
   right: auto !important;
-  bottom: clamp(10px, 2vh, 20px) !important;
+  bottom: clamp(22px, 4vh, 34px) !important;
   transform: translateX(-50%) !important;
   display: grid !important;
   grid-template-columns: repeat(3, var(--console-slot-size)) !important;
@@ -102,7 +102,7 @@
 @media (max-width: 900px), (max-height: 560px), (hover: none) and (pointer: coarse) {
   :root {
     --console-slot-size: 44px;
-    --console-shell-gap: 0.35rem;
+    --console-shell-gap: 0.18rem;
     --console-shell-padding: 0.5rem;
   }
 }

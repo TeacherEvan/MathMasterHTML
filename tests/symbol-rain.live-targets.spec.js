@@ -450,6 +450,16 @@ test.describe("Symbol rain live targets", () => {
       visibleTargetCount,
     });
 
+    await page.waitForTimeout(2000);
+
+    const delayedVisibleTargetCount = await countVisiblePanelCTargets(page);
+
+    await attachPanelCProof(page, testInfo, "mid-game-targetpanl-c-verification-plus-2s", {
+      elapsedSeconds: MID_GAME_TARGET_PANEL_C_WAIT_MS / 1000 + 2,
+      minimumVisibleTargets: MID_GAME_MIN_VISIBLE_PANEL_C_TARGETS,
+      visibleTargetCount: delayedVisibleTargetCount,
+    });
+
     expect(visibleTargetCount).toBeGreaterThanOrEqual(
       MID_GAME_MIN_VISIBLE_PANEL_C_TARGETS,
     );

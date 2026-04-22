@@ -47,6 +47,7 @@ function loadSymbolRainSpawnRuntime(overrides = {}) {
 
   return {
     getIntervalCallback: () => intervalCallback,
+    handleRandomSpawns: context.window.SymbolRainSpawn.handleRandomSpawns,
     startGuaranteedSpawnController:
       context.window.SymbolRainSpawn.startGuaranteedSpawnController,
   };
@@ -107,4 +108,87 @@ test("startGuaranteedSpawnController only guarantees active needed symbols", () 
   intervalCallback();
 
   assert.deepEqual(createdSymbols, ["2"]);
+});
+
+test("visible rain floor fills with distractors instead of duplicating unstable needed symbols", () => {
+  const createdSymbols = [];
+  const hiddenSymbols = [
+    {
+      dataset: { expected: "2" },
+      textContent: "2",
+    },
+  ];
+
+  const state = {
+    activeFallingSymbols: [],
+    activeFaceReveals: new Set(),
+    columnCount: 3,
+    config: {
+      spawnRate: 0,
+      burstSpawnRate: 0,
+      minVisibleSymbols: 2,
+      guaranteedSpawnInterval: 5000,
+      maxActiveSymbols: 200,
+      symbolHeight: 42,
+    },
+    guaranteedSpawnControllerId: null,
+    lastSymbolSpawnTimestamp: {
+      1: 0,
+      2: 0,
+      3: 0,
+    },
+    spatialGrid: {},
+    symbolPool: {},
+    symbolRainContainer: {},
+    symbols: ["1", "2", "3"],
+    cachedContainerHeight: 320,
+  };
+
+  const SymbolRainHelpers = {
+    cleanupSymbolObject: () => {},
+    createFallingSymbol: (spawnContext, options) => {
+      createdSymbols.push(options.forcedSymbol);
+      const rect = {
+        top: 285,
+        bottom: 327,
+        left: 0,
+        right: 42,
+        width: 42,
+        height: 42,
+      };
+      const symbolObj = {
+        symbol: options.forcedSymbol,
+        column: options.column,
+        y: options.initialY ?? 0,
+        element: {
+          isConnected: true,
+          classList: { contains: () => false },
+          getBoundingClientRect: () => rect,
+        },
+      };
+      spawnContext.activeFallingSymbols.push(symbolObj);
+      spawnContext.lastSymbolSpawnTimestamp[options.forcedSymbol] = 10_000;
+      return symbolObj;
+    },
+    getRainWindowRect: () => ({
+      top: 0,
+      bottom: 320,
+      left: 0,
+      right: 200,
+      width: 200,
+      height: 320,
+    }),
+    isColumnCrowded: () => false,
+    isSymbolVisibleInRainWindow: () => true,
+  };
+
+  const runtime = loadSymbolRainSpawnRuntime({
+    hiddenSymbols,
+    now: 10_000,
+    SymbolRainHelpers,
+  });
+
+  runtime.handleRandomSpawns(state);
+
+  assert.deepEqual(createdSymbols, ["2", "1"]);
 });

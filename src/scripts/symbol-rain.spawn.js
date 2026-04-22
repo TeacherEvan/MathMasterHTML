@@ -279,20 +279,21 @@
       return;
     }
 
-    const neededSymbols = getMissingStableNeededSymbols(state);
     const neededSymbolSet = new Set(
       getCurrentNeededSymbols().map((symbolChar) => normalizeSymbol(symbolChar)),
     );
-    const prioritizedMissingSymbols = [...neededSymbols];
+    const distractorSymbols = state.symbols.filter(
+      (symbolChar) => !neededSymbolSet.has(normalizeSymbol(symbolChar)),
+    );
 
     state.lastCompactBackfillTimestamp = currentTimestamp;
 
     let spawnIndex = 0;
 
     while (visibleCount < minVisibleSymbols) {
+      const symbolPool = distractorSymbols.length ? distractorSymbols : state.symbols;
       const symbolChar =
-        prioritizedMissingSymbols.shift() ||
-        state.symbols[Math.floor(Math.random() * state.symbols.length)];
+        symbolPool[Math.floor(Math.random() * symbolPool.length)];
 
       if (
         !spawnPrioritySymbol(
