@@ -31,11 +31,25 @@
       return;
     }
 
+    const handRect = hand.getBoundingClientRect();
+    const handWidth = handRect.width || hand.offsetWidth || 0;
+    const handHeight = handRect.height || hand.offsetHeight || 0;
+    let translateX = queuedHandPosition.x - handWidth / 2;
+    let translateY = queuedHandPosition.y - handHeight / 2;
+    const bounds = queuedHandPosition.bounds || null;
+
+    if (bounds) {
+      const maxX = Math.max(bounds.left, bounds.right - handWidth);
+      const maxY = Math.max(bounds.top, bounds.bottom - handHeight);
+      translateX = Math.min(Math.max(translateX, bounds.left), maxX);
+      translateY = Math.min(Math.max(translateY, bounds.top), maxY);
+    }
+
     if (hand.style.transition !== handTransition) {
       hand.style.transition = handTransition;
     }
 
-    hand.style.transform = `translate3d(${queuedHandPosition.x}px, ${queuedHandPosition.y}px, 0)`;
+    hand.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
     queuedHandPosition = null;
     handFrameId = null;
   }
@@ -203,9 +217,9 @@
     if (solveSlot) solveSlot.hidden = true;
   }
 
-  function moveHandTo(x, y) {
+  function moveHandTo(x, y, bounds = null) {
     if (!hand) return;
-    queuedHandPosition = { x, y };
+    queuedHandPosition = { x, y, bounds };
     if (handFrameId !== null) {
       return;
     }

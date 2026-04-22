@@ -225,4 +225,116 @@ test.describe("Evan Worm + Reward Behavior — Build 6", () => {
       }),
     ).toBe(false);
   });
+
+  test("Evan centers the hand on worm targets without leaving the target panel", async ({
+    page,
+  }) => {
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    await page.evaluate(() => {
+      window.__evanWormAlignment = { actions: 0 };
+
+      const panel = document.getElementById("panel-b");
+      if (!panel) {
+        return;
+      }
+
+      const panelRect = panel.getBoundingClientRect();
+      const target = document.createElement("button");
+      target.dataset.testTarget = "worm-alignment";
+      target.className = "worm-segment";
+      target.getBoundingClientRect = () => ({
+        x: panelRect.left + panelRect.width * 0.4,
+        y: panelRect.bottom - 32,
+        width: 24,
+        height: 24,
+        top: panelRect.bottom - 32,
+        left: panelRect.left + panelRect.width * 0.4,
+        right: panelRect.left + panelRect.width * 0.4 + 24,
+        bottom: panelRect.bottom - 8,
+        toJSON() {
+          return this;
+        },
+      });
+      document.body.appendChild(target);
+      window.__evanWormAlignment.target = target;
+
+      document.addEventListener(window.GameEvents.EVAN_ACTION_REQUESTED, (event) => {
+        if (event.detail?.action === "wormTap") {
+          window.__evanWormAlignment.actions += 1;
+        }
+      });
+
+      window.EvanTargets.findGreenWormSegment = () => target;
+      window.EvanTargets.findMuffinReward = () => null;
+      window.EvanTargets.getNeededSymbol = () => null;
+      window.EvanTargets.getNeededSymbols = () => [];
+      window.EvanTargets.findFallingSymbol = () => null;
+      window.EvanTargets.getBestPowerUp = () => null;
+    });
+
+    await page.waitForFunction(() => window.__evanWormAlignment.actions > 0, {
+      timeout: 10000,
+    });
+
+    await page.waitForFunction(() => {
+      const panel = document.getElementById("panel-b");
+      const hand = document.getElementById("evan-hand");
+      const target = window.__evanWormAlignment.target;
+      if (!panel || !hand || !target) {
+        return false;
+      }
+
+      const panelRect = panel.getBoundingClientRect();
+      const handRect = hand.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const handCenterX = handRect.left + handRect.width / 2;
+      const handCenterY = handRect.top + handRect.height / 2;
+      const targetCenterX = targetRect.left + targetRect.width / 2;
+      const targetCenterY = targetRect.top + targetRect.height / 2;
+
+      return (
+        handCenterX >= panelRect.left &&
+        handCenterX <= panelRect.right &&
+        handCenterY >= panelRect.top &&
+        handCenterY <= panelRect.bottom &&
+        Math.abs(handCenterX - targetCenterX) <= 18 &&
+        Math.abs(handCenterY - targetCenterY) <= 18
+      );
+    }, { timeout: 3000 });
+
+    const result = await page.evaluate(() => {
+      const panel = document.getElementById("panel-b");
+      const hand = document.getElementById("evan-hand");
+      const target = window.__evanWormAlignment.target;
+      const panelRect = panel?.getBoundingClientRect?.() || null;
+      const handRect = hand?.getBoundingClientRect?.() || null;
+      const targetRect = target?.getBoundingClientRect?.() || null;
+      const handCenterX = handRect ? handRect.left + handRect.width / 2 : null;
+      const handCenterY = handRect ? handRect.top + handRect.height / 2 : null;
+
+      return {
+        handInsidePanel:
+          Boolean(panelRect && handCenterX !== null && handCenterY !== null) &&
+          handCenterX >= panelRect.left &&
+          handCenterX <= panelRect.right &&
+          handCenterY >= panelRect.top &&
+          handCenterY <= panelRect.bottom,
+        deltaX:
+          handCenterX !== null && targetRect
+            ? Math.abs(handCenterX - (targetRect.left + targetRect.width / 2))
+            : null,
+        deltaY:
+          handCenterY !== null && targetRect
+            ? Math.abs(handCenterY - (targetRect.top + targetRect.height / 2))
+            : null,
+      };
+    });
+
+    expect(result.handInsidePanel).toBe(true);
+    expect(result.deltaX).not.toBeNull();
+    expect(result.deltaY).not.toBeNull();
+    expect(result.deltaX).toBeLessThanOrEqual(18);
+    expect(result.deltaY).toBeLessThanOrEqual(18);
+  });
 });

@@ -253,14 +253,14 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
       fake.className = "falling-symbol";
       fake.textContent = "x";
       fake.getBoundingClientRect = () => ({
-        x: panelRect.right - 10,
+        x: panelRect.right - 30,
         y: panelRect.top + panelRect.height * 0.45,
-        width: 44,
-        height: 44,
+        width: 20,
+        height: 20,
         top: panelRect.top + panelRect.height * 0.45,
-        left: panelRect.right - 10,
-        right: panelRect.right + 34,
-        bottom: panelRect.top + panelRect.height * 0.45 + 44,
+        left: panelRect.right - 30,
+        right: panelRect.right - 10,
+        bottom: panelRect.top + panelRect.height * 0.45 + 20,
         toJSON() {
           return this;
         },
@@ -275,6 +275,7 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
         y: 0,
       };
       state.activeFallingSymbols.push(symbolObj);
+      window.__evanEdgeCollection.symbolObj = symbolObj;
 
       document.addEventListener(window.GameEvents.SYMBOL_CLICKED, (event) => {
         window.__evanEdgeCollection.clicks.push(event.detail?.symbol ?? null);
@@ -299,8 +300,32 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
         return false;
       }
 
-      return !state.activeFallingSymbols.some(
-        (symbolObj) => symbolObj?.element === window.__evanEdgeCollection.target,
+      return !state.activeFallingSymbols.includes(window.__evanEdgeCollection.symbolObj);
+    }, { timeout: 3000 });
+
+    await page.waitForFunction(() => {
+      const panel = document.getElementById("panel-c");
+      const hand = document.getElementById("evan-hand");
+      const target = window.__evanEdgeCollection.target;
+      if (!panel || !hand || !target) {
+        return false;
+      }
+
+      const panelRect = panel.getBoundingClientRect();
+      const handRect = hand.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const handCenterX = handRect.left + handRect.width / 2;
+      const handCenterY = handRect.top + handRect.height / 2;
+      const targetCenterX = targetRect.left + targetRect.width / 2;
+      const targetCenterY = targetRect.top + targetRect.height / 2;
+
+      return (
+        handCenterX >= panelRect.left &&
+        handCenterX <= panelRect.right &&
+        handCenterY >= panelRect.top &&
+        handCenterY <= panelRect.bottom &&
+        Math.abs(handCenterX - targetCenterX) <= 18 &&
+        Math.abs(handCenterY - targetCenterY) <= 18
       );
     }, { timeout: 3000 });
 
@@ -308,11 +333,11 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
       const panel = document.getElementById("panel-c");
       const hand = document.getElementById("evan-hand");
       const state = window.__symbolRainState;
-      const transform = hand?.style.transform || "";
-      const match = transform.match(/translate3d\(([-\d.]+)px,\s*([-\d.]+)px/);
       const panelRect = panel?.getBoundingClientRect();
-      const handX = match ? Number(match[1]) : null;
-      const handY = match ? Number(match[2]) : null;
+      const handRect = hand?.getBoundingClientRect?.() || null;
+      const targetRect = window.__evanEdgeCollection.target?.getBoundingClientRect?.() || null;
+      const handX = handRect ? handRect.left + handRect.width / 2 : null;
+      const handY = handRect ? handRect.top + handRect.height / 2 : null;
       const handInsidePanel =
         panelRect &&
         handX !== null &&
@@ -325,14 +350,26 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
       return {
         clicks: window.__evanEdgeCollection.clicks.slice(),
         handInsidePanel,
-        removedFromRainState: !state.activeFallingSymbols.some(
-          (symbolObj) => symbolObj?.element === window.__evanEdgeCollection.target,
+        handDeltaX:
+          handX !== null && targetRect
+            ? Math.abs(handX - (targetRect.left + targetRect.width / 2))
+            : null,
+        handDeltaY:
+          handY !== null && targetRect
+            ? Math.abs(handY - (targetRect.top + targetRect.height / 2))
+            : null,
+        removedFromRainState: !state.activeFallingSymbols.includes(
+          window.__evanEdgeCollection.symbolObj,
         ),
       };
     });
 
     expect(result.clicks).toContain("x");
     expect(result.handInsidePanel).toBe(true);
+    expect(result.handDeltaX).not.toBeNull();
+    expect(result.handDeltaY).not.toBeNull();
+    expect(result.handDeltaX).toBeLessThanOrEqual(18);
+    expect(result.handDeltaY).toBeLessThanOrEqual(18);
     expect(result.removedFromRainState).toBe(true);
   });
 });

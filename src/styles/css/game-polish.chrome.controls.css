@@ -6,7 +6,7 @@
   --console-slot-size: 46px;
   --console-shell-gap: 0.25rem;
   --console-shell-padding: 0.75rem;
-  --console-border-inset: 4px;
+  --console-border-inset: 0px;
   --console-row-reserve: calc(
     var(--console-slot-size) +
     (var(--console-shell-padding) * 2) +

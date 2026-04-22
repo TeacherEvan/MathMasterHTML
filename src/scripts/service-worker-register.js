@@ -33,6 +33,8 @@ function dispatchAppUpdateAvailable(registration, source = "updatefound") {
 }
 
 const APP_CACHE_PREFIXES = ["math-master-static-", "math-master-runtime-"];
+const LOCAL_BUILD_VERSION_STORAGE_KEY = "mathmaster_build_version_v1";
+const APP_STORAGE_PREFIX = "mathmaster_";
 
 function isMathMasterCacheName(cacheName) {
   return APP_CACHE_PREFIXES.some((prefix) => cacheName.startsWith(prefix));
@@ -55,6 +57,103 @@ async function clearMathMasterCaches() {
   );
 
   return deletions.some(Boolean);
+}
+
+function isPrivateNetworkHost(hostname) {
+  return (
+    /^10\./.test(hostname) ||
+    /^192\.168\./.test(hostname) ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(hostname)
+  );
+}
+
+function isLocalDevelopmentHost() {
+  const hostname = window.location?.hostname || "";
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "0.0.0.0" ||
+    hostname === "::1" ||
+    hostname.endsWith(".local") ||
+    isPrivateNetworkHost(hostname)
+  );
+}
+
+function readStoredBuildVersion() {
+  try {
+    return window.localStorage?.getItem(LOCAL_BUILD_VERSION_STORAGE_KEY) || null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredBuildVersion(buildVersion) {
+  if (!buildVersion) {
+    return;
+  }
+
+  try {
+    window.localStorage?.setItem(LOCAL_BUILD_VERSION_STORAGE_KEY, buildVersion);
+  } catch {
+    // Ignore storage failures and continue with runtime boot.
+  }
+}
+
+function clearMathMasterStorage(storage) {
+  if (!storage) {
+    return;
+  }
+
+  try {
+    for (let index = storage.length - 1; index >= 0; index -= 1) {
+      const key = storage.key(index);
+      if (key && key.startsWith(APP_STORAGE_PREFIX)) {
+        storage.removeItem(key);
+      }
+    }
+  } catch {
+    // Ignore blocked storage access.
+  }
+}
+
+async function unregisterAllServiceWorkers() {
+  if (!("serviceWorker" in navigator)) {
+    return false;
+  }
+
+  const registrations =
+    (await navigator.serviceWorker.getRegistrations?.().catch(() => null)) ||
+    [await navigator.serviceWorker.getRegistration?.().catch(() => null)].filter(Boolean);
+
+  const results = await Promise.all(
+    registrations.map((registration) => registration?.unregister?.().catch(() => false)),
+  );
+
+  return results.some(Boolean);
+}
+
+async function prepareRuntimeForCurrentBuild() {
+  const currentBuildVersion = window.MathMasterBuildVersion || null;
+  const previousBuildVersion = readStoredBuildVersion();
+
+  if (!currentBuildVersion) {
+    return;
+  }
+
+  if (
+    isLocalDevelopmentHost() &&
+    previousBuildVersion &&
+    previousBuildVersion !== currentBuildVersion
+  ) {
+    await Promise.all([
+      clearMathMasterCaches(),
+      unregisterAllServiceWorkers(),
+    ]);
+    clearMathMasterStorage(window.localStorage);
+    clearMathMasterStorage(window.sessionStorage);
+  }
+
+  writeStoredBuildVersion(currentBuildVersion);
 }
 
 const swDebugMode = new URLSearchParams(window.location.search).get(
@@ -255,17 +354,30 @@ function startServiceWorkerRegistration() {
   registerServiceWorker();
 }
 
+let runtimeShellBootstrapStarted = false;
+
+async function bootstrapRuntimeShell() {
+  if (runtimeShellBootstrapStarted) {
+    return;
+  }
+
+  runtimeShellBootstrapStarted = true;
+  await prepareRuntimeForCurrentBuild();
+  startServiceWorkerRegistration();
+}
+
 if ("serviceWorker" in navigator) {
   dispatchPreload(15, "Booting runtime shell...");
 
   if (document.readyState === "complete") {
-    startServiceWorkerRegistration();
+    bootstrapRuntimeShell();
   } else {
-    window.addEventListener("load", startServiceWorkerRegistration, {
+    window.addEventListener("load", bootstrapRuntimeShell, {
       once: true,
     });
   }
 } else {
+  prepareRuntimeForCurrentBuild();
   dispatchPreload(60, "Service worker skipped.");
   if (window.GameEvents?.PRELOAD_READY) {
     document.dispatchEvent(new CustomEvent(window.GameEvents.PRELOAD_READY));

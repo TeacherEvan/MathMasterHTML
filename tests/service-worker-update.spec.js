@@ -278,4 +278,100 @@ test.describe("Service worker update flow", () => {
     ]);
     expect(state.messageResponses).toEqual([{ success: true }]);
   });
+
+  test("local build changes clear Math Master state before registering the next worker", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const deletedCaches = [];
+      let unregisterCalls = 0;
+
+      localStorage.setItem("mathmaster_build_version_v1", "older-build");
+      localStorage.setItem("mathmaster_onboarding_v1", JSON.stringify({ stale: true }));
+      localStorage.setItem("mathmaster_console_beginner", JSON.stringify(["x"]));
+      localStorage.setItem("third-party-key", "keep");
+
+      Object.defineProperty(window, "caches", {
+        configurable: true,
+        value: {
+          async keys() {
+            return [
+              "math-master-static-legacy",
+              "math-master-runtime-legacy",
+              "third-party-cache",
+            ];
+          },
+          async delete(cacheName) {
+            deletedCaches.push(cacheName);
+            return true;
+          },
+        },
+      });
+
+      const fakeRegistration = {
+        scope: "/",
+        waiting: null,
+        installing: null,
+        active: {},
+        addEventListener() {},
+        async update() {},
+        async unregister() {
+          unregisterCalls += 1;
+          return true;
+        },
+      };
+
+      Object.defineProperty(navigator, "serviceWorker", {
+        configurable: true,
+        value: {
+          controller: {},
+          async register() {
+            return fakeRegistration;
+          },
+          async getRegistration() {
+            return fakeRegistration;
+          },
+          async getRegistrations() {
+            return [fakeRegistration];
+          },
+          addEventListener() {},
+        },
+      });
+
+      window.__branchFreshness = {
+        deletedCaches,
+        get unregisterCalls() {
+          return unregisterCalls;
+        },
+      };
+    });
+
+    await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("load");
+
+    await expect
+      .poll(() =>
+        page.evaluate(() => ({
+          buildVersion: localStorage.getItem("mathmaster_build_version_v1"),
+          onboarding: localStorage.getItem("mathmaster_onboarding_v1"),
+          consoleState: localStorage.getItem("mathmaster_console_beginner"),
+          thirdParty: localStorage.getItem("third-party-key"),
+          deletedCaches: window.__branchFreshness.deletedCaches.slice(),
+          unregisterCalls: window.__branchFreshness.unregisterCalls,
+          runtimeBuildVersion: window.MathMasterBuildVersion,
+        })),
+      )
+      .toEqual({
+        buildVersion: expect.any(String),
+        onboarding: null,
+        consoleState: null,
+        thirdParty: "keep",
+        deletedCaches: [
+          "math-master-static-legacy",
+          "math-master-runtime-legacy",
+        ],
+        unregisterCalls: 1,
+        runtimeBuildVersion: expect.any(String),
+      });
+  });
 });

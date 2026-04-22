@@ -85,18 +85,65 @@
     });
   }
 
-  function clampPointToPanelC(point) {
-    const panel = document.getElementById("panel-c");
-    const rect = panel?.getBoundingClientRect?.();
-    if (!rect) {
+  function rectsIntersect(a, b) {
+    return (
+      a.left <= b.right &&
+      a.right >= b.left &&
+      a.top <= b.bottom &&
+      a.bottom >= b.top
+    );
+  }
+
+  function getGameplayPanelBounds(point, target = null) {
+    const panels = [
+      document.getElementById("panel-a"),
+      document.getElementById("panel-b"),
+      document.getElementById("panel-c"),
+    ].filter(Boolean);
+
+    const targetRect = target?.getBoundingClientRect?.() || null;
+
+    if (targetRect) {
+      const containingPanel = target.closest?.("#panel-a, #panel-b, #panel-c");
+      const containingRect = containingPanel?.getBoundingClientRect?.();
+      if (containingRect) {
+        return containingRect;
+      }
+
+      for (const panel of panels) {
+        const rect = panel.getBoundingClientRect?.();
+        if (rect && rectsIntersect(targetRect, rect)) {
+          return rect;
+        }
+      }
+    }
+
+    for (const panel of panels) {
+      const rect = panel.getBoundingClientRect?.();
+      if (
+        rect &&
+        point.x >= rect.left &&
+        point.x <= rect.right &&
+        point.y >= rect.top &&
+        point.y <= rect.bottom
+      ) {
+        return rect;
+      }
+    }
+
+    return null;
+  }
+
+  function clampPointToBounds(point, bounds) {
+    if (!bounds) {
       return point;
     }
 
     const inset = 8;
-    const minX = rect.left + inset;
-    const maxX = rect.right - inset;
-    const minY = rect.top + inset;
-    const maxY = rect.bottom - inset;
+    const minX = bounds.left + inset;
+    const maxX = bounds.right - inset;
+    const minY = bounds.top + inset;
+    const maxY = bounds.bottom - inset;
 
     return {
       x: Math.min(Math.max(point.x, minX), maxX),
@@ -106,8 +153,9 @@
 
   function moveHandToTarget(target) {
     const pos = window.EvanTargets?.centerOf?.(target) || { x: 0, y: 0 };
-    const safePos = clampPointToPanelC(pos);
-    window.EvanPresenter?.moveHandTo?.(safePos.x, safePos.y);
+    const bounds = getGameplayPanelBounds(pos, target);
+    const safePos = clampPointToBounds(pos, bounds);
+    window.EvanPresenter?.moveHandTo?.(safePos.x, safePos.y, bounds);
     return safePos;
   }
 

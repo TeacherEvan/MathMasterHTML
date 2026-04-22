@@ -131,7 +131,7 @@ test.describe("Interaction audio unlock", () => {
     expect(result.pendingCueCount).toBe(0);
   });
 
-  test("uses the upgraded master gain baseline when unmuted", async ({ page }) => {
+  test("uses the louder master gain baseline when unmuted", async ({ page }) => {
     await page.addInitScript(() => {
       window.__MM_ENABLE_AUDIO_IN_TESTS = true;
     });
@@ -160,6 +160,6 @@ test.describe("Interaction audio unlock", () => {
     });
 
     expect(result.hasAudio).toBe(true);
-    expect(result.gain).toBeGreaterThanOrEqual(0.14);
+    expect(result.gain).toBeGreaterThanOrEqual(0.2);
   });
 });

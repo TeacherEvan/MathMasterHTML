@@ -5,7 +5,7 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
   const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
   const automationAudioOverride =
     window.__MM_ENABLE_AUDIO_IN_TESTS === true;
-  const MASTER_GAIN_BASELINE = 0.16;
+  const MASTER_GAIN_BASELINE = 0.22;
   const MASTER_GAIN_RAMP_SECONDS = 0.045;
   const GameEvents = window.GameEvents || {
     PROBLEM_LINE_COMPLETED: "problemLineCompleted",

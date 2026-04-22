@@ -11,7 +11,7 @@ const gameModules = [
   "/src/scripts/game-symbol-handler.js",
   "/src/scripts/game-state-manager.js",
 ];
-const GAME_MODULE_VERSION = "20260421-panel-c-integrity-fix-1";
+const GAME_MODULE_VERSION = "20260422-local-freshness-evan-audio-1";
 
 let loadedModules = 0;
 const startupPreloadMessageEl = document.getElementById("startup-preload-message");
