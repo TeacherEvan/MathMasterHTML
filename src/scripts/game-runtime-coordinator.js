@@ -5,6 +5,7 @@
     preloadComplete: false,
     preloadReason: null,
     briefingDismissed: false,
+    gameplayContentReady: false,
     gameplayReady: false,
     inputLocks: {},
     inputLocked: false,
@@ -15,6 +16,7 @@
       preloadComplete: state.preloadComplete,
       preloadReason: state.preloadReason,
       briefingDismissed: state.briefingDismissed,
+      gameplayContentReady: state.gameplayContentReady,
       gameplayReady: state.gameplayReady,
       inputLocks: { ...state.inputLocks },
       inputLocked: state.inputLocked,
@@ -42,7 +44,9 @@
   function recomputeDerivedState() {
     const nextInputLocked = Object.values(state.inputLocks).some(Boolean);
     const nextGameplayReady =
-      state.preloadComplete && state.briefingDismissed;
+      state.preloadComplete &&
+      state.briefingDismissed &&
+      state.gameplayContentReady;
     const gameplayReadyChanged = nextGameplayReady !== state.gameplayReady;
 
     state.inputLocked = nextInputLocked;
@@ -70,6 +74,17 @@
     }
 
     state.briefingDismissed = true;
+    recomputeDerivedState();
+    return cloneState();
+  }
+
+  function markGameplayContentReady(ready = true) {
+    const nextReady = Boolean(ready);
+    if (state.gameplayContentReady === nextReady) {
+      return cloneState();
+    }
+
+    state.gameplayContentReady = nextReady;
     recomputeDerivedState();
     return cloneState();
   }
@@ -111,6 +126,7 @@
     canAcceptGameplayInput: () => state.gameplayReady && !state.inputLocked,
     markPreloadComplete,
     markBriefingDismissed,
+    markGameplayContentReady,
     setInputLock,
   };
 })();

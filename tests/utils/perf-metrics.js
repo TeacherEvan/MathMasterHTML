@@ -40,6 +40,10 @@ export async function enablePerfMetrics(page, opts = {}) {
 
   await page.evaluate(() => {
     window.__PERF_INSTRUMENTATION = true;
+    if (window.dynamicQualityAdjuster) {
+      window.dynamicQualityAdjuster.isActive = false;
+    }
+    window.uiBoundaryManager?.stopPeriodicCheck?.();
   });
 
   // Let the histogram buffer collect a baseline worth of frames

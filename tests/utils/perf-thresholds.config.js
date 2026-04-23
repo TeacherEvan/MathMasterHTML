@@ -137,10 +137,12 @@ export const PROJECT_POLICIES = {
         direction: "lower-is-better",
         catastrophicRatio: 0.5,
         catastrophicAbsolute: 250,
+        minSamples: 15,
       },
       jankPercent: {
         direction: "lower-is-better",
         catastrophicAbsolute: 20,
+        minSamples: 15,
       },
       inputLatencyAvg: {
         direction: "lower-is-better",
@@ -164,10 +166,12 @@ export const PROJECT_POLICIES = {
         direction: "lower-is-better",
         catastrophicRatio: 0.5,
         catastrophicAbsolute: 250,
+        minSamples: 15,
       },
       jankPercent: {
         direction: "lower-is-better",
         catastrophicAbsolute: 25,
+        minSamples: 15,
       },
       inputLatencyAvg: {
         direction: "lower-is-better",

@@ -80,7 +80,10 @@ body.viewport-compact.viewport-landscape #problem-container {
 }
 
 body.viewport-compact.viewport-landscape #lock-display {
-  top: calc(var(--compact-panel-a-top-safe-zone) + 48px) !important;
+  top: var(
+    --compact-panel-a-lock-top,
+    calc(var(--compact-panel-a-top-safe-zone) + 48px)
+  ) !important;
   right: var(--compact-panel-inline-gap);
   bottom: 60px;
   left: var(--compact-panel-inline-gap) !important;

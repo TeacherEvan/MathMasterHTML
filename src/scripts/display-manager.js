@@ -94,6 +94,7 @@ class DisplayManager {
       DISPLAY_RESOLUTION_CHANGED: "displayResolutionChanged",
     };
     this.currentResolution = null;
+    this.compactPanelALayoutFrameId = null;
     this.compactViewportConfig = {
       mobileMaxWidth: 600,
       compactMaxWidth: 1024,
@@ -158,6 +159,8 @@ class DisplayManager {
     this.domCache = {
       solutionContainer: document.getElementById("solution-container"),
       problemContainer: document.getElementById("problem-container"),
+      panelA: document.getElementById("panel-a"),
+      lockDisplay: document.getElementById("lock-display"),
       backButton: document.getElementById("back-button"),
       helpButton: document.getElementById("help-button"),
       startGameButton: document.getElementById("start-game-btn"),
@@ -429,6 +432,7 @@ class DisplayManager {
 
     // Apply symbol rain adjustments
     this.applySymbolRainAdjustments(detected.config);
+    this.queueCompactPanelALayoutSync();
 
     // Dispatch event for other components
     document.dispatchEvent(
@@ -439,6 +443,46 @@ class DisplayManager {
 
     // Update resolution indicator
     this.updateResolutionIndicator(detected);
+  }
+
+  syncCompactPanelALayout() {
+    this.compactPanelALayoutFrameId = null;
+
+    const panelA = this.domCache.panelA;
+    const problemContainer = this.domCache.problemContainer;
+    if (!(panelA instanceof HTMLElement)) {
+      return;
+    }
+
+    const isCompactLandscape =
+      this.currentResolution?.isCompactViewport === true &&
+      this.currentResolution?.isLandscape === true;
+
+    if (!isCompactLandscape || !(problemContainer instanceof HTMLElement)) {
+      panelA.style.removeProperty("--compact-panel-a-lock-top");
+      return;
+    }
+
+    const panelRect = panelA.getBoundingClientRect();
+    const problemRect = problemContainer.getBoundingClientRect();
+    if (panelRect.height === 0 || problemRect.height === 0) {
+      return;
+    }
+
+    const lockTop = Math.ceil(problemRect.bottom - panelRect.top + 8);
+    panelA.style.setProperty("--compact-panel-a-lock-top", `${lockTop}px`);
+  }
+
+  queueCompactPanelALayoutSync() {
+    if (this.compactPanelALayoutFrameId !== null) {
+      cancelAnimationFrame(this.compactPanelALayoutFrameId);
+    }
+
+    this.compactPanelALayoutFrameId = requestAnimationFrame(() => {
+      this.compactPanelALayoutFrameId = requestAnimationFrame(() => {
+        this.syncCompactPanelALayout();
+      });
+    });
   }
 
   applyFontSizes(config) {

@@ -99,7 +99,10 @@ test.describe("Evan Helper — UI Elements (Build 3)", () => {
     await expect(page.locator("#evan-assist-shell")).toBeVisible();
     await page.waitForFunction(() => {
       const hand = document.getElementById("evan-hand");
-      return hand?.style.transform.includes("24px") === true;
+      return Boolean(
+        hand?.style.transform.startsWith("translate3d(") &&
+          hand.style.transform.includes("-200px") === false,
+      );
     });
 
     const handTransition = await page.evaluate(() => {

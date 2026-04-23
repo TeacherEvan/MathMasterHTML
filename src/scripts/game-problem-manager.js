@@ -62,6 +62,8 @@ console.log("📚 Game problem manager module loading...");
       currentSymbol: 0,
     };
 
+    window.GameRuntimeCoordinator?.markGameplayContentReady?.(false);
+
     window.GameProblemLoader?.loadProblems({
       level,
       showSkeleton: (context) => {
@@ -92,6 +94,7 @@ console.log("📚 Game problem manager module loading...");
       !currentProblem.steps ||
       currentProblem.steps.length === 0
     ) {
+      window.GameRuntimeCoordinator?.markGameplayContentReady?.(false);
       return;
     }
 
@@ -114,6 +117,10 @@ console.log("📚 Game problem manager module loading...");
 
     // Setup the step-by-step solution display
     setupStepDisplay();
+    window.GameRuntimeCoordinator?.markGameplayContentReady?.(
+      solutionContainer.querySelectorAll(".hidden-symbol").length > 0,
+    );
+    window.displayManager?.queueCompactPanelALayoutSync?.();
 
     // Help functionality handled in game-symbol-handler.js
 

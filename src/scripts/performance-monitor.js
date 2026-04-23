@@ -321,6 +321,16 @@ class PerformanceMonitor {
   }
 
   updateOverlay(frameTime, elapsedMs = 500) {
+    const queriesPerSec = Math.round(
+      (this.domQueryCount / Math.max(elapsedMs, 1)) * 1000,
+    );
+    this.lastDomQueriesPerSec = queriesPerSec;
+    this.domQueryCount = 0;
+
+    if (!this.overlay || this.overlay.style.display === "none") {
+      return;
+    }
+
     const fpsElement = document.getElementById("perf-fps");
     const domElement = document.getElementById("perf-dom");
     const wormsElement = document.getElementById("perf-worms");
@@ -341,10 +351,6 @@ class PerformanceMonitor {
     }
 
     // Update DOM queries per second
-    const queriesPerSec = Math.round(
-      (this.domQueryCount / Math.max(elapsedMs, 1)) * 1000,
-    );
-    this.lastDomQueriesPerSec = queriesPerSec;
     domElement.textContent = queriesPerSec;
     if (queriesPerSec < 200) {
       domElement.style.color = "#0f0";
@@ -353,8 +359,6 @@ class PerformanceMonitor {
     } else {
       domElement.style.color = "#f00";
     }
-    this.domQueryCount = 0; // Reset counter
-
     // Update worm count
     if (window.wormSystem && window.wormSystem.worms) {
       const activeWorms = window.wormSystem.worms.filter(

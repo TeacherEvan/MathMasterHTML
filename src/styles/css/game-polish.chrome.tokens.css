@@ -74,6 +74,11 @@ body::before {
   left: clamp(14px, 2vw, 24px);
   bottom: clamp(14px, 2vh, 24px);
 }
+
+body.problem-completed.console-modal-open #back-button {
+  z-index: 10070;
+}
+
 #audio-toggle {
   right: clamp(14px, 2vw, 24px);
   bottom: clamp(14px, 2vh, 24px);

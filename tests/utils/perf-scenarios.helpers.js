@@ -10,6 +10,8 @@ function escapeRegExp(value) {
 
 async function getCurrentStepSnapshot(page) {
   return page.evaluate((hiddenSelector) => {
+    const getHiddenSymbolValue = (element) =>
+      String(element?.dataset?.expected || element?.textContent || "").trim();
     const firstHiddenSymbol = document.querySelector(hiddenSelector);
     if (!firstHiddenSymbol) {
       return { stepIndex: null, hiddenSymbols: [] };
@@ -21,7 +23,7 @@ async function getCurrentStepSnapshot(page) {
         `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`,
       ),
     )
-      .map((element) => element.textContent?.trim())
+      .map((element) => getHiddenSymbolValue(element))
       .filter(Boolean);
 
     return { stepIndex, hiddenSymbols };

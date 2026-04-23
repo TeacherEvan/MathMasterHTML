@@ -21,7 +21,10 @@
   }
 
   body.viewport-compact.viewport-landscape #lock-display {
-    top: calc(var(--compact-panel-a-top-safe-zone) + 44px) !important;
+    top: var(
+      --compact-panel-a-lock-top,
+      calc(var(--compact-panel-a-top-safe-zone) + 44px)
+    ) !important;
     opacity: 0.5;
   }
 

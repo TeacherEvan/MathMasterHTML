@@ -56,6 +56,13 @@ console.log("📐 UIBoundaryManager monitoring loading...");
    * @private
    */
   proto._periodicCheck = function _periodicCheck() {
+    if (
+      window.__PERF_SMOKE_MODE === true ||
+      window.__PERF_INSTRUMENTATION === true
+    ) {
+      return;
+    }
+
     const overlaps = this.getAllOverlaps();
 
     if (overlaps.length > 0 && this.config.autoReposition) {

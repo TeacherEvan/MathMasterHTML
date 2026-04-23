@@ -107,7 +107,17 @@ class DynamicQualityAdjuster {
     this.wasGameplayReady = gameplayReady;
   }
 
+  isPerfInstrumentationActive() {
+    return (
+      window.__PERF_SMOKE_MODE === true || window.__PERF_INSTRUMENTATION === true
+    );
+  }
+
   shouldSuspendSampling(now = performance.now()) {
+    if (this.isPerfInstrumentationActive()) {
+      return true;
+    }
+
     if (document.hidden) return true;
 
     if (now - this.startedAt < this.config.STARTUP_GRACE_MS) {

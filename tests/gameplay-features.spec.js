@@ -143,6 +143,8 @@ async function chooseConsoleReward(
 
 async function revealSymbols(page, count = 1) {
   const revealResult = await page.evaluate((times) => {
+    const getHiddenSymbolValue = (element) =>
+      String(element?.dataset?.expected || element?.textContent || "").trim();
     const revealedBefore = document.querySelectorAll(".revealed-symbol").length;
     let dispatches = 0;
 
@@ -152,11 +154,12 @@ async function revealSymbols(page, count = 1) {
       const nextHiddenSymbol = document.querySelector(
         `[data-step-index="${stepIndex}"].hidden-symbol`,
       );
-      if (!nextHiddenSymbol?.textContent) continue;
+      const symbol = getHiddenSymbolValue(nextHiddenSymbol);
+      if (!symbol) continue;
 
       document.dispatchEvent(
         new CustomEvent("symbolClicked", {
-          detail: { symbol: nextHiddenSymbol.textContent },
+          detail: { symbol },
         }),
       );
       dispatches++;

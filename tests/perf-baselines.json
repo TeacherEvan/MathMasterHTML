@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "capturedAt": "2026-04-07",
+  "capturedAt": "2026-04-23",
   "baselineMode": "comparative-regression",
   "notes": [
     "These baselines are empirical Playwright snapshots from the current automation harness.",
@@ -258,19 +258,19 @@
     "iphone-13": {
       "idle": {
         "samples": 3,
-        "fps": 2.84,
-        "frameTimeAvg": 352.2,
-        "frameTimeP95": 1343,
-        "frameTimeMax": 1343,
-        "jankPercent": 60,
-        "frameBudgetViolationPercent": 80,
-        "domNodeCount": 377,
-        "domQueriesPerSec": 34,
+        "fps": 1.39,
+        "frameTimeAvg": 722.66,
+        "frameTimeP95": 2217.67,
+        "frameTimeMax": 2217.67,
+        "jankPercent": 79.87,
+        "frameBudgetViolationPercent": 82.9,
+        "domNodeCount": 390.67,
+        "domQueriesPerSec": 7,
         "activeWorms": 0,
-        "rainSymbols": 12,
+        "rainSymbols": 7.67,
         "inputLatencyAvg": null,
         "inputLatencyP95": null,
-        "sampleCount": 5
+        "sampleCount": 10
       },
       "normalPlay": {
         "samples": 3,
@@ -322,19 +322,19 @@
       },
       "lockTransition": {
         "samples": 3,
-        "fps": 2.75,
-        "frameTimeAvg": 363.6,
-        "frameTimeP95": 1172,
-        "frameTimeMax": 1172,
-        "jankPercent": 60,
-        "frameBudgetViolationPercent": 80,
-        "domNodeCount": 387,
-        "domQueriesPerSec": 41,
-        "activeWorms": 0,
-        "rainSymbols": 4,
-        "inputLatencyAvg": 4,
-        "inputLatencyP95": 15,
-        "sampleCount": 5
+        "fps": 1.21,
+        "frameTimeAvg": 826.24,
+        "frameTimeP95": 2319.33,
+        "frameTimeMax": 2319.33,
+        "jankPercent": 71.43,
+        "frameBudgetViolationPercent": 71.43,
+        "domNodeCount": 463.33,
+        "domQueriesPerSec": 34.67,
+        "activeWorms": 1,
+        "rainSymbols": 8.33,
+        "inputLatencyAvg": 1.43,
+        "inputLatencyP95": 3.67,
+        "sampleCount": 7
       }
     },
     "pixel-7": {

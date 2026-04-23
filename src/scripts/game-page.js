@@ -273,6 +273,16 @@
     syncBackButtonState();
   });
 
+  document.addEventListener(window.GameEvents.CONSOLE_SYMBOL_ADDED, () => {
+    document.body.classList.remove("problem-completed");
+
+    if (window.GameRuntimeCoordinator?.getState?.().briefingDismissed) {
+      document.body.classList.add("gameplay-active-unresolved");
+    }
+
+    syncBackButtonState();
+  });
+
   function initializeGamePage() {
     if (pageInitialized) {
       return;

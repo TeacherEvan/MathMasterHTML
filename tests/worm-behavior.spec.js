@@ -3,22 +3,25 @@ import { expect, test } from "@playwright/test";
 
 async function revealCurrentStepSymbol(page) {
   const result = await page.evaluate(() => {
+    const getHiddenSymbolValue = (element) =>
+      String(element?.dataset?.expected || element?.textContent || "").trim();
     const stepIndex = window.GameProblemManager?.currentSolutionStepIndex ?? 0;
     const nextHiddenSymbol = document.querySelector(
       `[data-step-index="${stepIndex}"].hidden-symbol`,
     );
-    if (!nextHiddenSymbol?.textContent) {
+    const symbol = getHiddenSymbolValue(nextHiddenSymbol);
+    if (!symbol) {
       return { symbol: null, revealedCount: 0 };
     }
 
     document.dispatchEvent(
       new CustomEvent("symbolClicked", {
-        detail: { symbol: nextHiddenSymbol.textContent },
+        detail: { symbol },
       }),
     );
 
     return {
-      symbol: nextHiddenSymbol.textContent,
+      symbol,
       revealedCount: document.querySelectorAll(".revealed-symbol").length,
     };
   });

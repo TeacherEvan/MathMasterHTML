@@ -41,7 +41,26 @@ function formatDelta(metricName, metricResult) {
   return `${metricName} ${sign}${roundNumber(metricResult.delta)} (${sign}${roundNumber(metricResult.deltaRatio * 100)}%)`;
 }
 
-function evaluateMetric(metricName, baselineValue, actualValue, metricPolicy) {
+function evaluateMetric(
+  metricName,
+  baselineValue,
+  actualValue,
+  metricPolicy,
+  sampleCount,
+) {
+  if (
+    typeof metricPolicy.minSamples === "number" &&
+    sampleCount < metricPolicy.minSamples
+  ) {
+    return {
+      name: metricName,
+      status: "skipped",
+      reason: `insufficient samples for ${metricName}`,
+      baseline: baselineValue ?? null,
+      actual: actualValue ?? null,
+    };
+  }
+
   if (
     typeof baselineValue !== "number" ||
     !Number.isFinite(baselineValue) ||
@@ -183,7 +202,13 @@ export function evaluatePerfThresholds({
       continue;
     }
     metrics.push(
-      evaluateMetric(metricName, baselineScenario[metricName], after[metricName], metricPolicy),
+      evaluateMetric(
+        metricName,
+        baselineScenario[metricName],
+        after[metricName],
+        metricPolicy,
+        after.sampleCount ?? 0,
+      ),
     );
   }
 
