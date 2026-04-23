@@ -8,6 +8,15 @@ import {
 } from "./utils/onboarding-runtime.js";
 import { getStepSnapshot } from "./utils/perf-scenarios.helpers.js";
 
+async function clickHelpButton(page, count = 1) {
+  const helpButton = page.locator("#help-button");
+  await expect(helpButton).toBeVisible();
+
+  for (let index = 0; index < count; index += 1) {
+    await helpButton.click();
+  }
+}
+
 async function gotoDrumTestPage(page) {
   await page.addInitScript(() => {
     window.__MM_ENABLE_AUDIO_IN_TESTS = true;
@@ -63,7 +72,7 @@ test.describe("Progressive Drum Beat", () => {
     await expect(helpButton).toBeVisible();
 
     for (let index = 0; index < stepBefore.hiddenSymbols.length; index += 1) {
-      await helpButton.click();
+      await clickHelpButton(page);
       await page.waitForTimeout(100);
     }
 
