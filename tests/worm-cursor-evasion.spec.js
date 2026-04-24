@@ -1,14 +1,16 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
+import {
+  dismissBriefingAndWaitForInteractiveGameplay,
+  resetOnboardingState,
+  stopEvanHelpIfActive,
+} from "./utils/onboarding-runtime.js";
 
 test.describe("Worm cursor evasion", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/game.html?level=beginner");
-
-    const startButton = page.locator("#start-game-btn");
-    await expect(startButton).toBeVisible({ timeout: 10000 });
-    await startButton.click({ force: true });
-    await page.waitForTimeout(600);
+    await resetOnboardingState(page, "?level=beginner");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+    await stopEvanHelpIfActive(page);
 
     await page.waitForFunction(
       () => window.wormSystem && window.wormSystem.isInitialized === true,
