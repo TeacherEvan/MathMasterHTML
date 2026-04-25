@@ -189,6 +189,54 @@ export async function stopEvanHelpIfActive(page) {
   );
 }
 
+export async function waitForEvanToStayInactive(page, options = {}) {
+  const stableForMs = options.stableForMs ?? 300;
+  const timeout = options.timeout ?? 5000;
+  const pollIntervalMs = options.pollIntervalMs ?? 50;
+  const deadline = Date.now() + timeout;
+  let inactiveSince = null;
+
+  while (Date.now() < deadline) {
+    const state = await page.evaluate(() => {
+      const skipButton = document.getElementById("evan-skip-button");
+      const stopButton = document.getElementById("evan-stop-button");
+      const isVisible = (element) =>
+        Boolean(
+          element &&
+            !element.hidden &&
+            window.getComputedStyle(element).display !== "none",
+        );
+
+      return {
+        evanHelpActive: document.body.classList.contains("evan-help-active"),
+        evanInputLocked: document.body.classList.contains("evan-input-locked"),
+        skipVisible: isVisible(skipButton),
+        stopVisible: isVisible(stopButton),
+      };
+    });
+
+    if (state.skipVisible) {
+      await page.click("#evan-skip-button");
+      inactiveSince = null;
+    } else if (state.stopVisible) {
+      await page.click("#evan-stop-button");
+      inactiveSince = null;
+    } else if (!state.evanHelpActive && !state.evanInputLocked) {
+      if (inactiveSince === null) {
+        inactiveSince = Date.now();
+      } else if (Date.now() - inactiveSince >= stableForMs) {
+        return;
+      }
+    } else {
+      inactiveSince = null;
+    }
+
+    await page.waitForTimeout(pollIntervalMs);
+  }
+
+  throw new Error(`Timed out waiting for Evan to stay inactive after ${timeout}ms`);
+}
+
 export async function dismissBriefingAndWaitForInteractiveGameplay(page) {
   await waitForOnboardingRuntime(page);
   await ensureLandscapeGameplayViewport(page);
