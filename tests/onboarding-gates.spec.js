@@ -5,6 +5,7 @@ import {
   resetOnboardingState,
   seedOnboardingState,
   setCorruptOnboardingState,
+  waitForEvanToStayInactive,
   waitForGameplayReady,
 } from "./utils/onboarding-runtime.js";
 
@@ -95,6 +96,60 @@ test.describe("Onboarding gates — Build 1", () => {
       timeout: 5000,
     });
     expect(await page.evaluate(() => window.__evanStartCount)).toBe(1);
+  });
+
+  test("waitForEvanToStayInactive waits through delayed Evan activation", async ({
+    page,
+  }) => {
+    await seedOnboardingState(
+      page,
+      {
+        version: 1,
+        sessionCount: 1,
+        evanConsumed: { beginner: true, warrior: false, master: false },
+        installPromptDismissedAt: null,
+        updatedAt: 0,
+      },
+      "?level=beginner&evan=auto&preload=off",
+    );
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+    await page.waitForSelector("#evan-solve-button", {
+      state: "visible",
+      timeout: 5000,
+    });
+
+    await page.evaluate(() => {
+      setTimeout(() => {
+        document.getElementById("evan-solve-button")?.click();
+      }, 150);
+    });
+
+    await waitForEvanToStayInactive(page);
+
+    const state = await page.evaluate(() => {
+      const isVisible = (id) => {
+        const element = document.getElementById(id);
+        return Boolean(
+          element &&
+            !element.hidden &&
+            window.getComputedStyle(element).display !== "none",
+        );
+      };
+
+      return {
+        evanHelpActive: document.body.classList.contains("evan-help-active"),
+        evanInputLocked: document.body.classList.contains("evan-input-locked"),
+        skipVisible: isVisible("evan-skip-button"),
+        stopVisible: isVisible("evan-stop-button"),
+      };
+    });
+
+    expect(state).toEqual({
+      evanHelpActive: false,
+      evanInputLocked: false,
+      skipVisible: false,
+      stopVisible: false,
+    });
   });
 
   test("session counter increments on each page load", async ({ page }) => {

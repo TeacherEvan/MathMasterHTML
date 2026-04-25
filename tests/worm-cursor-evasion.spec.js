@@ -4,6 +4,7 @@ import {
   dismissBriefingAndWaitForInteractiveGameplay,
   resetOnboardingState,
   stopEvanHelpIfActive,
+  waitForEvanToStayInactive,
 } from "./utils/onboarding-runtime.js";
 
 test.describe("Worm cursor evasion", () => {
@@ -15,6 +16,7 @@ test.describe("Worm cursor evasion", () => {
     await page.waitForFunction(
       () => window.wormSystem && window.wormSystem.isInitialized === true,
     );
+    await waitForEvanToStayInactive(page);
   });
 
   test("worms move away from cursor threat", async ({ page }) => {
@@ -28,17 +30,22 @@ test.describe("Worm cursor evasion", () => {
 
     const initial = await page.evaluate(() => {
       const worm = window.wormSystem.worms.find((w) => w.active && !w.isPurple);
-      return worm ? { x: worm.x, y: worm.y } : null;
+      return worm ? { id: worm.id, x: worm.x, y: worm.y } : null;
     });
 
     expect(initial).toBeTruthy();
 
-    await page.evaluate((wormPos) => {
+    const threatPoint = {
+      x: initial.x + 10,
+      y: initial.y + 10,
+    };
+
+    await page.evaluate((point) => {
       document.dispatchEvent(
         new CustomEvent("wormCursorUpdate", {
           detail: {
-            x: wormPos.x + 10,
-            y: wormPos.y + 10,
+            x: point.x,
+            y: point.y,
             isActive: true,
             pointerType: "mouse",
             lastUpdate: performance.now(),
@@ -46,24 +53,45 @@ test.describe("Worm cursor evasion", () => {
           },
         }),
       );
-    }, initial);
+    }, threatPoint);
 
-    await page.waitForTimeout(200);
+    await page.waitForFunction(
+      ({ wormId, threatX, threatY, minimumDistance }) => {
+        const worm = window.wormSystem.worms.find((w) => w.id === wormId);
+        if (!worm || !worm.active) {
+          return false;
+        }
 
-    const after = await page.evaluate(() => {
-      const worm = window.wormSystem.worms.find((w) => w.active && !w.isPurple);
-      return worm ? { x: worm.x, y: worm.y } : null;
-    });
+        return (
+          Math.hypot(worm.x - threatX, worm.y - threatY) > minimumDistance
+        );
+      },
+      {
+        wormId: initial.id,
+        threatX: threatPoint.x,
+        threatY: threatPoint.y,
+        minimumDistance: Math.hypot(
+          initial.x - threatPoint.x,
+          initial.y - threatPoint.y,
+        ),
+      },
+      { timeout: 3000 },
+    );
+
+    const after = await page.evaluate((wormId) => {
+      const worm = window.wormSystem.worms.find((w) => w.id === wormId);
+      return worm && worm.active ? { x: worm.x, y: worm.y } : null;
+    }, initial.id);
 
     expect(after).toBeTruthy();
 
     const initialDistance = Math.hypot(
-      initial.x - (initial.x + 10),
-      initial.y - (initial.y + 10),
+      initial.x - threatPoint.x,
+      initial.y - threatPoint.y,
     );
     const newDistance = Math.hypot(
-      after.x - (initial.x + 10),
-      after.y - (initial.y + 10),
+      after.x - threatPoint.x,
+      after.y - threatPoint.y,
     );
 
     expect(newDistance).toBeGreaterThan(initialDistance);
