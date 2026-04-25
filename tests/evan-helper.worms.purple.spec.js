@@ -1,7 +1,10 @@
 // tests/evan-helper.worms.purple.spec.js
 import { expect, test } from "@playwright/test";
 import { installRectTarget } from "./utils/evan-target-fixtures.js";
-import { resetOnboardingState } from "./utils/onboarding-runtime.js";
+import {
+  dismissBriefingAndWaitForInteractiveGameplay,
+  resetOnboardingState,
+} from "./utils/onboarding-runtime.js";
 
 test.setTimeout(60000);
 
@@ -38,7 +41,7 @@ test.describe("Evan Purple Worm Guardrails — Build 6", () => {
       window.EvanTargets.findFallingSymbol = () => symbol;
     });
 
-    await page.click("#start-game-btn");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await page.waitForFunction(
       () => document.body.classList.contains("evan-help-active"),
       { timeout: 5000 },
@@ -79,7 +82,7 @@ test.describe("Evan Purple Worm Guardrails — Build 6", () => {
       window.EvanTargets.findFallingSymbol = () => symbol;
     });
 
-    await page.click("#start-game-btn");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
     await page.waitForFunction(
       () => window.__evanActions?.includes("symbolClick"),
       { timeout: 8000 },

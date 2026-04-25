@@ -2,6 +2,7 @@
 // Playwright tests for MathMaster Power-Up Two-Click System
 import { expect, test } from "@playwright/test";
 import {
+  dismissBriefingAndWaitForInteractiveGameplay,
   stopEvanHelpIfActive,
   waitForGameplayInputReady,
 } from "./utils/onboarding-runtime.js";
@@ -37,7 +38,7 @@ async function setupPowerUpPage(page, inventory = null) {
   await page.goto("/game.html?level=beginner", {
     waitUntil: "domcontentloaded",
   });
-  await dismissHowToPlayModal(page);
+  await dismissBriefingAndWaitForInteractiveGameplay(page);
   await stopEvanHelpIfActive(page);
   await waitForGameplayInputReady(page);
 
@@ -65,51 +66,10 @@ async function setupPowerUpPage(page, inventory = null) {
   await page.waitForSelector("#power-up-display", { timeout: 5000 });
 }
 
-
 async function dismissHowToPlayModal(page) {
-  await ensureLandscapeGameplayViewport(page);
-
-  const modal = page.locator("#how-to-play-modal");
-  const startButton = page.locator("#start-game-btn");
-
-  for (let attempt = 0; attempt < 20; attempt += 1) {
-    const [startVisible, modalVisible] = await Promise.all([
-      startButton.isVisible().catch(() => false),
-      modal.isVisible().catch(() => false),
-    ]);
-
-    if (startVisible || modalVisible) {
-      break;
-    }
-
-    await page.waitForTimeout(100);
-  }
-
-  const [startVisible, modalVisible] = await Promise.all([
-    startButton.isVisible().catch(() => false),
-    modal.isVisible().catch(() => false),
-  ]);
-
-  if (!startVisible && !modalVisible) {
-    return;
-  }
-
-  await expect(startButton).toBeVisible({ timeout: 10000 });
-
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    await startButton.click({ force: true });
-
-    try {
-      await expect(modal).toBeHidden({ timeout: 2000 });
-      return;
-    } catch {
-      // Some engines delay the modal fade-out or miss the first synthetic
-      // tap during startup; retry a couple of times before failing.
-    }
-  }
-
-  await expect(modal).toBeHidden({ timeout: 5000 });
+  await dismissBriefingAndWaitForInteractiveGameplay(page);
 }
+
 /**
  * Test suite for the Two-Click Power-Up System
  *

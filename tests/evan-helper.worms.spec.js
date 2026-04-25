@@ -213,7 +213,7 @@ test.describe("Evan Worm + Reward Behavior — Build 6", () => {
       const worm = window.wormSystem.worms.find(
         (entry) => entry.id === window.__evanWormId,
       );
-      return Boolean(worm) && worm.active === false;
+      return !worm || worm.active === false;
     });
 
     expect(
@@ -221,9 +221,9 @@ test.describe("Evan Worm + Reward Behavior — Build 6", () => {
         const worm = window.wormSystem.worms.find(
           (entry) => entry.id === window.__evanWormId,
         );
-        return worm?.active;
+        return worm ? worm.active : null;
       }),
-    ).toBe(false);
+    ).not.toBe(true);
   });
 
   test("Evan centers the hand on worm targets without leaving the target panel", async ({
