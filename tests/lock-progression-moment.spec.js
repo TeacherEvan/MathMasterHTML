@@ -32,7 +32,7 @@ test.describe("Lock progression signature moment", () => {
     });
 
     await page.waitForFunction(() => {
-      return window.lockManager?.container?.dataset.lockLevel === "2";
+      return window.lockManager?.container?.dataset.lockLevel === "1";
     });
 
     const lockState = await page.evaluate(() => {
@@ -44,8 +44,8 @@ test.describe("Lock progression signature moment", () => {
     });
 
     expect(lockState).toMatchObject({
-      currentLevel: 2,
-      datasetLevel: "2",
+      currentLevel: 1,
+      datasetLevel: "1",
       completedLines: 2,
     });
   });

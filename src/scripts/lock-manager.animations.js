@@ -162,9 +162,9 @@ console.log("🔒 LockManager animation helpers loading...");
     const isMasterLevel = document.body.classList.contains("master-level");
     let newLevel;
     if (isMasterLevel) {
-      newLevel = Math.min(6, this.completedLinesCount);
+      newLevel = Math.min(6, Math.floor(this.completedLinesCount / 2) + 1);
     } else {
-      newLevel = Math.min(3, this.completedLinesCount);
+      newLevel = Math.min(3, Math.floor(this.completedLinesCount / 4) + 1);
     }
 
     console.log(
