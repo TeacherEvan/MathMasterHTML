@@ -508,6 +508,9 @@ window.clearServiceWorkerCache = async function ({ silent = false } = {}) {
         console.log("✅ Service Worker cache cleared");
         if (!silent && window.UXEnhancements && window.UXEnhancements.toast) {
           window.UXEnhancements.toast.success("Cache cleared successfully!");
+        } else if (!silent) {
+          alert("Cache cleared successfully! The page will now reload.");
+          window.location.reload();
         }
       }
 
