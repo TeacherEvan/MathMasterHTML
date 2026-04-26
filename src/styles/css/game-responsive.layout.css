@@ -115,7 +115,7 @@ body.viewport-compact.viewport-portrait .grid-container > .wall:nth-child(4) {
 body.viewport-compact.viewport-portrait #panel-b {
   grid-column: 1 !important;
   grid-row: 3 !important;
-  padding: calc(var(--panel-b-top-safe-zone, 88px) - 8px) 6px 6px;
+  padding: 10px 6px 6px;
   gap: 6px;
   overflow: hidden;
 }
