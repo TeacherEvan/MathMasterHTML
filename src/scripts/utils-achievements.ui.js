@@ -35,7 +35,7 @@ const AchievementUI = {
             gap: 15px;
             font-family: 'Orbitron', monospace;
             z-index: 10003;
-            animation: achievement-slide-in 0.5s ease-out, achievement-slide-out 0.5s ease-in 3.5s forwards;
+            animation: achievement-slide-in 0.5s ease-out, achievement-slide-out 0.5s ease-in 1s forwards;
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
         `;
 
@@ -54,10 +54,15 @@ const AchievementUI = {
     const descStyle = popup.querySelector(".achievement-desc");
     descStyle.style.cssText = "color: #aaa; font-size: 0.75em;";
 
-    document.body.appendChild(popup);
+    const panelC = document.getElementById("panel-c");
+    if (panelC) {
+      panelC.appendChild(popup);
+    } else {
+      document.body.appendChild(popup);
+    }
 
     // Remove after animation
-    setTimeout(() => popup.remove(), 4000);
+    setTimeout(() => popup.remove(), 1500);
   },
 };
 
