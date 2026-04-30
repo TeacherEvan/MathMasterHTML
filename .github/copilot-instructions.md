@@ -30,6 +30,7 @@ Do not add any other `.md` files outside `.github/agents/*.agent.md`. Consolidat
 ## Authoritative Docs
 
 - `Plan Genesis.md` is the operational source of truth for runtime and engineering work.
+- `Plan Genesis.md` also absorbs the repository architecture and system-guide content that would otherwise live in a separate root architecture document.
 - `Plan Beta.md` is the source of truth for roadmap and execution priorities.
 - `Plan Alpha.md` is the source of truth for product, design, and experience rules.
 - `JOBCARD.md` is the rolling work log.
@@ -48,6 +49,12 @@ Do not add any other `.md` files outside `.github/agents/*.agent.md`. Consolidat
 - Preserve script load order and `window.*` registration semantics.
 - Keep cross-module integration event-driven.
 - Prefer `Plan Genesis.md` first, then `Plan Alpha.md` for UX-sensitive behavior.
+
+### When narrowing agent context for bugfixes or feature work
+
+- Prefer explicit file pinning over broad semantic search once the owning script is known.
+- Pin the script that directly computes the behavior and the nearest caller or page glue that invokes it.
+- If ownership is unclear, do one read-only exploration step, then execute against the owner and caller only.
 
 ### When editing `tests/**/*.spec.js`
 

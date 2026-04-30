@@ -1,0 +1,29 @@
+# Keep Copilot focused on runtime code, tests, and docs that matter for this web app.
+
+# Engine and editor metadata
+*.meta
+*.import
+*.asset
+*.prefab
+*.mat
+
+# Media and binary art/audio payloads
+*.wav
+*.mp3
+*.ogg
+*.png
+*.jpg
+*.fbx
+*.blend
+
+# Engine caches and IDE state
+Library/
+Temp/
+obj/
+bin/
+.godot/
+.vs/
+
+# Logs and generated diagnostics
+*.log
+Logs/

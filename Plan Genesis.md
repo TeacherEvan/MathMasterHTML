@@ -4,6 +4,7 @@
 
 Plan Genesis is the durable engineering source of truth for MathMasterHTML. It absorbs the old entrypoint guide, architecture guide, development guide, performance guide, worm developer guide, worm testing guide, and agent-customization ownership notes.
 It complements the root README with the deeper engineering overview under the markdown policy.
+Under the markdown policy, this file is also the repository system guide that would otherwise live in a separate `ARCHITECTURE.md`.
 
 ## Repo Reality
 
@@ -54,6 +55,30 @@ Use an HTTP server. Runtime assets are fetched dynamically, so `file://` is not 
 | `lock/` | Lock assets and styles |
 | `src/tools/` | Verification and maintenance scripts |
 | `src/types/` | Typecheck-only definitions |
+
+## System Guide
+
+- Behavior logic lives in `src/scripts/` and is split by domain: gameplay in `game-*.js`, worm mechanics in `worm-*.js` and `worm-system.*.js`, symbol-rain flow in `symbol-rain*.js`, audio in `interaction-audio.cyberpunk.*.js`, and onboarding or persistence in their matching controller or storage files.
+- UI and layout ownership also lives in `src/scripts/`, but in the display and page orchestration families: `display-manager*.js`, `ui-boundary-manager*.js`, `console-manager*.js`, `score-timer*.js`, and `*-page*.js` own viewport rules, rendering glue, and page-level wiring.
+- UI structure lives in `src/pages/` and `src/styles/`; runtime assets and problem data live in `src/assets/`; tests that lock behavior live in `tests/`; verification and maintenance scripts live in `src/tools/`.
+- Root HTML files stay redirect-only entrypoints. Runtime edits should target the active pages in `src/pages/` and the owning script in `src/scripts/`.
+
+## Script Naming Conventions
+
+- `*-manager.js`: subsystem ownership and coordination such as `display-manager.js`, `lock-manager.js`, and `score-timer-manager.js`.
+- `*-page.js` and `*-page.*.js`: page-level orchestration and event wiring such as `game-page.js` and `level-select-page.interactions.js`.
+- `game-*.js`: gameplay flow, problem lifecycle, symbol handling, and session glue.
+- `worm-*.js` and `worm-system.*.js`: worm behavior, movement, spawning, rewards, and power-ups split by concern.
+- `symbol-rain*.js`: Panel C animation, spawning, helpers, and interactions.
+- `interaction-audio.cyberpunk.*.js`: audio runtime split into bootstrap, state, playback, controls, and UI concerns.
+- `constants*.js`, `utils-*.js`, and `*-helpers*.js`: shared constants, reusable helpers, and low-level utilities.
+
+## Copilot Scoping Guidance
+
+- Start from the owning script that directly computes the behavior, then pin the immediate caller or page glue that invokes it. Avoid broad repo-wide search once ownership is known.
+- For an audio bug, pin the audio owner in `interaction-audio.cyberpunk.*.js` and the script that triggers it, such as a `game-*.js`, `*-page.js`, or interaction module.
+- For UI bugs, pin the layout owner such as `display-manager*.js`, `ui-boundary-manager*.js`, or `console-manager*.js` plus the page or feature script that consumes that contract.
+- If ownership is unclear, do one read-only exploration pass first, then narrow execution to the owner and its direct caller before editing.
 
 ## Runtime Model
 
