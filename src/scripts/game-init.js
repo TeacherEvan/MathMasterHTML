@@ -12,9 +12,19 @@ console.log("🎮 Game initialization module loading...");
     const clarifyButton = document.getElementById("clarify-button");
     const startGameButton = document.getElementById("start-game-btn");
 
-    // Parse URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const level = urlParams.get("level") || "beginner";
+    const requestedLevel = urlParams.get("level");
+    const level =
+      typeof window.getLevelFromURL === "function"
+        ? window.getLevelFromURL()
+        : typeof window.normalizeGameLevel === "function"
+          ? window.normalizeGameLevel(requestedLevel)
+          : requestedLevel === "h2p" ||
+              requestedLevel === "beginner" ||
+              requestedLevel === "warrior" ||
+              requestedLevel === "master"
+            ? requestedLevel
+            : "beginner";
     const allowedLockComponents = new Set([
       "Line-1-transformer.html",
       "line-2-transformer.html",
@@ -43,7 +53,8 @@ console.log("🎮 Game initialization module loading...");
     // Don't start the per-step countdown until shared gameplay readiness is reached.
     if (GE?.GAMEPLAY_READY_CHANGED && window.ScoreTimerManager) {
       document.addEventListener(GE.GAMEPLAY_READY_CHANGED, (event) => {
-        if (event.detail?.gameplayReady) {
+        const gameplayReadyEvent = /** @type {CustomEvent<{ gameplayReady?: boolean }>} */ (event);
+        if (gameplayReadyEvent.detail?.gameplayReady) {
           window.ScoreTimerManager.setGameStarted();
         }
       });
@@ -62,6 +73,7 @@ console.log("🎮 Game initialization module loading...");
 
     // Apply level theme to body without wiping other classes
     document.body.classList.remove(
+      "level-h2p",
       "level-beginner",
       "level-warrior",
       "level-master",

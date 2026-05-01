@@ -11,6 +11,12 @@
         ]
     },
     "include": [
+        "service-worker.js",
+        "src/scripts/game.js",
+        "src/scripts/utils-core.js",
+        "src/scripts/game-init.js",
+        "src/scripts/game-onboarding.bootstrap.js",
+        "src/scripts/console-manager.core.js",
         "src/scripts/worm.js",
         "src/scripts/worm-factory.js",
         "src/scripts/worm-movement.js",
@@ -26,7 +32,6 @@
         "node_modules",
         "tests/**",
         "scripts/**",
-        "service-worker.js",
         "playwright.config.js",
         "playwright.competition.config.js",
         "eslint.config.js",

@@ -4,11 +4,38 @@
  * Version: 20260422-local-freshness-evan-audio-1
  */
 
+/** @typedef {{ waitUntil: (promise: PromiseLike<unknown>) => void }} ExtendableWorkerEvent */
+/** @typedef {ExtendableWorkerEvent & { request: Request; respondWith: (response: Promise<Response> | Response) => void }} FetchWorkerEvent */
+/** @typedef {ExtendableWorkerEvent & { data?: any; ports: MessagePort[] }} MessageWorkerEvent */
+/** @typedef {ExtendableWorkerEvent & { tag: string }} SyncWorkerEvent */
+/** @typedef {ExtendableWorkerEvent & { data?: { json: () => any } }} PushWorkerEvent */
+/** @typedef {ExtendableWorkerEvent & { notification: { close: () => void; data?: { url?: string } } }} NotificationClickWorkerEvent */
+
+const serviceWorkerScope = /** @type {{
+  clients: { claim: () => Promise<void>; openWindow: (url: string) => Promise<any> };
+  registration: { showNotification: (title: string, options?: NotificationOptions) => Promise<void> };
+  skipWaiting: () => Promise<void>;
+}} */ (/** @type {unknown} */ (self));
+
 const BUILD_VERSION = "20260422-local-freshness-evan-audio-1";
 const CACHE_PREFIX = "math-master";
 const CACHE_NAME = `${CACHE_PREFIX}-static-${BUILD_VERSION}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_VERSION}`;
 const APP_CACHE_PREFIXES = [`${CACHE_PREFIX}-static-`, `${CACHE_PREFIX}-runtime-`];
+const ACTIVE_RUNTIME_PAGES = [
+  "/src/pages/index.html",
+  "/src/pages/level-select.html",
+  "/src/pages/game.html",
+];
+const DYNAMIC_GAME_MODULES = [
+  "/src/scripts/game-init.js",
+  "/src/scripts/game-problem-manager.js",
+  "/src/scripts/game-symbol-handler.stolen.js",
+  "/src/scripts/game-symbol-handler.core.js",
+  "/src/scripts/game-symbol-handler.events.js",
+  "/src/scripts/game-symbol-handler.js",
+  "/src/scripts/game-state-manager.js",
+];
 
 // Assets to cache immediately on install
 const STATIC_ASSETS = [
@@ -105,19 +132,88 @@ function isMathMasterCacheName(cacheName) {
   return APP_CACHE_PREFIXES.some((prefix) => cacheName.startsWith(prefix));
 }
 
+function normalizeCacheAssetPath(assetPath) {
+  if (typeof assetPath !== "string" || assetPath.length === 0) {
+    return null;
+  }
+
+  try {
+    const url = new URL(assetPath, location.origin);
+    if (url.origin !== location.origin) {
+      return null;
+    }
+
+    url.searchParams.delete("v");
+    return `${url.pathname}${url.search}`;
+  } catch {
+    return null;
+  }
+}
+
+function extractAssetReferences(html) {
+  const assets = [];
+  const assetPattern = /\b(?:src|href)=["']([^"']+)["']/g;
+  for (const match of html.matchAll(assetPattern)) {
+    const normalizedPath = normalizeCacheAssetPath(match[1]);
+    if (!normalizedPath) {
+      continue;
+    }
+
+    if (/\.(?:css|js|json|html)$/i.test(normalizedPath)) {
+      assets.push(normalizedPath);
+    }
+  }
+
+  return assets;
+}
+
+async function collectActiveRuntimeAssets() {
+  const pageAssetLists = await Promise.all(
+    ACTIVE_RUNTIME_PAGES.map(async (pagePath) => {
+      try {
+        const response = await fetch(pagePath);
+        if (!response?.ok) {
+          return [];
+        }
+
+        const html = await response.text();
+        return extractAssetReferences(html);
+      } catch {
+        return [];
+      }
+    }),
+  );
+
+  return pageAssetLists.flat();
+}
+
+async function getInstallAssets() {
+  const discoveredAssets = await collectActiveRuntimeAssets();
+  return [
+    ...new Set(
+      [...STATIC_ASSETS, ...ACTIVE_RUNTIME_PAGES, ...DYNAMIC_GAME_MODULES, ...discoveredAssets]
+        .map((assetPath) => normalizeCacheAssetPath(assetPath))
+        .filter(Boolean),
+    ),
+  ];
+}
+
 // ============================================
 // INSTALL EVENT - Cache static assets
 // ============================================
 self.addEventListener("install", (event) => {
   console.log("[ServiceWorker] Installing...");
 
-  event.waitUntil(
+  const installEvent = /** @type {ExtendableWorkerEvent} */ (/** @type {unknown} */ (event));
+
+  installEvent.waitUntil(
     caches
       .open(CACHE_NAME)
       .then(async (cache) => {
         console.log("[ServiceWorker] Caching static assets");
+        const installAssets = await getInstallAssets();
         const results = await Promise.allSettled(
-          STATIC_ASSETS.map((assetPath) => cache.add(assetPath)),
+          installAssets.map((assetPath) => cache.add(assetPath)),
         );
         const failed = results.filter((result) => result.status === "rejected");
         if (failed.length > 0) {
@@ -141,7 +237,9 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   console.log("[ServiceWorker] Activating...");
 
-  event.waitUntil(
+  const activateEvent = /** @type {ExtendableWorkerEvent} */ (/** @type {unknown} */ (event));
+
+  activateEvent.waitUntil(
     caches
       .keys()
       .then((cacheNames) => {
@@ -162,7 +260,7 @@ self.addEventListener("activate", (event) => {
       })
       .then(() => {
         console.log("[ServiceWorker] Claiming clients");
-        return self.clients.claim(); // Take control immediately
+        return serviceWorkerScope.clients.claim(); // Take control immediately
       }),
   );
 });
@@ -171,7 +269,8 @@ self.addEventListener("activate", (event) => {
 // FETCH EVENT - Serve from cache, fallback to network
 // ============================================
 self.addEventListener("fetch", (event) => {
-  const { request } = event;
+  const fetchEvent = /** @type {FetchWorkerEvent} */ (/** @type {unknown} */ (event));
+  const { request } = fetchEvent;
   const url = new URL(request.url);
 
   // Skip non-GET requests
@@ -185,7 +284,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (request.destination === "document") {
-    event.respondWith(
+    fetchEvent.respondWith(
       networkFirst(request)
         .catch(() => cacheFirst(request))
         .catch(() => fallbackResponse(request)),
@@ -194,7 +293,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (isFreshnessCriticalRequest(request, url)) {
-    event.respondWith(
+    fetchEvent.respondWith(
       networkFirst(request)
         .catch(() => staleWhileRevalidate(request))
         .catch(() => fallbackResponse(request)),
@@ -202,7 +301,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(
+  fetchEvent.respondWith(
     staleWhileRevalidate(request)
       .catch(() => cacheFirst(request))
       .catch(() => fallbackResponse(request)),
@@ -317,7 +416,17 @@ async function matchCachedAsset(request) {
   }
 
   const staticCache = await caches.open(CACHE_NAME);
-  return staticCache.match(request);
+  const staticCached = await staticCache.match(request);
+  if (staticCached) {
+    return staticCached;
+  }
+
+  const normalizedPath = normalizeCacheAssetPath(request.url);
+  if (!normalizedPath || normalizedPath === request.url) {
+    return null;
+  }
+
+  return (await runtimeCache.match(normalizedPath)) || staticCache.match(normalizedPath);
 }
 
 /**
@@ -404,14 +513,16 @@ function fallbackResponse(request) {
 // MESSAGE EVENT - Handle commands from app
 // ============================================
 self.addEventListener("message", (event) => {
-  console.log("[ServiceWorker] Message received:", event.data);
+  const messageEvent = /** @type {MessageWorkerEvent} */ (/** @type {unknown} */ (event));
 
-  if (event.data && event.data.type === "SKIP_WAITING") {
-    self.skipWaiting();
+  console.log("[ServiceWorker] Message received:", messageEvent.data);
+
+  if (messageEvent.data && messageEvent.data.type === "SKIP_WAITING") {
+    serviceWorkerScope.skipWaiting();
   }
 
-  if (event.data && event.data.type === "CLEAR_CACHE") {
-    event.waitUntil(
+  if (messageEvent.data && messageEvent.data.type === "CLEAR_CACHE") {
+    messageEvent.waitUntil(
       caches
         .keys()
         .then((cacheNames) => {
@@ -427,7 +538,7 @@ self.addEventListener("message", (event) => {
         })
         .then(() => {
           console.log("[ServiceWorker] Math Master caches cleared");
-          event.ports[0].postMessage({ success: true });
+          messageEvent.ports[0]?.postMessage({ success: true });
         }),
     );
   }
@@ -437,10 +548,12 @@ self.addEventListener("message", (event) => {
 // BACKGROUND SYNC - Retry failed requests
 // ============================================
 self.addEventListener("sync", (event) => {
-  console.log("[ServiceWorker] Background sync:", event.tag);
+  const syncEvent = /** @type {SyncWorkerEvent} */ (/** @type {unknown} */ (event));
 
-  if (event.tag === "sync-gameplay-data") {
-    event.waitUntil(syncGameplayData());
+  console.log("[ServiceWorker] Background sync:", syncEvent.tag);
+
+  if (syncEvent.tag === "sync-gameplay-data") {
+    syncEvent.waitUntil(syncGameplayData());
   }
 });
 
@@ -455,13 +568,45 @@ async function syncGameplayData() {
   );
 }
 
+function readPushPayload(pushEvent) {
+  if (!pushEvent.data?.json) {
+    return {};
+  }
+
+  try {
+    const payload = pushEvent.data.json();
+    return payload && typeof payload === "object" ? payload : {};
+  } catch {
+    return {};
+  }
+}
+
+function getNotificationTargetUrl(notificationData) {
+  try {
+    const candidateUrl =
+      typeof notificationData?.url === "string" && notificationData.url
+        ? notificationData.url
+        : "/";
+    const targetUrl = new URL(candidateUrl, location.origin);
+    if (targetUrl.origin !== location.origin) {
+      return "/";
+    }
+
+    return `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`;
+  } catch {
+    return "/";
+  }
+}
+
 // ============================================
 // PUSH NOTIFICATIONS - Future enhancement
 // ============================================
 self.addEventListener("push", (event) => {
   console.log("[ServiceWorker] Push notification received");
 
-  const data = event.data ? event.data.json() : {};
+  const pushEvent = /** @type {PushWorkerEvent} */ (/** @type {unknown} */ (event));
+
+  const data = readPushPayload(pushEvent);
   const title = data.title || "Math Master";
   const options = {
     body: data.body || "You have a new notification",
@@ -471,14 +616,20 @@ self.addEventListener("push", (event) => {
     data: data.data || {},
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  pushEvent.waitUntil(serviceWorkerScope.registration.showNotification(title, options));
 });
 
 self.addEventListener("notificationclick", (event) => {
-  console.log("[ServiceWorker] Notification clicked");
-  event.notification.close();
+  const notificationEvent = /** @type {NotificationClickWorkerEvent} */ (/** @type {unknown} */ (event));
 
-  event.waitUntil(clients.openWindow(event.notification.data.url || "/"));
+  console.log("[ServiceWorker] Notification clicked");
+  notificationEvent.notification.close();
+
+  notificationEvent.waitUntil(
+    serviceWorkerScope.clients.openWindow(
+      getNotificationTargetUrl(notificationEvent.notification.data),
+    ),
+  );
 });
 
 console.log("[ServiceWorker] Service Worker loaded");

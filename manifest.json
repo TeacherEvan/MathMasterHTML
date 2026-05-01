@@ -28,22 +28,22 @@
   ],
   "screenshots": [
     {
-      "src": "/Images/Gameplay1.jpg",
-      "sizes": "1920x1080",
-      "type": "image/jpeg",
+      "src": "/src/assets/images/Images/Gameplay3.png",
+      "sizes": "1280x720",
+      "type": "image/png",
       "label": "Game interface showing three panels"
     },
     {
-      "src": "/Images/Welcome%20screen.jpg",
-      "sizes": "1920x1080",
-      "type": "image/jpeg",
-      "label": "Welcome screen with Matrix animation"
+      "src": "/src/assets/images/Images/Level%20select.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Level selection screen"
     },
     {
-      "src": "/Images/Level%20select.jpg",
-      "sizes": "1920x1080",
-      "type": "image/jpeg",
-      "label": "Level selection screen"
+      "src": "/src/assets/images/Images/Gameplay3.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Gameplay shell showing the algebra arena"
     }
   ],
   "shortcuts": [

@@ -12,6 +12,7 @@ import {
   checkDocumentation,
   checkESLint,
   checkLineLimits,
+  checkManifestScreenshots,
   checkPackageJson,
   checkToolingTests,
   generateStats,
@@ -39,6 +40,7 @@ async function main() {
     eslint: checkESLint(ROOT),
     toolingTests: checkToolingTests(ROOT),
     packageJson: checkPackageJson(ROOT),
+    manifestScreenshots: checkManifestScreenshots(ROOT),
     documentation: checkDocumentation(ROOT),
   };
 

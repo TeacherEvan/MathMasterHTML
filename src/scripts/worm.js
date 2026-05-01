@@ -17,8 +17,20 @@ class WormSystem {
     this.lockedConsoleSlots = new Set();
     this.isDestroyed = false; // Flag to stop animations cleanly
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const currentLevel = urlParams.get("level") || "beginner";
+    const requestedLevel = new URLSearchParams(window.location.search).get(
+      "level",
+    );
+    const currentLevel =
+      typeof getLevelFromURL === "function"
+        ? getLevelFromURL()
+        : typeof window.normalizeGameLevel === "function"
+          ? window.normalizeGameLevel(requestedLevel)
+          : requestedLevel === "h2p" ||
+              requestedLevel === "beginner" ||
+              requestedLevel === "warrior" ||
+              requestedLevel === "master"
+            ? requestedLevel
+            : "beginner";
 
     const difficultySettings = {
       beginner: {

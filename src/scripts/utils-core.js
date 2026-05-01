@@ -34,24 +34,46 @@ function generateUniqueId(prefix = "item") {
 }
 
 /**
- * Get current level from URL parameters
- * @returns {string} Level name ('beginner', 'warrior', or 'master')
+ * Normalize a requested game level to a supported runtime value.
+ * @param {string | null | undefined} level - Requested level value
+ * @returns {GameLevel} Supported level name
+ */
+function normalizeGameLevel(level) {
+  if (
+    level === "h2p" ||
+    level === "beginner" ||
+    level === "warrior" ||
+    level === "master"
+  ) {
+    return level;
+  }
+
+  return "beginner";
+}
+
+/**
+ * Get current level from onboarding state or URL parameters.
+ * @returns {GameLevel} Level name ('h2p', 'beginner', 'warrior', or 'master')
  */
 function getLevelFromURL() {
+  if (window.GameOnboarding?.level) {
+    return normalizeGameLevel(window.GameOnboarding.level);
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get("level") || "beginner";
+  return normalizeGameLevel(urlParams.get("level"));
 }
 
 /**
  * Deferred execution utility - uses requestIdleCallback if available, else setTimeout
  * Useful for deferring heavy operations to prevent blocking animations
- * @param {Function} callback - Function to execute
+ * @param {() => void} callback - Function to execute
  */
 function deferExecution(callback) {
   if (window.requestIdleCallback) {
-    window.requestIdleCallback(callback);
+    window.requestIdleCallback(() => callback());
   } else {
-    setTimeout(callback, 1);
+    setTimeout(() => callback(), 1);
   }
 }
 
@@ -60,6 +82,7 @@ if (typeof window !== "undefined") {
   window.normalizeSymbol = normalizeSymbol;
   window.calculateDistance = calculateDistance;
   window.generateUniqueId = generateUniqueId;
+  window.normalizeGameLevel = normalizeGameLevel;
   window.getLevelFromURL = getLevelFromURL;
   window.deferExecution = deferExecution;
 }

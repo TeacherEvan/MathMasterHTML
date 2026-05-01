@@ -4,6 +4,37 @@ import vm from "node:vm";
 import { expect, test } from "@playwright/test";
 
 const LEVEL_SELECT_URL = "/src/pages/level-select.html";
+const PAGE_HTML_BY_PATH = new Map([
+  [
+    "/src/pages/index.html",
+    `
+      <link rel="stylesheet" href="/src/styles/css/index.css">
+      <script src="/src/scripts/index-page.js"></script>
+    `,
+  ],
+  [
+    "/src/pages/level-select.html",
+    `
+      <link rel="stylesheet" href="/src/styles/css/level-select.css">
+      <script src="/src/scripts/level-select-page.js"></script>
+    `,
+  ],
+  [
+    "/src/pages/game.html",
+    `
+      <link rel="stylesheet" href="/src/styles/css/game.css?v=20260422-local-freshness-evan-audio-1">
+      <link rel="stylesheet" href="/src/styles/css/game-modals.preload.css?v=20260422-local-freshness-evan-audio-1">
+      <script src="/src/scripts/game.js"></script>
+      <script src="/src/scripts/game-page.js?v=20260422-local-freshness-evan-audio-1"></script>
+    `,
+  ],
+]);
+
+function getCacheKey(input) {
+  const requestUrl = typeof input === "string" ? input : input?.url || "";
+  const url = new URL(requestUrl, "https://example.test");
+  return `${url.pathname}${url.search}`;
+}
 
 async function runServiceWorkerScenario(scenario) {
   const source = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
@@ -13,6 +44,9 @@ async function runServiceWorkerScenario(scenario) {
   const deletedCaches = [];
   const cachedAssets = [];
   const messageResponses = [];
+  const cacheEntries = new Map();
+  const shownNotifications = [];
+  const openedWindows = [];
   const initialCacheNames = [
     "math-master-static-legacy",
     "math-master-runtime-legacy",
@@ -25,10 +59,13 @@ async function runServiceWorkerScenario(scenario) {
       return {
         async add(assetPath) {
           cachedAssets.push(assetPath);
+          cacheEntries.set(assetPath, new Response("cached", { status: 200 }));
         },
-        async put() {},
-        async match() {
-          return null;
+        async put(request, response) {
+          cacheEntries.set(getCacheKey(request), response.clone());
+        },
+        async match(request) {
+          return cacheEntries.get(getCacheKey(request)) || null;
         },
       };
     },
@@ -56,12 +93,14 @@ async function runServiceWorkerScenario(scenario) {
         selfScope.clients.claimCalls += 1;
         return Promise.resolve();
       },
-      openWindow() {
+      openWindow(url) {
+        openedWindows.push(url);
         return Promise.resolve();
       },
     },
     registration: {
-      showNotification() {
+      showNotification(title, options) {
+        shownNotifications.push({ title, options });
         return Promise.resolve();
       },
     },
@@ -70,7 +109,16 @@ async function runServiceWorkerScenario(scenario) {
   const context = vm.createContext({
     self: selfScope,
     caches: fakeCaches,
-    fetch: async () => new Response("ok", { status: 200 }),
+    fetch: async (input) => {
+      const requestUrl = typeof input === "string" ? input : input?.url || "";
+      const url = new URL(requestUrl, "https://example.test");
+      const pageHtml = PAGE_HTML_BY_PATH.get(url.pathname);
+      if (pageHtml) {
+        return new Response(pageHtml, { status: 200 });
+      }
+
+      return new Response("ok", { status: 200 });
+    },
     location: { origin: "https://example.test" },
     URL,
     Response,
@@ -106,6 +154,7 @@ async function runServiceWorkerScenario(scenario) {
 
     return {
       openedCaches,
+      cachedAssets,
       cachedAssetsCount: cachedAssets.length,
       deletedCaches,
       skipWaitingCalls: selfScope.skipWaitingCalls,
@@ -136,6 +185,90 @@ async function runServiceWorkerScenario(scenario) {
     return {
       deletedCaches,
       messageResponses,
+    };
+  }
+
+  if (scenario === "versioned-cache-fallback") {
+    cacheEntries.set(
+      "/src/styles/css/game.css",
+      new Response("cached-style", { status: 200 }),
+    );
+
+    context.fetch = async (input) => {
+      const requestUrl = typeof input === "string" ? input : input?.url || "";
+      const url = new URL(requestUrl, "https://example.test");
+      if (url.pathname === "/src/styles/css/game.css") {
+        throw new Error("offline");
+      }
+
+      const pageHtml = PAGE_HTML_BY_PATH.get(url.pathname);
+      if (pageHtml) {
+        return new Response(pageHtml, { status: 200 });
+      }
+
+      return new Response("ok", { status: 200 });
+    };
+
+    const fetchEvent = {
+      request: new Request(
+        "https://example.test/src/styles/css/game.css?v=20260422-local-freshness-evan-audio-1",
+      ),
+      respondWith(promise) {
+        this.promise = Promise.resolve(promise);
+      },
+    };
+
+    listeners.get("fetch")?.(fetchEvent);
+    const response = await fetchEvent.promise;
+
+    return {
+      body: await response.text(),
+      status: response.status,
+    };
+  }
+
+  if (scenario === "push-invalid-json") {
+    const pushEvent = {
+      data: {
+        json() {
+          throw new Error("invalid json");
+        },
+      },
+      waitUntil(promise) {
+        this.promise = Promise.resolve(promise);
+      },
+    };
+
+    listeners.get("push")?.(pushEvent);
+    await pushEvent.promise;
+
+    return {
+      shownNotifications,
+    };
+  }
+
+  if (scenario === "notificationclick-foreign-url") {
+    const notificationEvent = {
+      notification: {
+        closeCalls: 0,
+        close() {
+          this.closeCalls += 1;
+        },
+        data: {
+          url: "https://evil.example/phish?x=1",
+        },
+      },
+      waitUntil(promise) {
+        this.promise = Promise.resolve(promise);
+      },
+    };
+
+    listeners.get("notificationclick")?.(notificationEvent);
+    await notificationEvent.promise;
+
+    return {
+      closeCalls: notificationEvent.notification.closeCalls,
+      openedWindows,
     };
   }
 
@@ -260,6 +393,9 @@ test.describe("Service worker update flow", () => {
     const state = await runServiceWorkerScenario("install-activate");
 
     expect(state.cachedAssetsCount).toBeGreaterThan(0);
+    expect(state.cachedAssets).toContain("/src/scripts/game-init.js");
+    expect(state.cachedAssets).toContain("/src/scripts/game-state-manager.js");
+    expect(state.cachedAssets).toContain("/src/styles/css/game.css");
     expect(state.openedCaches[0]).toContain("math-master-");
     expect(state.skipWaitingCalls).toBe(0);
     expect(state.claimCalls).toBe(1);
@@ -277,6 +413,42 @@ test.describe("Service worker update flow", () => {
       "math-master-runtime-legacy",
     ]);
     expect(state.messageResponses).toEqual([{ success: true }]);
+  });
+
+  test("versioned asset requests fall back to matching unversioned cached entries", async ({
+    page,
+  }) => {
+    const state = await runServiceWorkerScenario("versioned-cache-fallback");
+
+    expect(state).toEqual({
+      body: "cached-style",
+      status: 200,
+    });
+  });
+
+  test("push notifications fall back to defaults when payload JSON is invalid", async ({
+    page,
+  }) => {
+    const state = await runServiceWorkerScenario("push-invalid-json");
+
+    expect(state.shownNotifications).toEqual([
+      {
+        title: "Math Master",
+        options: expect.objectContaining({
+          body: "You have a new notification",
+          data: {},
+        }),
+      },
+    ]);
+  });
+
+  test("notification clicks ignore off-origin target URLs", async ({ page }) => {
+    const state = await runServiceWorkerScenario("notificationclick-foreign-url");
+
+    expect(state).toEqual({
+      closeCalls: 1,
+      openedWindows: ["/"],
+    });
   });
 
   test("local build changes clear Math Master state before registering the next worker", async ({

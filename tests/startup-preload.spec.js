@@ -361,6 +361,48 @@ test.describe("Startup Preload — Build 2", () => {
     await expect(page.locator("#startup-preload")).toBeHidden();
   });
 
+  test("dynamic gameplay module load failure surfaces a blocking error state", async ({
+    page,
+  }) => {
+    await page.route("**/game-state-manager.js?*", (route) => route.abort());
+
+    await gotoGameRuntime(page, "?level=beginner");
+    await waitForStartupPreload(page);
+
+    await page.waitForFunction(
+      () => window.StartupPreload?.isComplete() === true,
+      { timeout: 10000 },
+    );
+    await page.waitForFunction(() => {
+      const state = window.GameRuntimeCoordinator?.getState?.();
+      return (
+        state?.inputLocked === true &&
+        state?.preloadComplete === true &&
+        state?.preloadReason === "failed" &&
+        state?.inputLocks?.["game-module-loader"] === true
+      );
+    });
+
+    const runtimeState = await page.evaluate(() => ({
+      coordinator: window.GameRuntimeCoordinator?.getState?.(),
+      canAcceptGameplayInput:
+        window.GameRuntimeCoordinator?.canAcceptGameplayInput?.(),
+    }));
+
+    await expect(page.locator("#startup-preload")).toBeHidden();
+    await expect(page.locator("#game-module-load-error")).toBeVisible();
+    await expect(page.locator("#game-module-load-error")).toContainText(
+      "Game Loading Error",
+    );
+    expect(runtimeState.coordinator?.inputLocked).toBe(true);
+    expect(runtimeState.coordinator?.preloadComplete).toBe(true);
+    expect(runtimeState.coordinator?.preloadReason).toBe("failed");
+    expect(runtimeState.coordinator?.inputLocks?.["game-module-loader"]).toBe(
+      true,
+    );
+    expect(runtimeState.canAcceptGameplayInput).toBe(false);
+  });
+
   test("briefing modal not visible while preload is blocking", async ({
     page,
   }) => {

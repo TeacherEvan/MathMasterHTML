@@ -162,6 +162,24 @@ test.describe("Runtime boot orchestration", () => {
     );
   });
 
+  test("invalid level params normalize to beginner during boot", async ({ page }) => {
+    await gotoGameRuntime(page, "?level=bad%20level&preload=off");
+    await waitForRuntimeCoordinator(page);
+
+    const state = await page.evaluate(() => ({
+      onboardingLevel: window.GameOnboarding?.level,
+      initLevel: window.GameInit?.level,
+      currentLevel: window.getLevelFromURL?.(),
+      bodyClassName: document.body.className,
+    }));
+
+    expect(state.onboardingLevel).toBe("beginner");
+    expect(state.initLevel).toBe("beginner");
+    expect(state.currentLevel).toBe("beginner");
+    expect(state.bodyClassName).toContain("level-beginner");
+    expect(state.bodyClassName).not.toContain("level-bad level");
+  });
+
   test("auto Evan input lock is separate from gameplay readiness", async ({
     page,
   }) => {

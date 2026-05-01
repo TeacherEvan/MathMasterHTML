@@ -1,6 +1,17 @@
 // js/console-manager.core.js - Console manager core
 console.log("🎮 Console Manager core loading");
 
+/**
+ * @typedef {ConsoleManager & {
+ *   loadProgress: () => void;
+ *   setupConsoleButtons: () => void;
+ *   setupModalInteractions: () => void;
+ *   setupKeyboardShortcuts: () => void;
+ *   incrementProblemsCompleted: () => void;
+ *   showSymbolSelectionModal: () => void;
+ * }} ConsoleManagerRuntime
+ */
+
 (function() {
   class ConsoleManager {
     constructor() {
@@ -41,6 +52,10 @@ console.log("🎮 Console Manager core loading");
 
     _getLevelFromURLFallback() {
       const params = new URLSearchParams(window.location.search);
+      if (typeof window.normalizeGameLevel === "function") {
+        return window.normalizeGameLevel(params.get("level"));
+      }
+
       return params.get("level") || "beginner";
     }
 
@@ -76,10 +91,12 @@ console.log("🎮 Console Manager core loading");
 
       console.log("✅ Console elements found, setting up event listeners");
 
-      this.loadProgress();
-      this.setupConsoleButtons();
-      this.setupModalInteractions();
-      this.setupKeyboardShortcuts();
+      const runtimeConsoleManager = /** @type {ConsoleManagerRuntime} */ (/** @type {unknown} */ (this));
+
+      runtimeConsoleManager.loadProgress();
+      runtimeConsoleManager.setupConsoleButtons();
+      runtimeConsoleManager.setupModalInteractions();
+      runtimeConsoleManager.setupKeyboardShortcuts();
       const GameEvents = window.GameEvents || {
         CONSOLE_SYMBOL_ADDED: "consoleSymbolAdded",
         PROBLEM_COMPLETED: "problemCompleted",
@@ -87,7 +104,7 @@ console.log("🎮 Console Manager core loading");
 
       document.addEventListener(GameEvents.PROBLEM_COMPLETED, () => {
         console.log("🎉 Problem completed! Queueing console selection panel");
-        this.incrementProblemsCompleted();
+        runtimeConsoleManager.incrementProblemsCompleted();
         this.queueSymbolSelectionModal();
       });
 
@@ -114,6 +131,8 @@ console.log("🎮 Console Manager core loading");
     }
 
     queueSymbolSelectionModal() {
+      const runtimeConsoleManager = /** @type {ConsoleManagerRuntime} */ (/** @type {unknown} */ (this));
+
       if (this.isPendingSelection) {
         return;
       }
@@ -135,7 +154,7 @@ console.log("🎮 Console Manager core loading");
         }
 
         this.selectionGateTimer = null;
-        this.showSymbolSelectionModal();
+        runtimeConsoleManager.showSymbolSelectionModal();
       };
 
       tryOpen();

@@ -13,7 +13,12 @@
   const preloadMode = VALID_PRELOAD_MODES.includes(rawPreload)
     ? rawPreload
     : "auto";
-  const level = VALID_LEVELS.includes(rawLevel) ? rawLevel : "beginner";
+  const level =
+    typeof window.normalizeGameLevel === "function"
+      ? window.normalizeGameLevel(rawLevel)
+      : VALID_LEVELS.includes(rawLevel)
+        ? rawLevel
+        : "beginner";
 
   if (window.GameOnboardingStorage) {
     window.GameOnboardingStorage.initSession();
