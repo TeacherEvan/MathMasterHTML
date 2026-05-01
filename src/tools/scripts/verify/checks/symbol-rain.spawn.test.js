@@ -24,7 +24,7 @@ function loadSymbolRainSpawnRuntime(overrides = {}) {
   const context = vm.createContext({
     console,
     Math: math,
-    Date: { now: () => now },
+    Date: { now: () => (typeof now === "function" ? now() : now) },
     document: {
       querySelectorAll: () => hiddenSymbols,
     },
@@ -35,6 +35,7 @@ function loadSymbolRainSpawnRuntime(overrides = {}) {
     clearInterval: () => {},
     window: {
       SymbolRainHelpers: overrides.SymbolRainHelpers,
+      SymbolRainTargets: overrides.SymbolRainTargets,
       GameSymbolHandlerCore: {
         getCurrentStepIndex: () => 0,
       },
@@ -181,4 +182,89 @@ test("visible rain floor fills from the general symbol pool without prioritizing
   runtime.handleRandomSpawns(state);
 
   assert.deepEqual(createdSymbols, ["1", "1"]);
+});
+
+test("current-step target circulation is throttled and scans active symbols directly", () => {
+  let now = 10_000;
+  let targetLookups = 0;
+  const createdSymbols = [];
+  const state = {
+    activeFallingSymbols: [],
+    activeFaceReveals: new Set(),
+    columnCount: 3,
+    config: {
+      spawnRate: 0,
+      burstSpawnRate: 0,
+      minVisibleSymbols: 0,
+      guaranteedSpawnInterval: 5000,
+      maxActiveSymbols: 200,
+      symbolHeight: 42,
+    },
+    guaranteedSpawnControllerId: null,
+    lastSymbolSpawnTimestamp: {
+      1: 0,
+      2: 0,
+      3: 0,
+    },
+    spatialGrid: {},
+    symbolPool: {},
+    symbolRainContainer: {},
+    symbols: ["1", "2", "3"],
+    cachedContainerHeight: 320,
+  };
+
+  const SymbolRainHelpers = {
+    cleanupSymbolObject: () => {},
+    createFallingSymbol: (spawnContext, options) => {
+      createdSymbols.push(options.forcedSymbol);
+      const symbolObj = {
+        symbol: options.forcedSymbol,
+        column: options.column,
+        y: options.initialY ?? 0,
+        element: {
+          isConnected: true,
+          classList: { contains: () => false },
+          textContent: options.forcedSymbol,
+        },
+      };
+      spawnContext.activeFallingSymbols.push(symbolObj);
+      return symbolObj;
+    },
+    getRainWindowRect: () => ({
+      top: 0,
+      bottom: 320,
+      left: 0,
+      right: 200,
+      width: 200,
+      height: 320,
+    }),
+    isColumnCrowded: () => false,
+    isSymbolVisibleInRainWindow: () => true,
+  };
+
+  const SymbolRainTargets = {
+    normalizeSymbol: (value) => String(value || "").trim(),
+    getNextRequiredSymbol: () => {
+      targetLookups += 1;
+      return "2";
+    },
+    hasVisibleSymbol: () => {
+      throw new Error("spawn should not call DOM fallback target scans");
+    },
+  };
+
+  const runtime = loadSymbolRainSpawnRuntime({
+    now: () => now,
+    SymbolRainHelpers,
+    SymbolRainTargets,
+  });
+
+  runtime.handleRandomSpawns(state);
+  now += 100;
+  runtime.handleRandomSpawns(state);
+  now += 160;
+  runtime.handleRandomSpawns(state);
+
+  assert.deepEqual(createdSymbols, ["2"]);
+  assert.equal(targetLookups, 2);
 });

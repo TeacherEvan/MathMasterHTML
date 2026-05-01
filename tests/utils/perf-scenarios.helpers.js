@@ -8,6 +8,11 @@ function escapeRegExp(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function normalizeSymbolText(value) {
+  const normalized = String(value || "").trim();
+  return normalized.toLowerCase() === "x" ? "X" : normalized;
+}
+
 async function getCurrentStepSnapshot(page) {
   return page.evaluate((hiddenSelector) => {
     const getHiddenSymbolValue = (element) =>
@@ -36,6 +41,10 @@ async function waitForFallingSymbolText(page, matcher, timeoutMs = 5000) {
   while (Date.now() < deadline) {
     const match = await page.evaluate(
       ({ selector, predicate }) => {
+        const normalizeSymbolText = (value) => {
+          const normalized = String(value || "").trim();
+          return normalized.toLowerCase() === "x" ? "X" : normalized;
+        };
         const symbols = Array.from(document.querySelectorAll(selector));
         for (const symbolElement of symbols) {
           const text = symbolElement.textContent?.trim();
@@ -43,13 +52,18 @@ async function waitForFallingSymbolText(page, matcher, timeoutMs = 5000) {
             continue;
           }
 
-          if (predicate.type === "exact" && text === predicate.value) {
+          if (
+            predicate.type === "exact" &&
+            normalizeSymbolText(text) === normalizeSymbolText(predicate.value)
+          ) {
             return text;
           }
 
           if (
             predicate.type === "exclude" &&
-            !predicate.values.includes(text)
+            !predicate.values.map(normalizeSymbolText).includes(
+              normalizeSymbolText(text),
+            )
           ) {
             return text;
           }
@@ -72,7 +86,10 @@ async function waitForFallingSymbolText(page, matcher, timeoutMs = 5000) {
 
 async function clickFallingSymbolByText(page, symbolText, timeoutMs = 5000) {
   const deadline = Date.now() + timeoutMs;
-  const exactText = new RegExp(`^${escapeRegExp(symbolText)}$`);
+  const exactText =
+    normalizeSymbolText(symbolText) === "X"
+      ? /^[xX]$/
+      : new RegExp(`^${escapeRegExp(symbolText)}$`);
 
   while (Date.now() < deadline) {
     const matchingSymbols = page

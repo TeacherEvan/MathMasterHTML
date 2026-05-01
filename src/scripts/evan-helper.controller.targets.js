@@ -1,6 +1,4 @@
 (function () {
-  const SymbolRainHelpers = window.SymbolRainHelpers || {};
-
   function normalize(value) {
     return String(value || "")
       .trim()
@@ -18,19 +16,25 @@
     return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
   }
 
-  function isInRainWindow(el) {
-    if (!isVisible(el)) return false;
-
-    const rainContainer = document.getElementById("symbol-rain-container");
-    const rainRect = SymbolRainHelpers.getRainWindowRect?.(rainContainer);
-    if (!rainRect) {
-      return true;
+  function getBestLiveRainCandidate(symbols) {
+    const SymbolRainTargets = window.SymbolRainTargets;
+    if (!SymbolRainTargets?.getVisibleMatchingCandidates) {
+      return null;
     }
 
-    return SymbolRainHelpers.rectIntersectsRainWindow?.(
-      el.getBoundingClientRect(),
-      rainRect,
-    );
+    const state = window.__symbolRainState;
+    const symbolRainContainer =
+      state?.symbolRainContainer || document.getElementById("symbol-rain-container");
+    const candidates = SymbolRainTargets.getVisibleMatchingCandidates({
+      symbolRainContainer,
+      state,
+      symbols,
+    });
+    const ranked = SymbolRainTargets.rankKeyboardCandidates
+      ? SymbolRainTargets.rankKeyboardCandidates(candidates)
+      : candidates;
+
+    return ranked[0] || null;
   }
 
   function findTestTarget(name) {
@@ -61,27 +65,12 @@
   }
 
   function findFallingSymbol(symbol) {
-    const candidates = document.querySelectorAll(
-      "#panel-c .falling-symbol:not(.clicked)",
-    );
-    let best = null;
-    let bestBottom = -Infinity;
+    const liveCandidate = getBestLiveRainCandidate([symbol]);
+    if (liveCandidate?.element) {
+      return liveCandidate.element;
+    }
+
     const normalizedSymbol = normalize(symbol);
-
-    for (const el of candidates) {
-      if (!el.isConnected || normalize(el.textContent) !== normalizedSymbol) {
-        continue;
-      }
-      const r = el.getBoundingClientRect();
-      if (r.width > 0 && r.height > 0 && isInRainWindow(el) && r.bottom > bestBottom) {
-        best = el;
-        bestBottom = r.bottom;
-      }
-    }
-    if (best) {
-      return best;
-    }
-
     const fixture = findTestTarget("symbol");
     if (!fixture) {
       return null;
@@ -93,27 +82,12 @@
   function findBestFallingSymbol(symbols) {
     if (!Array.isArray(symbols) || symbols.length === 0) return null;
 
-    let best = null;
-    let bestBottom = -Infinity;
+    const liveCandidate = getBestLiveRainCandidate(symbols);
+    if (liveCandidate?.element) {
+      return liveCandidate.element;
+    }
+
     const normalized = new Set(symbols.map((symbol) => normalize(symbol)));
-    const candidates = document.querySelectorAll(
-      "#panel-c .falling-symbol:not(.clicked)",
-    );
-
-    for (const el of candidates) {
-      if (!el.isConnected || !normalized.has(normalize(el.textContent)))
-        continue;
-      const r = el.getBoundingClientRect();
-      if (r.width > 0 && r.height > 0 && isInRainWindow(el) && r.bottom > bestBottom) {
-        best = el;
-        bestBottom = r.bottom;
-      }
-    }
-
-    if (best) {
-      return best;
-    }
-
     const fixture = findTestTarget("symbol");
     if (!fixture) {
       return null;

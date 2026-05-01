@@ -1,7 +1,7 @@
 /**
  * Service Worker - Production-Grade PWA Support
  * Enables offline gameplay and improves performance
- * Version: 20260422-local-freshness-evan-audio-1
+ * Version: 20260501-symbol-rain-lifecycle-2
  */
 
 /** @typedef {{ waitUntil: (promise: PromiseLike<unknown>) => void }} ExtendableWorkerEvent */
@@ -17,7 +17,7 @@ const serviceWorkerScope = /** @type {{
   skipWaiting: () => Promise<void>;
 }} */ (/** @type {unknown} */ (self));
 
-const BUILD_VERSION = "20260422-local-freshness-evan-audio-1";
+const BUILD_VERSION = "20260501-symbol-rain-lifecycle-2";
 const CACHE_PREFIX = "math-master";
 const CACHE_NAME = `${CACHE_PREFIX}-static-${BUILD_VERSION}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_VERSION}`;

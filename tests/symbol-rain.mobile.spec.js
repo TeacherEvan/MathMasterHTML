@@ -132,42 +132,11 @@ async function clickLiveMatchingSymbol(page, symbolText, timeoutMs = 3500) {
 
 async function spawnVisiblePanelCSymbol(page, symbolText, column = 0) {
   return page.evaluate(({ forcedSymbol, targetColumn }) => {
-    const state = window.__symbolRainState;
-    const helpers = window.SymbolRainHelpers;
-
-    if (!state || !helpers?.createFallingSymbol || !state.symbolRainContainer) {
-      return false;
-    }
-
-    const symbolHeight = state.config?.symbolHeight || 42;
-    const rainRect = helpers.getRainWindowRect?.(state.symbolRainContainer);
-    const containerHeight = rainRect?.height || state.cachedContainerHeight || symbolHeight * 4;
-    const initialY = Math.max(
-      symbolHeight,
-      Math.min(containerHeight * 0.35, containerHeight - symbolHeight * 2),
-    );
-    const resolvedColumn = Math.min(
-      Math.max(targetColumn, 0),
-      Math.max((state.columnCount || 1) - 1, 0),
-    );
-
     return Boolean(
-      helpers.createFallingSymbol(
-        {
-          symbols: state.symbols,
-          symbolRainContainer: state.symbolRainContainer,
-          config: state.config,
-          activeFallingSymbols: state.activeFallingSymbols,
-          symbolPool: state.symbolPool,
-          lastSymbolSpawnTimestamp: state.lastSymbolSpawnTimestamp,
-        },
-        {
-          column: resolvedColumn,
-          forcedSymbol,
-          initialY,
-          horizontalOffset: 0,
-        },
-      ),
+      window.SymbolRainController?.spawnVisibleSymbol?.(forcedSymbol, {
+        column: targetColumn,
+        horizontalOffset: 0,
+      }),
     );
   }, { forcedSymbol: symbolText, targetColumn: column });
 }
@@ -413,11 +382,10 @@ test.describe("Symbol rain mobile interactions", () => {
     });
 
     const result = await page.evaluate(async () => {
-      const state = window.__symbolRainState;
       const panel = document.getElementById("panel-c");
       const rain = document.getElementById("symbol-rain-container");
 
-      if (!state || !panel || !rain) {
+      if (!panel || !rain) {
         return null;
       }
 
@@ -445,7 +413,8 @@ test.describe("Symbol rain mobile interactions", () => {
       }).length;
 
       return {
-        cachedContainerHeight: state.cachedContainerHeight,
+        cachedContainerHeight:
+          window.SymbolRainController?.getSnapshot?.()?.cachedContainerHeight,
         actualRainHeight: rainRect.height,
         staleVisibleSymbols,
       };
@@ -518,15 +487,17 @@ test.describe("Symbol rain mobile interactions", () => {
       );
     }, { timeout: 10000 });
 
-    const runtimeConfig = await page.evaluate(() => ({
-      burstSpawnRate: window.__symbolRainState?.config?.burstSpawnRate,
-      guaranteedSpawnInterval:
-        window.__symbolRainState?.config?.guaranteedSpawnInterval,
-      isMobileMode: window.__symbolRainState?.isMobileMode,
-      maxActiveSymbols: window.__symbolRainState?.config?.maxActiveSymbols,
-      spawnRate: window.__symbolRainState?.config?.spawnRate,
-      symbolsPerWave: window.__symbolRainState?.config?.symbolsPerWave,
-    }));
+    const runtimeConfig = await page.evaluate(() => {
+      const snapshot = window.SymbolRainController?.getSnapshot?.();
+      return {
+        burstSpawnRate: snapshot?.config?.burstSpawnRate,
+        guaranteedSpawnInterval: snapshot?.config?.guaranteedSpawnInterval,
+        isMobileMode: snapshot?.isMobileMode,
+        maxActiveSymbols: snapshot?.config?.maxActiveSymbols,
+        spawnRate: snapshot?.config?.spawnRate,
+        symbolsPerWave: snapshot?.config?.symbolsPerWave,
+      };
+    });
 
     expect(runtimeConfig.isMobileMode).toBe(true);
     expect(runtimeConfig.spawnRate).toBe(0.08);
@@ -588,15 +559,17 @@ test.describe("Symbol rain mobile interactions", () => {
     await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
     await dismissBriefingAndWaitForInteractiveGameplay(page);
 
-    const runtimeConfig = await page.evaluate(() => ({
-      burstSpawnRate: window.__symbolRainState?.config?.burstSpawnRate,
-      guaranteedSpawnInterval:
-        window.__symbolRainState?.config?.guaranteedSpawnInterval,
-      isMobileMode: window.__symbolRainState?.isMobileMode,
-      maxActiveSymbols: window.__symbolRainState?.config?.maxActiveSymbols,
-      spawnRate: window.__symbolRainState?.config?.spawnRate,
-      symbolsPerWave: window.__symbolRainState?.config?.symbolsPerWave,
-    }));
+    const runtimeConfig = await page.evaluate(() => {
+      const snapshot = window.SymbolRainController?.getSnapshot?.();
+      return {
+        burstSpawnRate: snapshot?.config?.burstSpawnRate,
+        guaranteedSpawnInterval: snapshot?.config?.guaranteedSpawnInterval,
+        isMobileMode: snapshot?.isMobileMode,
+        maxActiveSymbols: snapshot?.config?.maxActiveSymbols,
+        spawnRate: snapshot?.config?.spawnRate,
+        symbolsPerWave: snapshot?.config?.symbolsPerWave,
+      };
+    });
 
     expect(runtimeConfig.isMobileMode).toBe(false);
     expect(runtimeConfig.spawnRate).toBe(0.5);
@@ -734,7 +707,9 @@ test.describe("Symbol rain mobile interactions", () => {
     const keyboardTargetText = await page.locator(
       "#panel-c .falling-symbol.keyboard-target",
     ).textContent();
-    expect(before.hiddenSymbols).toContain(String(keyboardTargetText || "").trim());
+    expect(before.hiddenSymbols.map(normalizeSymbolText)).toContain(
+      normalizeSymbolText(keyboardTargetText),
+    );
 
     await page.keyboard.press("Enter");
 
@@ -761,37 +736,23 @@ test.describe("Symbol rain mobile interactions", () => {
     expect(before.hiddenSymbols.length).toBeGreaterThan(0);
 
     await page.evaluate((symbols) => {
-      const normalize = (value) => String(value || "").trim().toLowerCase();
-      const state = window.__symbolRainState;
-      const helpers = window.SymbolRainHelpers;
+      window.SymbolRainController?.stop?.("keyboard-target-no-match-setup");
+      window.SymbolRainController?.removeMatchingSymbols?.(symbols);
+    }, before.hiddenSymbols);
 
-      if (!state || !helpers?.cleanupSymbolObject) {
-        return;
-      }
+    const keyboardTargetCount = await page.evaluate((symbols) => {
+      window.SymbolRainController?.removeMatchingSymbols?.(symbols);
 
-      const normalizedSymbols = new Set(symbols.map((symbol) => normalize(symbol)));
-
-      for (let index = state.activeFallingSymbols.length - 1; index >= 0; index -= 1) {
-        const symbolObj = state.activeFallingSymbols[index];
-        if (!normalizedSymbols.has(normalize(symbolObj?.symbol))) {
-          continue;
-        }
-
-        state.activeFallingSymbols.splice(index, 1);
-        helpers.cleanupSymbolObject({
-          symbolObj,
-          activeFaceReveals: state.activeFaceReveals,
-          symbolPool: state.symbolPool,
-          spatialGrid: state.spatialGrid,
-        });
-      }
+      document.getElementById("panel-c")?.focus();
+      window.SymbolRainController?.syncKeyboardTarget?.();
+      return document.querySelectorAll(
+        "#panel-c .falling-symbol.keyboard-target",
+      ).length;
     }, before.hiddenSymbols);
 
     const panelC = page.locator("#panel-c");
-    await panelC.focus();
     await expect(panelC).toBeFocused();
-
-    await expect(page.locator("#panel-c .falling-symbol.keyboard-target")).toHaveCount(0);
+    expect(keyboardTargetCount).toBe(0);
 
     const targetSymbol = before.hiddenSymbols[0];
     expect(targetSymbol).toBeTruthy();
@@ -802,7 +763,7 @@ test.describe("Symbol rain mobile interactions", () => {
     await page.keyboard.press("ArrowRight");
 
     await page.waitForFunction(
-      (symbol) => {
+      (symbols) => {
         const panel = document.getElementById("panel-c");
         const target = document.querySelector(
           "#panel-c .falling-symbol.keyboard-target",
@@ -813,18 +774,19 @@ test.describe("Symbol rain mobile interactions", () => {
         }
 
         const normalize = (value) => String(value || "").trim().toLowerCase();
+        const normalizedSymbols = new Set(symbols.map(normalize));
         const panelRect = panel.getBoundingClientRect();
         const targetRect = target.getBoundingClientRect();
 
         return (
-          normalize(target.textContent) === normalize(symbol) &&
+          normalizedSymbols.has(normalize(target.textContent)) &&
           targetRect.bottom > panelRect.top &&
           targetRect.top < panelRect.bottom &&
           targetRect.right > panelRect.left &&
           targetRect.left < panelRect.right
         );
       },
-      targetSymbol,
+      before.hiddenSymbols,
       { timeout: 8000 },
     );
 
@@ -856,19 +818,16 @@ test.describe("Symbol rain mobile interactions", () => {
 
     const before = await getCurrentStepSnapshot(page);
 
+    let summary = null;
     await expect
-      .poll(async () => getVisiblePanelCSymbolSummary(page, before.hiddenSymbols), {
-        timeout: 10000,
-      })
-      .toMatchObject({
-        visibleCount: expect.any(Number),
-        distractorCount: expect.any(Number),
-      });
-
-    const summary = await getVisiblePanelCSymbolSummary(page, before.hiddenSymbols);
-
-    expect(summary.visibleCount).toBeGreaterThanOrEqual(3);
-    expect(summary.distractorCount).toBeGreaterThan(0);
+      .poll(
+        async () => {
+          summary = await getVisiblePanelCSymbolSummary(page, before.hiddenSymbols);
+          return summary.visibleCount >= 3 && summary.distractorCount > 0;
+        },
+        { timeout: 10000 },
+      )
+      .toBe(true);
 
     await testInfo.attach("mobile-mixed-visible-field", {
       body: Buffer.from(JSON.stringify(summary, null, 2)),

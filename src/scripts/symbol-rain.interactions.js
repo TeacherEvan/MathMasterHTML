@@ -1,9 +1,21 @@
 (function () {
   const SymbolRainHelpers = window.SymbolRainHelpers;
+  const SymbolRainTargets = window.SymbolRainTargets;
+
+  function createNoopInteractionController() {
+    return {
+      dispose() {},
+      syncKeyboardTarget() {
+        return false;
+      },
+      clearKeyboardTarget() {},
+      cancelKeyboardSync() {},
+    };
+  }
 
   function bindInteractions(symbolRainContainer, state) {
-    if (!SymbolRainHelpers || !symbolRainContainer) {
-      return;
+    if (!SymbolRainHelpers || !SymbolRainTargets || !symbolRainContainer) {
+      return createNoopInteractionController();
     }
 
     const panel = document.getElementById("panel-c");
@@ -11,17 +23,19 @@
     const recentSymbolActivations = new WeakMap();
     let activeKeyboardTarget = null;
     let keyboardSyncFrameId = null;
+    let keyboardRetargetTimeoutId = null;
+    let disposed = false;
     const POINTER_REACTIVATION_WINDOW_MS = 400;
-
-    const normalizeSymbol = (value) =>
-      String(value || "")
-        .trim()
-        .toLowerCase();
+    const pointerListenerOptions = { passive: false };
 
     const updateKeyboardStatus = (message) => {
       if (keyboardStatus) {
         keyboardStatus.textContent = message;
       }
+    };
+
+    const clearKeyboardStatus = () => {
+      updateKeyboardStatus("");
     };
 
     const clearKeyboardTarget = () => {
@@ -36,63 +50,27 @@
         cancelAnimationFrame(keyboardSyncFrameId);
         keyboardSyncFrameId = null;
       }
-    };
 
-    const getCurrentNeededSymbols = () => {
-      const stepIndex = window.GameSymbolHandlerCore?.getCurrentStepIndex?.();
-      const selector =
-        Number.isInteger(stepIndex) && stepIndex >= 0
-          ? `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`
-          : "#solution-container .hidden-symbol";
-
-      return Array.from(document.querySelectorAll(selector))
-        .map((element) => element.dataset.expected || element.textContent || "")
-        .map((value) => String(value).trim())
-        .filter(Boolean);
+      if (keyboardRetargetTimeoutId !== null) {
+        clearTimeout(keyboardRetargetTimeoutId);
+        keyboardRetargetTimeoutId = null;
+      }
     };
 
     const getVisibleKeyboardCandidates = () => {
-      const neededSymbols = new Set(
-        getCurrentNeededSymbols().map((value) => normalizeSymbol(value)),
+      return SymbolRainTargets.rankKeyboardCandidates(
+        SymbolRainTargets.getVisibleMatchingCandidates({
+          symbolRainContainer,
+          state,
+        }),
       );
-      const containerRect =
-        symbolRainContainer?.getBoundingClientRect?.() ||
-        panel?.getBoundingClientRect?.() ||
-        null;
-
-      if (!containerRect) {
-        return [];
-      }
-
-      return Array.from(
-        symbolRainContainer.querySelectorAll(".falling-symbol:not(.clicked)"),
-      )
-        .filter((element) => element?.isConnected)
-        .map((element) => ({
-          element,
-          rect: element.getBoundingClientRect(),
-        }))
-        .filter(({ rect, element }) => {
-          if (rect.width <= 0 || rect.height <= 0) {
-            return false;
-          }
-
-          const intersectsContainer =
-            rect.bottom > containerRect.top &&
-            rect.top < containerRect.bottom &&
-            rect.right > containerRect.left &&
-            rect.left < containerRect.right;
-
-          if (!intersectsContainer) {
-            return false;
-          }
-
-          return neededSymbols.has(normalizeSymbol(element.textContent));
-        })
-        .sort((left, right) => right.rect.bottom - left.rect.bottom);
     };
 
     const setKeyboardTarget = (target) => {
+      if (disposed) {
+        return null;
+      }
+
       clearKeyboardTarget();
       if (!target?.element) {
         return null;
@@ -104,7 +82,11 @@
       return target;
     };
 
-    const syncKeyboardTarget = () => {
+    const syncKeyboardTargetCandidate = () => {
+      if (disposed) {
+        return null;
+      }
+
       const candidates = getVisibleKeyboardCandidates();
 
       if (!candidates.length) {
@@ -128,19 +110,21 @@
       return setKeyboardTarget(candidates[0]);
     };
 
+    const syncKeyboardTarget = () => Boolean(syncKeyboardTargetCandidate());
+
     const scheduleKeyboardSync = () => {
-      if (!panel || keyboardSyncFrameId !== null) {
+      if (disposed || !panel || keyboardSyncFrameId !== null) {
         return;
       }
 
       const loop = () => {
         keyboardSyncFrameId = null;
 
-        if (!panel.matches(":focus")) {
+        if (disposed || !panel.matches(":focus")) {
           return;
         }
 
-        syncKeyboardTarget();
+        syncKeyboardTargetCandidate();
         keyboardSyncFrameId = requestAnimationFrame(loop);
       };
 
@@ -148,6 +132,10 @@
     };
 
     const cycleKeyboardTarget = (direction = 1) => {
+      if (disposed) {
+        return null;
+      }
+
       const candidates = getVisibleKeyboardCandidates();
       if (!candidates.length) {
         clearKeyboardTarget();
@@ -167,6 +155,10 @@
     };
 
     const triggerKeyboardTarget = () => {
+      if (disposed) {
+        return;
+      }
+
       const target =
         getVisibleKeyboardCandidates().find(
           ({ element }) => element === activeKeyboardTarget,
@@ -189,7 +181,17 @@
       );
       updateKeyboardStatus(`Collected ${target.element.textContent}.`);
 
-      window.setTimeout(() => {
+      if (keyboardRetargetTimeoutId !== null) {
+        clearTimeout(keyboardRetargetTimeoutId);
+      }
+
+      keyboardRetargetTimeoutId = window.setTimeout(() => {
+        keyboardRetargetTimeoutId = null;
+
+        if (disposed) {
+          return;
+        }
+
         if (panel?.matches(":focus")) {
           cycleKeyboardTarget(1);
         } else {
@@ -199,6 +201,10 @@
     };
 
     const handleSymbolCollection = (fallingSymbolElement) => {
+      if (disposed) {
+        return;
+      }
+
       const lastActivation = recentSymbolActivations.get(fallingSymbolElement);
       if (
         typeof lastActivation === "number" &&
@@ -227,27 +233,31 @@
       );
     };
 
+    const handlePointerDown = (event) => {
+      if (event.isPrimary === false) {
+        return;
+      }
+
+      const fallingSymbolElement = event.target.closest(".falling-symbol");
+      if (
+        fallingSymbolElement &&
+        symbolRainContainer.contains(fallingSymbolElement)
+      ) {
+        event.preventDefault();
+        handleSymbolCollection(fallingSymbolElement);
+      }
+    };
+
     symbolRainContainer.addEventListener(
       "pointerdown",
-      (event) => {
-        if (event.isPrimary === false) {
-          return;
-        }
-
-        const fallingSymbolElement = event.target.closest(".falling-symbol");
-        if (
-          fallingSymbolElement &&
-          symbolRainContainer.contains(fallingSymbolElement)
-        ) {
-          event.preventDefault();
-          handleSymbolCollection(fallingSymbolElement);
-        }
-      },
-      { passive: false },
+      handlePointerDown,
+      pointerListenerOptions,
     );
 
+    let handleFallbackClick = null;
+
     if (!window.PointerEvent) {
-      symbolRainContainer.addEventListener("click", (event) => {
+      handleFallbackClick = (event) => {
         const fallingSymbolElement = event.target.closest(".falling-symbol");
         if (
           fallingSymbolElement &&
@@ -255,44 +265,81 @@
         ) {
           handleSymbolCollection(fallingSymbolElement);
         }
-      });
+      };
+
+      symbolRainContainer.addEventListener("click", handleFallbackClick);
     }
+
+    const handlePanelFocus = () => {
+      if (!cycleKeyboardTarget(1)) {
+        updateKeyboardStatus(
+          "Panel C focused. Wait for a matching symbol, then press Enter or Space.",
+        );
+      }
+
+      scheduleKeyboardSync();
+    };
+
+    const handlePanelBlur = () => {
+      cancelKeyboardSync();
+      clearKeyboardTarget();
+    };
+
+    const handlePanelKeydown = (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        triggerKeyboardTarget();
+        return;
+      }
+
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        event.preventDefault();
+        cycleKeyboardTarget(1);
+        return;
+      }
+
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        event.preventDefault();
+        cycleKeyboardTarget(-1);
+      }
+    };
 
     if (panel) {
-      panel.addEventListener("focus", () => {
-        if (!cycleKeyboardTarget(1)) {
-          updateKeyboardStatus(
-            "Panel C focused. Wait for a matching symbol, then press Enter or Space.",
-          );
+      panel.addEventListener("focus", handlePanelFocus);
+      panel.addEventListener("blur", handlePanelBlur);
+      panel.addEventListener("keydown", handlePanelKeydown);
+    }
+
+    return {
+      dispose() {
+        if (disposed) {
+          return;
         }
 
-        scheduleKeyboardSync();
-      });
-
-      panel.addEventListener("blur", () => {
+        disposed = true;
         cancelKeyboardSync();
         clearKeyboardTarget();
-      });
+        clearKeyboardStatus();
+        symbolRainContainer.removeEventListener(
+          "pointerdown",
+          handlePointerDown,
+          pointerListenerOptions,
+        );
 
-      panel.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          triggerKeyboardTarget();
-          return;
+        if (handleFallbackClick) {
+          symbolRainContainer.removeEventListener("click", handleFallbackClick);
         }
 
-        if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-          event.preventDefault();
-          cycleKeyboardTarget(1);
-          return;
+        if (panel) {
+          panel.removeEventListener("focus", handlePanelFocus);
+          panel.removeEventListener("blur", handlePanelBlur);
+          panel.removeEventListener("keydown", handlePanelKeydown);
         }
-
-        if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-          event.preventDefault();
-          cycleKeyboardTarget(-1);
-        }
-      });
-    }
+      },
+      syncKeyboardTarget,
+      clearKeyboardTarget,
+      cancelKeyboardSync,
+    };
   }
 
   window.SymbolRainInteractions = { bindInteractions };

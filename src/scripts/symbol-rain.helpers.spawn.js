@@ -87,14 +87,25 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
       symbolRainContainer,
       symbolPool,
       lastSymbolSpawnTimestamp,
+      initialPopulationToken,
     },
     setInitialPopulationComplete,
   ) {
     const totalWaves = isMobileMode ? 4 : 8;
 
+    function isCancelled() {
+      return initialPopulationToken?.cancelled === true;
+    }
+
     function spawnWave(waveNumber) {
+      if (isCancelled()) {
+        return;
+      }
+
       if (waveNumber >= totalWaves) {
-        setInitialPopulationComplete();
+        if (!isCancelled()) {
+          setInitialPopulationComplete();
+        }
         return;
       }
 
@@ -102,6 +113,10 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
       const columnStep = Math.floor(columnCount / columnsToUse);
 
       for (let i = 0; i < config.symbolsPerWave && i < columnCount; i++) {
+        if (isCancelled()) {
+          return;
+        }
+
         const column = (i * columnStep) % columnCount;
         helpers.createFallingSymbol(
           {
@@ -116,7 +131,15 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
         );
       }
 
-      setTimeout(() => spawnWave(waveNumber + 1), config.waveInterval);
+      if (isCancelled()) {
+        return;
+      }
+
+      const timeoutId = setTimeout(
+        () => spawnWave(waveNumber + 1),
+        config.waveInterval,
+      );
+      initialPopulationToken?.timeoutIds?.push?.(timeoutId);
     }
 
     spawnWave(0);

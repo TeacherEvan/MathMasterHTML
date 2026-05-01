@@ -332,42 +332,11 @@ async function getVisiblePanelCSymbolSummary(page, hiddenSymbols = []) {
 
 async function spawnVisiblePanelCSymbol(page, symbolText, column = 0) {
   return page.evaluate(({ forcedSymbol, targetColumn }) => {
-    const state = window.__symbolRainState;
-    const helpers = window.SymbolRainHelpers;
-
-    if (!state || !helpers?.createFallingSymbol || !state.symbolRainContainer) {
-      return false;
-    }
-
-    const symbolHeight = state.config?.symbolHeight || 42;
-    const rainRect = helpers.getRainWindowRect?.(state.symbolRainContainer);
-    const containerHeight = rainRect?.height || state.cachedContainerHeight || symbolHeight * 4;
-    const initialY = Math.max(
-      symbolHeight,
-      Math.min(containerHeight * 0.35, containerHeight - symbolHeight * 2),
-    );
-    const resolvedColumn = Math.min(
-      Math.max(targetColumn, 0),
-      Math.max((state.columnCount || 1) - 1, 0),
-    );
-
     return Boolean(
-      helpers.createFallingSymbol(
-        {
-          symbols: state.symbols,
-          symbolRainContainer: state.symbolRainContainer,
-          config: state.config,
-          activeFallingSymbols: state.activeFallingSymbols,
-          symbolPool: state.symbolPool,
-          lastSymbolSpawnTimestamp: state.lastSymbolSpawnTimestamp,
-        },
-        {
-          column: resolvedColumn,
-          forcedSymbol,
-          initialY,
-          horizontalOffset: 0,
-        },
-      ),
+      window.SymbolRainController?.spawnVisibleSymbol?.(forcedSymbol, {
+        column: targetColumn,
+        horizontalOffset: 0,
+      }),
     );
   }, { forcedSymbol: symbolText, targetColumn: column });
 }
@@ -524,11 +493,10 @@ test.describe("Symbol rain live targets", () => {
     });
 
     const result = await page.evaluate(async () => {
-      const state = window.__symbolRainState;
       const panel = document.getElementById("panel-c");
       const rain = document.getElementById("symbol-rain-container");
 
-      if (!state || !panel || !rain) {
+      if (!panel || !rain) {
         return null;
       }
 
@@ -538,7 +506,8 @@ test.describe("Symbol rain live targets", () => {
       const rainRect = rain.getBoundingClientRect();
 
       return {
-        cachedContainerHeight: state.cachedContainerHeight,
+        cachedContainerHeight:
+          window.SymbolRainController?.getSnapshot?.()?.cachedContainerHeight,
         actualRainHeight: rainRect.height,
       };
     });

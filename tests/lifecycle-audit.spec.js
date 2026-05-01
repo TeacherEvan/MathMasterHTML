@@ -21,12 +21,7 @@ test.describe("Lifecycle audit", () => {
       window.dynamicQualityAdjuster?.destroy?.();
       window.performanceMonitor?.destroy?.();
 
-      if (
-        window.SymbolRainAnimation?.stopAnimation &&
-        window.__symbolRainState
-      ) {
-        window.SymbolRainAnimation.stopAnimation(window.__symbolRainState);
-      }
+      window.SymbolRainController?.stop?.("lifecycle-audit");
     });
 
     await page.waitForTimeout(1000);
