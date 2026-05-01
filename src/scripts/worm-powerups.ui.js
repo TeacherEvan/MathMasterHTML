@@ -20,7 +20,7 @@
     COMPACT_LANDSCAPE_WIDTH_CAP: 168,
     DESKTOP_TOP_OFFSET: 12,
     COMPACT_TOP_OFFSET: 86,
-    COMPACT_LANDSCAPE_TOP_OFFSET: 40,
+    COMPACT_LANDSCAPE_TOP_OFFSET: 4,
     DESKTOP_HORIZONTAL_INSET: 180,
     COMPACT_HORIZONTAL_INSET: 12,
     DESKTOP_MAX_Y: 100,
@@ -249,15 +249,16 @@
       }
     }
 
-    const minTop = Math.max(
-      hudSafeTop,
+    const panelAnchoredTop =
       panelRect.top +
-        (isCompactLandscape
-          ? config.COMPACT_LANDSCAPE_TOP_OFFSET
-          : isCompactViewport
-            ? config.COMPACT_TOP_OFFSET
-            : config.DESKTOP_TOP_OFFSET),
-    );
+      (isCompactLandscape
+        ? config.COMPACT_LANDSCAPE_TOP_OFFSET
+        : isCompactViewport
+          ? config.COMPACT_TOP_OFFSET
+          : config.DESKTOP_TOP_OFFSET);
+    const minTop = isCompactLandscape
+      ? panelAnchoredTop
+      : Math.max(hudSafeTop, panelAnchoredTop);
     const controlsBottomLimit =
       controlsRect?.top !== undefined
         ? controlsRect.top - config.PANEL_B_CONTROLS_CLEARANCE

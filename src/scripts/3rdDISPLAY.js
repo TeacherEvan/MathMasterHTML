@@ -57,9 +57,9 @@ function initSymbolRain() {
         spawnRate: 0.08,
         burstSpawnRate: 0.08,
         guaranteedSpawnInterval: 800,
-        symbolsPerWave: 5,
-        maxActiveSymbols: 36,
-        minVisibleSymbols: 3,
+        symbolsPerWave: 8,
+        maxActiveSymbols: 48,
+        minVisibleSymbols: 8,
       },
       standard: {
         spawnRate: 0.5,

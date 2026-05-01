@@ -12,7 +12,7 @@
   }
 
   body.viewport-compact.viewport-landscape #panel-b {
-    padding-top: calc(var(--panel-b-top-safe-zone, 64px) - 12px);
+    padding-top: var(--panel-b-top-safe-zone, 64px);
   }
 
   body.viewport-compact.viewport-landscape #problem-container {

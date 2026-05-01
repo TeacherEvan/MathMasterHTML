@@ -494,6 +494,7 @@ test.describe("Symbol rain mobile interactions", () => {
         guaranteedSpawnInterval: snapshot?.config?.guaranteedSpawnInterval,
         isMobileMode: snapshot?.isMobileMode,
         maxActiveSymbols: snapshot?.config?.maxActiveSymbols,
+        minVisibleSymbols: snapshot?.config?.minVisibleSymbols,
         spawnRate: snapshot?.config?.spawnRate,
         symbolsPerWave: snapshot?.config?.symbolsPerWave,
       };
@@ -503,8 +504,9 @@ test.describe("Symbol rain mobile interactions", () => {
     expect(runtimeConfig.spawnRate).toBe(0.08);
     expect(runtimeConfig.burstSpawnRate).toBe(0.08);
     expect(runtimeConfig.guaranteedSpawnInterval).toBe(800);
-    expect(runtimeConfig.symbolsPerWave).toBe(5);
-    expect(runtimeConfig.maxActiveSymbols).toBe(36);
+    expect(runtimeConfig.symbolsPerWave).toBe(8);
+    expect(runtimeConfig.maxActiveSymbols).toBe(48);
+    expect(runtimeConfig.minVisibleSymbols).toBe(8);
 
     await page.locator("#panel-c .falling-symbol").first().waitFor({
       state: "visible",
@@ -823,7 +825,7 @@ test.describe("Symbol rain mobile interactions", () => {
       .poll(
         async () => {
           summary = await getVisiblePanelCSymbolSummary(page, before.hiddenSymbols);
-          return summary.visibleCount >= 3 && summary.distractorCount > 0;
+          return summary.visibleCount >= 8 && summary.distractorCount > 0;
         },
         { timeout: 10000 },
       )

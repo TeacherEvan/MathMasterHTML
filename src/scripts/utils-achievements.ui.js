@@ -22,10 +22,13 @@ const AchievementUI = {
                 <div class="achievement-desc">${achievement.description}</div>
             </div>
         `;
-    popup.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
+        const panelC = document.getElementById("panel-c");
+        const popupPosition = panelC
+          ? "position: absolute; top: 12px; right: 12px; bottom: auto; width: min(340px, calc(100% - 24px)); max-width: calc(100% - 24px);"
+          : "position: fixed; top: 20px; right: 20px; bottom: auto; max-width: min(340px, calc(100vw - 40px));";
+
+        popup.style.cssText = `
+          ${popupPosition}
             background: linear-gradient(135deg, rgba(0,0,0,0.95), rgba(30,30,30,0.95));
             border: 2px solid gold;
             border-radius: 12px;
@@ -34,9 +37,12 @@ const AchievementUI = {
             align-items: center;
             gap: 15px;
             font-family: 'Orbitron', monospace;
-            z-index: 10003;
+          z-index: 10060;
             animation: achievement-slide-in 0.5s ease-out, achievement-slide-out 0.5s ease-in 1s forwards;
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+          box-sizing: border-box;
+          overflow: hidden;
+          pointer-events: none;
         `;
 
     // Add achievement icon styling
@@ -54,7 +60,6 @@ const AchievementUI = {
     const descStyle = popup.querySelector(".achievement-desc");
     descStyle.style.cssText = "color: #aaa; font-size: 0.75em;";
 
-    const panelC = document.getElementById("panel-c");
     if (panelC) {
       panelC.appendChild(popup);
     } else {

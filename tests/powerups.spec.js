@@ -380,23 +380,49 @@ test.describe("Power-Up Compact Layout", () => {
   test("keeps the power-up tray anchored near the top-center on compact layouts", async ({
     page,
   }) => {
+    await page.evaluate(() => {
+      window.AchievementUI?.showAchievementPopup?.({
+        icon: "*",
+        name: "Layout Probe",
+        description: "Panel C overlay probe",
+      });
+    });
+
+    await expect(page.locator("#panel-c .achievement-popup")).toBeVisible();
+  await page.waitForTimeout(650);
+
     const layout = await page.evaluate(() => {
       const display = document.getElementById("power-up-display");
       const panelB = document.getElementById("panel-b");
       const panelC = document.getElementById("panel-c");
       const controls = document.querySelector(".panel-b-controls");
+      const consoleElement = document.getElementById("symbol-console");
+      const wormContainer = document.getElementById("worm-container");
+      const achievement = panelC?.querySelector(".achievement-popup");
       const rect = display?.getBoundingClientRect();
       const panelBRect = panelB?.getBoundingClientRect();
       const panelCRect = panelC?.getBoundingClientRect();
       const controlsRect = controls?.getBoundingClientRect();
+      const consoleRect = consoleElement?.getBoundingClientRect();
+      const achievementRect = achievement?.getBoundingClientRect();
       const styles = display ? window.getComputedStyle(display) : null;
+      const consoleStyles = consoleElement
+        ? window.getComputedStyle(consoleElement)
+        : null;
+      const wormStyles = wormContainer
+        ? window.getComputedStyle(wormContainer)
+        : null;
+      const achievementStyles = achievement
+        ? window.getComputedStyle(achievement)
+        : null;
 
-      return rect && styles && panelBRect && panelCRect && controlsRect
+      return rect && styles && panelBRect && panelCRect && controlsRect && consoleRect
         ? {
             top: rect.top,
             bottom: rect.bottom,
             distanceToTop: rect.top,
             distanceToBottom: window.innerHeight - rect.bottom,
+            distanceToPanelBTop: rect.top - panelBRect.top,
             centerOffset: Math.abs(
               rect.left +
                 rect.width / 2 -
@@ -407,9 +433,27 @@ test.describe("Power-Up Compact Layout", () => {
             right: rect.right,
             panelBLeft: panelBRect.left,
             panelBRight: panelBRect.right,
+            panelBTop: panelBRect.top,
             panelCLeft: panelCRect.left,
+            panelCRight: panelCRect.right,
+            panelCTop: panelCRect.top,
+            panelCBottom: panelCRect.bottom,
             controlsTop: controlsRect.top,
+            controlsBottom: controlsRect.bottom,
+            consoleTop: consoleRect.top,
+            consoleZIndex: Number(consoleStyles?.zIndex || 0),
+            wormZIndex: Number(wormStyles?.zIndex || 0),
+            achievement: achievementRect
+              ? {
+                  top: achievementRect.top,
+                  right: achievementRect.right,
+                  bottom: achievementRect.bottom,
+                  left: achievementRect.left,
+                  zIndex: Number(achievementStyles?.zIndex || 0),
+                }
+              : null,
             gapToControls: controlsRect.top - rect.bottom,
+            gapFromControlsToConsole: consoleRect.top - controlsRect.bottom,
           }
         : null;
     });
@@ -418,12 +462,20 @@ test.describe("Power-Up Compact Layout", () => {
     expect(layout.left).toBeGreaterThanOrEqual(layout.panelBLeft);
     expect(layout.right).toBeLessThanOrEqual(layout.panelBRight);
     expect(layout.right).toBeLessThanOrEqual(layout.panelCLeft);
-    expect(layout.top).toBeLessThan(60);
+    expect(layout.distanceToPanelBTop).toBeLessThanOrEqual(8);
     expect(layout.bottom).toBeLessThanOrEqual(layout.controlsTop);
-    expect(layout.gapToControls).toBeGreaterThanOrEqual(0);
+    expect(layout.gapToControls).toBeGreaterThanOrEqual(8);
+    expect(layout.gapFromControlsToConsole).toBeGreaterThanOrEqual(6);
+    expect(layout.consoleZIndex).toBeLessThan(layout.wormZIndex);
     expect(layout.centerOffset).toBeLessThan(20);
     expect(layout.computedTop).not.toBe("auto");
     expect(layout.distanceToTop).toBeLessThan(layout.distanceToBottom);
+    expect(layout.achievement).not.toBeNull();
+    expect(layout.achievement.left).toBeGreaterThanOrEqual(layout.panelCLeft);
+    expect(layout.achievement.right).toBeLessThanOrEqual(layout.panelCRight);
+    expect(layout.achievement.top).toBeGreaterThanOrEqual(layout.panelCTop);
+    expect(layout.achievement.bottom).toBeLessThanOrEqual(layout.panelCBottom);
+    expect(layout.achievement.zIndex).toBeGreaterThan(layout.consoleZIndex);
   });
 
   test("re-anchors the power-up tray after fullscreen lifecycle changes", async ({

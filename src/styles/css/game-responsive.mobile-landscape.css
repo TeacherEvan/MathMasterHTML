@@ -42,9 +42,9 @@ body.viewport-compact.viewport-landscape .grid-container > .wall:nth-child(2) {
 body.viewport-compact.viewport-landscape #panel-b {
   grid-column: 3 !important;
   grid-row: 1 !important;
-  padding: calc(var(--panel-b-top-safe-zone, 72px) - 14px)
-    var(--compact-panel-inline-gap) var(--compact-panel-inline-gap);
-  gap: 4px;
+  padding: var(--panel-b-top-safe-zone, 72px) var(--compact-panel-inline-gap)
+    var(--compact-panel-inline-gap);
+  gap: 6px;
   overflow: hidden;
 }
 
@@ -120,7 +120,7 @@ body.viewport-compact.viewport-landscape #symbol-console {
   width: 100% !important;
   max-width: 100%;
   min-width: 0;
-  margin: 0;
+  margin: 6px 0 0;
   order: 2;
   flex: 0 0 auto;
   align-self: stretch;
