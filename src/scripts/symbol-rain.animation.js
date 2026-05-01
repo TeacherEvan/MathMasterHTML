@@ -12,7 +12,10 @@
       return;
     }
 
-    const containerHeight = state.cachedContainerHeight;
+    const rainRect = SymbolRainHelpers.getRainWindowRect?.(
+      state?.symbolRainContainer,
+    );
+    const containerHeight = rainRect?.height || state.cachedContainerHeight;
     const currentTime = Date.now();
 
     SymbolRainHelpers.triggerFaceRevealIfNeeded(

@@ -1,88 +1,8 @@
 (function () {
   const SymbolRainHelpers = window.SymbolRainHelpers;
 
-  function normalizeSymbol(value) {
-    return String(value || "")
-      .trim()
-      .toLowerCase();
-  }
-
-  function getCurrentNeededSymbols() {
-    const stepIndex = window.GameSymbolHandlerCore?.getCurrentStepIndex?.();
-    const selector =
-      Number.isInteger(stepIndex) && stepIndex >= 0
-        ? `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`
-        : "#solution-container .hidden-symbol";
-
-    return Array.from(document.querySelectorAll(selector))
-      .map((element) => element.dataset.expected || element.textContent || "")
-      .map((value) => String(value).trim())
-      .filter(Boolean);
-  }
-
-  function hasVisibleLiveSymbol(state, targetSymbol) {
-    const normalizedTarget = normalizeSymbol(targetSymbol);
-
-    return state.activeFallingSymbols.some((symbolObj) => {
-      if (normalizeSymbol(symbolObj.symbol) !== normalizedTarget) {
-        return false;
-      }
-
-      return SymbolRainHelpers.isSymbolVisibleInRainWindow(state, symbolObj);
-    });
-  }
-
-  function isStableVisibleLiveSymbol(state, targetSymbol) {
-    const normalizedTarget = normalizeSymbol(targetSymbol);
-    const getRainWindowRect = SymbolRainHelpers?.getRainWindowRect;
-
-    if (typeof getRainWindowRect !== "function") {
-      return hasVisibleLiveSymbol(state, targetSymbol);
-    }
-
-    const rainRect = getRainWindowRect(state?.symbolRainContainer);
-
-    if (!rainRect) {
-      return false;
-    }
-
-    return state.activeFallingSymbols.some((symbolObj) => {
-      if (normalizeSymbol(symbolObj.symbol) !== normalizedTarget) {
-        return false;
-      }
-
-      if (!symbolObj?.element?.isConnected || symbolObj.element.classList.contains("clicked")) {
-        return false;
-      }
-
-      const rect = symbolObj.element.getBoundingClientRect();
-      const overlapHeight = Math.min(rect.bottom, rainRect.bottom) - Math.max(rect.top, rainRect.top);
-      const visibleHeightThreshold = Math.min(
-        rect.height,
-        Math.max(rect.height * 0.6, (state.config.symbolHeight || 42) * 0.6),
-      );
-      const centerY = rect.top + rect.height / 2;
-      const safeTop = rainRect.top + (state.config.symbolHeight || 42) * 0.35;
-      const safeBottom = rainRect.bottom - (state.config.symbolHeight || 42) * 0.9;
-
-      return (
-        overlapHeight >= visibleHeightThreshold &&
-        centerY >= safeTop &&
-        centerY <= safeBottom
-      );
-    });
-  }
-
   function isVisibleInRainWindow(state, symbolObj) {
     return SymbolRainHelpers.isSymbolVisibleInRainWindow(state, symbolObj);
-  }
-
-  function getMissingStableNeededSymbols(state) {
-    const neededSymbols = [...new Set(getCurrentNeededSymbols())];
-
-    return neededSymbols.filter(
-      (symbolChar) => !isStableVisibleLiveSymbol(state, symbolChar),
-    );
   }
 
   function getVisibleActiveSymbolCount(state) {
@@ -130,7 +50,7 @@
     return selectedColumn;
   }
 
-  function releaseSymbolForPrioritySpawn(state, neededSymbolSet) {
+  function releaseSymbolForPrioritySpawn(state) {
     const maxActiveSymbols = state.config.maxActiveSymbols || 200;
     const hasCapacity = state.activeFallingSymbols.length < maxActiveSymbols;
     const availableColumns = getAvailablePriorityColumns(state);
@@ -148,10 +68,6 @@
       }
 
       if (symbolObj.element.classList.contains("clicked")) {
-        continue;
-      }
-
-      if (neededSymbolSet.has(normalizeSymbol(symbolObj.symbol))) {
         continue;
       }
 
@@ -189,13 +105,16 @@
   }
 
   function getVisiblePrioritySpawnY(state, slotIndex = 0) {
-    if (!Number.isFinite(state.cachedContainerHeight) || state.cachedContainerHeight <= 0) {
+    const rainRect = SymbolRainHelpers?.getRainWindowRect?.(state?.symbolRainContainer);
+    const containerHeight = rainRect?.height || state.cachedContainerHeight;
+
+    if (!Number.isFinite(containerHeight) || containerHeight <= 0) {
       return 0;
     }
 
     const symbolHeight = state.config.symbolHeight || 42;
     const minY = Math.max(0, symbolHeight * 0.9);
-    const maxY = Math.max(minY, state.cachedContainerHeight - symbolHeight * 2.4);
+    const maxY = Math.max(minY, containerHeight - symbolHeight * 2.4);
     const verticalBandCount = Math.max(
       1,
       Math.min(
@@ -205,26 +124,22 @@
     );
 
     if (verticalBandCount === 1) {
-      return Math.max(0, Math.min(minY, state.cachedContainerHeight - symbolHeight));
+      return Math.max(0, Math.min(minY, containerHeight - symbolHeight));
     }
 
     const bandIndex = Math.abs(slotIndex) % verticalBandCount;
     const preferredY = minY + ((maxY - minY) / (verticalBandCount - 1)) * bandIndex;
 
-    return Math.max(0, Math.min(preferredY, state.cachedContainerHeight - symbolHeight));
+    return Math.max(0, Math.min(preferredY, containerHeight - symbolHeight));
   }
 
   function spawnPrioritySymbol(
     state,
     symbolChar,
-    neededSymbolSet,
     currentTimestamp,
     options = {},
   ) {
-    const availableColumns = releaseSymbolForPrioritySpawn(
-      state,
-      neededSymbolSet,
-    );
+    const availableColumns = releaseSymbolForPrioritySpawn(state);
 
     if (!availableColumns.length) {
       return false;
@@ -279,27 +194,18 @@
       return;
     }
 
-    const neededSymbolSet = new Set(
-      getCurrentNeededSymbols().map((symbolChar) => normalizeSymbol(symbolChar)),
-    );
-    const distractorSymbols = state.symbols.filter(
-      (symbolChar) => !neededSymbolSet.has(normalizeSymbol(symbolChar)),
-    );
-
     state.lastCompactBackfillTimestamp = currentTimestamp;
 
     let spawnIndex = 0;
 
     while (visibleCount < minVisibleSymbols) {
-      const symbolPool = distractorSymbols.length ? distractorSymbols : state.symbols;
       const symbolChar =
-        symbolPool[Math.floor(Math.random() * symbolPool.length)];
+        state.symbols[Math.floor(Math.random() * state.symbols.length)];
 
       if (
         !spawnPrioritySymbol(
           state,
           symbolChar,
-          neededSymbolSet,
           currentTimestamp,
           {
             initialY: getVisiblePrioritySpawnY(state, spawnIndex),
@@ -316,78 +222,6 @@
     }
   }
 
-  function maintainNeededSymbolVisibility(state, currentTimestamp) {
-    if (state.columnCount <= 0) {
-      return;
-    }
-
-    if (currentTimestamp - (state.lastNeededSymbolVisibilitySyncAt || 0) < 150) {
-      return;
-    }
-
-    const missingSymbols = getMissingStableNeededSymbols(state);
-    if (!missingSymbols.length) {
-      return;
-    }
-
-    const neededSymbols = [...new Set(getCurrentNeededSymbols())];
-
-    const neededSymbolSet = new Set(
-      neededSymbols.map((symbolChar) => normalizeSymbol(symbolChar)),
-    );
-
-    state.lastNeededSymbolVisibilitySyncAt = currentTimestamp;
-
-    for (const symbolChar of missingSymbols) {
-      if (
-        !spawnPrioritySymbol(
-          state,
-          symbolChar,
-          neededSymbolSet,
-          currentTimestamp,
-          {
-            initialY: getVisiblePrioritySpawnY(state, symbolChar.charCodeAt(0) || 0),
-            preferLeastOccupiedColumn: true,
-            horizontalOffset: 0,
-          },
-        )
-      ) {
-        break;
-      }
-    }
-  }
-
-  function spawnNeededSymbols(state, currentTimestamp) {
-    if (state.columnCount <= 0) {
-      return;
-    }
-
-    const neededSymbols = [...new Set(getCurrentNeededSymbols())];
-    const neededSymbolSet = new Set(
-      neededSymbols.map((symbolChar) => normalizeSymbol(symbolChar)),
-    );
-    const hasVisibleRain = getVisibleActiveSymbolCount(state) > 0;
-    const priorityInterval = hasVisibleRain
-      ? state.config.guaranteedSpawnInterval
-      : 0;
-
-    neededSymbols.forEach((symbolChar) => {
-      const lastSpawnTimestamp = state.lastSymbolSpawnTimestamp[symbolChar] || 0;
-
-      if (isStableVisibleLiveSymbol(state, symbolChar)) {
-        return;
-      }
-
-      if (currentTimestamp - lastSpawnTimestamp <= priorityInterval) {
-        return;
-      }
-
-      if (!spawnPrioritySymbol(state, symbolChar, neededSymbolSet, currentTimestamp)) {
-        state.lastSymbolSpawnTimestamp[symbolChar] = currentTimestamp - priorityInterval;
-      }
-    });
-  }
-
   function handleRandomSpawns(state) {
     if (!SymbolRainHelpers) {
       return;
@@ -395,7 +229,6 @@
 
     const currentTimestamp = Date.now();
 
-    maintainNeededSymbolVisibility(state, currentTimestamp);
     maintainVisibleRainFloor(state, currentTimestamp);
 
     for (let columnIndex = 0; columnIndex < state.columnCount; columnIndex++) {
@@ -479,19 +312,11 @@
   }
 
   function startGuaranteedSpawnController(state) {
-    if (!SymbolRainHelpers) {
-      return;
-    }
-
     if (state.guaranteedSpawnControllerId) {
       return;
     }
 
-    state.guaranteedSpawnControllerId = setInterval(() => {
-      const currentTimestamp = Date.now();
-
-      spawnNeededSymbols(state, currentTimestamp);
-    }, 1000);
+    state.guaranteedSpawnControllerId = 0;
   }
 
   function stopGuaranteedSpawnController(state) {

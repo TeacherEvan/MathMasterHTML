@@ -203,7 +203,6 @@ function initSymbolRain() {
     function startControllers() {
       SymbolRainAnimation.startAnimation(state);
       SymbolRainAnimation.startSpeedController(state);
-      SymbolRainSpawn.startGuaranteedSpawnController(state);
     }
 
     function scheduleBootstrap() {
@@ -285,7 +284,7 @@ function initSymbolRain() {
       if (layoutChanged && state.isInitialPopulation) {
         scheduleBootstrap();
       }
-    }, 80);
+    }, 20);
 
     window.addEventListener("resize", debouncedResize);
     window.SharedResizeObserver?.subscribe?.(debouncedResize, {

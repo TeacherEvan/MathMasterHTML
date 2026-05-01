@@ -90,10 +90,13 @@ test.describe("Gameplay mobile landscape layout", () => {
     expect(layout.solution.fontSize).toBeGreaterThanOrEqual(10);
     expect(layout.console.display).toBe("grid");
     expect(layout.console.gridAutoFlow).toBe("column");
-    expect(layout.console.position).toBe("absolute");
-    expect(layout.console.top).toBeGreaterThanOrEqual(0);
+    expect(layout.console.position).toBe("relative");
+    expect(layout.console.top).toBeGreaterThanOrEqual(layout.controls.bottom - 2);
     expect(layout.console.left).toBeGreaterThanOrEqual(layout.panelB.left - 1);
     expect(layout.console.right).toBeLessThanOrEqual(layout.panelB.right + 1);
+    expect(layout.console.left - layout.panelB.left).toBeLessThanOrEqual(10);
+    expect(layout.panelB.right - layout.console.right).toBeLessThanOrEqual(10);
+    expect(layout.solution.top).toBeGreaterThanOrEqual(layout.console.bottom - 2);
     expect(layout.console.bottom).toBeLessThanOrEqual(layout.panelB.bottom + 1);
   });
 });

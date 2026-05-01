@@ -130,6 +130,89 @@ async function clickLiveMatchingSymbol(page, symbolText, timeoutMs = 3500) {
   return false;
 }
 
+async function spawnVisiblePanelCSymbol(page, symbolText, column = 0) {
+  return page.evaluate(({ forcedSymbol, targetColumn }) => {
+    const state = window.__symbolRainState;
+    const helpers = window.SymbolRainHelpers;
+
+    if (!state || !helpers?.createFallingSymbol || !state.symbolRainContainer) {
+      return false;
+    }
+
+    const symbolHeight = state.config?.symbolHeight || 42;
+    const rainRect = helpers.getRainWindowRect?.(state.symbolRainContainer);
+    const containerHeight = rainRect?.height || state.cachedContainerHeight || symbolHeight * 4;
+    const initialY = Math.max(
+      symbolHeight,
+      Math.min(containerHeight * 0.35, containerHeight - symbolHeight * 2),
+    );
+    const resolvedColumn = Math.min(
+      Math.max(targetColumn, 0),
+      Math.max((state.columnCount || 1) - 1, 0),
+    );
+
+    return Boolean(
+      helpers.createFallingSymbol(
+        {
+          symbols: state.symbols,
+          symbolRainContainer: state.symbolRainContainer,
+          config: state.config,
+          activeFallingSymbols: state.activeFallingSymbols,
+          symbolPool: state.symbolPool,
+          lastSymbolSpawnTimestamp: state.lastSymbolSpawnTimestamp,
+        },
+        {
+          column: resolvedColumn,
+          forcedSymbol,
+          initialY,
+          horizontalOffset: 0,
+        },
+      ),
+    );
+  }, { forcedSymbol: symbolText, targetColumn: column });
+}
+
+async function getVisiblePanelCSymbolSummary(page, hiddenSymbols = []) {
+  return page.evaluate((currentHiddenSymbols) => {
+    const normalize = (value) => {
+      const normalized = String(value || "").trim();
+      return normalized === "x" ? "X" : normalized;
+    };
+    const hiddenSet = new Set(currentHiddenSymbols.map((symbol) => normalize(symbol)));
+    const visibleSymbols = [];
+
+    Array.from(document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"))
+      .forEach((element) => {
+        const rect = element.getBoundingClientRect();
+        const panel = element.closest("#panel-c");
+        const panelRect = panel?.getBoundingClientRect();
+        if (!panelRect) {
+          return;
+        }
+
+        const intersectsPanel =
+          rect.bottom > panelRect.top &&
+          rect.top < panelRect.bottom &&
+          rect.right > panelRect.left &&
+          rect.left < panelRect.right;
+
+        if (intersectsPanel) {
+          visibleSymbols.push(normalize(element.textContent));
+        }
+      });
+
+    const distractorCount = visibleSymbols.filter(
+      (symbol) => !hiddenSet.has(symbol),
+    ).length;
+
+    return {
+      visibleCount: visibleSymbols.length,
+      distractorCount,
+      distinctVisibleSymbols: [...new Set(visibleSymbols)],
+    };
+  }, hiddenSymbols);
+}
+
 test.describe("Symbol rain mobile interactions", () => {
   test("only slows a mobile symbol when the blocking neighbor is below it", async ({
     page,
@@ -567,9 +650,12 @@ test.describe("Symbol rain mobile interactions", () => {
     await stopEvanHelpIfActive(page);
 
     const before = await getCurrentStepSnapshot(page);
-    const targetSymbol = await findVisibleMatchingSymbol(page, before.hiddenSymbols);
+    const targetSymbol = before.hiddenSymbols[0];
 
     expect(targetSymbol).toBeTruthy();
+
+    const spawned = await spawnVisiblePanelCSymbol(page, targetSymbol);
+    expect(spawned).toBe(true);
 
     const clicked = await clickLiveMatchingSymbol(page, targetSymbol);
     expect(clicked).toBe(true);
@@ -618,19 +704,8 @@ test.describe("Symbol rain mobile interactions", () => {
 
     expect(targetSymbol).toBeTruthy();
 
-    await page.waitForFunction(
-      (symbols) => {
-        const liveSymbols = Array.from(
-          document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
-        )
-          .map((element) => element.textContent?.trim())
-          .filter(Boolean);
-
-        return symbols.some((symbol) => liveSymbols.includes(symbol));
-      },
-      before.hiddenSymbols,
-      { timeout: 5000 },
-    );
+    const spawned = await spawnVisiblePanelCSymbol(page, targetSymbol);
+    expect(spawned).toBe(true);
 
     const panelC = page.locator("#panel-c");
     await panelC.focus();
@@ -655,34 +730,20 @@ test.describe("Symbol rain mobile interactions", () => {
         targetRect.left < panelRect.right
       );
     }, { timeout: 5000 });
+
+    const keyboardTargetText = await page.locator(
+      "#panel-c .falling-symbol.keyboard-target",
+    ).textContent();
+    expect(before.hiddenSymbols).toContain(String(keyboardTargetText || "").trim());
+
     await page.keyboard.press("Enter");
 
-    await page.waitForFunction(
-      ({ stepIndex, previousHiddenCount, symbol }) => {
-        if (stepIndex == null) {
-          return false;
-        }
-
-        const remaining = Array.from(
-          document.querySelectorAll(
-            `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`,
-          ),
-        )
-          .map((element) => element.dataset.expected || element.textContent || "")
-          .map((value) => String(value).trim())
-          .filter(Boolean);
-
-        return (
-          remaining.length < previousHiddenCount || !remaining.includes(symbol)
-        );
-      },
-      {
-        stepIndex: before.stepIndex,
-        previousHiddenCount: before.hiddenSymbols.length,
-        symbol: targetSymbol,
-      },
-      { timeout: 5000 },
-    );
+    await expect
+      .poll(async () => {
+        const after = await getCurrentStepSnapshot(page);
+        return after.hiddenSymbols.length;
+      }, { timeout: 5000 })
+      .toBeLessThan(before.hiddenSymbols.length);
   });
 
   test("Panel C reacquires a keyboard target when focus comes before a live match", async ({
@@ -730,8 +791,18 @@ test.describe("Symbol rain mobile interactions", () => {
     await panelC.focus();
     await expect(panelC).toBeFocused();
 
+    await expect(page.locator("#panel-c .falling-symbol.keyboard-target")).toHaveCount(0);
+
+    const targetSymbol = before.hiddenSymbols[0];
+    expect(targetSymbol).toBeTruthy();
+
+    const spawned = await spawnVisiblePanelCSymbol(page, targetSymbol);
+    expect(spawned).toBe(true);
+
+    await page.keyboard.press("ArrowRight");
+
     await page.waitForFunction(
-      (symbols) => {
+      (symbol) => {
         const panel = document.getElementById("panel-c");
         const target = document.querySelector(
           "#panel-c .falling-symbol.keyboard-target",
@@ -742,19 +813,18 @@ test.describe("Symbol rain mobile interactions", () => {
         }
 
         const normalize = (value) => String(value || "").trim().toLowerCase();
-        const normalizedSymbols = new Set(symbols.map((symbol) => normalize(symbol)));
         const panelRect = panel.getBoundingClientRect();
         const targetRect = target.getBoundingClientRect();
 
         return (
-          normalizedSymbols.has(normalize(target.textContent)) &&
+          normalize(target.textContent) === normalize(symbol) &&
           targetRect.bottom > panelRect.top &&
           targetRect.top < panelRect.bottom &&
           targetRect.right > panelRect.left &&
           targetRect.left < panelRect.right
         );
       },
-      before.hiddenSymbols,
+      targetSymbol,
       { timeout: 8000 },
     );
 
@@ -768,7 +838,7 @@ test.describe("Symbol rain mobile interactions", () => {
       .toBeLessThan(before.hiddenSymbols.length);
   });
 
-  test("keeps the active hidden symbol raining as a live Panel C target on mobile", async ({
+  test("keeps a mixed visible Panel C symbol field on mobile", async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -784,41 +854,25 @@ test.describe("Symbol rain mobile interactions", () => {
       timeout: 10000,
     });
 
-    for (let revealIndex = 0; revealIndex < 5; revealIndex += 1) {
-      const before = await getCurrentStepSnapshot(page);
-      const targetSymbol = await findVisibleMatchingSymbol(page, before.hiddenSymbols);
+    const before = await getCurrentStepSnapshot(page);
 
-      expect(targetSymbol).toBeTruthy();
+    await expect
+      .poll(async () => getVisiblePanelCSymbolSummary(page, before.hiddenSymbols), {
+        timeout: 10000,
+      })
+      .toMatchObject({
+        visibleCount: expect.any(Number),
+        distractorCount: expect.any(Number),
+      });
 
-      const clicked = await clickLiveMatchingSymbol(page, targetSymbol);
-      expect(clicked).toBe(true);
+    const summary = await getVisiblePanelCSymbolSummary(page, before.hiddenSymbols);
 
-      await page.waitForFunction(
-        ({ stepIndex, previousHiddenCount, symbol }) => {
-          if (stepIndex == null) {
-            return false;
-          }
+    expect(summary.visibleCount).toBeGreaterThanOrEqual(3);
+    expect(summary.distractorCount).toBeGreaterThan(0);
 
-          const remaining = Array.from(
-            document.querySelectorAll(
-              `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`,
-            ),
-          )
-            .map((element) => element.dataset.expected || element.textContent || "")
-            .map((value) => String(value).trim())
-            .filter(Boolean);
-
-          return (
-            remaining.length < previousHiddenCount || !remaining.includes(symbol)
-          );
-        },
-        {
-          stepIndex: before.stepIndex,
-          previousHiddenCount: before.hiddenSymbols.length,
-          symbol: targetSymbol,
-        },
-        { timeout: 5000 },
-      );
-    }
+    await testInfo.attach("mobile-mixed-visible-field", {
+      body: Buffer.from(JSON.stringify(summary, null, 2)),
+      contentType: "application/json",
+    });
   });
 });

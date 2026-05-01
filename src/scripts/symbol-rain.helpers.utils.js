@@ -104,7 +104,15 @@ console.log("🎯 SymbolRain helpers: utils loading...");
 
     const rainRect = helpers.getRainWindowRect(state?.symbolRainContainer);
     if (!rainRect) {
-      return symbolObj.y > (state?.cachedContainerHeight || 0) + padding;
+      const cachedContainerHeight = state?.cachedContainerHeight;
+      if (
+        !Number.isFinite(cachedContainerHeight) ||
+        cachedContainerHeight <= 0
+      ) {
+        return false;
+      }
+
+      return symbolObj.y > cachedContainerHeight + padding;
     }
 
     const rect = symbolObj.element.getBoundingClientRect();

@@ -31,8 +31,8 @@
   body.viewport-compact.viewport-landscape #symbol-console {
     grid-auto-columns: 44px;
     grid-template-rows: 44px !important;
-    gap: 3px;
-    padding: 3px 4px;
+    gap: 2px;
+    padding: 1px 0;
   }
 
   body.viewport-compact.viewport-landscape .console-slot {
@@ -48,5 +48,24 @@
     min-height: 44px;
     font-size: 9px;
     padding: 6px 8px;
+  }
+
+  body.viewport-compact.viewport-landscape .steps-container {
+    font-size: clamp(0.86rem, 2vw, 0.96rem);
+    line-height: 1;
+    letter-spacing: -0.016em;
+  }
+
+  body.viewport-compact.viewport-landscape .solution-step {
+    margin-bottom: 1px;
+    padding: 0;
+  }
+
+  body.viewport-compact.viewport-landscape .solution-symbol {
+    min-width: 8px;
+  }
+
+  body.viewport-compact.viewport-landscape .space-symbol {
+    margin: 0 1px;
   }
 }

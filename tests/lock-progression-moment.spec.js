@@ -50,6 +50,68 @@ test.describe("Lock progression signature moment", () => {
     });
   });
 
+  test("console symbol transition resets lock progression before the next problem", async ({
+    page,
+  }) => {
+    await page.goto("/game.html?level=beginner");
+    await page.waitForFunction(() => {
+      return (
+        typeof window.lockManager?.reset === "function" &&
+        typeof window.GameProblemManager?.nextProblem === "function" &&
+        Boolean(window.GameEvents?.CONSOLE_SYMBOL_ADDED)
+      );
+    });
+
+    await page.evaluate(() => {
+      window.lockManager.reset();
+
+      document.dispatchEvent(
+        new CustomEvent(window.GameEvents.PROBLEM_LINE_COMPLETED, {
+          detail: { line: 1 },
+        }),
+      );
+      document.dispatchEvent(
+        new CustomEvent(window.GameEvents.PROBLEM_LINE_COMPLETED, {
+          detail: { line: 2 },
+        }),
+      );
+      window.lockManager.currentLockLevel = 3;
+      window.lockManager.completedLinesCount = 4;
+
+      document.dispatchEvent(
+        new CustomEvent(window.GameEvents.CONSOLE_SYMBOL_ADDED),
+      );
+    });
+
+    await page.waitForTimeout(350);
+
+    const resetState = await page.evaluate(() => {
+      return {
+        currentLevel: window.lockManager?.getCurrentLevel?.(),
+        completedLines: window.lockManager?.getCompletedLines?.(),
+        lockIsLive: window.lockManager?.lockIsLive,
+      };
+    });
+
+    expect(resetState).toMatchObject({
+      currentLevel: 1,
+      completedLines: 0,
+      lockIsLive: false,
+    });
+
+    await page.evaluate(() => {
+      document.dispatchEvent(
+        new CustomEvent(window.GameEvents.PROBLEM_LINE_COMPLETED, {
+          detail: { line: 1 },
+        }),
+      );
+    });
+
+    await page.waitForFunction(() => {
+      return window.lockManager?.getCompletedLines?.() === 1;
+    });
+  });
+
   test("game page loads dedicated lock progression moment styles", async ({
     page,
   }) => {

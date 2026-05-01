@@ -53,8 +53,7 @@ function loadSymbolRainSpawnRuntime(overrides = {}) {
   };
 }
 
-test("startGuaranteedSpawnController only guarantees active needed symbols", () => {
-  const createdSymbols = [];
+test("startGuaranteedSpawnController stays inert when needed-symbol guarantees are disabled", () => {
   const hiddenSymbols = [
     {
       dataset: { expected: "2" },
@@ -84,11 +83,7 @@ test("startGuaranteedSpawnController only guarantees active needed symbols", () 
 
   const SymbolRainHelpers = {
     cleanupSymbolObject: () => {},
-    createFallingSymbol: (spawnContext, options) => {
-      createdSymbols.push(options.forcedSymbol);
-      spawnContext.lastSymbolSpawnTimestamp[options.forcedSymbol] = 10_000;
-      return { symbol: options.forcedSymbol };
-    },
+    createFallingSymbol: () => null,
     isColumnCrowded: () => false,
     isSymbolVisibleInRainWindow: () => false,
   };
@@ -101,16 +96,11 @@ test("startGuaranteedSpawnController only guarantees active needed symbols", () 
 
   runtime.startGuaranteedSpawnController(state);
 
-  const intervalCallback = runtime.getIntervalCallback();
-
-  assert.equal(typeof intervalCallback, "function");
-
-  intervalCallback();
-
-  assert.deepEqual(createdSymbols, ["2"]);
+  assert.equal(runtime.getIntervalCallback(), null);
+  assert.equal(state.guaranteedSpawnControllerId, 0);
 });
 
-test("visible rain floor fills with distractors instead of duplicating unstable needed symbols", () => {
+test("visible rain floor fills from the general symbol pool without prioritizing needed symbols", () => {
   const createdSymbols = [];
   const hiddenSymbols = [
     {
@@ -190,5 +180,5 @@ test("visible rain floor fills with distractors instead of duplicating unstable 
 
   runtime.handleRandomSpawns(state);
 
-  assert.deepEqual(createdSymbols, ["2", "1"]);
+  assert.deepEqual(createdSymbols, ["1", "1"]);
 });

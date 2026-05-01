@@ -98,6 +98,8 @@ console.log("🔤 Game symbol handler events loading...");
   });
 
   document.addEventListener(GameEvents.CONSOLE_SYMBOL_ADDED, () => {
+    window.lockManager?.reset?.();
+
     setTimeout(() => {
       window.GameProblemManager?.nextProblem?.();
     }, 300);

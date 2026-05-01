@@ -133,8 +133,7 @@ body.viewport-compact.viewport-landscape #clarify-button {
   padding: 0.45rem 0.65rem;
 }
 
-body.viewport-compact.viewport-portrait #symbol-console,
-body.viewport-compact.viewport-landscape #symbol-console {
+body.viewport-compact.viewport-portrait #symbol-console {
   left: var(--console-border-inset) !important;
   right: var(--console-border-inset) !important;
   bottom: var(--console-border-inset) !important;
@@ -149,8 +148,28 @@ body.viewport-compact.viewport-landscape #symbol-console {
   scrollbar-width: none;
 }
 
-body.viewport-compact.viewport-portrait #solution-container,
-body.viewport-compact.viewport-landscape #solution-container {
+body.viewport-compact.viewport-landscape #symbol-console {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: 100%;
+  min-width: 0;
+  align-self: stretch;
+  box-sizing: border-box;
+  grid-template-columns: none !important;
+  grid-template-rows: var(--console-slot-size) !important;
+  grid-auto-flow: column !important;
+  justify-content: start !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none;
+}
+
+body.viewport-compact.viewport-portrait #solution-container {
   padding-bottom: var(--console-row-reserve) !important;
 }
 

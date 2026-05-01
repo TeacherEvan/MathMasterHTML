@@ -44,7 +44,7 @@ body.viewport-compact.viewport-landscape #panel-b {
   grid-row: 1 !important;
   padding: calc(var(--panel-b-top-safe-zone, 72px) - 14px)
     var(--compact-panel-inline-gap) var(--compact-panel-inline-gap);
-  gap: 6px;
+  gap: 4px;
   overflow: hidden;
 }
 
@@ -100,28 +100,39 @@ body.viewport-compact.viewport-landscape #lock-display {
 body.viewport-compact.viewport-landscape #solution-container {
   min-height: 0;
   max-height: none;
-  padding: 0 0 4px;
+  padding: 0;
   margin: 0 !important;
   background: rgba(0, 0, 0, 0.45);
   flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+  order: 3;
 }
 
 body.viewport-compact.viewport-landscape #symbol-console {
-  position: absolute;
-  left: var(--compact-panel-inline-gap) !important;
-  right: var(--compact-panel-inline-gap) !important;
-  bottom: var(--compact-panel-inline-gap) !important;
+  position: relative;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
   transform: none !important;
-  width: auto !important;
-  max-width: none;
+  width: 100% !important;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  order: 2;
+  flex: 0 0 auto;
+  align-self: stretch;
+  box-sizing: border-box;
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 44px;
   grid-template-columns: none !important;
   grid-template-rows: 44px !important;
   justify-content: start;
-  gap: 4px;
-  padding: 4px 6px;
+  gap: 3px;
+  padding: 2px 0 1px;
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
@@ -148,6 +159,32 @@ body.viewport-compact.viewport-landscape .panel-b-controls {
   justify-content: space-between;
   flex-wrap: nowrap;
   gap: 4px;
+  margin-bottom: 0;
+  order: 1;
+}
+
+body.viewport-compact.viewport-landscape #worm-container {
+  order: 4;
+}
+
+body.viewport-compact.viewport-landscape .steps-container {
+  font-size: clamp(0.94rem, 2.15vw, 1.08rem);
+  line-height: 1.04;
+  letter-spacing: -0.012em;
+}
+
+body.viewport-compact.viewport-landscape .solution-step {
+  margin-bottom: 1px;
+  padding: 0;
+  white-space: nowrap;
+}
+
+body.viewport-compact.viewport-landscape .solution-symbol {
+  min-width: 9px;
+}
+
+body.viewport-compact.viewport-landscape .space-symbol {
+  margin: 0 2px;
 }
 
 body.viewport-compact.viewport-landscape #help-button,
