@@ -80,6 +80,12 @@ Use an HTTP server. Runtime assets are fetched dynamically, so `file://` is not 
 - For UI bugs, pin the layout owner such as `display-manager*.js`, `ui-boundary-manager*.js`, or `console-manager*.js` plus the page or feature script that consumes that contract.
 - If ownership is unclear, do one read-only exploration pass first, then narrow execution to the owner and its direct caller before editing.
 
+### Zero-Search Execution
+
+- Do not hand an agent a symptom-only request like `Fix the audio bug.` once the owner is known; pin the owner and caller together so execution stays local.
+- Audio example: pin the specific `interaction-audio.cyberpunk.*.js` owner plus the nearest `game-*.js`, `*-page.js`, or interaction script that triggers playback.
+- Layout example: pin `display-manager*.js`, `ui-boundary-manager*.js`, or `console-manager*.js` plus the page or feature script that invokes that layout contract.
+
 ## Runtime Model
 
 - No framework or bundler in gameplay runtime.

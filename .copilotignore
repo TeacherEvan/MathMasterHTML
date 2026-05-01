@@ -1,4 +1,4 @@
-# Keep Copilot focused on runtime code, tests, and docs that matter for this web app.
+# Keep Copilot focused on runtime code, tests, and the sanctioned docs that matter for this web app.
 
 # Engine and editor metadata
 *.meta
@@ -17,13 +17,20 @@
 *.blend
 
 # Engine caches and IDE state
-Library/
-Temp/
-obj/
-bin/
-.godot/
-.vs/
+/Library/
+**/Library/
+/Temp/
+**/Temp/
+/obj/
+**/obj/
+/bin/
+**/bin/
+/.godot/
+**/.godot/
+/.vs/
+**/.vs/
 
 # Logs and generated diagnostics
 *.log
-Logs/
+/Logs/
+**/Logs/

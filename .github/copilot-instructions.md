@@ -31,6 +31,7 @@ Do not add any other `.md` files outside `.github/agents/*.agent.md`. Consolidat
 
 - `Plan Genesis.md` is the operational source of truth for runtime and engineering work.
 - `Plan Genesis.md` also absorbs the repository architecture and system-guide content that would otherwise live in a separate root architecture document.
+- If a request asks for `ARCHITECTURE.md`, update `Plan Genesis.md` instead and keep this file limited to routing and guardrails.
 - `Plan Beta.md` is the source of truth for roadmap and execution priorities.
 - `Plan Alpha.md` is the source of truth for product, design, and experience rules.
 - `JOBCARD.md` is the rolling work log.
@@ -54,6 +55,7 @@ Do not add any other `.md` files outside `.github/agents/*.agent.md`. Consolidat
 
 - Prefer explicit file pinning over broad semantic search once the owning script is known.
 - Pin the script that directly computes the behavior and the nearest caller or page glue that invokes it.
+- For symptom-led requests such as audio regressions, pin the owning `interaction-audio.cyberpunk.*.js` file and the nearest `game-*.js`, `*-page.js`, or interaction caller instead of asking for a repo-wide fix.
 - If ownership is unclear, do one read-only exploration step, then execute against the owner and caller only.
 
 ### When editing `tests/**/*.spec.js`
