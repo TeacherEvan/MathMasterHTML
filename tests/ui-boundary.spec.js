@@ -196,6 +196,71 @@ test.describe("UI Boundary Management", () => {
     console.log("✅ Validation system functional:", validationResult);
   });
 
+  test("UIBoundaryManager should throttle impossible placement warnings", async ({
+    page,
+  }) => {
+    const warningCount = await page.evaluate(async () => {
+      const warnings = [];
+      const originalWarn = console.warn;
+      console.warn = (...args) => {
+        const message = args.join(" ");
+        if (message.includes("Could not find non-overlapping position")) {
+          warnings.push(message);
+        }
+        originalWarn.apply(console, args);
+      };
+
+      const obstacle = document.createElement("div");
+      const subject = document.createElement("div");
+      Object.assign(obstacle.style, {
+        position: "fixed",
+        left: "20px",
+        top: "20px",
+        width: "80px",
+        height: "80px",
+      });
+      Object.assign(subject.style, {
+        position: "fixed",
+        left: "20px",
+        top: "20px",
+        width: "80px",
+        height: "80px",
+      });
+      document.body.append(obstacle, subject);
+
+      const manager = new window.UIBoundaryManager({
+        autoReposition: true,
+        checkInterval: 40,
+        enablePeriodic: true,
+        logOverlaps: false,
+        minSpacing: 10,
+        noSafePositionWarnInterval: 1000,
+      });
+
+      try {
+        manager.register("fixed-obstacle", obstacle, {
+          fixed: true,
+          priority: 10,
+        });
+        manager.register("movable-subject", subject, {
+          constraints: { minX: 20, maxX: 100, minY: 20, maxY: 100 },
+          fixed: false,
+          priority: 1,
+        });
+
+        await new Promise((resolve) => window.setTimeout(resolve, 160));
+        return warnings.length;
+      } finally {
+        manager.destroy();
+        obstacle.remove();
+        subject.remove();
+        console.warn = originalWarn;
+      }
+    });
+
+    expect(warningCount).toBe(1);
+  });
+
   test("UIBoundaryManager should expose public constraint updates", async ({
     page,
   }) => {

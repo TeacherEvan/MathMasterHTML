@@ -8,6 +8,7 @@ console.log("📐 UIBoundaryManager positioning loading...");
   }
 
   const proto = window.UIBoundaryManager.prototype;
+  const DEFAULT_NO_SAFE_POSITION_WARN_INTERVAL_MS = 5000;
 
   /**
    * Calculate a non-overlapping position for an element
@@ -130,12 +131,24 @@ console.log("📐 UIBoundaryManager positioning loading...");
       }
 
       if (!hasOverlap) {
+        entry.lastNoSafePositionWarnAt = 0;
         return pos;
       }
     }
 
-    // Fallback: return position with minimum overlap
-    console.warn(`📐 Could not find non-overlapping position for "${id}"`);
+    const warnInterval =
+      this.config.noSafePositionWarnInterval ??
+      DEFAULT_NO_SAFE_POSITION_WARN_INTERVAL_MS;
+    const now = Date.now();
+    if (
+      warnInterval <= 0 ||
+      !entry.lastNoSafePositionWarnAt ||
+      now - entry.lastNoSafePositionWarnAt >= warnInterval
+    ) {
+      console.warn(`📐 Could not find non-overlapping position for "${id}"`);
+      entry.lastNoSafePositionWarnAt = now;
+    }
+
     return positions[0];
   };
 
