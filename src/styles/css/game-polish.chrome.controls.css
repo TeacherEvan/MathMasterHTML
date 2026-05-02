@@ -67,11 +67,12 @@
 }
 
 #symbol-console {
-  position: absolute !important;
-  left: 50% !important;
+  position: relative !important;
+  left: auto !important;
   right: auto !important;
-  bottom: clamp(22px, 4vh, 34px) !important;
-  transform: translateX(-50%) !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
   display: grid !important;
   grid-template-columns: repeat(3, var(--console-slot-size)) !important;
   grid-template-rows: repeat(3, var(--console-slot-size)) !important;
@@ -80,12 +81,27 @@
   gap: var(--console-shell-gap) !important;
   padding: var(--console-shell-padding) !important;
   width: auto !important;
-  max-width: calc(100% - 16px);
+  max-width: min(100%, calc(100% - 8px));
   justify-content: center !important;
   align-items: stretch;
   overflow: visible !important;
-  z-index: 90 !important;
+  z-index: 1 !important;
   backdrop-filter: blur(12px);
+}
+
+.panel-c-console-zone {
+  position: absolute;
+  left: clamp(18px, 2vw, 24px);
+  right: clamp(18px, 2vw, 24px);
+  bottom: clamp(18px, 3vh, 24px);
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.panel-c-console-zone #symbol-console {
+  pointer-events: auto;
 }
 
 .console-slot {
@@ -140,10 +156,7 @@ body.viewport-compact.viewport-landscape #clarify-button {
 }
 
 body.viewport-compact.viewport-portrait #symbol-console {
-  left: var(--console-border-inset) !important;
-  right: var(--console-border-inset) !important;
-  bottom: var(--console-border-inset) !important;
-  transform: none !important;
+  width: 100% !important;
   max-width: none;
   grid-template-columns: none !important;
   grid-template-rows: var(--console-slot-size) !important;
@@ -155,16 +168,9 @@ body.viewport-compact.viewport-portrait #symbol-console {
 }
 
 body.viewport-compact.viewport-landscape #symbol-console {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-  transform: none !important;
   width: 100% !important;
   max-width: 100%;
   min-width: 0;
-  align-self: stretch;
   box-sizing: border-box;
   grid-template-columns: none !important;
   grid-template-rows: var(--console-slot-size) !important;
@@ -175,8 +181,12 @@ body.viewport-compact.viewport-landscape #symbol-console {
   scrollbar-width: none;
 }
 
-body.viewport-compact.viewport-portrait #solution-container {
-  padding-bottom: var(--console-row-reserve) !important;
+body.viewport-compact.viewport-portrait .panel-c-console-zone,
+body.viewport-compact.viewport-landscape .panel-c-console-zone {
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  justify-content: stretch;
 }
 
 body.viewport-compact.viewport-portrait #symbol-console::-webkit-scrollbar,

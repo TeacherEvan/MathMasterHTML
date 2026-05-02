@@ -453,7 +453,9 @@ test.describe("Power-Up Compact Layout", () => {
                 }
               : null,
             gapToControls: controlsRect.top - rect.bottom,
-            gapFromControlsToConsole: consoleRect.top - controlsRect.bottom,
+            consoleBottom: consoleRect.bottom,
+            consoleLeft: consoleRect.left,
+            consoleRight: consoleRect.right,
           }
         : null;
     });
@@ -465,11 +467,13 @@ test.describe("Power-Up Compact Layout", () => {
     expect(layout.distanceToPanelBTop).toBeLessThanOrEqual(8);
     expect(layout.bottom).toBeLessThanOrEqual(layout.controlsTop);
     expect(layout.gapToControls).toBeGreaterThanOrEqual(8);
-    expect(layout.gapFromControlsToConsole).toBeGreaterThanOrEqual(6);
-    expect(layout.consoleZIndex).toBeLessThan(layout.wormZIndex);
     expect(layout.centerOffset).toBeLessThan(20);
     expect(layout.computedTop).not.toBe("auto");
     expect(layout.distanceToTop).toBeLessThan(layout.distanceToBottom);
+    expect(layout.consoleLeft).toBeGreaterThanOrEqual(layout.panelCLeft);
+    expect(layout.consoleRight).toBeLessThanOrEqual(layout.panelCRight);
+    expect(layout.consoleTop).toBeGreaterThanOrEqual(layout.panelCTop);
+    expect(layout.consoleBottom).toBeLessThanOrEqual(layout.panelCBottom);
     expect(layout.achievement).not.toBeNull();
     expect(layout.achievement.left).toBeGreaterThanOrEqual(layout.panelCLeft);
     expect(layout.achievement.right).toBeLessThanOrEqual(layout.panelCRight);

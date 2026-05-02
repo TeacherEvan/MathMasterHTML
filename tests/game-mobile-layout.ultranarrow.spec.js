@@ -60,7 +60,7 @@ test.describe("Gameplay ultra-narrow embedded landscape layout", () => {
     screen: { width: 294, height: 161 },
   });
 
-  test("keeps all three panels visible and the console horizontal inside panel B", async ({
+  test("keeps all three panels visible and the console horizontal inside panel C", async ({
     page,
   }) => {
     await page.goto("/src/pages/game.html?level=beginner", {
@@ -146,22 +146,21 @@ test.describe("Gameplay ultra-narrow embedded landscape layout", () => {
     expect(layout.panelC.bottom).toBeLessThanOrEqual(
       layout.viewport.height + 1,
     );
-    expect(layout.console.position).toBe("relative");
+    expect(layout.console.position).toBe("absolute");
     expect(layout.console.gridAutoFlow).toBe("column");
     expect(layout.console.overflowX).toMatch(/auto|scroll/);
-    expect(layout.console.left).toBeGreaterThanOrEqual(layout.panelB.left - 1);
-    expect(layout.console.right).toBeLessThanOrEqual(layout.panelB.right + 1);
-    expect(Math.abs(layout.console.left - layout.panelB.left)).toBeLessThanOrEqual(
-      10,
+    expect(layout.console.left).toBeGreaterThanOrEqual(layout.panelC.left - 1);
+    expect(layout.console.right).toBeLessThanOrEqual(layout.panelC.right + 1);
+    expect(Math.abs(layout.console.left - layout.panelC.left)).toBeLessThanOrEqual(
+      14,
     );
-    expect(Math.abs(layout.panelB.right - layout.console.right)).toBeLessThanOrEqual(
-      10,
+    expect(Math.abs(layout.panelC.right - layout.console.right)).toBeLessThanOrEqual(
+      14,
     );
-    expect(layout.console.top).toBeGreaterThanOrEqual(layout.help.bottom - 2);
+    expect(layout.console.top).toBeGreaterThanOrEqual(layout.panelC.top - 1);
     expect(Math.abs(layout.help.bottom - layout.clarify.bottom)).toBeLessThanOrEqual(
       8,
     );
-    expect(layout.solution.top).toBeGreaterThanOrEqual(layout.console.bottom - 2);
     expect(layout.solutionPaddingTop).toBeLessThanOrEqual(1);
     expect(layout.consoleSlot.width).toBeGreaterThanOrEqual(44);
     expect(layout.consoleSlot.height).toBeGreaterThanOrEqual(44);

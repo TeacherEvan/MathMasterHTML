@@ -224,17 +224,60 @@
   box-shadow:
     var(--shell-shadow-panel),
     0 30px 72px rgba(0, 0, 0, 0.52);
+  position: relative;
+  overflow: hidden;
+}
+
+.game-over-content::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklch, var(--shell-alert) 68%, var(--shell-signal) 32%), transparent);
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.game-over-content::after {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border-radius: 1.4rem;
+  border: 1px solid color-mix(in oklch, var(--shell-alert) 12%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--shell-copy) 3%, transparent), transparent 22%),
+    radial-gradient(120% 90% at 50% 0%, color-mix(in oklch, var(--shell-alert) 10%, transparent), transparent 62%);
+  opacity: 0.78;
+  pointer-events: none;
 }
 
 .game-over-title {
+  position: relative;
   color: var(--shell-alert);
   text-shadow:
     0 0 14px color-mix(in oklch, var(--shell-alert) 32%, transparent),
     0 0 28px color-mix(in oklch, var(--shell-alert) 16%, transparent);
 }
 
+.game-over-title::before {
+  content: "Lockdown report";
+  display: block;
+  margin-bottom: 0.75rem;
+  color: color-mix(in oklch, var(--shell-copy-muted) 74%, var(--shell-alert) 26%);
+  font: 700 0.68rem/1.2 var(--font-body);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-shadow: none;
+}
+
 .game-over-message,
 .game-over-penalty {
+  position: relative;
+  padding: 0.95rem 1rem;
+  border: 1px solid color-mix(in oklch, var(--shell-alert) 14%, transparent);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, color-mix(in oklch, var(--shell-panel-strong) 58%, transparent), color-mix(in oklch, var(--shell-bg) 94%, black 6%));
+  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--shell-copy) 4%, transparent);
   font-family: var(--font-body);
   color: color-mix(in oklch, var(--shell-copy) 84%, var(--shell-alert) 16%);
   text-shadow: none;
@@ -282,4 +325,28 @@
     color-mix(in oklch, var(--shell-signal) 12%, var(--shell-panel-strong) 88%),
     color-mix(in oklch, var(--shell-bg) 90%, black 10%)
   );
+}
+
+.game-over-message strong,
+.game-over-penalty strong {
+  color: color-mix(in oklch, var(--shell-copy) 70%, var(--shell-alert) 30%);
+}
+
+@media (max-width: 520px), (max-height: 320px) {
+  .game-over-content::after {
+    inset: 10px;
+    border-radius: 1rem;
+  }
+
+  .game-over-title::before {
+    margin-bottom: 0.45rem;
+    font-size: 0.54rem;
+    letter-spacing: 0.18em;
+  }
+
+  .game-over-message,
+  .game-over-penalty {
+    padding: 0.7rem 0.8rem;
+    border-radius: 0.8rem;
+  }
 }
