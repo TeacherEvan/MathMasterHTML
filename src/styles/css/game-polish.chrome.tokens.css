@@ -1,20 +1,20 @@
 :root {
-  --shell-bg: oklch(0.14 0.018 122);
-  --shell-panel: oklch(0.19 0.022 122);
-  --shell-panel-strong: oklch(0.24 0.03 122);
-  --shell-copy: oklch(0.95 0.018 105);
-  --shell-copy-muted: oklch(0.79 0.028 105);
-  --shell-line: oklch(0.84 0.17 132);
+  --shell-bg: oklch(0.12 0.014 122);
+  --shell-panel: oklch(0.16 0.016 122);
+  --shell-panel-strong: oklch(0.2 0.022 122);
+  --shell-copy: oklch(0.94 0.014 105);
+  --shell-copy-muted: oklch(0.79 0.018 105);
+  --shell-line: oklch(0.82 0.14 132);
   --shell-line-soft: color-mix(in oklch, var(--shell-line) 40%, transparent);
-  --shell-signal: oklch(0.84 0.12 82);
+  --shell-signal: oklch(0.81 0.08 82);
   --shell-alert: oklch(0.74 0.16 42);
   --shell-surface-raised: linear-gradient(160deg, color-mix(in oklch, var(--shell-panel-strong) 84%, transparent), color-mix(in oklch, var(--shell-bg) 92%, black 8%));
   --shell-surface-soft: linear-gradient(180deg, color-mix(in oklch, var(--shell-panel) 88%, transparent), color-mix(in oklch, var(--shell-bg) 94%, black 6%));
   --shell-border-subtle: color-mix(in oklch, var(--shell-copy) 8%, transparent);
   --shell-border-strong: color-mix(in oklch, var(--shell-line) 26%, transparent);
   --shell-border-signal: color-mix(in oklch, var(--shell-signal) 34%, transparent);
-  --shell-shadow-panel: inset 0 1px 0 color-mix(in oklch, var(--shell-copy) 8%, transparent), 0 16px 40px rgba(0, 0, 0, 0.3);
-  --shell-shadow-control: 0 0 0 1px rgba(194, 236, 102, 0.12), 0 14px 30px rgba(0, 0, 0, 0.35);
+  --shell-shadow-panel: inset 0 1px 0 color-mix(in oklch, var(--shell-copy) 8%, transparent), 0 18px 46px rgba(0, 0, 0, 0.34);
+  --shell-shadow-control: inset 0 1px 0 color-mix(in oklch, var(--shell-copy) 6%, transparent), 0 14px 30px rgba(0, 0, 0, 0.35);
   --shell-ring-soft: 0 0 0 1px color-mix(in oklch, var(--shell-signal) 28%, transparent);
   --shell-scrollbar-thumb: color-mix(in oklch, var(--shell-line) 42%, black 18%);
   --shell-scrollbar-track: color-mix(in oklch, var(--shell-bg) 88%, black 12%);
@@ -31,7 +31,11 @@
 body {
   font-family: var(--font-body);
   color: var(--shell-copy);
-  background: radial-gradient(circle at top, color-mix(in oklch, var(--shell-signal) 14%, transparent), transparent 34%), linear-gradient(180deg, oklch(0.18 0.02 122), var(--shell-bg) 58%);
+  background:
+    radial-gradient(88% 66% at 14% 8%, color-mix(in oklch, var(--shell-line) 14%, transparent), transparent 52%),
+    radial-gradient(74% 58% at 88% 12%, color-mix(in oklch, var(--shell-signal) 12%, transparent), transparent 44%),
+    radial-gradient(64% 50% at 78% 82%, color-mix(in oklch, var(--shell-alert) 10%, transparent), transparent 48%),
+    linear-gradient(180deg, oklch(0.16 0.018 122), var(--shell-bg) 52%, oklch(0.11 0.01 122) 100%);
 }
 
 body::before {
@@ -39,12 +43,31 @@ body::before {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.08;
-  background: linear-gradient(180deg, color-mix(in oklch, var(--shell-line) 7%, transparent), transparent 32%);
+  z-index: 0;
+  opacity: 0.32;
+  background:
+    linear-gradient(90deg, color-mix(in oklch, var(--shell-line) 4%, transparent) 0, transparent 18%, transparent 82%, color-mix(in oklch, var(--shell-line) 4%, transparent) 100%),
+    linear-gradient(180deg, color-mix(in oklch, var(--shell-copy) 5%, transparent), transparent 18%);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.72;
+  background:
+    radial-gradient(circle at center, color-mix(in oklch, var(--shell-line) 10%, transparent), transparent 60%),
+    radial-gradient(circle at center, transparent 0 62%, rgba(0, 0, 0, 0.34) 100%);
 }
 
 .wall {
-  background: linear-gradient(180deg, color-mix(in oklch, var(--shell-signal) 78%, var(--shell-line) 22%), color-mix(in oklch, var(--shell-line) 82%, black 18%));
+  background: linear-gradient(180deg, color-mix(in oklch, var(--shell-signal) 38%, var(--shell-line) 62%), color-mix(in oklch, var(--shell-line) 74%, black 26%));
+  box-shadow:
+    inset 1px 0 0 color-mix(in oklch, var(--shell-copy) 6%, transparent),
+    inset -1px 0 0 rgba(0, 0, 0, 0.28),
+    0 0 14px color-mix(in oklch, var(--shell-line) 10%, transparent);
 }
 
 #back-button,
@@ -55,18 +78,31 @@ body::before {
   min-height: 3rem;
   padding: 0.8rem 1rem;
   border-radius: 999px;
-  border: 1px solid color-mix(in oklch, var(--shell-line) 78%, black 22%);
-  background: var(--shell-surface-raised);
+  border: 1px solid color-mix(in oklch, var(--shell-copy) 12%, var(--shell-line) 18%);
+  background: linear-gradient(180deg, color-mix(in oklch, var(--shell-panel-strong) 88%, transparent), color-mix(in oklch, var(--shell-bg) 94%, black 6%));
   color: var(--shell-copy);
   font: 700 0.88rem/1 var(--font-body);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   box-shadow: var(--shell-shadow-control);
+  overflow: hidden;
   transition:
     transform 180ms ease-out,
     border-color 180ms ease-out,
     background-color 180ms ease-out,
     box-shadow 180ms ease-out;
+}
+
+#back-button::before,
+#audio-toggle::before {
+  content: "";
+  position: absolute;
+  inset: 1px 1px auto 1px;
+  height: 48%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 82%);
+  opacity: 0.85;
+  pointer-events: none;
 }
 
 #back-button {
@@ -114,6 +150,9 @@ body.problem-completed.console-modal-open #back-button {
 .power-up-item:hover {
   transform: translateY(-2px);
   border-color: var(--shell-signal);
+  box-shadow:
+    var(--shell-ring-soft),
+    0 18px 32px rgba(0, 0, 0, 0.34);
 }
 
 #back-button:active,

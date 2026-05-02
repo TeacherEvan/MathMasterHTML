@@ -32,14 +32,17 @@
   min-height: var(--panel-b-control-min-height);
   margin: 0;
   justify-self: stretch;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
 }
 
 #help-button {
   border-color: var(--shell-border-signal);
   background: linear-gradient(
-    145deg,
-    color-mix(in oklch, var(--shell-signal) 18%, var(--shell-panel-strong) 82%),
-    color-mix(in oklch, var(--shell-panel) 74%, black 26%)
+    180deg,
+    color-mix(in oklch, var(--shell-signal) 12%, var(--shell-panel-strong) 88%),
+    color-mix(in oklch, var(--shell-panel) 76%, black 24%)
   );
   color: var(--shell-copy);
 }
@@ -48,11 +51,13 @@
   border-color: var(--shell-border-strong);
   background: linear-gradient(
     180deg,
-    color-mix(in oklch, var(--shell-panel-strong) 72%, transparent),
+    color-mix(in oklch, var(--shell-panel-strong) 80%, transparent),
     color-mix(in oklch, var(--shell-bg) 92%, black 8%)
   );
   color: var(--shell-copy-muted);
-  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--shell-copy) 4%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklch, var(--shell-copy) 4%, transparent),
+    inset 0 -8px 12px rgba(0, 0, 0, 0.14);
 }
 
 #clarify-button:hover,
@@ -80,6 +85,7 @@
   align-items: stretch;
   overflow: visible !important;
   z-index: 90 !important;
+  backdrop-filter: blur(12px);
 }
 
 .console-slot {

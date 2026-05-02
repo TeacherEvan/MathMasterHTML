@@ -14,13 +14,25 @@
   margin-top: clamp(1rem, 8vh, 4.5rem);
   padding: clamp(1.35rem, 3.4vw, 2.2rem);
   border-radius: 1.75rem;
-  border: 1px solid var(--shell-border-signal);
+  border: 1px solid color-mix(in oklch, var(--shell-copy) 10%, var(--shell-line) 18%);
   background: var(--shell-surface-raised);
   box-shadow:
     var(--shell-shadow-panel),
     0 32px 80px rgba(0, 0, 0, 0.44);
+  position: relative;
+  overflow: hidden;
   scrollbar-width: thin;
   scrollbar-color: var(--shell-scrollbar-thumb) var(--shell-scrollbar-track);
+}
+
+.how-to-play-content::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklch, var(--shell-signal) 58%, var(--shell-line) 42%), transparent);
+  opacity: 0.9;
+  pointer-events: none;
 }
 
 .how-to-play-content::-webkit-scrollbar {
@@ -39,7 +51,7 @@
 
 .how-to-play-kicker {
   margin: 0 0 0.8rem;
-  color: var(--shell-signal);
+  color: color-mix(in oklch, var(--shell-signal) 78%, var(--shell-copy) 22%);
   font: 700 0.72rem/1.2 var(--font-body);
   letter-spacing: 0.28em;
   text-transform: uppercase;
@@ -52,8 +64,7 @@
   font-size: clamp(1.9rem, 4.8vw, 3.35rem);
   line-height: 0.98;
   text-align: left;
-  text-shadow: 0 0 24px
-    color-mix(in oklch, var(--shell-signal) 18%, transparent);
+  text-shadow: 0 0 20px color-mix(in oklch, var(--shell-line) 16%, transparent);
 }
 
 .how-to-play-message {
@@ -83,7 +94,7 @@
 .how-to-play-callout strong {
   display: block;
   margin-bottom: 0.7rem;
-  color: color-mix(in oklch, var(--shell-copy) 84%, var(--shell-signal) 16%);
+  color: color-mix(in oklch, var(--shell-copy) 78%, var(--shell-signal) 22%);
   font-family: var(--font-display);
   font-size: 0.9rem;
   letter-spacing: 0.18em;
@@ -99,11 +110,11 @@
 #help-button,
 #clarify-button {
   min-height: 44px;
-  border-radius: 1rem;
+  border-radius: 999px;
   border: 1px solid var(--shell-border-signal);
   background: linear-gradient(
-    145deg,
-    color-mix(in oklch, var(--shell-signal) 14%, var(--shell-panel-strong) 86%),
+    180deg,
+    color-mix(in oklch, var(--shell-signal) 12%, var(--shell-panel-strong) 88%),
     color-mix(in oklch, var(--shell-panel) 80%, black 20%)
   );
   color: var(--shell-copy);
@@ -115,6 +126,8 @@
   width: auto;
   min-width: 14rem;
   padding-inline: 1.1rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 .panel-b-controls {
