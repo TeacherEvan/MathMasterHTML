@@ -19,6 +19,15 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
     symbol.style.transform = `translate3d(${x}px, ${y}px, 0)`;
   };
 
+  helpers.setSymbolState = function setSymbolState(symbol, state) {
+    if (!symbol) {
+      return;
+    }
+
+    symbol.dataset.symbolState = state;
+    symbol.setAttribute("data-symbol-state", state);
+  };
+
   helpers.createFallingSymbol = function createFallingSymbol(
     {
       symbols,
@@ -36,7 +45,12 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
       horizontalOffset = null,
     },
   ) {
-    if (activeFallingSymbols.length >= (config.maxActiveSymbols || 200)) {
+    const maxActiveSymbols = Math.min(
+      config.maxDomElements || 150,
+      config.maxActiveSymbols || 200,
+    );
+
+    if (activeFallingSymbols.length >= maxActiveSymbols) {
       return null;
     }
 
@@ -44,6 +58,7 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
     symbol.className = "falling-symbol";
     symbol.textContent =
       forcedSymbol || symbols[Math.floor(Math.random() * symbols.length)];
+    helpers.setSymbolState(symbol, "visible");
 
     const resolvedHorizontalOffset = Number.isFinite(horizontalOffset)
       ? horizontalOffset

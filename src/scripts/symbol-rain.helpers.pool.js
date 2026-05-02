@@ -12,17 +12,22 @@ console.log("🎯 SymbolRain helpers: pool loading...");
         if (this.pool.length > 0) {
           const symbol = this.pool.pop();
           symbol.style.display = "block";
+          symbol.dataset.symbolState = symbol.dataset.symbolState || "hidden";
           return symbol;
         }
         const symbol = document.createElement("div");
         symbol.className = "falling-symbol";
+        symbol.dataset.symbolState = "hidden";
         return symbol;
       },
 
       release(symbolElement) {
-        if (this.pool.length < config.poolSize) {
+        const maxPoolSize = config.maxDomElements || config.poolSize || 150;
+
+        if (this.pool.length < maxPoolSize) {
           symbolElement.style.display = "none";
           symbolElement.className = "falling-symbol";
+          symbolElement.dataset.symbolState = "hidden";
           this.pool.push(symbolElement);
         } else {
           symbolElement.remove();
@@ -37,6 +42,10 @@ console.log("🎯 SymbolRain helpers: pool loading...");
     symbolPool,
     spatialGrid,
   }) {
+    if (helpers.clearSymbolLifecycle) {
+      helpers.clearSymbolLifecycle(symbolObj);
+    }
+
     if (activeFaceReveals.has(symbolObj)) {
       activeFaceReveals.delete(symbolObj);
       if (helpers.resetFaceRevealStyles) {

@@ -78,6 +78,13 @@ console.log("🎯 SymbolRain helpers: utils loading...");
       return false;
     }
 
+    if (
+      symbolObj.element.dataset?.symbolState !== "visible" &&
+      symbolObj.element.getAttribute?.("data-symbol-state") !== "visible"
+    ) {
+      return false;
+    }
+
     if (symbolObj.element.classList.contains("clicked")) {
       return false;
     }

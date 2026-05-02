@@ -1,13 +1,11 @@
 (function () {
   const SymbolRainHelpers = window.SymbolRainHelpers;
-  const SymbolRainSpawn = window.SymbolRainSpawn;
 
   function animateSymbols(state) {
     if (!SymbolRainHelpers) {
       return;
     }
 
-    // Tab visibility throttling
     if (!state.isTabVisible && Math.random() > 0.016) {
       return;
     }
@@ -33,12 +31,25 @@
       currentTime,
     );
 
-    state.spatialGrid.update(state.activeFallingSymbols);
     state.symbolsToRemove.clear();
 
-    for (let i = 0; i < state.activeFallingSymbols.length; i++) {
+    const nextActiveSymbols = [];
+    const symbolsForGrid = [];
+
+    for (let i = 0; i < state.activeFallingSymbols.length; i += 1) {
       const symbolObj = state.activeFallingSymbols[i];
-      if (state.symbolsToRemove.has(symbolObj)) continue;
+      if (!symbolObj?.element?.isConnected) {
+        continue;
+      }
+
+      const symbolState = symbolObj.element.dataset?.symbolState || "hidden";
+      symbolObj.element.style.opacity =
+        symbolState === "visible" ? "1" : symbolState === "fading" ? "0" : "0";
+
+      if (symbolState === "hidden") {
+        nextActiveSymbols.push(symbolObj);
+        continue;
+      }
 
       const touchingSymbol = state.isMobileMode
         ? SymbolRainHelpers.checkTouching(
@@ -54,15 +65,7 @@
         state.symbolsToRemove.add(symbolObj);
         state.symbolsToRemove.add(touchingSymbol);
       }
-    }
 
-    let writeIndex = 0;
-    for (
-      let readIndex = 0;
-      readIndex < state.activeFallingSymbols.length;
-      readIndex++
-    ) {
-      const symbolObj = state.activeFallingSymbols[readIndex];
       const isOffScreen = SymbolRainHelpers.isSymbolPastRainWindow(
         state,
         symbolObj,
@@ -101,8 +104,7 @@
           symbolObj.y,
         );
       } else {
-        symbolObj.y +=
-          state.symbolFallSpeed * state.config.collisionSpeedFactor;
+        symbolObj.y += state.symbolFallSpeed * state.config.collisionSpeedFactor;
         SymbolRainHelpers.setSymbolPosition(
           symbolObj.element,
           symbolObj.x,
@@ -110,17 +112,18 @@
         );
       }
 
-      state.activeFallingSymbols[writeIndex++] = symbolObj;
+      nextActiveSymbols.push(symbolObj);
+      symbolsForGrid.push(symbolObj);
     }
-    state.activeFallingSymbols.length = writeIndex;
+
+    state.activeFallingSymbols.length = 0;
+    state.activeFallingSymbols.push(...nextActiveSymbols);
+    state.spatialGrid?.update?.(symbolsForGrid);
 
     if (state.isInitialPopulation) {
       return;
     }
 
-    if (SymbolRainSpawn) {
-      SymbolRainSpawn.handleRandomSpawns(state);
-    }
   }
 
   function startAnimation(state) {
@@ -143,10 +146,6 @@
     if (state.speedControllerId) {
       clearInterval(state.speedControllerId);
       state.speedControllerId = null;
-    }
-
-    if (SymbolRainSpawn?.stopGuaranteedSpawnController) {
-      SymbolRainSpawn.stopGuaranteedSpawnController(state);
     }
 
     for (let i = 0; i < state.activeFallingSymbols.length; i++) {

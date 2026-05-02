@@ -13,6 +13,53 @@
     ).length;
   }
 
+  function hasVisibleActiveSymbol(state, targetSymbol) {
+    const normalizedTarget = SymbolRainTargets?.normalizeSymbol?.(targetSymbol);
+
+    if (!normalizedTarget) {
+      return false;
+    }
+
+    for (const symbolObj of state.activeFallingSymbols) {
+      const symbol = SymbolRainTargets?.normalizeSymbol?.(
+        symbolObj?.symbol || symbolObj?.element?.textContent || "",
+      );
+
+      if (symbol !== normalizedTarget) {
+        continue;
+      }
+
+      if (isVisibleInRainWindow(state, symbolObj)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function maintainCurrentStepTargetCirculation(state, currentTimestamp) {
+    if (
+      currentTimestamp - (state.lastTargetCirculationTimestamp || 0) <
+      TARGET_CIRCULATION_INTERVAL_MS
+    ) {
+      return;
+    }
+
+    state.lastTargetCirculationTimestamp = currentTimestamp;
+
+    const nextNeededSymbol = SymbolRainTargets?.getNextRequiredSymbol?.();
+
+    if (!nextNeededSymbol || hasVisibleActiveSymbol(state, nextNeededSymbol)) {
+      return;
+    }
+
+    spawnPrioritySymbol(state, nextNeededSymbol, currentTimestamp, {
+      initialY: getVisiblePrioritySpawnY(state, 0),
+      preferLeastOccupiedColumn: true,
+      horizontalOffset: 0,
+    });
+  }
+
   function getAvailablePriorityColumns(state) {
     const availableColumnIndices = [];
 
@@ -222,61 +269,6 @@
       visibleCount += 1;
       spawnIndex += 1;
     }
-  }
-
-  function hasVisibleActiveSymbol(state, targetSymbol) {
-    const normalizedTarget = SymbolRainTargets?.normalizeSymbol?.(targetSymbol);
-
-    if (!normalizedTarget) {
-      return false;
-    }
-
-    for (const symbolObj of state.activeFallingSymbols) {
-      const symbol = SymbolRainTargets.normalizeSymbol(
-        symbolObj?.symbol || symbolObj?.element?.textContent || "",
-      );
-
-      if (symbol !== normalizedTarget) {
-        continue;
-      }
-
-      if (isVisibleInRainWindow(state, symbolObj)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  function maintainCurrentStepTargetCirculation(state, currentTimestamp) {
-    if (
-      currentTimestamp - (state.lastTargetCirculationTimestamp || 0) <
-      TARGET_CIRCULATION_INTERVAL_MS
-    ) {
-      return;
-    }
-
-    state.lastTargetCirculationTimestamp = currentTimestamp;
-
-    const nextNeededSymbol = SymbolRainTargets?.getNextRequiredSymbol?.();
-
-    if (
-      !nextNeededSymbol ||
-      hasVisibleActiveSymbol(state, nextNeededSymbol)
-    ) {
-      return;
-    }
-
-    spawnPrioritySymbol(
-      state,
-      nextNeededSymbol,
-      currentTimestamp,
-      {
-        initialY: getVisiblePrioritySpawnY(state, 0),
-        preferLeastOccupiedColumn: true,
-        horizontalOffset: 0,
-      },
-    );
   }
 
   function handleRandomSpawns(state) {

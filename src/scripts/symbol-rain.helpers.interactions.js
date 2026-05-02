@@ -23,6 +23,7 @@ console.log("🎯 SymbolRain helpers: interactions loading...");
 
     const clickedSymbol = symbolElement.textContent;
     symbolElement.classList.add("clicked");
+    symbolElement.dataset.symbolState = "clicked";
 
     document.dispatchEvent(
       new CustomEvent(GameEvents.SYMBOL_CLICKED, {
@@ -30,21 +31,39 @@ console.log("🎯 SymbolRain helpers: interactions loading...");
       }),
     );
 
-    setTimeout(() => {
+    const managedLifecycle = window.__symbolRainLifecycle;
+
+    const scheduleReplacement = (callback) => {
+      const managedTimeout = managedLifecycle?.createManagedTimeout?.(
+        callback,
+        500,
+      );
+
+      if (managedTimeout) {
+        return managedTimeout;
+      }
+
+      return window.setTimeout(callback, 500);
+    };
+
+    scheduleReplacement(() => {
       const symbolObj = activeFallingSymbols.find(
         (s) => s.element === symbolElement,
       );
       if (symbolObj) {
-        const symbolIndex = activeFallingSymbols.indexOf(symbolObj);
-        if (symbolIndex !== -1) {
-          activeFallingSymbols.splice(symbolIndex, 1);
+        symbolObj.isCollected = true;
+        if (helpers.clearSymbolLifecycle) {
+          helpers.clearSymbolLifecycle(symbolObj);
         }
-        if (helpers.cleanupSymbolObject) {
-          helpers.cleanupSymbolObject({
-            symbolObj,
-            activeFaceReveals,
-            symbolPool,
-            spatialGrid,
+        const replacementController = window.SymbolRainController;
+        const restarted = replacementController?.restartCollectedSymbol?.(
+          symbolObj,
+          clickedSymbol,
+        );
+
+        if (!restarted && replacementController?.spawnVisibleSymbol) {
+          replacementController.spawnVisibleSymbol(clickedSymbol, {
+            horizontalOffset: 0,
           });
         }
         return;

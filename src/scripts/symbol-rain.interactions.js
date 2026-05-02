@@ -216,7 +216,8 @@
       recentSymbolActivations.set(fallingSymbolElement, performance.now());
       if (
         !fallingSymbolElement.isConnected ||
-        fallingSymbolElement.classList.contains("clicked")
+        fallingSymbolElement.classList.contains("clicked") ||
+        fallingSymbolElement.dataset?.symbolState !== "visible"
       ) {
         return;
       }
@@ -238,7 +239,9 @@
         return;
       }
 
-      const fallingSymbolElement = event.target.closest(".falling-symbol");
+      const fallingSymbolElement = event.target.closest(
+        ".falling-symbol[data-symbol-state='visible']",
+      );
       if (
         fallingSymbolElement &&
         symbolRainContainer.contains(fallingSymbolElement)
@@ -258,7 +261,9 @@
 
     if (!window.PointerEvent) {
       handleFallbackClick = (event) => {
-        const fallingSymbolElement = event.target.closest(".falling-symbol");
+        const fallingSymbolElement = event.target.closest(
+          ".falling-symbol[data-symbol-state='visible']",
+        );
         if (
           fallingSymbolElement &&
           symbolRainContainer.contains(fallingSymbolElement)

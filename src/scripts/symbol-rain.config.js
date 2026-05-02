@@ -20,16 +20,25 @@
   ];
 
   const config = {
+    // Resurfacing lifecycle
+    visibleMs: 2000,
+    fadeMs: 1000,
+    hiddenMinMs: 2000,
+    hiddenMaxMs: 7000,
+    instancesPerSymbol: 5,
+    minClearancePx: 4,
+    maxDomElements: 150,
+    // Legacy cadence knobs retained for older tooling, but disabled by default
     // Fall speed
     initialFallSpeed: 0.6,
     maxFallSpeed: 1.2,
     collisionSpeedFactor: 0.5,
     // Spawn rates
-    spawnRate: 0.5,
-    burstSpawnRate: 0.15,
-    symbolsPerWave: 14,
+    spawnRate: 0,
+    burstSpawnRate: 0,
+    symbolsPerWave: 0,
     waveInterval: 80,
-    guaranteedSpawnInterval: 5000,
+    guaranteedSpawnInterval: 0,
     // Face reveal
     faceRevealInterval: 5000,
     faceRevealDuration: 1500,
@@ -37,10 +46,10 @@
     columnWidth: 50,
     gridCellSize: 100,
     poolSize: 60,
-    maxActiveSymbols: 200,
+    maxActiveSymbols: 150,
     // Unified Base collision (pixels)
-    symbolHeight: 42,
-    symbolWidth: 60,
+    symbolHeight: 30,
+    symbolWidth: 30,
     collisionBuffer: 28,
     horizontalBuffer: 80,
     faceRevealBuffer: 120,

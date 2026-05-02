@@ -51,6 +51,7 @@
     let gameplayReadyRetryId = null;
     let gameplayReadyRetryDelayMs = GAMEPLAY_READY_RETRY_INITIAL_MS;
     let observedGameplayReady = isGameplayReady();
+    const managedTimeouts = new Set();
 
     state.lifecyclePhase = state.lifecyclePhase || PHASES.CREATED;
     state.layoutRetryCount = state.layoutRetryCount || 0;
@@ -88,6 +89,97 @@
       clearBootstrapFrame();
       clearLayoutRetry();
       clearGameplayReadyRetry();
+    }
+
+    function clearManagedTimeout(entry) {
+      if (!entry) {
+        return false;
+      }
+
+      if (entry.timeoutId !== null) {
+        clearTimeoutFn(entry.timeoutId);
+        entry.timeoutId = null;
+      }
+
+      managedTimeouts.delete(entry);
+      return true;
+    }
+
+    function clearManagedTimeouts() {
+      for (const entry of managedTimeouts) {
+        clearManagedTimeout(entry);
+      }
+    }
+
+    function scheduleManagedTimeout(entry, delayMs) {
+      if (!entry || destroyed) {
+        return null;
+      }
+
+      const safeDelayMs = Math.max(0, Number(delayMs) || 0);
+      entry.delayMs = safeDelayMs;
+      entry.paused = false;
+      entry.startedAt = Date.now();
+      entry.remainingMs = safeDelayMs;
+
+      if (entry.timeoutId !== null) {
+        clearTimeoutFn(entry.timeoutId);
+      }
+
+      entry.timeoutId = setTimeoutFn(() => {
+        entry.timeoutId = null;
+
+        if (destroyed || entry.paused) {
+          return;
+        }
+
+        managedTimeouts.delete(entry);
+        entry.callback?.();
+      }, safeDelayMs);
+
+      managedTimeouts.add(entry);
+      return entry;
+    }
+
+    function createManagedTimeout(callback, delayMs) {
+      const entry = {
+        callback,
+        delayMs: 0,
+        remainingMs: 0,
+        startedAt: 0,
+        timeoutId: null,
+        paused: false,
+      };
+
+      return scheduleManagedTimeout(entry, delayMs);
+    }
+
+    function pauseManagedTimeouts() {
+      const now = Date.now();
+
+      for (const entry of managedTimeouts) {
+        if (entry.timeoutId === null || entry.paused) {
+          continue;
+        }
+
+        clearTimeoutFn(entry.timeoutId);
+        entry.timeoutId = null;
+        entry.paused = true;
+        entry.remainingMs = Math.max(
+          0,
+          entry.delayMs - (now - (entry.startedAt || now)),
+        );
+      }
+    }
+
+    function resumeManagedTimeouts() {
+      for (const entry of managedTimeouts) {
+        if (!entry.paused) {
+          continue;
+        }
+
+        scheduleManagedTimeout(entry, entry.remainingMs);
+      }
     }
 
     function hasSpeedControllerState() {
@@ -136,6 +228,7 @@
 
     function fail(reason) {
       clearTimers();
+      clearManagedTimeouts();
       setPhase(PHASES.FAILED);
       onFailure(reason);
     }
@@ -359,6 +452,7 @@
 
       startRequested = false;
       clearTimers();
+      clearManagedTimeouts();
       cancelInitialPopulation();
 
       if (state.isInitialPopulation === true) {
@@ -378,6 +472,7 @@
 
       stop(reason);
       destroyed = true;
+      clearManagedTimeouts();
 
       if (runtimeDocument?.removeEventListener && gameplayReadyEvent) {
         runtimeDocument.removeEventListener(
@@ -415,11 +510,17 @@
     }
 
     return {
+      createManagedTimeout,
+      clearManagedTimeout,
+      clearManagedTimeouts,
+      pauseManagedTimeouts,
+      resumeManagedTimeouts,
       requestStart,
       onGameplayReadyChanged,
       onLayoutChanged,
       stop,
       destroy,
+      teardown: destroy,
       getSnapshot,
     };
   }

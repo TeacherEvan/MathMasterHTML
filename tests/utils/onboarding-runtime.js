@@ -1,4 +1,4 @@
-const GAME_RUNTIME_PATH = "/game.html";
+const GAME_RUNTIME_PATH = "/src/pages/game.html";
 const ONBOARDING_STORAGE_KEY = "mathmaster_onboarding_v1";
 const NAVIGATION_RETRY_COUNT = 3;
 

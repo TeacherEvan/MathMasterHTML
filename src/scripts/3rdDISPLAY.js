@@ -54,20 +54,20 @@ function initSymbolRain() {
 
     const responsiveConfig = {
       compact: {
-        spawnRate: 0.08,
-        burstSpawnRate: 0.08,
-        guaranteedSpawnInterval: 800,
-        symbolsPerWave: 8,
-        maxActiveSymbols: 48,
-        minVisibleSymbols: 8,
+        spawnRate: 0,
+        burstSpawnRate: 0,
+        guaranteedSpawnInterval: 0,
+        symbolsPerWave: 0,
+        maxActiveSymbols: 150,
+        minVisibleSymbols: 0,
       },
       standard: {
-        spawnRate: 0.5,
-        burstSpawnRate: 0.15,
-        guaranteedSpawnInterval: 5000,
-        symbolsPerWave: 14,
-        maxActiveSymbols: 200,
-        minVisibleSymbols: 22,
+        spawnRate: 0,
+        burstSpawnRate: 0,
+        guaranteedSpawnInterval: 0,
+        symbolsPerWave: 0,
+        maxActiveSymbols: 150,
+        minVisibleSymbols: 0,
       },
     };
     const preservePerfSmokeConfig = window.__PERF_SMOKE_MODE === true;
@@ -200,31 +200,420 @@ function initSymbolRain() {
       return state.columnCount > 0 && state.cachedContainerHeight > 0;
     }
 
-    function populateInitialSymbols(initialPopulationToken) {
-      SymbolRainHelpers.populateInitialSymbols(
-        {
-          config: SymbolRainConfig,
-          columnCount: state.columnCount,
-          isMobileMode: state.isMobileMode,
-          activeFallingSymbols: state.activeFallingSymbols,
-          symbols: state.symbols,
-          symbolRainContainer,
-          symbolPool: state.symbolPool,
-          lastSymbolSpawnTimestamp: state.lastSymbolSpawnTimestamp,
-          initialPopulationToken,
-        },
-        () => {
-          if (initialPopulationToken?.cancelled === true) {
+    function getPanelBounds() {
+      return panelC?.getBoundingClientRect?.() || null;
+    }
+
+    function getContainerBounds() {
+      return symbolRainContainer?.getBoundingClientRect?.() || null;
+    }
+
+    function rectIntersectsWithClearance(leftRect, rightRect, clearance) {
+      if (!leftRect || !rightRect) {
+        return false;
+      }
+
+      return !(
+        leftRect.right + clearance <= rightRect.left ||
+        leftRect.left >= rightRect.right + clearance ||
+        leftRect.bottom + clearance <= rightRect.top ||
+        leftRect.top >= rightRect.bottom + clearance
+      );
+    }
+
+    function getVisibleSymbolRects(excludeElement = null) {
+      return state.activeFallingSymbols
+        .filter((symbolObj) => {
+          const element = symbolObj?.element;
+          return (
+            element?.isConnected &&
+            element !== excludeElement &&
+            element.dataset?.symbolState === "visible" &&
+            !element.classList.contains("clicked")
+          );
+        })
+        .map((symbolObj) => ({
+          element: symbolObj.element,
+          rect: symbolObj.element.getBoundingClientRect(),
+        }))
+        .filter(({ rect }) => Boolean(rect && rect.width > 0 && rect.height > 0));
+    }
+
+    function isPlacementClear(candidateRect, excludeElement = null, clearance = SymbolRainConfig.minClearancePx || 4) {
+      const containerRect = getContainerBounds();
+      const panelRect = getPanelBounds();
+
+      if (!containerRect || !panelRect) {
+        return false;
+      }
+
+      const insideContainer =
+        candidateRect.left >= containerRect.left + clearance &&
+        candidateRect.top >= containerRect.top + clearance &&
+        candidateRect.right <= containerRect.right - clearance &&
+        candidateRect.bottom <= containerRect.bottom - clearance;
+
+      const insidePanel =
+        candidateRect.left >= panelRect.left + clearance &&
+        candidateRect.top >= panelRect.top + clearance &&
+        candidateRect.right <= panelRect.right - clearance &&
+        candidateRect.bottom <= panelRect.bottom - clearance;
+
+      if (!insideContainer || !insidePanel) {
+        return false;
+      }
+
+      return !getVisibleSymbolRects(excludeElement).some(({ rect }) =>
+        rectIntersectsWithClearance(candidateRect, rect, clearance),
+      );
+    }
+
+    function samplePlacement(symbolWidth, symbolHeight, excludeElement = null) {
+      const containerRect = getContainerBounds();
+      if (!containerRect) {
+        return null;
+      }
+
+      const preferredClearance = SymbolRainConfig.minClearancePx || 4;
+      const reducedClearance = Math.max(1, Math.floor(preferredClearance / 2));
+      const attemptSets = [
+        { attempts: 10, clearance: preferredClearance },
+        { attempts: 5, clearance: reducedClearance },
+      ];
+
+      for (const attemptSet of attemptSets) {
+        for (let attempt = 0; attempt < attemptSet.attempts; attempt += 1) {
+          const maxLeft = Math.max(
+            0,
+            containerRect.width - symbolWidth - attemptSet.clearance * 2,
+          );
+          const maxTop = Math.max(
+            0,
+            containerRect.height - symbolHeight - attemptSet.clearance * 2,
+          );
+          const left = containerRect.left + attemptSet.clearance + Math.random() * maxLeft;
+          const top = containerRect.top + attemptSet.clearance + Math.random() * maxTop;
+          const candidateRect = {
+            left,
+            top,
+            right: left + symbolWidth,
+            bottom: top + symbolHeight,
+            width: symbolWidth,
+            height: symbolHeight,
+          };
+
+          if (isPlacementClear(candidateRect, excludeElement, attemptSet.clearance)) {
+            return {
+              left: candidateRect.left - containerRect.left,
+              top: candidateRect.top - containerRect.top,
+              clearance: attemptSet.clearance,
+            };
+          }
+        }
+      }
+
+      return null;
+    }
+
+    function clearSymbolLifecycle(symbolObj) {
+      if (!Array.isArray(symbolObj?.lifecycleTimers)) {
+        return;
+      }
+
+      while (symbolObj.lifecycleTimers.length > 0) {
+        const timeoutEntry = symbolObj.lifecycleTimers.pop();
+        symbolRainLifecycle?.clearManagedTimeout?.(timeoutEntry);
+      }
+    }
+
+    SymbolRainHelpers.clearSymbolLifecycle = clearSymbolLifecycle;
+
+    function setSymbolLifecycleState(symbolObj, lifecycleState) {
+      if (!symbolObj?.element) {
+        return;
+      }
+
+      SymbolRainHelpers.setSymbolState?.(symbolObj.element, lifecycleState);
+      symbolObj.lifecycleState = lifecycleState;
+    }
+
+    function scheduleSymbolTimer(symbolObj, delayMs, callback) {
+      const timeoutEntry = symbolRainLifecycle?.createManagedTimeout?.(() => {
+        if (controllerDestroyed || symbolObj?.isCollected === true) {
+          return;
+        }
+
+        if (Array.isArray(symbolObj.lifecycleTimers)) {
+          const entryIndex = symbolObj.lifecycleTimers.indexOf(timeoutEntry);
+          if (entryIndex !== -1) {
+            symbolObj.lifecycleTimers.splice(entryIndex, 1);
+          }
+        }
+
+        callback?.();
+      }, delayMs);
+
+      if (!timeoutEntry) {
+        return null;
+      }
+
+      if (!Array.isArray(symbolObj.lifecycleTimers)) {
+        symbolObj.lifecycleTimers = [];
+      }
+
+      symbolObj.lifecycleTimers.push(timeoutEntry);
+      return timeoutEntry;
+    }
+
+    function scheduleVisibleCycle(symbolObj) {
+      if (controllerDestroyed || symbolObj?.isCollected === true) {
+        return;
+      }
+
+      setSymbolLifecycleState(symbolObj, "visible");
+
+      scheduleSymbolTimer(symbolObj, SymbolRainConfig.visibleMs, () => {
+        if (controllerDestroyed || symbolObj?.isCollected === true) {
+          return;
+        }
+
+        setSymbolLifecycleState(symbolObj, "fading");
+
+        scheduleSymbolTimer(symbolObj, SymbolRainConfig.fadeMs, () => {
+          if (controllerDestroyed || symbolObj?.isCollected === true) {
             return;
           }
 
-          state.isInitialPopulation = false;
+          setSymbolLifecycleState(symbolObj, "hidden");
+          state.spatialGrid?.remove?.(symbolObj);
+          scheduleHiddenResurface(symbolObj);
+        });
+      });
+    }
 
-          if (state.initialPopulationToken === initialPopulationToken) {
-            state.initialPopulationToken = null;
-          }
+    function scheduleHiddenResurface(symbolObj) {
+      const hiddenMin = SymbolRainConfig.hiddenMinMs || 2000;
+      const hiddenMax = SymbolRainConfig.hiddenMaxMs || hiddenMin;
+      const hiddenDelay =
+        hiddenMin + Math.random() * Math.max(0, hiddenMax - hiddenMin);
+
+      scheduleSymbolTimer(symbolObj, hiddenDelay, () => {
+        if (controllerDestroyed || symbolObj?.isCollected === true) {
+          return;
+        }
+
+        const symbolWidth = SymbolRainConfig.symbolWidth || 60;
+        const symbolHeight = SymbolRainConfig.symbolHeight || 42;
+        const placement = samplePlacement(symbolWidth, symbolHeight, symbolObj.element);
+
+        if (!placement) {
+          scheduleSymbolTimer(symbolObj, 500, () => scheduleHiddenResurface(symbolObj));
+          return;
+        }
+
+        SymbolRainHelpers.setSymbolPosition(
+          symbolObj.element,
+          placement.left,
+          placement.top,
+        );
+        symbolObj.x = placement.left;
+        symbolObj.y = placement.top;
+        symbolObj.column = Math.max(
+          0,
+          Math.floor(placement.left / (SymbolRainConfig.columnWidth || symbolWidth)),
+        );
+        state.spatialGrid?.update?.([symbolObj]);
+
+        scheduleVisibleCycle(symbolObj);
+      });
+    }
+
+    function createResurfacingSymbol(symbolText, placementIndex = 0) {
+      const symbolWidth = SymbolRainConfig.symbolWidth || 60;
+      const symbolHeight = SymbolRainConfig.symbolHeight || 42;
+      const placement = samplePlacement(symbolWidth, symbolHeight);
+
+      if (!placement) {
+        return null;
+      }
+
+      const createdSymbol = SymbolRainHelpers.createFallingSymbol(
+        {
+          symbols: state.symbols,
+          symbolRainContainer,
+          config: SymbolRainConfig,
+          activeFallingSymbols: state.activeFallingSymbols,
+          symbolPool: state.symbolPool,
+          lastSymbolSpawnTimestamp: state.lastSymbolSpawnTimestamp,
+        },
+        {
+          column: Math.max(0, placementIndex % Math.max(state.columnCount || 1, 1)),
+          isInitialPopulation: false,
+          forcedSymbol: symbolText,
+          initialY: placement.top,
+          horizontalOffset: placement.left,
         },
       );
+
+      if (!createdSymbol) {
+        return null;
+      }
+
+      const symbolObj = state.activeFallingSymbols.at(-1);
+      if (!symbolObj) {
+        return null;
+      }
+
+      symbolObj.lifecycleTimers = [];
+      symbolObj.lifecycleState = "visible";
+      symbolObj.isCollected = false;
+      SymbolRainHelpers.setSymbolPosition(
+        symbolObj.element,
+        placement.left,
+        placement.top,
+      );
+      symbolObj.x = placement.left;
+      symbolObj.y = placement.top;
+      symbolObj.column = Math.max(
+        0,
+        Math.floor(placement.left / (SymbolRainConfig.columnWidth || symbolWidth)),
+      );
+      setSymbolLifecycleState(symbolObj, "visible");
+      state.spatialGrid?.update?.([symbolObj]);
+      scheduleVisibleCycle(symbolObj);
+      return symbolObj;
+    }
+
+    function restartCollectedSymbol(symbolObj, symbolText = null) {
+      if (!symbolObj?.element || controllerDestroyed) {
+        return false;
+      }
+
+      const symbolWidth = SymbolRainConfig.symbolWidth || 60;
+      const symbolHeight = SymbolRainConfig.symbolHeight || 42;
+      const placement = samplePlacement(symbolWidth, symbolHeight, symbolObj.element);
+
+      clearSymbolLifecycle(symbolObj);
+
+      if (symbolText) {
+        symbolObj.symbol = symbolText;
+        symbolObj.element.textContent = symbolText;
+      }
+
+      symbolObj.isCollected = false;
+      symbolObj.element.classList.remove("clicked");
+
+      if (placement) {
+        SymbolRainHelpers.setSymbolPosition(
+          symbolObj.element,
+          placement.left,
+          placement.top,
+        );
+        symbolObj.x = placement.left;
+        symbolObj.y = placement.top;
+        symbolObj.column = Math.max(
+          0,
+          Math.floor(placement.left / (SymbolRainConfig.columnWidth || symbolWidth)),
+        );
+      }
+
+      setSymbolLifecycleState(symbolObj, "visible");
+      state.spatialGrid?.update?.([symbolObj]);
+      scheduleVisibleCycle(symbolObj);
+      return true;
+    }
+
+    function createInitialPopulationSymbol(symbolText, placementIndex = 0) {
+      const columnCount = Math.max(state.columnCount || 1, 1);
+      const containerHeight = Math.max(
+        0,
+        state.cachedContainerHeight || symbolRainContainer.offsetHeight || 0,
+      );
+
+      const createdSymbol = SymbolRainHelpers.createFallingSymbol(
+        {
+          symbols: state.symbols,
+          symbolRainContainer,
+          config: SymbolRainConfig,
+          activeFallingSymbols: state.activeFallingSymbols,
+          symbolPool: state.symbolPool,
+          lastSymbolSpawnTimestamp: state.lastSymbolSpawnTimestamp,
+        },
+        {
+          column: placementIndex % columnCount,
+          isInitialPopulation: true,
+          forcedSymbol: symbolText,
+          initialY: containerHeight > 0 ? Math.random() * containerHeight : 0,
+          horizontalOffset:
+            (Math.random() - 0.5) * (SymbolRainConfig.columnWidth || 50),
+        },
+      );
+
+      if (!createdSymbol) {
+        return null;
+      }
+
+      const symbolObj = state.activeFallingSymbols.at(-1);
+      if (!symbolObj) {
+        return null;
+      }
+
+      symbolObj.lifecycleTimers = [];
+      symbolObj.lifecycleState = "visible";
+      symbolObj.isCollected = false;
+      setSymbolLifecycleState(symbolObj, "visible");
+      state.spatialGrid?.update?.([symbolObj]);
+      return symbolObj;
+    }
+
+    function populateInitialSymbols(initialPopulationToken) {
+      const spawnOrder = [];
+
+      state.symbols.forEach((symbolText) => {
+        for (let index = 0; index < (SymbolRainConfig.instancesPerSymbol || 5); index += 1) {
+          spawnOrder.push({ symbolText, placementIndex: index });
+        }
+      });
+
+      const batchSize = 8;
+      let cursor = 0;
+      let createdCount = 0;
+      const readySymbols = [];
+
+      function pumpInitialPopulation() {
+        if (initialPopulationToken?.cancelled === true) {
+          return;
+        }
+
+        const limit = Math.min(cursor + batchSize, spawnOrder.length);
+        for (; cursor < limit; cursor += 1) {
+          const { symbolText, placementIndex } = spawnOrder[cursor];
+          const symbolObj = createInitialPopulationSymbol(
+            symbolText,
+            placementIndex + cursor,
+          );
+          if (symbolObj) {
+            createdCount += 1;
+            readySymbols.push(symbolObj);
+          }
+        }
+
+        if (cursor < spawnOrder.length) {
+          const timeoutId = window.setTimeout(pumpInitialPopulation, 16);
+          initialPopulationToken?.timeoutIds?.push?.(timeoutId);
+          return;
+        }
+
+        if (createdCount > 0) {
+          readySymbols.forEach((symbolObj) => {
+            scheduleVisibleCycle(symbolObj);
+          });
+          state.isInitialPopulation = false;
+          state.initialPopulationToken = null;
+        }
+      }
+
+      pumpInitialPopulation();
     }
 
     function startControllers() {
@@ -712,6 +1101,7 @@ function initSymbolRain() {
           return null;
         }
       },
+      restartCollectedSymbol,
       spawnVisibleSymbol,
       removeMatchingSymbols,
       syncKeyboardTarget() {
@@ -751,6 +1141,11 @@ function initSymbolRain() {
       }
 
       state.isTabVisible = !document.hidden;
+      if (state.isTabVisible) {
+        symbolRainLifecycle?.resumeManagedTimeouts?.();
+      } else {
+        symbolRainLifecycle?.pauseManagedTimeouts?.();
+      }
     };
 
     const debouncedResize = debounce(() => {

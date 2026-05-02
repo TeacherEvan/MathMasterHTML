@@ -75,7 +75,9 @@ async function findVisibleMatchingSymbol(page, symbols, timeoutMs = 5000) {
   while (Date.now() < deadline) {
     const visibleSymbols = await page.evaluate(() =>
       Array.from(
-        document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
+        document.querySelectorAll(
+          '#panel-c [data-symbol-state="visible"]:not(.clicked)',
+        ),
       )
         .filter((element) => {
           const rect = element.getBoundingClientRect();
@@ -124,7 +126,9 @@ async function clickLiveMatchingSymbol(page, symbolText, timeoutMs = 5000) {
         return normalized === "x" ? "X" : normalized;
       };
       const candidates = Array.from(
-        document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
+        document.querySelectorAll(
+          '#panel-c [data-symbol-state="visible"]:not(.clicked)',
+        ),
       );
       const matching = candidates.filter((element) => {
         if (normalize(element.textContent) !== targetSymbol) {
@@ -194,7 +198,9 @@ async function hasVisibleMatchingSymbol(page, symbolText) {
     };
 
     return Array.from(
-      document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
+      document.querySelectorAll(
+        '#panel-c [data-symbol-state="visible"]:not(.clicked)',
+      ),
     ).some((element) => {
       if (normalize(element.textContent) !== targetSymbol) {
         return false;
@@ -230,7 +236,11 @@ async function getVisibleMatchingSymbols(page, symbolTexts) {
 
     const visibleSymbols = new Set();
 
-    Array.from(document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"))
+    Array.from(
+      document.querySelectorAll(
+        '#panel-c [data-symbol-state="visible"]:not(.clicked)',
+      ),
+    )
       .forEach((element) => {
         const symbolText = normalize(element.textContent);
         if (!targetSymbols.includes(symbolText)) {
@@ -263,7 +273,11 @@ async function countVisiblePanelCTargets(page) {
   return page.evaluate(() => {
     let visibleTargetCount = 0;
 
-    Array.from(document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"))
+    Array.from(
+      document.querySelectorAll(
+        '#panel-c [data-symbol-state="visible"]:not(.clicked)',
+      ),
+    )
       .forEach((element) => {
         const rect = element.getBoundingClientRect();
         const panel = element.closest("#panel-c");
@@ -296,7 +310,11 @@ async function getVisiblePanelCSymbolSummary(page, hiddenSymbols = []) {
     const hiddenSet = new Set(currentHiddenSymbols.map((symbol) => normalize(symbol)));
     const visibleSymbols = [];
 
-    Array.from(document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"))
+    Array.from(
+      document.querySelectorAll(
+        '#panel-c [data-symbol-state="visible"]:not(.clicked)',
+      ),
+    )
       .forEach((element) => {
         const rect = element.getBoundingClientRect();
         const panel = element.closest("#panel-c");
@@ -487,7 +505,7 @@ test.describe("Symbol rain live targets", () => {
     await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
     await dismissBriefingAndWaitForInteractiveGameplay(page);
 
-    await page.locator("#panel-c .falling-symbol").first().waitFor({
+    await page.locator('#panel-c [data-symbol-state="visible"]').first().waitFor({
       state: "visible",
       timeout: 10000,
     });

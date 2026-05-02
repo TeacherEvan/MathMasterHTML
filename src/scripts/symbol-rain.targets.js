@@ -71,6 +71,13 @@
     return rectIntersectsDirectly(rect, rainRect);
   }
 
+  function isVisibleStateElement(element) {
+    return (
+      element?.dataset?.symbolState === "visible" ||
+      element?.getAttribute?.("data-symbol-state") === "visible"
+    );
+  }
+
   function isVisibleSymbolObject(state, symbolObj, container, rect) {
     const SymbolRainHelpers = window.SymbolRainHelpers;
     const visibilityState = state?.symbolRainContainer
@@ -98,7 +105,11 @@
     normalizedSymbols,
     matchRequired,
   ) {
-    if (!element?.isConnected || element.classList.contains("clicked")) {
+    if (
+      !element?.isConnected ||
+      element.classList.contains("clicked") ||
+      !isVisibleStateElement(element)
+    ) {
       return null;
     }
 
@@ -146,7 +157,11 @@
 
     for (const symbolObj of activeSymbols) {
       const element = symbolObj?.element;
-      if (!element?.isConnected || element.classList.contains("clicked")) {
+      if (
+        !element?.isConnected ||
+        element.classList.contains("clicked") ||
+        !isVisibleStateElement(element)
+      ) {
         continue;
       }
 
@@ -167,7 +182,7 @@
     }
 
     for (const element of container.querySelectorAll(
-      ".falling-symbol:not(.clicked)",
+      ".falling-symbol[data-symbol-state='visible']:not(.clicked)",
     )) {
       if (seenElements.has(element)) {
         continue;
@@ -202,10 +217,6 @@
     });
   }
 
-  function getNextRequiredSymbol(symbols = getCurrentNeededSymbols()) {
-    return symbols[0] || null;
-  }
-
   function hasVisibleSymbol({ symbolRainContainer, state, symbols } = {}) {
     return getVisibleMatchingCandidates({
       symbolRainContainer,
@@ -225,7 +236,6 @@
     getCurrentNeededSymbols,
     getVisibleCandidates,
     getVisibleMatchingCandidates,
-    getNextRequiredSymbol,
     hasVisibleSymbol,
     rankKeyboardCandidates,
   };

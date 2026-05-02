@@ -206,6 +206,12 @@ body.automation {
     will-change: translate, transform, color, text-shadow;
 }
 
+#panel-c .falling-symbol[data-symbol-state] {
+    font-size: 14px;
+    padding: 15px 20px;
+    margin: -15px -20px;
+}
+
 /* PERFORMANCE: ::before pseudo-element removed - was creating double render layers */
 /* Touch target now handled by padding above */
 

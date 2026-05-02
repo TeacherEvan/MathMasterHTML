@@ -53,7 +53,11 @@ async function findVisibleMatchingSymbol(page, symbols, timeoutMs = 3500) {
 
   while (Date.now() < deadline) {
     const visibleSymbols = await page.evaluate(() =>
-      Array.from(document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"))
+      Array.from(
+        document.querySelectorAll(
+          '#panel-c [data-symbol-state="visible"]:not(.clicked)',
+        ),
+      )
         .map((element) => element.textContent?.trim())
         .filter(Boolean),
     );
@@ -86,11 +90,29 @@ async function clickLiveMatchingSymbol(page, symbolText, timeoutMs = 3500) {
         return normalized === "x" ? "X" : normalized;
       };
       const candidates = Array.from(
-        document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
+        document.querySelectorAll(
+          '#panel-c [data-symbol-state="visible"]:not(.clicked)',
+        ),
       );
-      const matching = candidates.filter(
-        (element) => normalize(element.textContent) === targetSymbol,
-      );
+      const matching = candidates.filter((element) => {
+        if (normalize(element.textContent) !== targetSymbol) {
+          return false;
+        }
+
+        const rect = element.getBoundingClientRect();
+        const panel = element.closest("#panel-c");
+        const panelRect = panel?.getBoundingClientRect();
+        if (!panelRect) {
+          return false;
+        }
+
+        return (
+          rect.bottom > panelRect.top &&
+          rect.top < panelRect.bottom &&
+          rect.right > panelRect.left &&
+          rect.left < panelRect.right
+        );
+      });
       const target = matching.at(-1);
 
       if (!target) {
@@ -150,7 +172,11 @@ async function getVisiblePanelCSymbolSummary(page, hiddenSymbols = []) {
     const hiddenSet = new Set(currentHiddenSymbols.map((symbol) => normalize(symbol)));
     const visibleSymbols = [];
 
-    Array.from(document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"))
+    Array.from(
+      document.querySelectorAll(
+        '#panel-c [data-symbol-state="visible"]:not(.clicked)',
+      ),
+    )
       .forEach((element) => {
         const rect = element.getBoundingClientRect();
         const panel = element.closest("#panel-c");
@@ -271,6 +297,8 @@ test.describe("Symbol rain mobile interactions", () => {
         const symbol = document.createElement("div");
         symbol.className = "falling-symbol test-falling-symbol";
         symbol.textContent = text;
+        symbol.dataset.symbolState = "visible";
+        symbol.setAttribute("data-symbol-state", "visible");
         symbol.style.position = "absolute";
         symbol.style.left = `${40 + index * 72}px`;
         symbol.style.top = "48px";
@@ -597,7 +625,9 @@ test.describe("Symbol rain mobile interactions", () => {
     await expect(page.locator("#evan-skip-button")).toBeVisible();
 
     const state = await page.evaluate(async () => {
-      const firstSymbol = document.querySelector("#panel-c .falling-symbol");
+      const firstSymbol = document.querySelector(
+        '#panel-c [data-symbol-state="visible"]',
+      );
       return {
         gameplayInputReady:
           window.GameRuntimeCoordinator?.canAcceptGameplayInput?.() ?? null,
