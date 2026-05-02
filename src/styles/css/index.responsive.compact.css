@@ -1,5 +1,11 @@
 /* Additional welcome responsive layers extracted to keep line-limit scope tight. */
 
+@media (max-height: 900px) {
+  .welcome-brief {
+    display: none;
+  }
+}
+
 @media (max-height: 760px) {
   body.welcome-page {
     padding: 20px 20px 16px;
@@ -26,6 +32,11 @@
     letter-spacing: 0.16em;
   }
 
+  .welcome-deck {
+    font-size: 0.92rem;
+    line-height: 1.42;
+  }
+
   .welcome-container {
     display: flex;
     flex-direction: column;
@@ -34,6 +45,10 @@
     max-height: none;
     gap: 12px;
     padding: 16px 22px 18px;
+  }
+
+  .welcome-brief {
+    display: none;
   }
 
   .logo-circle {
@@ -97,6 +112,10 @@
     display: none;
   }
 
+  .welcome-deck {
+    display: none;
+  }
+
   .main-title {
     font-size: clamp(1.6rem, 5.1vw, 2.8rem);
   }
@@ -115,6 +134,24 @@
     gap: 6px;
     padding: 8px 12px 8px;
     border-radius: 22px;
+  }
+
+  .welcome-brief {
+    width: 100%;
+    gap: 0.3rem;
+    padding: 0.42rem 0.56rem;
+    border-radius: 16px;
+  }
+
+  .welcome-brief-signals {
+    gap: 0.35rem;
+  }
+
+  .welcome-brief-signals span {
+    min-height: 1.6rem;
+    padding: 0.32rem 0.46rem;
+    font-size: 0.52rem;
+    letter-spacing: 0.08em;
   }
 
   .logo-circle {

@@ -52,6 +52,10 @@
     line-height: 1.45;
   }
 
+  .route-atlas {
+    display: none;
+  }
+
   .header-hint {
     justify-content: center;
     gap: 0.55rem;
@@ -123,6 +127,10 @@
   .level-title {
     grid-area: title;
     font-size: clamp(1.35rem, 4.8vw, 1.7rem);
+  }
+
+  .level-brief {
+    display: none;
   }
 
   .level-description {

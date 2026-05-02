@@ -1,36 +1,56 @@
-# Keep Copilot focused on runtime code, tests, and the sanctioned docs that matter for this web app.
+# Keep Copilot focused on active source, tests, and the project markdown files.
+# Exclude generated output, local workspace state, and binary payloads that add noise.
 
-# Engine and editor metadata
-*.meta
-*.import
-*.asset
-*.prefab
-*.mat
+# Dependencies and caches
+node_modules/
+.cache/
+.eslintcache
 
-# Media and binary art/audio payloads
-*.wav
-*.mp3
-*.ogg
+# Environment and local workspace state
+.env
+.env.local
+.env.*.local
+.vscode/
+.idea/
+.qodo/
+.worktrees/
+
+# Local temp and logs
+.tmp/
+.tmp-*/
+*.log
+server.log
+npm-debug.log*
+
+# Generated test and report artifacts
+playwright-report/
+test-results/
+test-results.json
+test-results.competition.json
+
+# Common build output
+dist/
+build/
+
+# OS/editor clutter
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Binary assets are usually not useful Copilot context in this repo.
 *.png
 *.jpg
-*.fbx
-*.blend
-
-# Engine caches and IDE state
-/Library/
-**/Library/
-/Temp/
-**/Temp/
-/obj/
-**/obj/
-/bin/
-**/bin/
-/.godot/
-**/.godot/
-/.vs/
-**/.vs/
-
-# Logs and generated diagnostics
-*.log
-/Logs/
-**/Logs/
+*.jpeg
+*.gif
+*.webp
+*.svg
+*.ico
+*.mp3
+*.ogg
+*.wav
+*.mp4
+*.webm
+*.woff
+*.woff2

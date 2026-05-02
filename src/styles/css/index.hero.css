@@ -32,6 +32,15 @@
   animation: subtitle-float 6.8s ease-in-out infinite;
 }
 
+.welcome-deck {
+  max-width: 38rem;
+  color: rgba(215, 247, 209, 0.82);
+  font-family: "Alegreya Sans", "IBM Plex Mono", sans-serif;
+  font-size: clamp(1rem, 1.9vw, 1.16rem);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
 .quote {
   width: min(100%, 620px);
   margin-top: 0;
@@ -61,7 +70,7 @@
 .welcome-hint {
   color: rgba(203, 231, 208, 0.74);
   font-size: 0.78rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   opacity: 0.84;
 }

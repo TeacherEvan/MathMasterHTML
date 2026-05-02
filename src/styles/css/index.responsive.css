@@ -39,6 +39,23 @@
     gap: 18px;
   }
 
+  .welcome-brief {
+    width: 100%;
+    gap: 0.45rem;
+    padding: 0.65rem 0.7rem;
+  }
+
+  .welcome-brief-signals {
+    gap: 0.5rem;
+  }
+
+  .welcome-brief-signals span {
+    min-height: 2rem;
+    padding-inline: 0.68rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+  }
+
   .button-container {
     display: flex;
     flex-direction: column;
@@ -97,10 +114,24 @@
     letter-spacing: 0.14em;
   }
 
+  .welcome-deck {
+    font-size: 0.96rem;
+    line-height: 1.48;
+  }
+
   .welcome-container {
     gap: 16px;
     padding: 18px 14px 20px;
     border-radius: 24px;
+  }
+
+  .welcome-brief {
+    padding: 0.6rem 0.65rem;
+    border-radius: 18px;
+  }
+
+  .welcome-brief-signals span {
+    font-size: 0.6rem;
   }
 
   .logo-circle {
