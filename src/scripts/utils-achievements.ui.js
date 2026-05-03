@@ -12,6 +12,10 @@ const AchievementUI = {
    * @param {Object} achievement - Achievement object with icon, name, description
    */
   showAchievementPopup(achievement) {
+    document
+      .querySelectorAll(".achievement-popup")
+      .forEach((existingPopup) => existingPopup.remove());
+
     const popup = document.createElement("div");
     popup.className = "achievement-popup";
     popup.setAttribute("role", "status");

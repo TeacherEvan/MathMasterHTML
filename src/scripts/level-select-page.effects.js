@@ -16,10 +16,12 @@
   });
 
   const elements = {
+    body: document.body,
     matrixBg: document.getElementById("matrixBg"),
   };
 
   const state = {
+    motionFrame: null,
     resizeTimer: null,
   };
 
@@ -78,6 +80,30 @@
     matrixBg.appendChild(fragment);
   }
 
+  function applyMotionPreference() {
+    const { body } = elements;
+    if (!body) return;
+
+    const reducedMotion = prefersReducedMotion();
+    body.classList.toggle("level-motion-disabled", reducedMotion);
+
+    if (state.motionFrame) {
+      window.cancelAnimationFrame(state.motionFrame);
+      state.motionFrame = null;
+    }
+
+    if (reducedMotion) {
+      return;
+    }
+
+    state.motionFrame = window.requestAnimationFrame(() => {
+      state.motionFrame = window.requestAnimationFrame(() => {
+        body.classList.add("level-motion-ready");
+        state.motionFrame = null;
+      });
+    });
+  }
+
   function handleResize() {
     clearTimeout(state.resizeTimer);
     state.resizeTimer = setTimeout(createMatrixRain, CONFIG.RESIZE_DEBOUNCE_MS);
@@ -88,10 +114,14 @@
   }
 
   function initEffects() {
+    applyMotionPreference();
     window.addEventListener("resize", handleResize);
     document.addEventListener(
       window.GameEvents?.USER_SETTINGS_CHANGED || "userSettingsChanged",
-      createMatrixRain,
+      () => {
+        applyMotionPreference();
+        createMatrixRain();
+      },
     );
 
     if (document.readyState === "loading") {
@@ -102,6 +132,10 @@
   }
 
   function destroyEffects() {
+    if (state.motionFrame) {
+      window.cancelAnimationFrame(state.motionFrame);
+      state.motionFrame = null;
+    }
     clearTimeout(state.resizeTimer);
     window.removeEventListener("load", handleLoad);
     window.removeEventListener("resize", handleResize);

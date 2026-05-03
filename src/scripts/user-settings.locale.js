@@ -9,9 +9,9 @@
     "en-US": {
       "levelSelect.pageKicker": "Training dossier",
       "levelSelect.subtitle": "Choose a route",
-      "levelSelect.subtitleBody": "Three tracks. Local scores.",
-      "levelSelect.headerHintLaunch": "Keys 1 / 2 / 3 launch",
-      "levelSelect.headerHintProgress": "Progress stays here",
+      "levelSelect.subtitleBody": "Three routes. Saved here.",
+      "levelSelect.headerHintLaunch": "Keys 1 / 2 / 3 start",
+      "levelSelect.headerHintProgress": "Saved on device",
       "game.onboarding.kicker": "Field briefing // algebra calibration",
       "game.onboarding.title": "Unlock Your Mind",
       "game.onboarding.intro":
@@ -26,9 +26,9 @@
     "es-ES": {
       "levelSelect.pageKicker": "Expediente de entrenamiento",
       "levelSelect.subtitle": "Elige una ruta",
-      "levelSelect.subtitleBody": "Tres rutas. Puntuación local.",
+      "levelSelect.subtitleBody": "Tres rutas. Se guarda aquí.",
       "levelSelect.headerHintLaunch": "Las teclas 1 / 2 / 3 inician",
-      "levelSelect.headerHintProgress": "El progreso se queda aquí",
+      "levelSelect.headerHintProgress": "Guardado en este dispositivo",
       "game.onboarding.kicker": "Informe de campo // calibración de álgebra",
       "game.onboarding.title": "Desbloquea tu mente",
       "game.onboarding.intro":

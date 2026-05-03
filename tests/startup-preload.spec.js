@@ -1,8 +1,63 @@
 // tests/startup-preload.spec.js
 import { expect, test } from "@playwright/test";
+import { open, rm, stat } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { setTimeout as sleep } from "node:timers/promises";
 import { gotoGameRuntime } from "./utils/onboarding-runtime.js";
 
 test.setTimeout(30000);
+
+const STARTUP_PRELOAD_SUITE_LOCK_PATH = join(
+  tmpdir(),
+  "mathmaster-startup-preload-suite.lock",
+);
+const STARTUP_PRELOAD_LOCK_TIMEOUT_MS = 120000;
+const STARTUP_PRELOAD_STALE_LOCK_MS = 5 * 60 * 1000;
+let startupPreloadSuiteLockHandle = null;
+
+async function acquireStartupPreloadSuiteLock() {
+  const deadline = Date.now() + STARTUP_PRELOAD_LOCK_TIMEOUT_MS;
+
+  while (Date.now() < deadline) {
+    try {
+      const lockHandle = await open(STARTUP_PRELOAD_SUITE_LOCK_PATH, "wx");
+      await lockHandle.writeFile(
+        JSON.stringify({ pid: process.pid, createdAt: Date.now() }),
+      );
+      return lockHandle;
+    } catch (error) {
+      if (error?.code !== "EEXIST") {
+        throw error;
+      }
+
+      try {
+        const lockStats = await stat(STARTUP_PRELOAD_SUITE_LOCK_PATH);
+        if (Date.now() - lockStats.mtimeMs > STARTUP_PRELOAD_STALE_LOCK_MS) {
+          await rm(STARTUP_PRELOAD_SUITE_LOCK_PATH, { force: true });
+          continue;
+        }
+      } catch {
+        // Another worker may have released the lock between stat attempts.
+      }
+
+      await sleep(100);
+    }
+  }
+
+  throw new Error(
+    `Timed out waiting for startup preload suite lock after ${STARTUP_PRELOAD_LOCK_TIMEOUT_MS}ms`,
+  );
+}
+
+async function releaseStartupPreloadSuiteLock() {
+  try {
+    await startupPreloadSuiteLockHandle?.close?.();
+  } finally {
+    startupPreloadSuiteLockHandle = null;
+    await rm(STARTUP_PRELOAD_SUITE_LOCK_PATH, { force: true });
+  }
+}
 
 async function waitForBriefingVisible(page, timeout = 10000) {
   await page.waitForFunction(
@@ -17,6 +72,11 @@ async function waitForBriefingVisible(page, timeout = 10000) {
 async function waitForStartupPreload(page) {
   await page.waitForFunction(
     () => typeof window.StartupPreload?.isBlocking === "function",
+    { timeout: 10000 },
+  );
+
+  await page.waitForFunction(
+    () => document.readyState === "complete",
     { timeout: 10000 },
   );
 }
@@ -50,6 +110,17 @@ async function gotoBlockingPreloadRuntime(
 }
 
 test.describe("Startup Preload — Build 2", () => {
+  test.describe.configure({ mode: "serial" });
+
+  test.beforeEach(async ({}, testInfo) => {
+    testInfo.setTimeout(testInfo.timeout + STARTUP_PRELOAD_LOCK_TIMEOUT_MS);
+    startupPreloadSuiteLockHandle = await acquireStartupPreloadSuiteLock();
+  });
+
+  test.afterEach(async () => {
+    await releaseStartupPreloadSuiteLock();
+  });
+
   test("boot applies settings before onboarding locale is shown after preload completion", async ({
     page,
   }) => {

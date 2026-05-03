@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="/src/styles/css/service-worker-register.css">
 </head>
 
-<body>
+<body class="level-motion-disabled">
     <!-- Matrix Rain Background -->
     <div class="matrix-bg" id="matrixBg" aria-hidden="true"></div>
 
@@ -35,24 +35,24 @@
         <h1 class="main-title">MATH MASTER</h1>
         <h2 class="subtitle">Choose a route</h2>
         <p class="level-select-subtitle">
-            Three tracks. Local scores.
+            Three routes. Saved here.
         </p>
         <div class="header-hint">
-            <span>Keys 1 / 2 / 3 launch</span>
-            <span>Progress stays here</span>
+            <span>Keys 1 / 2 / 3 start</span>
+            <span>Saved on device</span>
         </div>
         <div class="route-atlas" aria-label="Route pressure profiles">
             <div class="route-atlas-item route-atlas-item-beginner">
                 <span class="route-atlas-index">01</span>
-                <span class="route-atlas-copy">Steady start</span>
+                <span class="route-atlas-copy">Warm-up</span>
             </div>
             <div class="route-atlas-item route-atlas-item-warrior">
                 <span class="route-atlas-index">02</span>
-                <span class="route-atlas-copy">Mixed cadence</span>
+                <span class="route-atlas-copy">Switch pace</span>
             </div>
             <div class="route-atlas-item route-atlas-item-master">
                 <span class="route-atlas-index">03</span>
-                <span class="route-atlas-copy">Exact pressure</span>
+                <span class="route-atlas-copy">Full strain</span>
             </div>
         </div>
     </header>
@@ -82,12 +82,12 @@
                 <p class="level-ordinal">Route 01 · Beginner</p>
                 <div class="level-icon" aria-hidden="true">01</div>
                 <h3 class="level-title">Foundations</h3>
-                <p class="level-brief">Steady reps for first-pass accuracy.</p>
+                <p class="level-brief">Clean starts.</p>
                 <p class="level-description">
                     <span class="level-description-desktop">
-                        Addition and subtraction only. Build clean reads and confident inputs.
+                        Only + and −. Set your rhythm first.
                     </span>
-                    <span class="level-description-mobile">Build clean reads.</span>
+                    <span class="level-description-mobile">Set your rhythm.</span>
                 </p>
                 <div class="level-stats">
                     <div class="stat" data-mobile-priority="low">
@@ -109,8 +109,8 @@
                         <div class="progress-fill"></div>
                     </div>
                 </div>
-                <p class="level-cta-caption">Best first run.</p>
-                <button class="level-button" type="button" data-level="beginner">Start foundations</button>
+                <p class="level-cta-caption">Best first pick.</p>
+                <button class="level-button" type="button" data-level="beginner">Run foundations</button>
             </div>
 
             <!-- Medium Level - Multiplication -->
@@ -118,12 +118,12 @@
                 <p class="level-ordinal">Route 02 · Warrior</p>
                 <div class="level-icon" aria-hidden="true">02</div>
                 <h3 class="level-title">Mixed Ops</h3>
-                <p class="level-brief">Operator shifts without breaking cadence.</p>
+                <p class="level-brief">Shift fast. Stay clean.</p>
                 <p class="level-description">
                     <span class="level-description-desktop">
-                        Rotate across three operators while keeping the lock moving.
+                        Adds × to the mix. Keep the lock moving.
                     </span>
-                    <span class="level-description-mobile">Shift operators fast.</span>
+                    <span class="level-description-mobile">Adds ×. Keep pace.</span>
                 </p>
                 <div class="level-stats">
                     <div class="stat" data-mobile-priority="low">
@@ -145,8 +145,8 @@
                         <div class="progress-fill"></div>
                     </div>
                 </div>
-                <p class="level-cta-caption">Balanced pressure.</p>
-                <button class="level-button" type="button" data-level="warrior">Start mixed ops</button>
+                <p class="level-cta-caption">Most balanced.</p>
+                <button class="level-button" type="button" data-level="warrior">Run mixed ops</button>
             </div>
 
             <!-- Hard Level - Division -->
@@ -154,12 +154,12 @@
                 <p class="level-ordinal">Route 03 · Master</p>
                 <div class="level-icon" aria-hidden="true">03</div>
                 <h3 class="level-title">Division</h3>
-                <p class="level-brief">Precision reads with tighter recovery windows.</p>
+                <p class="level-brief">Fast clock. Exact answers.</p>
                 <p class="level-description">
                     <span class="level-description-desktop">
-                        Division leads the session. Faster clock. Exact answers only.
+                        Division only. Read clean. Answer exact.
                     </span>
-                    <span class="level-description-mobile">Exact reads. Faster clock.</span>
+                    <span class="level-description-mobile">Fast clock. No misses.</span>
                 </p>
                 <div class="level-stats">
                     <div class="stat" data-mobile-priority="low">
@@ -181,20 +181,20 @@
                         <div class="progress-fill"></div>
                     </div>
                 </div>
-                <p class="level-cta-caption">Highest strain.</p>
-                <button class="level-button" type="button" data-level="master">Start division</button>
+                <p class="level-cta-caption">Highest pressure.</p>
+                <button class="level-button" type="button" data-level="master">Run division</button>
             </div>
         </div>
     </main>
 
     <!-- Navigation Footer -->
     <footer class="navigation">
-        <button class="back-button" type="button">← Return to Welcome</button>
+        <button class="back-button" type="button">← Back to welcome</button>
         <div class="navigation-meta">
             <div class="creator-credit">Created by Teacher Evan</div>
             <button class="settings-button" type="button" aria-haspopup="dialog" aria-controls="level-select-settings-dialog"
-                aria-expanded="false">Open settings</button>
-            <button class="reset-progress-btn" type="button">Reset local progress</button>
+                aria-expanded="false">Settings</button>
+            <button class="reset-progress-btn" type="button">Reset progress</button>
         </div>
     </footer>
 
@@ -209,10 +209,10 @@
                 </div>
                 <button class="settings-dialog-close" type="button">Close settings</button>
             </div>
-            <p class="settings-dialog-copy">Changes save on this device and apply to the level select flow immediately.</p>
+            <p class="settings-dialog-copy">Changes save here and apply right away.</p>
             <section class="settings-update-panel" aria-label="Application update controls">
                 <p class="settings-update-title">Application updates</p>
-                <p class="settings-update-message">No update pending. Cache recovery stays available here if this device gets stuck on stale assets.</p>
+                <p class="settings-update-message">No update pending. Use cache recovery if this device gets stuck on old files.</p>
                 <div class="settings-update-actions">
                     <button class="settings-update-refresh" type="button" hidden>Refresh now</button>
                     <button class="settings-update-clear-cache" type="button">Clear cache</button>

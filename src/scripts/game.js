@@ -79,7 +79,18 @@ function showModuleLoadFailure(error) {
 }
 
 function setStartupPreloadMessage(message) {
-  if (startupPreloadMessageEl && typeof message === "string") {
+  if (typeof message !== "string") {
+    return;
+  }
+
+  const handledByPreload = window.StartupPreload?.setMessage?.(message, {
+    priority: "status",
+  });
+  if (handledByPreload !== false) {
+    return;
+  }
+
+  if (startupPreloadMessageEl) {
     startupPreloadMessageEl.textContent = message;
   }
 }

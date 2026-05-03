@@ -6,6 +6,10 @@ const shouldSerializeLocalIphonePerfLane =
   !process.env.CI &&
   cliArgs.includes("iphone-13") &&
   cliArgs.includes("perf-scenarios.spec.js");
+const shouldSerializeFocusedMobileA11yLane =
+  !process.env.CI &&
+  cliArgs.includes("game-mobile-layout.ultranarrow.spec.js") &&
+  cliArgs.includes("startup-preload.spec.js");
 
 /**
  * MathMaster Playwright Configuration
@@ -25,7 +29,12 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : shouldSerializeLocalIphonePerfLane ? 1 : undefined,
+  workers:
+    process.env.CI ||
+    shouldSerializeLocalIphonePerfLane ||
+    shouldSerializeFocusedMobileA11yLane
+      ? 1
+      : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ["html", { outputFolder: "playwright-report" }],

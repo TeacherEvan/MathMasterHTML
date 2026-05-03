@@ -44,6 +44,15 @@ declare global {
     PlayerStorage?: any;
     ScoreTimerManager?: any;
     GameRuntimeCoordinator?: any;
+    StartupPreload?: {
+      isBlocking?: () => boolean;
+      isComplete?: () => boolean;
+      requestComplete?: (reason?: string) => void;
+      setMessage?: (
+        message: string,
+        options?: { priority?: "status" | "progress" },
+      ) => boolean;
+    };
     GameOnboardingStorage?: any;
     GameOnboarding?: {
       level?: string;

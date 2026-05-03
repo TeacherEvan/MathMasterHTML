@@ -1,6 +1,7 @@
 const GAME_RUNTIME_PATH = "/src/pages/game.html";
 const ONBOARDING_STORAGE_KEY = "mathmaster_onboarding_v1";
 const NAVIGATION_RETRY_COUNT = 3;
+const NAVIGATION_TIMEOUT_MS = 30000;
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -59,7 +60,7 @@ async function gotoRuntimeWithRetry(page, url) {
     try {
       await page.goto(url, {
         waitUntil: "domcontentloaded",
-        timeout: 15000,
+        timeout: NAVIGATION_TIMEOUT_MS,
       });
       return;
     } catch (error) {
@@ -187,6 +188,8 @@ export async function stopEvanHelpIfActive(page) {
     },
     { timeout: 15000 },
   );
+
+  await waitForEvanToStayInactive(page);
 }
 
 export async function waitForEvanToStayInactive(page, options = {}) {

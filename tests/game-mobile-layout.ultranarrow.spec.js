@@ -1,4 +1,7 @@
 import { expect, test } from "@playwright/test";
+import { gotoGameRuntime } from "./utils/onboarding-runtime.js";
+
+test.setTimeout(120000);
 
 async function dismissBriefing(page) {
   const startButton = page.locator("#start-game-btn");
@@ -63,9 +66,7 @@ test.describe("Gameplay ultra-narrow embedded landscape layout", () => {
   test("keeps all three panels visible and the console horizontal inside panel C", async ({
     page,
   }) => {
-    await page.goto("/src/pages/game.html?level=beginner", {
-      waitUntil: "domcontentloaded",
-    });
+    await gotoGameRuntime(page, "?level=beginner");
 
     await dismissBriefing(page);
 

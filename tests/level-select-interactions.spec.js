@@ -3,9 +3,9 @@ import { expect, test } from "@playwright/test";
 
 const LEVEL_SELECT_URL = "/src/pages/level-select.html";
 const ROUTES = [
-  { key: "1", level: "beginner", buttonName: "Start foundations" },
-  { key: "2", level: "warrior", buttonName: "Start mixed ops" },
-  { key: "3", level: "master", buttonName: "Start division" },
+  { key: "1", level: "beginner", buttonName: "Run foundations" },
+  { key: "2", level: "warrior", buttonName: "Run mixed ops" },
+  { key: "3", level: "master", buttonName: "Run division" },
 ];
 
 const DESKTOP_VIEWPORT = { width: 1440, height: 1100 };
@@ -64,6 +64,34 @@ async function waitForCardsToSettle(page) {
   await page.waitForLoadState("load");
   await expect(page.locator(".level-card")).toHaveCount(3);
   await expect(page.locator(".level-button")).toHaveCount(3);
+}
+
+/**
+ * @param {import("@playwright/test").Page} page
+ */
+async function expectReducedMotionStaticState(page) {
+  await page.waitForFunction(() => {
+    const body = document.body;
+    const staticElements = Array.from(
+      document.querySelectorAll(
+        ".page-kicker, .main-title, .subtitle, .level-select-subtitle, .header-hint, .route-switcher, .level-card, .navigation > *, .progress-fill",
+      ),
+    );
+
+    return (
+      body.classList.contains("level-motion-disabled") &&
+      !body.classList.contains("level-motion-ready") &&
+      staticElements.length > 0 &&
+      staticElements.every((element) => {
+        if (!(element instanceof HTMLElement)) {
+          return false;
+        }
+
+        const style = window.getComputedStyle(element);
+        return style.animationName === "none" && style.opacity === "1";
+      })
+    );
+  });
 }
 
 /**
@@ -207,22 +235,7 @@ test.describe("Level select interactions", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
 
-    await page.waitForFunction(() => {
-      const cards = Array.from(document.querySelectorAll(".level-card"));
-      const progressBars = Array.from(
-        document.querySelectorAll(".progress-fill"),
-      );
-
-      return (
-        cards.length === 3 &&
-        progressBars.length === 3 &&
-        cards.every((card) => {
-          const style = window.getComputedStyle(card);
-          return style.opacity === "1" && style.transform === "none";
-        }) &&
-        progressBars.every((bar) => bar.style.transition === "none")
-      );
-    });
+    await expectReducedMotionStaticState(page);
 
     await page
       .getByRole("button", { name: ROUTES[0].buttonName })
@@ -294,7 +307,7 @@ test.describe("Level select interactions", () => {
     await waitForCardsToSettle(page);
 
     const backButton = page.getByRole("button", {
-      name: "← Return to Welcome",
+      name: "← Back to welcome",
     });
     await backButton.focus();
     await expect(backButton).toBeFocused();
@@ -308,7 +321,7 @@ test.describe("Level select interactions", () => {
     await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
     await waitForCardsToSettle(page);
 
-    const settingsButton = page.getByRole("button", { name: "Open settings" });
+    const settingsButton = page.getByRole("button", { name: "Settings" });
     await settingsButton.focus();
     await expect(settingsButton).toBeFocused();
     await settingsButton.press("Enter");
@@ -330,7 +343,7 @@ test.describe("Level select interactions", () => {
       await waitForCardsToSettle(page);
 
       const backButton = page.getByRole("button", {
-        name: "← Return to Welcome",
+        name: "← Back to welcome",
       });
       await backButton.focus();
 

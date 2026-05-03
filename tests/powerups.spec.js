@@ -377,6 +377,33 @@ test.describe("Power-Up Compact Layout", () => {
     await setupPowerUpPage(page);
   });
 
+  test("replaces prior achievement shoutouts instead of stacking overlaps", async ({
+    page,
+  }) => {
+    const popupNames = await page.evaluate(() => {
+      window.AchievementUI?.showAchievementPopup?.({
+        icon: "*",
+        name: "First unlock",
+        description: "Initial overlay",
+      });
+      window.AchievementUI?.showAchievementPopup?.({
+        icon: "*",
+        name: "Second unlock",
+        description: "Replacement overlay",
+      });
+
+      return Array.from(
+        document.querySelectorAll("#panel-c .achievement-popup"),
+      ).map(
+        (element) =>
+          element.querySelector(".achievement-name")?.textContent?.trim() || "",
+      );
+    });
+
+    await expect(page.locator("#panel-c .achievement-popup")).toHaveCount(1);
+    expect(popupNames).toEqual(["Second unlock"]);
+  });
+
   test("keeps the power-up tray anchored near the top-center on compact layouts", async ({
     page,
   }) => {

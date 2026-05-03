@@ -12,6 +12,44 @@
   let briefingStartRequested = false;
   let pageInitialized = false;
 
+  function bindPressActivation(target, handler) {
+    if (!target || typeof handler !== "function") {
+      return () => {};
+    }
+
+    let lastHandledAt = -Infinity;
+    const dedupeWindowMs = 450;
+
+    const wrappedHandler = (event) => {
+      const now = performance.now();
+      const isFollowUpActivation =
+        (event?.type === "click" || event?.type === "touchend") &&
+        now - lastHandledAt < dedupeWindowMs;
+
+      if (isFollowUpActivation) {
+        event?.preventDefault?.();
+        return;
+      }
+
+      if (event?.type === "touchend") {
+        event.preventDefault?.();
+      }
+
+      lastHandledAt = now;
+      handler(event);
+    };
+
+    target.addEventListener("click", wrappedHandler);
+    target.addEventListener("pointerup", wrappedHandler);
+    target.addEventListener("touchend", wrappedHandler, { passive: false });
+
+    return () => {
+      target.removeEventListener("click", wrappedHandler);
+      target.removeEventListener("pointerup", wrappedHandler);
+      target.removeEventListener("touchend", wrappedHandler);
+    };
+  }
+
   function canLeaveActiveGameplay() {
     const runtimeState = window.GameRuntimeCoordinator?.getState?.();
     if (!runtimeState) {
@@ -228,10 +266,7 @@
       }, dismissDelayMs);
     }
 
-    startButton.addEventListener("click", onStartClick);
-    if (navigator.webdriver) {
-      startButton.addEventListener("pointerup", onStartClick);
-    }
+    bindPressActivation(startButton, onStartClick);
 
     document.addEventListener(
       GE?.DISPLAY_RESOLUTION_CHANGED,
@@ -257,10 +292,7 @@
   }
 
   if (backButton) {
-    backButton.addEventListener("click", goBack);
-    if (navigator.webdriver) {
-      backButton.addEventListener("pointerup", goBack);
-    }
+    bindPressActivation(backButton, goBack);
   }
 
   document.addEventListener(GE?.GAMEPLAY_READY_CHANGED, () => {

@@ -8,6 +8,22 @@
   let complete = false;
   let progressBar = null;
   let hideOverlayTimer = null;
+  let messagePriority = "status";
+
+  function setOverlayMessage(message, options = {}) {
+    if (complete || !messageEl || typeof message !== "string") {
+      return false;
+    }
+
+    const nextPriority = options.priority === "progress" ? "progress" : "status";
+    if (messagePriority === "progress" && nextPriority !== "progress") {
+      return false;
+    }
+
+    messagePriority = nextPriority;
+    messageEl.textContent = message;
+    return true;
+  }
 
   function hideOverlay() {
     if (!overlay) return;
@@ -35,6 +51,7 @@
     if (complete) return;
 
     complete = true;
+    messagePriority = "status";
     hideOverlay();
 
     if (shouldDispatch) {
@@ -46,8 +63,8 @@
     if (complete) return;
 
     const { progress, message } = event.detail || {};
-    if (messageEl && message) {
-      messageEl.textContent = message;
+    if (message) {
+      setOverlayMessage(message, { priority: "progress" });
     }
     if (progressEl && typeof progress === "number") {
       progressEl.setAttribute("aria-valuenow", String(progress));
@@ -114,6 +131,7 @@
   window.StartupPreload = {
     isBlocking: () => !complete,
     isComplete: () => complete,
+    setMessage: (message, options = {}) => setOverlayMessage(message, options),
     requestComplete: (reason = "api") => {
       if (GE?.STARTUP_PRELOAD_FORCE_COMPLETE) {
         document.dispatchEvent(

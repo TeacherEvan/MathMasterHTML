@@ -14,11 +14,27 @@ async function waitForCardsToSettle(page) {
       const opacity = Number.parseFloat(style.opacity || "1");
       const transform = style.transform;
 
-      return (
-        opacity >= 0.99 &&
-        (transform === "none" ||
-          /^matrix\(1, 0, 0, 1, 0(?:\.0+)?, 0(?:\.0+)?\)$/.test(transform))
-      );
+      const transformSettled = (() => {
+        if (transform === "none") return true;
+
+        const match = transform.match(/^matrix\((.+)\)$/);
+        if (!match) return false;
+
+        const values = match[1].split(",").map((value) => Number.parseFloat(value.trim()));
+        if (values.length !== 6) return false;
+
+        const [scaleX, skewY, skewX, scaleY, translateX, translateY] = values;
+        return (
+          Math.abs(scaleX - 1) <= 0.01 &&
+          Math.abs(skewY) <= 0.01 &&
+          Math.abs(skewX) <= 0.01 &&
+          Math.abs(scaleY - 1) <= 0.01 &&
+          Math.abs(translateX) <= 0.5 &&
+          Math.abs(translateY) <= 6
+        );
+      })();
+
+      return opacity >= 0.99 && transformSettled;
     });
   });
 }
@@ -48,6 +64,60 @@ function expectButtonWithinCard(cardBox, buttonBox) {
   );
 }
 
+/**
+ * @param {import("@playwright/test").Page} page
+ */
+async function readRouteDeckState(page) {
+  return page.evaluate(() => {
+    const isShown = (element) => {
+      if (!(element instanceof HTMLElement)) return false;
+      if (element.hidden) return false;
+
+      const style = window.getComputedStyle(element);
+      return style.display !== "none" && style.visibility !== "hidden";
+    };
+
+    const switcherButtons = Array.from(
+      document.querySelectorAll(".route-switcher-button"),
+    ).map((button) => ({
+      level: button.getAttribute("data-level"),
+      label: button.textContent?.replace(/\s+/g, " ").trim() || "",
+      pressed: button.getAttribute("aria-pressed"),
+      isActive: button.classList.contains("is-active"),
+    }));
+
+    const cards = Array.from(document.querySelectorAll(".level-card")).map((card) => {
+      const progress = card.querySelector(".progress-container");
+      const caption = card.querySelector(".level-cta-caption");
+      const button = card.querySelector(".level-button");
+      const title = card.querySelector(".level-title");
+      const brief = card.querySelector(".level-brief");
+      const style = window.getComputedStyle(card);
+
+      return {
+        level: card.getAttribute("data-level"),
+        title: title?.textContent?.trim() || "",
+        brief: brief?.textContent?.trim() || "",
+        buttonLabel: button?.textContent?.trim() || "",
+        hidden: card.hidden,
+        isActive: card.classList.contains("is-active"),
+        opacity: Number.parseFloat(style.opacity || "1"),
+        progressVisible: isShown(progress),
+        captionVisible: isShown(caption),
+        buttonVisible: isShown(button),
+      };
+    });
+
+    return {
+      switcherButtons,
+      cards,
+      atlasCopy: Array.from(document.querySelectorAll(".route-atlas-copy")).map((item) =>
+        item.textContent?.trim() || "",
+      ),
+    };
+  });
+}
+
 test.describe("Level select polish", () => {
   test("keeps the hero and route cards visually readable after polish", async ({
     page,
@@ -69,9 +139,83 @@ test.describe("Level select polish", () => {
     await expect(header.locator(".page-kicker")).toHaveText("Training dossier");
     await expect(header.locator(".main-title")).toHaveText("MATH MASTER");
     await expect(header.locator(".subtitle")).toHaveText("Choose a route");
-    await expect(headerSubtitle).toContainText("Three tracks. Local scores.");
+    await expect(headerSubtitle).toContainText("Three routes. Saved here.");
+    await expect(headerHint).toContainText("Keys 1 / 2 / 3 start");
+    await expect(headerHint).toContainText("Saved on device");
 
     await waitForCardsToSettle(page);
+
+    const routeDeckState = await readRouteDeckState(page);
+
+    expect(routeDeckState.atlasCopy).toEqual([
+      "Warm-up",
+      "Switch pace",
+      "Full strain",
+    ]);
+    expect(routeDeckState.switcherButtons).toEqual([
+      {
+        level: "beginner",
+        label: "01 Foundations",
+        pressed: "true",
+        isActive: true,
+      },
+      {
+        level: "warrior",
+        label: "02 Mixed Ops",
+        pressed: "false",
+        isActive: false,
+      },
+      {
+        level: "master",
+        label: "03 Division",
+        pressed: "false",
+        isActive: false,
+      },
+    ]);
+    expect(routeDeckState.cards).toEqual([
+      {
+        level: "beginner",
+        title: "Foundations",
+        brief: "Clean starts.",
+        buttonLabel: "Run foundations",
+        hidden: false,
+        isActive: true,
+        opacity: routeDeckState.cards[0].opacity,
+        progressVisible: true,
+        captionVisible: true,
+        buttonVisible: true,
+      },
+      {
+        level: "warrior",
+        title: "Mixed Ops",
+        brief: "Shift fast. Stay clean.",
+        buttonLabel: "Run mixed ops",
+        hidden: false,
+        isActive: false,
+        opacity: routeDeckState.cards[1].opacity,
+        progressVisible: false,
+        captionVisible: false,
+        buttonVisible: true,
+      },
+      {
+        level: "master",
+        title: "Division",
+        brief: "Fast clock. Exact answers.",
+        buttonLabel: "Run division",
+        hidden: false,
+        isActive: false,
+        opacity: routeDeckState.cards[2].opacity,
+        progressVisible: false,
+        captionVisible: false,
+        buttonVisible: true,
+      },
+    ]);
+    expect(routeDeckState.cards[0].opacity).toBeGreaterThan(
+      routeDeckState.cards[1].opacity,
+    );
+    expect(routeDeckState.cards[0].opacity).toBeGreaterThan(
+      routeDeckState.cards[2].opacity,
+    );
 
     const [
       headerBox,
@@ -108,12 +252,8 @@ test.describe("Level select polish", () => {
     expect(
       Math.abs(resolvedMasterBox.y - resolvedBeginnerBox.y),
     ).toBeLessThanOrEqual(32);
-    expect(
-      Math.abs(resolvedBeginnerBox.height - resolvedWarriorBox.height),
-    ).toBeLessThanOrEqual(72);
-    expect(
-      Math.abs(resolvedMasterBox.height - resolvedWarriorBox.height),
-    ).toBeLessThanOrEqual(72);
+    expect(resolvedBeginnerBox.height).toBeGreaterThan(resolvedWarriorBox.height);
+    expect(resolvedBeginnerBox.height).toBeGreaterThan(resolvedMasterBox.height);
   });
 
   test("uses a compact route selector instead of stacked scrolling cards on narrow mobile", async ({
@@ -133,6 +273,12 @@ test.describe("Level select polish", () => {
 
     await expect(switcher).toBeVisible();
     await expect(switcherButtons).toHaveCount(3);
+    await expect(switcherButtons.nth(0)).toContainText("Foundations");
+    await expect(switcherButtons.nth(1)).toContainText("Mixed Ops");
+    await expect(switcherButtons.nth(2)).toContainText("Division");
+    await expect(switcherButtons.nth(0)).toHaveAttribute("aria-pressed", "true");
+    await expect(switcherButtons.nth(1)).toHaveAttribute("aria-pressed", "false");
+    await expect(switcherButtons.nth(2)).toHaveAttribute("aria-pressed", "false");
 
     const [visibleLevels, docHeight, viewportHeight, activeCardBox, activeButtonBox] =
       await Promise.all([
@@ -171,19 +317,32 @@ test.describe("Level select polish", () => {
 
     await expect(cta).toBeVisible();
     await expect(ctaHint).toBeVisible();
+    await expect(cta).toHaveText("Run foundations");
+    await expect(ctaHint).toHaveText("Best first pick.");
 
-    const visibleNoiseCount = await page.evaluate(() => {
-      return Array.from(
-        document.querySelectorAll(
-          ".best-score-stat, .total-score-stat, .stat[data-mobile-priority='low']",
-        ),
-      ).filter((element) => {
+    const { visibleNoiseCount, visibleCtas } = await page.evaluate(() => {
+      const isShown = (element) => {
+        if (!(element instanceof HTMLElement)) return false;
+        if (element.hidden || element.closest("[hidden]")) return false;
+
         const style = window.getComputedStyle(element);
         return style.display !== "none" && style.visibility !== "hidden";
-      }).length;
+      };
+
+      return {
+        visibleNoiseCount: Array.from(
+          document.querySelectorAll(
+            ".best-score-stat, .total-score-stat, .stat[data-mobile-priority='low']",
+          ),
+        ).filter(isShown).length,
+        visibleCtas: Array.from(document.querySelectorAll(".level-button"))
+          .filter(isShown)
+          .map((button) => button.textContent?.trim() || ""),
+      };
     });
 
     expect(visibleNoiseCount).toBe(0);
+    expect(visibleCtas).toEqual(["Run foundations"]);
 
     const [activeCardBox, ctaBox] = await Promise.all([
       activeCard.boundingBox(),
@@ -215,6 +374,9 @@ test.describe("Level select polish", () => {
     await expect(
       page.locator('.route-switcher-button[data-level="warrior"]'),
     ).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      page.locator('.level-card[data-level="warrior"] .level-button'),
+    ).toHaveText("Run mixed ops");
 
     const visibleLevels = await page.evaluate(() =>
       Array.from(document.querySelectorAll(".level-card"))
@@ -255,6 +417,9 @@ test.describe("Level select polish", () => {
     await expect(
       page.locator('.level-card[data-level="master"]'),
     ).toBeVisible();
+    await expect(
+      page.locator('.level-card[data-level="master"] .level-button'),
+    ).toHaveText("Run division");
   });
 
   test("exposes semantic landmarks and hides decorative symbols from assistive tech", async ({

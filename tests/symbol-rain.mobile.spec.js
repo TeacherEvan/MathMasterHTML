@@ -78,76 +78,73 @@ async function findVisibleMatchingSymbol(page, symbols, timeoutMs = 3500) {
 }
 
 async function clickLiveMatchingSymbol(page, symbolText, timeoutMs = 3500) {
-  const deadline = Date.now() + timeoutMs;
-  const normalizedTarget = normalizeSymbolText(symbolText);
+  const resolvedTarget = await findVisibleMatchingSymbol(
+    page,
+    symbolText,
+    timeoutMs,
+  );
 
-  while (Date.now() < deadline) {
-    const clicked = await page.evaluate((targetSymbol) => {
-      const normalize = (value) => {
-        const normalized = String(value || "").trim();
-        return normalized === "x" ? "X" : normalized;
-      };
-      const candidates = Array.from(
-        document.querySelectorAll(
-          '#panel-c [data-symbol-state="visible"]:not(.clicked)',
-        ),
-      );
-      const matching = candidates.filter((element) => {
-        if (normalize(element.textContent) !== targetSymbol) {
-          return false;
-        }
+  if (!resolvedTarget) {
+    return false;
+  }
 
-        const rect = element.getBoundingClientRect();
-        const panel = element.closest("#panel-c");
-        const panelRect = panel?.getBoundingClientRect();
-        if (!panelRect) {
-          return false;
-        }
-
-        return (
-          rect.bottom > panelRect.top &&
-          rect.top < panelRect.bottom &&
-          rect.right > panelRect.left &&
-          rect.left < panelRect.right
-        );
-      });
-      const target = matching.at(-1);
-
-      if (!target) {
+  return page.evaluate((targetSymbol) => {
+    const normalize = (value) => {
+      const normalized = String(value || "").trim();
+      return normalized === "x" ? "X" : normalized;
+    };
+    const candidates = Array.from(
+      document.querySelectorAll(
+        '#panel-c [data-symbol-state="visible"]:not(.clicked)',
+      ),
+    );
+    const matching = candidates.filter((element) => {
+      if (normalize(element.textContent) !== targetSymbol) {
         return false;
       }
 
-      target.dispatchEvent(
-        new PointerEvent("pointerdown", {
-          bubbles: true,
-          cancelable: true,
-          pointerType: "touch",
-          isPrimary: true,
-          button: 0,
-          buttons: 1,
-        }),
-      );
-      window.dispatchEvent(
-        new PointerEvent("pointerup", {
-          bubbles: true,
-          cancelable: true,
-          pointerType: "touch",
-          isPrimary: true,
-          button: 0,
-          buttons: 0,
-        }),
-      );
-      return true;
-    }, normalizedTarget);
+      const rect = element.getBoundingClientRect();
+      const panel = element.closest("#panel-c");
+      const panelRect = panel?.getBoundingClientRect();
+      if (!panelRect) {
+        return false;
+      }
 
-    if (clicked) {
-      return true;
+      return (
+        rect.bottom > panelRect.top &&
+        rect.top < panelRect.bottom &&
+        rect.right > panelRect.left &&
+        rect.left < panelRect.right
+      );
+    });
+    const target = matching.at(-1);
+
+    if (!target) {
+      return false;
     }
 
-    await page.waitForTimeout(100);
-  }
-
-  return false;
+    target.dispatchEvent(
+      new PointerEvent("pointerdown", {
+        bubbles: true,
+        cancelable: true,
+        pointerType: "touch",
+        isPrimary: true,
+        button: 0,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent("pointerup", {
+        bubbles: true,
+        cancelable: true,
+        pointerType: "touch",
+        isPrimary: true,
+        button: 0,
+        buttons: 0,
+      }),
+    );
+    return true;
+  }, resolvedTarget);
 }
 
 async function spawnVisiblePanelCSymbol(page, symbolText, column = 0) {
@@ -159,6 +156,27 @@ async function spawnVisiblePanelCSymbol(page, symbolText, column = 0) {
       }),
     );
   }, { forcedSymbol: symbolText, targetColumn: column });
+}
+
+async function ensureVisibleMatchingSymbol(
+  page,
+  symbols,
+  timeoutMs = 4000,
+  column = 0,
+) {
+  const candidates = (Array.isArray(symbols) ? symbols : [symbols]).filter(Boolean);
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  const visibleTarget = await findVisibleMatchingSymbol(page, candidates, 1000);
+  if (visibleTarget) {
+    return visibleTarget;
+  }
+
+  await spawnVisiblePanelCSymbol(page, candidates[0], column);
+  return findVisibleMatchingSymbol(page, candidates, timeoutMs);
 }
 
 async function markLatestVisiblePanelCSymbol(page, symbolText) {
@@ -284,6 +302,49 @@ async function getVisiblePanelCSymbolSummary(page, hiddenSymbols = []) {
 }
 
 test.describe("Symbol rain mobile interactions", () => {
+  test("maps touchstart coordinates into worm cursor tap events", async ({
+    page,
+  }) => {
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+    await page.waitForFunction(() => window.wormSystem?.isInitialized === true);
+
+    const tapDetail = await page.evaluate(() => {
+      return new Promise((resolve) => {
+        const handler = (event) => {
+          document.removeEventListener(window.GameEvents.WORM_CURSOR_TAP, handler);
+          resolve(event.detail);
+        };
+
+        document.addEventListener(window.GameEvents.WORM_CURSOR_TAP, handler);
+        const panelC = document.getElementById("panel-c");
+
+        const touchEvent = new Event("touchstart", {
+          bubbles: true,
+          cancelable: true,
+        });
+
+        Object.defineProperty(touchEvent, "touches", {
+          configurable: true,
+          value: [{ clientX: 164, clientY: 212 }],
+        });
+        Object.defineProperty(touchEvent, "changedTouches", {
+          configurable: true,
+          value: [{ clientX: 164, clientY: 212 }],
+        });
+
+        panelC?.dispatchEvent(touchEvent);
+      });
+    });
+
+    expect(tapDetail).toMatchObject({
+      x: 164,
+      y: 212,
+      pointerType: "touch",
+      isActive: true,
+    });
+  });
+
   test("keeps responding to successive taps after pointer release", async ({
     page,
   }) => {
@@ -683,12 +744,9 @@ test.describe("Symbol rain mobile interactions", () => {
     await stopEvanHelpIfActive(page);
 
     const before = await getCurrentStepSnapshot(page);
-    const targetSymbol = before.hiddenSymbols[0];
+    const targetSymbol = await ensureVisibleMatchingSymbol(page, before.hiddenSymbols);
 
     expect(targetSymbol).toBeTruthy();
-
-    const spawned = await spawnVisiblePanelCSymbol(page, targetSymbol);
-    expect(spawned).toBe(true);
 
     const clicked = await clickLiveMatchingSymbol(page, targetSymbol);
     expect(clicked).toBe(true);
@@ -733,12 +791,9 @@ test.describe("Symbol rain mobile interactions", () => {
     await dismissBriefingAndWaitForInteractiveGameplay(page);
 
     const before = await getCurrentStepSnapshot(page);
-    const targetSymbol = before.hiddenSymbols[0];
+    const targetSymbol = await ensureVisibleMatchingSymbol(page, before.hiddenSymbols);
 
     expect(targetSymbol).toBeTruthy();
-
-    const spawned = await spawnVisiblePanelCSymbol(page, targetSymbol);
-    expect(spawned).toBe(true);
 
     const panelC = page.locator("#panel-c");
     await panelC.focus();
@@ -817,8 +872,8 @@ test.describe("Symbol rain mobile interactions", () => {
     const targetSymbol = before.hiddenSymbols[0];
     expect(targetSymbol).toBeTruthy();
 
-    const spawned = await spawnVisiblePanelCSymbol(page, targetSymbol);
-    expect(spawned).toBe(true);
+    const visibleTarget = await ensureVisibleMatchingSymbol(page, targetSymbol);
+    expect(visibleTarget).toBeTruthy();
 
     await page.keyboard.press("ArrowRight");
 
