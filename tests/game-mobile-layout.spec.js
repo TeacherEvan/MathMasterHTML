@@ -1,12 +1,27 @@
-import { devices, expect, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-test.use({
-  ...devices["Pixel 7"],
-  viewport: { width: 915, height: 412 },
-  screen: { width: 915, height: 412 },
-});
+async function ensureLandscapeViewport(page) {
+  const viewport = page.viewportSize();
+  if (!viewport || viewport.width >= viewport.height) {
+    return;
+  }
+
+  await page.setViewportSize({
+    width: viewport.height,
+    height: viewport.width,
+  });
+}
 
 test.describe("Gameplay mobile landscape layout", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    test.skip(
+      !testInfo.project.use?.isMobile,
+      "Mobile landscape layout contract runs on mobile projects only.",
+    );
+
+    await ensureLandscapeViewport(page);
+  });
+
   test("keeps the gameplay chrome inside the viewport", async ({ page }) => {
     await page.goto("/src/pages/game.html?level=beginner", {
       waitUntil: "domcontentloaded",

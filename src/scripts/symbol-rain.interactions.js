@@ -234,14 +234,65 @@
       );
     };
 
+    const resolvePointerSymbolElement = (event) => {
+      const directTarget = event.target.closest(
+        ".falling-symbol[data-symbol-state='visible']",
+      );
+
+      const isTouchLikeInteraction =
+        event.pointerType === "touch" ||
+        window.matchMedia?.("(pointer: coarse)")?.matches === true;
+
+      if (!isTouchLikeInteraction) {
+        return directTarget;
+      }
+
+      const hasPointerCoordinates =
+        typeof event.clientX === "number" && typeof event.clientY === "number";
+
+      if (!hasPointerCoordinates) {
+        return directTarget;
+      }
+
+      const candidates = SymbolRainTargets.getVisibleCandidates({
+        symbolRainContainer,
+        state,
+      });
+
+      let bestCandidate = null;
+      let bestDistanceSquared = Number.POSITIVE_INFINITY;
+
+      for (const candidate of candidates) {
+        const { rect } = candidate;
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const distanceX = centerX - event.clientX;
+        const distanceY = centerY - event.clientY;
+        const distanceSquared = distanceX * distanceX + distanceY * distanceY;
+        const touchRadius = Math.max(
+          26,
+          Math.min(rect.width, rect.height) * 0.52,
+        );
+
+        if (distanceSquared > touchRadius * touchRadius) {
+          continue;
+        }
+
+        if (distanceSquared < bestDistanceSquared) {
+          bestDistanceSquared = distanceSquared;
+          bestCandidate = candidate;
+        }
+      }
+
+      return bestCandidate?.element || directTarget;
+    };
+
     const handlePointerDown = (event) => {
       if (event.isPrimary === false) {
         return;
       }
 
-      const fallingSymbolElement = event.target.closest(
-        ".falling-symbol[data-symbol-state='visible']",
-      );
+      const fallingSymbolElement = resolvePointerSymbolElement(event);
       if (
         fallingSymbolElement &&
         symbolRainContainer.contains(fallingSymbolElement)

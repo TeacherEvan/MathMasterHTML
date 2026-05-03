@@ -3,6 +3,47 @@ console.log("🎯 SymbolRain helpers: utils loading...");
 
 (function attachSymbolRainUtils() {
   const helpers = (window.SymbolRainHelpers = window.SymbolRainHelpers || {});
+  const RAIN_WINDOW_PADDING_PX = 8;
+
+  function rectsIntersect(a, b) {
+    if (!a || !b || a.width <= 0 || a.height <= 0 || b.width <= 0 || b.height <= 0) {
+      return false;
+    }
+
+    return (
+      a.bottom > b.top &&
+      a.top < b.bottom &&
+      a.right > b.left &&
+      a.left < b.right
+    );
+  }
+
+  function getVisibleElementRect(element) {
+    if (!element?.getBoundingClientRect) {
+      return null;
+    }
+
+    const rect = element.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return null;
+    }
+
+    return rect;
+  }
+
+  function getRainWindowOccluders(container) {
+    const panel = container?.closest?.("#panel-c") || container?.parentElement || null;
+    const candidates = [
+      panel?.querySelector?.(".panel-c-brief"),
+      document.getElementById("back-button"),
+      document.getElementById("audio-toggle"),
+      document.getElementById("game-hud"),
+    ];
+
+    return candidates
+      .map((element) => getVisibleElementRect(element))
+      .filter((rect) => rect && rectsIntersect(rect, container.getBoundingClientRect()));
+  }
 
   helpers.debounce = function debounce(func, wait) {
     let timeout;
@@ -52,6 +93,40 @@ console.log("🎯 SymbolRain helpers: utils loading...");
     }
 
     return rect;
+  };
+
+  helpers.getPlayableRainWindowRect = function getPlayableRainWindowRect(container) {
+    if (!container?.getBoundingClientRect) {
+      return null;
+    }
+
+    const rect = container.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return null;
+    }
+
+    const occluders = getRainWindowOccluders(container);
+    if (!occluders.length) {
+      return rect;
+    }
+
+    let top = rect.top;
+
+    for (const occluder of occluders) {
+      if (occluder.bottom <= rect.top + rect.height * 0.45) {
+        top = Math.max(top, occluder.bottom + RAIN_WINDOW_PADDING_PX);
+      }
+    }
+
+    if (rect.bottom - top <= 0) {
+      return rect;
+    }
+
+    return {
+      ...rect,
+      top,
+      height: rect.bottom - top,
+    };
   };
 
   helpers.rectIntersectsRainWindow = function rectIntersectsRainWindow(

@@ -5,11 +5,17 @@ import {
   stopEvanHelpIfActive,
 } from "./utils/onboarding-runtime.js";
 
-test.use({
-  ...devices["Pixel 7"],
-  viewport: { width: 915, height: 412 },
-  screen: { width: 915, height: 412 },
-});
+async function ensureLandscapeViewport(page) {
+  const viewport = page.viewportSize();
+  if (!viewport || viewport.width >= viewport.height) {
+    return;
+  }
+
+  await page.setViewportSize({
+    width: viewport.height,
+    height: viewport.width,
+  });
+}
 
 async function getCurrentStepSnapshot(page) {
   return page.evaluate(() => {
@@ -179,6 +185,13 @@ async function ensureVisibleMatchingSymbol(
   return findVisibleMatchingSymbol(page, candidates, timeoutMs);
 }
 
+async function dismissBriefingIfPresent(page) {
+  const startButton = page.locator("#start-game-btn");
+  if (await startButton.isVisible().catch(() => false)) {
+    await startButton.click({ force: true });
+  }
+}
+
 async function markLatestVisiblePanelCSymbol(page, symbolText) {
   const normalizedTarget = normalizeSymbolText(symbolText);
 
@@ -302,6 +315,77 @@ async function getVisiblePanelCSymbolSummary(page, hiddenSymbols = []) {
 }
 
 test.describe("Symbol rain mobile interactions", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    if (["pixel-7", "iphone-13"].includes(testInfo.project.name)) {
+      await ensureLandscapeViewport(page);
+    }
+  });
+
+  test("uses touch coordinates when the event target is the rain container", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !["pixel-7", "iphone-13"].includes(testInfo.project.name),
+      "This touch-coordinate contract is enforced on the mobile projects.",
+    );
+
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    const before = await getCurrentStepSnapshot(page);
+    const targetSymbol = await ensureVisibleMatchingSymbol(page, before.hiddenSymbols);
+    expect(targetSymbol).toBeTruthy();
+
+    const collectedSymbol = await page.evaluate((symbolText) => {
+      const container = document.getElementById("symbol-rain-container");
+      if (!container) {
+        return null;
+      }
+
+      let collected = null;
+      window.SymbolRainHelpers.handleSymbolClick = (_state, symbolElement) => {
+        collected = symbolElement.textContent?.trim() || null;
+      };
+
+      const normalize = (value) => {
+        const trimmed = String(value || "").trim();
+        return trimmed === "x" ? "X" : trimmed;
+      };
+
+      const target = Array.from(
+        document.querySelectorAll(
+          '#panel-c .falling-symbol[data-symbol-state="visible"]:not(.clicked)',
+        ),
+      ).find((element) => normalize(element.textContent) === normalize(symbolText));
+      const rect = target?.getBoundingClientRect?.();
+
+      if (!rect) {
+        return null;
+      }
+
+      const pointerEvent = new Event("pointerdown", {
+        bubbles: true,
+        cancelable: true,
+      });
+      Object.defineProperties(pointerEvent, {
+        pointerType: { value: "touch" },
+        isPrimary: { value: true },
+        button: { value: 0 },
+        buttons: { value: 1 },
+        clientX: { value: rect.left + rect.width / 2 },
+        clientY: { value: rect.top + rect.height / 2 },
+      });
+
+      container.dispatchEvent(pointerEvent);
+
+      return collected;
+    }, targetSymbol);
+
+    expect(normalizeSymbolText(collectedSymbol)).toBe(
+      normalizeSymbolText(targetSymbol),
+    );
+  });
+
   test("maps touchstart coordinates into worm cursor tap events", async ({
     page,
   }) => {

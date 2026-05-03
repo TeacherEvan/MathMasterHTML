@@ -814,7 +814,6 @@ function initSymbolRain() {
         parentElement?.clientWidth ||
         0;
       const height =
-        rainRect?.height ||
         state.cachedContainerHeight ||
         state.symbolRainContainer?.clientHeight ||
         state.symbolRainContainer?.offsetHeight ||

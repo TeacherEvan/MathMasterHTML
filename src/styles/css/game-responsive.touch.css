@@ -5,16 +5,16 @@
 @media (hover: none) and (pointer: coarse) and (max-width: 1024px) {
   /* Enlarge touch targets on tablet and mobile */
   .falling-symbol {
-    padding: 30px;
-    margin: -30px;
+    padding: 18px;
+    margin: -18px;
     font-size: 24px !important;
   }
 }
 
 @media (hover: none) and (pointer: coarse) {
   body.viewport-compact.viewport-landscape .falling-symbol {
-    padding: 14px;
-    margin: -14px;
+    padding: 10px;
+    margin: -10px;
     font-size: 18px !important;
     line-height: 1;
   }
@@ -24,9 +24,9 @@
 @media (hover: none) and (pointer: coarse) and (max-width: 800px),
   (hover: none) and (pointer: coarse) and (max-height: 500px) {
   .falling-symbol {
-    /* Touch targets must stay large even if symbols get a bit smaller */
-    padding: 36px;
-    margin: -36px;
+    /* Keep mobile symbols finger-friendly without letting adjacent hitboxes swallow each other. */
+    padding: 22px;
+    margin: -22px;
     font-size: 20px !important;
   }
 
