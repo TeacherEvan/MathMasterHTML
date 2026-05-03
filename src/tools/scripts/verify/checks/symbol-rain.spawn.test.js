@@ -184,7 +184,7 @@ test("visible rain floor fills from the general symbol pool without prioritizing
   assert.deepEqual(createdSymbols, ["1", "1"]);
 });
 
-test("current-step target circulation is throttled and scans active symbols directly", () => {
+test("current-step target circulation stays disabled even when a needed-symbol lookup exists", () => {
   let now = 10_000;
   let targetLookups = 0;
   const createdSymbols = [];
@@ -265,6 +265,6 @@ test("current-step target circulation is throttled and scans active symbols dire
   now += 160;
   runtime.handleRandomSpawns(state);
 
-  assert.deepEqual(createdSymbols, ["2"]);
-  assert.equal(targetLookups, 2);
+  assert.deepEqual(createdSymbols, []);
+  assert.equal(targetLookups, 0);
 });

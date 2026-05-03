@@ -232,12 +232,13 @@ npx playwright test tests/worm-stability.spec.js tests/worm-cursor-evasion.spec.
 - Let Panel C bootstrap wait for real layout stabilization; do not replace zero-height container measurements with synthetic fallback heights.
 - Panel C must refresh cached rain metrics when `#panel-c` or `#symbol-rain-container` changes size without a `window.resize`; `window.__symbolRainState.cachedContainerHeight` cannot rely on global resize alone.
 - Keyboard-target eligibility in Panel C must use actual panel/container intersection, not global viewport checks alone.
-- Visibility, keyboard targeting, spawn circulation, and Evan helper targeting must route through `window.SymbolRainTargets` so live Panel C lookups share the actual `#symbol-rain-container` intersection contract rather than mixing panel bounds with cached Y-only heuristics.
+- Visibility, keyboard targeting, and Evan helper targeting must route through `window.SymbolRainTargets` so live Panel C lookups share the actual `#symbol-rain-container` intersection contract rather than mixing panel bounds with cached Y-only heuristics.
 - Symbol rain lifecycle belongs to `window.SymbolRainLifecycle`; the phase model is `created`, `waiting-gameplay`, `waiting-layout`, `starting`, `running`, `stopping`, `stopped`, and `failed`.
 - `src/scripts/3rdDISPLAY.js` remains the composition root. It wires lifecycle dependencies, controller teardown, resize/layout observers, interactions, and the temporary `window.__symbolRainState` bridge.
 - Tests and runtime integration should prefer `window.SymbolRainController` for snapshots, start/stop/destroy, layout refresh, visible forced spawns, matching-symbol removal, and keyboard target sync. Treat direct `window.__symbolRainState` mutation as compatibility-only legacy access.
 - If symbol-rain uses incremental spatial-grid bookkeeping, every symbol removal path, including click collection, must remove the symbol from the grid.
-- Compact/mobile spawn throttling can be reduced, but keep guaranteed target circulation fast enough that live matching symbols remain available during gameplay.
+- Resurfacing mode does not force current-step symbol visibility from the spawn path; runtime should not consult `getNextRequiredSymbol` to guarantee an always-visible match.
+- Compact/mobile resurfacing timing can be tuned, but do not reintroduce guaranteed target circulation; live matches may be temporarily unavailable until a hidden target resurfaces.
 
 ## Gameplay Integrity Contracts
 

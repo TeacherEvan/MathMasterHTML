@@ -628,6 +628,154 @@ test.describe("Runtime boot orchestration", () => {
     expect(result.afterRejectedSpawn.activeFallingSymbols).toBe(0);
   });
 
+  test("spawnVisibleSymbol follows the resurfacing lifecycle", async ({
+    page,
+  }) => {
+    await gotoGameRuntime(page, "?level=beginner&preload=off");
+    await waitForRuntimeCoordinator(page);
+    await activateStartGame(page);
+    await page.waitForFunction(
+      () => window.SymbolRainController?.getSnapshot?.()?.phase === "running",
+      null,
+      { timeout: 10000 },
+    );
+
+    const spawned = await page.evaluate(() => {
+      window.SymbolRainController?.stop?.("test-spawn-lifecycle-stop");
+      const result = window.SymbolRainController?.spawnVisibleSymbol?.("X", {
+        column: 0,
+        horizontalOffset: 0,
+      });
+      const target = Array.from(
+        document.querySelectorAll('#panel-c .falling-symbol[data-symbol-state="visible"]'),
+      ).find((element) => String(element.textContent || "").trim() === "X");
+      if (target) {
+        target.dataset.testSpawnProbe = "true";
+      }
+      return result;
+    });
+
+    expect(spawned).toBe(true);
+
+    const initialSample = await page.evaluate(() => {
+      const target = document.querySelector('#panel-c [data-test-spawn-probe="true"]');
+      if (!target) {
+        return null;
+      }
+
+      const rect = target.getBoundingClientRect();
+      return {
+        top: rect.top,
+        left: rect.left,
+        state: target.dataset.symbolState || "",
+      };
+    });
+
+    expect(initialSample).not.toBeNull();
+    expect(initialSample.state).toBe("visible");
+
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() => {
+            const target = document.querySelector('#panel-c [data-test-spawn-probe="true"]');
+            return target?.dataset.symbolState || null;
+          }),
+        { timeout: 5000 },
+      )
+      .toBe("hidden");
+
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() => {
+            const target = document.querySelector('#panel-c [data-test-spawn-probe="true"]');
+            if (!target) {
+              return null;
+            }
+
+            const rect = target.getBoundingClientRect();
+            return {
+              top: rect.top,
+              left: rect.left,
+              state: target.dataset.symbolState || "",
+            };
+          }),
+        { timeout: 10000 },
+      )
+      .toMatchObject({
+        state: "visible",
+      });
+
+    const resurfacedSample = await page.evaluate(() => {
+      const target = document.querySelector('#panel-c [data-test-spawn-probe="true"]');
+      if (!target) {
+        return null;
+      }
+
+      const rect = target.getBoundingClientRect();
+      return {
+        top: rect.top,
+        left: rect.left,
+        state: target.dataset.symbolState || "",
+      };
+    });
+
+    expect(resurfacedSample).not.toBeNull();
+    expect(resurfacedSample.state).toBe("visible");
+    expect(
+      Math.abs(resurfacedSample.top - initialSample.top) +
+        Math.abs(resurfacedSample.left - initialSample.left),
+    ).toBeGreaterThan(2);
+  });
+
+  test("live controller does not consult current-step target circulation lookups", async ({
+    page,
+  }) => {
+    await gotoGameRuntime(page, "?level=beginner&preload=off");
+    await waitForRuntimeCoordinator(page);
+    await activateStartGame(page);
+    await page.waitForFunction(
+      () => window.SymbolRainController?.getSnapshot?.()?.phase === "running",
+      null,
+      { timeout: 10000 },
+    );
+
+    const lookupCount = await page.evaluate(async () => {
+      const targets = window.SymbolRainTargets;
+      if (!targets) {
+        return null;
+      }
+
+      const originalLookup = targets.getNextRequiredSymbol;
+      let count = 0;
+
+      try {
+        targets.getNextRequiredSymbol = () => {
+          count += 1;
+          return "X";
+        };
+
+        window.SymbolRainController?.refreshLayout?.("test-no-target-circulation");
+        window.SymbolRainController?.spawnVisibleSymbol?.("X", {
+          column: 0,
+          horizontalOffset: 0,
+        });
+
+        await new Promise((resolve) => window.setTimeout(resolve, 1200));
+        return count;
+      } finally {
+        if (originalLookup) {
+          targets.getNextRequiredSymbol = originalLookup;
+        } else {
+          delete targets.getNextRequiredSymbol;
+        }
+      }
+    });
+
+    expect(lookupCount).toBe(0);
+  });
+
   test("symbol rain lifecycle requestStart is idempotent", async ({ page }) => {
     await page.addScriptTag({ path: "./src/scripts/symbol-rain.lifecycle.js" });
     await page.addScriptTag({

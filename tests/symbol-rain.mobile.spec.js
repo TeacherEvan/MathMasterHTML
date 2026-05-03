@@ -5,8 +5,6 @@ import {
   stopEvanHelpIfActive,
 } from "./utils/onboarding-runtime.js";
 
-const PANEL_C_CATCH_ZONE_THRESHOLD = 0.7;
-
 test.use({
   ...devices["Pixel 7"],
   viewport: { width: 915, height: 412 },
@@ -163,38 +161,115 @@ async function spawnVisiblePanelCSymbol(page, symbolText, column = 0) {
   }, { forcedSymbol: symbolText, targetColumn: column });
 }
 
+async function markLatestVisiblePanelCSymbol(page, symbolText) {
+  const normalizedTarget = normalizeSymbolText(symbolText);
+
+  return page.evaluate((targetSymbol) => {
+    const normalize = (value) => {
+      const normalized = String(value || "").trim();
+      return normalized === "x" ? "X" : normalized;
+    };
+
+    const matchingElements = Array.from(
+      document.querySelectorAll(
+        '#panel-c [data-symbol-state="visible"]:not(.clicked)',
+      ),
+    ).filter((element) => normalize(element.textContent) === targetSymbol);
+
+    const trackedElement = matchingElements.at(-1);
+    if (!trackedElement) {
+      return null;
+    }
+
+    trackedElement.dataset.testTracked = "true";
+    const rect = trackedElement.getBoundingClientRect();
+
+    return {
+      symbol: normalize(trackedElement.textContent),
+      state: trackedElement.dataset.symbolState || "",
+      top: rect.top,
+      left: rect.left,
+    };
+  }, normalizedTarget);
+}
+
+async function readTrackedPanelCSymbol(page) {
+  return page.evaluate(() => {
+    const trackedElement = document.querySelector(
+      '#panel-c [data-test-tracked="true"]',
+    );
+
+    if (!trackedElement) {
+      return null;
+    }
+
+    const rect = trackedElement.getBoundingClientRect();
+
+    return {
+      state: trackedElement.dataset.symbolState || "",
+      top: rect.top,
+      left: rect.left,
+      text: trackedElement.textContent?.trim() || "",
+    };
+  });
+}
+
+async function markFirstVisiblePanelCSymbol(page) {
+  return page.evaluate(() => {
+    const trackedElement = document.querySelector(
+      '#panel-c [data-symbol-state="visible"]:not(.clicked)',
+    );
+
+    if (!trackedElement) {
+      return null;
+    }
+
+    trackedElement.dataset.testTracked = "true";
+    const rect = trackedElement.getBoundingClientRect();
+
+    return {
+      state: trackedElement.dataset.symbolState || "",
+      top: rect.top,
+      left: rect.left,
+      text: trackedElement.textContent?.trim() || "",
+    };
+  });
+}
+
 async function getVisiblePanelCSymbolSummary(page, hiddenSymbols = []) {
   return page.evaluate((currentHiddenSymbols) => {
     const normalize = (value) => {
       const normalized = String(value || "").trim();
       return normalized === "x" ? "X" : normalized;
     };
-    const hiddenSet = new Set(currentHiddenSymbols.map((symbol) => normalize(symbol)));
+
+    const hiddenSet = new Set(
+      currentHiddenSymbols.map((symbol) => normalize(symbol)),
+    );
     const visibleSymbols = [];
 
     Array.from(
       document.querySelectorAll(
         '#panel-c [data-symbol-state="visible"]:not(.clicked)',
       ),
-    )
-      .forEach((element) => {
-        const rect = element.getBoundingClientRect();
-        const panel = element.closest("#panel-c");
-        const panelRect = panel?.getBoundingClientRect();
-        if (!panelRect) {
-          return;
-        }
+    ).forEach((element) => {
+      const rect = element.getBoundingClientRect();
+      const panel = element.closest("#panel-c");
+      const panelRect = panel?.getBoundingClientRect();
+      if (!panelRect) {
+        return;
+      }
 
-        const intersectsPanel =
-          rect.bottom > panelRect.top &&
-          rect.top < panelRect.bottom &&
-          rect.right > panelRect.left &&
-          rect.left < panelRect.right;
+      const intersectsPanel =
+        rect.bottom > panelRect.top &&
+        rect.top < panelRect.bottom &&
+        rect.right > panelRect.left &&
+        rect.left < panelRect.right;
 
-        if (intersectsPanel) {
-          visibleSymbols.push(normalize(element.textContent));
-        }
-      });
+      if (intersectsPanel) {
+        visibleSymbols.push(normalize(element.textContent));
+      }
+    });
 
     const distractorCount = visibleSymbols.filter(
       (symbol) => !hiddenSet.has(symbol),
@@ -209,65 +284,6 @@ async function getVisiblePanelCSymbolSummary(page, hiddenSymbols = []) {
 }
 
 test.describe("Symbol rain mobile interactions", () => {
-  test("only slows a mobile symbol when the blocking neighbor is below it", async ({
-    page,
-  }) => {
-    await page.goto("/src/pages/game.html?level=beginner", {
-      waitUntil: "domcontentloaded",
-    });
-
-    await page.waitForFunction(
-      () => Boolean(window.SymbolRainHelpers && window.SymbolRainConfig),
-      { timeout: 10000 },
-    );
-
-    const collisionState = await page.evaluate(() => {
-      const spatialGrid = window.SymbolRainHelpers.createSpatialGrid(
-        window.SymbolRainConfig,
-      );
-      const current = {
-        x: 120,
-        y: 100,
-        isInFaceReveal: false,
-      };
-      const above = {
-        x: 126,
-        y: 82,
-        isInFaceReveal: false,
-      };
-      const below = {
-        x: 126,
-        y: 118,
-        isInFaceReveal: false,
-      };
-
-      spatialGrid.update([current, above]);
-      const aboveConflict = window.SymbolRainHelpers.checkCollision(
-        {
-          config: window.SymbolRainConfig,
-          isMobileMode: true,
-          spatialGrid,
-        },
-        current,
-      );
-
-      spatialGrid.update([current, below]);
-      const belowConflict = window.SymbolRainHelpers.checkCollision(
-        {
-          config: window.SymbolRainConfig,
-          isMobileMode: true,
-          spatialGrid,
-        },
-        current,
-      );
-
-      return { aboveConflict, belowConflict };
-    });
-
-    expect(collisionState.aboveConflict).toBe(false);
-    expect(collisionState.belowConflict).toBe(true);
-  });
-
   test("keeps responding to successive taps after pointer release", async ({
     page,
   }) => {
@@ -343,7 +359,7 @@ test.describe("Symbol rain mobile interactions", () => {
     expect(tapCount).toBe(2);
   });
 
-  test("shows a live falling symbol in Panel C after gameplay becomes interactive", async ({
+  test("keeps a live Panel C symbol stationary before fading and resurfacing", async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -355,45 +371,54 @@ test.describe("Symbol rain mobile interactions", () => {
     await dismissBriefingAndWaitForInteractiveGameplay(page);
 
     await expect(page.locator("#panel-c")).toBeVisible();
-    await page.locator("#panel-c .falling-symbol").first().waitFor({
+    await page.locator('#panel-c [data-symbol-state="visible"]').first().waitFor({
       state: "visible",
       timeout: 4000,
     });
 
-    const visibilitySamples = await page.evaluate(async () => {
-      const samples = [];
+    const tracked = await markFirstVisiblePanelCSymbol(page);
+    expect(tracked).not.toBeNull();
+    expect(tracked.state).toBe("visible");
 
-      for (let index = 0; index < 6; index += 1) {
-        const panel = document.getElementById("panel-c");
-        const panelRect = panel?.getBoundingClientRect();
-        const visibleSymbols = Array.from(
-          document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
-        ).filter((element) => {
-          if (!panelRect) {
-            return false;
-          }
+    const positionSamples = [];
+    for (let sampleIndex = 0; sampleIndex < 4; sampleIndex += 1) {
+      const sample = await readTrackedPanelCSymbol(page);
+      expect(sample).not.toBeNull();
+      positionSamples.push(sample.top);
+      await page.waitForTimeout(300);
+    }
 
-          const rect = element.getBoundingClientRect();
-          return (
-            rect.bottom > panelRect.top &&
-            rect.top < panelRect.bottom &&
-            rect.right > panelRect.left &&
-            rect.left < panelRect.right
-          );
-        });
+    const initialTop = positionSamples[0];
+    const maxDrift = Math.max(
+      ...positionSamples.map((sampleTop) => Math.abs(sampleTop - initialTop)),
+    );
 
-        samples.push(visibleSymbols.length);
-        await new Promise((resolve) => window.setTimeout(resolve, 120));
-      }
+    expect(maxDrift).toBeLessThanOrEqual(2);
 
-      return samples;
-    });
+    await expect
+      .poll(async () => {
+        const sample = await readTrackedPanelCSymbol(page);
+        return sample?.state;
+      }, { timeout: 5000 })
+      .toBe("hidden");
 
-    expect(visibilitySamples.some((count) => count >= 2)).toBe(true);
-    expect(visibilitySamples.at(-1)).toBeGreaterThan(0);
+    await expect
+      .poll(async () => {
+        const sample = await readTrackedPanelCSymbol(page);
+        return sample?.state;
+      }, { timeout: 10000 })
+      .toBe("visible");
+
+    const resurfaced = await readTrackedPanelCSymbol(page);
+    expect(resurfaced).not.toBeNull();
+    expect(resurfaced.state).toBe("visible");
+    expect(
+      Math.abs(resurfaced.top - tracked.top) +
+        Math.abs(resurfaced.left - tracked.left),
+    ).toBeGreaterThan(2);
   });
 
-  test("treats only the real rain window as visible after Panel C reflow", async ({
+  test("treats only the live Panel C bounds as visible after Panel C reflow", async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -455,7 +480,7 @@ test.describe("Symbol rain mobile interactions", () => {
     expect(result.staleVisibleSymbols).toBe(0);
   });
 
-  test("keeps live Panel C targets visible in an Android WebView-like runtime", async ({
+  test("keeps resurfacing targets stationary until they fade in an Android WebView-like runtime", async ({
     browser,
   }, testInfo) => {
     test.skip(
@@ -501,10 +526,7 @@ test.describe("Symbol rain mobile interactions", () => {
       waitUntil: "domcontentloaded",
     });
 
-    const startButton = page.locator("#start-game-btn");
-    if (await startButton.isVisible()) {
-      await startButton.click({ force: true });
-    }
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
 
     await page.waitForFunction(() => {
       const state = window.displayManager?.getCurrentResolution?.();
@@ -518,57 +540,57 @@ test.describe("Symbol rain mobile interactions", () => {
     const runtimeConfig = await page.evaluate(() => {
       const snapshot = window.SymbolRainController?.getSnapshot?.();
       return {
-        burstSpawnRate: snapshot?.config?.burstSpawnRate,
-        guaranteedSpawnInterval: snapshot?.config?.guaranteedSpawnInterval,
+        fadeMs: snapshot?.config?.fadeMs,
         isMobileMode: snapshot?.isMobileMode,
+        instancesPerSymbol: snapshot?.config?.instancesPerSymbol,
         maxActiveSymbols: snapshot?.config?.maxActiveSymbols,
-        minVisibleSymbols: snapshot?.config?.minVisibleSymbols,
-        spawnRate: snapshot?.config?.spawnRate,
-        symbolsPerWave: snapshot?.config?.symbolsPerWave,
+        maxDomElements: snapshot?.config?.maxDomElements,
+        minClearancePx: snapshot?.config?.minClearancePx,
+        hiddenMaxMs: snapshot?.config?.hiddenMaxMs,
+        hiddenMinMs: snapshot?.config?.hiddenMinMs,
+        visibleMs: snapshot?.config?.visibleMs,
       };
     });
 
     expect(runtimeConfig.isMobileMode).toBe(true);
-    expect(runtimeConfig.spawnRate).toBe(0.08);
-    expect(runtimeConfig.burstSpawnRate).toBe(0.08);
-    expect(runtimeConfig.guaranteedSpawnInterval).toBe(800);
-    expect(runtimeConfig.symbolsPerWave).toBe(8);
-    expect(runtimeConfig.maxActiveSymbols).toBe(48);
-    expect(runtimeConfig.minVisibleSymbols).toBe(8);
+    expect(runtimeConfig.visibleMs).toBe(2000);
+    expect(runtimeConfig.fadeMs).toBe(1000);
+    expect(runtimeConfig.hiddenMinMs).toBe(2000);
+    expect(runtimeConfig.hiddenMaxMs).toBe(7000);
+    expect(runtimeConfig.instancesPerSymbol).toBe(5);
+    expect(runtimeConfig.minClearancePx).toBe(4);
+    expect(runtimeConfig.maxDomElements).toBe(150);
+    expect(runtimeConfig.maxActiveSymbols).toBe(150);
 
     await page.locator("#panel-c .falling-symbol").first().waitFor({
       state: "visible",
       timeout: 10000,
     });
 
-    await expect
-      .poll(
-        async () =>
-          page.evaluate((catchZoneThreshold) => {
-            const panel = document.getElementById("panel-c");
-            const panelRect = panel?.getBoundingClientRect();
-            if (!panelRect) {
-              return 0;
-            }
+    const tracked = await markFirstVisiblePanelCSymbol(page);
+    expect(tracked).not.toBeNull();
+    expect(tracked.state).toBe("visible");
 
-            return Array.from(
-              document.querySelectorAll("#panel-c .falling-symbol:not(.clicked)"),
-            ).filter((element) => {
-              const rect = element.getBoundingClientRect();
-              const intersectsPanel =
-                rect.bottom > panelRect.top &&
-                rect.top < panelRect.bottom &&
-                rect.right > panelRect.left &&
-                rect.left < panelRect.right;
-              const reachesCatchZone =
-                rect.top >=
-                panelRect.top + panelRect.height * catchZoneThreshold;
-              return intersectsPanel && reachesCatchZone;
-            }).length;
-          }, PANEL_C_CATCH_ZONE_THRESHOLD),
-        { timeout: 8000 },
-      )
-      .toBeGreaterThan(0);
+    const positionSamples = [];
+    for (let sampleIndex = 0; sampleIndex < 4; sampleIndex += 1) {
+      const sample = await readTrackedPanelCSymbol(page);
+      expect(sample).not.toBeNull();
+      positionSamples.push(sample.top);
+      await page.waitForTimeout(250);
+    }
+
+    const initialTop = positionSamples[0];
+    const maxDrift = Math.max(
+      ...positionSamples.map((sampleTop) => Math.abs(sampleTop - initialTop)),
+    );
+    expect(maxDrift).toBeLessThanOrEqual(2);
+
+    await expect
+      .poll(async () => {
+        const sample = await readTrackedPanelCSymbol(page);
+        return sample?.state;
+      }, { timeout: 5000 })
+      .toBe("hidden");
 
     await context.close();
   });
@@ -592,26 +614,32 @@ test.describe("Symbol rain mobile interactions", () => {
     const runtimeConfig = await page.evaluate(() => {
       const snapshot = window.SymbolRainController?.getSnapshot?.();
       return {
-        burstSpawnRate: snapshot?.config?.burstSpawnRate,
-        guaranteedSpawnInterval: snapshot?.config?.guaranteedSpawnInterval,
+        fadeMs: snapshot?.config?.fadeMs,
         isMobileMode: snapshot?.isMobileMode,
+        instancesPerSymbol: snapshot?.config?.instancesPerSymbol,
         maxActiveSymbols: snapshot?.config?.maxActiveSymbols,
-        spawnRate: snapshot?.config?.spawnRate,
-        symbolsPerWave: snapshot?.config?.symbolsPerWave,
+        maxDomElements: snapshot?.config?.maxDomElements,
+        minClearancePx: snapshot?.config?.minClearancePx,
+        hiddenMaxMs: snapshot?.config?.hiddenMaxMs,
+        hiddenMinMs: snapshot?.config?.hiddenMinMs,
+        visibleMs: snapshot?.config?.visibleMs,
       };
     });
 
     expect(runtimeConfig.isMobileMode).toBe(false);
-    expect(runtimeConfig.spawnRate).toBe(0.5);
-    expect(runtimeConfig.burstSpawnRate).toBe(0.15);
-    expect(runtimeConfig.guaranteedSpawnInterval).toBe(5000);
-    expect(runtimeConfig.symbolsPerWave).toBe(14);
-    expect(runtimeConfig.maxActiveSymbols).toBe(200);
+    expect(runtimeConfig.visibleMs).toBe(2000);
+    expect(runtimeConfig.fadeMs).toBe(1000);
+    expect(runtimeConfig.hiddenMinMs).toBe(2000);
+    expect(runtimeConfig.hiddenMaxMs).toBe(7000);
+    expect(runtimeConfig.instancesPerSymbol).toBe(5);
+    expect(runtimeConfig.minClearancePx).toBe(4);
+    expect(runtimeConfig.maxDomElements).toBe(150);
+    expect(runtimeConfig.maxActiveSymbols).toBe(150);
 
     await context.close();
   });
 
-  test("forced Evan boot keeps rain visible while gameplay input is locked", async ({
+  test("forced Evan boot keeps the target field visible while gameplay input is locked", async ({
     page,
   }, testInfo) => {
     test.skip(

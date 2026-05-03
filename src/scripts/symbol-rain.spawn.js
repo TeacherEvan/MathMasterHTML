@@ -38,26 +38,8 @@
   }
 
   function maintainCurrentStepTargetCirculation(state, currentTimestamp) {
-    if (
-      currentTimestamp - (state.lastTargetCirculationTimestamp || 0) <
-      TARGET_CIRCULATION_INTERVAL_MS
-    ) {
-      return;
-    }
-
-    state.lastTargetCirculationTimestamp = currentTimestamp;
-
-    const nextNeededSymbol = SymbolRainTargets?.getNextRequiredSymbol?.();
-
-    if (!nextNeededSymbol || hasVisibleActiveSymbol(state, nextNeededSymbol)) {
-      return;
-    }
-
-    spawnPrioritySymbol(state, nextNeededSymbol, currentTimestamp, {
-      initialY: getVisiblePrioritySpawnY(state, 0),
-      preferLeastOccupiedColumn: true,
-      horizontalOffset: 0,
-    });
+    void state;
+    void currentTimestamp;
   }
 
   function getAvailablePriorityColumns(state) {

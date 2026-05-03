@@ -51,67 +51,6 @@
         continue;
       }
 
-      const touchingSymbol = state.isMobileMode
-        ? SymbolRainHelpers.checkTouching(
-            {
-              config: state.config,
-              isMobileMode: state.isMobileMode,
-              spatialGrid: state.spatialGrid,
-            },
-            symbolObj,
-          )
-        : null;
-      if (touchingSymbol) {
-        state.symbolsToRemove.add(symbolObj);
-        state.symbolsToRemove.add(touchingSymbol);
-      }
-
-      const isOffScreen = SymbolRainHelpers.isSymbolPastRainWindow(
-        state,
-        symbolObj,
-        50,
-      );
-      const isStuckAtBottom =
-        !state.isMobileMode &&
-        SymbolRainHelpers.isSymbolPastRainWindow(state, symbolObj, -100) &&
-        state.activeFallingSymbols.length > 30;
-      const isTouching = state.symbolsToRemove.has(symbolObj);
-
-      if (isOffScreen || isStuckAtBottom || isTouching) {
-        SymbolRainHelpers.cleanupSymbolObject({
-          symbolObj,
-          activeFaceReveals: state.activeFaceReveals,
-          symbolPool: state.symbolPool,
-          spatialGrid: state.spatialGrid,
-        });
-        continue;
-      }
-
-      if (
-        !SymbolRainHelpers.checkCollision(
-          {
-            config: state.config,
-            isMobileMode: state.isMobileMode,
-            spatialGrid: state.spatialGrid,
-          },
-          symbolObj,
-        )
-      ) {
-        symbolObj.y += state.symbolFallSpeed;
-        SymbolRainHelpers.setSymbolPosition(
-          symbolObj.element,
-          symbolObj.x,
-          symbolObj.y,
-        );
-      } else {
-        symbolObj.y += state.symbolFallSpeed * state.config.collisionSpeedFactor;
-        SymbolRainHelpers.setSymbolPosition(
-          symbolObj.element,
-          symbolObj.x,
-          symbolObj.y,
-        );
-      }
-
       nextActiveSymbols.push(symbolObj);
       symbolsForGrid.push(symbolObj);
     }

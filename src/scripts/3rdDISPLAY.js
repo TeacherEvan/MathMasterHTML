@@ -19,7 +19,6 @@ function initSymbolRain() {
     const SymbolRainSymbols = window.SymbolRainSymbols;
     const SymbolRainAnimation = window.SymbolRainAnimation;
     const SymbolRainInteractions = window.SymbolRainInteractions;
-    const SymbolRainSpawn = window.SymbolRainSpawn;
     const SymbolRainLifecycle = window.SymbolRainLifecycle;
 
     if (
@@ -28,7 +27,6 @@ function initSymbolRain() {
       !SymbolRainSymbols ||
       !SymbolRainAnimation ||
       !SymbolRainInteractions ||
-      !SymbolRainSpawn ||
       !SymbolRainLifecycle
     ) {
       console.error("❌ Symbol Rain modules not loaded");
@@ -90,7 +88,6 @@ function initSymbolRain() {
       activeFallingSymbols: [],
       isAnimationRunning: false,
       speedControllerId: null,
-      guaranteedSpawnControllerId: null,
       symbolsToRemove: new Set(),
       cachedContainerHeight: 0,
       isTabVisible: !document.hidden,
@@ -99,7 +96,6 @@ function initSymbolRain() {
       symbolPool: SymbolRainHelpers.createSymbolPool(SymbolRainConfig),
       lifecyclePhase: "created",
       layoutRetryCount: 0,
-      lastTargetCirculationTimestamp: 0,
       lastMeasuredLayout: {
         columnCount: 0,
         containerHeight: 0,
@@ -268,12 +264,34 @@ function initSymbolRain() {
       );
     }
 
-    function samplePlacement(symbolWidth, symbolHeight, excludeElement = null) {
+    function hasMeaningfulPlacementShift(placement, previousPlacement, thresholdPx = 2) {
+      if (
+        !previousPlacement ||
+        !Number.isFinite(previousPlacement.left) ||
+        !Number.isFinite(previousPlacement.top)
+      ) {
+        return true;
+      }
+
+      return (
+        Math.abs(placement.left - previousPlacement.left) +
+          Math.abs(placement.top - previousPlacement.top) >
+        thresholdPx
+      );
+    }
+
+    function samplePlacement(
+      symbolWidth,
+      symbolHeight,
+      excludeElement = null,
+      options = {},
+    ) {
       const containerRect = getContainerBounds();
       if (!containerRect) {
         return null;
       }
 
+      const previousPlacement = options.previousPlacement || null;
       const preferredClearance = SymbolRainConfig.minClearancePx || 4;
       const reducedClearance = Math.max(1, Math.floor(preferredClearance / 2));
       const attemptSets = [
@@ -303,11 +321,17 @@ function initSymbolRain() {
           };
 
           if (isPlacementClear(candidateRect, excludeElement, attemptSet.clearance)) {
-            return {
+            const placement = {
               left: candidateRect.left - containerRect.left,
               top: candidateRect.top - containerRect.top,
               clearance: attemptSet.clearance,
             };
+
+            if (!hasMeaningfulPlacementShift(placement, previousPlacement)) {
+              continue;
+            }
+
+            return placement;
           }
         }
       }
@@ -404,7 +428,12 @@ function initSymbolRain() {
 
         const symbolWidth = SymbolRainConfig.symbolWidth || 60;
         const symbolHeight = SymbolRainConfig.symbolHeight || 42;
-        const placement = samplePlacement(symbolWidth, symbolHeight, symbolObj.element);
+        const placement = samplePlacement(symbolWidth, symbolHeight, symbolObj.element, {
+          previousPlacement: {
+            left: symbolObj.x,
+            top: symbolObj.y,
+          },
+        });
 
         if (!placement) {
           scheduleSymbolTimer(symbolObj, 500, () => scheduleHiddenResurface(symbolObj));
@@ -428,10 +457,16 @@ function initSymbolRain() {
       });
     }
 
-    function createResurfacingSymbol(symbolText, placementIndex = 0) {
+    function createResurfacingSymbol(
+      symbolText,
+      placementIndex = 0,
+      options = {},
+    ) {
       const symbolWidth = SymbolRainConfig.symbolWidth || 60;
       const symbolHeight = SymbolRainConfig.symbolHeight || 42;
-      const placement = samplePlacement(symbolWidth, symbolHeight);
+      const initialState = options.initialState || "visible";
+      const placement =
+        options.placementOverride || samplePlacement(symbolWidth, symbolHeight);
 
       if (!placement) {
         return null;
@@ -465,7 +500,7 @@ function initSymbolRain() {
       }
 
       symbolObj.lifecycleTimers = [];
-      symbolObj.lifecycleState = "visible";
+      symbolObj.lifecycleState = initialState;
       symbolObj.isCollected = false;
       SymbolRainHelpers.setSymbolPosition(
         symbolObj.element,
@@ -478,9 +513,16 @@ function initSymbolRain() {
         0,
         Math.floor(placement.left / (SymbolRainConfig.columnWidth || symbolWidth)),
       );
-      setSymbolLifecycleState(symbolObj, "visible");
-      state.spatialGrid?.update?.([symbolObj]);
-      scheduleVisibleCycle(symbolObj);
+      setSymbolLifecycleState(symbolObj, initialState);
+
+      if (initialState === "hidden") {
+        state.spatialGrid?.remove?.(symbolObj);
+        scheduleHiddenResurface(symbolObj);
+      } else {
+        state.spatialGrid?.update?.([symbolObj]);
+        scheduleVisibleCycle(symbolObj);
+      }
+
       return symbolObj;
     }
 
@@ -489,38 +531,29 @@ function initSymbolRain() {
         return false;
       }
 
-      const symbolWidth = SymbolRainConfig.symbolWidth || 60;
-      const symbolHeight = SymbolRainConfig.symbolHeight || 42;
-      const placement = samplePlacement(symbolWidth, symbolHeight, symbolObj.element);
-
-      clearSymbolLifecycle(symbolObj);
-
-      if (symbolText) {
-        symbolObj.symbol = symbolText;
-        symbolObj.element.textContent = symbolText;
+      const symbolIndex = state.activeFallingSymbols.indexOf(symbolObj);
+      if (symbolIndex === -1) {
+        return false;
       }
 
-      symbolObj.isCollected = false;
-      symbolObj.element.classList.remove("clicked");
+      const replacementText =
+        symbolText || symbolObj.symbol || symbolObj.element.textContent || "";
+      const replacementPlacement = {
+        left: Number.isFinite(symbolObj.x) ? symbolObj.x : 0,
+        top: Number.isFinite(symbolObj.y) ? symbolObj.y : 0,
+      };
+      const replacementColumn = Number.isInteger(symbolObj.column)
+        ? symbolObj.column
+        : 0;
 
-      if (placement) {
-        SymbolRainHelpers.setSymbolPosition(
-          symbolObj.element,
-          placement.left,
-          placement.top,
-        );
-        symbolObj.x = placement.left;
-        symbolObj.y = placement.top;
-        symbolObj.column = Math.max(
-          0,
-          Math.floor(placement.left / (SymbolRainConfig.columnWidth || symbolWidth)),
-        );
-      }
+      cleanupSymbolAtIndex(symbolIndex);
 
-      setSymbolLifecycleState(symbolObj, "visible");
-      state.spatialGrid?.update?.([symbolObj]);
-      scheduleVisibleCycle(symbolObj);
-      return true;
+      return Boolean(
+        createResurfacingSymbol(replacementText, replacementColumn, {
+          initialState: "hidden",
+          placementOverride: replacementPlacement,
+        }),
+      );
     }
 
     function createInitialPopulationSymbol(symbolText, placementIndex = 0) {
@@ -640,6 +673,13 @@ function initSymbolRain() {
     });
 
     const configSnapshotKeys = [
+      "visibleMs",
+      "fadeMs",
+      "hiddenMinMs",
+      "hiddenMaxMs",
+      "instancesPerSymbol",
+      "minClearancePx",
+      "maxDomElements",
       "spawnRate",
       "burstSpawnRate",
       "guaranteedSpawnInterval",
@@ -936,6 +976,70 @@ function initSymbolRain() {
       return clampedX - baseX;
     }
 
+    function resolveControllerPlacement(options, effectiveColumnCount) {
+      const rainMeasurements = getRainWindowMeasurements();
+      if (rainMeasurements.width <= 0 || rainMeasurements.height <= 0) {
+        return null;
+      }
+
+      const column = resolveControllerSpawnColumn(
+        options,
+        effectiveColumnCount,
+      );
+      const top = resolveControllerSpawnY(options, rainMeasurements);
+      const horizontalOffset = resolveControllerHorizontalOffset(
+        options,
+        column,
+        rainMeasurements,
+      );
+
+      if (top === null || horizontalOffset === null) {
+        return null;
+      }
+
+      const symbolWidth = state.config?.symbolWidth || 60;
+      const symbolHeight = state.config?.symbolHeight || 42;
+      const columnWidth = state.config?.columnWidth || symbolWidth;
+      const left = clampVisibleAxis(
+        column * columnWidth + columnWidth / 2 + horizontalOffset,
+        rainMeasurements.width,
+        symbolWidth,
+      );
+
+      if (left === null) {
+        return null;
+      }
+
+      const candidateRect = {
+        left,
+        top,
+        right: left + symbolWidth,
+        bottom: top + symbolHeight,
+        width: symbolWidth,
+        height: symbolHeight,
+      };
+
+      if (isPlacementClear(candidateRect)) {
+        return {
+          column,
+          placement: {
+            left,
+            top,
+          },
+        };
+      }
+
+      const sampledPlacement = samplePlacement(symbolWidth, symbolHeight);
+      if (!sampledPlacement) {
+        return null;
+      }
+
+      return {
+        column,
+        placement: sampledPlacement,
+      };
+    }
+
     function spawnVisibleSymbol(symbol, options = {}) {
       try {
         if (controllerDestroyed) {
@@ -945,7 +1049,7 @@ function initSymbolRain() {
         const forcedSymbol = window.SymbolRainTargets?.normalizeSymbol?.(symbol);
         if (
           !forcedSymbol ||
-          !SymbolRainHelpers.createFallingSymbol ||
+          typeof createResurfacingSymbol !== "function" ||
           !state.symbolRainContainer
         ) {
           return false;
@@ -966,38 +1070,32 @@ function initSymbolRain() {
           return false;
         }
 
-        const column = resolveControllerSpawnColumn(
+        const resolvedPlacement = resolveControllerPlacement(
           options,
           effectiveColumnCount,
         );
-        const initialY = resolveControllerSpawnY(options, rainMeasurements);
-        const horizontalOffset = resolveControllerHorizontalOffset(
-          options,
-          column,
-          rainMeasurements,
-        );
-
-        if (initialY === null || horizontalOffset === null) {
+        let controllerPlacement = resolvedPlacement;
+        if (!controllerPlacement && !releaseSymbolForControllerSpawn()) {
           return false;
         }
 
-        const activeSymbolCountBeforeCreate = state.activeFallingSymbols.length;
+        if (!controllerPlacement) {
+          controllerPlacement = resolveControllerPlacement(
+            options,
+            effectiveColumnCount,
+          );
+        }
 
-        const createdSymbol = SymbolRainHelpers.createFallingSymbol(
+        if (!controllerPlacement) {
+          return false;
+        }
+
+        const createdSymbol = createResurfacingSymbol(
+          forcedSymbol,
+          controllerPlacement.column,
           {
-            symbols: state.symbols,
-            symbolRainContainer: state.symbolRainContainer,
-            config: state.config,
-            activeFallingSymbols: state.activeFallingSymbols,
-            symbolPool: state.symbolPool,
-            lastSymbolSpawnTimestamp: state.lastSymbolSpawnTimestamp,
-          },
-          {
-            column,
-            isInitialPopulation: false,
-            forcedSymbol,
-            initialY,
-            horizontalOffset,
+            initialState: "visible",
+            placementOverride: controllerPlacement.placement,
           },
         );
 
@@ -1005,15 +1103,11 @@ function initSymbolRain() {
           return false;
         }
 
-        const createdSymbolIndex = state.activeFallingSymbols.findIndex(
-          (symbolObj, index) =>
-            index >= activeSymbolCountBeforeCreate &&
-            symbolObj?.element === createdSymbol,
-        );
+        const createdSymbolIndex = state.activeFallingSymbols.indexOf(createdSymbol);
 
         if (createdSymbolIndex === -1) {
-          createdSymbol.remove();
-          state.symbolPool?.release?.(createdSymbol);
+          createdSymbol?.element?.remove?.();
+          state.symbolPool?.release?.(createdSymbol?.element);
           state.spatialGrid?.update?.(state.activeFallingSymbols);
           return false;
         }
