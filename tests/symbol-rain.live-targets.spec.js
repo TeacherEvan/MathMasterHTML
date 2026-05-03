@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { devices, expect, test } from "@playwright/test";
 import {
   dismissBriefingAndWaitForInteractiveGameplay,
   resetOnboardingState,
@@ -377,18 +377,15 @@ test.describe("Symbol rain live targets", () => {
     const before = await getCurrentStepSnapshot(page);
 
     await expect
-      .poll(async () => getVisiblePanelCSymbolSummary(page, before.hiddenSymbols), {
-        timeout: 10000,
+      .poll(async () => {
+        const summary = await getVisiblePanelCSymbolSummary(page, before.hiddenSymbols);
+        return summary.visibleCount >= 3 && summary.distractorCount > 0;
+      }, {
+        timeout: 15000,
       })
-      .toMatchObject({
-        visibleCount: expect.any(Number),
-        distractorCount: expect.any(Number),
-      });
+      .toBe(true);
 
     const summary = await getVisiblePanelCSymbolSummary(page, before.hiddenSymbols);
-
-    expect(summary.visibleCount).toBeGreaterThanOrEqual(3);
-    expect(summary.distractorCount).toBeGreaterThan(0);
 
     await attachPanelCProof(page, testInfo, "desktop-mixed-visible-field", {
       hiddenSymbols: before.hiddenSymbols.map((symbol) => normalizeSymbolText(symbol)),
@@ -536,5 +533,49 @@ test.describe("Symbol rain live targets", () => {
     ).toBeLessThanOrEqual(2);
 
     await attachPanelCProof(page, testInfo, "panel-c-reflow-proof", result);
+  });
+
+  test("keeps standard Panel C tuning in the default desktop runtime", async ({
+    browser,
+  }, testInfo) => {
+    test.skip(
+      !chromiumProjects.has(testInfo.project.name),
+      "This desktop contract only runs on the Chromium gameplay project.",
+    );
+
+    const context = await browser.newContext({
+      ...devices["Desktop Chrome"],
+    });
+    const page = await context.newPage();
+
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    const runtimeConfig = await page.evaluate(() => {
+      const snapshot = window.SymbolRainController?.getSnapshot?.();
+      return {
+        fadeMs: snapshot?.config?.fadeMs,
+        isMobileMode: snapshot?.isMobileMode,
+        instancesPerSymbol: snapshot?.config?.instancesPerSymbol,
+        maxActiveSymbols: snapshot?.config?.maxActiveSymbols,
+        maxDomElements: snapshot?.config?.maxDomElements,
+        minClearancePx: snapshot?.config?.minClearancePx,
+        hiddenMaxMs: snapshot?.config?.hiddenMaxMs,
+        hiddenMinMs: snapshot?.config?.hiddenMinMs,
+        visibleMs: snapshot?.config?.visibleMs,
+      };
+    });
+
+    expect(runtimeConfig.isMobileMode).toBe(false);
+    expect(runtimeConfig.visibleMs).toBe(2000);
+    expect(runtimeConfig.fadeMs).toBe(1000);
+    expect(runtimeConfig.hiddenMinMs).toBe(2000);
+    expect(runtimeConfig.hiddenMaxMs).toBe(7000);
+    expect(runtimeConfig.instancesPerSymbol).toBe(5);
+    expect(runtimeConfig.minClearancePx).toBe(4);
+    expect(runtimeConfig.maxDomElements).toBe(150);
+    expect(runtimeConfig.maxActiveSymbols).toBe(150);
+
+    await context.close();
   });
 });

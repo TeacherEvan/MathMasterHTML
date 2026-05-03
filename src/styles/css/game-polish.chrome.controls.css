@@ -156,8 +156,10 @@ body.viewport-compact.viewport-landscape #clarify-button {
 }
 
 body.viewport-compact.viewport-portrait #symbol-console {
-  width: 100% !important;
-  max-width: none;
+  width: auto !important;
+  max-width: calc(100% - 12px);
+  min-width: 0;
+  box-sizing: border-box;
   grid-template-columns: none !important;
   grid-template-rows: var(--console-slot-size) !important;
   grid-auto-flow: column !important;

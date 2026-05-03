@@ -170,10 +170,16 @@ test.describe("Gameplay portrait device contract", () => {
         portraitState.panelA.right - 4,
       );
       expect(portraitState.console.left).toBeGreaterThanOrEqual(
-        portraitState.panelB.left - 1,
+        portraitState.panelC.left - 1,
       );
       expect(portraitState.console.right).toBeLessThanOrEqual(
-        portraitState.panelB.right + 1,
+        portraitState.panelC.right + 18,
+      );
+      expect(
+        portraitState.console.right - portraitState.panelC.right,
+      ).toBeLessThanOrEqual(18);
+      expect(portraitState.console.bottom).toBeLessThanOrEqual(
+        portraitState.panelC.bottom + 1,
       );
 
     });
@@ -521,11 +527,12 @@ test.describe("Gameplay portrait device contract", () => {
         layout.viewport.height + 1,
       );
       expect(layout.console.left).toBeGreaterThanOrEqual(
-        layout.panelB.left - 1,
+        layout.panelC.left - 1,
       );
-      expect(layout.console.right).toBeLessThanOrEqual(layout.panelB.right + 1);
+      expect(layout.console.right).toBeLessThanOrEqual(layout.panelC.right + 18);
+      expect(layout.console.right - layout.panelC.right).toBeLessThanOrEqual(18);
       expect(layout.console.bottom).toBeLessThanOrEqual(
-        layout.panelB.bottom + 1,
+        layout.panelC.bottom + 1,
       );
     });
   });

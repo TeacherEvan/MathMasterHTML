@@ -1,6 +1,9 @@
 // tests/utils/game-helpers.js - Shared game test helpers
 import { expect } from "@playwright/test";
-import { ensureLandscapeGameplayViewport } from "./onboarding-runtime.js";
+import {
+  ensureLandscapeGameplayViewport,
+  waitForOnboardingRuntime,
+} from "./onboarding-runtime.js";
 
 export const BASE_URL = "http://localhost:8000";
 
@@ -9,17 +12,52 @@ export const BASE_URL = "http://localhost:8000";
  * and waiting for the modal to close.
  */
 export async function dismissBriefing(page) {
+  await waitForOnboardingRuntime(page);
   await ensureLandscapeGameplayViewport(page);
 
-  await page.waitForSelector("#start-game-btn", {
-    state: "visible",
-    timeout: 10000,
-  });
-  await page.click("#start-game-btn");
   await page.waitForFunction(
     () => {
       const modal = document.getElementById("how-to-play-modal");
-      return !modal || window.getComputedStyle(modal).display === "none";
+      const start = document.getElementById("start-game-btn");
+      const modalVisible = Boolean(
+        modal && window.getComputedStyle(modal).display !== "none",
+      );
+      const startVisible = Boolean(
+        start &&
+          window.getComputedStyle(start).display !== "none" &&
+          start.getClientRects().length > 0,
+      );
+      const gameplayReady =
+        window.GameRuntimeCoordinator?.isGameplayReady?.() === true;
+
+      return gameplayReady || (modalVisible && startVisible);
+    },
+    { timeout: 10000 },
+  );
+
+  const briefingState = await page.evaluate(() => {
+    const modal = document.getElementById("how-to-play-modal");
+    return {
+      modalVisible: Boolean(
+        modal && window.getComputedStyle(modal).display !== "none",
+      ),
+      gameplayReady:
+        window.GameRuntimeCoordinator?.isGameplayReady?.() === true,
+    };
+  });
+
+  if (briefingState.gameplayReady && !briefingState.modalVisible) {
+    return;
+  }
+
+  await page.evaluate(() => {
+    document.getElementById("start-game-btn")?.click();
+  });
+  await page.waitForFunction(
+    () => {
+      const modal = document.getElementById("how-to-play-modal");
+      const modalHidden = !modal || window.getComputedStyle(modal).display === "none";
+      return modalHidden || window.GameRuntimeCoordinator?.isGameplayReady?.() === true;
     },
     { timeout: 10000 },
   );
