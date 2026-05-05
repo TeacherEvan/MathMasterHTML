@@ -10,91 +10,175 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.95);
+    padding: clamp(1rem, 3vw, 2rem);
+    background:
+        radial-gradient(circle at top, rgba(142, 203, 117, 0.08), transparent 34%),
+        rgba(6, 9, 8, 0.9);
     z-index: 1000000;
     /* Above rotation overlay */
     display: flex;
     justify-content: center;
     align-items: center;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px);
 }
 
 .how-to-play-content {
-    background: linear-gradient(145deg, #0a0a0a, #1a1a2a);
-    border: 3px solid #ffd700;
-    /* Gold border */
-    border-radius: 20px;
-    padding: 40px;
+    width: min(42rem, 100%);
+    padding: clamp(1.25rem, 4vw, 2.2rem);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    background: linear-gradient(
+        180deg,
+        rgba(24, 29, 26, 0.98) 0%,
+        rgba(12, 15, 13, 0.98) 100%
+    );
+    box-shadow:
+        0 26px 64px rgba(0, 0, 0, 0.46),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
     max-width: 700px;
-    max-height: 80vh;
+    max-height: min(84vh, 52rem);
     overflow-y: auto;
-    box-shadow: 0 0 50px rgba(255, 215, 0, 0.5),
-        inset 0 0 30px rgba(255, 215, 0, 0.1);
     animation: modalFadeIn 0.5s ease-out;
 }
 
 .how-to-play-content h2 {
+    margin: 0 0 0.85rem;
     font-family: 'Orbitron', monospace;
-    font-size: 32px;
-    font-weight: 900;
-    color: #ffd700;
-    /* Gold */
-    text-align: center;
-    margin-bottom: 25px;
-    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8),
-        0 0 40px rgba(255, 215, 0, 0.4);
-    letter-spacing: 2px;
+    font-size: clamp(1.8rem, 3vw, 2.55rem);
+    font-weight: 800;
+    line-height: 0.95;
+    color: #ebe5d8;
+    text-align: left;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-shadow: 0 0 18px rgba(142, 203, 117, 0.14);
+}
+
+.how-to-play-kicker {
+    margin: 0 0 0.55rem;
+    color: #8ecb75;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
 }
 
 .how-to-play-message {
-    font-family: 'Orbitron', monospace;
-    font-size: 18px;
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.35rem;
+    font-family: 'Exo 2', sans-serif;
+    font-size: clamp(1rem, 1.5vw, 1.1rem);
     font-style: normal;
-    /* Normal (non-italic) as requested */
-    color: #00ffff;
-    /* Cyan */
-    line-height: 1.8;
-    text-align: justify;
-    margin-bottom: 30px;
-    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    color: #c2c8bf;
+    line-height: 1.65;
+    text-align: left;
+    text-shadow: none;
+}
+
+.how-to-play-message p {
+    margin: 0;
+}
+
+.how-to-play-callout {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.how-to-play-callout ul {
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+.how-to-play-callout li + li {
+    margin-top: 0.45rem;
 }
 
 .how-to-play-message strong {
-    color: #ff6b6b;
-    /* Red for emphasis */
-    font-weight: 900;
-    text-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+    color: #ebe5d8;
+    font-weight: 700;
+    text-shadow: none;
     font-style: normal;
-    /* Strong text not italic */
 }
 
 .start-game-button {
     display: block;
     width: 100%;
-    padding: 15px 30px;
-    background: linear-gradient(145deg, #ffd700, #ffed4e);
-    border: 3px solid #ffed4e;
-    border-radius: 10px;
+    min-height: 3.25rem;
+    padding: 0.95rem 1.25rem;
+    background: linear-gradient(
+        135deg,
+        rgba(236, 228, 184, 0.96),
+        rgba(199, 164, 76, 0.94) 54%,
+        rgba(154, 117, 45, 0.94)
+    );
+    border: 1px solid rgba(236, 228, 184, 0.26);
+    border-radius: 999px;
     font-family: 'Orbitron', monospace;
-    font-size: 22px;
-    font-weight: 900;
-    color: #000;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #0d100f;
     cursor: pointer;
-    /* PERFORMANCE: Only transition specific properties, not 'all' */
-    transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    transition:
+        background 220ms cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 220ms cubic-bezier(0.16, 1, 0.3, 1);
     text-transform: uppercase;
-    letter-spacing: 3px;
-    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+    letter-spacing: 0.18em;
+    box-shadow:
+        0 16px 32px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(199, 164, 76, 0.18);
 }
 
 .start-game-button:hover {
-    background: linear-gradient(145deg, #ffed4e, #ffd700);
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
-    transform: scale(1.05);
+    background: linear-gradient(
+        135deg,
+        rgba(243, 236, 199, 0.98),
+        rgba(208, 176, 92, 0.95) 56%,
+        rgba(166, 126, 48, 0.95)
+    );
+    border-color: rgba(243, 236, 199, 0.32);
+    box-shadow:
+        0 18px 34px rgba(0, 0, 0, 0.32),
+        0 0 0 1px rgba(199, 164, 76, 0.24);
+    transform: translateY(-1px);
 }
 
 .start-game-button:active {
     transform: scale(0.98);
+}
+
+.start-game-button:focus-visible {
+    outline: 2px solid #edf7dd;
+    outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+    .how-to-play-overlay {
+        padding: 0.85rem;
+        align-items: end;
+    }
+
+    .how-to-play-content {
+        width: 100%;
+        max-height: min(88vh, 44rem);
+        border-radius: 24px;
+    }
+
+    .how-to-play-content h2 {
+        letter-spacing: 0.1em;
+    }
+
+    .start-game-button {
+        font-size: 0.82rem;
+        letter-spacing: 0.14em;
+    }
 }
 
 /* ============================================

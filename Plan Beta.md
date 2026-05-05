@@ -93,6 +93,34 @@ Plan Beta is the roadmap and execution source of truth. It absorbs the old compe
 npx playwright test tests/tutorial-level-routing.spec.js tests/gameplay-exit-guard.spec.js tests/h2p-tutorial.spec.js --project=chromium --reporter=line
 ```
 
+## Active Feature Track: Welcome Surface Unification
+
+Status: in progress. Use this checklist as the monitoring surface for the welcome-to-level-select aesthetic unification work.
+
+### Doc consolidation
+
+- [x] Fold the imported welcome JTBD and aesthetic brief into `Plan Alpha.md` as the durable welcome-surface contract.
+- [x] Record the welcome page owner files and focused validation lane in `Plan Genesis.md`.
+- [x] Disregard or remove the imported exploratory `.github/superpower/ux/welcome-sith-*` notes after any remaining durable details are folded into the canonical plans.
+
+### Design contract
+
+- [x] Reframe the Marcus Aurelius quote as the welcome surface core principle.
+- [x] Shift the hero copy toward calm training-dossier language instead of a generic neon splash tone.
+- [x] Audit remaining welcome hero glow, accent, and texture decisions against the level-select premium benchmark.
+
+### Runtime surface changes
+
+- [x] Land a first-pass welcome hero content update in `src/pages/index.html`.
+- [x] Align `src/styles/css/index.core.css`, `src/styles/css/index.hero.css`, and `src/styles/css/index.logo.css` with the level-select palette and hierarchy where needed.
+- [x] Confirm the scoreboard modal remains a local utility path and not a competing primary action.
+
+### Validation and signoff
+
+- [x] Run `npx playwright test tests/welcome-page-redesign.spec.js tests/welcome-page-motion.spec.js --project=chromium --reporter=line`.
+- [x] Run `npm run verify`.
+- [x] Run `npm run typecheck`.
+
 ## Competition QA Policy
 
 ### Required Lanes

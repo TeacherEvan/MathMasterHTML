@@ -12,16 +12,10 @@ This file is the repo-wide routing and guardrail layer.
 
 ## Markdown Policy
 
-Only ten project Markdown files plus repo-local custom agent files in `.github/agents/*.agent.md` may exist in this repository:
+Consolidate new durable content into one of the three plan files based on scope:
 
-1. `.github/copilot-instructions.md`
-2. `JOBCARD.md`
-3. `Plan Genesis.md`
-4. `Plan Beta.md`
-5. `Plan Alpha.md`
-6. `README.md`
-
-Do not add any other `.md` files outside `.github/agents/*.agent.md`. Consolidate new durable content into one of the three plan files based on scope:
+- Temporary drafted plans may be created when needed during active work.
+- After the user verifies the work is complete and the agent logs that work to `JOBCARD.md`, those drafted plans must be disregarded and removed or folded into the authoritative docs.
 
 - `Plan Genesis.md`: runtime architecture, workflow, testing, performance, and subsystem contracts.
 - `Plan Beta.md`: roadmap, execution sequencing, validation lanes, backlog, and feature delivery policy.
@@ -82,7 +76,7 @@ Do not add any other `.md` files outside `.github/agents/*.agent.md`. Consolidat
 
 ## Documentation Upkeep
 
-- Fold duplicate or stale notes into the ten project Markdown files.
+- Fold duplicate or stale notes into the authoritative Markdown files that already own that scope.
 - Keep repo-local custom agent definitions in `.github/agents/*.agent.md` instead of adding new freeform docs.
 - Prefer updating an existing plan section over creating a new heading dump.
 - Keep every surviving Markdown file below 1000 lines.

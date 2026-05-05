@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   margin-top: 4px;
-  gap: 14px;
+  gap: 12px;
   width: min(100%, 430px);
   align-items: center;
 }
@@ -12,14 +12,14 @@
 .action-button {
   min-width: 200px;
   padding: 14px 22px;
-  font-size: 0.96rem;
+  font-size: 0.9rem;
   font-weight: 700;
   font-family: "Orbitron", monospace;
   border: 1px solid rgba(122, 255, 187, 0.22);
   border-radius: 999px;
   cursor: pointer;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   transition:
     transform 180ms ease,
     box-shadow 220ms ease,
@@ -56,9 +56,9 @@
   transform: translateY(-1px);
   border-color: color-mix(in srgb, var(--welcome-accent) 64%, transparent);
   box-shadow:
-    0 16px 36px rgba(0, 0, 0, 0.35),
+    0 12px 28px rgba(0, 0, 0, 0.32),
     0 0 0 1px color-mix(in srgb, var(--welcome-accent) 26%, transparent),
-    0 0 28px color-mix(in srgb, var(--welcome-accent) 22%, transparent);
+    0 0 18px color-mix(in srgb, var(--welcome-accent) 16%, transparent);
 }
 
 .action-button:focus-visible {
@@ -68,18 +68,18 @@
 
 .primary-action-button {
   width: 100%;
-  color: #08120e;
+  color: #0d100f;
   background:
-    linear-gradient(135deg, rgba(237, 240, 189, 0.98), rgba(124, 232, 176, 0.94) 58%, rgba(63, 170, 125, 0.94)),
-    rgba(122, 255, 187, 0.92);
-  border-color: rgba(213, 241, 176, 0.42);
+    linear-gradient(135deg, rgba(237, 240, 189, 0.98), rgba(199, 164, 76, 0.94) 56%, rgba(154, 117, 45, 0.94)),
+    rgba(199, 164, 76, 0.92);
+  border-color: rgba(237, 240, 189, 0.28);
   box-shadow:
-    0 18px 38px rgba(0, 0, 0, 0.36),
-    0 0 24px rgba(74, 224, 150, 0.2);
+    0 16px 32px rgba(0, 0, 0, 0.32),
+    0 0 0 1px rgba(199, 164, 76, 0.18);
 }
 
 .secondary-action-button {
-  color: color-mix(in srgb, var(--welcome-gold) 68%, var(--welcome-text));
+  color: color-mix(in srgb, var(--welcome-gold) 58%, var(--welcome-text));
   background:
     linear-gradient(135deg, rgba(20, 24, 21, 0.98), rgba(11, 14, 12, 0.94)),
     rgba(11, 24, 19, 0.92);
@@ -87,7 +87,7 @@
   min-width: 0;
   padding-inline: 1rem;
   font-size: 0.74rem;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   opacity: 0.9;
 }
 

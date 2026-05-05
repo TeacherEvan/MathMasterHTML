@@ -25,7 +25,10 @@ test.describe("Welcome page redesign", () => {
       "MATH MASTER",
     );
     await expect(page.locator("header[role='banner'] .subtitle")).toHaveText(
-      "Unlock Your Mind",
+      "Enter the training console",
+    );
+    await expect(page.locator("main[role='main'] .quote .quote-label")).toHaveText(
+      "Core principle",
     );
 
     await expect(page.locator("main[role='main'] blockquote")).toContainText(
@@ -143,7 +146,27 @@ test.describe("Welcome page redesign", () => {
   }) => {
     await page.goto(getWelcomeUrl(), { waitUntil: "domcontentloaded" });
 
-    await expect(page.locator("#scoreboard-button")).toBeVisible();
+    const cta = page.getByRole("button", { name: "Begin Training" });
+    const scoreboardButton = page.locator("#scoreboard-button");
+
+    await expect(cta).toBeVisible();
+    await expect(scoreboardButton).toBeVisible();
+    await expect(scoreboardButton).toHaveAttribute("aria-haspopup", "dialog");
+    await expect(scoreboardButton).toHaveAttribute(
+      "aria-controls",
+      "scoreboard-modal",
+    );
+
+    const [ctaBox, scoreboardBox] = await Promise.all([
+      cta.boundingBox(),
+      scoreboardButton.boundingBox(),
+    ]);
+
+    expect(ctaBox).toBeTruthy();
+    expect(scoreboardBox).toBeTruthy();
+    expect(scoreboardBox.width).toBeLessThan(ctaBox.width);
+    expect(scoreboardBox.y).toBeGreaterThanOrEqual(ctaBox.y + ctaBox.height);
+
     await page
       .locator("#scoreboard-button")
       .click({ force: true, noWaitAfter: true });

@@ -124,6 +124,15 @@ The identity moment is the rhythm between falling symbol rain and line-by-line a
 
 The level-select screen remains the benchmark for premium clarity: route identity, legibility, and restrained polish should pull the welcome and gameplay surfaces upward.
 
+## Welcome Surface Contract
+
+- The welcome page is the training-dossier ingress, not a separate arcade-style splash screen.
+- Welcome and level select should read as the same product world: dark ink structure, restrained phosphor signal, brass or ember accents, and calm briefing language.
+- The Marcus Aurelius quote remains on the welcome surface, but it should be framed as the core principle of the training system rather than a decorative epigraph.
+- Orbitron stays reserved for the hero title and HUD-like labels; supporting welcome copy should favor the calmer dossier mix already used by the premium route surfaces.
+- The welcome page should keep one clear primary action, keep local utilities secondary, and avoid noisy glow stacks that compete with the CTA.
+- Visual continuity matters more than novelty here: remove welcome-to-level-select whiplash before chasing extra effects.
+
 ## Current UX Decisions
 
 - welcome, level select, and gameplay must all preserve full-screen play ergonomics
@@ -163,6 +172,12 @@ The interface should feel confident, premium, and slightly ominous: more elite t
 - Premium clarity under pressure: interfaces must stay legible and navigable even during active play, with concise copy and strong hierarchy.
 - Practical accessibility: reduced motion, clear focus states, non-color cues, and touch-safe targets are part of the visual quality bar, not add-ons.
 
+### Welcome-Specific Opportunity
+
+- Current debt: the welcome page still risks feeling brighter and more promotional than the darker level-select dossier that follows it.
+- Desired effect: the first screen should feel like entering a serious training console for competitive algebra, not a generic neon landing page.
+- Immediate translation: use briefing-style copy, core-principle framing, and restrained atmosphere so the handoff into route selection feels intentional.
+
 ## Consolidation Record
 
 Alpha absorbed the old content from:
@@ -170,5 +185,8 @@ Alpha absorbed the old content from:
 - `task.md`
 - `.github/superpower/ux/*.md`
 - `.github/superpower/context/2026-04-07-design-unification-context-map.md`
+- `.github/superpower/ux/welcome-sith-aesthetic-jtbd.md`
+- `.github/superpower/ux/welcome-sith-aesthetic-journey.md`
+- `.github/superpower/ux/welcome-sith-aesthetic-flow.md`
 
 Those deleted files were exploratory or design-source inputs. Alpha is now the maintained design contract.

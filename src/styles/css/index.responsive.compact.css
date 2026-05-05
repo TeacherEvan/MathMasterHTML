@@ -43,8 +43,8 @@
     align-items: center;
     text-align: center;
     max-height: none;
-    gap: 12px;
-    padding: 16px 22px 18px;
+    gap: 10px;
+    padding: 14px 20px 16px;
   }
 
   .welcome-brief {
@@ -52,12 +52,12 @@
   }
 
   .logo-circle {
-    width: clamp(184px, 22vw, 212px);
+    width: clamp(180px, 20.4vw, 200px);
   }
 
   .quote {
-    margin-top: 12px;
-    padding: 14px 18px;
+    margin-top: 10px;
+    padding: 12px 18px;
   }
 
   .quote p {
@@ -65,8 +65,8 @@
   }
 
   .button-container {
-    margin-top: 8px;
-    gap: 10px;
+    margin-top: 6px;
+    gap: 8px;
   }
 
   .button-container .scoreboard-button {
@@ -80,12 +80,13 @@
   }
 
   .welcome-hint {
-    margin-top: 4px;
+    margin-top: 6px;
     font-size: 0.76rem;
   }
 
   .creator-credit {
-    font-size: 0.74rem;
+    margin-top: 2px;
+    font-size: 0.7rem;
   }
 }
 

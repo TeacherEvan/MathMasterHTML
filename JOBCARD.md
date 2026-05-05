@@ -1,5 +1,13 @@
 # JOBCARD
 
+## Latest update (2026-05-06)
+
+- Folded the imported welcome design brief into `Plan Alpha.md`, `Plan Beta.md`, and `Plan Genesis.md` so the welcome-to-level-select unification work now lives in the repo's canonical planning docs instead of temporary superpower markdown.
+- Reframed the welcome page in `src/pages/index.html` as a calmer training-dossier ingress, including the core-principle label for the Marcus Aurelius quote and briefing-style supporting copy.
+- Aligned the welcome shell, CTA hierarchy, logo treatment, matrix layer, and short-height responsive behavior in `src/styles/css/index.core.css`, `src/styles/css/index.actions.css`, `src/styles/css/index.hero.css`, `src/styles/css/index.logo.css`, `src/styles/css/index.matrix.css`, and `src/styles/css/index.responsive.compact.css` so the welcome screen reads closer to the level-select premium dossier aesthetic.
+- Added focused welcome regressions in `tests/welcome-page-redesign.spec.js` to keep the scoreboard modal as a secondary local utility path beneath the primary CTA, while preserving the existing `tests/welcome-scoreboard.spec.js` behavior coverage.
+- Verified the completed welcome slice with `npx playwright test tests/welcome-page-redesign.spec.js tests/welcome-page-motion.spec.js tests/welcome-scoreboard.spec.js --project=chromium --reporter=line`, `npm run verify`, and `npm run typecheck`.
+
 ## Latest update (2026-05-05)
 
 - Removed the console slot follow-up click timing hack and kept the console on a primary-pointer path with a programmatic click-safe fallback so Playwright, assistive activation, and live taps all resolve once.

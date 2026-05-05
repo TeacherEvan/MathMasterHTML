@@ -63,6 +63,13 @@ Use an HTTP server. Runtime assets are fetched dynamically, so `file://` is not 
 - UI structure lives in `src/pages/` and `src/styles/`; runtime assets and problem data live in `src/assets/`; tests that lock behavior live in `tests/`; verification and maintenance scripts live in `src/tools/`.
 - Root HTML files stay redirect-only entrypoints. Runtime edits should target the active pages in `src/pages/` and the owning script in `src/scripts/`.
 
+## Welcome Surface Ownership
+
+- The active welcome runtime page is `src/pages/index.html`; root `index.html` remains redirect-only.
+- The welcome visual shell is routed through `src/styles/css/index.css`, with the main aesthetic owners in `src/styles/css/index.core.css`, `src/styles/css/index.hero.css`, `src/styles/css/index.logo.css`, `src/styles/css/index.actions.css`, and `src/styles/css/index.matrix.css`.
+- Welcome-page behavior is orchestrated by `src/scripts/index-page.core.js`, while ambient visual behavior is owned by `src/scripts/index-page.effects.js` and `src/scripts/index-page.matrix.js`.
+- Focused verification for this surface is `npx playwright test tests/welcome-page-redesign.spec.js tests/welcome-page-motion.spec.js --project=chromium --reporter=line`.
+
 ## Script Naming Conventions
 
 - `*-manager.js`: subsystem ownership and coordination such as `display-manager.js`, `lock-manager.js`, and `score-timer-manager.js`.
