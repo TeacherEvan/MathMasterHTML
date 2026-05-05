@@ -63,11 +63,30 @@ async function clearAllQueuedWorms(page) {
   await page.evaluate(() => {
     window.wormSystem.killAllWorms();
     window.wormSystem.spawnManager?.clearQueue?.();
+    document
+      .querySelectorAll(".worm-muffin-reward")
+      .forEach((reward) => reward.remove());
   });
-  await page.waitForTimeout(250);
+  await page.waitForFunction(() => {
+    const activeWormCount = Array.isArray(window.wormSystem?.worms)
+      ? window.wormSystem.worms.filter((worm) => worm?.active).length
+      : 0;
+    const queuedSpawnCount =
+      window.wormSystem?.spawnManager?.getStatus?.()?.length ?? 0;
+    const blockingRewards = document.querySelectorAll(
+      ".worm-muffin-reward",
+    ).length;
+
+    return (
+      activeWormCount === 0 &&
+      queuedSpawnCount === 0 &&
+      blockingRewards === 0
+    );
+  });
 }
 
 async function openConsoleSelectionModal(page) {
+  await clearAllQueuedWorms(page);
   await page.waitForFunction(
     () =>
       !!window.consoleManager &&
@@ -90,7 +109,7 @@ async function openConsoleSelectionModal(page) {
 
 async function activateConsoleButton(locator, activation = "pointerdown") {
   if (activation === "click") {
-    await locator.click();
+    await locator.evaluate((node) => node.click());
     return;
   }
 
@@ -324,15 +343,18 @@ test.describe("Worm Spawn — 1× Panel B Green Worm", () => {
   test("second completed row spawns one additional green worm (+1 scaling)", async ({
     page,
   }) => {
+    await clearAllQueuedWorms(page);
+
     await page.evaluate(() => {
-      window.wormSystem.killAllWorms();
-      window.wormSystem.spawnManager?.clearQueue?.();
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
       );
-      // Keep row counter progression, but clear row-1 worms so only row-2 spawns are counted.
-      window.wormSystem.killAllWorms();
-      window.wormSystem.spawnManager?.clearQueue?.();
+    });
+
+    // Keep row counter progression, but wait for row-1 cleanup before counting row-2 spawns.
+    await clearAllQueuedWorms(page);
+
+    await page.evaluate(() => {
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 2 } }),
       );
@@ -359,9 +381,9 @@ test.describe("Worm Spawn — 1× Panel B Green Worm", () => {
   test("problem completion resets per-row spawn scaling for the next level", async ({
     page,
   }) => {
+    await clearAllQueuedWorms(page);
+
     await page.evaluate(() => {
-      window.wormSystem.killAllWorms();
-      window.wormSystem.spawnManager?.clearQueue?.();
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
       );
@@ -371,7 +393,11 @@ test.describe("Worm Spawn — 1× Panel B Green Worm", () => {
       document.dispatchEvent(
         new CustomEvent("problemCompleted", { detail: {} }),
       );
-      window.wormSystem.killAllWorms();
+    });
+
+    await clearAllQueuedWorms(page);
+    await page.evaluate(() => {
+      window.consoleManager?.hideSymbolSelectionModal?.();
       document.dispatchEvent(
         new CustomEvent("problemLineCompleted", { detail: { line: 1 } }),
       );

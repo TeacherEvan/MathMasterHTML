@@ -25,9 +25,18 @@ console.log("🎮 Console Manager events loading");
       element.addEventListener(
         "pointerdown",
         (event) => {
-          if (isNonPrimaryActivation(event) || !event.isPrimary) {
+          const hasPointerIdentity =
+            (typeof event.pointerId === "number" && event.pointerId > 0) ||
+            (typeof event.pointerType === "string" && event.pointerType.length > 0);
+
+          if (isNonPrimaryActivation(event)) {
             return;
           }
+
+          if (event.isPrimary === false && hasPointerIdentity) {
+            return;
+          }
+
           event.preventDefault();
           handler(event);
         },
