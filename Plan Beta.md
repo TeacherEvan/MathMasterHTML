@@ -39,6 +39,7 @@ Plan Beta is the roadmap and execution source of truth. It absorbs the old compe
 
 - compact/mobile classification stays centralized
 - tutorial and onboarding work must validate on WebView-like conditions
+- touch-first fixes should prefer owner-script heuristics and CSS `touch-action` over ad hoc timing-based click suppression
 
 ### Phase 3: UX and Accessibility
 
@@ -112,6 +113,7 @@ npx playwright test tests/tutorial-level-routing.spec.js tests/gameplay-exit-gua
 - broken critical event sequence
 - focused regression lane failure
 - mobile/WebView contract failure on a touched surface
+- console or symbol-rain touch regressions on `tests/console-interactions.spec.js`, `tests/game-portrait-device-contract.spec.js`, or `tests/symbol-rain.mobile.spec.js`
 
 ## Backlog Rules
 

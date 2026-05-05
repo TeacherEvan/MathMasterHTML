@@ -1,5 +1,12 @@
 # JOBCARD
 
+## Latest update (2026-05-05)
+
+- Removed the console slot follow-up click timing hack and kept the console on a primary-pointer path with a programmatic click-safe fallback so Playwright, assistive activation, and live taps all resolve once.
+- Centralized the Android WebView compact fallback in `src/scripts/display-manager.js` and toggled `body.console-compact-clearance` from the layout owner so compact Panel B overlap is handled by console-owned spacing instead of panel size overrides.
+- Hardened `src/scripts/symbol-rain.interactions.js` to resolve touch hits from live coordinates, `changedTouches`, and the active rain-window bounds, including the non-PointerEvent fallback path.
+- Verified the touched mobile surfaces with `npx playwright test tests/console-interactions.spec.js tests/game-portrait-device-contract.spec.js tests/symbol-rain.mobile.spec.js --reporter=list`.
+
 ## Latest update (2026-04-23)
 
 - Pinned the compact Panel B console against the panel border while reserving bottom clearance inside `#solution-container` so the final answer row is no longer obscured by the shortcut console.

@@ -61,6 +61,7 @@ The identity moment is the rhythm between falling symbol rain and line-by-line a
 - touch-first ergonomics beat desktop-first assumptions
 - desktop should feel like the expanded premium version, not the design source of truth
 - if a desktop-specific capability weakens mobile gameplay, trim the desktop affordance first
+- touch interactions must preserve assistive and programmatic activation parity; anti-ghosting logic cannot block legitimate synthetic clicks or screen-reader activation
 
 ## Color System
 
@@ -103,6 +104,7 @@ The identity moment is the rhythm between falling symbol rain and line-by-line a
 - maintain clear separation between problem display, solution/worm action, and symbol rain
 - use fluid spacing through `clamp()` on responsive surfaces
 - prioritize readable touch targets and non-overlapping HUD zones
+- compact-console overlap fixes must come from console-owned clearance, not panel dimension changes
 
 ## Accessibility
 

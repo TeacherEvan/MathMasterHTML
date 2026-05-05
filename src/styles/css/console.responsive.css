@@ -208,3 +208,9 @@
     justify-self: stretch;
   }
 }
+
+/* Compact mobile console overlap clearance */
+body.console-compact-clearance #panel-b {
+  padding-bottom: calc(var(--console-slot-size, 50px) + 24px);
+}
+

@@ -20,6 +20,9 @@ Open `http://localhost:8000/game.html?level=beginner` after the server starts.
 ## Runtime Notes
 
 - `src/scripts/display-manager.js` owns panel sizing and compact/mobile classification.
+- Compact mobile console clearance is exposed through `body.console-compact-clearance`; Panel A and Panel B dimensions should not be overridden to make room for the floating console.
+- Console and symbol-choice touch latency is handled with CSS `touch-action` plus primary-pointer activation, while programmatic `click()` paths remain valid for tests and assistive tooling.
+- Symbol rain mobile targeting resolves against live `#symbol-rain-container` bounds and touch coordinates instead of stale panel-only geometry.
 - Problem content lives under `src/assets/problems/Assets/` as runtime JSON.
 - `service-worker.js` handles offline and update behavior.
 - Use an HTTP server; `file://` is not supported for runtime assets.
@@ -44,3 +47,4 @@ Open `http://localhost:8000/game.html?level=beginner` after the server starts.
 
 - `npm run verify`
 - `npm run typecheck`
+- `npx playwright test tests/console-interactions.spec.js tests/game-portrait-device-contract.spec.js tests/symbol-rain.mobile.spec.js --reporter=list`

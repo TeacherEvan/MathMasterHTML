@@ -216,7 +216,8 @@ class DisplayManager {
         : 0;
     const hasTouchRuntime =
       maxTouchPoints > 0 ||
-      window.matchMedia?.("(any-pointer: coarse)")?.matches === true;
+      window.matchMedia?.("(any-pointer: coarse)")?.matches === true ||
+      /Android|Tablet|Mobile|iP(hone|ad|od)|webOS/i.test(userAgent);
     const isAndroid = /Android/i.test(userAgent);
     const isKnownTabletClassAndroidUa =
       /Tablet|\bSM-T\w+\b|\bNexus (7|9|10)\b|\bPixel C\b|\bLenovo TB-[A-Z0-9]+\b/i.test(
@@ -259,7 +260,11 @@ class DisplayManager {
     const coarsePointerQuery = window.matchMedia?.(
       "(hover: none) and (pointer: coarse)",
     );
-    const hasCoarsePointer = Boolean(coarsePointerQuery?.matches);
+    const platformHints = this.getMobilePlatformHints();
+    const hasCoarsePointer =
+      Boolean(coarsePointerQuery?.matches) ||
+      platformHints.isAndroidPhoneLikeRuntime ||
+      platformHints.isTabletLikeAndroidRuntime;
     const {
       mobileMaxWidth,
       compactMaxWidth,
@@ -267,7 +272,6 @@ class DisplayManager {
       compactLandscapeWidth,
       compactLandscapeMaxHeight,
     } = this.compactViewportConfig;
-    const platformHints = this.getMobilePlatformHints();
     const isLandscape = width >= height;
     const isPortrait = height > width;
     const isCompactNarrowViewport = width <= mobileMaxWidth;
@@ -280,7 +284,6 @@ class DisplayManager {
       width <= compactMaxWidth && height <= compactMaxHeight;
     const isCompactAndroidWebViewFallback =
       platformHints.isAndroidPhoneLikeRuntime &&
-      !hasCoarsePointer &&
       isLandscape &&
       width <= compactMaxWidth &&
       height <= compactLandscapeWidth;
@@ -348,6 +351,10 @@ class DisplayManager {
       detected.shouldShowRotationOverlay
         ? "viewport-rotate-required"
         : "viewport-rotate-not-required",
+    );
+    document.body.classList.toggle(
+      "console-compact-clearance",
+      detected.isCompactViewport === true,
     );
   }
 

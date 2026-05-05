@@ -159,6 +159,14 @@ Do not reorder scripts casually. If a runtime dependency changes, validate the f
 - Symbol-rain visibility and Evan target selection both use the actual `#symbol-rain-container` intersection contract, not stale cached geometry or panel-local bounds alone.
 - `problemLineCompleted` may include additive provenance detail, and listeners should keep existing behavior when the field is absent.
 
+### Mobile Touch Contracts
+
+- `src/scripts/console-manager.events.js` owns console-slot activation: live taps use the primary `pointerdown` path, while the `click` fallback remains available for programmatic and assistive activation. Do not reintroduce time-window follow-up click suppression.
+- `src/scripts/display-manager.js` is the only owner of compact/mobile classification, including Android WebView fallback when coarse-pointer media queries lie.
+- Compact Panel B overlap recovery must be exposed as `body.console-compact-clearance` and consumed from console-owned CSS; do not resize Panel A or Panel B to create that space.
+- `src/scripts/symbol-rain.interactions.js` must resolve touch collection from live coordinates and the current `#symbol-rain-container` bounds, including `changedTouches` fallback when Pointer Events are unavailable.
+- Focused validation for this surface is `npx playwright test tests/console-interactions.spec.js tests/game-portrait-device-contract.spec.js tests/symbol-rain.mobile.spec.js --reporter=list`.
+
 ### Spawn Rules
 
 - `problemLineCompleted` increments `rowsCompleted`.

@@ -51,6 +51,7 @@ test.describe("Console interactions", () => {
   }) => {
     await prepareConsoleSlot(page);
 
+    page.on('console', msg => console.log(msg.text()));
     await page.evaluate(() => {
       document.querySelector('[data-slot="0"]')?.click();
     });

@@ -235,22 +235,29 @@
     };
 
     const resolvePointerSymbolElement = (event) => {
-      const directTarget = event.target.closest(
+      const directTarget = event.target?.closest?.(
         ".falling-symbol[data-symbol-state='visible']",
-      );
+      ) || null;
 
       const isTouchLikeInteraction =
         event.pointerType === "touch" ||
-        window.matchMedia?.("(pointer: coarse)")?.matches === true;
+        (event.changedTouches && event.changedTouches.length > 0) ||
+        window.matchMedia?.("(any-pointer: coarse)")?.matches === true ||
+        (typeof navigator !== "undefined" && typeof navigator.maxTouchPoints === "number" && navigator.maxTouchPoints > 0);
 
       if (!isTouchLikeInteraction) {
         return directTarget;
       }
 
-      const hasPointerCoordinates =
-        typeof event.clientX === "number" && typeof event.clientY === "number";
+      let clientX = event.clientX;
+      let clientY = event.clientY;
 
-      if (!hasPointerCoordinates) {
+      if (event.changedTouches && event.changedTouches.length > 0) {
+        clientX = event.changedTouches[0].clientX;
+        clientY = event.changedTouches[0].clientY;
+      }
+
+      if (typeof clientX !== "number" || typeof clientY !== "number") {
         return directTarget;
       }
 
@@ -261,18 +268,16 @@
 
       let bestCandidate = null;
       let bestDistanceSquared = Number.POSITIVE_INFINITY;
+      const devicePixelRatio = Math.max(window.devicePixelRatio || 1, 1);
+      const touchRadius = Math.max(26 * devicePixelRatio, 44);
 
       for (const candidate of candidates) {
         const { rect } = candidate;
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
-        const distanceX = centerX - event.clientX;
-        const distanceY = centerY - event.clientY;
+        const distanceX = centerX - clientX;
+        const distanceY = centerY - clientY;
         const distanceSquared = distanceX * distanceX + distanceY * distanceY;
-        const touchRadius = Math.max(
-          26,
-          Math.min(rect.width, rect.height) * 0.52,
-        );
 
         if (distanceSquared > touchRadius * touchRadius) {
           continue;
@@ -312,9 +317,7 @@
 
     if (!window.PointerEvent) {
       handleFallbackClick = (event) => {
-        const fallingSymbolElement = event.target.closest(
-          ".falling-symbol[data-symbol-state='visible']",
-        );
+        const fallingSymbolElement = resolvePointerSymbolElement(event);
         if (
           fallingSymbolElement &&
           symbolRainContainer.contains(fallingSymbolElement)
@@ -323,6 +326,11 @@
         }
       };
 
+      symbolRainContainer.addEventListener(
+        "touchstart",
+        handleFallbackClick,
+        pointerListenerOptions,
+      );
       symbolRainContainer.addEventListener("click", handleFallbackClick);
     }
 

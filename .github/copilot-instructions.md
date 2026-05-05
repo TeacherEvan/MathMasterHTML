@@ -41,6 +41,8 @@ Do not add any other `.md` files outside `.github/agents/*.agent.md`. Consolidat
 ### When editing compact Panel B console layout, Evan helper symbol collection, or install prompt touch flows
 
 - Keep Panel B sizing ownership in `src/scripts/display-manager.js`, but fix compact answer/console overlap by adjusting console-owned CSS clearance rather than changing panel dimensions.
+- Keep compact console clearance wired from `display-manager.js` through `body.console-compact-clearance`; do not recreate spacing with panel height overrides.
+- Keep console and symbol touch handling programmatic-click safe: prefer primary pointer handling plus CSS `touch-action`, and do not reintroduce timing-based follow-up click suppression.
 - Route Evan auto symbol collection through the same Symbol Rain helper path used by live Panel C interaction so DOM, active-rain state, and gameplay events stay in sync.
 - Keep Evan hand movement clamped to the visible Panel C playfield when targeting live rain symbols near an edge.
 - Treat the deferred install prompt as single-flight UI: repeated touch or click bursts must not re-enter `prompt()` while a native prompt cycle is already in progress.

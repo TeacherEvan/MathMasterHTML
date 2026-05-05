@@ -11,22 +11,9 @@ console.log("🎮 Console Manager events loading");
   const GameEvents = window.GameEvents || {
     SYMBOL_CLICKED: "symbolClicked",
   };
-  const POINTER_FOLLOWUP_CLICK_WINDOW_MS = 400;
-  const recentPointerActivations = new WeakMap();
-
-  function shouldIgnoreFollowupClick(element) {
-    const lastPointerActivation = recentPointerActivations.get(element);
-
-    if (typeof lastPointerActivation !== "number") {
-      return false;
-    }
-
-    return performance.now() - lastPointerActivation <
-      POINTER_FOLLOWUP_CLICK_WINDOW_MS;
-  }
 
   function isNonPrimaryActivation(event) {
-    return event instanceof MouseEvent && event.button !== 0;
+    return event.button !== 0;
   }
 
   function bindPrimaryActivation(element, handler) {
@@ -38,11 +25,9 @@ console.log("🎮 Console Manager events loading");
       element.addEventListener(
         "pointerdown",
         (event) => {
-          if (isNonPrimaryActivation(event)) {
+          if (isNonPrimaryActivation(event) || !event.isPrimary) {
             return;
           }
-
-          recentPointerActivations.set(element, performance.now());
           event.preventDefault();
           handler(event);
         },
@@ -54,7 +39,12 @@ console.log("🎮 Console Manager events loading");
           return;
         }
 
-        if (event.detail !== 0 && shouldIgnoreFollowupClick(element)) {
+        // We already handled pointerdown. If this is a physical browser-generated click,
+        // it will have a pointerId > 0 or a valid pointerType. 
+        // Programmatic clicks (e.g. from tests or screen readers) typically have empty pointerType 
+        // and pointerId <= 0 (or undefined).
+        // By relying on pointer ID / pointerType directly, we ignore follow-up clicks seamlessly natively.
+        if ((typeof event.pointerId === "number" && event.pointerId > 0) || event.pointerType) {
           return;
         }
 
