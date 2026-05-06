@@ -97,6 +97,10 @@
   line-height: 1.8;
 }
 
+#solution-container[data-solution-visibility="hidden"] .steps-container {
+  width: 100%;
+}
+
 .solution-step {
   opacity: 0;
   transform: translate3d(0, 0.5rem, 0);
@@ -130,6 +134,18 @@
   user-select: none;
   -webkit-user-select: none;
   pointer-events: none;
+}
+
+#solution-container[data-solution-visibility="hidden"] .hidden-symbol {
+  background: linear-gradient(
+    180deg,
+    rgba(199, 164, 76, 0.16),
+    rgba(142, 203, 117, 0.08)
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(235, 229, 216, 0.08),
+    0 0 0 1px rgba(142, 203, 117, 0.06);
+  opacity: 0.72;
 }
 
 .hidden-symbol::selection {

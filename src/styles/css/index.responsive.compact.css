@@ -92,7 +92,7 @@
 
 @media (max-height: 520px) {
   body.welcome-page {
-    padding: 0 10px 4px;
+    padding: 0 10px 2px;
     gap: 0;
   }
 
@@ -128,8 +128,8 @@
     align-items: center;
     text-align: center;
     max-height: none;
-    gap: 3px;
-    padding: 5px 10px 6px;
+    gap: 10px;
+    padding: 4px 10px;
     border-radius: 22px;
   }
 
@@ -152,7 +152,9 @@
   }
 
   .logo-circle {
-    width: 164px;
+    width: 180px;
+    height: 146px;
+    aspect-ratio: auto;
   }
 
   .logo-variables span {
@@ -164,31 +166,31 @@
   .quote {
     width: 100%;
     margin-top: 10px;
-    padding: 4px 8px 0;
+    padding: 2px 8px 0;
   }
 
   .quote-label {
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.2rem;
     font-size: 0.58rem;
     letter-spacing: 0.12em;
   }
 
   .quote p {
-    font-size: clamp(0.72rem, 1.2vw, 0.82rem);
-    line-height: 1.18;
+    font-size: clamp(0.69rem, 1.08vw, 0.78rem);
+    line-height: 1.08;
   }
 
   .quote footer {
-    margin-top: 2px;
-    font-size: 0.58rem;
+    margin-top: 1px;
+    font-size: 0.5rem;
   }
 
   .button-container {
     display: flex;
     flex-direction: column;
     width: min(100%, 288px);
-    margin-top: 10px;
-    gap: 4px;
+    margin-top: 6px;
+    gap: 0;
     align-items: center;
   }
 
@@ -216,16 +218,17 @@
 
   .welcome-hint,
   .creator-credit {
-    font-size: 0.58rem;
+    font-size: 0.57rem;
     line-height: 1.12;
   }
 
   .welcome-hint {
-    margin-top: 8px;
+    margin-top: 6px;
   }
 
   .creator-credit {
-    margin-top: 6px;
+    margin-top: 2px;
+    font-size: 0.54rem;
   }
 }
 

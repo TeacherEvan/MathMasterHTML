@@ -2,6 +2,21 @@
 console.log("🎯 GameSymbolHelpers loading...");
 
 (function attachGameSymbolHelpers() {
+  function syncSolutionVisibilityState(container) {
+    const solutionContainer =
+      container || document.getElementById("solution-container");
+
+    if (!solutionContainer) {
+      return;
+    }
+
+    const hasHiddenSymbols =
+      solutionContainer.querySelector(".hidden-symbol") !== null;
+
+    solutionContainer.dataset.solutionVisibility =
+      hasHiddenSymbols ? "hidden" : "active";
+  }
+
   function getSymbolValue(element) {
     return String(element?.dataset?.expected || element?.textContent || "").trim();
   }
@@ -20,6 +35,7 @@ console.log("🎯 GameSymbolHelpers loading...");
     element.classList.remove("revealed-symbol");
     element.classList.add("hidden-symbol");
     element.style.visibility = "visible";
+    syncSolutionVisibilityState(element.closest("#solution-container"));
 
     return symbolValue;
   }
@@ -34,6 +50,7 @@ console.log("🎯 GameSymbolHelpers loading...");
     element.classList.remove("hidden-symbol");
     element.classList.add("revealed-symbol");
     element.style.visibility = "visible";
+    syncSolutionVisibilityState(element.closest("#solution-container"));
 
     return symbolValue;
   }
@@ -110,5 +127,6 @@ console.log("🎯 GameSymbolHelpers loading...");
     revealSpecificSymbol,
     setHiddenSymbolState,
     setRevealedSymbolState,
+    syncSolutionVisibilityState,
   };
 })();

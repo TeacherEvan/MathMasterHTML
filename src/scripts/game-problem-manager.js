@@ -168,6 +168,7 @@ console.log("📚 Game problem manager module loading...");
     });
 
     solutionContainer.appendChild(stepsContainer);
+    window.GameSymbolHelpers?.syncSolutionVisibilityState?.(solutionContainer);
   }
 
   function nextProblem() {

@@ -183,4 +183,78 @@ test.describe("Gameplay ultra-narrow embedded landscape layout", () => {
     expect(layout.back.bottom).toBeLessThanOrEqual(layout.viewport.height + 1);
     expect(layout.audio.bottom).toBeLessThanOrEqual(layout.viewport.height + 1);
   });
+
+  test("keeps the hidden solution layout stable after the first reveal", async ({
+    page,
+  }) => {
+    await gotoGameRuntime(page, "?level=beginner");
+
+    await dismissBriefing(page);
+
+    await page.waitForFunction(() => {
+      const solution = document.getElementById("solution-container");
+      const steps = document.querySelector(".steps-container");
+      const overlay = document.getElementById("rotation-overlay");
+      return (
+        document.body.classList.contains("viewport-compact") &&
+        document.body.classList.contains("viewport-landscape") &&
+        overlay &&
+        window.getComputedStyle(overlay).display === "none" &&
+        solution &&
+        steps &&
+        solution.querySelectorAll(".hidden-symbol").length > 1
+      );
+    });
+
+    const before = await page.evaluate(() => {
+      const solution = document.getElementById("solution-container");
+      const steps = document.querySelector(".steps-container");
+
+      if (!(solution instanceof HTMLElement) || !(steps instanceof HTMLElement)) {
+        return null;
+      }
+
+      return {
+        solutionVisibility: solution.dataset.solutionVisibility || null,
+        hiddenCount: solution.querySelectorAll(".hidden-symbol").length,
+        stepsWidth: steps.getBoundingClientRect().width,
+        solutionWidth: solution.getBoundingClientRect().width,
+      };
+    });
+
+    expect(before).not.toBeNull();
+    expect(before?.solutionVisibility).toBe("hidden");
+    expect(before?.hiddenCount ?? 0).toBeGreaterThan(1);
+
+    await page.locator("#help-button").click({ force: true });
+    await page.waitForTimeout(400);
+
+    const after = await page.evaluate(() => {
+      const solution = document.getElementById("solution-container");
+      const steps = document.querySelector(".steps-container");
+
+      if (!(solution instanceof HTMLElement) || !(steps instanceof HTMLElement)) {
+        return null;
+      }
+
+      return {
+        solutionVisibility: solution.dataset.solutionVisibility || null,
+        hiddenCount: solution.querySelectorAll(".hidden-symbol").length,
+        revealedCount: solution.querySelectorAll(".revealed-symbol").length,
+        stepsWidth: steps.getBoundingClientRect().width,
+        solutionWidth: solution.getBoundingClientRect().width,
+      };
+    });
+
+    expect(after).not.toBeNull();
+    expect(after?.revealedCount ?? 0).toBeGreaterThan(0);
+    expect(after?.hiddenCount ?? 0).toBeGreaterThan(0);
+    expect(after?.solutionVisibility).toBe("hidden");
+    expect(after?.stepsWidth ?? 0).toBeLessThanOrEqual(
+      (after?.solutionWidth ?? 0) + 1,
+    );
+    expect(
+      Math.abs((after?.stepsWidth ?? 0) - (before?.stepsWidth ?? 0)),
+    ).toBeLessThanOrEqual(1);
+  });
 });
