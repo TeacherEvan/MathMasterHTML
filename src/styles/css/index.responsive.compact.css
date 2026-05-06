@@ -92,23 +92,22 @@
 
 @media (max-height: 520px) {
   body.welcome-page {
-    padding: 0 12px 4px;
+    padding: 0 10px 4px;
     gap: 0;
   }
 
   .welcome-header {
     align-items: center;
-    gap: 2px;
+    gap: 1px;
     padding-top: 0;
     text-align: center;
   }
 
   .page-kicker {
-    font-size: 0.58rem;
-    letter-spacing: 0.24em;
+    font-size: 0.52rem;
+    letter-spacing: 0.2em;
   }
 
-  .page-kicker,
   .subtitle {
     display: none;
   }
@@ -118,12 +117,9 @@
   }
 
   .main-title {
-    font-size: clamp(1.6rem, 5.1vw, 2.8rem);
-  }
-
-  .subtitle {
-    font-size: clamp(0.68rem, 1.45vw, 0.88rem);
+    font-size: clamp(1.18rem, 3.4vw, 1.85rem);
     letter-spacing: 0.12em;
+    line-height: 0.88;
   }
 
   .welcome-container {
@@ -132,8 +128,8 @@
     align-items: center;
     text-align: center;
     max-height: none;
-    gap: 6px;
-    padding: 8px 12px 8px;
+    gap: 3px;
+    padding: 5px 10px 6px;
     border-radius: 22px;
   }
 
@@ -156,7 +152,7 @@
   }
 
   .logo-circle {
-    width: 180px;
+    width: 164px;
   }
 
   .logo-variables span {
@@ -167,27 +163,33 @@
 
   .quote {
     width: 100%;
-    margin-top: 14px;
-    padding: 5px 10px;
+    margin-top: 10px;
+    padding: 4px 8px 0;
+  }
+
+  .quote-label {
+    margin-bottom: 0.3rem;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
   }
 
   .quote p {
-    font-size: clamp(0.72rem, 1.35vw, 0.86rem);
-    line-height: 1.16;
+    font-size: clamp(0.72rem, 1.2vw, 0.82rem);
+    line-height: 1.18;
   }
 
   .quote footer {
-    margin-top: 4px;
-    font-size: 0.6rem;
+    margin-top: 2px;
+    font-size: 0.58rem;
   }
 
   .button-container {
-    display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.85fr);
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 288px);
     margin-top: 10px;
-    gap: 6px;
-    align-items: stretch;
+    gap: 4px;
+    align-items: center;
   }
 
   .button-container .scoreboard-button {
@@ -197,26 +199,29 @@
   .action-button {
     min-width: 0;
     min-height: 44px;
-    padding: 6px 10px;
-    font-size: 0.66rem;
+    padding: 7px 10px;
+    font-size: 0.64rem;
     letter-spacing: 0.08em;
   }
 
   .primary-action-button {
-    grid-column: auto;
+    width: 100%;
   }
 
   .scoreboard-button {
-    justify-self: stretch;
+    width: auto;
+    min-width: min(100%, 190px);
+    align-self: center;
   }
 
   .welcome-hint,
   .creator-credit {
-    font-size: 0.62rem;
+    font-size: 0.58rem;
+    line-height: 1.12;
   }
 
   .welcome-hint {
-    margin-top: 10px;
+    margin-top: 8px;
   }
 
   .creator-credit {

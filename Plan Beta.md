@@ -121,6 +121,59 @@ Status: in progress. Use this checklist as the monitoring surface for the welcom
 - [x] Run `npm run verify`.
 - [x] Run `npm run typecheck`.
 
+## Active Feature Track: Entry Flow Hardening
+
+Status: planned. This track covers a balanced hardening pass across welcome, level select, and game startup entry flows using tests first and the smallest defensive fixes needed to close real gaps.
+
+### Scope guardrails
+
+- Tests and small defensive fixes only.
+- Do not redesign surfaces or change the script-tag boot order.
+- Keep redirects redirect-only and keep runtime edits pinned to the active pages in `src/pages/` plus their owning scripts.
+
+### Workstream 1: Welcome bad-state and copy stress
+
+- [ ] Add welcome regressions for malformed `localStorage` or `sessionStorage`, missing or malformed scoreboard payloads, and oversized or translated player names.
+- [ ] Confirm the new welcome hardening assertions fail before implementation.
+- [ ] Apply the smallest welcome fix: safe parse, bounded display text, fallback labels, and no-throw scoreboard rendering.
+- [ ] Rerun the welcome hardening lane.
+
+### Workstream 2: Redirect continuity under seeded state
+
+- [ ] Extend redirect-entrypoint coverage so query and hash are preserved exactly while seeded state and startup parameters are present.
+- [ ] Confirm the new redirect continuity assertions fail before implementation.
+- [ ] Apply the smallest redirect fix so root entrypoints do not branch on fragile stored state.
+- [ ] Rerun the redirect lane.
+
+### Workstream 3: Level select degraded storage and CTA continuity
+
+- [ ] Add level-select regressions for malformed profile/settings payloads, long localized player names, and seeded-state launch continuity.
+- [ ] Confirm the new level-select hardening assertions fail before implementation.
+- [ ] Apply the smallest level-select fix around profile/settings reads and text containment without redesigning the route cards.
+- [ ] Rerun the level-select lane.
+
+### Workstream 4: Game startup partial-boot consistency
+
+- [ ] Add startup-preload regressions for malformed settings, absent optional preload data, and partial-boot scenarios that should degrade to defaults instead of stalling.
+- [ ] Confirm the new startup-preload assertions fail before implementation.
+- [ ] Apply the smallest startup fix: safe defaults, guarded hydration, and explicit fallback continuation when preload/bootstrap inputs are invalid.
+- [ ] Rerun the startup-preload lane.
+
+### Acceptance criteria
+
+1. Welcome and level-select surfaces render without uncaught errors when persisted state is missing, malformed, or semantically invalid.
+2. Long or translated player names and copy do not break primary entry actions or obscure critical controls.
+3. Root redirect entrypoints preserve query and hash exactly while forwarding into `src/pages/` routes.
+4. Game startup reaches a defined fallback-ready state under degraded settings/storage instead of hanging in partial boot.
+5. All fixes stay additive and local to existing entry-flow owners.
+
+### Validation and signoff
+
+- [ ] Run `npx playwright test tests/welcome-page-redesign.spec.js tests/welcome-scoreboard.spec.js --project=chromium --reporter=line`.
+- [ ] Run `npx playwright test tests/level-select-interactions.spec.js tests/redirect-entrypoints.spec.js tests/startup-preload.spec.js --project=chromium --reporter=line`.
+- [ ] Run `npm run verify`.
+- [ ] Run `npm run typecheck`.
+
 ## Competition QA Policy
 
 ### Required Lanes

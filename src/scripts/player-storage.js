@@ -15,13 +15,12 @@ console.log("💾 PlayerStorage loading...");
     RECENT_HISTORY_LIMIT,
     createEmptyLevelStats,
     createDefaultProfile,
+    normalizePlayerName,
     normalizeLevelStats,
     normalizeRecentHistory,
     buildOverallSummary,
     migrateProfile,
   } = helpers;
-
-  const MAX_PLAYER_NAME_LENGTH = 18;
 
   function safeParse(json) {
     if (!json) return null;
@@ -32,13 +31,6 @@ console.log("💾 PlayerStorage loading...");
     }
   }
 
-  function normalizePlayerName(value) {
-    if (typeof value !== "string") {
-      return "";
-    }
-
-    return value.replace(/\s+/g, " ").trim().slice(0, MAX_PLAYER_NAME_LENGTH);
-  }
 
   const PlayerStorage = {
     STORAGE_KEY,

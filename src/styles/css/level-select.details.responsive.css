@@ -158,11 +158,11 @@
   }
 
   .stat-value {
-    font-size: 0.96rem;
+    font-size: 1rem;
   }
 
   .stat-label {
-    font-size: 0.58rem;
+    font-size: 0.64rem;
     letter-spacing: 0.12em;
   }
 
@@ -172,7 +172,7 @@
   }
 
   .progress-label {
-    font-size: 0.64rem;
+    font-size: 0.68rem;
   }
 
   .level-button {

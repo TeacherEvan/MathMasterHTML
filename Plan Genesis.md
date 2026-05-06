@@ -70,6 +70,14 @@ Use an HTTP server. Runtime assets are fetched dynamically, so `file://` is not 
 - Welcome-page behavior is orchestrated by `src/scripts/index-page.core.js`, while ambient visual behavior is owned by `src/scripts/index-page.effects.js` and `src/scripts/index-page.matrix.js`.
 - Focused verification for this surface is `npx playwright test tests/welcome-page-redesign.spec.js tests/welcome-page-motion.spec.js --project=chromium --reporter=line`.
 
+## Entry Flow Hardening Contract
+
+- Treat persisted profile, scoreboard, onboarding, session, and settings state as untrusted input across welcome, level select, redirect entrypoints, and game startup.
+- Parse or hydrate stored state defensively: malformed or semantically invalid payloads must fall back to defaults instead of throwing or stalling the entry flow.
+- Root redirect entrypoints must preserve `location.search` and `location.hash` exactly while forwarding into the active `src/pages/` runtime pages.
+- Entry-flow hardening fixes should stay local to existing owners such as `index-page.*`, `level-select-page.*`, redirect helpers, settings/storage modules, and startup/preload bootstrap scripts; do not reorder `src/pages/game.html` boot scripts as part of resilience work.
+- Focused validation for this contract is `npx playwright test tests/welcome-page-redesign.spec.js tests/welcome-scoreboard.spec.js tests/level-select-interactions.spec.js tests/redirect-entrypoints.spec.js tests/startup-preload.spec.js --project=chromium --reporter=line` plus `npm run verify` and `npm run typecheck`.
+
 ## Script Naming Conventions
 
 - `*-manager.js`: subsystem ownership and coordination such as `display-manager.js`, `lock-manager.js`, and `score-timer-manager.js`.

@@ -124,4 +124,113 @@ test.describe("Welcome scoreboard", () => {
 
     expect(storedProfile?.name).toBe("Ada");
   });
+
+  test("clamps oversized persisted player names before rendering the scoreboard", async ({
+    page,
+  }) => {
+    await page.addInitScript((storageKey) => {
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          version: 3,
+          name: "  The Eternal Algebra Commander  ",
+          levels: {},
+          recentHistory: [],
+          overall: {
+            totalScore: 0,
+            problemsCompleted: 0,
+            lastPlayed: null,
+          },
+          updatedAt: 1735689600000,
+        }),
+      );
+    }, PROFILE_KEY);
+
+    await page.goto("/src/pages/index.html");
+    await page.locator("#scoreboard-button").click({
+      force: true,
+      noWaitAfter: true,
+    });
+
+    await expect(page.locator("#scoreboard-player-name")).toHaveText(
+      "The Eternal Algebr",
+    );
+
+    const storedProfile = await page.evaluate((storageKey) => {
+      return JSON.parse(localStorage.getItem(storageKey) || "null");
+    }, PROFILE_KEY);
+
+    expect(storedProfile?.name).toBe("The Eternal Algebr");
+  });
+
+  test("keeps the modal usable on short landscape screens", async ({ page }) => {
+    await page.addInitScript((storageKey) => {
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          version: 3,
+          name: "Neo",
+          levels: {
+            beginner: {
+              totalScore: 43210,
+              bestProblemScore: 12345,
+              lastProblemScore: 9000,
+              problemsCompleted: 7,
+              lastPlayed: 1735689600000,
+            },
+          },
+          overall: {
+            totalScore: 43210,
+            problemsCompleted: 7,
+            lastPlayed: 1735689600000,
+          },
+          recentHistory: [
+            {
+              levelKey: "beginner",
+              score: 12345,
+              completedAt: 1735689600000,
+            },
+          ],
+          updatedAt: 1735689600000,
+        }),
+      );
+    }, PROFILE_KEY);
+
+    await page.setViewportSize({ width: 844, height: 390 });
+    await page.goto("/src/pages/index.html");
+    await page.locator("#scoreboard-button").click({
+      force: true,
+      noWaitAfter: true,
+    });
+
+    const modal = page.locator(".scoreboard-modal-content");
+    const historyItem = page.locator(".scoreboard-history-item").first();
+    const historyScore = page.locator(".scoreboard-history-score").first();
+    const closeButton = page.locator("#scoreboard-close-button");
+
+    await expect(page.locator("#scoreboard-modal")).toBeVisible();
+    await expect(closeButton).toBeVisible();
+    await expect(page.locator("#scoreboard-name-input")).toBeVisible();
+
+    const [modalBox, closeBox, historyBox, scoreBox] = await Promise.all([
+      modal.boundingBox(),
+      closeButton.boundingBox(),
+      historyItem.boundingBox(),
+      historyScore.boundingBox(),
+    ]);
+
+    expect(modalBox).toBeTruthy();
+    expect(closeBox).toBeTruthy();
+    expect(historyBox).toBeTruthy();
+    expect(scoreBox).toBeTruthy();
+
+    expect(modalBox.x).toBeGreaterThanOrEqual(0);
+    expect(modalBox.y).toBeGreaterThanOrEqual(0);
+    expect(modalBox.x + modalBox.width).toBeLessThanOrEqual(844);
+    expect(modalBox.y + modalBox.height).toBeLessThanOrEqual(390);
+    expect(closeBox.x + closeBox.width).toBeLessThanOrEqual(
+      modalBox.x + modalBox.width,
+    );
+    expect(scoreBox.y).toBeGreaterThanOrEqual(historyBox.y + 18);
+  });
 });

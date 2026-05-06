@@ -2,6 +2,12 @@
 
 ## Latest update (2026-05-06)
 
+- Hardened shared player-profile normalization so oversized persisted player names are clamped during profile migration instead of only on manual save, which keeps welcome and level-select scoreboard consumers on the same bounded storage contract.
+- Added a focused welcome regression proving stale oversized stored names are trimmed before the scoreboard renders or re-persists the profile.
+- Verified the storage hardening slice with `npx playwright test tests/welcome-scoreboard.spec.js --project=chromium --reporter=line` and `npx playwright test tests/welcome-scoreboard.spec.js tests/level-select-scoreboard.spec.js --project=chromium --reporter=line`.
+
+## Latest update (2026-05-06)
+
 - Folded the imported welcome design brief into `Plan Alpha.md`, `Plan Beta.md`, and `Plan Genesis.md` so the welcome-to-level-select unification work now lives in the repo's canonical planning docs instead of temporary superpower markdown.
 - Reframed the welcome page in `src/pages/index.html` as a calmer training-dossier ingress, including the core-principle label for the Marcus Aurelius quote and briefing-style supporting copy.
 - Aligned the welcome shell, CTA hierarchy, logo treatment, matrix layer, and short-height responsive behavior in `src/styles/css/index.core.css`, `src/styles/css/index.actions.css`, `src/styles/css/index.hero.css`, `src/styles/css/index.logo.css`, `src/styles/css/index.matrix.css`, and `src/styles/css/index.responsive.compact.css` so the welcome screen reads closer to the level-select premium dossier aesthetic.

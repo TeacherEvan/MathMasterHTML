@@ -1,7 +1,4 @@
-/* level-select.css - Import hub (keeps existing references stable) */
-
-@import url("/src/styles/css/level-select.polish.css");
-@import url("/src/styles/css/level-select.details.responsive.css");
+/* level-select.css - settings and page-local layer */
 
 .settings-button,
 .settings-reset-button,

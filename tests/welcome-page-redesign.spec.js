@@ -232,6 +232,20 @@ test.describe("Welcome page redesign", () => {
     expect(overflowState.bodyOverflowY).not.toBe("hidden");
     expect(overflowState.containerOverflow).not.toBe("hidden");
     expect(overflowState.containerMaxHeight).toBe("none");
+    await expect(page.locator("header[role='banner'] .page-kicker")).toBeVisible();
+
+    const compactType = await page.evaluate(() => {
+      const quote = document.querySelector(".quote p");
+      const hint = document.querySelector(".welcome-hint");
+
+      return {
+        quoteFontSize: quote ? Number.parseFloat(window.getComputedStyle(quote).fontSize) : 0,
+        hintFontSize: hint ? Number.parseFloat(window.getComputedStyle(hint).fontSize) : 0,
+      };
+    });
+
+    expect(compactType.quoteFontSize).toBeGreaterThanOrEqual(11);
+    expect(compactType.hintFontSize).toBeGreaterThanOrEqual(9);
     await expect(page.getByRole("button", { name: "Begin Training" })).toBeVisible();
   });
 });

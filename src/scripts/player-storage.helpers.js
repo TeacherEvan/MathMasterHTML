@@ -5,6 +5,7 @@ console.log("💾 PlayerStorage helpers loading...");
   const PROFILE_VERSION = 3;
   const LEVEL_KEYS = ["beginner", "warrior", "master"];
   const RECENT_HISTORY_LIMIT = 25;
+  const MAX_PLAYER_NAME_LENGTH = 18;
 
   function createEmptyLevelStats() {
     return {
@@ -29,6 +30,14 @@ console.log("💾 PlayerStorage helpers loading...");
       },
       updatedAt: Date.now(),
     };
+  }
+
+  function normalizePlayerName(value) {
+    if (typeof value !== "string") {
+      return "";
+    }
+
+    return value.replace(/\s+/g, " ").trim().slice(0, MAX_PLAYER_NAME_LENGTH);
   }
 
   function normalizeRecentHistoryEntry(entry) {
@@ -111,11 +120,7 @@ console.log("💾 PlayerStorage helpers loading...");
         ? sourceProfile.levels
         : {};
 
-    nextProfile.name =
-      typeof sourceProfile.name === "string" &&
-      sourceProfile.name.trim().length > 0
-        ? sourceProfile.name.trim()
-        : null;
+    nextProfile.name = normalizePlayerName(sourceProfile.name) || null;
 
     LEVEL_KEYS.forEach((levelKey) => {
       if (sourceLevels[levelKey]) {
@@ -142,8 +147,10 @@ console.log("💾 PlayerStorage helpers loading...");
   window.PlayerStorageHelpers = {
     PROFILE_VERSION,
     RECENT_HISTORY_LIMIT,
+    MAX_PLAYER_NAME_LENGTH,
     createEmptyLevelStats,
     createDefaultProfile,
+    normalizePlayerName,
     normalizeLevelStats,
     normalizeRecentHistory,
     buildOverallSummary,

@@ -68,6 +68,12 @@
     max-width: none;
   }
 
+  .scoreboard-button {
+    width: auto;
+    min-width: min(100%, 220px);
+    align-self: center;
+  }
+
   .logo-circle {
     width: min(72vw, 240px);
   }
@@ -82,7 +88,15 @@
   }
 
   .scoreboard-modal-content {
-    padding: 20px;
+    padding: 18px;
+  }
+
+  .scoreboard-modal-header {
+    gap: 12px;
+  }
+
+  .scoreboard-section {
+    margin-top: 18px;
   }
 }
 
@@ -167,6 +181,12 @@
     letter-spacing: 0.12em;
   }
 
+  .scoreboard-button {
+    width: auto;
+    min-width: min(100%, 220px);
+    align-self: center;
+  }
+
   .welcome-hint {
     margin-top: 2px;
     font-size: 0.74rem;
@@ -177,5 +197,43 @@
     margin-top: 2px;
     font-size: 0.7rem;
     letter-spacing: 0.12em;
+  }
+}
+
+@media (max-width: 480px), (max-height: 720px) {
+  .scoreboard-modal {
+    padding: 10px;
+  }
+
+  .scoreboard-modal-content {
+    max-height: min(92dvh, 900px);
+    padding: 16px 14px;
+    border-radius: 20px;
+  }
+
+  .scoreboard-modal-content::before {
+    border-radius: 20px 20px 0 0;
+  }
+
+  .scoreboard-modal-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .scoreboard-close-button {
+    align-self: flex-end;
+  }
+
+  .scoreboard-profile-form {
+    padding: 16px 14px;
+  }
+
+  .scoreboard-history-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .scoreboard-history-score {
+    align-self: flex-start;
   }
 }

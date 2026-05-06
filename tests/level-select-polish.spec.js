@@ -1,6 +1,8 @@
 // @ts-check
 import { expect, test } from "@playwright/test";
 
+const PROFILE_KEY = "mathmaster_player_profile_v1";
+
 /**
  * @param {import("@playwright/test").Page} page
  */
@@ -304,6 +306,42 @@ test.describe("Level select polish", () => {
   test("keeps one unmistakable launch CTA on narrow mobile", async ({
     page,
   }) => {
+    await page.addInitScript((storageKey) => {
+      if (!sessionStorage.getItem("level-select-mobile-seeded")) {
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify({
+            version: 3,
+            name: "Player",
+            levels: {
+              beginner: {
+                totalScore: 43210,
+                bestProblemScore: 12345,
+                lastProblemScore: 9000,
+                problemsCompleted: 7,
+                lastPlayed: Date.now(),
+              },
+            },
+            overall: {
+              totalScore: 43210,
+              problemsCompleted: 7,
+              lastPlayed: Date.now(),
+            },
+            recentHistory: [
+              {
+                levelKey: "beginner",
+                score: 12345,
+                completedAt: Date.now(),
+              },
+            ],
+            updatedAt: Date.now(),
+          }),
+        );
+        localStorage.setItem("mathmaster_problems_beginner", "7");
+        sessionStorage.setItem("level-select-mobile-seeded", "1");
+      }
+    }, PROFILE_KEY);
+
     await page.setViewportSize({ width: 412, height: 915 });
     await page.goto("/src/pages/level-select.html", {
       waitUntil: "domcontentloaded",
@@ -320,7 +358,12 @@ test.describe("Level select polish", () => {
     await expect(cta).toHaveText("Run foundations");
     await expect(ctaHint).toHaveText("Best first pick.");
 
-    const { visibleNoiseCount, visibleCtas } = await page.evaluate(() => {
+    const injectedStats = activeCard.locator(
+      ".completion-stat, .best-score-stat, .total-score-stat",
+    );
+    await expect(injectedStats).toHaveCount(3);
+
+    const { visibleNoiseCount, visibleCtas, statValueFontSize, progressLabelFontSize } = await page.evaluate(() => {
       const isShown = (element) => {
         if (!(element instanceof HTMLElement)) return false;
         if (element.hidden || element.closest("[hidden]")) return false;
@@ -338,11 +381,27 @@ test.describe("Level select polish", () => {
         visibleCtas: Array.from(document.querySelectorAll(".level-button"))
           .filter(isShown)
           .map((button) => button.textContent?.trim() || ""),
+        statValueFontSize: Number.parseFloat(
+          window.getComputedStyle(
+            document.querySelector(
+              '.level-card[data-level="beginner"] .completion-stat .stat-value',
+            ),
+          ).fontSize,
+        ),
+        progressLabelFontSize: Number.parseFloat(
+          window.getComputedStyle(
+            document.querySelector(
+              '.level-card[data-level="beginner"] .progress-label',
+            ),
+          ).fontSize,
+        ),
       };
     });
 
     expect(visibleNoiseCount).toBe(0);
     expect(visibleCtas).toEqual(["Run foundations"]);
+    expect(statValueFontSize).toBeGreaterThanOrEqual(16);
+    expect(progressLabelFontSize).toBeGreaterThanOrEqual(10);
 
     const [activeCardBox, ctaBox] = await Promise.all([
       activeCard.boundingBox(),
