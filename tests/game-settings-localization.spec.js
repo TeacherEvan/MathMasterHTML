@@ -191,7 +191,7 @@ test.describe("Game settings localization", () => {
       .toMatchObject({
         modalVisible: true,
         muted: true,
-        audioLabel: "Sound off",
+        audioLabel: null,
       });
   });
 });

@@ -155,9 +155,7 @@ test.describe("Gameplay ultra-narrow embedded landscape layout", () => {
     expect(Math.abs(layout.console.left - layout.panelC.left)).toBeLessThanOrEqual(
       14,
     );
-    expect(Math.abs(layout.panelC.right - layout.console.right)).toBeLessThanOrEqual(
-      14,
-    );
+    expect(layout.audio).toBeNull();
     expect(layout.console.top).toBeGreaterThanOrEqual(layout.panelC.top - 1);
     expect(Math.abs(layout.help.bottom - layout.clarify.bottom)).toBeLessThanOrEqual(
       8,
@@ -175,13 +173,9 @@ test.describe("Gameplay ultra-narrow embedded landscape layout", () => {
       8,
     );
     expect(layout.back.height).toBeGreaterThanOrEqual(44);
-    expect(layout.audio.height).toBeGreaterThanOrEqual(44);
     expect(layout.back.transform).toBe("none");
-    expect(layout.audio.transform).toBe("none");
     expect(layout.back.right).toBeLessThanOrEqual(layout.viewport.width + 1);
-    expect(layout.audio.right).toBeLessThanOrEqual(layout.viewport.width + 1);
     expect(layout.back.bottom).toBeLessThanOrEqual(layout.viewport.height + 1);
-    expect(layout.audio.bottom).toBeLessThanOrEqual(layout.viewport.height + 1);
   });
 
   test("keeps the hidden solution layout stable after the first reveal", async ({

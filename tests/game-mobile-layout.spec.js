@@ -61,6 +61,7 @@ test.describe("Gameplay mobile landscape layout", () => {
           height: rect.height,
           display: style.display,
           position: style.position,
+          transform: style.transform,
           gridAutoFlow: style.gridAutoFlow,
           gridTemplateColumns: style.gridTemplateColumns,
           gridTemplateRows: style.gridTemplateRows,
@@ -83,6 +84,8 @@ test.describe("Gameplay mobile landscape layout", () => {
         problem: measure("#problem-container"),
         solution: measure("#solution-container"),
         console: measure("#symbol-console"),
+        back: measure("#back-button"),
+        audio: measure("#audio-toggle"),
       };
     });
 
@@ -109,7 +112,11 @@ test.describe("Gameplay mobile landscape layout", () => {
     expect(layout.console.left).toBeGreaterThanOrEqual(layout.panelC.left - 1);
     expect(layout.console.right).toBeLessThanOrEqual(layout.panelC.right + 1);
     expect(layout.console.left - layout.panelC.left).toBeLessThanOrEqual(18);
-    expect(layout.panelC.right - layout.console.right).toBeLessThanOrEqual(18);
+    expect(layout.audio).toBeNull();
+    expect(layout.back.height).toBeGreaterThanOrEqual(44);
+    expect(layout.back.transform).toBe("none");
+    expect(layout.back.right).toBeLessThanOrEqual(layout.viewport.width + 1);
+    expect(layout.back.bottom).toBeLessThanOrEqual(layout.viewport.height + 1);
     expect(layout.console.top).toBeGreaterThanOrEqual(layout.panelC.top - 1);
     expect(layout.console.bottom).toBeLessThanOrEqual(layout.panelC.bottom + 1);
   });

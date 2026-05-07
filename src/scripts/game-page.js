@@ -50,34 +50,12 @@
     };
   }
 
-  function canLeaveActiveGameplay() {
-    const runtimeState = window.GameRuntimeCoordinator?.getState?.();
-    if (!runtimeState) {
-      return !document.body.classList.contains("gameplay-active-unresolved");
-    }
-
-    const activelyPlaying =
-      runtimeState.briefingDismissed === true &&
-      runtimeState.gameplayReady === true;
-
-    const completed = document.body.classList.contains("problem-completed");
-    const startingGameplay =
-      document.body.classList.contains("gameplay-active-unresolved");
-    return (!activelyPlaying && !startingGameplay) || completed;
-  }
-
   function syncBackButtonState() {
-    const canLeave = canLeaveActiveGameplay();
     if (backButton) {
-      backButton.dataset.exitGuard = canLeave ? "ready" : "blocked";
-      backButton.setAttribute(
-        "aria-label",
-        canLeave
-          ? "Go back to level selection"
-          : "Go back to level selection unavailable until the current problem is complete",
-      );
+      backButton.dataset.exitGuard = "ready";
+      backButton.setAttribute("aria-label", "Go back to level selection");
     }
-    return canLeave;
+    return true;
   }
 
   function goBack(event) {
@@ -89,7 +67,16 @@
       return;
     }
 
-    if (!syncBackButtonState()) {
+    const confirmExit = document.body.classList.contains(
+      "gameplay-active-unresolved",
+    );
+
+    if (
+      confirmExit &&
+      window.confirm(
+        "Leave this problem and return to level select? Your current progress on this problem will be lost.",
+      ) !== true
+    ) {
       event?.preventDefault?.();
       return;
     }

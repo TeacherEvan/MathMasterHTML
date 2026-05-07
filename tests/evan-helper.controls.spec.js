@@ -85,9 +85,9 @@ test.describe("Evan Helper — Controls (Build 3)", () => {
     await expect(page.locator("#evan-solve-button")).toBeVisible();
   });
 
-  test("manual solve keeps the stop control clear of the audio toggle", async ({
+  test("manual solve keeps the stop control clear of the back button", async ({
     page,
-  }, testInfo) => {
+  }) => {
     await page.evaluate(() => {
       window.EvanPresenter?.showSolve();
     });
@@ -95,45 +95,35 @@ test.describe("Evan Helper — Controls (Build 3)", () => {
     await page.click("#evan-solve-button");
 
     await expect(page.locator("#evan-stop-button")).toBeVisible();
-    await expect(page.locator("#audio-toggle")).toBeVisible();
+    await expect(page.locator("#back-button")).toBeVisible();
 
     const layoutState = await page.evaluate(() => {
       const stopButton = document.getElementById("evan-stop-button");
-      const audioToggle = document.getElementById("audio-toggle");
+      const backButton = document.getElementById("back-button");
       const shell = document.getElementById("evan-assist-shell");
-      if (!stopButton || !audioToggle || !shell) return null;
+      if (!stopButton || !backButton || !shell) return null;
 
       const stopRect = stopButton.getBoundingClientRect();
-      const audioRect = audioToggle.getBoundingClientRect();
+      const backRect = backButton.getBoundingClientRect();
       const shellHidden = shell.hasAttribute("hidden");
 
       return {
         shellHidden,
-        stopCenterX: stopRect.left + stopRect.width / 2,
-        audioCenterX: audioRect.left + audioRect.width / 2,
-        horizontalGap: Math.abs(stopRect.left - audioRect.right),
-        verticalDelta: Math.abs(stopRect.top - audioRect.top),
+        overlaps: !(
+          stopRect.right <= backRect.left ||
+          stopRect.left >= backRect.right ||
+          stopRect.bottom <= backRect.top ||
+          stopRect.top >= backRect.bottom
+        ),
       };
     });
 
     expect(layoutState).not.toBeNull();
     expect(layoutState.shellHidden).toBe(false);
-    expect(layoutState.horizontalGap).toBeLessThan(128);
-
-    if (testInfo.project.use?.isMobile === true) {
-      expect(layoutState.verticalDelta).toBeGreaterThan(24);
-      expect(layoutState.stopCenterX).toBeGreaterThanOrEqual(
-        layoutState.audioCenterX - 4,
-      );
-    } else {
-      expect(layoutState.stopCenterX).toBeGreaterThan(
-        layoutState.audioCenterX,
-      );
-      expect(layoutState.verticalDelta).toBeLessThan(24);
-    }
+    expect(layoutState.overlaps).toBe(false);
   });
 
-  test("manual solve keeps the audio toggle anchored on compact mobile", async ({
+  test("manual solve keeps the back button anchored on compact mobile", async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -141,8 +131,8 @@ test.describe("Evan Helper — Controls (Build 3)", () => {
       "Anchor-stability check runs on mobile projects only",
     );
 
-    const audioBefore = await page.locator("#audio-toggle").boundingBox();
-    expect(audioBefore).toBeTruthy();
+    const backBefore = await page.locator("#back-button").boundingBox();
+    expect(backBefore).toBeTruthy();
 
     await page.evaluate(() => {
       window.EvanPresenter?.showSolve();
@@ -151,11 +141,11 @@ test.describe("Evan Helper — Controls (Build 3)", () => {
     await page.click("#evan-solve-button");
     await expect(page.locator("#evan-stop-button")).toBeVisible();
 
-    const audioAfter = await page.locator("#audio-toggle").boundingBox();
-    expect(audioAfter).toBeTruthy();
+    const backAfter = await page.locator("#back-button").boundingBox();
+    expect(backAfter).toBeTruthy();
 
-    expect(Math.abs(audioAfter.x - audioBefore.x)).toBeLessThanOrEqual(1);
-    expect(Math.abs(audioAfter.y - audioBefore.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(backAfter.x - backBefore.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(backAfter.y - backBefore.y)).toBeLessThanOrEqual(1);
   });
 
   test("#evan-controls-slot does not overlap #power-up-display on compact landscape", async ({

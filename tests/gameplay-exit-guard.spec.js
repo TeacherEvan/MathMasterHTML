@@ -25,7 +25,7 @@ async function dispatchTouchEnd(page, selector) {
   }, selector);
 }
 
-test.describe("gameplay exit guard", () => {
+test.describe("gameplay back button", () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       if ("serviceWorker" in navigator) {
@@ -42,7 +42,7 @@ test.describe("gameplay exit guard", () => {
     });
   });
 
-  test("back button is blocked while gameplay is active and unresolved", async ({ page }) => {
+  test("back button asks for confirmation and stays on the game when unresolved gameplay exit is dismissed", async ({ page }) => {
     await page.goto("/src/pages/game.html?level=beginner&evan=off&preload=off", {
       waitUntil: "domcontentloaded",
     });
@@ -51,22 +51,32 @@ test.describe("gameplay exit guard", () => {
     await page.locator("#start-game-btn").click();
     await page.waitForTimeout(1500);
 
-    const beforeUrl = page.url();
+    let dialogSeen = false;
+    page.once("dialog", async (dialog) => {
+      dialogSeen = true;
+      expect(dialog.type()).toBe("confirm");
+      expect(dialog.message()).toContain("Leave this problem");
+      await dialog.dismiss();
+    });
+
     await page.click("#back-button");
     await page.waitForTimeout(400);
 
-    await expect(page).toHaveURL(beforeUrl);
+    expect(dialogSeen).toBe(true);
+    await expect(page).toHaveURL(/src\/pages\/game\.html/);
   });
 
-  test("back button is restored after problemCompleted fires", async ({ page }) => {
+  test("back button exits after confirmation while gameplay is active and unresolved", async ({ page }) => {
     await page.goto("/src/pages/game.html?level=beginner&evan=off&preload=off", {
       waitUntil: "domcontentloaded",
     });
 
     await expect(page.locator("#how-to-play-modal")).toBeVisible();
     await page.locator("#start-game-btn").click();
-    await page.evaluate(() => {
-      document.dispatchEvent(new CustomEvent(window.GameEvents.PROBLEM_COMPLETED));
+
+    page.once("dialog", async (dialog) => {
+      expect(dialog.type()).toBe("confirm");
+      await dialog.accept();
     });
 
     await page.click("#back-button");
@@ -74,7 +84,7 @@ test.describe("gameplay exit guard", () => {
     await expect(page).not.toHaveURL(/src\/pages\/game\.html/);
   });
 
-  test("back button honors touchend activation after problemCompleted fires", async ({ page }) => {
+  test("back button exits immediately without confirmation after problemCompleted fires", async ({ page }) => {
     await page.goto("/src/pages/game.html?level=beginner&evan=off&preload=off", {
       waitUntil: "domcontentloaded",
     });
@@ -83,6 +93,31 @@ test.describe("gameplay exit guard", () => {
     await page.locator("#start-game-btn").click();
     await page.evaluate(() => {
       document.dispatchEvent(new CustomEvent(window.GameEvents.PROBLEM_COMPLETED));
+    });
+
+    let dialogSeen = false;
+    page.once("dialog", async (dialog) => {
+      dialogSeen = true;
+      await dialog.dismiss();
+    });
+
+    await page.click("#back-button");
+    await page.waitForTimeout(400);
+    expect(dialogSeen).toBe(false);
+    await expect(page).not.toHaveURL(/src\/pages\/game\.html/);
+  });
+
+  test("back button honors touchend activation and exits after confirmation during unresolved gameplay", async ({ page }) => {
+    await page.goto("/src/pages/game.html?level=beginner&evan=off&preload=off", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await expect(page.locator("#how-to-play-modal")).toBeVisible();
+    await page.locator("#start-game-btn").click();
+
+    page.once("dialog", async (dialog) => {
+      expect(dialog.type()).toBe("confirm");
+      await dialog.accept();
     });
 
     await dispatchTouchEnd(page, "#back-button");

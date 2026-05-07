@@ -113,7 +113,7 @@ test.describe("Level select settings", () => {
       )
       .toMatchObject({
         muted: true,
-        buttonLabel: "Sound off",
+        buttonLabel: null,
       });
   });
 
