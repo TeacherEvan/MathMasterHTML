@@ -21,7 +21,7 @@
 
   const config = {
     // Resurfacing lifecycle
-    visibleMs: 2000,
+    visibleMs: 7000,
     fadeMs: 1000,
     hiddenMinMs: 2000,
     hiddenMaxMs: 7000,
