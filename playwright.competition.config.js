@@ -3,6 +3,18 @@ import { defineConfig, devices } from "@playwright/test";
 
 const smokeFiles = ["lock-components.spec.js", "managers.spec.js"];
 
+// Chromium-only launch hardening. chrome-headless-shell segfaults intermittently
+// (signal 11 SEGV_MAPERR) on some kernels; the full Chromium in new headless mode
+// (channel: "chromium") is the documented stable workaround. Scoped to chromium
+// projects only — webkit/firefox projects must NOT inherit channel: "chromium"
+// (Playwright throws "chromium channel can only be launched when launching Chromium").
+const chromiumLaunch = {
+  launchOptions: {
+    args: ["--disable-dev-shm-usage"],
+  },
+  channel: "chromium",
+};
+
 export default defineConfig({
   testDir: "./tests",
   testIgnore: ["**/unit/**", "**/integration/**", "**/performance/**"],
@@ -31,12 +43,12 @@ export default defineConfig({
     {
       name: "qa-smoke-chromium",
       testMatch: smokeFiles,
-      use: { ...devices["Desktop Chrome"] },
+      use: { ...devices["Desktop Chrome"], ...chromiumLaunch },
     },
     {
       name: "qa-smoke-pixel-7",
       testMatch: smokeFiles,
-      use: { ...devices["Pixel 7"] },
+      use: { ...devices["Pixel 7"], ...chromiumLaunch },
     },
     {
       name: "qa-perf-smoke",
@@ -47,6 +59,7 @@ export default defineConfig({
       ],
       use: {
         ...devices["Desktop Chrome"],
+        ...chromiumLaunch,
         trace: "off",
         screenshot: "off",
         video: "off",
@@ -54,7 +67,7 @@ export default defineConfig({
     },
     {
       name: "qa-matrix-chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: { ...devices["Desktop Chrome"], ...chromiumLaunch },
     },
     {
       name: "qa-soak-webkit",
@@ -70,13 +83,14 @@ export default defineConfig({
       name: "qa-matrix-iphone-13",
       use: {
         ...devices["iPhone 13"],
+        ...chromiumLaunch,
         viewport: { width: 844, height: 390 },
         screen: { width: 844, height: 390 },
       },
     },
     {
       name: "qa-matrix-pixel-7",
-      use: { ...devices["Pixel 7"] },
+      use: { ...devices["Pixel 7"], ...chromiumLaunch },
     },
   ],
   webServer: {

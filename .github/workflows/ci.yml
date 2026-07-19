@@ -1,0 +1,227 @@
+# MathMasterHTML CI — quality gates before merge
+#
+# Stack reality (this repo is NOT the skill's pnpm/Next.js example):
+#   - npm + Node 24 (see .nvmrc), lockfile = package-lock.json
+#   - ESLint 9 flat config (eslint.config.js): `npm run lint`
+#   - Type check via tsc --noEmit --project tsconfig.typecheck.json: `npm run typecheck`
+#   - Custom project-health gate: `npm run verify`
+#   - Playwright E2E:
+#       - default config (playwright.config.js): chromium + iphone-13 + pixel-7 (device emulation)
+#       - competition config (playwright.competition.config.js): adds webkit + firefox soak lanes
+#   - Static site, no build step. Vercel auto-deploys from main (framework:null),
+#     so there is intentionally NO deploy job here — a second deploy path would
+#     become the sole red job when Vercel secrets drift (see ci-cd skill pitfalls).
+#
+# Layering (shift-left + faster-is-safer):
+#   Push / PR  -> lint, typecheck, verify, audit, and a FAST chromium-only e2e gate.
+#   Nightly    -> full default-matrix e2e (chromium + 2 mobile emulation projects),
+#                 non-blocking, to catch regressions the fast gate can't.
+#   On-demand  -> `competition` job: pick a curated lane (matrix/soak/stress/full/...)
+#                 from the repo's own `test:competition:*` scripts.
+#
+# Branch protection (set in repo Settings, not here): require the push/PR checks
+# below to pass before merge; disable force-push to main.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Nightly full-matrix e2e (UTC). Cheap insurance against cross-browser regressions.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      lane:
+        description: "Competition lane to run (maps to npm run test:competition:<lane>)"
+        required: true
+        default: matrix
+        type: choice
+        options:
+          - smoke
+          - matrix
+          - soak
+          - soak-symbol-rain
+          - stress
+          - full
+          - perf-gate
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint (ESLint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+
+  typecheck:
+    name: Type check (tsc)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Type check
+        run: npm run typecheck
+
+  verify:
+    name: Project health (verify)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Verify
+        run: npm run verify
+
+  audit:
+    name: Security audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: npm audit
+        # High-severity only so transitive advisories don't red the whole pipeline
+        # without a clear, fixable signal. Tighten to "moderate" if desired.
+        run: npm audit --audit-level=high
+
+  test:
+    name: Playwright E2E (chromium gate)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      # Fast PR gate: chromium only. playwright.config.js forces workers=1 on CI,
+      # so the full default matrix (chromium + iphone-13 + pixel-7) would blow the
+      # 10-min budget. Mobile + the full matrix run in the nightly job instead.
+      - name: Playwright tests (chromium lane)
+        run: npx playwright test --project=chromium
+      - name: Upload failure artifacts
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+          if-no-files-found: warn
+
+  e2e-nightly:
+    name: Playwright full matrix (nightly)
+    # Only the scheduled trigger runs this; PRs/push stay on the fast chromium gate.
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+      - name: Install Playwright browsers
+        # iphone-13 / pixel-7 are chromium device-emulation projects; chromium binary covers all three.
+        run: npx playwright install --with-deps chromium
+      - name: Playwright full default matrix
+        # CLI --workers overrides the config's CI workers:1 for the nightly batch.
+        run: npx playwright test --workers=2
+      - name: Upload report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-nightly-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 14
+          if-no-files-found: warn
+
+  competition:
+    name: Competition lane (${{ inputs.lane || 'matrix' }})
+    # On-demand only. Reuses the repo's curated test:competition:* lanes, each of
+    # which already pins projects + seed. Soak lanes need webkit + firefox too.
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+      - name: Install Playwright browsers
+        # Soak lanes (soak / soak-symbol-rain) use webkit + firefox; install all three.
+        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Resolve lane command
+        id: lane
+        run: |
+          LANE="${{ inputs.lane }}"
+          if [ "$LANE" = "perf-gate" ]; then
+            echo "cmd=npm run test:perf:gate" >> "$GITHUB_OUTPUT"
+          else
+            echo "cmd=npm run test:competition:$LANE" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Run competition lane
+        run: ${{ steps.lane.outputs.cmd }}
+      - name: Upload report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-competition-${{ inputs.lane }}
+          path: |
+            playwright-report
+            playwright-report/competition
+            test-results
+            test-results.competition.json
+          retention-days: 14
+          if-no-files-found: warn

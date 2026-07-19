@@ -50,6 +50,15 @@ export default defineConfig({
     screenshot: "only-on-failure",
     /* Enable test hooks for debugging */
     testIdAttribute: "data-testid",
+    /* Chromium crashes (SIGSEGV on newContext) on CI runners with small /dev/shm.
+       Disable the shm-backed ramfs and use /tmp instead. Harmless on dev machines. */
+    launchOptions: {
+      args: ["--disable-dev-shm-usage"],
+    },
+    /* Use the full Chromium in new headless mode instead of chrome-headless-shell.
+       chrome-headless-shell segfaults intermittently (signal 11 SEGV_MAPERR) on some
+       kernels; the full chromium channel is the documented stable workaround. */
+    channel: "chromium",
   },
 
   /* Configure projects for major browsers */

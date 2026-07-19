@@ -1,0 +1,24 @@
+# Keep dependencies fresh without manual toil.
+# Best practice: weekly npm bumps, capped PR volume, grouped to reduce noise.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 5
+    # Group patch/minor bumps so a wave of transitive updates is one reviewable PR.
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+      development-dependencies:
+        dependency-type: "development"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 5
