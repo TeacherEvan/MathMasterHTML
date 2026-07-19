@@ -51,12 +51,14 @@
     // Create a copy of the worms array to iterate over
     const wormsToKill = [...this.worms];
 
-    // Explode each worm with a slight delay for dramatic effect
+    // Explode each worm with a slight delay for dramatic effect.
+    // Pass isCleanup=true: these are mass-clear explosions, not player kills —
+    // suppresses muffin-reward spawns and achievement kill inflation.
     wormsToKill.forEach((worm, index) => {
       setTimeout(() => {
         if (worm.active) {
           console.log(`💥 Exploding worm ${worm.id}`);
-          this.explodeWorm(worm);
+          this.explodeWorm(worm, false, false, true);
         }
       }, index * 100); // 100ms delay between each explosion
     });
