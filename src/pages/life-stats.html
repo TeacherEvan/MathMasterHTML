@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Life Stats — Math Master</title>
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self';">
+  <link rel="stylesheet" href="/src/styles/life-stats.css" />
+</head>
+
+<body>
+  <main class="ls-page">
+    <header class="ls-header">
+      <h1 class="ls-title">Life Stats</h1>
+      <div class="ls-actions">
+        <button id="ls-add" class="ls-btn primary" type="button">Add entry</button>
+        <button id="ls-demo" class="ls-btn" type="button">Load demo data</button>
+        <button id="ls-export-json" class="ls-btn" type="button">Export JSON</button>
+        <button id="ls-export-csv" class="ls-btn" type="button">Export CSV</button>
+        <button id="ls-export-svg" class="ls-btn" type="button">Export SVG</button>
+        <button id="ls-export-png" class="ls-btn" type="button">Export PNG</button>
+        <button id="ls-reset" class="ls-btn danger" type="button">Reset</button>
+        <a class="ls-btn" href="/src/pages/index.html">Back</a>
+      </div>
+    </header>
+
+    <nav id="ls-tabs" class="ls-tabs" role="tablist" aria-label="Time range"></nav>
+
+    <section id="ls-cards" class="ls-cards" aria-label="Statistic summary"></section>
+
+    <section id="ls-charts" class="ls-charts" aria-label="Charts"></section>
+  </main>
+
+  <!-- Logging modal -->
+  <div id="ls-modal" class="ls-modal" hidden data-no-nav="true" aria-hidden="true">
+    <div class="ls-modal-content" role="dialog" aria-modal="true" aria-labelledby="ls-form-title" data-no-nav="true">
+      <h2 id="ls-form-title" data-no-nav="true">Add entry</h2>
+      <form id="ls-form" data-no-nav="true">
+        <div class="ls-field">
+          <label for="ls-field" data-no-nav="true">Field</label>
+          <select id="ls-field" data-no-nav="true"></select>
+        </div>
+        <div class="ls-field" id="ls-custom-wrap" hidden>
+          <label for="ls-custom-name" data-no-nav="true">New field name</label>
+          <input id="ls-custom-name" type="text" maxlength="24" data-no-nav="true" />
+        </div>
+        <div class="ls-field">
+          <label for="ls-value" data-no-nav="true">Value (number)</label>
+          <input id="ls-value" type="number" step="any" inputmode="decimal" required data-no-nav="true" />
+        </div>
+        <div class="ls-field">
+          <label for="ls-note" data-no-nav="true">Note / category (optional)</label>
+          <input id="ls-note" type="text" maxlength="80" data-no-nav="true" />
+        </div>
+        <div class="ls-field">
+          <label for="ls-date" data-no-nav="true">Date (optional, defaults today)</label>
+          <input id="ls-date" type="date" data-no-nav="true" />
+        </div>
+        <p id="ls-form-feedback" class="ls-feedback" aria-live="polite" data-no-nav="true"></p>
+        <div class="ls-modal-actions" data-no-nav="true">
+          <button id="ls-form-cancel" type="button" class="ls-btn" data-no-nav="true">Cancel</button>
+          <button type="submit" class="ls-btn primary" data-no-nav="true">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/src/scripts/life-stats/life-stats-storage.helpers.js" defer></script>
+  <script src="/src/scripts/life-stats/life-stats-storage.js" defer></script>
+  <script src="/src/scripts/life-stats/life-stats-aggregate.js" defer></script>
+  <script src="/src/scripts/life-stats/life-stats-charts.js" defer></script>
+  <script src="/src/scripts/life-stats/life-stats-seed.js" defer></script>
+  <script src="/src/scripts/life-stats/life-stats-export.js" defer></script>
+  <script src="/src/scripts/life-stats/life-stats-tax.js" defer></script>
+  <script src="/src/scripts/life-stats/life-stats-page.render.js" defer></script>
+  <script src="/src/scripts/life-stats/life-stats-page.controls.js" defer></script>
+  <script src="/src/scripts/life-stats/life-stats-page.core.js" defer></script>
+</body>
+
+</html>

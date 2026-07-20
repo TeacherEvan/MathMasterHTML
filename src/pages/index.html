@@ -77,7 +77,11 @@
                 data-testid="welcome-cta">Begin Training</button>
             <button id="scoreboard-button" class="action-button secondary-action-button scoreboard-button" type="button"
                 data-no-nav="true" aria-haspopup="dialog" aria-controls="scoreboard-modal">Scoreboard</button>
+            <a id="life-stats-menu-button" class="action-button secondary-action-button" type="button"
+                href="/src/pages/life-stats.html">Life Stats</a>
         </div>
+
+        <section id="life-stats-features" aria-label="Life stats at a glance" hidden></section>
 
         <p class="welcome-hint">Select Begin Training or press Enter to continue</p>
         <div class="creator-credit">Created by Teacher Evan</div>
@@ -136,6 +140,13 @@
 
     <script src="/src/scripts/player-storage.helpers.js" defer></script>
     <script src="/src/scripts/player-storage.js" defer></script>
+    <script src="/src/scripts/life-stats/life-stats-storage.helpers.js" defer></script>
+    <script src="/src/scripts/life-stats/life-stats-storage.js" defer></script>
+    <script src="/src/scripts/life-stats/life-stats-aggregate.js" defer></script>
+    <script src="/src/scripts/life-stats/life-stats-charts.js" defer></script>
+    <script src="/src/scripts/life-stats/life-stats-tax.js" defer></script>
+    <script src="/src/scripts/life-stats/life-stats-menu.js" defer></script>
+    <script src="/src/scripts/life-stats/life-stats-page.core.js" defer></script>
     <script src="/src/scripts/index-page.matrix.js" defer></script>
     <script src="/src/scripts/index-page.effects.js" defer></script>
     <script src="/src/scripts/index-page.ripple.js" defer></script>

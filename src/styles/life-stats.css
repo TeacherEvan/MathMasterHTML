@@ -1,0 +1,242 @@
+/* life-stats.css — Life Stats board + menu features + TAX indicator */
+:root {
+  --ls-bg: #04140a;
+  --ls-panel: #0a2415;
+  --ls-border: #1c5c33;
+  --ls-accent: #39ff14;
+  --ls-accent-2: #00e5ff;
+  --ls-text: #d8ffe6;
+  --ls-muted: #7fae93;
+  --ls-danger: #ff3b3b;
+  --ls-warn: #ffd166;
+}
+
+body {
+  background: radial-gradient(circle at 50% 0%, #062315 0%, var(--ls-bg) 70%);
+  color: var(--ls-text);
+  font-family: "Courier New", ui-monospace, monospace;
+  margin: 0;
+  min-height: 100vh;
+}
+
+.ls-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.ls-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.ls-title {
+  font-size: 1.6rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ls-accent);
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
+  margin: 0;
+}
+
+.ls-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ls-btn {
+  background: var(--ls-panel);
+  color: var(--ls-text);
+  border: 1px solid var(--ls-border);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.ls-btn:hover { background: #103a22; box-shadow: 0 0 10px rgba(57, 255, 20, 0.25); }
+.ls-btn.primary { border-color: var(--ls-accent); color: var(--ls-accent); }
+.ls-btn.danger { border-color: var(--ls-danger); color: var(--ls-danger); }
+
+.ls-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 18px;
+  border-bottom: 1px solid var(--ls-border);
+  padding-bottom: 8px;
+}
+.ls-tab {
+  background: transparent;
+  border: 1px solid var(--ls-border);
+  color: var(--ls-muted);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+}
+.ls-tab[aria-selected="true"] {
+  color: var(--ls-accent);
+  border-color: var(--ls-accent);
+  box-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
+}
+
+.ls-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.ls-card {
+  background: var(--ls-panel);
+  border: 1px solid var(--ls-border);
+  border-radius: 8px;
+  padding: 12px;
+}
+.ls-card h3 { margin: 0 0 6px; font-size: 0.9rem; color: var(--ls-muted); font-weight: normal; }
+.ls-card .value { font-size: 1.4rem; color: var(--ls-text); }
+.ls-card .delta.up { color: var(--ls-accent); }
+.ls-card .delta.down { color: var(--ls-danger); }
+.ls-card .sub { font-size: 0.72rem; color: var(--ls-muted); margin-top: 4px; }
+
+.ls-charts {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1fr;
+}
+.ls-chart-card {
+  background: var(--ls-panel);
+  border: 1px solid var(--ls-border);
+  border-radius: 8px;
+  padding: 14px;
+}
+.ls-chart-card h3 { margin: 0 0 10px; color: var(--ls-accent-2); font-size: 0.95rem; letter-spacing: 1px; }
+.ls-chart-card svg { display: block; width: 100%; height: auto; }
+
+.ls-legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 0; }
+.ls-legend button {
+  background: transparent; border: none; color: var(--ls-text);
+  cursor: pointer; font-family: inherit; font-size: 0.78rem; display: flex; align-items: center; gap: 6px;
+}
+.ls-legend .swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+.ls-legend button[aria-pressed="false"] { opacity: 0.4; text-decoration: line-through; }
+
+.ls-empty { color: var(--ls-muted); text-align: center; padding: 40px 0; }
+
+/* Menu feature panel */
+#life-stats-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 16px auto;
+  max-width: 760px;
+}
+.ls-feature {
+  background: var(--ls-panel);
+  border: 1px solid var(--ls-border);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ls-feature .label { font-size: 0.75rem; color: var(--ls-muted); }
+.ls-feature .chip { font-size: 1rem; color: var(--ls-accent); }
+.ls-feature svg { width: 100%; height: 36px; }
+
+/* Logging modal */
+.ls-modal[hidden] { display: none; }
+.ls-modal {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7);
+  display: flex; align-items: center; justify-content: center; z-index: 50;
+}
+.ls-modal-content {
+  background: var(--ls-bg); border: 1px solid var(--ls-border); border-radius: 10px;
+  padding: 20px; width: min(420px, 92vw);
+}
+.ls-modal-content h2 { color: var(--ls-accent); font-size: 1.1rem; margin-top: 0; }
+.ls-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.ls-field label { font-size: 0.78rem; color: var(--ls-muted); }
+.ls-field input, .ls-field select {
+  background: var(--ls-panel); border: 1px solid var(--ls-border); color: var(--ls-text);
+  padding: 8px; border-radius: 6px; font-family: inherit; font-size: 0.9rem;
+}
+.ls-feedback { font-size: 0.75rem; color: var(--ls-warn); min-height: 1em; }
+.ls-modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* TAX indicator — steady red badge, slow safe pulse (no hazardous flashing) */
+#tax-indicator {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--ls-danger);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(255, 59, 59, 0.6);
+  animation: ls-tax-pulse 2.4s ease-in-out infinite;
+}
+#tax-indicator.acknowledged {
+  background: #5a1414;
+  color: #ff9c9c;
+  box-shadow: none;
+  animation: none;
+}
+#tax-indicator .dot {
+  width: 8px; height: 8px; border-radius: 50%; background: #fff;
+}
+@keyframes ls-tax-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #tax-indicator { animation: none !important; opacity: 1 !important; }
+}
+
+/* TAX modal */
+#tax-modal[hidden] { display: none; }
+#tax-modal {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75);
+  display: flex; align-items: center; justify-content: center; z-index: 70;
+}
+#tax-modal .tax-content {
+  background: var(--ls-bg); border: 1px solid var(--ls-danger); border-radius: 10px;
+  padding: 22px; width: min(520px, 92vw); max-height: 88vh; overflow-y: auto;
+}
+#tax-modal h2 { color: var(--ls-danger); margin-top: 0; }
+#tax-modal p { color: var(--ls-text); font-size: 0.9rem; line-height: 1.5; }
+#tax-modal .tax-yesno { display: flex; gap: 10px; margin: 14px 0; }
+#tax-modal .tax-yesno button {
+  flex: 1; padding: 10px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 0.9rem;
+}
+#tax-modal .yes { background: var(--ls-accent); color: #042; border: none; }
+#tax-modal .no { background: var(--ls-panel); color: var(--ls-text); border: 1px solid var(--ls-border); }
+#tax-modal .tax-form label { display: block; font-size: 0.8rem; color: var(--ls-muted); margin: 10px 0 4px; }
+#tax-modal .tax-form input, #tax-modal .tax-form select, #tax-modal .tax-form textarea {
+  width: 100%; box-sizing: border-box; background: var(--ls-panel); border: 1px solid var(--ls-border);
+  color: var(--ls-text); padding: 8px; border-radius: 6px; font-family: inherit; font-size: 0.85rem;
+}
+#tax-modal .tax-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+.tax-disclaimer { font-size: 0.72rem; color: var(--ls-muted); margin-top: 12px; font-style: italic; }
+
+@media (max-width: 600px) {
+  .ls-header { flex-direction: column; align-items: flex-start; }
+  .ls-actions { width: 100%; }
+}
