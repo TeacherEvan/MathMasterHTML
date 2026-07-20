@@ -100,6 +100,11 @@ function getModuleLabel(src) {
   return parts[parts.length - 1] || src;
 }
 
+/**
+ * Dynamically load a game module script.
+ * @param {string} src - Script URL
+ * @returns {Promise<void>}
+ */
 function loadModule(src) {
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");

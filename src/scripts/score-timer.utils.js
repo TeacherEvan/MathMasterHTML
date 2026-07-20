@@ -80,7 +80,7 @@
     }
 
     const duration = cfg.stepDurationSeconds;
-    let color = "rgb(0, 191, 255)";
+    let color;
 
     if (remainingSeconds > cfg.thresholds.blueToGreen) {
       const t =
