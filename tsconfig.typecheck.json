@@ -4,6 +4,8 @@
         "noEmit": true,
         "checkJs": true,
         "allowJs": true,
+        "strict": false,
+        "noImplicitAny": false,
         "maxNodeModuleJsDepth": 0,
         "lib": [
             "ES2021",
