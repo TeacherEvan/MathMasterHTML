@@ -178,8 +178,9 @@ jobs:
           restore-keys: |
             playwright-${{ runner.os }}-
       - name: Install Playwright browsers
-        # iphone-13 / pixel-7 are chromium device-emulation projects; chromium binary covers all three.
-        run: npx playwright install --with-deps chromium
+        # Full default matrix covers chromium (chromium/pixel-7 projects) AND
+        # webkit (iphone-13 project — Device "iPhone 13" is WebKit). Install both.
+        run: npx playwright install --with-deps chromium webkit
       - name: Playwright full default matrix
         # CLI --workers overrides the config's CI workers:1 for the nightly batch.
         run: npx playwright test --workers=2
