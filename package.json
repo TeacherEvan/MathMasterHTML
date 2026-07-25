@@ -63,6 +63,6 @@
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
-    "lint": "^1.1.2"
+    "lint": "^1.2.2"
   }
 }
