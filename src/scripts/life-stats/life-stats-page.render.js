@@ -1,11 +1,24 @@
 // life-stats-page.render.js — render stat cards + charts from aggregated data
 // window.LifeStatsRender
 (function () {
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
   function fmt(value, meta) {
     if (value === undefined || value === null) return "—";
     const v = Number(value);
     const num = Math.abs(v) >= 1000 ? v.toLocaleString(undefined, { maximumFractionDigits: 0 }) : v.toFixed(2);
     return meta && meta.unit ? `${num} ${meta.unit}` : `${num}`;
+  }
+
+  // HTML-escaped variant for innerHTML sinks (labels/units are user-controlled).
+  function fmtHtml(value, meta) {
+    if (value === undefined || value === null) return "—";
+    const v = Number(value);
+    const num = Math.abs(v) >= 1000 ? v.toLocaleString(undefined, { maximumFractionDigits: 0 }) : v.toFixed(2);
+    return meta && meta.unit ? `${num} ${esc(meta.unit)}` : `${num}`;
   }
 
   function renderCards(container, agg, fields) {
@@ -18,10 +31,10 @@
       const netUp = r.net >= 0;
       const good = meta.higherIsBetter ? netUp : !netUp;
       card.innerHTML = `
-        <h3>${meta.label}</h3>
-        <div class="value">${fmt(r.latest, meta)}</div>
-        <div class="delta ${good ? "up" : "down"}">${netUp ? "▲" : "▼"} ${fmt(Math.abs(r.net), meta)}</div>
-        <div class="sub">avg ${fmt(r.avg, meta)} · min ${fmt(r.min, meta)} · max ${fmt(r.max, meta)}</div>`;
+        <h3>${esc(meta.label)}</h3>
+        <div class="value">${fmtHtml(r.latest, meta)}</div>
+        <div class="delta ${good ? "up" : "down"}">${netUp ? "▲" : "▼"} ${fmtHtml(Math.abs(r.net), meta)}</div>
+        <div class="sub">avg ${fmtHtml(r.avg, meta)} · min ${fmtHtml(r.min, meta)} · max ${fmtHtml(r.max, meta)}</div>`;
       container.appendChild(card);
     }
     if (Object.keys(fields).length === 0) {
@@ -58,7 +71,7 @@
     if (cat && Object.keys(cat).length > 0) {
       const donutCard = document.createElement("div");
       donutCard.className = "ls-chart-card";
-      donutCard.innerHTML = `<h3>Composition — ${fields[visibleFields[0]] ? fields[visibleFields[0]].label : visibleFields[0]}</h3>`;
+      donutCard.innerHTML = `<h3>Composition — ${esc(fields[visibleFields[0]] ? fields[visibleFields[0]].label : visibleFields[0])}</h3>`;
       const donutSvg = Charts.buildDonut(cat, { ariaLabel: "Composition donut chart" });
       donutCard.appendChild(donutSvg);
       chartsEl.appendChild(donutCard);
@@ -74,7 +87,7 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.setAttribute("aria-pressed", String(visibleFields.includes(fk)));
-      btn.innerHTML = `<span class="swatch" style="background:${window.LifeStatsCharts.colorFor(fk)}"></span>${meta.label}`;
+      btn.innerHTML = `<span class="swatch" style="background:${window.LifeStatsCharts.colorFor(fk)}"></span>${esc(meta.label)}`;
       btn.onclick = () => onToggle && onToggle(fk);
       legend.appendChild(btn);
     }
