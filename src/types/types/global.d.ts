@@ -66,6 +66,16 @@ declare global {
     consoleManager?: any;
     uiBoundaryManager?: any;
     performanceMonitor?: any;
+    LifeStatsStorageHelpers?: any;
+    LifeStatsStorage?: any;
+    LifeStatsAggregate?: any;
+    LifeStatsCharts?: any;
+    LifeStatsSeed?: any;
+    LifeStatsExport?: any;
+    LifeStatsTax?: any;
+    LifeStatsMenu?: any;
+    LifeStatsControls?: any;
+    LifeStatsRender?: any;
   }
 
   interface ScreenOrientation {
@@ -75,5 +85,25 @@ declare global {
   interface Element {
     dataset: DOMStringMap;
     style: CSSStyleDeclaration;
+    hidden: boolean;
+    onclick: ((this: Element, ev: MouseEvent) => any) | null;
+    reset?: () => void;
+  }
+
+  interface HTMLCollection {
+    [Symbol.iterator](): IterableIterator<Element>;
+  }
+
+  interface Document {
+    getElementById(elementId: string): any;
+    querySelector(selectors: string): any;
+    querySelectorAll(selectors: string): any;
+  }
+
+  interface HTMLElement {
+    value: any;
+    type: any;
+    addEventListener(type: string, listener: any, options?: any): void;
+    reset?: () => void;
   }
 }
