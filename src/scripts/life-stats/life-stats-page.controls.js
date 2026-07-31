@@ -117,7 +117,7 @@
       const fieldSel = document.getElementById("ls-field");
       const fields = Storage.getFields();
       fieldSel.innerHTML = Object.keys(fields)
-        .map((k) => `<option value="${k}">${fields[k].label.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]))}</option>`)
+        .map((k) => `<option value="${k}">${window.DomSanitizer.escapeHTML(fields[k].label)}</option>`)
         .join("") + '<option value="__new">+ New custom field…</option>';
     }
 

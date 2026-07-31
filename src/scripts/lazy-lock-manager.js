@@ -69,10 +69,8 @@ class LazyLockManager {
         );
       }
 
-      // Fallback to basic display
-      const safeLevelLabel = window.DomSanitizer
-        ? window.DomSanitizer.escapeHTML(`Lock Level ${level}`)
-        : `Lock Level ${level}`;
+      // Fallback to basic display (window.DomSanitizer is guaranteed loaded on all pages)
+      const safeLevelLabel = window.DomSanitizer.escapeHTML(`Lock Level ${level}`);
       container.innerHTML = `<div class="lock-error">${safeLevelLabel}</div>`;
     }
   }
