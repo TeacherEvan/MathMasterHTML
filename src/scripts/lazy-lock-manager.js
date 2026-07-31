@@ -41,7 +41,16 @@ class LazyLockManager {
         window.UXEnhancements.loading.hideLoadingSkeleton(container);
       }
 
-      container.innerHTML = lockHtml;
+      // Sanitize the fetched allowlisted component HTML before injecting,
+      // reusing lock-manager.loader's sanitizer for consistent hardening.
+      const lockDoc = new DOMParser().parseFromString(lockHtml, "text/html");
+      if (
+        window.LockManager &&
+        typeof window.LockManager.sanitizeComponentDocument === "function"
+      ) {
+        window.LockManager.sanitizeComponentDocument(lockDoc);
+      }
+      container.innerHTML = lockDoc.body.innerHTML;
 
       // Preload next components
       this.componentLoader.preloadNextLockComponents(level);
