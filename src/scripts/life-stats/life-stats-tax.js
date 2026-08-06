@@ -88,7 +88,7 @@
 
     modal.querySelector("#tax-submit").onclick = () => {
       const form = modal.querySelector(".tax-form");
-      const fd = new FormData(form);
+      const fd = new FormData(/** @type {HTMLFormElement} */ (form));
       const questionnaire = {};
       for (const q of QUESTIONS) questionnaire[q.name] = fd.get(q.name) || null;
       questionnaire.notes = (fd.get("notes") || "").toString().slice(0, 500);
