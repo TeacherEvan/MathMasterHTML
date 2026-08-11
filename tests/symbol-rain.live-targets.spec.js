@@ -567,7 +567,7 @@ test.describe("Symbol rain live targets", () => {
     });
 
     expect(runtimeConfig.isMobileMode).toBe(false);
-    expect(runtimeConfig.visibleMs).toBe(2000);
+    expect(runtimeConfig.visibleMs).toBe(7000);
     expect(runtimeConfig.fadeMs).toBe(1000);
     expect(runtimeConfig.hiddenMinMs).toBe(2000);
     expect(runtimeConfig.hiddenMaxMs).toBe(7000);

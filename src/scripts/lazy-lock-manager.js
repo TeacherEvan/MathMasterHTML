@@ -41,7 +41,16 @@ class LazyLockManager {
         window.UXEnhancements.loading.hideLoadingSkeleton(container);
       }
 
-      container.innerHTML = lockHtml;
+      // Sanitize the fetched allowlisted component HTML before injecting,
+      // reusing lock-manager.loader's sanitizer for consistent hardening.
+      const lockDoc = new DOMParser().parseFromString(lockHtml, "text/html");
+      if (
+        window.LockManager &&
+        typeof window.LockManager.sanitizeComponentDocument === "function"
+      ) {
+        window.LockManager.sanitizeComponentDocument(lockDoc);
+      }
+      container.innerHTML = lockDoc.body.innerHTML;
 
       // Preload next components
       this.componentLoader.preloadNextLockComponents(level);
@@ -69,10 +78,8 @@ class LazyLockManager {
         );
       }
 
-      // Fallback to basic display
-      const safeLevelLabel = window.DomSanitizer
-        ? window.DomSanitizer.escapeHTML(`Lock Level ${level}`)
-        : `Lock Level ${level}`;
+      // Fallback to basic display (window.DomSanitizer is guaranteed loaded on all pages)
+      const safeLevelLabel = window.DomSanitizer.escapeHTML(`Lock Level ${level}`);
       container.innerHTML = `<div class="lock-error">${safeLevelLabel}</div>`;
     }
   }
