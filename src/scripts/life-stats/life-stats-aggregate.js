@@ -21,7 +21,7 @@
     const buckets = [];
     for (let i = 0; i < range.count; i++) {
       const startTs = now - range.ms + i * range.step;
-      buckets.push({ index: i, startTs, endTs: startTs + range.step, totals: {}, counts: {} });
+      buckets.push({ index: i, startTs, endTs: startTs + range.step, totals: {}, counts: {}, label: "" });
     }
     return buckets;
   }

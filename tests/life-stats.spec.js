@@ -107,7 +107,39 @@ test.describe("Life Stats dashboard", () => {
     expect(pngDl.suggestedFilename()).toMatch(/\.png$/);
   });
 
-  test("prefers-reduced-motion disables the TAX pulse", async ({ page }) => {
+  test("user-controlled field labels are HTML-escaped (no stored XSS)", async ({ page }) => {
+  await page.evaluate(() => localStorage.removeItem("mathmaster_life_stats_v1"));
+  await page.goto("/src/pages/life-stats.html");
+  await page.evaluate(() => localStorage.removeItem("mathmaster_life_stats_v1"));
+  await page.reload();
+
+  // Seed a custom field whose LABEL is an injection payload (label is user-controlled).
+  const xssLabel = '<img src=x onerror="window.__xssFired=true">';
+  await page.click("#ls-add");
+  await page.selectOption("#ls-field", "__new");
+  await page.fill("#ls-custom-name", xssLabel);
+  await page.fill("#ls-value", "1");
+  await page.click('#ls-form button[type="submit"]');
+
+  // The injected label must appear as literal escaped text, never as a parsed element.
+  const cardsHtml = await page.locator("#ls-cards").innerHTML();
+  expect(cardsHtml).toContain("&lt;img src=x onerror");
+  expect(cardsHtml).not.toContain("<img src=x onerror");
+  // No <img> may have been parsed inside any card heading.
+  const liveImg = page.locator("#ls-cards .ls-card h3 img");
+  await expect(liveImg).toHaveCount(0);
+  // Confirm no script/injection executed.
+  const fired = await page.evaluate(() => window.__xssFired === true);
+  expect(fired).toBe(false);
+
+  // Legend toggle button must also escape the label (no live <img>).
+  const legendHtml = await page.locator("#ls-charts .ls-legend").innerHTML();
+  expect(legendHtml).toContain("&lt;img src=x onerror");
+  expect(legendHtml).not.toContain("<img src=x onerror");
+  await expect(page.locator("#ls-charts .ls-legend button img")).toHaveCount(0);
+});
+
+test("prefers-reduced-motion disables the TAX pulse", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/src/pages/life-stats.html");
     await expect(page.locator("#tax-indicator")).toBeVisible();

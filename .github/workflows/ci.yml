@@ -106,8 +106,10 @@ jobs:
       - run: npm ci
       - name: npm audit
         # High-severity only so transitive advisories don't red the whole pipeline
-        # without a clear, fixable signal. Tighten to "moderate" if desired.
-        run: npm audit --audit-level=high
+        # without a clear, fixable signal. Audit production deps only: this is a
+        # static site, so dev dependencies (the eslint toolchain) never ship to
+        # the browser and their transitive CVEs are not a production risk.
+        run: npm audit --audit-level=high --omit=dev
 
   test:
     name: Playwright E2E (chromium gate)

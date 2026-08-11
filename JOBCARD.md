@@ -146,4 +146,4 @@
 - Event-driven integration remains the runtime rule.
 - Root HTML files remain redirect entrypoints; active runtime pages live in `src/pages/`.
 - Panel A and B sizing belongs to `src/scripts/display-manager.js`.
-- Only the ten project Markdown files plus repo-local custom agent files in `.github/agents/*.agent.md` are allowed in this repository.
+- Only the approved project Markdown files (`.github/copilot-instructions.md`, `JOBCARD.md`, `Plan Genesis.md`, `Plan Beta.md`, `Plan Alpha.md`, `README.md`, `docs/SECURITY.md`) plus repo-local custom agent files in `.github/agents/*.agent.md` are allowed in this repository.

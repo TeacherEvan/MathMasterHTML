@@ -57,6 +57,10 @@ console.log("🔒 LockManager loader helpers loading...");
     });
   }
 
+  // Expose the component sanitizer so other lock loaders (e.g. lazy-lock-manager)
+  // apply identical hardening to the same allowlisted static sources.
+  window.LockManager.sanitizeComponentDocument = sanitizeComponentDocument;
+
   const proto = window.LockManager.prototype;
 
   proto.loadLockComponent = function loadLockComponent(componentName) {
