@@ -40,7 +40,7 @@
       spinner.className = "loading-spinner-container";
       spinner.innerHTML = `
             <div class="loading-spinner"></div>
-            ${message ? `<p class="loading-message">${message}</p>` : ""}
+            ${message ? `<p class="loading-message">${window.DomSanitizer.escapeHTML(message)}</p>` : ""}
         `;
       spinner.setAttribute("role", "status");
       spinner.setAttribute("aria-label", message);

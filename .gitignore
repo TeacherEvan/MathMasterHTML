@@ -57,3 +57,9 @@ test-results.competition.json
 # Local one-off debug probes and perf artifacts
 .tmp-*
 .tmp/
+
+# Code-review skill artifacts (advisory, not project source)
+audit_report.md
+review_findings.md
+fix_summary.md
+investigation_report.md

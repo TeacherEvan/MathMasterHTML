@@ -8,7 +8,7 @@
     "lint": "eslint src/scripts lock src/tools/middle-screen",
     "lint:fix": "eslint src/scripts lock src/tools/middle-screen --fix",
     "verify": "node src/tools/scripts/verify.js",
-    "verify:quick": "npm run lint && echo '\u2705 Lint passed!'",
+    "verify:quick": "npm run lint && echo '✅ Lint passed!'",
     "typecheck": "npx tsc --noEmit --project tsconfig.typecheck.json",
     "test": "npx playwright test",
     "test:competition": "npm run test:competition:matrix",
@@ -60,9 +60,5 @@
   },
   "engines": {
     "node": "^24.0.0"
-  },
-  "dependencies": {
-    "@vercel/analytics": "^2.0.1",
-    "lint": "^1.1.2"
   }
 }

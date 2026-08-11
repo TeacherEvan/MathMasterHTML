@@ -28,6 +28,7 @@
         "src/scripts/worm-pathfinding.js",
         "src/scripts/worm-obstacle-map.js",
         "src/scripts/worm-evasion.js",
+        "src/scripts/life-stats/**/*.js",
         "src/types/types/global.d.ts"
     ],
     "exclude": [

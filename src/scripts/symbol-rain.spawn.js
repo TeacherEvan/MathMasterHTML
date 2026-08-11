@@ -1,7 +1,7 @@
 (function () {
   const SymbolRainHelpers = window.SymbolRainHelpers;
   const SymbolRainTargets = window.SymbolRainTargets;
-  const TARGET_CIRCULATION_INTERVAL_MS = 250;
+  const _TARGET_CIRCULATION_INTERVAL_MS = 250;
 
   function isVisibleInRainWindow(state, symbolObj) {
     return SymbolRainHelpers.isSymbolVisibleInRainWindow(state, symbolObj);
@@ -13,7 +13,7 @@
     ).length;
   }
 
-  function hasVisibleActiveSymbol(state, targetSymbol) {
+  function _hasVisibleActiveSymbol(state, targetSymbol) {
     const normalizedTarget = SymbolRainTargets?.normalizeSymbol?.(targetSymbol);
 
     if (!normalizedTarget) {

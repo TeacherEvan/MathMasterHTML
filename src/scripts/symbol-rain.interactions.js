@@ -326,11 +326,9 @@
         }
       };
 
-      symbolRainContainer.addEventListener(
-        "touchstart",
-        handleFallbackClick,
-        pointerListenerOptions,
-      );
+      symbolRainContainer.addEventListener("touchstart", handleFallbackClick, {
+        passive: true,
+      });
       symbolRainContainer.addEventListener("click", handleFallbackClick);
     }
 

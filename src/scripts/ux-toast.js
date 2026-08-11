@@ -37,9 +37,7 @@
       toast.setAttribute("aria-live", "polite");
 
       const icon = this.getIconForType(type);
-      const safeMessage = window.DomSanitizer
-        ? window.DomSanitizer.escapeHTML(message)
-        : this.escapeHtml(message);
+      const safeMessage = window.DomSanitizer.escapeHTML(message);
       toast.innerHTML = `
             <span class="toast-icon">${icon}</span>
             <span class="toast-message">${safeMessage}</span>
@@ -84,12 +82,6 @@
       setTimeout(() => {
         document.body.removeChild(announcement);
       }, 1000);
-    }
-
-    escapeHtml(text) {
-      const div = document.createElement("div");
-      div.textContent = text;
-      return div.innerHTML;
     }
 
     success(message, duration) {
