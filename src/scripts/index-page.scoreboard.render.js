@@ -26,15 +26,6 @@
     return timeFormatter.format(new Date(value));
   }
 
-  function escapeHtml(value) {
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
-  }
-
   function getSummary() {
     const fallbackSummary = {
       profile: window.PlayerStorage?.getProfile?.() || {
@@ -58,12 +49,12 @@
         const stats = levels[levelKey] || {};
         return `
           <article class="scoreboard-level-card">
-            <h3>${escapeHtml(label)}</h3>
+            <h3>${window.DomSanitizer.escapeHTML(label)}</h3>
             <dl>
               <div class="scoreboard-stat-row"><dt>Total score</dt><dd>${formatScore(stats.totalScore)}</dd></div>
               <div class="scoreboard-stat-row"><dt>Best score</dt><dd>${formatScore(stats.bestProblemScore)}</dd></div>
               <div class="scoreboard-stat-row"><dt>Problems solved</dt><dd>${formatScore(stats.problemsCompleted)}</dd></div>
-              <div class="scoreboard-stat-row"><dt>Last played</dt><dd>${escapeHtml(formatTimestamp(stats.lastPlayed))}</dd></div>
+              <div class="scoreboard-stat-row"><dt>Last played</dt><dd>${window.DomSanitizer.escapeHTML(formatTimestamp(stats.lastPlayed))}</dd></div>
             </dl>
           </article>
         `;
@@ -87,8 +78,8 @@
         return `
           <li class="scoreboard-history-item">
             <div>
-              <strong>${escapeHtml(levelLabel)}</strong>
-              <span>${escapeHtml(formatTimestamp(entry.completedAt))}</span>
+              <strong>${window.DomSanitizer.escapeHTML(levelLabel)}</strong>
+              <span>${window.DomSanitizer.escapeHTML(formatTimestamp(entry.completedAt))}</span>
             </div>
             <span class="scoreboard-history-score">${formatScore(entry.score)}</span>
           </li>
@@ -118,7 +109,7 @@
     elements.overallSummary.innerHTML = `
       <div class="scoreboard-stat-row"><dt>Total score</dt><dd>${formatScore(overall.totalScore)}</dd></div>
       <div class="scoreboard-stat-row"><dt>Problems solved</dt><dd>${formatScore(overall.problemsCompleted)}</dd></div>
-      <div class="scoreboard-stat-row"><dt>Last played</dt><dd>${escapeHtml(formatTimestamp(overall.lastPlayed))}</dd></div>
+      <div class="scoreboard-stat-row"><dt>Last played</dt><dd>${window.DomSanitizer.escapeHTML(formatTimestamp(overall.lastPlayed))}</dd></div>
     `;
 
     renderLevelStats(elements.levelStats, profile.levels || {});

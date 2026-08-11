@@ -53,6 +53,7 @@
     worm,
     isRainKill = false,
     isChainReaction = false,
+    isCleanup = false,
   ) {
     // ERROR HANDLING: Validate worm parameter
     if (!worm) {
@@ -81,20 +82,27 @@
     // FIX: Mark worm inactive IMMEDIATELY to stop movement during explosion animation
     worm.active = false;
 
-    // ACHIEVEMENT SYSTEM: Dispatch worm explosion event
-    document.dispatchEvent(
-      new CustomEvent("wormExploded", {
-        detail: {
-          wormId: worm.id,
-          x: worm.x,
-          y: worm.y,
-          isRainKill: isRainKill,
-          isChainReaction: isChainReaction,
-          wasPurple: worm.isPurple || false,
-          stolenSymbol: worm.stolenSymbol || null,
-        },
-      }),
-    );
+    // Player-facing side effects (rewards, achievement kills) only apply to
+    // real player-triggered explosions. Mass-clear/cleanup explosions (killAllWorms,
+    // reset, problem completion) must NOT spawn muffin rewards or inflate the
+    // kill counter — those rewards are never clickable and create a self-
+    // replenishing element leak that blocks teardown.
+    if (!isCleanup) {
+      // ACHIEVEMENT SYSTEM: Dispatch worm explosion event
+      document.dispatchEvent(
+        new CustomEvent("wormExploded", {
+          detail: {
+            wormId: worm.id,
+            x: worm.x,
+            y: worm.y,
+            isRainKill: isRainKill,
+            isChainReaction: isChainReaction,
+            wasPurple: worm.isPurple || false,
+            stolenSymbol: worm.stolenSymbol || null,
+          },
+        }),
+      );
+    }
 
     // AOE DAMAGE: Check for nearby worms and trigger chain explosions
     const nearbyWorms = this.worms.filter((w) => {

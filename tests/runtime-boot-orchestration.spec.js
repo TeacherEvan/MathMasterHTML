@@ -681,7 +681,9 @@ test.describe("Runtime boot orchestration", () => {
             const target = document.querySelector('#panel-c [data-test-spawn-probe="true"]');
             return target?.dataset.symbolState || null;
           }),
-        { timeout: 5000 },
+        // visibleMs (7000) + fadeMs (1000) = 8000ms before the symbol hides.
+        // Was 5000ms, which predates the visibleMs 2000->7000 gameplay change.
+        { timeout: 15000 },
       )
       .toBe("hidden");
 
@@ -701,7 +703,9 @@ test.describe("Runtime boot orchestration", () => {
               state: target.dataset.symbolState || "",
             };
           }),
-        { timeout: 10000 },
+        // Hidden (8000ms) + hiddenMinMs (2000) + random reschedule before resurface.
+        // Was 10000ms, which predates the visibleMs 2000->7000 gameplay change.
+        { timeout: 20000 },
       )
       .toMatchObject({
         state: "visible",
