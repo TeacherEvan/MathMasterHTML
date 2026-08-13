@@ -1,5 +1,18 @@
-// @ts-check
+/** @ts-check */
 import { defineConfig, devices } from "@playwright/test";
+
+// Chromium-only launch hardening. chrome-headless-shell segfaults intermittently
+// (signal 11 SEGV_MAPERR) on some kernels; the full Chromium in new headless mode
+// (channel: "chromium") is the documented stable workaround. Scoped to chromium
+// projects only — the webkit project (iphone-13 / Device "iPhone 13") must NOT
+// inherit channel: "chromium" (Playwright throws
+// "Unsupported webkit channel \"chromium\"").
+const chromiumLaunch = {
+  launchOptions: {
+    args: ["--disable-dev-shm-usage"],
+  },
+  channel: "chromium",
+};
 
 const cliArgs = process.argv.slice(2).join(" ");
 const shouldSerializeLocalIphonePerfLane =
@@ -50,22 +63,13 @@ export default defineConfig({
     screenshot: "only-on-failure",
     /* Enable test hooks for debugging */
     testIdAttribute: "data-testid",
-    /* Chromium crashes (SIGSEGV on newContext) on CI runners with small /dev/shm.
-       Disable the shm-backed ramfs and use /tmp instead. Harmless on dev machines. */
-    launchOptions: {
-      args: ["--disable-dev-shm-usage"],
-    },
-    /* Use the full Chromium in new headless mode instead of chrome-headless-shell.
-       chrome-headless-shell segfaults intermittently (signal 11 SEGV_MAPERR) on some
-       kernels; the full chromium channel is the documented stable workaround. */
-    channel: "chromium",
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: { ...devices["Desktop Chrome"], ...chromiumLaunch },
     },
     {
       name: "iphone-13",
@@ -77,7 +81,7 @@ export default defineConfig({
     },
     {
       name: "pixel-7",
-      use: { ...devices["Pixel 7"] },
+      use: { ...devices["Pixel 7"], ...chromiumLaunch },
     },
   ],
 
