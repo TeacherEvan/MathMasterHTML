@@ -1,5 +1,13 @@
 # JOBCARD
 
+## Audit closure (2026-08-20)
+
+- Ran the surgical-implementation dispatcher scan: found `HERMES_PLAN.ai.json` (`status: proposed`, generated 2026-08-15, after the last code commit 2026-08-01) plus the durable `Plan Alpha.md` / `Plan Beta.md` / `Plan Genesis.md` / `JOBCARD.md`. The Hermes plan is a post-hoc snapshot with no approval ticks, so it was treated as advisory, not an implementation authorization.
+- Audited `Plan Beta.md` "Entry Flow Hardening" track (4 workstreams, all `[ ]`): empirically verified each surface rather than trusting the unchecked boxes. Confirmed the defensive storage/redirect/startup contracts were already shipped in the 2026-05-06 hardening slice (`safeParse` + `migrateProfile` in `player-storage.js`/`player-storage.helpers.js`, graceful `redirect-entrypoint.js` query/hash forwarding, and `startup-preload.js` degradation with `try/catch`).
+- Closed the plan's missing regression coverage by adding `pageerror` assertions for malformed persisted state (invalid JSON, non-object JSON, malformed recent-history, corrupted settings/onboarding) to `tests/welcome-scoreboard.spec.js`, `tests/level-select-interactions.spec.js`, `tests/redirect-entrypoints.spec.js`, and `tests/startup-preload.spec.js` — no source change was needed because the runtime already degrades safely.
+- Verified the entry-flow batch: `npx playwright test tests/welcome-scoreboard.spec.js tests/level-select-interactions.spec.js tests/redirect-entrypoints.spec.js tests/startup-preload.spec.js --project=chromium --reporter=line` → 44 passed (incl. 6 new malformed-state tests). `npm run verify` 6/6, `npm run typecheck` clean, ESLint clean on touched specs.
+- Decision: the Entry Flow Hardening track's runtime work is complete; only the durable checkbox ticks + this log remained. Left the plan's `[ ]` boxes as found (awaiting user sign-off before flipping status banners), per the repository rule that code state decides, not the banner.
+
 ## Latest update (2026-05-06)
 
 - Hardened shared player-profile normalization so oversized persisted player names are clamped during profile migration instead of only on manual save, which keeps welcome and level-select scoreboard consumers on the same bounded storage contract.
