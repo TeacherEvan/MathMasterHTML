@@ -28,4 +28,32 @@ test.describe("root redirect entrypoints", () => {
       await expect(page).toHaveURL(redirectCase.expected);
     });
   }
+
+  test("preserves query and hash while forwarding from a malformed seeded state", async ({
+    page,
+  }) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "mathmaster_player_profile_v1",
+        "{ not valid json ",
+      );
+      localStorage.setItem(
+        "mathmaster_onboarding_v1",
+        "corrupted-string",
+      );
+    });
+
+    await page.goto("/index.html?welcome=returning#scoreboard", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await expect(page).toHaveURL(
+      /\/src\/pages\/index\.html\?welcome=returning#scoreboard$/,
+    );
+
+    expect(errors).toEqual([]);
+  });
 });

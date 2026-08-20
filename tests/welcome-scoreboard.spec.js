@@ -233,4 +233,89 @@ test.describe("Welcome scoreboard", () => {
     );
     expect(scoreBox.y).toBeGreaterThanOrEqual(historyBox.y + 18);
   });
+
+  test("renders without uncaught errors when the stored profile is malformed JSON", async ({
+    page,
+  }) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+
+    await page.addInitScript((storageKey) => {
+      localStorage.setItem(storageKey, "{ this is not valid json ");
+    }, PROFILE_KEY);
+
+    await page.goto("/src/pages/index.html");
+    await page.locator("#scoreboard-button").click({
+      force: true,
+      noWaitAfter: true,
+    });
+
+    await expect(page.locator("#scoreboard-modal")).toBeVisible();
+    await expect(page.locator("#scoreboard-player-name")).toBeVisible();
+
+    expect(errors).toEqual([]);
+  });
+
+  test("renders without uncaught errors when the stored profile is valid JSON but not an object", async ({
+    page,
+  }) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+
+    await page.addInitScript((storageKey) => {
+      localStorage.setItem(storageKey, JSON.stringify("corrupted-string"));
+    }, PROFILE_KEY);
+
+    await page.goto("/src/pages/index.html");
+    await page.locator("#scoreboard-button").click({
+      force: true,
+      noWaitAfter: true,
+    });
+
+    await expect(page.locator("#scoreboard-modal")).toBeVisible();
+    await expect(page.locator("#scoreboard-player-name")).toBeVisible();
+
+    expect(errors).toEqual([]);
+  });
+
+  test("renders without uncaught errors when recent history entries are malformed", async ({
+    page,
+  }) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+
+    await page.addInitScript((storageKey) => {
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          version: 3,
+          name: "Neo",
+          levels: {},
+          recentHistory: [
+            { levelKey: "beginner", score: 100, completedAt: 1735689600000 },
+            { levelKey: 42, score: "broken", completedAt: "nope" },
+            "garbage",
+            null,
+          ],
+          overall: {
+            totalScore: 100,
+            problemsCompleted: 1,
+            lastPlayed: 1735689600000,
+          },
+          updatedAt: 1735689600000,
+        }),
+      );
+    }, PROFILE_KEY);
+
+    await page.goto("/src/pages/index.html");
+    await page.locator("#scoreboard-button").click({
+      force: true,
+      noWaitAfter: true,
+    });
+
+    await expect(page.locator("#scoreboard-modal")).toBeVisible();
+    await expect(page.locator("#scoreboard-history-list")).toBeVisible();
+
+    expect(errors).toEqual([]);
+  });
 });
