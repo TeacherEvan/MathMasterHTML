@@ -63,3 +63,8 @@ audit_report.md
 review_findings.md
 fix_summary.md
 investigation_report.md
+
+# Hermes plan/audit analyzer artifacts (advisory, not project source)
+HERMES_PLAN.ai.json
+HERMES_PLAN.html
+docs/.scratch-audit/*.html

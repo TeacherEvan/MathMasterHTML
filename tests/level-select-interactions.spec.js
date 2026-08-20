@@ -352,4 +352,35 @@ test.describe("Level select interactions", () => {
       await expect(page).toHaveURL(/\/src\/pages\/index\.html(?:$|\?)/);
     });
   }
+
+  test("renders without uncaught errors when persisted profile and settings are malformed", async ({
+    page,
+  }) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "mathmaster_player_profile_v1",
+        "{ not valid json ",
+      );
+      localStorage.setItem(
+        "mathmaster_user_settings_v1",
+        "corrupted-string",
+      );
+      localStorage.setItem(
+        "mathmaster_onboarding_v1",
+        JSON.stringify(42),
+      );
+    });
+
+    await useDesktopViewport(page);
+    await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
+    await waitForCardsToSettle(page);
+
+    const runButton = page.getByRole("button", { name: "Run foundations" });
+    await expect(runButton).toBeVisible();
+
+    expect(errors).toEqual([]);
+  });
 });
