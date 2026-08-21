@@ -45,6 +45,9 @@ build/
 # Local git worktrees
 .worktrees/
 
+# Devcontainer bundles (seeded locally; large, not project source)
+.devcontainer/
+
 # Playwright test artifacts
 test-results/
 playwright-report/

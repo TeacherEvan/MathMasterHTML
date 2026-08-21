@@ -8,16 +8,29 @@ import { log, logSection } from "../verify.logging.js";
 const ALLOWED_MARKDOWN_FILES = new Set(REQUIRED_DOCS);
 // Direct child agent definitions are allowed; nested markdown stays disallowed.
 const CUSTOM_AGENT_FILE_RE = /^\.github\/agents\/[^/]+\.agent\.md$/;
+// Repo-local governance / agent-context files at the root (same class as the
+// permitted .github/agents/*.agent.md instructions; never project documentation).
+const ROOT_GOVERNANCE_FILES = new Set([
+  "AGENTS.md",
+  "CLAUDE.md",
+  "GEMINI.md",
+]);
 const IGNORED_DIRECTORIES = new Set([
   ".git",
   ".worktrees",
+  ".devcontainer",
+  "cosmic-ui",
   "node_modules",
   "playwright-report",
   "test-results",
 ]);
 
 function isAllowedMarkdownFile(file) {
-  return ALLOWED_MARKDOWN_FILES.has(file) || CUSTOM_AGENT_FILE_RE.test(file);
+  return (
+    ALLOWED_MARKDOWN_FILES.has(file) ||
+    CUSTOM_AGENT_FILE_RE.test(file) ||
+    ROOT_GOVERNANCE_FILES.has(file)
+  );
 }
 
 function collectMarkdownFiles(rootDir, relativeDir = "") {
