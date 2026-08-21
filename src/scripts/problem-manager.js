@@ -15,7 +15,7 @@ const ProblemManager = {
    * @returns {Promise<void>}
    */
   async loadProblems(level) {
-    let problemPath = "";
+    let problemPath;
     switch (level) {
       case "h2p":
         problemPath =

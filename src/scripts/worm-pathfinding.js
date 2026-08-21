@@ -59,7 +59,6 @@ class WormPathfinder {
         if (score < currentScore) {
           currentIndex = i;
           currentScore = score;
-          currentKey = key;
         }
       }
 
