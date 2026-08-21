@@ -572,4 +572,35 @@ test.describe("Startup Preload — Build 2", () => {
         queuedLevels: ["warrior", "master"],
       });
   });
+
+  test("reaches a fallback-ready state without uncaught errors under malformed stored state", async ({
+    page,
+  }) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "mathmaster_player_profile_v1",
+        "{ not valid json ",
+      );
+      localStorage.setItem(
+        "mathmaster_user_settings_v1",
+        "corrupted-string",
+      );
+      localStorage.setItem(
+        "mathmaster_onboarding_v1",
+        JSON.stringify(42),
+      );
+      localStorage.setItem("mathmaster_audio_pref_v1", "{ broken ");
+    });
+
+    await gotoGameRuntime(page, "?level=beginner&preload=off");
+    await waitForStartupPreload(page);
+    await waitForBriefingVisible(page, 3000);
+
+    await expect(page.locator("#start-game-btn")).toBeVisible();
+
+    expect(errors).toEqual([]);
+  });
 });
