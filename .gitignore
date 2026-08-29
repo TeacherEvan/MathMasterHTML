@@ -70,4 +70,12 @@ investigation_report.md
 # Hermes plan/audit analyzer artifacts (advisory, not project source)
 HERMES_PLAN.ai.json
 HERMES_PLAN.html
-docs/.scratch-audit/*.html
+docs/.scratch-audit/
+
+# Vendored "cosmic-ui" component library (added as git subtree; build/install
+# artifacts are ignored, source is tracked).
+cosmic-ui/node_modules/
+cosmic-ui/dist/
+cosmic-ui/.cache/
+cosmic-ui/coverage/
+cosmic-ui/.vite/

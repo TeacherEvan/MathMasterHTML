@@ -1,0 +1,133 @@
+/* shell.dvh.css
+ * Shared 100dvh shell for short-viewport pages. Use on a <body> by
+ * adding the `page-shell` class plus the page-specific class
+ * (e.g. `welcome-page`, `level-page`).
+ *
+ * Layout:
+ *   body.page-shell
+ *     ├── .page-topbar   (optional, sticky-top with brand + actions)
+ *     ├── .page-content  (flex: 1, min-height: 0, overflow-y: auto)
+ *     └── .page-actions  (optional, sticky-bottom action band)
+ *
+ * Below a soft height cap the welcome-page hides chrome; the
+ * level-page collapses the route-atlas.
+ */
+
+.page-shell {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow-x: hidden;
+}
+
+.page-shell--with-actions {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.page-topbar {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1.1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background:
+    linear-gradient(180deg, rgba(8, 14, 11, 0.78), rgba(6, 10, 8, 0.4));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.page-topbar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: "Orbitron", monospace;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--btn-secondary-fg, #ebe5d8);
+}
+
+.page-topbar__brand-mark {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffe9ae, #76f2be 72%, #3fcf95);
+  color: #0d100f;
+  font-size: 0.6rem;
+  font-weight: 900;
+  box-shadow: 0 0 12px rgba(122, 255, 187, 0.32);
+}
+
+.page-topbar__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.page-content {
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.page-actions {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 1.1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background:
+    linear-gradient(0deg, rgba(8, 14, 11, 0.82), rgba(6, 10, 8, 0.4));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* High-contrast mode toggle. Apply on <body class="user-high-contrast"> */
+body.user-high-contrast {
+  --level-text-0: #ffffff;
+  --level-text-1: #e7eedf;
+  --level-text-2: #c4cdc1;
+  --btn-secondary-fg: #ffffff;
+  --btn-tertiary-fg: #e7eedf;
+}
+
+body.user-high-contrast .btn,
+body.user-high-contrast .icon-button,
+body.user-high-contrast .level-card,
+body.user-high-contrast .welcome-container {
+  border-width: 2px;
+}
+
+body.user-high-contrast .level-card::after,
+body.user-high-contrast .welcome-container::after {
+  border-width: 2px;
+}
+
+/* UI scale on <html> via --mm-ui-scale set by JS. The default is 1. */
+:root {
+  --mm-ui-scale: 1;
+}
+
+html {
+  font-size: calc(16px * var(--mm-ui-scale));
+}
+
+@media (max-height: 600px) {
+  .page-topbar {
+    padding-block: 0.45rem;
+  }
+  .page-actions {
+    padding-block: 0.5rem;
+  }
+}
