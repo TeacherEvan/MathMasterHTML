@@ -1,0 +1,442 @@
+# Cosmic UI Console + Evan Pulse — Implementation Plan
+
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+
+> **For Hermes:** REQUIRED SUB-SKILL: superpowers:executing-plans. Slice-by-slice, gate each milestone before the next.
+
+**Goal:** Layer a "cosmic console" polish pass on top of the partially-shipped UI hardening (page-shell + tier buttons), and add a new mechanic where the evan helper's pointing hand causes the symbol/numeral it is about to tap to **pulse with a selection highlight** so the player can see the impending action.
+
+**Architecture:**
+- The tier-button + 100dvh shell work in `Plan UI Hardening.md` is already partly on disk (`src/styles/css/buttons.tiers.css`, `src/styles/css/shell.dvh.css`, modified `index.core.css`, `index.actions.css`, `level-select.polish.css`, modified `index.html`, `level-select.html`, new `welcome-page.settings.js`, `settings-open` body class). We EXTEND that work, not rewrite it. rev 1 ships 70% done; rev 2 closes the visual gap and adds the pulse.
+- Cosmic polish: a single new `src/styles/css/cosmic-console.css` layer that augments the existing `matrix-bg` and page-shell with (a) a starfield/aurora overlay, (b) angular "chamfered" panel chrome using clip-path, (c) glowing HUD-readout accent on the page-topbar brand mark and the settings dialog, (d) a `body.cosmic-console` opt-in class so users with `prefers-reduced-motion` get the static fallback.
+- Evan pulse: a small new module `src/scripts/evan-helper.pulse.js` registered as `window.EvanPulse`. The presenter calls `EvanPulse.setTarget(el)` whenever the hand moves onto a new live target; the pulse adds an `evan-pulse-target` class plus an inline `--pulse-color` token, then removes both when the action fires or the hand moves on. Pure CSS keyframe animation in `cosmic-console.css`. Reduced-motion → no animation, just a static outline.
+
+**Tech Stack:** HTML5, vanilla JS (ES2020), CSS3 (custom properties, `@property`-free fallback, `clip-path`, `prefers-reduced-motion`), existing Playwright suite. No new dependencies.
+
+**Effort:** ~1.5 weeks | **Surfaces touched:** 2 pages (welcome, level-select) + 1 game page (pulse) | **New tables:** 0 | **Feature flag:** `cosmicConsole` (settings.display.cosmicConsole, default off; new field, not a runtime URL flag)
+
+**Predecessor plan:** `Plan UI Hardening.md` (untracked) — rev 1 of this work. ~70% implemented, unstaged, mostly correct. The new work below is the rev 2 delta; we do NOT re-litigate rev 1.
+
+---
+
+## Live State Verified (2026-08-29)
+
+Read against the live tree on `feature/ui-hardening`:
+
+| Claim | Live source | Verified |
+|---|---|---|
+| Three-tier button system exists | `src/styles/css/buttons.tiers.css:82-186` defines `.btn--primary`, `.btn--secondary`, `.btn--tertiary`, `.btn--danger` | yes |
+| Icon button exists | `src/styles/css/buttons.tiers.css:201-254` defines `.icon-button` with `[aria-expanded]` state | yes |
+| 100dvh shell exists | `src/styles/css/shell.dvh.css:16-25` defines `.page-shell` / `.page-shell--with-actions` | yes |
+| Welcome body has the shell | `src/pages/index.html:29` `<body class="welcome-page page-shell page-shell--with-actions">` | yes |
+| Level-select body has the shell | `src/pages/level-select.html:33` `<body class="level-motion-disabled page-shell page-shell--with-actions level-page">` | yes |
+| Welcome has a gear icon | `src/pages/index.html:39-47` `#welcome-settings-button.icon-button` | yes |
+| Level-select footer uses tiered buttons | `src/pages/level-select.html:220,229,239` `btn--tertiary`/`btn--secondary`/`btn--danger` | yes |
+| Matrix-rain background on both pages | `src/pages/index.html:31`, `src/pages/level-select.html:35` `<div class="matrix-bg" id="matrixBg">` | yes |
+| Welcome-page settings controller is shared | `src/scripts/welcome-page.settings.js:1-352` (untracked) `window.SettingsDialog` | yes |
+| Evan hand is a fixed overlay, transforms via translate3d | `src/styles/css/game-modals.evan.css:63-75` `#evan-hand` (`position:fixed`, `transform: translate3d(-200px,-200px,0)`) | yes |
+| Evan hand is moved by `EvanPresenter.moveHandTo(x,y,bounds)` | `src/scripts/evan-helper.presenter.js:220-228` | yes |
+| There is currently NO target-pulse mechanism | search of `src/styles/css/game-modals.evan.css` and `src/scripts/evan-helper.*.js` for `pulse` / `highlight` — no match | yes |
+| The hand is `pointer-events: none` (does not capture hover) | `src/styles/css/game-modals.evan.css:70` | yes |
+| The hand's parent `#evan-assist-shell` is `z-index: 900000` and `pointer-events: none` until `body.evan-input-locked` | `src/styles/css/game-modals.evan.css:6-15` | yes |
+
+---
+
+## Design Tokens (locked, additive only)
+
+Add to `src/styles/css/game-polish.chrome.tokens.css:24-26` and to `src/styles/css/level-select.polish.css:1-31` and to a new `:root` in `cosmic-console.css`:
+
+```
+--cosmic-void:        #05080F
+--cosmic-haze:        #16222F
+--cosmic-star:        #E8F1FF
+--cosmic-signal:      #5BE3C9   /* pulse accent */
+--cosmic-amber:       #FFB347   /* glow accent */
+--cosmic-magenta:     #E96BFF   /* secondary glow */
+--cosmic-pulse-halo:  rgba(91, 227, 201, 0.55)
+--cosmic-chamfer:     14px      /* clip-path inset for angular panel corners */
+--cosmic-glow-spread: 28px
+--cosmic-anim-dur:    1.6s
+```
+
+Computed contrast gate (mandatory executable test, not a memory claim): `--cosmic-signal` `#5BE3C9` on the welcome body bg `#0d100f` ≈ **11.2:1** (AAA). White on amber `#FFB347` ≈ **1.9:1** — UNSAFE for body text, use only for decorative ring/glow. The plan asserts the latter is decorative-only and a Vitest gate enforces it.
+
+---
+
+## Milestone Timeline
+
+### Milestone 1: Starfield + Aurora overlay (Day 1 — Mon)
+
+Cosmetic foundation. No JS, no test changes. Visible everywhere `body.cosmic-console` is set, off by default.
+
+- New `src/styles/css/cosmic-console.css` — `body.cosmic-console` adds:
+  - `::before` starfield: 3-layer radial-gradient pinned to `position: fixed; inset: 0; z-index: 0; pointer-events: none;` with `@keyframes cosmic-twinkle` (opacity 0.55 → 0.9 → 0.55, 6s) inside `prefers-reduced-motion: no-preference` only.
+  - `::after` aurora: a single linear-gradient + mask-image, low opacity (≤0.12), `mix-blend-mode: screen`.
+  - `.page-topbar` `border-bottom-color` becomes `--cosmic-signal` at 0.35 alpha, plus a 1px inset glow `box-shadow: inset 0 1px 0 rgba(91,227,201,0.18)`.
+  - `.page-topbar__brand-mark` `box-shadow` upgraded to a 0/0/22px `--cosmic-signal` halo.
+  - `.page-actions` gets the same border-top treatment.
+- `src/pages/index.html:25-26` and `src/pages/level-select.html:29-30` — add `<link rel="stylesheet" href="/src/styles/css/cosmic-console.css">` AFTER `shell.dvh.css`.
+- `src/scripts/user-settings.helpers.js` — add `display.cosmicConsole` (bool, default `false`) to `createDefaultSettings()` and `normalizeSettings()`. Bump `SETTINGS_VERSION` to 3.
+- `src/styles/css/cosmic-console.css` — add `.page-shell { --mm-cosmic: var(--mm-cosmic-default); }` placeholder so the user-toggle works without a runtime flag.
+
+**Gate:** `npm run lint` clean. Manual: opening `index.html?cosmic=on` (URL param, see below) shows the twinkle. Manual screenshot at 1920×1080 captured for the changelog.
+
+### Milestone 2: Chamfered panel chrome + dialog glow (Day 1-2 — Tue)
+
+The "console" feel. Existing `index.core.css` and `level-select.polish.css` use rounded corners (`border-radius: 24px`). We add a SECOND set of panels with angular `clip-path` for the dialog, the page-topbar, and the welcome container.
+
+- `src/styles/css/cosmic-console.css`:
+  - `.page-shell.cosmic-console .page-topbar` — `clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));` plus 1px border via `clip-path` mirror.
+  - `.page-shell.cosmic-console .page-actions` — mirrored chamfer at the bottom.
+  - `.page-shell.cosmic-console .welcome-container` — clip-path with 24px chamfer; `::after` pseudo-element draws a 1px inner stroke with `--cosmic-signal`.
+  - `body.cosmic-console .settings-dialog` — 24px chamfer + 0/0/32px `--cosmic-signal` outer glow + `border: 1px solid var(--cosmic-signal)` at 0.45 alpha. Backdrop: `backdrop-filter: blur(14px) saturate(140%)`.
+- `src/scripts/welcome-page.settings.js` (already on disk) — on `userSettingsLoaded`/`userSettingsChanged`, toggle `body.cosmic-console` based on `settings.display.cosmicConsole`.
+- URL convenience: a tiny runtime hook in `welcome-page.settings.js` reads `?cosmic=on` / `?cosmic=off` from `location.search` and calls `UserSettings.updateSettings({ display: { cosmicConsole: ... } }, "url.override")`. Forwards into the same setter as the dialog.
+
+**Gate:**
+- New unit test `tests/cosmic-console.toggle.spec.js`: navigate to `index.html?cosmic=on`, assert `body.cosmic-console` is set and `--cosmic-signal` resolves to `#5BE3C9`.
+- Re-run `tests/welcome-page-redesign.spec.js`, `tests/level-select-polish.spec.js`, `tests/level-select-settings.spec.js`, `tests/level-select-scoreboard.spec.js` — all green.
+- New test `tests/cosmic-console.contrast.spec.js` (unit, `tests/unit/`) computes the body-text contrast on `--cosmic-void` for the four text colors. Test FAILS if the body uses amber.
+
+### Milestone 3: Settings dialog UI for the toggle (Day 2 — Wed)
+
+Surface the new flag in the dialog without inventing a new control shape — the existing `settings-toggle` row fits.
+
+- `src/pages/index.html` and `src/pages/level-select.html` — inside the Display fieldset, add a new row:
+  ```html
+  <label class="settings-toggle" for="{prefix}settings-cosmic-console">
+    <span class="settings-field-label">Cosmic console visuals</span>
+    <input id="{prefix}settings-cosmic-console" type="checkbox"
+           aria-label="Cosmic console visuals">
+  </label>
+  ```
+- `src/scripts/welcome-page.settings.js` — add `cosmicConsoleInput` to the `elements` map (line 90), bind to `settings.display.cosmicConsole` in `populateForm` (line 100-127), handle the change in `handleControlChange` (line 138-175) → call `UserSettings.updateSettings({ display: { cosmicConsole: target.checked } }, "settingsDialog.cosmicConsole")` AND `document.body.classList.toggle("cosmic-console", target.checked)`.
+- Same change mirrored in `src/scripts/level-select-page.settings.js` (the level-select page keeps its own controller; see comment at `welcome-page.settings.js:344-346`).
+
+**Gate:**
+- New spec `tests/welcome-page.settings.spec.js` (or extend the existing one) — open the welcome gear, toggle cosmic on, assert `body.cosmic-console` is set AND the input is checked. Reload, assert persistence. Toggle off, assert class removed.
+- `npx playwright test tests/welcome-page.settings.spec.js tests/level-select-settings.spec.js --project=chromium --reporter=line` green.
+
+### Milestone 4: Evan-helper target PULSE (Day 3-4 — Thu-Fri) ★ the new mechanic
+
+When the hand arrives at a target, that target should pulse to indicate "this is what I'm about to tap". The pulse is a CSS keyframe driven by a class added/removed by a new `EvanPulse` module. It is a selection signal — not a hover (the hand does not capture pointer events). It must clear instantly when the hand leaves or the action fires.
+
+**Where it lives:** `src/scripts/evan-helper.pulse.js` (new file, registered as `window.EvanPulse`). Loaded by `service-worker.js` cache list and by `src/pages/game.html` script tags (find the `evan-helper.controller.runtime.js` import line and add this one immediately after — the project already uses `defer` for these scripts).
+
+**API:**
+- `EvanPulse.setTarget(target: Element | null)` — call from the presenter whenever a new live target is selected. Idempotent. Removes the class from the previous target, adds it to the new one. Reuses `centerOf` from `EvanTargets`.
+- `EvanPulse.clearTarget()` — call from the presenter on `hide` / `parkHand` / on action completion.
+- Internal: stores `lastTarget`, animates via `requestAnimationFrame` (no CSS transitions for class add/remove; we toggle a class that runs an `@keyframes` loop until removed).
+- Honors `prefers-reduced-motion`: in reduced-motion mode, no animation — just an outline via `:focus-visible` style copied onto the pulse class.
+
+**Where to call it from:** `src/scripts/evan-helper.presenter.js`. Two sites:
+1. `moveHandTo(x, y, bounds)` (line 220): after the RAF queue is set, we need to know WHICH element the hand is moving toward. The caller already knows — `moveHandTo` is called from `evan-helper.controller.runtime.js:158` which in turn is called from `moveHandToTarget` (runtime line 154). The cleanest hook: change `moveHandTo` to accept a `target` argument (`EvanPresenter.moveHandTo(x, y, bounds, target)`), defaulting to `null` (preserves any other caller), and call `EvanPulse.setTarget(target)` inside `moveHandTo` after the RAF is queued.
+2. `parkHand()` (line 230): add `EvanPulse.clearTarget()` call at the top.
+3. `hide()` (line 161): add `EvanPulse.clearTarget()` call.
+
+**CSS (in `cosmic-console.css`):**
+```css
+@keyframes evan-pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--cosmic-pulse-halo); outline-color: var(--cosmic-signal); }
+  50%      { box-shadow: 0 0 var(--cosmic-glow-spread) 6px var(--cosmic-pulse-halo); outline-color: var(--cosmic-amber); }
+}
+body.automation .evan-pulse-target,
+body:not(.automation) .evan-pulse-target {
+  position: relative;
+  outline: 2px solid var(--cosmic-signal);
+  outline-offset: 2px;
+  animation: evan-pulse-glow var(--cosmic-anim-dur) ease-in-out infinite;
+  z-index: 2;
+  border-radius: 6px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .evan-pulse-target {
+    animation: none;
+    outline-color: var(--cosmic-signal);
+    box-shadow: 0 0 0 2px var(--cosmic-signal);
+  }
+}
+```
+
+**Tricky bits (per the writing-plans skill — verify before claiming):**
+- The evan shell is `z-index: 900000`. The pulse class only adds `z-index: 2` on the target — that is BELOW the shell. That is correct: the shell is `pointer-events: none` outside `body.evan-input-locked` (so it never intercepts clicks), and the pulse lives on the actual gameplay element so its glow renders against the panel bg, not on top of the hand. The hand's `pointer-events: none` means it never blocks the target either. **Empirical check in the test**: assert the target retains its `pointer-events: auto` after the class is added.
+- Worm segments and falling symbols are re-created on every frame. We must avoid leaking the class onto detached nodes. `setTarget` removes the class from the previous target BEFORE assigning the new one, and `clearTarget` does the same. The pulse class itself has no transition, so a node that disappears mid-animation simply stops animating — no leak, no flash.
+- Some targets are buttons (`button.worm-muffin-reward`); the pulse's `outline` is layered on top of the existing focus ring via `outline-offset`. Verify in test that the button's `aria-disabled` is NOT toggled by the class (it is purely visual).
+- The `prefers-reduced-motion` gate: assert the class is added even in reduced-motion mode, just that the keyframe is disabled. The visual cue (static outline) MUST still appear or the user has no feedback.
+
+**Test (GATE before implementation per TDD framing):**
+- `tests/evan-helper.pulse.spec.js` (new):
+  1. Mount `EvanPulse.setTarget(stubEl)` → assert `stubEl.classList.contains("evan-pulse-target")` within 50ms.
+  2. Set target A, then target B → assert A lost the class, B has it.
+  3. `EvanPulse.clearTarget()` → previous target loses the class, no class on document.
+  4. With `prefers-reduced-motion: reduce` emulated, assert the static outline is computed (via `getComputedStyle` — but jsdom cannot resolve keyframes, so instead assert that the test target is NOT inside an `@media` block, OR mock matchMedia and assert the class is still added).
+  5. Assert the class adds `z-index: 2` and `outline: 2px solid` to the target via inline `getAttribute("style")` — but CSS classes don't set inline styles. Better: assert the ruleset exists in the cascade by querying the stylesheet (`document.styleSheets[].cssRules` for the keyframe name) and asserting at least one rule references `evan-pulse-target`. The skill's rule on "computed color claims" applies: assert the keyframe NAME is present in the stylesheet, not a computed color value.
+  6. Stub `EvanPresenter.moveHandTo(x, y, bounds, target)` with a fake target → call `EvanPresenter.moveHandTo(10, 10, null, fakeTarget)` → assert `fakeTarget.classList.contains("evan-pulse-target")`.
+  7. Call `EvanPresenter.parkHand()` → assert `fakeTarget.classList.contains("evan-pulse-target")` is `false`.
+
+**Gate:** `npx playwright test tests/evan-helper.pulse.spec.js tests/evan-helper.symbols.spec.js tests/evan-helper.flow.spec.js tests/evan-helper.ui.spec.js --project=chromium --reporter=line` all green. The existing evan tests must NOT regress — the pulse is purely additive.
+
+### Milestone 5: Documentation, screenshots, ramp (Day 5 — Fri)
+
+- Update `README.md` "Local development" section with the `?cosmic=on` URL override and the new settings field.
+- Update `docs/SECURITY.md` (if it documents user-settings schema) — append `display.cosmicConsole`.
+- Capture before/after screenshots of `index.html` and `level-select.html` at 1366×768 with `?cosmic=on` → commit to `docs/screenshots/2026-08-29-cosmic-console.{png,webp}`.
+- Final manual pass: open `index.html` at 1920×1080, 1366×768, iPhone 13 (390×844). Confirm no vertical scrollbar, gear present, three-tier footer reads, dialog glows. Open `game.html?level=beginner&evan=force`, dismiss briefing, watch a full solve — confirm every target pulses before the hand taps it, and the pulse clears on `parkHand`.
+
+**Final gate:** `npm run lint && npm run typecheck && npx playwright test --project=chromium --reporter=line` all green.
+
+---
+
+## Data Flow
+
+### Settings write path (display.cosmicConsole)
+
+User (toggle in dialog)            SettingsDialog             UserSettings         DOM
+  │                                  │                          │                  │
+  ├─ click checkbox ────────────────▶│                          │                  │
+  │                                  ├─ updateSettings(partial)▶│                  │
+  │                                  │                          ├─ persist to LS   │
+  │                                  │                          ├─ emit changed ──▶│
+  │                                  │                          │                  ├─ body.classList
+  │                                  │                          │                  │   .toggle(
+  │                                  │                          │                  │     "cosmic-console"
+  │                                  │                          │                  │   )
+  │                                  ├─ populateForm(next)      │                  │
+  │                                  │   re-check the checkbox  │                  │
+
+### Evan pulse path (symbol tap)
+
+Game runtime              EvanController               EvanControllerRuntime          EvanPresenter              EvanPulse              DOM (target)
+  │                            │                              │                            │                        │                    │
+  ├─ EVAN_HELP_STARTED ──────▶│                              │                            │                        │                    │
+  │                            ├─ runLoop()                  │                            │                        │                    │
+  │                            │   └─ clickSymbol(el)        │                            │                        │                    │
+  │                            │      └─ moveHandToTarget(el) │                            │                        │                    │
+  │                            │         └─ Presenter.moveHandTo(x, y, bounds, el)         │                        │                    │
+  │                            │                                │                        ├─ queue RAF              │                    │
+  │                            │                                │                        ├─ setTarget(el) ────────▶├─ add class ────────▶│
+  │                            │                                │                        │                        │   (keyframe runs)   │
+  │                            │   ... DELAY_TARGET ...        │                        │                        │                    │
+  │                            │   └─ emit SYMBOL_CLICKED     │                        │                        │                    │
+  │                            │   └─ clearTarget() ──────────│                        │                        ├─ remove class ────▶│
+  │                            │                                │                        │                        │  (animation stops)  │
+
+---
+
+## Mockups
+
+### A · Welcome page with cosmic-console on (1920×1080)
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│  ◆ MATH MASTER                                              ⚙ gear    │  <-- chamfered topbar, phosphor underline
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│        Training dossier                                                  │
+│        MATH MASTER                              [animated logo: scale]   │
+│        Enter the training console                                         │
+│        A calm dossier for reaction drills…                                │
+│                                                                          │
+│        ┌─ Route briefing ─ Local progress cache ─ Reduced-motion ─┐    │
+│                                                                          │
+│        ┌─ "Core principle" ────────────────────────┐                    │
+│        │  "If it is not right, do not do it…"      │  <-- chamfered     │
+│        │  — Marcus Aurelius                        │      glow border   │
+│        └────────────────────────────────────────────┘                    │
+│                                                                          │
+├────────────────────────────────────────────────────────────────────────┤
+│  ◀ Back to welcome          Created by Teacher Evan     ⚙ Settings  ⌫ Reset │  <-- three tiers readable
+└────────────────────────────────────────────────────────────────────────┘
+   * twinkle field behind, aurora wash top-right (opacity 0.08)
+```
+
+### B · Settings dialog (cosmic on)
+
+```
+   ┌─ Runtime controls ─────────────────────────[Close]─┐  <-- 24px chamfer
+   │  Game settings                                      │     outer glow
+   │  Changes save here and apply right away.            │     --cosmic-signal
+   │  ─────────────────────────────────────────────────  │
+   │  DISPLAY                                            │
+   │  Display quality    [ Auto ▾ ]                      │
+   │  Reduce motion      [ ☐ ]                           │
+   │  High contrast      [ ☐ ]                           │
+   │  Cosmic console     [ ☑ ]   ← new                   │
+   │  UI scale           [───●──] 100%                   │
+   │  SOUND                                               │
+   │  Volume             [────●─]  80%                   │
+   │  Mute               [ ☐ ]                           │
+   │  GAMEPLAY                                            │
+   │  Per-level pressure: auto                            │
+   │  ─────────────────────────────────────────────────  │
+   │  [Reset to defaults]                                 │
+   └─────────────────────────────────────────────────────┘
+```
+
+### C · Evan hand about to tap a falling symbol (game view, portrait)
+
+```
+   ┌── panel-c (symbol rain) ───────────────────────────┐
+   │                                                     │
+   │       ╔═══╗    ╔═══╗                                │
+   │       ║ x ║    ║ y ║                                │
+   │       ╚═══╝    ╚═══╝                                │
+   │            ┊                                         │
+   │            ▼  (hand points here)                     │
+   │       ╔═══════════╗                                 │
+   │       ║  ◉  z   ◉ ║   <-- target pulsing            │
+   │       ╚═══════════╝     outline: --cosmic-signal    │
+   │                          box-shadow: 0 0 28px halo   │
+   │                          keyframe: 1.6s ease-in-out │
+   │                                                     │
+   └─────────────────────────────────────────────────────┘
+   HUD: SCORE 10000   TIME 600   PROBLEM 1/3
+```
+
+### D · Sidebar / topbar elements that read clearly
+
+- Primary CTA: filled gold gradient, dark text, 14px radius, 0.78rem font, lift 1px on hover, drop shadow.
+- Secondary (Settings, Scoreboard): dark fill + brass-gold 1px border, icon left, label right.
+- Tertiary (Back): text only with arrow icon, hover shifts icon -2px and label color brightens.
+- Danger (Reset): ember-red 1px border, ember glow on hover.
+- Icon button (gear): 40×40 round, brass border, phosphor fill on `[aria-expanded="true"]`.
+
+---
+
+## Risk Table
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Starfield/aurora kills Lighthouse perf | Medium | Medium | Pure CSS, no JS loop; cap opacity ≤0.12; gate on `prefers-reduced-motion` AND on a battery-saver class (future work) |
+| Clip-path chamfer breaks `border-radius` corners visually | High | Low | Chamfer is additive — the underlying `border-radius` is kept; `clip-path` only affects the outer silhouette. Verify visually in milestone 2 gate. |
+| Cosmic-console breaks the test fixtures that paint `body` with a hard color | Low | Medium | All Playwright tests should pass because the toggle defaults to OFF. Gate = `npm run test --project=chromium` is green. |
+| Evan pulse class leaks onto detached DOM nodes | Medium | Low | `setTarget` always removes from previous target before assigning. `clearTarget` clears unconditionally. Add an automated check in milestone 4 test #3: after `parkHand`, the orphaned element from a teardown has no class. |
+| Reduced-motion users see no feedback at all | High | High | Static outline MUST render in reduced-motion mode. Test #4 enforces this — the assertion is "class IS added even in reduced-motion"; visual feedback is the outline. |
+| `EvanPresenter.moveHandTo` signature change breaks other callers | Medium | Medium | Default the new `target` argument to `null`; keep current callers (`EvanTargets.centerOf`-style flows that don't carry the target) compiling. Add a `// eslint-disable-next-line` comment if the default-empty arg is flagged. |
+| Settings dialog loses sync between the two pages | Low | High | The shared controller in `welcome-page.settings.js:217-318` is the single source of truth. `level-select-page.settings.js` mirrors the same change. Run BOTH test files. |
+| New field `display.cosmicConsole` breaks the SETTINGS_VERSION=2 path | Low | High | `normalizeSettings()` already passes through unknown keys (it's a deep-merge). Add explicit branch: if missing → default `false`. Bump to v3. |
+| The hand moves through MULTIPLE targets in one frame; the pulse only settles on the last | Low | Low | Intentional. The user sees the FINAL target glow as the hand arrives. Add a Playwright assertion: when the hand is parked at A then jumps to B in the same RAF, only B has the class. |
+
+---
+
+## Files Touched
+
+### New
+- `src/styles/css/cosmic-console.css` (Milestones 1, 2, 4)
+- `src/scripts/evan-helper.pulse.js` (Milestone 4)
+- `tests/evan-helper.pulse.spec.js` (Milestone 4)
+- `tests/cosmic-console.toggle.spec.js` (Milestone 2)
+- `tests/cosmic-console.contrast.spec.js` (Milestone 2, unit/)
+- `tests/welcome-page.settings.spec.js` (Milestone 3) — or extend existing
+- `docs/screenshots/2026-08-29-cosmic-console-welcome.png` + `.webp` (Milestone 5)
+- `docs/screenshots/2026-08-29-cosmic-console-level.png` + `.webp` (Milestone 5)
+
+### Modified
+- `src/pages/index.html` — link cosmic-console.css (M1); add `settings-cosmic-console` row (M3)
+- `src/pages/level-select.html` — link cosmic-console.css (M1); add `settings-cosmic-console` row (M3)
+- `src/pages/game.html` — add `<script defer src="/src/scripts/evan-helper.pulse.js"></script>` after the existing evan-helper scripts (M4)
+- `service-worker.js` — add `/src/scripts/evan-helper.pulse.js` and `/src/styles/css/cosmic-console.css` to the precache list (M1, M4)
+- `src/scripts/evan-helper.presenter.js` — `moveHandTo` accepts optional `target` (M4); `parkHand` calls `EvanPulse.clearTarget()` (M4); `hide` calls `EvanPulse.clearTarget()` (M4)
+- `src/scripts/welcome-page.settings.js` — bind the new `cosmicConsoleInput` (M3); add `?cosmic=on/off` URL override (M2)
+- `src/scripts/level-select-page.settings.js` — mirror the new field binding (M3)
+- `src/scripts/user-settings.helpers.js` — add `display.cosmicConsole`, bump `SETTINGS_VERSION` to 3 (M1)
+- `src/styles/css/game-polish.chrome.tokens.css` — add cosmic tokens (M1)
+- `src/styles/css/level-select.polish.css` — add cosmic tokens (M1)
+- `README.md` — document `?cosmic=on` and the new field (M5)
+- `docs/SECURITY.md` — append `display.cosmicConsole` to schema (M5)
+
+---
+
+## Test Matrix
+
+| File | Why | Gate |
+|---|---|---|
+| `tests/welcome-page-redesign.spec.js` | existing — re-run unchanged | green |
+| `tests/level-select-polish.spec.js` | existing — re-run unchanged | green |
+| `tests/level-select-settings.spec.js` | existing — re-run unchanged | green |
+| `tests/level-select-scoreboard.spec.js` | existing — re-run unchanged | green |
+| `tests/welcome-scoreboard.spec.js` | existing — re-run unchanged | green |
+| `tests/welcome-page.settings.spec.js` (new) | dialog + persistence + URL override | green |
+| `tests/cosmic-console.toggle.spec.js` (new) | body class + token resolves | green |
+| `tests/cosmic-console.contrast.spec.js` (unit, new) | body text on cosmic-void is AAA; amber is decorative-only | green |
+| `tests/evan-helper.pulse.spec.js` (new) | class add/remove/clear/RAF; reduced-motion still outlines | green |
+| `tests/evan-helper.symbols.spec.js` | existing — pulse must not break the click loop | green |
+| `tests/evan-helper.flow.spec.js` | existing — re-run | green |
+| `tests/evan-helper.ui.spec.js` | existing — re-run | green |
+| `tests/evan-helper.controls.spec.js` | existing — re-run | green |
+| `tests/evan-helper.worms.spec.js` | existing — pulse on worm segment, then on power-up, then on symbol | green |
+| `tests/game-mobile-layout.ultranarrow.spec.js` | existing — narrow viewport still has the new content visible | green |
+| `tests/ui-boundary.spec.js` | existing — chamfered panels don't break hit-test math | green |
+
+---
+
+## Bite-Sized Task Granularity (TDD framing for Milestone 4, the new mechanic)
+
+### Task M4.1: Failing test — `EvanPulse.setTarget` adds the class
+
+**Files:**
+- Test: `tests/evan-helper.pulse.spec.js` (new)
+
+**Step 1:** Write the test (cases 1-3 from Milestone 4 test list). Run it. Expected: FAIL — `window.EvanPulse` is undefined.
+
+**Step 2:** Create `src/scripts/evan-helper.pulse.js` with a stub `window.EvanPulse = { setTarget, clearTarget }` that ADDS the class but does nothing else. Re-run. Expected: PASS.
+
+**Step 3:** Commit. `git add tests/evan-helper.pulse.spec.js src/scripts/evan-helper.pulse.js; git commit -m "feat(evan-pulse): stub EvanPulse module + failing test -> green"`
+
+### Task M4.2: Wire `EvanPresenter.moveHandTo` to call `EvanPulse.setTarget`
+
+**Files:**
+- Modify: `src/scripts/evan-helper.presenter.js:220-228`
+
+**Step 1:** Add test case 6 (call `EvanPresenter.moveHandTo(10, 10, null, fakeTarget)`, assert class). Re-run. Expected: FAIL.
+
+**Step 2:** Change `function moveHandTo(x, y, bounds = null)` → `function moveHandTo(x, y, bounds = null, target = null)`. Add `window.EvanPulse?.setTarget?.(target);` after the RAF queue line.
+
+**Step 3:** Re-run. Expected: PASS.
+
+**Step 4:** Commit. `git commit -m "feat(evan-pulse): presenter.moveHandTo sets pulse target"`
+
+### Task M4.3: Wire `parkHand` and `hide` to call `EvanPulse.clearTarget`
+
+**Files:**
+- Modify: `src/scripts/evan-helper.presenter.js:230-236` and `161-176`
+
+**Step 1:** Add test case 7 (call `EvanPresenter.parkHand()`, assert previous target has no class). Re-run. Expected: FAIL.
+
+**Step 2:** Add `window.EvanPulse?.clearTarget?.();` at the top of `parkHand()` and `hide()`.
+
+**Step 3:** Re-run. Expected: PASS. Run the full evan test suite to confirm no regression.
+
+**Step 4:** Commit. `git commit -m "feat(evan-pulse): clear target on parkHand and hide"`
+
+### Task M4.4: CSS keyframe + reduced-motion outline
+
+**Files:**
+- Modify: `src/styles/css/cosmic-console.css`
+
+**Step 1:** Add a temporary assertion to `tests/evan-helper.pulse.spec.js` that walks `document.styleSheets` looking for a CSS rule with selector `.evan-pulse-target`. Run. Expected: FAIL (no rules yet).
+
+**Step 2:** Add the keyframe + the class block + the reduced-motion block from the "CSS" section above.
+
+**Step 3:** Re-run. Expected: PASS.
+
+**Step 4:** Run `npm run lint` and the full evan test suite. Commit.
+
+### Task M4.5: Service worker precache + game.html script tag
+
+**Files:**
+- Modify: `service-worker.js`, `src/pages/game.html`
+
+**Step 1:** Run a one-off shell test: `npx playwright test tests/service-worker-update.spec.js --project=chromium --reporter=line` — confirm green baseline.
+
+**Step 2:** Add the two new files to the cache list and the script tag in game.html. Re-run.
+
+**Step 3:** Commit. `git commit -m "feat(evan-pulse): precache pulse module + style"`
+
+---
+
+## Execution Handoff
+
+Defaulting to Subagent-Driven (this session) per your terse-operator profile. Say "parallel" to open a separate session instead.
+
+When the parent kicks off subagents, each subagent gets a Milestone (M1, M2, M3, M4, M5) with this plan + the verified-live evidence table. Each subagent returns: files touched, diff summary, test command(s) run, exit code, before/after screenshot path. The parent then verifies the on-disk files via `git status --porcelain` and runs the gate command independently before marking the milestone green. Per the empirical-verification rule: a subagent claiming "all tests green" is a SELF-REPORT — the parent re-runs the listed test command before trusting it.
