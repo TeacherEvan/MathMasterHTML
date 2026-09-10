@@ -10,7 +10,7 @@
     const api = window.SettingsDialog.mount({
       shellId: "level-select-settings-shell",
       dialogId: "level-select-settings-dialog",
-      openButtonSelector: ".settings-button, #level-select-settings-icon",
+      openButtonSelector: ".settings-button, #level-select-settings-icon, #settings-button",
       idPrefix: "",
     });
 
