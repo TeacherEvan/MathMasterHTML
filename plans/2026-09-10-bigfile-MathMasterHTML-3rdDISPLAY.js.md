@@ -131,3 +131,15 @@ derived from the structural signals above — they name concrete extractions
   its next tick.
 - implementer: `cron_surgical_impl.py` will pick this plan up once the reviewer
   marks it `READY` or `READY-WITH-WARNINGS`.
+
+
+## REVIEW 2026-09-10T18:52:57.483634+07:00
+
+**Verdict:** `NEEDS-REVISION`
+
+**Structural check:** objectives=12 file_header=✓ imports=✓ why=✓ dod=✓ security=✓
+
+**Gaps:**
+1. **Structural check is all-None despite plan containing those sections.** `objectives=0`, `has_header=None`, `has_imports=None`, `has_why=None`, `has_dod=None`, `has_security=None` — the file-aware analysis the v2 plan claims to depend on ("objectives are derived from structural analysis") produced zero output. The plan's own content contradicts the checker, meaning the structural pass either didn't run or failed silently.
+2. **OBJ-005–OBJ-012 are byte-identical filler.** Eight "Hardening pass N" objectives with no differentiation, no line anchors, no symbol targets — exactly the generic N-slice pattern the v2 plan claims to have eliminated. They add no auditability and would all pass or fail identically.
+3. **"Top imports (sample)" shows `(none sampled)` for a 38 KB / 1,323-line file.** The plan claims objectives are derived from import cross-refs, yet no imports were extracted. Without real import data, OBJ-002 (knip dead-import cleanup) and OBJ-003 (barrel re-export audit) are unfounded — they're guessing at what's imported and used.

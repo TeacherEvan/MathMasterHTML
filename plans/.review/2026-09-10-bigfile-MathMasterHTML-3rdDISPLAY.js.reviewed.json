@@ -1,0 +1,11 @@
+{
+  "plan": "2026-09-10-bigfile-MathMasterHTML-3rdDISPLAY.js.md",
+  "verdict": "NEEDS-REVISION",
+  "ready_for_impl": false,
+  "gaps": [
+    "**Structural check is all-None despite plan containing those sections.** `objectives=0`, `has_header=None`, `has_imports=None`, `has_why=None`, `has_dod=None`, `has_security=None` \u2014 the file-aware analysis the v2 plan claims to depend on (\"objectives are derived from structural analysis\") produced zero output. The plan's own content contradicts the checker, meaning the structural pass either didn't run or failed silently.",
+    "**OBJ-005\u2013OBJ-012 are byte-identical filler.** Eight \"Hardening pass N\" objectives with no differentiation, no line anchors, no symbol targets \u2014 exactly the generic N-slice pattern the v2 plan claims to have eliminated. They add no auditability and would all pass or fail identically.",
+    "**\"Top imports (sample)\" shows `(none sampled)` for a 38 KB / 1,323-line file.** The plan claims objectives are derived from import cross-refs, yet no imports were extracted. Without real import data, OBJ-002 (knip dead-import cleanup) and OBJ-003 (barrel re-export audit) are unfounded \u2014 they're guessing at what's imported and used."
+  ],
+  "reviewed_at": "2026-09-10T18:52:57.484291+07:00"
+}
