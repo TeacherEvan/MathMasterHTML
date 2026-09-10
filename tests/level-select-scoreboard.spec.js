@@ -128,7 +128,7 @@ test.describe("Level select scoreboard", () => {
       ),
     ).toHaveText("5,000");
 
-    const resetButton = page.locator(".reset-progress-btn");
+    const resetButton = page.locator("#reset-progress-btn");
 
     await expect(resetButton).toBeVisible();
     await expect(resetButton).toBeEnabled();
