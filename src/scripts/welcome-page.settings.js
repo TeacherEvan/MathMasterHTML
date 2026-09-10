@@ -121,10 +121,10 @@ function populateForm(settings = readSettings(), scope, idPrefix) {
       elements.highContrastInput.checked = Boolean(settings.display?.highContrast);
     }
     if (elements.uiScaleInput) {
-      elements.uiScaleInput.value = String(Number(settings.display?.uiScale) * 100 || 100);
+      elements.uiScaleInput.value = String(Number.isFinite(Number(settings.display?.uiScale)) ? Number(settings.display?.uiScale) * 100 : 100);
     }
     if (elements.volumeInput) {
-      elements.volumeInput.value = String(Number(settings.sound?.volume) || 80);
+      elements.volumeInput.value = String(Number.isFinite(Number(settings.sound?.volume)) ? Number(settings.sound?.volume) : 80);
     }
     if (elements.cosmicConsoleInput) {
       elements.cosmicConsoleInput.checked = Boolean(settings.display?.cosmicConsole);
