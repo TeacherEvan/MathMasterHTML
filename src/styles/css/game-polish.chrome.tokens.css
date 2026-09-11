@@ -26,6 +26,17 @@
   --evan-hand-size: 2.4rem;
   --font-display: "Orbitron", sans-serif;
   --font-body: "Exo 2", "Segoe UI", sans-serif;
+  /* Cosmic console tokens (additive) */
+  --cosmic-void:        #05080F;
+  --cosmic-haze:        #16222F;
+  --cosmic-star:        #E8F1FF;
+  --cosmic-signal:      #5BE3C9;
+  --cosmic-amber:       #FFB347;
+  --cosmic-magenta:     #E96BFF;
+  --cosmic-pulse-halo:  rgba(91, 227, 201, 0.55);
+  --cosmic-chamfer:     14px;
+  --cosmic-glow-spread: 28px;
+  --cosmic-anim-dur:    1.6s;
 }
 
 body {

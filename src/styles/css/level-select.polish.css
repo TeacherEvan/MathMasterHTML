@@ -19,6 +19,25 @@
   --level-panel-shadow: 0 28px 70px rgba(0, 0, 0, 0.34);
   --level-panel-border: rgba(255, 255, 255, 0.06);
   --level-hero-width: min(72rem, calc(100vw - 2rem));
+  /* Tiered-button tokens */
+  --btn-secondary-fg: #ebe5d8;
+  --btn-tertiary-fg: #c2c8bf;
+  --btn-primary-fg: #0d100f;
+  --btn-primary-bg-from: rgba(237, 240, 189, 0.98);
+  --btn-primary-bg-to: rgba(154, 117, 45, 0.94);
+  --btn-danger-fg: #fde7df;
+  --btn-danger-edge: rgba(199, 107, 82, 0.45);
+  /* Cosmic console tokens (additive) */
+  --cosmic-void:        #05080F;
+  --cosmic-haze:        #16222F;
+  --cosmic-star:        #E8F1FF;
+  --cosmic-signal:      #5BE3C9;
+  --cosmic-amber:       #FFB347;
+  --cosmic-magenta:     #E96BFF;
+  --cosmic-pulse-halo:  rgba(91, 227, 201, 0.55);
+  --cosmic-chamfer:     14px;
+  --cosmic-glow-spread: 28px;
+  --cosmic-anim-dur:    1.6s;
 }
 
 * {
@@ -54,6 +73,13 @@ body {
       var(--level-ink-0) 48%,
       #080b0a 100%
     );
+}
+
+body.level-page {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
 }
 
 body::before {
@@ -126,11 +152,20 @@ button {
   width: var(--level-hero-width);
   max-width: 1180px;
   margin: 0 auto;
-  padding: clamp(2rem, 4.8vw, 4.5rem) clamp(1rem, 4vw, 2rem) 0;
+  padding: clamp(1.25rem, 3vw, 2.6rem) clamp(1rem, 4vw, 2rem) 0;
   display: grid;
   justify-items: start;
   gap: 0.68rem;
   text-align: left;
+}
+
+.page-content .header {
+  padding-top: clamp(0.75rem, 1.4vw, 1.2rem);
+}
+
+.page-content .level-container {
+  padding: clamp(0.9rem, 1.6vw, 1.5rem) clamp(1rem, 4vw, 2rem)
+    clamp(1.4rem, 3vw, 2.6rem);
 }
 
 .header::before {

@@ -173,6 +173,7 @@
     document.body.classList.remove("evan-stop-visible");
     setAssistStatus("");
     setInputLock(false);
+    window.EvanPulse?.clearTarget?.();
   }
 
   function showSkip() {
@@ -217,7 +218,7 @@
     if (solveSlot) solveSlot.hidden = true;
   }
 
-  function moveHandTo(x, y, bounds = null) {
+  function moveHandTo(x, y, bounds = null, target = null) {
     if (!hand) return;
     queuedHandPosition = { x, y, bounds };
     if (handFrameId !== null) {
@@ -225,6 +226,7 @@
     }
 
     handFrameId = requestAnimationFrame(flushHandMove);
+    window.EvanPulse?.setTarget?.(target);
   }
 
   function parkHand() {
@@ -233,6 +235,7 @@
     queuedHandPosition = null;
     hand.style.transition = "none";
     hand.style.transform = "translate3d(-200px, -200px, 0)";
+    window.EvanPulse?.clearTarget?.();
   }
 
   document.addEventListener(window.GameEvents?.EVAN_HELP_STARTED, (e) => {
