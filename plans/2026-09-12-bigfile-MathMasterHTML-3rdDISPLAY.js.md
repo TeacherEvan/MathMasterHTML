@@ -131,3 +131,15 @@ derived from the structural signals above — they name concrete extractions
   its next tick.
 - implementer: `cron_surgical_impl.py` will pick this plan up once the reviewer
   marks it `READY` or `READY-WITH-WARNINGS`.
+
+
+## REVIEW 2026-09-12T22:17:58.739896+07:00
+
+**Verdict:** `NEEDS-REVISION`
+
+**Structural check:** objectives=12 file_header=✓ imports=✓ why=✓ dod=✓ security=✓
+
+**Gaps:**
+1. **OBJ-005–OBJ-012 are generic filler.** Eight of twelve objectives are identical "Hardening pass N" entries with no concrete target, no symbol anchor, and no line-range evidence — directly contradicting the plan's claim that objectives are "derived from structural analysis, NOT a generic N-slice filler." The structural checker confirms this: `objectives=0` (zero objectives pass structural validation).
+2. **Structural analysis is superficial.** The analysis identifies only 4 `return (` blocks and file size — no hooks, no state/props, no repeated literals, no import cross-refs, no symbol-level anchors. OBJ-001 claims extraction of "4 distinct UIs (loading, unauthorized, authorized variants)" but the analysis provides no evidence for what these UIs are or where their boundaries actually fall.
+3. **OBJ-004 target is unsupported.** The 50% line-reduction goal (1,323→≤661) is attributed to "OBJ-001 → OBJ-008," but OBJ-005–OBJ-008 are hardening passes that add no line-reduction value. Only OBJ-001 (decomposition) would shrink the file, and the plan gives no evidence that extracting 4 panel components alone can halve the file size. The target is either misattributed or unrealistic without additional concrete extraction objectives.
