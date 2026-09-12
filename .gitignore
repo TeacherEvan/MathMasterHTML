@@ -73,10 +73,6 @@ HERMES_PLAN.html
 docs/.scratch-audit/*.html
 
 # V2 audit scratch dir (surgical-implementation runtime artifacts)
+
+# V2 audit scratch dir (surgical-implementation runtime artifacts)
 docs/.scratch-audit/
-
-# Auto-generated refactor plans (duplicates; excluded by repo markdown policy)
-plans/*.md
-plans/.review/*.json
-
-# V2 audit scratch (surgical-implementation runtime artifacts)

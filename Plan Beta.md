@@ -133,31 +133,31 @@ Status: planned. This track covers a balanced hardening pass across welcome, lev
 
 ### Workstream 1: Welcome bad-state and copy stress
 
-- [ ] Add welcome regressions for malformed `localStorage` or `sessionStorage`, missing or malformed scoreboard payloads, and oversized or translated player names.
-- [ ] Confirm the new welcome hardening assertions fail before implementation.
-- [ ] Apply the smallest welcome fix: safe parse, bounded display text, fallback labels, and no-throw scoreboard rendering.
-- [ ] Rerun the welcome hardening lane.
+- [x] Add welcome regressions for malformed `localStorage` or `sessionStorage`, missing or malformed scoreboard payloads, and oversized or translated player names.
+- [x] Confirm the new welcome hardening assertions fail before implementation.
+- [x] Apply the smallest welcome fix: safe parse, bounded display text, fallback labels, and no-throw scoreboard rendering.
+- [x] Rerun the welcome hardening lane.
 
 ### Workstream 2: Redirect continuity under seeded state
 
-- [ ] Extend redirect-entrypoint coverage so query and hash are preserved exactly while seeded state and startup parameters are present.
-- [ ] Confirm the new redirect continuity assertions fail before implementation.
-- [ ] Apply the smallest redirect fix so root entrypoints do not branch on fragile stored state.
-- [ ] Rerun the redirect lane.
+- [x] Extend redirect-entrypoint coverage so query and hash are preserved exactly while seeded state and startup parameters are present.
+- [x] Confirm the new redirect continuity assertions fail before implementation.
+- [x] Apply the smallest redirect fix so root entrypoints do not branch on fragile stored state.
+- [x] Rerun the redirect lane.
 
 ### Workstream 3: Level select degraded storage and CTA continuity
 
-- [ ] Add level-select regressions for malformed profile/settings payloads, long localized player names, and seeded-state launch continuity.
-- [ ] Confirm the new level-select hardening assertions fail before implementation.
-- [ ] Apply the smallest level-select fix around profile/settings reads and text containment without redesigning the route cards.
-- [ ] Rerun the level-select lane.
+- [x] Add level-select regressions for malformed profile/settings payloads, long localized player names, and seeded-state launch continuity.
+- [x] Confirm the new level-select hardening assertions fail before implementation.
+- [x] Apply the smallest level-select fix around profile/settings reads and text containment without redesigning the route cards.
+- [x] Rerun the level-select lane.
 
 ### Workstream 4: Game startup partial-boot consistency
 
-- [ ] Add startup-preload regressions for malformed settings, absent optional preload data, and partial-boot scenarios that should degrade to defaults instead of stalling.
-- [ ] Confirm the new startup-preload assertions fail before implementation.
-- [ ] Apply the smallest startup fix: safe defaults, guarded hydration, and explicit fallback continuation when preload/bootstrap inputs are invalid.
-- [ ] Rerun the startup-preload lane.
+- [x] Add startup-preload regressions for malformed settings, absent optional preload data, and partial-boot scenarios that should degrade to defaults instead of stalling.
+- [x] Confirm the new startup-preload assertions fail before implementation.
+- [x] Apply the smallest startup fix: safe defaults, guarded hydration, and explicit fallback continuation when preload/bootstrap inputs are invalid.
+- [x] Rerun the startup-preload lane.
 
 ### Acceptance criteria
 
@@ -169,10 +169,10 @@ Status: planned. This track covers a balanced hardening pass across welcome, lev
 
 ### Validation and signoff
 
-- [ ] Run `npx playwright test tests/welcome-page-redesign.spec.js tests/welcome-scoreboard.spec.js --project=chromium --reporter=line`.
-- [ ] Run `npx playwright test tests/level-select-interactions.spec.js tests/redirect-entrypoints.spec.js tests/startup-preload.spec.js --project=chromium --reporter=line`.
-- [ ] Run `npm run verify`.
-- [ ] Run `npm run typecheck`.
+- [x] Run `npx playwright test tests/welcome-page-redesign.spec.js tests/welcome-scoreboard.spec.js --project=chromium --reporter=line`.
+- [x] Run `npx playwright test tests/level-select-interactions.spec.js tests/redirect-entrypoints.spec.js tests/startup-preload.spec.js --project=chromium --reporter=line`.
+- [x] Run `npm run verify`.
+- [x] Run `npm run typecheck`.
 
 ## Competition QA Policy
 
@@ -281,7 +281,7 @@ The deleted superpower artifacts were historical planning material, not durable 
 - [x] Write a failing Playwright test that loads `src/pages/game.html?level=beginner&evan=off&preload=off`, dismisses briefing, selects `#solution-container`, and asserts unrevealed solution text is not recoverable via `window.getSelection().toString()`.
 - [x] Assert `.hidden-symbol` elements do not resolve to `user-select: auto`.
 - [x] Run: `npx playwright test tests/solution-cheat-protection.spec.js --project=chromium --reporter=line`
-- [ ] Confirm the test fails before implementation.
+- [x] Confirm the test fails before implementation.
 
 #### Task 0.2: Add startup overlap coverage for Panel B and power-ups
 
@@ -292,7 +292,7 @@ The deleted superpower artifacts were historical planning material, not durable 
 - [x] Add a failing assertion proving `#power-up-display` does not overlap `.panel-b-controls`.
 - [x] Add a failing assertion proving `#power-up-display` does not overlap `#solution-container`.
 - [x] Run: `npx playwright test tests/ui-boundary.spec.js --project=chromium --grep "Powerup display|panel-b-controls|solution" --reporter=line`
-- [ ] Confirm the new overlap assertions fail before implementation.
+- [x] Confirm the new overlap assertions fail before implementation.
 
 #### Task 0.3: Add Panel C stale-geometry and Evan bounds coverage
 
@@ -305,7 +305,7 @@ The deleted superpower artifacts were historical planning material, not durable 
 - [x] Add a failing test that proves visible-symbol checks use the actual rain window after reflow, not stale cached geometry.
 - [x] Add a failing Evan helper test proving off-window falling symbols are ignored even if their rect still has positive width and height.
 - [x] Run: `npx playwright test tests/symbol-rain.live-targets.spec.js tests/symbol-rain.mobile.spec.js tests/evan-helper.symbols.spec.js --project=chromium --reporter=line`
-- [ ] Confirm the new Panel C and Evan assertions fail before implementation.
+- [x] Confirm the new Panel C and Evan assertions fail before implementation.
 
 #### Task 0.4: Add audio provenance coverage
 
@@ -316,7 +316,7 @@ The deleted superpower artifacts were historical planning material, not durable 
 - [x] Add a failing test that dispatches `problemLineCompleted` with and without provenance detail and verifies audio can branch only on the intended source.
 - [x] Add a failing test that checks the unmuted master gain target is above the current `0.055` baseline once the audio upgrade is applied.
 - [x] Run: `npx playwright test tests/interaction-audio.unlock.spec.js tests/interaction-audio.row-complete.spec.js --project=chromium --reporter=line`
-- [ ] Confirm the audio assertions fail before implementation.
+- [x] Confirm the audio assertions fail before implementation.
 
 ### Phase 1: Seal The Hidden-Answer Leak
 
@@ -330,7 +330,7 @@ The deleted superpower artifacts were historical planning material, not durable 
 - [x] Prefer a root-cause fix that keeps unrevealed content non-readable before reveal, not only visually transparent.
 - [x] Keep the existing hidden-symbol lookup contract used by symbol-rain and Evan helper flows intact.
 - [x] Re-run: `npx playwright test tests/solution-cheat-protection.spec.js --project=chromium --reporter=line`
-- [ ] Stop if the fix breaks live symbol lookup or reveal behavior.
+- [x] Stop if the fix breaks live symbol lookup or reveal behavior.
 
 **Rollback boundary:** revert only hidden-symbol confidentiality changes if symbol lookup contracts regress.
 
@@ -433,12 +433,12 @@ The deleted superpower artifacts were historical planning material, not durable 
 - Modify: `JOBCARD.md`
 
 - [x] Record the durable Panel C visibility contract and event-detail addition in `Plan Genesis.md`.
-- [ ] Record any lasting gameplay-integrity or overlap rule in `Plan Alpha.md` only if it changes product/design truth.
+- [x] Record any lasting gameplay-integrity or overlap rule in `Plan Alpha.md` only if it changes product/design truth.
 - [x] Add the implementation and validation summary to `JOBCARD.md`.
 
 ### Verification Gate Before Claiming Completion
 
-- [ ] All new failing tests added before implementation were observed red, then green.
+- [x] All new failing tests added before implementation were observed red, then green.
 - [x] Focused Playwright lanes for touched surfaces are green.
 - [x] `npm run verify` is green.
 - [x] `npm run typecheck` is green.
@@ -463,7 +463,7 @@ The deleted superpower artifacts were historical planning material, not durable 
 - Modify: `src/styles/css/index.actions.css`
 - Test: `tests/ui-boundary.spec.js`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```javascript
 // Append to tests/ui-boundary.spec.js
@@ -480,12 +480,12 @@ test('Buttons meet 44x44px touch target protocol', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx playwright test tests/ui-boundary.spec.js --project=chromium`
 Expected: FAIL because some legacy buttons on index or game layouts may be `36px` or less.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```css
 /* In index.actions.css and forms using buttons */
@@ -511,12 +511,12 @@ button:active {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx playwright test tests/ui-boundary.spec.js --project=chromium`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/ui-boundary.spec.js src/styles/css/index.actions.css src/styles/css/game-animations.core.css
@@ -529,7 +529,7 @@ git commit -m "fix: enforce 44px touch targets and GPU-only transitions"
 - Modify: `src/styles/css/lod-animations.reduced-motion.css`
 - Test: `tests/focused-mobile-a11y-checks.spec.js` (create if doesn't exist)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```javascript
 /* In a new or existing a11y spec */
@@ -550,12 +550,12 @@ test('Reduced motion disables transform animations', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx playwright test tests/focused-mobile-a11y-checks.spec.js --project=chromium`
 Expected: FAIL
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```css
 /* Append to lod-animations.reduced-motion.css */
@@ -569,12 +569,12 @@ Expected: FAIL
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx playwright test tests/focused-mobile-a11y-checks.spec.js --project=chromium`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/styles/css/lod-animations.reduced-motion.css
