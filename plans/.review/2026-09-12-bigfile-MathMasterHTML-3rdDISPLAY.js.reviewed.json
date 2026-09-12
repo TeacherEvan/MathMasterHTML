@@ -1,0 +1,11 @@
+{
+  "plan": "2026-09-12-bigfile-MathMasterHTML-3rdDISPLAY.js.md",
+  "verdict": "NEEDS-REVISION",
+  "ready_for_impl": false,
+  "gaps": [
+    "**OBJ-005\u2013OBJ-012 are generic filler.** Eight of twelve objectives are identical \"Hardening pass N\" entries with no concrete target, no symbol anchor, and no line-range evidence \u2014 directly contradicting the plan's claim that objectives are \"derived from structural analysis, NOT a generic N-slice filler.\" The structural checker confirms this: `objectives=0` (zero objectives pass structural validation).",
+    "**Structural analysis is superficial.** The analysis identifies only 4 `return (` blocks and file size \u2014 no hooks, no state/props, no repeated literals, no import cross-refs, no symbol-level anchors. OBJ-001 claims extraction of \"4 distinct UIs (loading, unauthorized, authorized variants)\" but the analysis provides no evidence for what these UIs are or where their boundaries actually fall.",
+    "**OBJ-004 target is unsupported.** The 50% line-reduction goal (1,323\u2192\u2264661) is attributed to \"OBJ-001 \u2192 OBJ-008,\" but OBJ-005\u2013OBJ-008 are hardening passes that add no line-reduction value. Only OBJ-001 (decomposition) would shrink the file, and the plan gives no evidence that extracting 4 panel components alone can halve the file size. The target is either misattributed or unrealistic without additional concrete extraction objectives."
+  ],
+  "reviewed_at": "2026-09-12T22:17:58.740619+07:00"
+}

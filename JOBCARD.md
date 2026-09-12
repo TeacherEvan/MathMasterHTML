@@ -155,3 +155,13 @@
 - Root HTML files remain redirect entrypoints; active runtime pages live in `src/pages/`.
 - Panel A and B sizing belongs to `src/scripts/display-manager.js`.
 - Only the approved project Markdown files (`.github/copilot-instructions.md`, `JOBCARD.md`, `Plan Genesis.md`, `Plan Beta.md`, `Plan Alpha.md`, `README.md`, `docs/SECURITY.md`) plus repo-local custom agent files in `.github/agents/*.agent.md` are allowed in this repository.
+
+
+## Audit closure (2026-09-12)
+
+- Ran the surgical-implementation dispatcher scan: found 4 plan docs at repo root (`Plan Alpha.md`, `Plan Beta.md`, `Plan Genesis.md`, `JOBCARD.md`) plus `docs/SECURITY.md`; no `docs/plans/`, no `HERMES_PLAN.*`, no `docs/.scratch-audit/` runtime artifacts.
+- Verified `Plan Beta.md` "Sci-Fi Console UI Hardening" track (2 tasks, all `[ ]`) against the live tree: `game-animations.core.css` already has GPU-only `transition: transform 200ms linear, opacity 150ms var(--ease-out-quint)` (no `transition: all`); `index.actions.css` already enforces `min-height: 44px; min-width: 44px` on `button, .action-target, [role="button"]`; `lod-animations.reduced-motion.css` already has the full `@media (prefers-reduced-motion: reduce)` block; `tests/ui-boundary.spec.js` already contains the 44x44 touch-target test (line 379). Ticked all checkboxes to match code state.
+- Verified `Plan Beta.md` "Entry Flow Hardening" track (4 workstreams, all `[ ]`) empirically: `safeParse` + `migrateProfile` live in `player-storage.js`/`player-storage.helpers.js` and `user-settings.js`; `redirect-entrypoint.js` preserves `location.search` + `location.hash` exactly; `startup-preload.js` degrades with `try/catch` fallbacks. Ran the entry-flow batch: `npx playwright test tests/welcome-scoreboard.spec.js tests/level-select-interactions.spec.js tests/redirect-entrypoints.spec.js tests/startup-preload.spec.js --project=chromium --reporter=line` -> 44 passed. `npm run verify` 6/6, `npm run typecheck` clean, `npm run lint` clean (1 pre-existing prefer-const warning). Ticked all checkboxes to match code state.
+- Ran `npx playwright test tests/ui-boundary.spec.js --project=chromium --reporter=line` -> 14 passed (incl. 44x44 touch-target protocol).
+- Added `docs/.scratch-audit/` to `.gitignore` per surgical-implementation pitfall (was untracked, would have leaked audit artifacts into commits).
+- Decision: all plan tracks are verified complete against the live tree; no new implementation work required. Left the plan status banners as found (no `HERMES_PLAN.ai.json` approval snapshot exists to flip).
