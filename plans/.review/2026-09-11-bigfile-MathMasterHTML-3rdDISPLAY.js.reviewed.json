@@ -1,0 +1,11 @@
+{
+  "plan": "2026-09-11-bigfile-MathMasterHTML-3rdDISPLAY.js.md",
+  "verdict": "NEEDS-REVISION",
+  "ready_for_impl": false,
+  "gaps": [
+    "**OBJ-005\u2013OBJ-012 are generic filler, contradicting the plan's own claim of being \"file-aware\" and \"NOT a generic N-slice filler.\"** Eight of twelve objectives are identical \"Hardening pass N\" entries with no concrete targets, no line anchors, no symbol names, and no specific type issues to address. The structural analysis flagged `objectives=0` with `has_why=None`, `has_dod=None` \u2014 these passes have no per-objective Why, Definition of Done, imports, or security. They must be replaced with concrete, line-anchored objectives derived from actual type errors, loose inferences, or prop-drilling hotspots found in the file (e.g., specific `any` usages, untyped props, or inferred-then-drilled boundaries at the L47/L224/L275/L1188 render branches).",
+    "**No per-objective Definition of Done.** The DoD section at the bottom is a global checklist only. Each OBJ-00X needs its own filled-in DoD entry (validation command, evidence artifact, acceptance criteria) \u2014 currently only OBJ-001 and OBJ-004 have anything resembling acceptance, and even those are thin.",
+    "**OBJ-004's 661-line target is arbitrary and unanchored.** No rationale ties it to the structural analysis (e.g., \"extract X panel at L47\u2013L224 = ~200 lines, Y panel at L275\u2013L1188 = ~900 lines, leaving ~150 lines of composition\"). The goal should be derived from the actual extractions, not a round number. Additionally, OBJ-002 (knip/ts-prune) and OBJ-003 (barrel audit) are sequenced *after* OBJ-001 but before OBJ-004's line-count gate \u2014 the dependency chain is muddy and the line-count acceptance may fail if dead imports aren't cleaned first."
+  ],
+  "reviewed_at": "2026-09-11T19:19:22.623527+07:00"
+}
