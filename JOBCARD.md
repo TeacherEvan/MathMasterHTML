@@ -165,3 +165,12 @@
 - Ran `npx playwright test tests/ui-boundary.spec.js --project=chromium --reporter=line` -> 14 passed (incl. 44x44 touch-target protocol).
 - Added `docs/.scratch-audit/` to `.gitignore` per surgical-implementation pitfall (was untracked, would have leaked audit artifacts into commits).
 - Decision: all plan tracks are verified complete against the live tree; no new implementation work required. Left the plan status banners as found (no `HERMES_PLAN.ai.json` approval snapshot exists to flip).
+
+## Audit closure (2026-09-14)
+
+- Re-ran the surgical-implementation dispatcher scan: 4 plan docs at repo root (`Plan Alpha.md`, `Plan Beta.md`, `Plan Genesis.md`, `JOBCARD.md`) plus `docs/SECURITY.md`; no `docs/plans/`, no `HERMES_PLAN.*`, no `docs/.scratch-audit/` runtime artifacts. `docs/.scratch-audit/` already gitignored (line 78).
+- Confirmed zero unchecked `[ ]` boxes remain in any plan doc (only the literal instructional line in `Plan Beta.md:449` referencing the checkbox syntax itself).
+- Re-verified all gates from a clean tree: `npm run verify` → 6/6 PASS (eslint now green after `npm ci` restored `@eslint/js`); `npm run typecheck` → clean; `npm run lint` → 0 errors (1 pre-existing `prefer-const` warning in `worm-pathfinding.js:53`).
+- Re-ran the entry-flow batch: `npx playwright test tests/welcome-scoreboard.spec.js tests/level-select-interactions.spec.js tests/redirect-entrypoints.spec.js tests/startup-preload.spec.js --project=chromium --reporter=line` → 44 passed.
+- Ran code-review (5-axis) across the full tree. Findings: (a) LOW — `worm-pathfinding.js:53` `prefer-const` warning (pre-existing, lint-clean); (b) LOW — `worm-behavior.steal.js:140` TODO comment re FSM consolidation; (c) LOW — `worm-movement-core.js:60` `@private` placeholder JSDoc; (d) SECURITY/INFO — `innerHTML` sinks in `game-init.js:125`, `game.js:54`, `game-problem-manager.js:135`, `index-page.matrix.js:46`, `lazy-lock-manager.js:53` are all static trusted content or same-origin component HTML, covered by the `docs/SECURITY.md` documented exceptions; `index-page.scoreboard.render.js` escapes all user-derived values via `window.DomSanitizer.escapeHTML`. No CRITICAL/HIGH findings → no new orchestration jobs warranted.
+- Decision: all plan tracks verified complete against the live tree; no new implementation work required. Working tree clean, `main == origin/main` (no divergence). Pushed per `PUSH=1`.
