@@ -15,7 +15,7 @@
   });
 
   const elements = {
-    backButton: document.querySelector(".back-button"),
+    backButton: document.querySelector("#back-button-bottom, .back-button"),
     cards: Array.from(document.querySelectorAll(".level-card")),
     levelButtons: Array.from(document.querySelectorAll(".level-button")),
     routeButtons: Array.from(document.querySelectorAll(".route-switcher-button")),

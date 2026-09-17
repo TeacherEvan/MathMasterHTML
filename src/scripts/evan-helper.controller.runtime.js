@@ -155,7 +155,7 @@
     const pos = window.EvanTargets?.centerOf?.(target) || { x: 0, y: 0 };
     const bounds = getGameplayPanelBounds(pos, target);
     const safePos = clampPointToBounds(pos, bounds);
-    window.EvanPresenter?.moveHandTo?.(safePos.x, safePos.y, bounds);
+    window.EvanPresenter?.moveHandTo?.(safePos.x, safePos.y, bounds, target);
     return safePos;
   }
 

@@ -1,0 +1,200 @@
+/* Cosmic Console Visual Layer
+ * Adds starfield/aurora overlay, chamfered panel chrome, glowing HUD accents,
+ * and Evan pulse target highlighting.
+ * Opt-in via body.cosmic-console (settings.display.cosmicConsole).
+ * Respects prefers-reduced-motion: reduce -> static fallback only.
+ */
+
+/* ========================================================================
+   DESIGN TOKENS (root-level, additive only)
+   ======================================================================== */
+:root {
+  --cosmic-void:        #05080F;
+  --cosmic-haze:        #16222F;
+  --cosmic-star:        #E8F1FF;
+  --cosmic-signal:      #5BE3C9;
+  --cosmic-amber:       #FFB347;
+  --cosmic-magenta:     #E96BFF;
+  --cosmic-pulse-halo:  rgba(91, 227, 201, 0.55);
+  --cosmic-chamfer:     14px;
+  --cosmic-glow-spread: 28px;
+  --cosmic-anim-dur:    1.6s;
+}
+
+/* ========================================================================
+   MILESTONE 1: STARFIELD + AURORA OVERLAY
+   ======================================================================== */
+
+body.cosmic-console {
+  /* Starfield layer - fixed, behind all content */
+}
+body.cosmic-console::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(2px 2px at 20% 30%, var(--cosmic-star) 1px, transparent 1px),
+    radial-gradient(1px 1px at 40% 70%, var(--cosmic-star) 0.5px, transparent 0.5px),
+    radial-gradient(1.5px 1.5px at 60% 20%, var(--cosmic-star) 1px, transparent 1px),
+    radial-gradient(1px 1px at 80% 80%, var(--cosmic-star) 0.5px, transparent 0.5px),
+    radial-gradient(2px 2px at 10% 90%, var(--cosmic-star) 1px, transparent 1px),
+    radial-gradient(1px 1px at 30% 10%, var(--cosmic-star) 0.5px, transparent 0.5px),
+    radial-gradient(1.5px 1.5px at 70% 60%, var(--cosmic-star) 1px, transparent 1px),
+    radial-gradient(1px 1px at 90% 40%, var(--cosmic-star) 0.5px, transparent 0.5px),
+    var(--cosmic-void);
+  background-size:
+    200px 200px,
+    150px 150px,
+    250px 250px,
+    180px 180px,
+    220px 220px,
+    160px 160px,
+    240px 240px,
+    170px 170px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  body.cosmic-console::before {
+    animation: cosmic-twinkle 6s ease-in-out infinite;
+  }
+}
+@keyframes cosmic-twinkle {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.9; }
+}
+
+/* Aurora layer - low opacity screen blend */
+body.cosmic-console::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(135deg, var(--cosmic-signal) 0%, var(--cosmic-magenta) 50%, var(--cosmic-amber) 100%);
+  opacity: 0.08;
+  mix-blend-mode: screen;
+  mask-image: radial-gradient(ellipse 80% 60% at 20% 0%, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 20% 0%, black 40%, transparent 100%);
+}
+
+/* Topbar brand mark glow upgrade */
+body.cosmic-console .page-topbar {
+  border-bottom: 1px solid rgba(91, 227, 201, 0.35);
+  box-shadow: inset 0 1px 0 rgba(91, 227, 201, 0.18);
+}
+body.cosmic-console .page-topbar__brand-mark {
+  box-shadow: 0 0 22px var(--cosmic-signal);
+}
+
+/* Page actions (footer) border treatment */
+body.cosmic-console .page-actions {
+  border-top: 1px solid rgba(91, 227, 201, 0.35);
+  box-shadow: inset 0 -1px 0 rgba(91, 227, 201, 0.18);
+}
+
+/* ========================================================================
+   MILESTONE 2: CHAMFERED PANEL CHROME + DIALOG GLOW
+   ======================================================================== */
+
+body.cosmic-console .page-shell .page-topbar {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 18px) 0,
+    100% 18px,
+    100% 100%,
+    18px 100%,
+    0 calc(100% - 18px)
+  );
+}
+
+body.cosmic-console .page-shell .page-actions {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    calc(100% - 18px) 100%,
+    0 100%,
+    0 calc(100% - 18px),
+    18px 0
+  );
+}
+
+body.cosmic-console .page-shell .welcome-stage {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 24px) 0,
+    100% 24px,
+    100% calc(100% - 24px),
+    calc(100% - 24px) 100%,
+    0 100%,
+    0 24px,
+    24px 0
+  );
+}
+body.cosmic-console .page-shell .welcome-stage::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 22px) 0,
+    100% 22px,
+    100% calc(100% - 22px),
+    calc(100% - 22px) 100%,
+    0 100%,
+    0 22px,
+    22px 0
+  );
+  border: 1px solid var(--cosmic-signal);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Settings dialog cosmic chrome */
+body.cosmic-console .settings-dialog {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 24px) 0,
+    100% 24px,
+    100% calc(100% - 24px),
+    calc(100% - 24px) 100%,
+    0 100%,
+    0 24px,
+    24px 0
+  );
+  border: 1px solid rgba(91, 227, 201, 0.45);
+  box-shadow: 0 0 32px var(--cosmic-signal);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* ========================================================================
+   MILESTONE 4: EVAN HELPER TARGET PULSE
+   ======================================================================== */
+
+@keyframes evan-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 var(--cosmic-pulse-halo);
+    outline-color: var(--cosmic-signal);
+  }
+  50% {
+    box-shadow: 0 0 var(--cosmic-glow-spread) 6px var(--cosmic-pulse-halo);
+    outline-color: var(--cosmic-amber);
+  }
+}
+
+.evan-pulse-target {
+  position: relative;
+  outline: 2px solid var(--cosmic-signal);
+  outline-offset: 2px;
+  animation: evan-pulse-glow var(--cosmic-anim-dur) ease-in-out infinite;
+  z-index: 2;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .evan-pulse-target {
+    animation: none;
+    outline-color: var(--cosmic-signal);
+    box-shadow: 0 0 0 2px var(--cosmic-signal);
+  }
+}

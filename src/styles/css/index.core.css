@@ -14,27 +14,25 @@
   --welcome-muted: #b7d8c1;
   --welcome-gold: #ffe08f;
   --welcome-ember: rgba(199, 107, 82, 0.9);
+  /* Tiered-button tokens */
+  --btn-secondary-fg: #ebe5d8;
+  --btn-tertiary-fg: #c2c8bf;
 }
 
 body {
   font-family: "Exo 2", "Alegreya Sans", sans-serif;
   background: #000;
   color: var(--welcome-text);
-  min-height: 100vh;
-  overflow-x: hidden;
-  overflow-y: auto;
   cursor: default;
   position: relative;
+  overflow: hidden;
 }
 
 body.welcome-page {
   min-height: 100dvh;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  justify-items: center;
-  align-items: start;
-  gap: clamp(8px, 1.5vh, 16px);
-  padding: clamp(18px, 3vw, 32px);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  justify-items: stretch;
   background:
     radial-gradient(
       90% 70% at 14% 8%,
@@ -85,50 +83,97 @@ body.welcome-page::after {
   z-index: 1;
 }
 
-.welcome-header,
-.welcome-container {
+/* Page content area */
+.welcome-stage {
   width: min(100%, 1040px);
+  margin: 0 auto;
+  padding: clamp(10px, 1.4vh, 18px) clamp(14px, 2.6vw, 26px);
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  gap: clamp(8px, 1.2vh, 14px);
+  align-content: start;
   position: relative;
-  z-index: 10;
+  z-index: 2;
 }
 
-.welcome-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
+.welcome-stage__top {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
   text-align: center;
-  padding-top: clamp(6px, 1.5vh, 18px);
 }
 
-/* Main Container */
-.welcome-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(10px, 1.4vh, 16px);
+.logo-container {
+  align-self: center;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+}
+
+.quote {
+  align-self: center;
   text-align: center;
-  min-height: 0;
-  max-height: none;
-  overflow: visible;
-  padding: clamp(14px, 2.6vw, 26px);
-  border: 1px solid var(--welcome-border);
-  border-radius: 32px;
-  background:
-    linear-gradient(160deg, rgba(17, 27, 22, 0.96), rgba(7, 11, 9, 0.92)),
-    var(--welcome-surface);
-  box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.46),
-    inset 0 0 0 1px rgba(220, 255, 233, 0.04),
-    0 0 0 1px rgba(122, 255, 187, 0.08);
+  width: min(100%, 560px);
+  margin: 4px auto 0;
+  padding: 0.75rem 0.25rem 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
-.welcome-brief {
-  width: min(100%, 760px);
+/* Bottom action band */
+.welcome-actions {
   display: grid;
   gap: 0.5rem;
-  padding: 0.72rem 0.8rem;
+  align-content: center;
+}
+
+.welcome-actions__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.welcome-hint {
+  margin: 0;
+  text-align: center;
+  color: rgba(203, 231, 208, 0.78);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.welcome-hint kbd {
+  display: inline-block;
+  padding: 0.05rem 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffe9ae;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0;
+}
+
+.creator-credit {
+  margin: 0;
+  text-align: center;
+  color: rgba(203, 231, 208, 0.78);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Brief chip strip */
+.welcome-brief {
+  width: min(100%, 760px);
+  margin: 0 auto;
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background:
@@ -141,47 +186,26 @@ body.welcome-page::after {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.65rem;
+  gap: 0.5rem;
 }
 
 .welcome-brief-signals span {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 1.92rem;
-  padding: 0.38rem 0.72rem;
+  min-height: 1.7rem;
+  padding: 0.3rem 0.6rem;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(255, 255, 255, 0.025);
-  color: rgba(215, 247, 209, 0.74);
-  font-size: 0.68rem;
-  font-weight: 600;
+  color: rgba(215, 247, 209, 0.78);
+  font-size: 0.62rem;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.logo-container {
-  align-self: center;
-}
-
-.quote {
-  align-self: center;
-  text-align: center;
-}
-
-.button-container {
-  align-self: center;
-}
-
-.welcome-hint {
-  text-align: center;
-}
-
-.creator-credit {
-  text-align: center;
-}
-
-/* Description */
+/* Description (legacy class — kept for safety) */
 .description {
   font-size: clamp(1rem, 2.5vw, 1.4rem);
   color: #aaffaa;

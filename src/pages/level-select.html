@@ -26,42 +26,68 @@
     <link rel="stylesheet" href="/src/styles/css/level-select.details.responsive.css">
     <link rel="stylesheet" href="/src/styles/css/level-select.css">
     <link rel="stylesheet" href="/src/styles/css/service-worker-register.css">
+    <link rel="stylesheet" href="/src/styles/css/buttons.tiers.css">
+    <link rel="stylesheet" href="/src/styles/css/shell.dvh.css">
+    <link rel="stylesheet" href="/src/styles/css/cosmic-console.css">
 </head>
 
-<body class="level-motion-disabled">
+<body class="level-motion-disabled page-shell page-shell--with-actions level-page">
     <!-- Matrix Rain Background -->
     <div class="matrix-bg" id="matrixBg" aria-hidden="true"></div>
 
-    <!-- Header Section -->
-    <header class="header" role="banner">
-        <p class="page-kicker">Training dossier</p>
-        <h1 class="main-title">MATH MASTER</h1>
-        <h2 class="subtitle">Choose a route</h2>
-        <p class="level-select-subtitle">
-            Three routes. Saved here.
-        </p>
-        <div class="header-hint">
-            <span>Keys 1 / 2 / 3 start</span>
-            <span>Saved on device</span>
-        </div>
-        <div class="route-atlas" aria-label="Route pressure profiles">
-            <div class="route-atlas-item route-atlas-item-beginner">
-                <span class="route-atlas-index">01</span>
-                <span class="route-atlas-copy">Warm-up</span>
-            </div>
-            <div class="route-atlas-item route-atlas-item-warrior">
-                <span class="route-atlas-index">02</span>
-                <span class="route-atlas-copy">Switch pace</span>
-            </div>
-            <div class="route-atlas-item route-atlas-item-master">
-                <span class="route-atlas-index">03</span>
-                <span class="route-atlas-copy">Full strain</span>
-            </div>
-        </div>
+    <header class="page-topbar" role="banner">
+        <button class="btn btn--tertiary" id="back-button-top" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+            </svg>
+            Back
+        </button>
+        <span class="page-topbar__brand" aria-hidden="true">
+            <span class="page-topbar__brand-mark">M</span>
+            Math Master
+        </span>
+        <span class="page-topbar__actions">
+            <button class="icon-button" id="level-select-settings-icon" type="button" aria-haspopup="dialog"
+                aria-controls="level-select-settings-dialog" aria-expanded="false" aria-label="Open settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+            </button>
+        </span>
     </header>
 
-    <!-- Main Level Selection Container -->
-    <main class="level-container" role="main">
+    <main class="page-content" role="main">
+        <div class="header" role="region" aria-label="Choose a route">
+            <p class="page-kicker">Training dossier</p>
+            <h1 class="main-title">MATH MASTER</h1>
+            <h2 class="subtitle">Choose a route</h2>
+            <p class="level-select-subtitle">
+                Three routes. Saved here.
+            </p>
+            <div class="header-hint">
+                <span>Keys 1 / 2 / 3 start</span>
+                <span>Saved on device</span>
+            </div>
+            <div class="route-atlas" aria-label="Route pressure profiles">
+                <div class="route-atlas-item route-atlas-item-beginner">
+                    <span class="route-atlas-index">01</span>
+                    <span class="route-atlas-copy">Warm-up</span>
+                </div>
+                <div class="route-atlas-item route-atlas-item-warrior">
+                    <span class="route-atlas-index">02</span>
+                    <span class="route-atlas-copy">Switch pace</span>
+                </div>
+                <div class="route-atlas-item route-atlas-item-master">
+                    <span class="route-atlas-index">03</span>
+                    <span class="route-atlas-copy">Full strain</span>
+                </div>
+            </div>
+        </div>
+
+        <section class="level-container" aria-label="Level cards">
         <div class="route-switcher" aria-label="Choose route preview">
             <button class="route-switcher-button is-active" type="button" data-level="beginner" aria-pressed="true"
                 aria-controls="level-panel-beginner">
@@ -187,18 +213,40 @@
                 <p class="level-cta-caption">Highest pressure.</p>
                 <button class="level-button" type="button" data-level="master">Run division</button>
             </div>
-        </div>
+        </section>
     </main>
 
-    <!-- Navigation Footer -->
-    <footer class="navigation">
-        <button class="back-button" type="button">← Back to welcome</button>
-        <div class="navigation-meta">
-            <div class="creator-credit">Created by Teacher Evan</div>
-            <button class="settings-button" type="button" aria-haspopup="dialog" aria-controls="level-select-settings-dialog"
-                aria-expanded="false">Settings</button>
-            <button class="reset-progress-btn" type="button">Reset progress</button>
+    <!-- Bottom action bar: three-tier visual hierarchy -->
+    <footer class="page-actions level-actions" role="contentinfo">
+        <button class="btn btn--tertiary" id="back-button-bottom" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+            </svg>
+            Back
+        </button>
+        <div class="level-actions__center">
+            <span class="creator-credit">Created by Teacher Evan</span>
+            <button class="btn btn--secondary" id="settings-button" type="button" aria-haspopup="dialog"
+                aria-controls="level-select-settings-dialog" aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                Settings
+            </button>
         </div>
+        <button class="btn btn--danger reset-progress-btn" id="reset-progress-btn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M19 6l-1.4 14a2 2 0 0 1-2 1.8H8.4a2 2 0 0 1-2-1.8L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+                <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+            </svg>
+            Reset
+        </button>
     </footer>
 
     <div class="settings-dialog-shell" id="level-select-settings-shell" hidden>
@@ -221,34 +269,72 @@
                     <button class="settings-update-clear-cache" type="button">Clear cache</button>
                 </div>
             </section>
-            <form class="settings-form">
-                <label class="settings-field">
-                    <span class="settings-field-label">Display quality</span>
-                    <select id="settings-quality" name="qualityMode" aria-label="Display quality">
-                        <option value="auto">Auto</option>
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                    </select>
-                </label>
-
-                <label class="settings-toggle" for="settings-reduced-motion">
-                    <span class="settings-field-label">Reduce motion</span>
-                    <input id="settings-reduced-motion" type="checkbox" aria-label="Reduce motion">
-                </label>
-
-                <label class="settings-field">
-                    <span class="settings-field-label">Language</span>
-                    <select id="settings-language" name="locale" aria-label="Language">
-                        <option value="en-US">English</option>
-                        <option value="es-ES">Español</option>
-                    </select>
-                </label>
-
-                <label class="settings-toggle" for="settings-muted">
-                    <span class="settings-field-label">Mute sound effects</span>
-                    <input id="settings-muted" type="checkbox" aria-label="Mute sound effects">
-                </label>
+            <form class="settings-form" id="level-select-settings-form">
+                <fieldset class="settings-group">
+                    <legend class="settings-group-legend">Display</legend>
+                    <label class="settings-field">
+                        <span class="settings-field-label">Display quality</span>
+                        <select id="settings-quality" name="qualityMode" aria-label="Display quality">
+                            <option value="auto">Auto</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </label>
+                    <label class="settings-toggle" for="settings-reduced-motion">
+                        <span class="settings-field-label">Reduce motion</span>
+                        <input id="settings-reduced-motion" type="checkbox" aria-label="Reduce motion">
+                    </label>
+                    <label class="settings-toggle" for="settings-high-contrast">
+                        <span class="settings-field-label">High contrast</span>
+                        <input id="settings-high-contrast" type="checkbox"
+                            aria-label="High contrast interface">
+                    </label>
+                    <label class="settings-toggle" for="cosmic-console">
+                        <span class="settings-field-label">Cosmic console visuals</span>
+                        <input id="cosmic-console" type="checkbox"
+                            aria-label="Cosmic console visuals">
+                    </label>
+                    <label class="settings-field settings-field--range">
+                        <span class="settings-field-label">
+                            UI scale
+                            <span class="settings-field-value" data-mm-bind="uiScale">100%</span>
+                        </span>
+                        <input id="settings-ui-scale" type="range" min="85" max="115" step="5" value="100"
+                            aria-label="Interface scale">
+                    </label>
+                </fieldset>
+                <fieldset class="settings-group">
+                    <legend class="settings-group-legend">Sound</legend>
+                    <label class="settings-toggle" for="settings-muted">
+                        <span class="settings-field-label">Mute sound effects</span>
+                        <input id="settings-muted" type="checkbox" aria-label="Mute sound effects">
+                    </label>
+                    <label class="settings-field settings-field--range">
+                        <span class="settings-field-label">
+                            Master volume
+                            <span class="settings-field-value" data-mm-bind="volume">80%</span>
+                        </span>
+                        <input id="settings-volume" type="range" min="0" max="100" step="5" value="80"
+                            aria-label="Master volume">
+                    </label>
+                </fieldset>
+                <fieldset class="settings-group">
+                    <legend class="settings-group-legend">Language</legend>
+                    <label class="settings-field">
+                        <span class="settings-field-label">Language</span>
+                        <select id="settings-language" name="locale" aria-label="Language">
+                            <option value="en-US">English</option>
+                            <option value="es-ES">Español</option>
+                        </select>
+                    </label>
+                </fieldset>
+                <fieldset class="settings-group">
+                    <legend class="settings-group-legend">Gameplay</legend>
+                    <p class="settings-field-label settings-gameplay-preview" id="settings-pressure-preview">
+                        Per-level pressure: auto
+                    </p>
+                </fieldset>
             </form>
             <div class="settings-dialog-actions">
                 <button class="settings-reset-button" type="button">Reset settings</button>
@@ -273,6 +359,7 @@
     <script src="/src/scripts/user-settings.helpers.js" defer></script>
     <script src="/src/scripts/user-settings.js" defer></script>
     <script src="/src/scripts/user-settings.locale.js" defer></script>
+    <script src="/src/scripts/welcome-page.settings.js" defer></script>
     <script src="/src/scripts/app-update-ui.js" defer></script>
     <script src="/src/scripts/level-select-page.settings.js" defer></script>
     <script src="/src/scripts/player-storage.helpers.js" defer></script>

@@ -149,7 +149,7 @@ test.describe("Level select settings", () => {
   test("settings UI persists changed values across reload", async ({ page }) => {
     await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
 
-    await page.getByRole("button", { name: SETTINGS_BUTTON_NAME }).click();
+    await page.getByRole("button", { name: SETTINGS_BUTTON_NAME, exact: true }).click();
     await expect(page.getByRole("dialog", { name: "Game settings" })).toBeVisible();
 
     await page.getByLabel("Display quality").selectOption("medium");
@@ -158,7 +158,7 @@ test.describe("Level select settings", () => {
     await page.getByLabel("Mute sound effects").check();
 
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.getByRole("button", { name: SETTINGS_BUTTON_NAME }).click();
+    await page.getByRole("button", { name: SETTINGS_BUTTON_NAME, exact: true }).click();
 
     await expect(page.getByLabel("Display quality")).toHaveValue("medium");
     await expect(page.getByLabel("Reduce motion")).toBeChecked();
@@ -191,7 +191,7 @@ test.describe("Level select settings", () => {
     }, SETTINGS_KEY);
 
     await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
-    await page.getByRole("button", { name: SETTINGS_BUTTON_NAME }).click();
+    await page.getByRole("button", { name: SETTINGS_BUTTON_NAME, exact: true }).click();
 
     await page.getByRole("button", { name: "Reset settings" }).click();
 
@@ -231,7 +231,7 @@ test.describe("Level select settings", () => {
       );
     });
 
-    await page.getByRole("button", { name: SETTINGS_BUTTON_NAME }).click();
+    await page.getByRole("button", { name: SETTINGS_BUTTON_NAME, exact: true }).click();
 
     await expect(page.getByText(/Update ready/i)).toBeVisible();
     await page.getByRole("button", { name: "Refresh now" }).click();
@@ -255,7 +255,7 @@ test.describe("Level select settings", () => {
       };
     });
 
-    await page.getByRole("button", { name: SETTINGS_BUTTON_NAME }).click();
+    await page.getByRole("button", { name: SETTINGS_BUTTON_NAME, exact: true }).click();
     await page.getByRole("button", { name: "Clear cache" }).click();
 
     await expect

@@ -1,0 +1,129 @@
+# UI Hardening Plan — Welcome & Level Select
+
+## Goals (from user)
+1. **No-scroll** on the welcome + level-select pages for common laptop
+   and mobile-landscape viewports (≥768 wide, ≥600 tall). Phones in
+   portrait continue to scroll naturally.
+2. **Buttons must read clearly.** Current footer trio on level-select
+   (Back / Settings / Reset) is a row of identical-looking ghost pills
+   in three different accent colors. They blend in and read as the
+   same control. Introduce a **three-tier visual hierarchy** with icons.
+3. **Add settings access to the welcome page.** Right now the gear
+   button only lives in the level-select footer.
+4. **Extend settings with new controls:** audio volume slider,
+   high-contrast toggle, game speed / difficulty preview, persistent
+   UI scale slider.
+5. **No regressions** to existing tests (welcome-page-redesign,
+   level-select-interactions, level-select-settings,
+   welcome-scoreboard, level-select-scoreboard).
+
+## Design Decisions
+- **Visual hierarchy:**
+  - **Primary** (filled phosphor-green, dark text) — `Run foundations`,
+    `Begin Training`.
+  - **Secondary** (outlined brass-gold, light text + icon) — `Settings`,
+    `Scoreboard`.
+  - **Tertiary** (text-only with arrow icon) — `Back to welcome`.
+  - **Danger** (outlined ember-red, icon) — `Reset progress`.
+  - **Icon button** (40×40 round, phosphor outline) — top-bar `Settings`
+    gear and the new welcome-page gear.
+- **Layout pattern for both pages:**
+  - `body` becomes a 100dvh flex/grid column with three named regions:
+    `topbar`, `content` (flex:1, min-height:0), `actions` (sticky band).
+  - Internal content uses CSS `clamp()` for vertical sizing with hard
+    `min()` caps at the bottom so the page never grows past 100dvh.
+  - At ≤900px tall the welcome page hides the `welcome-brief` chip
+    strip and the `quote` block (collapsing chrome).
+- **Settings dialog:** grows to 5 controls (4 existing + volume) plus
+  2 toggles (high contrast, UI scale). Grouped into
+  `Display` / `Sound` / `Accessibility` / `Gameplay` sections inside
+  the same dialog shell. UI scale and game speed use `<input type=range>`.
+- **New settings storage fields** (added to `user-settings.helpers.js`
+  `createDefaultSettings()` + `normalizeSettings()`):
+  - `sound.volume` (0–100, default 80)
+  - `display.highContrast` (bool, default false)
+  - `display.uiScale` (number 0.85–1.15, default 1)
+  - `gameplay.pressure` (read-only preview string — `"auto"` so
+    user can read what the per-level multiplier will be)
+  - Bump `SETTINGS_VERSION` to 2; legacy v1 records fall back via
+    `normalizeSettings`.
+
+## Files Touched
+
+### HTML
+- `src/pages/index.html`
+  - Add `<button class="icon-button settings-icon" type="button" aria-haspopup="dialog" aria-controls="welcome-settings-dialog" aria-expanded="false" aria-label="Open settings">…gear svg…</button>` inside the welcome-header.
+  - Add the same `settings-dialog-shell` markup as level-select uses, with id `welcome-settings-shell` and a slightly trimmed form (no game-speed preview).
+- `src/pages/level-select.html`
+  - Wrap the `.navigation` footer with a new `.action-bar` div with three named children: `.action-bar-primary` (Back), `.action-bar-secondary` (Settings), `.action-bar-danger` (Reset).
+  - Add icons (inline SVG) inside each footer button.
+  - Add the same icon-button `Settings` gear to the page header so it's discoverable.
+
+### CSS
+- New shared layer `src/styles/css/buttons.tiers.css` — defines
+  `.btn`, `.btn--primary`, `.btn--secondary`, `.btn--tertiary`,
+  `.btn--danger`, `.icon-button`, focus rings, hover/active/disabled.
+- New shared layer `src/styles/css/shell.dvh.css` — defines the
+  `body.page-shell` 100dvh flex layout + `.page-topbar` + `.page-content`
+  + `.page-actions`. Imports once on both pages.
+- `src/styles/css/index.core.css` — switch `body.welcome-page` to use
+  the dvh shell; collapse the welcome-brief to `display:none` below
+  900px tall; add the gear icon-button styles.
+- `src/styles/css/index.actions.css` — replace `.action-button`
+  pill style with the new tiered classes; primary action gets a
+  fill+icon combo, secondary becomes an outlined button with
+  visible icon.
+- `src/styles/css/index.responsive.compact.css` — make the
+  ≤520px-tall compact mode even tighter: hide the welcome-deck and
+  welcome-hint, shrink the logo, drop gaps.
+- `src/styles/css/level-select.polish.css` — apply the dvh shell
+  classes to `body` (`.level-page-shell`), shrink header padding,
+  reduce `.levels-grid` `gap` and card padding inside the
+  `level-page-shell` context.
+- `src/styles/css/level-select.css` — replace `.settings-button`,
+  `.back-button`, `.reset-progress-btn` styles with the new tiered
+  classes plus danger / tertiary variants.
+- `src/styles/css/level-select.details.responsive.css` — add
+  `(max-height: 760px)` rules to make cards and the route-switcher
+  fit a 720-tall mobile-landscape viewport.
+
+### JS
+- `src/scripts/user-settings.helpers.js` — add new fields and
+  version bump.
+- `src/scripts/user-settings.js` — `mergePartialSettings` already
+  handles arbitrary objects, no change required.
+- `src/scripts/level-select-page.settings.js` — already the canonical
+  controller. Refactor to:
+  - Read new fields and bind to new inputs.
+  - Wire the icon-button in the header to the same `openSettings()`.
+- New `src/scripts/welcome-page.settings.js` — extract the
+  `level-select-page.settings.js` open/close/apply logic into a
+  small helper at `window.SettingsDialog` so both pages share the
+  same controller. `welcome-page.settings.js` mounts it on the
+  welcome dialog.
+- `src/scripts/level-select-page.interactions.js` — no change, but
+  update selector hooks if any class names move.
+
+### Tests
+- `tests/welcome-page-redesign.spec.js` — add assertion that the
+  gear button exists and that the welcome shell has `min-height:100dvh`.
+- `tests/level-select-settings.spec.js` — add assertions for the
+  new volume / high-contrast / ui-scale controls and the icon-button
+  shortcut.
+- `tests/level-select-interactions.spec.js` — assert the three-tier
+  button class on each footer button.
+- New `tests/welcome-page.settings.spec.js` — verify the welcome
+  dialog opens from the gear, that the four existing settings
+  apply, and that the new controls are present.
+
+## Verification (manual + automated)
+1. `npm run lint` — must pass.
+2. `npx playwright test tests/welcome-page-redesign.spec.js tests/welcome-scoreboard.spec.js tests/level-select-settings.spec.js tests/level-select-interactions.spec.js tests/level-select-scoreboard.spec.js` — must pass.
+3. Manual: open `http://localhost:8000/src/pages/index.html` at
+   1920×1080, 1366×768, and iPhone 13 (390×844) and confirm no
+   vertical scrollbar. Repeat for `level-select.html`.
+4. Manual: tap/click the gear on the welcome page → dialog opens,
+   all 6 controls render, save persists across reload.
+5. Manual: confirm danger button is clearly distinct (border + icon),
+   tertiary back button has an arrow, primary CTA fills the brand
+   color.

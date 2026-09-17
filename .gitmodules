@@ -1,0 +1,4 @@
+[submodule "cosmic-ui"]
+	path = cosmic-ui
+	url = https://github.com/TeacherEvan/cosmic-ui.git
+

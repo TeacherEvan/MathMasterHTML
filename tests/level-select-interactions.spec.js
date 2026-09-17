@@ -307,7 +307,7 @@ test.describe("Level select interactions", () => {
     await waitForCardsToSettle(page);
 
     const backButton = page.getByRole("button", {
-      name: "← Back to welcome",
+      name: "Back",
     });
     await backButton.focus();
     await expect(backButton).toBeFocused();
@@ -321,7 +321,8 @@ test.describe("Level select interactions", () => {
     await page.goto(LEVEL_SELECT_URL, { waitUntil: "domcontentloaded" });
     await waitForCardsToSettle(page);
 
-    const settingsButton = page.getByRole("button", { name: "Settings" });
+    // Use the footer settings button (the topbar one is "Open settings")
+    const settingsButton = page.getByRole("button", { name: "Settings", exact: true });
     await settingsButton.focus();
     await expect(settingsButton).toBeFocused();
     await settingsButton.press("Enter");
@@ -343,7 +344,7 @@ test.describe("Level select interactions", () => {
       await waitForCardsToSettle(page);
 
       const backButton = page.getByRole("button", {
-        name: "← Back to welcome",
+        name: "Back",
       });
       await backButton.focus();
 

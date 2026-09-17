@@ -489,9 +489,10 @@ test.describe("Level select polish", () => {
       waitUntil: "domcontentloaded",
     });
 
-    await expect(page.locator("header.header")).toBeVisible();
-    await expect(page.locator("main.level-container")).toBeVisible();
-    await expect(page.locator("footer.navigation")).toBeVisible();
+    // New layout: page-topbar header, page-content main, page-actions footer
+    await expect(page.locator("header.page-topbar")).toBeVisible();
+    await expect(page.locator("main.page-content")).toBeVisible();
+    await expect(page.locator("footer.page-actions")).toBeVisible();
 
     const decorativeState = await page.evaluate(() => {
       const matrix = document.getElementById("matrixBg");

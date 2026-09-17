@@ -1,69 +1,8 @@
-/* level-select.css - settings and page-local layer */
-
-.settings-button,
-.settings-reset-button,
-.settings-dialog-close {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 0.35rem;
-	min-height: 2.95rem;
-	padding: 0.9rem 1.05rem;
-	border-radius: 999px;
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	background: rgba(255, 255, 255, 0.03);
-	color: var(--level-text-0);
-	font-family: var(--level-font-mono);
-	font-size: 0.72rem;
-	font-weight: 600;
-	letter-spacing: 0.2em;
-	text-transform: uppercase;
-	cursor: pointer;
-	transition:
-		transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
-		border-color 220ms cubic-bezier(0.16, 1, 0.3, 1),
-		color 220ms cubic-bezier(0.16, 1, 0.3, 1),
-		background 220ms cubic-bezier(0.16, 1, 0.3, 1),
-		box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.settings-button {
-	color: var(--level-brass);
-	border-color: color-mix(
-		in srgb,
-		var(--level-brass) 24%,
-		rgba(255, 255, 255, 0.08)
-	);
-}
-
-.settings-button:hover,
-.settings-button:focus-visible,
-.settings-reset-button:hover,
-.settings-reset-button:focus-visible,
-.settings-dialog-close:hover,
-.settings-dialog-close:focus-visible {
-	transform: translateY(-1px);
-	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
-}
-
-.settings-button:hover,
-.settings-button:focus-visible {
-	border-color: var(--level-brass);
-	background: color-mix(
-		in srgb,
-		var(--level-brass) 10%,
-		rgba(255, 255, 255, 0.03)
-	);
-}
-
-.settings-button:focus-visible,
-.settings-reset-button:focus-visible,
-.settings-dialog-close:focus-visible,
-.settings-field select:focus-visible,
-.settings-toggle input:focus-visible {
-	outline: 2px solid var(--level-focus);
-	outline-offset: 3px;
-}
+/* level-select.css - settings and page-local layer.
+ * The interactive buttons (settings / reset / close) now use the
+ * shared `.btn` tier system from buttons.tiers.css. This file keeps
+ * the dialog shell styles and page-local tweaks.
+ */
 
 .settings-dialog-shell {
 	position: fixed;
@@ -180,33 +119,76 @@
 	accent-color: var(--level-phosphor);
 }
 
+.settings-group {
+	display: grid;
+	gap: 0.7rem;
+	padding: 0.9rem;
+	border-radius: 16px;
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	background: rgba(255, 255, 255, 0.02);
+}
+
+.settings-group-legend {
+	color: var(--level-text-2);
+	font-family: var(--level-font-mono);
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+}
+
+.settings-field--range {
+	gap: 0.4rem;
+}
+
+.settings-field--range input[type="range"] {
+	-webkit-appearance: none;
+	appearance: none;
+	height: 6px;
+	border-radius: 999px;
+	background: linear-gradient(90deg, var(--level-phosphor) var(--p, 80%), rgba(255, 255, 255, 0.08) var(--p, 80%));
+	outline: none;
+}
+
+.settings-field--range input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: #ffe9ae;
+	border: 2px solid var(--level-phosphor);
+	cursor: pointer;
+	box-shadow: 0 0 8px rgba(255, 255, 255, 0.18);
+}
+
+.settings-field--range input[type="range"]::-moz-range-thumb {
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: #ffe9ae;
+	border: 2px solid var(--level-phosphor);
+	cursor: pointer;
+}
+
+.settings-field-value {
+	color: var(--level-brass);
+	font-family: var(--level-font-mono);
+	font-size: 0.68rem;
+	letter-spacing: 0.1em;
+}
+
+.settings-gameplay-preview {
+	color: var(--level-text-1);
+	font-family: var(--level-font-mono);
+	font-size: 0.68rem;
+	letter-spacing: 0.08em;
+}
+
 .settings-dialog-actions {
 	display: flex;
 	justify-content: flex-end;
 	margin-top: 1.2rem;
-}
-
-.settings-reset-button {
-	color: var(--level-ember);
-	border-color: color-mix(
-		in srgb,
-		var(--level-ember) 24%,
-		rgba(255, 255, 255, 0.08)
-	);
-}
-
-.settings-reset-button:hover,
-.settings-reset-button:focus-visible {
-	border-color: var(--level-ember);
-	background: color-mix(
-		in srgb,
-		var(--level-ember) 10%,
-		rgba(255, 255, 255, 0.03)
-	);
-}
-
-.settings-dialog-close {
-	color: var(--level-text-1);
 }
 
 body.settings-open {
@@ -232,10 +214,6 @@ body.user-reduced-motion .settings-dialog-close {
 		place-items: start center;
 	}
 
-	.settings-button {
-		width: 100%;
-	}
-
 	.settings-dialog {
 		width: min(100%, 32rem);
 		max-height: calc(100vh - 1.5rem);
@@ -244,11 +222,6 @@ body.user-reduced-motion .settings-dialog-close {
 
 	.settings-dialog-header {
 		flex-direction: column;
-	}
-
-	.settings-dialog-close,
-	.settings-reset-button {
-		width: 100%;
 	}
 
 	.settings-dialog-actions {
