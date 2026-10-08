@@ -7,7 +7,8 @@
       "1x + 3 = 1",
       "1x = 1 - 3",
       "x = -2"
-    ]
+    ],
+    "concepts": ["variable-on-left", "combine-like-terms", "subtraction", "coefficient-one"]
   },
   {
     "number": 2,
@@ -17,7 +18,8 @@
       "12 - X = 9",
       "X = 12 - 9",
       "X = 3"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 3,
@@ -27,7 +29,8 @@
       "13 - X = 8",
       "X = 13 - 8",
       "X = 5"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 4,
@@ -37,7 +40,8 @@
       "14 - X = 11",
       "X = 14 - 11",
       "X = 3"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 5,
@@ -47,7 +51,8 @@
       "20 - X = 15",
       "X = 20 - 15",
       "X = 5"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 6,
@@ -57,7 +62,8 @@
       "17 - X = 12",
       "X = 17 - 12",
       "X = 5"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 7,
@@ -67,7 +73,8 @@
       "24 - X = 18",
       "X = 24 - 18",
       "X = 6"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 8,
@@ -77,7 +84,8 @@
       "25 - X = 20",
       "X = 25 - 20",
       "X = 5"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 9,
@@ -87,7 +95,8 @@
       "30 - X = 25",
       "X = 30 - 25",
       "X = 5"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 10,
@@ -97,7 +106,8 @@
       "35 - X = 28",
       "X = 35 - 28",
       "X = 7"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 11,
@@ -107,7 +117,8 @@
       "29 - X = 22",
       "X = 29 - 22",
       "X = 7"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 12,
@@ -117,7 +128,8 @@
       "40 - X = 32",
       "X = 40 - 32",
       "X = 8"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 13,
@@ -127,7 +139,8 @@
       "45 - X = 38",
       "X = 45 - 38",
       "X = 7"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 14,
@@ -137,7 +150,8 @@
       "55 - X = 45",
       "X = 55 - 45",
       "X = 10"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 15,
@@ -147,7 +161,8 @@
       "50 - X = 42",
       "X = 50 - 42",
       "X = 8"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 16,
@@ -157,7 +172,8 @@
       "63 - X = 55",
       "X = 63 - 55",
       "X = 8"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 17,
@@ -167,7 +183,8 @@
       "72 - X = 65",
       "X = 72 - 65",
       "X = 7"
-    ]
+    ],
+    "concepts": ["two-step-addition-subtraction", "variable-on-right", "combine-constants", "subtraction"]
   },
   {
     "number": 18,
@@ -177,7 +194,8 @@
       "7 + X = 12",
       "X = 12 - 7",
       "X = 5"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 19,
@@ -187,7 +205,8 @@
       "10 + X = 18",
       "X = 18 - 10",
       "X = 8"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 20,
@@ -197,7 +216,8 @@
       "12 + X = 25",
       "X = 25 - 12",
       "X = 13"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 21,
@@ -207,7 +227,8 @@
       "12 + X = 22",
       "X = 22 - 12",
       "X = 10"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 22,
@@ -217,7 +238,8 @@
       "16 + X = 30",
       "X = 30 - 16",
       "X = 14"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 23,
@@ -227,7 +249,8 @@
       "18 + X = 35",
       "X = 35 - 18",
       "X = 17"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 24,
@@ -237,7 +260,8 @@
       "18 + X = 38",
       "X = 38 - 18",
       "X = 20"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 25,
@@ -247,7 +271,8 @@
       "20 + X = 45",
       "X = 45 - 20",
       "X = 25"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 26,
@@ -257,7 +282,8 @@
       "22 + X = 50",
       "X = 50 - 22",
       "X = 28"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 27,
@@ -267,7 +293,8 @@
       "25 + X = 55",
       "X = 55 - 25",
       "X = 30"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 28,
@@ -277,7 +304,8 @@
       "28 + X = 65",
       "X = 65 - 28",
       "X = 37"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 29,
@@ -287,7 +315,8 @@
       "30 + X = 70",
       "X = 70 - 30",
       "X = 40"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 30,
@@ -297,7 +326,8 @@
       "32 + X = 75",
       "X = 75 - 32",
       "X = 43"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 31,
@@ -307,7 +337,8 @@
       "35 + X = 80",
       "X = 80 - 35",
       "X = 45"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 32,
@@ -317,7 +348,8 @@
       "35 + X = 85",
       "X = 85 - 35",
       "X = 50"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 33,
@@ -327,7 +359,8 @@
       "35 + X = 90",
       "X = 90 - 35",
       "X = 55"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 34,
@@ -337,7 +370,8 @@
       "35 + X = 95",
       "X = 95 - 35",
       "X = 60"
-    ]
+    ],
+    "concepts": ["two-step-subtraction-addition", "variable-on-left", "combine-constants", "subtraction"]
   },
   {
     "number": 35,
@@ -346,7 +380,8 @@
       "8 + 5 - 3 = x",
       "13 - 3 = x",
       "X = 10"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 36,
@@ -355,7 +390,8 @@
       "12 + 7 - 5 = x",
       "19 - 5 = x",
       "X = 14"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 37,
@@ -364,7 +400,8 @@
       "15 + 9 - 8 = x",
       "24 - 8 = x",
       "X = 16"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 38,
@@ -373,7 +410,8 @@
       "18 + 12 - 10 = x",
       "30 - 10 = x",
       "X = 20"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 39,
@@ -382,7 +420,8 @@
       "20 + 15 - 12 = x",
       "35 - 12 = x",
       "X = 23"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 40,
@@ -391,7 +430,8 @@
       "25 + 18 - 15 = x",
       "43 - 15 = x",
       "X = 28"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 41,
@@ -400,7 +440,8 @@
       "30 + 22 - 18 = x",
       "52 - 18 = x",
       "X = 34"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 42,
@@ -409,7 +450,8 @@
       "35 + 25 - 20 = x",
       "60 - 20 = x",
       "X = 40"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 43,
@@ -418,7 +460,8 @@
       "40 + 28 - 25 = x",
       "68 - 25 = x",
       "X = 43"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 44,
@@ -427,7 +470,8 @@
       "45 + 32 - 28 = x",
       "77 - 28 = x",
       "X = 49"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 45,
@@ -436,7 +480,8 @@
       "50 + 35 - 30 = x",
       "85 - 30 = x",
       "X = 55"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 46,
@@ -445,7 +490,8 @@
       "55 + 40 - 35 = x",
       "95 - 35 = x",
       "X = 60"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 47,
@@ -454,7 +500,8 @@
       "60 + 45 - 40 = x",
       "105 - 40 = x",
       "X = 65"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 48,
@@ -463,7 +510,8 @@
       "65 + 50 - 45 = x",
       "115 - 45 = x",
       "X = 70"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 49,
@@ -472,7 +520,8 @@
       "70 + 55 - 50 = x",
       "125 - 50 = x",
       "X = 75"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   },
   {
     "number": 50,
@@ -481,6 +530,7 @@
       "75 + 60 - 55 = x",
       "135 - 55 = x",
       "X = 80"
-    ]
+    ],
+    "concepts": ["three-step-combine-then-solve", "variable-on-right", "addition", "subtraction"]
   }
 ]

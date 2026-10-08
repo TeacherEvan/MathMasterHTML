@@ -13,11 +13,11 @@
   left: 12px;
   right: 12px;
   display: grid;
-  /* 3-zone layout: score + timer (left) | spacer (center for powerups) */
-  grid-template-columns: auto auto 1fr;
-  grid-template-areas: "score timer powerup-zone";
+  /* 4-zone layout: score + timer + streak (left) | spacer (center for powerups) */
+  grid-template-columns: auto auto auto 1fr;
+  grid-template-areas: "score timer streak powerup-zone";
   align-items: flex-start;
-  gap: 20px; /* Minimum spacing between HUD elements */
+  gap: 16px; /* Minimum spacing between HUD elements */
   z-index: 10005;
   pointer-events: none;
 }
@@ -26,7 +26,12 @@
 .game-hud::after {
   content: "";
   grid-area: powerup-zone;
-  min-width: 200px; /* Reserve space for powerup display */
+  min-width: 180px; /* Reserve space for powerup display */
+}
+
+.streak-display {
+  grid-area: streak;
+  justify-self: start;
 }
 
 .hud-block {

@@ -311,7 +311,25 @@
     document.body.classList.remove("problem-completed");
     document.body.classList.remove("gameplay-active-unresolved");
     syncBackButtonState();
+
+    // Record streak on game start
+    if (window.PlayerStorage?.recordStreak) {
+      const streakCount = window.PlayerStorage.recordStreak();
+      console.log(`📅 Streak recorded: ${streakCount} day${streakCount !== 1 ? "s" : ""}`);
+      // Update streak display if element exists
+      updateStreakDisplay(streakCount);
+    }
+
     setupHowToPlayModal();
+  }
+
+  function updateStreakDisplay(count) {
+    const streakEl = document.getElementById("streak-count");
+    if (streakEl) {
+      streakEl.textContent = count;
+      streakEl.classList.add("updated");
+      setTimeout(() => streakEl.classList.remove("updated"), 500);
+    }
   }
 
   if (document.readyState === "loading") {

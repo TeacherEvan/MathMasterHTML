@@ -85,6 +85,9 @@ const ComboSystem = {
     if (this._combo > 0) {
       console.log(`💔 Combo broken at ${this._combo}!`);
 
+      // Screen shake for combo break
+      window.ScreenShake?.shakePreset?.("comboBreak");
+
       // Dispatch combo break event
       document.dispatchEvent(
         new CustomEvent("comboBroken", {

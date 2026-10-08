@@ -63,6 +63,9 @@ console.log("🔤 Game symbol handler core loading...");
 
     consecutiveWrongAnswers = 0;
 
+    // Haptic feedback for correct answer
+    window.HapticFeedback?.HapticEvents?.correctAnswer?.();
+
     let comboFeedback = {
       multiplier: 1.0,
       level: "normal",
@@ -70,6 +73,15 @@ console.log("🔤 Game symbol handler core loading...");
     };
     if (window.ComboSystem) {
       comboFeedback = window.ComboSystem.hit();
+    }
+
+    // Haptic feedback for combo milestones
+    if (comboFeedback.level !== "normal") {
+      window.HapticFeedback?.HapticEvents?.comboMilestone?.(
+        comboFeedback.level === "legendary" ? 4 :
+        comboFeedback.level === "amazing" ? 3 :
+        comboFeedback.level === "great" ? 2 : 1
+      );
     }
 
     if (totalCorrectAnswers === 1) {
@@ -106,6 +118,10 @@ console.log("🔤 Game symbol handler core loading...");
       window.ComboSystem.break();
     }
 
+    // Haptic feedback for wrong answer and combo break
+    window.HapticFeedback?.HapticEvents?.wrongAnswer?.();
+    window.HapticFeedback?.HapticEvents?.comboBreak?.();
+
     consecutiveWrongAnswers++;
 
     if (consecutiveWrongAnswers >= PURPLE_WORM_THRESHOLD) {
@@ -138,6 +154,9 @@ console.log("🔤 Game symbol handler core loading...");
         currentSolutionStepIndex,
         solutionContainer,
       );
+
+      // Haptic feedback for line completion
+      window.HapticFeedback?.HapticEvents?.lockProgress?.();
 
       document.dispatchEvent(
         new CustomEvent(GameEvents.PROBLEM_LINE_COMPLETED, {

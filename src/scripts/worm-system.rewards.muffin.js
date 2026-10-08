@@ -122,6 +122,12 @@
     const y = Number(detail.y);
     if (!Number.isFinite(x) || !Number.isFinite(y)) return;
 
+    // Haptic feedback for worm explosion
+    window.HapticFeedback?.HapticEvents?.wormExplosion?.();
+
+    // Screen shake for worm explosion
+    window.ScreenShake?.shakePreset?.("explosion");
+
     if (detail.wasPurple && detail.isRainKill) {
       const canApplyPurpleBonus = !wormId || !processedPurpleBonusWormIds.has(wormId);
       if (canApplyPurpleBonus) {

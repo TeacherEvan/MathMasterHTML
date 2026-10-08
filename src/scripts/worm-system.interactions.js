@@ -22,6 +22,9 @@
     event?.preventDefault?.();
     console.log(`💥 Green worm ${worm.id} tapped - EXPLODING!`);
 
+    // Haptic feedback for worm tap
+    window.HapticFeedback?.HapticEvents?.wormTap?.();
+
     this.explodeWorm(worm, false); // false = not a rain kill
   };
 
@@ -30,6 +33,9 @@
     if (!worm.active) return;
 
     console.log(`🪲 Purple worm ${worm.id} clicked - CREATING CLONE!`);
+
+    // Haptic feedback for worm tap
+    window.HapticFeedback?.HapticEvents?.wormTap?.();
 
     // Visual feedback
     worm.element.style.animation = "worm-flash-purple 0.5s ease-out";

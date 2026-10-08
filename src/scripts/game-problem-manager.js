@@ -204,6 +204,9 @@ console.log("📚 Game problem manager module loading...");
       // Enhanced completion effect
       solutionContainer.style.animation = "completionGlow 1s ease-in-out";
 
+      // Haptic feedback for problem completion
+      window.HapticFeedback?.HapticEvents?.problemCompleted?.();
+
       // Show completion message and trigger console modal
       setTimeout(() => {
         // Reset completion effect

@@ -159,26 +159,214 @@
     outline-offset: 3px;
 }
 
+/* ============================================
+   FIRST WIN CELEBRATION MODAL
+   ============================================ */
+.first-win-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  padding: clamp(1rem, 3vw, 2rem);
+  background:
+    radial-gradient(circle at center, rgba(142, 203, 117, 0.12), transparent 40%),
+    rgba(6, 9, 8, 0.95);
+  z-index: 1000100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(16px);
+}
+
+.first-win-content {
+  width: min(36rem, 90%);
+  padding: clamp(2rem, 5vw, 3rem);
+  border: 2px solid rgba(142, 203, 117, 0.4);
+  border-radius: 28px;
+  background: linear-gradient(
+    180deg,
+    rgba(24, 29, 26, 0.98) 0%,
+    rgba(12, 15, 13, 0.98) 100%
+  );
+  box-shadow:
+    0 0 60px rgba(142, 203, 117, 0.3),
+    0 26px 64px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  text-align: center;
+  animation: modalFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.first-win-emoji {
+  font-size: clamp(4rem, 10vw, 6rem);
+  margin-bottom: 1rem;
+  animation: firstWinPop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes firstWinPop {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.first-win-content h2 {
+  margin: 0 0 0.75rem;
+  font-family: "Orbitron", monospace;
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: #8ecb75;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 24px rgba(142, 203, 117, 0.4);
+}
+
+.first-win-message {
+  margin: 0 0 1.5rem;
+  font-family: "Exo 2", sans-serif;
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  color: #c2c8bf;
+  line-height: 1.6;
+}
+
+.first-win-stats {
+  display: flex;
+  justify-content: center;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: rgba(142, 203, 117, 0.08);
+  border: 1px solid rgba(142, 203, 117, 0.15);
+}
+
+.first-win-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.first-win-stat-value {
+  font-family: "Orbitron", monospace;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 900;
+  color: #8ecb75;
+  text-shadow: 0 0 16px rgba(142, 203, 117, 0.5);
+}
+
+.first-win-stat-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #8ecb75;
+  opacity: 0.8;
+}
+
+.first-win-button {
+  display: inline-block;
+  min-width: 220px;
+  min-height: 3.25rem;
+  padding: 0.95rem 2rem;
+  background: linear-gradient(
+    135deg,
+    rgba(142, 203, 117, 0.95),
+    rgba(91, 160, 75, 0.95) 54%,
+    rgba(60, 120, 50, 0.95)
+  );
+  border: 1px solid rgba(142, 203, 117, 0.3);
+  border-radius: 999px;
+  font-family: "Orbitron", monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0d100f;
+  cursor: pointer;
+  transition:
+    background 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  box-shadow:
+    0 16px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(142, 203, 117, 0.2);
+}
+
+.first-win-button:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(162, 223, 137, 0.98),
+    rgba(111, 180, 95, 0.95) 56%,
+    rgba(80, 140, 70, 0.95)
+  );
+  border-color: rgba(162, 223, 137, 0.4);
+  box-shadow:
+    0 18px 34px rgba(0, 0, 0, 0.32),
+    0 0 0 1px rgba(142, 203, 117, 0.3),
+    0 0 30px rgba(142, 203, 117, 0.4);
+  transform: translateY(-2px);
+}
+
+.first-win-button:active {
+  transform: scale(0.97);
+}
+
+.first-win-button:focus-visible {
+  outline: 2px solid #8ecb75;
+  outline-offset: 3px;
+}
+
+/* Confetti particles */
+.first-win-confetti {
+  position: fixed;
+  top: -10px;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  animation: confettiFall linear forwards;
+  pointer-events: none;
+  z-index: 1000200;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
 @media (max-width: 640px) {
-    .how-to-play-overlay {
-        padding: 0.85rem;
-        align-items: end;
-    }
+  .first-win-content {
+    width: 95%;
+    padding: 1.5rem;
+    border-radius: 24px;
+  }
 
-    .how-to-play-content {
-        width: 100%;
-        max-height: min(88vh, 44rem);
-        border-radius: 24px;
-    }
+  .first-win-stats {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
 
-    .how-to-play-content h2 {
-        letter-spacing: 0.1em;
-    }
-
-    .start-game-button {
-        font-size: 0.82rem;
-        letter-spacing: 0.14em;
-    }
+  .first-win-button {
+    font-size: 0.82rem;
+    letter-spacing: 0.14em;
+    min-width: 180px;
+  }
 }
 
 /* ============================================

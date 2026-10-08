@@ -131,6 +131,65 @@ console.log("💾 PlayerStorage loading...");
       return level;
     },
 
+    recordStreak() {
+      const profile = this._read() || createDefaultProfile();
+      const today = new Date().toISOString().split("T")[0];
+      const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+      function isYesterday(dateStr) {
+        const d1 = new Date(dateStr);
+        const d2 = new Date(today);
+        const diff = Math.floor((d2 - d1) / MS_PER_DAY);
+        return diff === 1;
+      }
+
+      let newCount = 1;
+      const lastPlayed = profile.streak?.lastPlayed;
+      if (lastPlayed) {
+        if (lastPlayed === today) {
+          return profile.streak.count;
+        } else if (isYesterday(lastPlayed)) {
+          newCount = (profile.streak.count || 0) + 1;
+        } else {
+          newCount = 1;
+        }
+      }
+
+      profile.streak = { count: newCount, lastPlayed: today };
+      profile.updatedAt = Date.now();
+      this._write(profile);
+      return newCount;
+    },
+
+    getStreak() {
+      const profile = this._read() || createDefaultProfile();
+      return profile.streak || { count: 0, lastPlayed: null };
+    },
+
+    getDailyChallenge() {
+      const profile = this._read() || createDefaultProfile();
+      return profile.dailyChallenge || { date: null, completed: false, completedScore: 0 };
+    },
+
+    setDailyChallengeCompleted(score) {
+      const profile = this._read() || createDefaultProfile();
+      const today = new Date().toISOString().split("T")[0];
+      profile.dailyChallenge = {
+        date: today,
+        completed: true,
+        completedScore: Math.max(0, Number(score) || 0),
+      };
+      profile.updatedAt = Date.now();
+      this._write(profile);
+    },
+
+    isDailyChallengeAvailable() {
+      const profile = this._read() || createDefaultProfile();
+      const today = new Date().toISOString().split("T")[0];
+      const dc = profile.dailyChallenge;
+      return !dc.completed || dc.date !== today;
+    },
+
     resetProfile() {
       try {
         localStorage.removeItem(STORAGE_KEY);

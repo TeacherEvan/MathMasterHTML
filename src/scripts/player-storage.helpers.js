@@ -2,7 +2,7 @@
 console.log("💾 PlayerStorage helpers loading...");
 
 (function() {
-  const PROFILE_VERSION = 3;
+  const PROFILE_VERSION = 4;
   const LEVEL_KEYS = ["beginner", "warrior", "master"];
   const RECENT_HISTORY_LIMIT = 25;
   const MAX_PLAYER_NAME_LENGTH = 18;
@@ -27,6 +27,15 @@ console.log("💾 PlayerStorage helpers loading...");
         totalScore: 0,
         problemsCompleted: 0,
         lastPlayed: null,
+      },
+      streak: {
+        count: 0,
+        lastPlayed: null,
+      },
+      dailyChallenge: {
+        date: null,
+        completed: false,
+        completedScore: 0,
       },
       updatedAt: Date.now(),
     };
@@ -136,6 +145,36 @@ console.log("💾 PlayerStorage helpers loading...");
 
     nextProfile.recentHistory = normalizeRecentHistory(sourceProfile.recentHistory);
     nextProfile.overall = buildOverallSummary(nextProfile.levels);
+
+    // Migrate streak data
+    if (sourceProfile.streak && typeof sourceProfile.streak === "object") {
+      nextProfile.streak = {
+        count: Math.max(0, Number(sourceProfile.streak.count) || 0),
+        lastPlayed:
+          typeof sourceProfile.streak.lastPlayed === "string"
+            ? sourceProfile.streak.lastPlayed
+            : null,
+      };
+    }
+
+    // Migrate daily challenge data
+    if (sourceProfile.dailyChallenge && typeof sourceProfile.dailyChallenge === "object") {
+      nextProfile.dailyChallenge = {
+        date:
+          typeof sourceProfile.dailyChallenge.date === "string"
+            ? sourceProfile.dailyChallenge.date
+            : null,
+        completed:
+          typeof sourceProfile.dailyChallenge.completed === "boolean"
+            ? sourceProfile.dailyChallenge.completed
+            : false,
+        completedScore:
+          typeof sourceProfile.dailyChallenge.completedScore === "number"
+            ? Math.max(0, sourceProfile.dailyChallenge.completedScore)
+            : 0,
+      };
+    }
+
     nextProfile.updatedAt =
       typeof sourceProfile.updatedAt === "number"
         ? sourceProfile.updatedAt

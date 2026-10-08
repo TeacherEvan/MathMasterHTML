@@ -104,6 +104,10 @@
             <div class="hud-label">TIME</div>
             <div id="timer-value" class="hud-value">600</div>
         </div>
+        <div id="streak-display" class="hud-block streak-display" aria-label="Daily Streak">
+            <div class="hud-label">STREAK</div>
+            <div id="streak-count" class="hud-value">0</div>
+        </div>
     </div>
 
     <!-- Main Game Container -->
@@ -357,6 +361,10 @@
     <!-- Timer + scoring + persistence -->
     <script defer src="/src/scripts/player-storage.helpers.js"></script>
     <script defer src="/src/scripts/player-storage.js"></script>
+    <script defer src="/src/scripts/daily-challenge.js"></script>
+    <script defer src="/src/scripts/haptic-feedback.js"></script>
+    <script defer src="/src/scripts/screen-shake.js"></script>
+    <script defer src="/src/scripts/first-win-celebration.js"></script>
     <!-- Onboarding state + bootstrap -->
     <script defer src="/src/scripts/game-onboarding.storage.js"></script>
     <script defer src="/src/scripts/game-onboarding.bootstrap.js"></script>
