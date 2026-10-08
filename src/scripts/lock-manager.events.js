@@ -41,7 +41,11 @@ console.log("🔒 LockManager events loading...");
         return;
       }
 
-      const isMasterLevel = document.body.classList.contains("master-level");
+      const isMasterLevel =
+        typeof lockManager._isMasterRoute === "function"
+          ? lockManager._isMasterRoute()
+          : document.body.classList.contains("level-master") ||
+            document.body.classList.contains("master-level");
       console.log(
         `🔒 Current game mode: ${
           isMasterLevel ? "Master Level" : "Normal Level"

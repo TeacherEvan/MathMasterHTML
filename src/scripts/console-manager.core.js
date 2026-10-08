@@ -13,6 +13,11 @@ console.log("🎮 Console Manager core loading");
  */
 
 (function() {
+  // How long the post-problem console intermission may be held back by an
+  // unclear board (live worms / unclaimed muffin rewards) before it opens
+  // anyway. Prevents the game from stalling between problems.
+  const SELECTION_GATE_MAX_WAIT_MS = 4000;
+
   class ConsoleManager {
     constructor() {
       this.slots = [null, null, null, null, null, null, null, null, null];
@@ -142,15 +147,33 @@ console.log("🎮 Console Manager core loading");
         this.selectionGateTimer = null;
       }
 
+      // GUARD: the board can stay "unclear" indefinitely (a muffin reward the
+      // player never clicks, or a worm that refuses to die). Without a ceiling
+      // the console modal never opens, so the game stalls after a completed
+      // problem and the next problem never loads. Force the intermission open
+      // once the grace window elapses so progression always continues.
+      const gateStartedAt = Date.now();
+
       const tryOpen = () => {
         if (this.isPendingSelection) {
           this.selectionGateTimer = null;
           return;
         }
 
-        if (!this.isBoardClearForSelection()) {
-          this.selectionGateTimer = window.setTimeout(tryOpen, 120);
-          return;
+        const boardClear = this.isBoardClearForSelection();
+        const waitedMs = Date.now() - gateStartedAt;
+
+        if (!boardClear) {
+          if (waitedMs < SELECTION_GATE_MAX_WAIT_MS) {
+            this.selectionGateTimer = window.setTimeout(tryOpen, 120);
+            return;
+          }
+
+          console.warn(
+            `⚠️ Console selection gate still blocked after ${waitedMs}ms ` +
+              `(worms=${this.hasActiveBoardWorms()}, ` +
+              `rewards=${this.hasBlockingBoardRewards()}) - opening anyway`,
+          );
         }
 
         this.selectionGateTimer = null;

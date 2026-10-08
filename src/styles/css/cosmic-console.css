@@ -168,6 +168,111 @@ body.cosmic-console .settings-dialog {
 }
 
 /* ========================================================================
+   MILESTONE 3b: IN-GAME COSMIC CHROME (game.html)
+   The in-game page has no settings dialog, so body.cosmic-console is applied
+   by src/scripts/cosmic-console.js. These rules cover the gameplay surfaces.
+   ======================================================================== */
+
+/* Starfield + aurora sit behind the board without touching stacking contexts
+   used by panels/modals: panels paint their own backgrounds above them. */
+body.cosmic-console.grid-container,
+body.cosmic-console .grid-container {
+  background-color: transparent;
+}
+
+body.cosmic-console .display-panel {
+  border-color: rgba(91, 227, 201, 0.32);
+  box-shadow:
+    inset 0 1px 0 rgba(91, 227, 201, 0.14),
+    0 0 24px rgba(91, 227, 201, 0.08);
+}
+
+body.cosmic-console .wall {
+  background: linear-gradient(
+    180deg,
+    rgba(91, 227, 201, 0.05) 0%,
+    rgba(233, 107, 255, 0.07) 50%,
+    rgba(91, 227, 201, 0.05) 100%
+  );
+  box-shadow: 0 0 12px rgba(91, 227, 201, 0.18);
+}
+
+/* HUD blocks get a signal-glow edge so score/time read as powered chrome. */
+body.cosmic-console .hud-block {
+  border-color: rgba(91, 227, 201, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(91, 227, 201, 0.18),
+    0 0 18px rgba(91, 227, 201, 0.14);
+}
+
+body.cosmic-console .hud-value {
+  color: var(--cosmic-star);
+  text-shadow: 0 0 12px rgba(91, 227, 201, 0.55);
+}
+
+/* Chamfered corner accents drawn as an inner border overlay instead of a
+   clip-path, so overflowing worms/symbols are never clipped. */
+body.cosmic-console .display-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 1px solid rgba(91, 227, 201, 0.22);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 16px) 0,
+    100% 16px,
+    100% 100%,
+    16px 100%,
+    0 calc(100% - 16px)
+  );
+}
+
+/* Console slot grid: signal accents + charged filled state. */
+body.cosmic-console .console-slot {
+  border-color: rgba(91, 227, 201, 0.35);
+  box-shadow: inset 0 0 12px rgba(91, 227, 201, 0.08);
+}
+
+body.cosmic-console .console-slot.filled {
+  border-color: var(--cosmic-signal);
+  box-shadow: 0 0 16px rgba(91, 227, 201, 0.45);
+  color: var(--cosmic-star);
+}
+
+/* Solution rows and problem line pick up a faint signal halo. */
+body.cosmic-console #problem-container,
+body.cosmic-console #solution-container {
+  border-color: rgba(91, 227, 201, 0.28);
+}
+
+body.cosmic-console .revealed-symbol {
+  text-shadow: 0 0 10px rgba(91, 227, 201, 0.5);
+}
+
+/* Console intermission modal joins the cosmic chrome. */
+body.cosmic-console .console-selection-window {
+  border: 1px solid rgba(91, 227, 201, 0.45);
+  box-shadow: 0 0 32px rgba(91, 227, 201, 0.3);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+body.cosmic-console .symbol-choice.is-active,
+body.cosmic-console .symbol-choice.selected {
+  border-color: var(--cosmic-signal);
+  box-shadow: 0 0 16px rgba(91, 227, 201, 0.5);
+}
+
+/* Modals/chrome must paint above the fixed starfield layers (z-index 0/1). */
+body.cosmic-console #symbol-modal,
+body.cosmic-console #how-to-play-modal {
+  z-index: 100900;
+}
+
+/* ========================================================================
+   MILESTONE 4: EVAN HELPER TARGET PULSE
+   ======================================================================== */
+/* ========================================================================
    MILESTONE 4: EVAN HELPER TARGET PULSE
    ======================================================================== */
 

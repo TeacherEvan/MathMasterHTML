@@ -20,6 +20,20 @@ console.log("🔒 LockManager animation helpers loading...");
     MASTER: "master",
   };
 
+  // game-init.js tags the body `level-master`, while older code paths checked
+  // `master-level`. Accept either so the master route really progresses past
+  // lock phase 3 (and resolves the master tone/animations).
+  proto._isMasterRoute = function _isMasterRoute() {
+    const body = document.body;
+    if (!body) {
+      return false;
+    }
+    return (
+      body.classList.contains("level-master") ||
+      body.classList.contains("master-level")
+    );
+  };
+
   proto.activateLockLevel = function activateLockLevel(level) {
     console.log(`🔒 Activating lock level ${level}`);
 
@@ -70,7 +84,7 @@ console.log("🔒 LockManager animation helpers loading...");
   };
 
   proto._resolveLockTone = function _resolveLockTone(level) {
-    const isMasterLevel = document.body.classList.contains("master-level");
+    const isMasterLevel = this._isMasterRoute();
     if (isMasterLevel || level >= 4) {
       return LOCK_TONES.MASTER;
     }
@@ -159,7 +173,7 @@ console.log("🔒 LockManager animation helpers loading...");
       return;
     }
 
-    const isMasterLevel = document.body.classList.contains("master-level");
+    const isMasterLevel = this._isMasterRoute();
     let newLevel;
     if (isMasterLevel) {
       newLevel = Math.min(6, Math.floor(this.completedLinesCount / 2) + 1);
@@ -201,7 +215,7 @@ console.log("🔒 LockManager animation helpers loading...");
     level,
   ) {
     console.log(`🎨 Triggering level ${level} animation`);
-    const isMasterLevel = document.body.classList.contains("master-level");
+    const isMasterLevel = this._isMasterRoute();
     if (!isMasterLevel && level > 3) {
       console.log(`⚠️ Capping animation at level 3 (non-master level)`);
       level = 3;
