@@ -79,7 +79,7 @@ body.level-page {
   min-height: 100dvh;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  overflow: hidden;
+  /* overflow: hidden removed - prevents scrolling in .page-content */
 }
 
 body::before {

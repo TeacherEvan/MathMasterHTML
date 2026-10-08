@@ -15,6 +15,24 @@ body.viewport-standard.viewport-portrait .grid-container {
 body.viewport-standard.viewport-portrait #panel-a {
   grid-column: 1 !important;
   grid-row: 1 !important;
+  padding-top: 110px; /* Clear compact HUD (~95px) + gap */
+}
+
+body.viewport-standard.viewport-portrait #problem-container {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  min-height: 32px;
+  padding: 6px 8px;
+  text-align: center;
+  white-space: normal;
+  letter-spacing: 0.1em;
+  z-index: 2;
 }
 
 body.viewport-standard.viewport-portrait .grid-container > .wall:nth-child(2) {
@@ -61,14 +79,14 @@ body.viewport-compact.viewport-portrait #panel-c {
 body.viewport-compact.viewport-portrait #panel-a {
   grid-column: 1 !important;
   grid-row: 1 !important;
-  padding: 56px 6px 6px;
+  padding: 12px 6px 6px; /* HUD is compact at top */
   align-items: stretch;
 }
 
 /* Automation keeps portrait gameplay visible for assertions, so Panel A needs
    flow-based spacing instead of the fixed lock offset used by the live rotate gate. */
 body.automation.viewport-compact.viewport-portrait #panel-a {
-  padding-top: 60px;
+  padding-top: 16px;
   gap: 10px;
 }
 

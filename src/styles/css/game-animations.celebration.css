@@ -89,3 +89,68 @@
     transform: scale(1);
   }
 }
+
+/* ======================================== */
+/* VICTORY BANNER - Line Completion */
+/* ======================================== */
+
+.victory-banner {
+  position: fixed;
+  /* Position above panel A (lock/problem area), not dead center */
+  top: 85px; /* Below HUD (80px), above lock area */
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  font-family: 'Orbitron', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #00ffff;
+  text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff, 2px 2px 0 #000;
+  z-index: 10001;
+  pointer-events: none;
+  animation: victory-popup 1.5s ease-out forwards;
+  white-space: nowrap;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+  max-width: 90vw;
+}
+
+.victory-text {
+  display: inline-block;
+}
+
+/* Responsive: smaller on mobile */
+@media (max-width: 768px) {
+  .victory-banner {
+    font-size: 1.1rem;
+    top: 75px;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .victory-banner {
+    font-size: 0.95rem;
+    top: 70px;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+/* Landscape mobile: ensure banner doesn't overlap lock */
+@media (max-height: 500px) and (orientation: landscape) {
+  .victory-banner {
+    top: 60px;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+/* Automation mode: ensure visibility for tests */
+body.automation .victory-banner {
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+}

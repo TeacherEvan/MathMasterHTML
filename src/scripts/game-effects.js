@@ -93,21 +93,6 @@ console.log("🎯 GameEffects loading...");
     text.className = "victory-text";
     text.textContent = `LINE ${lineNumber} COMPLETE!`;
     banner.appendChild(text);
-    banner.style.cssText = `
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      font-family: 'Orbitron', monospace;
-      font-size: 2em;
-      font-weight: bold;
-      color: #00ffff;
-      text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff, 2px 2px 0 #000;
-      z-index: 10001;
-      pointer-events: none;
-      animation: victory-popup 1.5s ease-out forwards;
-      white-space: nowrap;
-    `;
 
     document.body.appendChild(banner);
 

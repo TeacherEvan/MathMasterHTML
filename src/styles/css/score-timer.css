@@ -184,21 +184,84 @@
 
 @media (max-width: 768px), (max-height: 500px) {
   .game-hud {
-    gap: 16px;
+    gap: 6px;
+    top: 8px;
+    align-items: center;
+    grid-template-columns: auto auto auto 1fr;
   }
 
   .hud-block {
-    min-width: 82px;
-    max-width: 108px;
-    padding: 6px 8px;
+    min-width: 60px;
+    max-width: 90px;
+    padding: 3px 5px;
   }
 
   .hud-value {
-    font-size: 14px;
+    font-size: 12px;
+  }
+
+  .hud-label {
+    font-size: 5px;
+    letter-spacing: 1px;
   }
 }
 
-/* Panel B buttons are laid out by .panel-b-controls (see game.css) */
-#clarify-button {
-  pointer-events: auto;
+body.viewport-standard.viewport-portrait .game-hud {
+  top: 8px;
+  left: 12px;
+  right: 12px;
+  gap: 12px;
+  align-items: center;
+}
+
+body.viewport-standard.viewport-portrait .hud-block {
+  min-width: 90px;
+  max-width: 130px;
+  padding: 6px 10px;
+}
+
+body.viewport-standard.viewport-portrait .hud-value {
+  font-size: 16px;
+}
+
+body.viewport-standard.viewport-landscape .game-hud {
+  top: 8px;
+  left: 12px;
+  right: 12px;
+  gap: 12px;
+  align-items: center;
+}
+
+body.viewport-standard.viewport-landscape .hud-block {
+  min-width: 90px;
+  max-width: 130px;
+  padding: 6px 10px;
+}
+
+body.viewport-standard.viewport-landscape .hud-value {
+  font-size: 16px;
+}
+
+/* Tablet portrait specific - more compact HUD */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  body.viewport-standard .game-hud {
+    top: 8px;
+    gap: 4px;
+    align-items: center;
+  }
+
+  body.viewport-standard .hud-block {
+    min-width: 55px;
+    max-width: 80px;
+    padding: 2px 4px;
+  }
+
+  body.viewport-standard .hud-value {
+    font-size: 11px;
+  }
+
+  body.viewport-standard .hud-label {
+    font-size: 4px;
+    letter-spacing: 0.5px;
+  }
 }
