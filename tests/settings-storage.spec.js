@@ -41,7 +41,7 @@ test.describe("User settings storage", () => {
         page.evaluate(() => window.UserSettings?.getSettings?.() || null),
       )
       .toMatchObject({
-        version: 1,
+        version: 3,
         display: {
           qualityMode: "auto",
           reducedMotion: false,
@@ -84,7 +84,7 @@ test.describe("User settings storage", () => {
       )
       .toMatchObject({
         current: {
-          version: 1,
+          version: 3,
           display: {
             qualityMode: "high",
             reducedMotion: false,
@@ -95,7 +95,7 @@ test.describe("User settings storage", () => {
           },
         },
         stored: {
-          version: 1,
+          version: 3,
           display: {
             qualityMode: "high",
             reducedMotion: false,

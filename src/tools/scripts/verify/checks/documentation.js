@@ -23,6 +23,7 @@ const IGNORED_DIRECTORIES = new Set([
   "node_modules",
   "playwright-report",
   "test-results",
+  "plans",
 ]);
 
 function isAllowedMarkdownFile(file) {
