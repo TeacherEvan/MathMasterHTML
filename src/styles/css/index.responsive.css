@@ -1,51 +1,27 @@
 /* Responsive Design */
-.button-container .scoreboard-button {
-  margin-top: 0;
-}
-
-@media (max-width: 960px) {
-  body.welcome-page {
-    padding-inline: 20px;
-  }
-
-  .welcome-container {
-    width: min(100%, 900px);
-  }
-}
-
 @media (max-width: 768px) {
-  body.welcome-page {
-    overflow-y: auto;
-    height: auto;
-    padding: 16px;
-    gap: 14px;
-  }
-
-  .welcome-header {
-    gap: 10px;
-    padding-top: 2px;
-  }
-
-  .welcome-container {
-    max-height: none;
-    padding: 22px 18px 26px;
-    border-radius: 24px;
-    gap: 18px;
-  }
-
   .button-container {
     flex-direction: column;
-    width: min(100%, 320px);
+    width: 100%;
   }
 
   .action-button {
     width: 100%;
-    min-width: 0;
-    max-width: none;
+    max-width: 300px;
   }
 
   .logo-circle {
-    width: min(72vw, 240px);
+    width: 80px;
+    height: 80px;
+  }
+
+  .logo-circle::before {
+    width: 40px;
+    height: 40px;
+  }
+
+  .logo-circle::after {
+    font-size: 2rem;
   }
 
   .scoreboard-summary-grid,

@@ -1,0 +1,77 @@
+# CODEBASE-STATE — MathMasterHTML
+
+> Auditor: surgical-implementation (DISCOVER + CODEBASE_STATE scope)
+> Date: 2026-08-20
+> Repo: origin = github.com/TeacherEvan/MathMasterHTML.git
+> Branch: main (0/0 divergent from origin/main)
+> Scope: "investigate git THEN audit codebase" — audit-only, no source changes.
+
+## Run metadata
+- workflow_id: audit-2026-08-20
+- run_id: 1
+- node: v24.15.0 (matches package.json engines ^24.0.0)
+- node_modules: present
+- branch protection: ACTIVE (CI quality-gate pipeline) — main is not a free-commit target
+
+## Tech stack
+- Browser-native algebra training game; runtime pages served over HTTP (script-tag driven).
+- Plain JS modules (ESM, `type: module`); no framework bundler for runtime.
+- Tooling: ESLint 9, Playwright 1.59, TypeScript 5.9 (typecheck only, no runtime compile).
+- Scripts: `verify` (node src/tools/scripts/verify.js), `typecheck`, `test` (Playwright).
+- Optional dep: http-server (dev static server).
+
+## Relevant structure
+- `src/pages/`        runtime HTML surfaces (index/level-select/game/life-stats)
+- `src/scripts/`     game + storage + symbol-rain + life-stats + worm-system modules
+- `src/styles/css/`  per-surface stylesheets
+- `src/tools/scripts/verify/`  verify harness + checks (life-stats unit checks)
+- `tests/`           Playwright specs (entry-flow, symbol-rain, evan-helper, e2e)
+- Governance docs: README.md, Plan Alpha/Beta/Genesis.md, JOBCARD.md, docs/SECURITY.md
+
+## Components (key, verified in tree)
+- `src/scripts/player-storage.js`
+  - `safeParse()` (line 25): try/catch JSON.parse → null on bad input
+  - `migrateProfile()` (imported line 22): clamps oversized names during migration
+  - `init/_read/_write` all wrapped in try/catch with console.warn fallbacks
+  - Confirms runtime degrades safely on corrupt persisted state (no-throw).
+- Entry-flow hardening already shipped (per JOBCARD 2026-05-06): safe parse,
+  bounded display text, fallback labels, graceful redirect query/hash forwarding,
+  startup-preload degradation with try/catch.
+
+## Baseline tests (empirically run, not assumed)
+- `npm run verify` → 6/6 PASSED (critical files, eslint, tooling tests, package json,
+  manifest screenshots, documentation)
+- `npm run typecheck` → exit 0 (clean)
+- `npx playwright test tests/welcome-scoreboard.spec.js tests/level-select-interactions.spec.js
+   tests/redirect-entrypoints.spec.js tests/startup-preload.spec.js --project=chromium`
+  → 44 passed (1.4m), including 6 new malformed-persisted-state regression tests
+  (real pageerror guards, NOT expect(true) stubs)
+
+## Dependencies (no secret values present)
+- devDependencies: @eslint/js ^9.39.4, @playwright/test ^1.59.1, cross-env ^10.1.0,
+  eslint ^9.39.4, globals ^16.5.0, playwright ^1.59.1, typescript ^5.9.3
+- optionalDependencies: http-server ^14.1.1
+- Secret scan (src + docs + tests + *.json/*.html/*.md): 0 matches
+  (no ghp_/sk_/xox-/AIza/PRIVATE KEY/client_secret)
+
+## Known issues / open items (from prior audit, still open)
+1. UNCOMMITTED PRIOR AUDIT: a 2026-08-20 pass added 4 specs + JOBCARD note
+   and left them on main, uncommitted → blocked behind PR (branch protection).
+2. TWO DIVERGED LOCAL BRANCHES (not on origin):
+   - feature/manual-implementation (1 ahead, +145 lines, onboarding test helpers)
+   - feature/panel-c-mobile-rain-fix (2 ahead, +1,241 lines, mobile rain/UX tests)
+3. 4 stale stashes (stash@{0..3}) on main + feature branches, un-popped.
+4. Untracked analyzer artifacts (HERMES_PLAN.ai.json/html, docs/audit*.html)
+   were polluting `git status`; relocated to docs/.scratch-audit/ + gitignored.
+
+## Initial risks
+- R1 (medium): entry-flow hardening plan (Plan Beta) boxes are still marked `[ ]`
+  though the runtime work is shipped+verified — status banner drift, not a code gap.
+- R2 (low): unmerged local branches risk silent loss / cross-branch contamination.
+- R3 (low): main carries uncommitted WIP that must reach a PR, not be committed
+  directly to main (branch protection will block).
+
+## Decision
+Audit scope complete and GREEN. No source change required. Recommended next step is
+a scoped PR for the verified entry-flow closure (see open item 1); git commit/push
+held pending the user's explicit scoped-commit authorization.
