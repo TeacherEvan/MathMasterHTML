@@ -53,6 +53,7 @@ The identity moment is the rhythm between falling symbol rain and line-by-line a
 - active gameplay should stay a puzzle
 - in-app exits or bypasses should not let the player abandon unresolved puzzle flow without intent
 - once the problem is complete, those controls should become available again immediately
+- unrevealed solution symbols must stay non-readable until explicitly revealed; visual hiding alone does not meet the gameplay-integrity bar
 
 ### Platform Priority Policy
 

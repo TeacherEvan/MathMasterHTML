@@ -10,6 +10,7 @@ function initSymbolRain() {
     const symbolRainContainer = document.getElementById(
       "symbol-rain-container",
     );
+    const panelC = document.getElementById("panel-c");
     if (!symbolRainContainer) {
       return;
     }
@@ -123,6 +124,10 @@ function initSymbolRain() {
       layoutRetryId: null,
       layoutRetryCount: 0,
       bootstrapDeferred: false,
+      lastMeasuredLayout: {
+        columnCount: 0,
+        containerHeight: 0,
+      },
     };
 
     window.__symbolRainState = state;
@@ -147,14 +152,30 @@ function initSymbolRain() {
 
     syncResponsiveConfig();
 
-    function calculateColumns() {
+    function refreshLayoutMetrics(force = false) {
       const { columnCount, containerHeight } =
         SymbolRainHelpers.calculateColumns(
           symbolRainContainer,
           SymbolRainConfig,
         );
+
+      const layoutChanged =
+        force ||
+        state.lastMeasuredLayout.columnCount !== columnCount ||
+        state.lastMeasuredLayout.containerHeight !== containerHeight;
+
       state.cachedContainerHeight = containerHeight;
       state.columnCount = columnCount;
+      state.lastMeasuredLayout = {
+        columnCount,
+        containerHeight,
+      };
+
+      return layoutChanged;
+    }
+
+    function calculateColumns() {
+      refreshLayoutMetrics(true);
     }
 
     function hasUsableLayout() {
@@ -251,11 +272,37 @@ function initSymbolRain() {
       scheduleBootstrap();
     }, 250);
 
+    const debouncedLocalLayoutRefresh = debounce(() => {
+      state.isMobileMode = isCompactDisplayMode();
+      syncResponsiveConfig();
+
+      const layoutChanged = refreshLayoutMetrics();
+      if (!hasUsableLayout() || !state.isAnimationRunning) {
+        scheduleBootstrap();
+        return;
+      }
+
+      if (layoutChanged && state.isInitialPopulation) {
+        scheduleBootstrap();
+      }
+    }, 80);
+
     window.addEventListener("resize", debouncedResize);
     window.SharedResizeObserver?.subscribe?.(debouncedResize, {
       immediate: true,
       source: "symbol-rain",
     });
+
+    if (typeof ResizeObserver === "function") {
+      const panelLocalResizeObserver = new ResizeObserver(() => {
+        debouncedLocalLayoutRefresh();
+      });
+
+      if (panelC) {
+        panelLocalResizeObserver.observe(panelC);
+      }
+      panelLocalResizeObserver.observe(symbolRainContainer);
+    }
 
     document.addEventListener(
       GameEvents.DISPLAY_RESOLUTION_CHANGED,

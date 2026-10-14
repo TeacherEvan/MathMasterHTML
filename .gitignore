@@ -34,7 +34,7 @@ build/
 *.backup
 *.corrupted
 *.bak
-
+test-results
 # Cache directories
 .cache/
 .eslintcache

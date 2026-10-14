@@ -41,6 +41,76 @@ console.log("🎯 SymbolRain helpers: utils loading...");
     return { columnCount, containerHeight };
   };
 
+  helpers.getRainWindowRect = function getRainWindowRect(container) {
+    if (!container?.getBoundingClientRect) {
+      return null;
+    }
+
+    const rect = container.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return null;
+    }
+
+    return rect;
+  };
+
+  helpers.rectIntersectsRainWindow = function rectIntersectsRainWindow(
+    rect,
+    rainRect,
+  ) {
+    if (!rect || !rainRect || rect.width <= 0 || rect.height <= 0) {
+      return false;
+    }
+
+    return (
+      rect.bottom > rainRect.top &&
+      rect.top < rainRect.bottom &&
+      rect.right > rainRect.left &&
+      rect.left < rainRect.right
+    );
+  };
+
+  helpers.isSymbolVisibleInRainWindow = function isSymbolVisibleInRainWindow(
+    state,
+    symbolObj,
+  ) {
+    if (!symbolObj?.element?.isConnected) {
+      return false;
+    }
+
+    if (symbolObj.element.classList.contains("clicked")) {
+      return false;
+    }
+
+    const rainRect = helpers.getRainWindowRect(state?.symbolRainContainer);
+    if (!rainRect) {
+      return false;
+    }
+
+    return helpers.rectIntersectsRainWindow(
+      symbolObj.element.getBoundingClientRect(),
+      rainRect,
+    );
+  };
+
+  helpers.isSymbolPastRainWindow = function isSymbolPastRainWindow(
+    state,
+    symbolObj,
+    padding = 0,
+  ) {
+    if (!symbolObj?.element?.isConnected) {
+      return true;
+    }
+
+    const rainRect = helpers.getRainWindowRect(state?.symbolRainContainer);
+    if (!rainRect) {
+      return symbolObj.y > (state?.cachedContainerHeight || 0) + padding;
+    }
+
+    const rect = symbolObj.element.getBoundingClientRect();
+    return rect.top > rainRect.bottom + padding;
+  };
+
   helpers.isColumnCrowded = function isColumnCrowded(
     activeFallingSymbols,
     targetColumnIndex,

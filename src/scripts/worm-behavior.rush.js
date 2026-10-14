@@ -1,5 +1,8 @@
 const WormConstants = window.WormConstants || {};
 const WormBehaviorModules = window.WormBehaviorModules || {};
+const getSolutionSymbolValue = (element) =>
+  window.GameSymbolHelpers?.getSymbolValue?.(element) ||
+  String(element?.dataset?.expected || element?.textContent || "").trim();
 
 function updateWormRushingToTarget(behavior, worm) {
   const system = behavior.system;
@@ -20,7 +23,7 @@ function updateWormRushingToTarget(behavior, worm) {
   if (worm.targetSymbol) {
     const normalizedTarget = system.utils.normalizeSymbol(worm.targetSymbol);
     targetElement = Array.from(symbolsToSearch).find((el) => {
-      const elSymbol = system.utils.normalizeSymbol(el.textContent);
+      const elSymbol = system.utils.normalizeSymbol(getSolutionSymbolValue(el));
       return elSymbol === normalizedTarget && !el.dataset.stolen;
     });
   }
@@ -76,7 +79,7 @@ function updateWormRushingToTarget(behavior, worm) {
       });
 
       if (nearestSymbol) {
-        worm.targetSymbol = nearestSymbol.textContent;
+        worm.targetSymbol = getSolutionSymbolValue(nearestSymbol);
         targetElement = nearestSymbol;
         logger.log(
           `🟣 Purple worm ${worm.id} found nearest symbol: "${

@@ -1,4 +1,26 @@
 const WormConstants = window.WormConstants || {};
+const getSolutionSymbolValue = (element) =>
+  window.GameSymbolHelpers?.getSymbolValue?.(element) ||
+  String(element?.dataset?.expected || element?.textContent || "").trim();
+const hideSolutionSymbol = (element) => {
+  if (window.GameSymbolHelpers?.setHiddenSymbolState) {
+    return window.GameSymbolHelpers.setHiddenSymbolState(element);
+  }
+
+  const symbolValue = getSolutionSymbolValue(element);
+  if (symbolValue && element && !element.dataset.expected) {
+    element.dataset.expected = symbolValue;
+  }
+
+  if (element) {
+    element.textContent = "";
+    element.classList.remove("revealed-symbol");
+    element.classList.add("hidden-symbol");
+    element.style.visibility = "visible";
+  }
+
+  return symbolValue;
+};
 
 function stealSymbol(behavior, worm) {
   const logger = behavior.logger;
@@ -74,7 +96,7 @@ function stealSymbol(behavior, worm) {
   if (worm.targetSymbol) {
     const normalizedTarget = system.utils.normalizeSymbol(worm.targetSymbol);
     targetSymbol = availableSymbols.find((el) => {
-      const elSymbol = system.utils.normalizeSymbol(el.textContent);
+      const elSymbol = system.utils.normalizeSymbol(getSolutionSymbolValue(el));
       return elSymbol === normalizedTarget;
     });
   }
@@ -84,14 +106,14 @@ function stealSymbol(behavior, worm) {
       availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
   }
 
-  if (!targetSymbol || !targetSymbol.textContent) {
+  const symbolValue = getSolutionSymbolValue(targetSymbol);
+  if (!targetSymbol || !symbolValue) {
     logger.warn("⚠️", `Worm ${worm.id} could not find valid target symbol`);
     worm.roamingEndTime = Date.now() + WormConstants.ROAM_RESUME_DURATION;
     worm.isRushingToTarget = false;
     return;
   }
 
-  const symbolValue = targetSymbol.textContent;
   const wasBlueSymbol = targetSymbol.classList.contains("revealed-symbol");
 
   logger.log(
@@ -102,8 +124,7 @@ function stealSymbol(behavior, worm) {
 
   targetSymbol.dataset.stolen = "true";
   targetSymbol.classList.add("stolen");
-  targetSymbol.classList.remove("revealed-symbol");
-  targetSymbol.classList.add("hidden-symbol");
+  hideSolutionSymbol(targetSymbol);
   targetSymbol.style.visibility = "hidden";
 
   worm.stolenSymbol = symbolValue;
@@ -127,8 +148,7 @@ function stealSymbol(behavior, worm) {
           `[data-step-index="${stepIndex}"].revealed-symbol`,
         );
         rowSymbols.forEach((el) => {
-          el.classList.remove("revealed-symbol");
-          el.classList.add("hidden-symbol");
+          hideSolutionSymbol(el);
         });
         logger.log(
           `🔴 Worm stole blue symbol from row ${stepIndex} - reverted ${rowSymbols.length} more revealed symbol(s) to red`,

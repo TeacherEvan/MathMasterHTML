@@ -58,6 +58,32 @@ test.describe("UI Boundary Management", () => {
     );
   });
 
+  test("Powerup display should not overlap Panel B controls", async ({
+    page,
+  }) => {
+    await ensurePowerUpDisplay(page);
+
+    const powerupBox = await page.locator("#power-up-display").boundingBox();
+    const controlsBox = await page.locator(".panel-b-controls").boundingBox();
+
+    expect(powerupBox).toBeTruthy();
+    expect(controlsBox).toBeTruthy();
+    expect(boxesOverlap(powerupBox, controlsBox, 0)).toBe(false);
+  });
+
+  test("Powerup display should not overlap solution container", async ({
+    page,
+  }) => {
+    await ensurePowerUpDisplay(page);
+
+    const powerupBox = await page.locator("#power-up-display").boundingBox();
+    const solutionBox = await page.locator("#solution-container").boundingBox();
+
+    expect(powerupBox).toBeTruthy();
+    expect(solutionBox).toBeTruthy();
+    expect(boxesOverlap(powerupBox, solutionBox, 0)).toBe(false);
+  });
+
   test("Problem container should not overlap with score display", async ({
     page,
   }) => {

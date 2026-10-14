@@ -193,9 +193,17 @@ npx playwright test tests/worm-stability.spec.js tests/worm-cursor-evasion.spec.
 
 - Compact/mobile symbol-rain tuning belongs in `src/scripts/3rdDISPLAY.js` and should follow the existing `viewport-compact` contract instead of one-time `window.innerWidth` checks.
 - Let Panel C bootstrap wait for real layout stabilization; do not replace zero-height container measurements with synthetic fallback heights.
+- Panel C must refresh cached rain metrics when `#panel-c` or `#symbol-rain-container` changes size without a `window.resize`; `window.__symbolRainState.cachedContainerHeight` cannot rely on global resize alone.
 - Keyboard-target eligibility in Panel C must use actual panel/container intersection, not global viewport checks alone.
+- Visibility and cleanup checks for symbol-rain and Evan helper targeting must share the actual `#symbol-rain-container` intersection contract rather than mixing panel bounds with cached Y-only heuristics.
 - If symbol-rain uses incremental spatial-grid bookkeeping, every symbol removal path, including click collection, must remove the symbol from the grid.
 - Compact/mobile spawn throttling can be reduced, but keep guaranteed target circulation fast enough that live matching symbols remain available during gameplay.
+
+## Gameplay Integrity Contracts
+
+- Unrevealed solution symbols must keep their answer value in `data-expected` and render blank text until reveal; visual transparency alone is not sufficient.
+- Worm steal, hide, restore, and help-reveal flows must preserve that hidden-symbol contract so unrevealed answers do not become readable again later in the same run.
+- `problemLineCompleted` may carry additive provenance detail such as `symbolClick`, `tutorial`, or `greenWormCompletion`; listeners must remain backward-compatible and ignore fields they do not need.
 
 ## Settings and Update Model
 

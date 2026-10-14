@@ -2,6 +2,42 @@
 console.log("🎯 GameSymbolHelpers loading...");
 
 (function attachGameSymbolHelpers() {
+  function getSymbolValue(element) {
+    return String(element?.dataset?.expected || element?.textContent || "").trim();
+  }
+
+  function setHiddenSymbolState(element) {
+    if (!element || element.classList.contains("space-symbol")) {
+      return "";
+    }
+
+    const symbolValue = getSymbolValue(element);
+    if (symbolValue && !element.dataset.expected) {
+      element.dataset.expected = symbolValue;
+    }
+
+    element.textContent = "";
+    element.classList.remove("revealed-symbol");
+    element.classList.add("hidden-symbol");
+    element.style.visibility = "visible";
+
+    return symbolValue;
+  }
+
+  function setRevealedSymbolState(element) {
+    if (!element) {
+      return "";
+    }
+
+    const symbolValue = getSymbolValue(element);
+    element.textContent = symbolValue;
+    element.classList.remove("hidden-symbol");
+    element.classList.add("revealed-symbol");
+    element.style.visibility = "visible";
+
+    return symbolValue;
+  }
+
   function invalidateWormSymbolCache() {
     window.wormSystem?.invalidateSymbolCache?.();
   }
@@ -13,7 +49,7 @@ console.log("🎯 GameSymbolHelpers loading...");
     );
 
     if (hiddenSymbols.length > 0) {
-      return hiddenSymbols.map((span) => span.textContent);
+      return hiddenSymbols.map((span) => getSymbolValue(span));
     }
 
     return null;
@@ -51,12 +87,11 @@ console.log("🎯 GameSymbolHelpers loading...");
     );
 
     for (const span of hiddenSymbols) {
-      const spanSymbol = span.textContent;
+      const spanSymbol = getSymbolValue(span);
       const normalizedSpan = normalizeSymbol(spanSymbol);
 
       if (normalizedSpan === normalizedTarget) {
-        span.classList.remove("hidden-symbol");
-        span.classList.add("revealed-symbol");
+        setRevealedSymbolState(span);
         invalidateStepCache();
         invalidateWormSymbolCache();
 
@@ -69,8 +104,11 @@ console.log("🎯 GameSymbolHelpers loading...");
   }
 
   window.GameSymbolHelpers = {
+    getSymbolValue,
     getNextSymbol,
     isSymbolInCurrentLine,
     revealSpecificSymbol,
+    setHiddenSymbolState,
+    setRevealedSymbolState,
   };
 })();

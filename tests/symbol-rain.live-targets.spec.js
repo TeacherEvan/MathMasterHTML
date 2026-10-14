@@ -24,7 +24,8 @@ async function getCurrentStepSnapshot(page) {
         `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`,
       ),
     )
-      .map((element) => element.textContent?.trim())
+      .map((element) => element.dataset.expected || element.textContent || "")
+      .map((value) => String(value).trim())
       .filter(Boolean);
 
     return { stepIndex, hiddenSymbols };
@@ -184,7 +185,8 @@ test.describe("Symbol rain live targets", () => {
               `#solution-container [data-step-index="${stepIndex}"].hidden-symbol`,
             ),
           )
-            .map((element) => element.textContent?.trim())
+            .map((element) => element.dataset.expected || element.textContent || "")
+            .map((value) => String(value).trim())
             .filter(Boolean);
 
           return (
@@ -199,5 +201,47 @@ test.describe("Symbol rain live targets", () => {
         { timeout: 5000 },
       );
     }
+  });
+
+  test("re-syncs cached container height after a Panel C-only reflow", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "chromium",
+      "This desktop contract only runs on the Chromium gameplay project.",
+    );
+
+    await resetOnboardingState(page, "?level=beginner&evan=off&preload=off");
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    await page.locator("#panel-c .falling-symbol").first().waitFor({
+      state: "visible",
+      timeout: 10000,
+    });
+
+    const result = await page.evaluate(async () => {
+      const state = window.__symbolRainState;
+      const panel = document.getElementById("panel-c");
+      const rain = document.getElementById("symbol-rain-container");
+
+      if (!state || !panel || !rain) {
+        return null;
+      }
+
+      panel.style.height = "340px";
+      await new Promise((resolve) => window.setTimeout(resolve, 400));
+
+      const rainRect = rain.getBoundingClientRect();
+
+      return {
+        cachedContainerHeight: state.cachedContainerHeight,
+        actualRainHeight: rainRect.height,
+      };
+    });
+
+    expect(result).not.toBeNull();
+    expect(
+      Math.abs(result.cachedContainerHeight - result.actualRainHeight),
+    ).toBeLessThanOrEqual(2);
   });
 });

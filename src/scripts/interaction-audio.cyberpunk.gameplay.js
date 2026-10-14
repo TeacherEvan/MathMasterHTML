@@ -98,6 +98,48 @@
     );
   };
 
+  proto.playRowCompleteCue = function playRowCompleteCue(lineNumber) {
+    const base = 560 + Math.min(lineNumber, 6) * 28;
+
+    this._playCue(
+      "row-complete",
+      [
+        {
+          type: "sawtooth",
+          startHz: base * 0.92,
+          endHz: base * 1.45,
+          duration: 0.16,
+          volume: 0.03,
+          filterFrequency: 1800,
+          q: 7,
+          pan: -0.22,
+        },
+        {
+          type: "square",
+          startHz: base * 1.5,
+          endHz: base * 2.1,
+          delay: 0.028,
+          duration: 0.12,
+          volume: 0.024,
+          filterFrequency: 2400,
+          q: 9,
+          pan: 0.2,
+        },
+        {
+          type: "triangle",
+          startHz: 220,
+          endHz: 320,
+          delay: 0.018,
+          duration: 0.18,
+          volume: 0.016,
+          filterFrequency: 900,
+          q: 4,
+        },
+      ],
+      140,
+    );
+  };
+
   proto.playLockAdvance = function playLockAdvance(level) {
     const base = 120 + Math.min(level, 6) * 24;
 

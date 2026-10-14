@@ -186,4 +186,47 @@ test.describe("Evan Symbol Behavior — Build 5", () => {
       0,
     );
   });
+
+  test("off-window falling symbols are ignored as Evan targets", async ({
+    page,
+  }) => {
+    await dismissBriefingAndWaitForInteractiveGameplay(page);
+
+    const result = await page.evaluate(() => {
+      const panel = document.getElementById("panel-c");
+      if (!panel) {
+        return null;
+      }
+
+      const fake = document.createElement("div");
+      fake.className = "falling-symbol";
+      fake.textContent = "⊕";
+      fake.getBoundingClientRect = () => ({
+        x: 0,
+        y: -60,
+        width: 48,
+        height: 48,
+        top: -60,
+        left: 0,
+        right: 48,
+        bottom: -12,
+        toJSON() {
+          return this;
+        },
+      });
+      panel.appendChild(fake);
+
+      const target = window.EvanTargets.findBestFallingSymbol(["⊕"]);
+      const chosenText = target?.textContent || null;
+
+      fake.remove();
+
+      return {
+        chosenText,
+      };
+    });
+
+    expect(result).not.toBeNull();
+    expect(result.chosenText).toBeNull();
+  });
 });
