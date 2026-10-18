@@ -1,4 +1,760 @@
-@import url("/src/styles/css/console.core.css");
-@import url("/src/styles/css/console.modal.css");
-@import url("/src/styles/css/console.responsive.css");
-@import url("/src/styles/css/console.worm.css");
+/* Symbol Console Styles - Matrix Theme */
+
+/* Ensure console is positioned within Panel B */
+#panel-b {
+  position: relative;
+}
+
+#symbol-console {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  /* Always on top of solution display and worms */
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 8px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 2px solid #00ff00;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+}
+
+.console-slot {
+  width: 50px;
+  height: 50px;
+  background: rgba(0, 20, 0, 0.6);
+  border: 2px solid #00ff00;
+  border-radius: 5px;
+  font-family: "Orbitron", monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: #00ff00;
+  cursor: pointer;
+  /* PERFORMANCE: Only transition specific properties, not 'all' */
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  /* TOUCH FIX: Prevent tap delay and double-tap zoom */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 255, 0, 0.3);
+  user-select: none;
+}
+
+/* Empty slot subtle animation */
+.console-slot:empty::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border: 2px solid #00ff0033;
+  border-radius: 50%;
+  animation: emptySlotPulse 2s ease-in-out infinite;
+}
+
+@keyframes emptySlotPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  50% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+}
+
+/* Filled slot */
+.console-slot.filled {
+  background: rgba(0, 40, 0, 0.9);
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.console-slot.filled:hover {
+  background: rgba(0, 60, 0, 1);
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+  transform: scale(1.1);
+  color: #0ff;
+}
+
+/* Purple pulsate animation on click */
+.console-slot.clicked {
+  animation: purplePulsate 0.6s ease-out;
+}
+
+@keyframes purplePulsate {
+  0% {
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    border-color: #00ff00;
+    color: #00ff00;
+  }
+
+  50% {
+    box-shadow: 0 0 30px rgba(138, 43, 226, 1), 0 0 60px rgba(138, 43, 226, 0.5);
+    border-color: #8a2be2;
+    color: #8a2be2;
+    transform: scale(1.2);
+  }
+
+  100% {
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    border-color: #00ff00;
+    color: #00ff00;
+    transform: scale(1);
+  }
+}
+
+/* Refresh flash after a symbol is placed in a console slot */
+.console-slot.refreshing {
+  animation: slotRefresh 0.5s ease-out;
+}
+
+@keyframes slotRefresh {
+  0% {
+    background: rgba(0, 255, 255, 0.6);
+    border-color: #0ff;
+    transform: scale(1.15);
+  }
+
+  60% {
+    background: rgba(0, 40, 0, 0.9);
+    border-color: #00ff00;
+    transform: scale(1.05);
+  }
+
+  100% {
+    background: rgba(0, 40, 0, 0.9);
+    border-color: #00ff00;
+    transform: scale(1);
+  }
+}
+
+/* Disabled state for empty slots */
+.console-slot:empty {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.console-slot:empty:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.console-selection-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 10060;
+  display: none;
+  place-items: center;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 14% 8%, color-mix(in oklch, var(--shell-line) 16%, transparent), transparent 42%),
+    radial-gradient(circle at 86% 10%, color-mix(in oklch, var(--shell-signal) 12%, transparent), transparent 38%),
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--shell-bg) 44%, transparent),
+      color-mix(in oklch, var(--shell-bg) 68%, black 32%)
+    );
+  pointer-events: auto;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.console-selection-shell[style*="display: flex"] {
+  display: grid !important;
+}
+
+.console-selection-window {
+  width: min(720px, calc(100vw - 32px));
+  height: min(520px, calc(100vh - 32px));
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  padding: 18px;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--shell-copy) 10%, var(--shell-line) 18%);
+  border-radius: 24px;
+  background: var(--shell-surface-raised);
+  box-shadow:
+    var(--shell-shadow-panel),
+    0 28px 64px rgba(0, 0, 0, 0.48);
+  position: relative;
+  animation: modalSlideIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.console-selection-window::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklch, var(--shell-signal) 58%, var(--shell-line) 42%), transparent);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.console-selection-window::after {
+  content: "Console staging";
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  color: color-mix(in oklch, var(--shell-copy-muted) 72%, var(--shell-line) 28%);
+  font: 700 0.6rem/1.2 var(--font-body);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.console-selection-header {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid color-mix(in oklch, var(--shell-copy) 6%, transparent);
+}
+
+.console-selection-kicker {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--shell-signal) 74%, var(--shell-copy) 26%);
+}
+
+.console-selection-header h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--shell-copy);
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 22px color-mix(in oklch, var(--shell-line) 14%, transparent);
+}
+
+.console-selection-copy {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.45;
+  color: color-mix(in oklch, var(--shell-copy-muted) 88%, var(--shell-copy) 12%);
+}
+
+.console-selection-body {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 14px;
+}
+
+.console-selection-card {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--shell-border-strong);
+  border-radius: 18px;
+  background: linear-gradient(180deg, color-mix(in oklch, var(--shell-panel-strong) 70%, transparent), color-mix(in oklch, var(--shell-bg) 94%, black 6%));
+  box-shadow:
+    inset 0 1px 0 var(--shell-border-subtle),
+    inset 0 0 0 1px color-mix(in oklch, var(--shell-copy) 3%, transparent);
+  overflow: hidden;
+  position: relative;
+}
+
+.console-selection-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklch, var(--shell-signal) 48%, var(--shell-line) 52%), transparent);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.console-selection-card h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: color-mix(in oklch, var(--shell-copy) 86%, var(--shell-signal) 14%);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.symbol-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  min-height: 0;
+}
+
+.position-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  min-height: 0;
+}
+
+.console-selection-shell #position-choices {
+  display: grid !important;
+}
+
+.symbol-choice,
+.position-choice {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  background: linear-gradient(180deg, color-mix(in oklch, var(--shell-panel-strong) 84%, transparent), color-mix(in oklch, var(--shell-bg) 94%, black 6%));
+  border: 1px solid color-mix(in oklch, var(--shell-line) 24%, transparent);
+  border-radius: 14px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  touch-action: manipulation;
+  color: var(--shell-copy);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklch, var(--shell-copy) 4%, transparent),
+    inset 0 -10px 14px rgba(0, 0, 0, 0.16);
+}
+
+.symbol-choice {
+  font-size: 24px;
+}
+
+.position-choice {
+  font-size: 22px;
+}
+
+.symbol-choice:hover,
+.position-choice:hover {
+  background: linear-gradient(180deg, color-mix(in oklch, var(--shell-signal) 14%, var(--shell-panel-strong) 86%), color-mix(in oklch, var(--shell-panel) 78%, black 22%));
+  border-color: var(--shell-signal);
+  box-shadow: 0 0 12px color-mix(in oklch, var(--shell-signal) 24%, transparent);
+  transform: translateY(-1px);
+}
+
+.symbol-choice.selected {
+  background: linear-gradient(180deg, color-mix(in oklch, var(--shell-signal) 26%, var(--shell-panel-strong) 74%), color-mix(in oklch, var(--shell-line) 18%, var(--shell-bg) 82%));
+  border-color: var(--shell-signal);
+  color: var(--shell-copy);
+  box-shadow:
+    0 0 14px color-mix(in oklch, var(--shell-signal) 26%, transparent),
+    inset 0 0 8px color-mix(in oklch, var(--shell-signal) 10%, transparent);
+}
+
+.position-choice.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: color-mix(in oklch, var(--shell-bg) 82%, black 18%);
+  border-color: color-mix(in oklch, var(--shell-alert) 34%, transparent);
+}
+
+.position-choice.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.console-selection-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in oklch, var(--shell-copy) 6%, transparent);
+}
+
+.console-selection-status {
+  margin: 0;
+  min-height: 1.4em;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid color-mix(in oklch, var(--shell-line) 12%, transparent);
+  border-radius: 0.95rem;
+  background: linear-gradient(180deg, color-mix(in oklch, var(--shell-panel-strong) 54%, transparent), color-mix(in oklch, var(--shell-bg) 94%, black 6%));
+  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--shell-copy) 4%, transparent);
+  font-family: var(--font-body);
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--shell-copy-muted);
+}
+
+.console-selection-autofill {
+  justify-self: end;
+  padding: 10px 16px;
+  background: linear-gradient(180deg, color-mix(in oklch, var(--shell-panel-strong) 82%, transparent), color-mix(in oklch, var(--shell-bg) 92%, black 8%));
+  border: 1px solid var(--shell-border-strong);
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--shell-copy-muted);
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.console-selection-autofill:hover {
+  border-color: var(--shell-signal);
+  color: var(--shell-copy);
+  box-shadow: 0 0 10px color-mix(in oklch, var(--shell-signal) 22%, transparent);
+}
+
+body.console-modal-open,
+body.console-selection-active {
+  overflow: hidden;
+}
+
+body.console-modal-open #symbol-rain-container,
+body.console-modal-open .falling-symbol,
+body.console-modal-open #worm-container,
+body.console-modal-open #panel-c {
+  pointer-events: none !important;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 700px), (max-height: 420px) {
+  .console-selection-window::after {
+    top: 12px;
+    right: 14px;
+    font-size: 0.5rem;
+    letter-spacing: 0.18em;
+  }
+
+  .console-selection-header {
+    padding-bottom: 0.65rem;
+  }
+
+  .console-selection-footer {
+    padding-top: 0.55rem;
+  }
+
+  .console-selection-status {
+    padding: 0.55rem 0.65rem;
+    border-radius: 0.8rem;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  body.viewport-compact.viewport-landscape #symbol-console {
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    right: 6px;
+    transform: none;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 44px;
+    grid-template-columns: none;
+    grid-template-rows: 44px;
+    justify-content: start;
+    align-items: stretch;
+    gap: 4px;
+    padding: 4px 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    z-index: 60;
+  }
+
+  body.viewport-compact.viewport-landscape .console-slot {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 16px;
+    flex: 0 0 auto;
+  }
+
+  body.viewport-compact.viewport-landscape .console-slot:nth-child(2),
+  body.viewport-compact.viewport-landscape .console-slot:nth-child(4),
+  body.viewport-compact.viewport-landscape .console-slot:nth-child(6) {
+    margin-right: 0;
+  }
+
+  #symbol-console {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    display: grid;
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(3, 44px);
+    justify-content: center;
+    align-items: stretch;
+    gap: 6px;
+    padding: 8px;
+    width: auto;
+    max-width: calc(100% - 20px);
+    z-index: 10000;
+  }
+
+  .console-slot {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+    flex: 0 0 auto;
+  }
+
+  .console-slot:nth-child(2),
+  .console-slot:nth-child(4),
+  .console-slot:nth-child(6) {
+    margin-right: 0;
+  }
+
+}
+
+@media (max-width: 900px), (max-height: 560px) {
+  .console-selection-shell {
+    padding: 10px;
+  }
+
+  .console-selection-window {
+    width: min(680px, calc(100vw - 20px));
+    height: min(400px, calc(100vh - 20px));
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .console-selection-header {
+    gap: 4px;
+  }
+
+  .console-selection-header h2 {
+    font-size: 24px;
+  }
+
+  .console-selection-copy {
+    font-size: 13px;
+  }
+
+  .console-selection-body {
+    gap: 10px;
+  }
+
+  .console-selection-card {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .console-selection-card h3 {
+    font-size: 12px;
+  }
+
+  .symbol-grid,
+  .position-grid {
+    gap: 6px;
+  }
+
+  .symbol-choice {
+    font-size: 18px;
+  }
+
+  .position-choice {
+    font-size: 16px;
+  }
+
+  .console-selection-footer {
+    gap: 10px;
+  }
+
+  .console-selection-status,
+  .console-selection-autofill {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  body.viewport-compact.viewport-landscape .console-slot {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  body.viewport-compact.viewport-landscape .console-slot:nth-child(2),
+  body.viewport-compact.viewport-landscape .console-slot:nth-child(4),
+  body.viewport-compact.viewport-landscape .console-slot:nth-child(6) {
+    margin-right: 0;
+  }
+
+  .console-slot {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 20px;
+  }
+
+  .console-slot:nth-child(2),
+  .console-slot:nth-child(4),
+  .console-slot:nth-child(6) {
+    margin-right: 0;
+  }
+
+  .console-selection-shell {
+    padding: 6px;
+  }
+
+  .console-selection-window {
+    width: calc(100vw - 12px);
+    height: min(400px, calc(100vh - 12px));
+    gap: 8px;
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .console-selection-header h2 {
+    font-size: 20px;
+  }
+
+  .console-selection-copy {
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .console-selection-body {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .console-selection-card {
+    padding: 8px;
+  }
+
+  .symbol-grid,
+  .position-grid {
+    gap: 5px;
+  }
+
+  .symbol-choice {
+    font-size: 16px;
+  }
+
+  .position-choice {
+    font-size: 14px;
+  }
+
+  .console-selection-footer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .console-selection-autofill {
+    justify-self: stretch;
+  }
+}
+
+/* Compact mobile console overlap clearance */
+body.console-compact-clearance #panel-b {
+  padding-bottom: calc(var(--console-slot-size, 50px) + 24px);
+}
+
+
+/* Console Worm Spawn Styles */
+.console-slot.worm-spawning {
+  animation: slideOpenHole 0.8s ease-out forwards;
+  background: rgba(0, 0, 0, 0.95);
+  box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.4);
+}
+
+@keyframes slideOpenHole {
+  0% {
+    transform: scale(1);
+    border-color: #00ff00;
+  }
+
+  50% {
+    transform: scale(1.3);
+    border-color: #00ff00;
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.8),
+      inset 0 0 30px rgba(0, 255, 0, 0.6);
+  }
+
+  100% {
+    transform: scale(1.1);
+    border-color: #00ff00;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5),
+      inset 0 0 25px rgba(0, 255, 0, 0.5);
+  }
+}
+
+.console-slot.locked {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+  border-color: #ff0000;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.console-slot.locked::after {
+  content: "🚫";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  opacity: 0.7;
+}
+
+/* Console worm special styling */
+.worm-container.console-worm {
+  z-index: 1000 !important;
+  /* Front of all displays */
+  animation: wormCrawlOut 1s ease-out;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+@keyframes wormCrawlOut {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+

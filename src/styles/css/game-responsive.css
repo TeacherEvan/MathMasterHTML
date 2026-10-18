@@ -7,9 +7,761 @@
 
 /* game-responsive.css - Import hub (keeps existing references stable) */
 
-@import url("/src/styles/css/game-responsive.touch.css?v=20260406-embedded-pane-3");
-@import url("/src/styles/css/game-responsive.layout.css?v=20260406-embedded-pane-3");
-@import url("/src/styles/css/game-responsive.mobile-landscape.css?v=20260406-embedded-pane-3");
-@import url("/src/styles/css/game-responsive.mobile-landscape.shallow.css?v=20260406-embedded-pane-3");
-@import url("/src/styles/css/game-responsive.rotation.css?v=20260406-embedded-pane-3");
-@import url("/src/styles/css/game-responsive.modals.css?v=20260406-embedded-pane-3");
+/* ----------------------------------------------------
+   TOUCH + INTERACTION RULES
+------------------------------------------------------- */
+
+@media (hover: none) and (pointer: coarse) and (max-width: 1024px) {
+  /* Enlarge touch targets on tablet and mobile */
+  .falling-symbol {
+    padding: 18px;
+    margin: -18px;
+    font-size: 24px !important;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  body.viewport-compact.viewport-landscape .falling-symbol {
+    padding: 10px;
+    margin: -10px;
+    font-size: 18px !important;
+    line-height: 1;
+  }
+}
+
+/* Extra small devices / Mobile optimizations */
+@media (hover: none) and (pointer: coarse) and (max-width: 800px),
+  (hover: none) and (pointer: coarse) and (max-height: 500px) {
+  .falling-symbol {
+    /* Keep mobile symbols finger-friendly without letting adjacent hitboxes swallow each other. */
+    padding: 22px;
+    margin: -22px;
+    font-size: 20px !important;
+  }
+
+  /* Consoles slots need larger minimum hit areas */
+  .console-slot {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    margin: 2px;
+  }
+
+  /* Buttons need fat targets */
+  #back-button,
+  #audio-toggle {
+    transform: none;
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 1100px) {
+  .grid-container {
+    grid-template-columns: minmax(0, 1.25fr) 4px minmax(0, 1.25fr) 4px minmax(
+        0,
+        1.35fr
+      ) !important;
+  }
+}
+
+body.viewport-standard.viewport-portrait .grid-container {
+  grid-template-columns: minmax(280px, 0.78fr) 4px minmax(0, 1.22fr) !important;
+  grid-template-rows: minmax(0, 0.54fr) 4px minmax(0, 0.46fr) !important;
+}
+
+body.viewport-standard.viewport-portrait #panel-a {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  padding-top: 110px; /* Clear compact HUD (~95px) + gap */
+}
+
+body.viewport-standard.viewport-portrait #problem-container {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  min-height: 32px;
+  padding: 6px 8px;
+  text-align: center;
+  white-space: normal;
+  letter-spacing: 0.1em;
+  z-index: 2;
+}
+
+body.viewport-standard.viewport-portrait .grid-container > .wall:nth-child(2) {
+  display: block !important;
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  width: auto !important;
+  height: 4px;
+}
+
+body.viewport-standard.viewport-portrait .grid-container > .wall:nth-child(4) {
+  grid-column: 2 !important;
+  grid-row: 1 / span 3 !important;
+  width: 4px !important;
+  height: auto;
+}
+
+body.viewport-standard.viewport-portrait #panel-b {
+  grid-column: 1 !important;
+  grid-row: 3 !important;
+}
+
+body.viewport-standard.viewport-portrait #panel-c {
+  grid-column: 3 !important;
+  grid-row: 1 / span 3 !important;
+}
+
+body.viewport-compact.viewport-portrait .grid-container {
+  grid-template-columns: minmax(0, 0.96fr) 3px minmax(0, 1.04fr) !important;
+  grid-template-rows: minmax(0, 0.52fr) 3px minmax(0, 0.48fr) !important;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+body.viewport-compact.viewport-portrait #panel-a,
+body.viewport-compact.viewport-portrait #panel-b,
+body.viewport-compact.viewport-portrait #panel-c {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}
+
+body.viewport-compact.viewport-portrait #panel-a {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  padding: 12px 6px 6px; /* HUD is compact at top */
+  align-items: stretch;
+}
+
+/* Automation keeps portrait gameplay visible for assertions, so Panel A needs
+   flow-based spacing instead of the fixed lock offset used by the live rotate gate. */
+body.automation.viewport-compact.viewport-portrait #panel-a {
+  padding-top: 16px;
+  gap: 10px;
+}
+
+body.automation.viewport-compact.viewport-portrait #evan-controls-slot {
+  order: 0;
+  position: relative;
+}
+
+body.automation.viewport-compact.viewport-portrait #problem-container {
+  order: 1;
+  flex: 0 0 auto;
+}
+
+body.automation.viewport-compact.viewport-portrait #lock-display {
+  order: 2;
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  width: 100%;
+  height: auto;
+  min-height: 180px;
+  margin-top: 8px;
+  flex: 1 1 auto;
+}
+
+body.viewport-compact.viewport-portrait .grid-container > .wall:nth-child(2) {
+  display: block !important;
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  width: auto !important;
+  height: 3px;
+}
+
+body.viewport-compact.viewport-portrait .grid-container > .wall:nth-child(4) {
+  display: block !important;
+  grid-column: 2 !important;
+  grid-row: 1 / span 3 !important;
+  width: 3px !important;
+  height: auto;
+}
+
+body.viewport-compact.viewport-portrait #panel-b {
+  grid-column: 1 !important;
+  grid-row: 3 !important;
+  padding: 10px 6px 6px;
+  gap: 6px;
+  overflow: hidden;
+}
+
+body.viewport-compact.viewport-portrait #panel-c {
+  grid-column: 3 !important;
+  grid-row: 1 / span 3 !important;
+  padding: 6px 6px 56px;
+}
+
+body.viewport-compact.viewport-portrait #problem-container {
+  position: relative;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  min-height: 32px;
+  padding: 6px 8px;
+  text-align: center;
+  white-space: normal;
+  letter-spacing: 0.1em;
+  z-index: 2;
+}
+
+body.viewport-compact.viewport-portrait #lock-display {
+  top: 102px !important;
+  right: 6px;
+  bottom: 6px;
+  left: 6px !important;
+  width: auto;
+  height: auto;
+  min-height: 34px;
+  max-height: none;
+  transform: none !important;
+  transform-origin: center;
+  opacity: 0.58;
+  z-index: 1;
+}
+
+body.viewport-compact.viewport-portrait .panel-b-controls {
+  position: relative;
+  top: auto;
+  right: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-content: stretch;
+  gap: 6px;
+}
+
+body.viewport-compact.viewport-portrait #help-button,
+body.viewport-compact.viewport-portrait #clarify-button {
+  min-height: 44px;
+  width: 100%;
+}
+
+body.viewport-compact.viewport-portrait #solution-container {
+  min-height: 0;
+  max-height: none;
+  padding: 0 0 4px;
+  margin: 0 !important;
+  background: rgba(0, 0, 0, 0.45);
+  flex: 1 1 auto;
+}
+
+body.viewport-compact.viewport-portrait #symbol-console {
+  position: absolute !important;
+  left: 6px !important;
+  right: 6px !important;
+  bottom: 6px !important;
+  width: auto !important;
+  max-width: none;
+  margin-top: 0;
+  padding: 4px 6px;
+  grid-auto-flow: column;
+  grid-auto-columns: 44px;
+  grid-template-columns: none !important;
+  grid-template-rows: 44px !important;
+  gap: 4px;
+  justify-content: start;
+  border-radius: 0.95rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+body.viewport-compact.viewport-portrait .console-slot {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  border-radius: 0.55rem;
+}
+
+body.viewport-compact .grid-container {
+  display: grid !important;
+}
+
+#rotation-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--shell-bg, oklch(0.14 0.018 122)) 56%, transparent),
+    color-mix(in oklch, var(--shell-bg, oklch(0.14 0.018 122)) 82%, black 18%)
+  );
+  z-index: 999999;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--shell-copy, #e7fff0);
+  font-family: inherit;
+  text-align: center;
+  padding: 20px;
+}
+
+#rotation-overlay .rotate-icon {
+  font-size: 80px;
+  margin-bottom: 20px;
+  animation: rotatePhone 2s ease-in-out infinite;
+}
+
+#rotation-overlay .rotate-text {
+  font-size: 24px;
+  font-weight: 700;
+  text-shadow: 0 0 14px color-mix(in oklch, var(--shell-signal, oklch(0.84 0.12 82)) 24%, transparent);
+  font-family: "Exo 2", sans-serif;
+}
+
+body.automation #rotation-overlay {
+  display: none !important;
+}
+
+body.automation .grid-container {
+  display: grid !important;
+}
+
+body.automation #back-button {
+  display: block !important;
+}
+
+body.automation.viewport-compact.viewport-portrait #back-button,
+body.automation.viewport-compact.viewport-portrait #audio-toggle {
+  top: 60px;
+  bottom: auto;
+}
+
+body.viewport-compact.viewport-landscape {
+  --compact-panel-inline-gap: 8px;
+  --compact-panel-a-top-safe-zone: 96px; /* Clear compact HUD (~82px) + gap */
+}
+
+body.viewport-compact.viewport-landscape .grid-container {
+  grid-template-columns: minmax(0, 0.94fr) 2px minmax(0, 1.02fr) 2px minmax(
+      0,
+      1.18fr
+    ) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+body.viewport-compact.viewport-landscape #panel-a,
+body.viewport-compact.viewport-landscape #panel-b,
+body.viewport-compact.viewport-landscape #panel-c {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}
+
+body.viewport-compact.viewport-landscape #panel-a {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  padding: var(--compact-panel-a-top-safe-zone) var(--compact-panel-inline-gap)
+    var(--compact-panel-inline-gap);
+  align-items: stretch;
+}
+
+body.viewport-compact.viewport-landscape .grid-container > .wall:nth-child(2) {
+  display: block !important;
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  width: 2px !important;
+  height: auto;
+  background: linear-gradient(180deg, #0f0, #060);
+}
+
+body.viewport-compact.viewport-landscape #panel-b {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  padding: var(--panel-b-top-safe-zone, 104px) var(--compact-panel-inline-gap)
+    var(--compact-panel-inline-gap);
+  gap: 6px;
+  overflow: hidden;
+}
+
+body.viewport-compact.viewport-landscape .grid-container > .wall:nth-child(4) {
+  display: block !important;
+  grid-column: 4 !important;
+  grid-row: 1 !important;
+  width: 2px !important;
+  height: auto;
+}
+
+body.viewport-compact.viewport-landscape #panel-c {
+  grid-column: 5 !important;
+  grid-row: 1 !important;
+  padding: 0;
+}
+
+body.viewport-compact.viewport-landscape #problem-container {
+  position: relative;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  min-height: 30px;
+  padding: 6px 8px;
+  text-align: center;
+  white-space: normal;
+  letter-spacing: 0.12em;
+  z-index: 2;
+}
+
+body.viewport-compact.viewport-landscape #lock-display {
+  top: var(
+    --compact-panel-a-lock-top,
+    calc(var(--compact-panel-a-top-safe-zone) + 48px)
+  ) !important;
+  right: var(--compact-panel-inline-gap);
+  bottom: 80px; /* Increased from 60px to clear console */
+  left: var(--compact-panel-inline-gap) !important;
+  width: auto;
+  height: auto;
+  min-height: 34px;
+  max-height: none;
+  transform: none !important;
+  transform-origin: center;
+  opacity: 0.58;
+  z-index: 1;
+}
+
+body.viewport-compact.viewport-landscape #solution-container {
+  min-height: 0;
+  max-height: none;
+  padding: 0;
+  margin: 0 !important;
+  background: rgba(0, 0, 0, 0.45);
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+  order: 3;
+}
+
+body.viewport-compact.viewport-landscape #symbol-console {
+  position: relative;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: 100%;
+  min-width: 0;
+  margin: 6px 0 0;
+  order: 2;
+  flex: 0 0 auto;
+  align-self: stretch;
+  box-sizing: border-box;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 44px;
+  grid-template-columns: none !important;
+  grid-template-rows: 44px !important;
+  justify-content: start;
+  gap: 3px;
+  padding: 2px 0 1px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+body.viewport-compact.viewport-landscape #symbol-console::-webkit-scrollbar {
+  display: none;
+}
+
+body.viewport-compact.viewport-landscape .console-slot {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  font-size: 16px !important;
+  border-radius: 0.55rem;
+}
+
+body.viewport-compact.viewport-landscape .panel-b-controls {
+  position: relative;
+  top: auto;
+  right: auto;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 4px;
+  margin-bottom: 0;
+  order: 1;
+}
+
+body.viewport-compact.viewport-landscape #worm-container {
+  order: 4;
+}
+
+body.viewport-compact.viewport-landscape .steps-container {
+  font-size: clamp(0.94rem, 2.15vw, 1.08rem);
+  line-height: 1.04;
+  letter-spacing: -0.012em;
+}
+
+body.viewport-compact.viewport-landscape .solution-step {
+  margin-bottom: 1px;
+  padding: 0;
+  white-space: nowrap;
+}
+
+body.viewport-compact.viewport-landscape .solution-symbol {
+  min-width: 9px;
+}
+
+body.viewport-compact.viewport-landscape .space-symbol {
+  margin: 0 2px;
+}
+
+body.viewport-compact.viewport-landscape #help-button,
+body.viewport-compact.viewport-landscape #clarify-button {
+  min-height: 44px;
+  font-size: 10px;
+  padding: 6px 8px;
+}
+
+body.viewport-compact.viewport-landscape .game-hud {
+  top: 8px; /* Compact HUD at top */
+  left: 8px;
+  right: 8px;
+  gap: 6px;
+  align-items: center;
+}
+
+body.viewport-compact.viewport-landscape .hud-block {
+  min-width: 60px;
+  max-width: 90px;
+  padding: 3px 5px;
+}
+
+body.viewport-compact.viewport-landscape .hud-value {
+  font-size: 12px;
+}
+
+body.viewport-compact.viewport-landscape .hud-label {
+  font-size: 5px;
+  letter-spacing: 1px;
+}
+
+@media (max-height: 260px) {
+  body.viewport-compact.viewport-landscape .game-hud {
+    top: 8px; /* Still compact even in shallow */
+  }
+}
+
+body.viewport-compact.viewport-landscape .hud-block {
+  min-width: 0;
+  max-width: none;
+  padding: 4px 6px;
+  border-radius: 0.85rem;
+}
+
+body.viewport-compact.viewport-landscape .hud-label {
+  font-size: 0.38rem;
+  letter-spacing: 0.12em;
+}
+
+body.viewport-compact.viewport-landscape .hud-value {
+  font-size: clamp(0.82rem, 3.2vh, 1.05rem);
+}
+
+body.viewport-compact.viewport-landscape #back-button,
+body.viewport-compact.viewport-landscape #audio-toggle {
+  min-width: auto;
+  min-height: 44px;
+  padding: 0.4rem 0.55rem;
+  bottom: 8px;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  border-radius: 0.8rem;
+  transform: none !important;
+}
+
+body.viewport-compact.viewport-landscape .audio-toggle__eyebrow {
+  display: none;
+}
+
+body.viewport-compact.viewport-landscape .audio-toggle__label {
+  margin-bottom: 0;
+  font-size: 0.7rem;
+}
+
+body.viewport-compact.viewport-landscape #power-up-display {
+  max-width: min(160px, calc(100vw - 180px));
+}
+
+@media (max-height: 260px) {
+  body.viewport-compact.viewport-landscape .grid-container {
+    grid-template-columns: minmax(78px, 0.92fr) 2px minmax(
+        86px,
+        1fr
+      ) 2px minmax(0, 1.24fr) !important;
+  }
+
+  body.viewport-compact.viewport-landscape #panel-a {
+    --compact-panel-a-top-safe-zone: 80px;
+    padding-top: var(--compact-panel-a-top-safe-zone);
+  }
+
+  body.viewport-compact.viewport-landscape #panel-b {
+    padding-top: var(--panel-b-top-safe-zone, 88px);
+  }
+
+  body.viewport-compact.viewport-landscape #problem-container {
+    min-height: 28px;
+    padding: 4px 6px;
+  }
+
+  body.viewport-compact.viewport-landscape #lock-display {
+    top: var(
+      --compact-panel-a-lock-top,
+      calc(var(--compact-panel-a-top-safe-zone) + 44px)
+    ) !important;
+    opacity: 0.5;
+  }
+
+  body.viewport-compact.viewport-landscape #symbol-console {
+    grid-auto-columns: 44px;
+    grid-template-rows: 44px !important;
+    gap: 2px;
+    padding: 1px 0;
+  }
+
+  body.viewport-compact.viewport-landscape .console-slot {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    font-size: 16px !important;
+  }
+
+  body.viewport-compact.viewport-landscape #help-button,
+  body.viewport-compact.viewport-landscape #clarify-button {
+    min-height: 44px;
+    font-size: 9px;
+    padding: 6px 8px;
+  }
+
+  body.viewport-compact.viewport-landscape .steps-container {
+    font-size: clamp(0.86rem, 2vw, 0.96rem);
+    line-height: 1;
+    letter-spacing: -0.016em;
+  }
+
+  body.viewport-compact.viewport-landscape .solution-step {
+    margin-bottom: 1px;
+    padding: 0;
+  }
+
+  body.viewport-compact.viewport-landscape .solution-symbol {
+    min-width: 8px;
+  }
+
+  body.viewport-compact.viewport-landscape .space-symbol {
+    margin: 0 1px;
+  }
+}
+
+/* Show overlay only when the shared display contract explicitly requires it. */
+body.viewport-rotate-required #rotation-overlay {
+  display: flex !important;
+}
+
+/* Hide game content only when the shared display contract explicitly requires rotation. */
+body.viewport-rotate-required .grid-container {
+  display: none !important;
+}
+
+body.viewport-rotate-required #back-button {
+  display: none !important;
+}
+
+/* Automation runs should keep the gameplay grid visible even on portrait mobile
+   so Playwright can exercise boundary/layout assertions without the rotate gate. */
+body.automation.viewport-rotate-required #rotation-overlay {
+  display: none !important;
+}
+
+body.automation.viewport-rotate-required .grid-container {
+  display: grid !important;
+}
+
+body.automation.viewport-rotate-required #back-button {
+  display: block !important;
+}
+
+/* Landscape mode on compact/mobile - ensure full visibility */
+body.viewport-compact.viewport-landscape #rotation-overlay {
+  display: none !important;
+}
+
+body.viewport-compact.viewport-landscape #panel-a {
+  min-height: 0;
+  max-height: none;
+}
+
+body.viewport-compact.viewport-landscape #panel-b {
+  min-height: 0;
+}
+
+@media (max-width: 900px), (max-height: 500px) {
+  .how-to-play-content {
+    width: min(720px, calc(100vw - 1rem));
+    max-height: calc(100dvh - 1rem);
+    padding: 1rem;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: 0.75rem;
+  }
+
+  .how-to-play-content h2 {
+    margin-bottom: 0;
+    font-size: clamp(1.5rem, 5.4vw, 2.3rem);
+  }
+
+  .how-to-play-kicker {
+    margin-bottom: 0;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+  }
+
+  .how-to-play-message {
+    min-height: 0;
+    margin-bottom: 0;
+    gap: 0.75rem;
+    overflow-y: auto;
+    font-size: clamp(0.88rem, 2vw, 1rem);
+    line-height: 1.45;
+  }
+
+  .how-to-play-callout {
+    padding: 0.75rem 0.9rem;
+  }
+
+  .start-game-button {
+    min-width: 0;
+    width: 100%;
+    padding-block: 0.85rem;
+    position: sticky;
+    bottom: 0;
+  }
+}
+

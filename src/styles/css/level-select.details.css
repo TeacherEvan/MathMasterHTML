@@ -1,5 +1,595 @@
 /* level-select.details.css - Import hub (keeps existing references stable) */
 
-@import url("/src/styles/css/level-select.details.core.css");
-@import url("/src/styles/css/level-select.details.effects.css");
-@import url("/src/styles/css/level-select.details.responsive.css");
+/* level-select.details.core.css - normalized stats/progress data display */
+
+.level-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.68rem;
+  margin: 0.2rem 0 0;
+}
+
+.stat {
+  display: grid;
+  gap: 0.32rem;
+  align-content: start;
+  min-height: 100%;
+  padding: 0.82rem 0.94rem 0.88rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.038) 0%,
+      rgba(255, 255, 255, 0.016) 100%
+    ),
+    rgba(8, 12, 11, 0.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+.stat-value {
+  font-family: var(--level-font-body);
+  font-size: clamp(1rem, 1.7vw, 1.22rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  color: var(--level-text-0);
+  overflow-wrap: anywhere;
+}
+
+.stat-label {
+  font-family: var(--level-font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--level-accent) 28%, var(--level-text-1));
+}
+
+.progress-container {
+  display: grid;
+  gap: 0.45rem;
+  align-self: end;
+  padding: 0.78rem 0.92rem 0.9rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.035) 0%,
+      rgba(255, 255, 255, 0.014) 100%
+    ),
+    rgba(8, 12, 11, 0.62);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.progress-label {
+  font-family: var(--level-font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--level-brass) 32%, var(--level-text-1));
+}
+
+.progress-bar {
+  height: 0.62rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.34);
+}
+
+.progress-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--level-brass) 52%, var(--level-accent)),
+    color-mix(in srgb, var(--level-accent) 30%, rgba(235, 229, 216, 0.86))
+  );
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Floating Mathematical Symbols */
+.math-symbol {
+  position: absolute;
+  color: rgba(255, 215, 0, 0.2);
+  font-size: 1.5rem;
+  animation: float 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 5;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-30px) rotate(180deg);
+  }
+}
+
+/* Click Ripple Effect */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0, 255, 0, 0.3);
+  transform: scale(0);
+  animation: ripple-animation 0.6s linear;
+  pointer-events: none;
+}
+
+@keyframes ripple-animation {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Lock Animation for Higher Levels */
+.level-locked {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.level-locked:hover {
+  transform: none !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.1) !important;
+}
+
+.lock-icon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  color: #666;
+  font-size: 1.5rem;
+  animation: shake 1s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(-5deg);
+  }
+
+  75% {
+    transform: rotate(5deg);
+  }
+}
+
+/* Reset Progress Button */
+.reset-progress-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
+  background: linear-gradient(145deg, #ff3333, #cc0000);
+  border: 2px solid #ff6666;
+  border-radius: 15px;
+  padding: 12px 24px;
+  font-family: "Orbitron", monospace;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+  /* PERFORMANCE: Only transition properties that animate on hover */
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease,
+    border-color 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(255, 51, 51, 0.3);
+}
+
+.reset-progress-btn:hover {
+  background: linear-gradient(145deg, #ff5555, #ff0000);
+  border-color: #ff8888;
+  box-shadow: 0 0 25px rgba(255, 51, 51, 0.6);
+  transform: scale(1.05);
+}
+
+.reset-progress-btn:active {
+  transform: scale(0.95);
+}
+
+/* Responsive Design */
+@keyframes level-cta-pulse {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+
+  70% {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+
+.level-description-mobile,
+.level-cta-caption {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .level-description-desktop {
+    display: none;
+  }
+
+  .level-description-mobile {
+    display: inline;
+  }
+
+  .header {
+    justify-items: center;
+    padding: 1.15rem 1rem 0;
+    gap: 0.45rem;
+    text-align: center;
+  }
+
+  .main-title {
+    font-size: clamp(2.4rem, 11vw, 4rem);
+    letter-spacing: 0.16em;
+  }
+
+  .subtitle {
+    font-size: clamp(0.95rem, 3.8vw, 1.2rem);
+  }
+
+  .level-select-subtitle {
+    max-width: 28ch;
+    font-size: 0.94rem;
+    line-height: 1.45;
+  }
+
+  .route-atlas {
+    display: none;
+  }
+
+  .header-hint {
+    justify-content: center;
+    gap: 0.55rem;
+    margin-top: 0.2rem;
+  }
+
+  .header-hint > span {
+    min-height: 2.1rem;
+    padding: 0.5rem 0.72rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+  }
+
+  .level-container {
+    padding: 0.85rem 1rem 1.25rem;
+  }
+
+  .route-switcher {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+    margin-bottom: 0.8rem;
+    position: sticky;
+    top: 0.5rem;
+    z-index: 2;
+    padding: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    background: rgba(11, 14, 12, 0.78);
+    backdrop-filter: blur(12px);
+  }
+
+  .level-card:not(.is-active) .progress-container,
+  .level-card:not(.is-active) .level-cta-caption,
+  .level-card:not(.is-active) .level-button {
+    display: revert;
+  }
+
+  .levels-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .level-card {
+    grid-template-columns: minmax(0, 1.1fr) minmax(9rem, 0.9fr);
+    grid-template-areas:
+      "ordinal icon"
+      "title icon"
+      "description stats"
+      "progress progress"
+      "cta cta"
+      "button button";
+    padding: 1rem;
+    gap: 0.7rem 0.85rem;
+    min-height: auto;
+  }
+
+  .level-ordinal {
+    grid-area: ordinal;
+  }
+
+  .level-icon {
+    grid-area: icon;
+    justify-self: end;
+    width: 2.85rem;
+    height: 2.85rem;
+  }
+
+  .level-title {
+    grid-area: title;
+    font-size: clamp(1.35rem, 4.8vw, 1.7rem);
+  }
+
+  .level-brief {
+    display: none;
+  }
+
+  .level-description {
+    grid-area: description;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .level-stats {
+    grid-area: stats;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+    align-self: start;
+  }
+
+  .level-card .best-score-stat,
+  .level-card .total-score-stat,
+  .level-card .stat[data-mobile-priority="low"] {
+    display: none;
+  }
+
+  .stat {
+    padding: 0.62rem 0.58rem;
+    border-radius: 14px;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+
+  .stat-label {
+    font-size: 0.64rem;
+    letter-spacing: 0.12em;
+  }
+
+  .progress-container {
+    grid-area: progress;
+    gap: 0.35rem;
+  }
+
+  .progress-label {
+    font-size: 0.68rem;
+  }
+
+  .level-button {
+    grid-area: button;
+    min-height: 3rem;
+    padding: 0.8rem 1rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+  }
+
+  .level-card.is-active .level-button {
+    position: relative;
+    box-shadow:
+      0 0 0 2px rgba(255, 255, 255, 0.16),
+      0 0 18px color-mix(in srgb, var(--level-accent) 45%, transparent);
+  }
+
+  .level-card.is-active .level-button::after {
+    content: "";
+    position: absolute;
+    inset: -0.25rem;
+    border-radius: inherit;
+    border: 2px solid color-mix(in srgb, var(--level-accent) 82%, white);
+    animation: level-cta-pulse 1.6s ease-out infinite;
+    pointer-events: none;
+  }
+
+  .level-cta-caption {
+    grid-area: cta;
+    display: block;
+    margin: 0;
+    font-family: var(--level-font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--level-accent) 78%, var(--level-text-0));
+  }
+
+  .navigation {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 1rem 1.4rem;
+    gap: 0.7rem;
+  }
+
+  .navigation-meta {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+  }
+
+  .back-button,
+  .settings-button,
+  .reset-progress-btn {
+    width: 100%;
+  }
+
+  .creator-credit {
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+  }
+}
+
+@media (max-width: 560px) {
+  .level-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding-top: 1rem;
+  }
+
+  .route-switcher-button {
+    min-height: 2.85rem;
+    padding: 0.62rem;
+  }
+
+  .route-switcher-index {
+    font-size: 0.6rem;
+  }
+
+  .route-switcher-copy {
+    font-size: 0.66rem;
+  }
+
+  .level-card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "ordinal"
+      "icon"
+      "title"
+      "description"
+      "stats"
+      "progress"
+      "cta"
+      "button";
+    gap: 0.65rem;
+    padding: 0.9rem;
+  }
+
+  .level-icon {
+    justify-self: start;
+  }
+
+  .level-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .navigation {
+    padding: 0 1rem 2rem;
+  }
+}
+
+@media (max-height: 760px) {
+  /* Mobile landscape: keep the route atlas + header compact so the
+     level container stays in the viewport. */
+
+  .header {
+    padding-top: clamp(0.9rem, 1.6vw, 1.3rem);
+  }
+
+  .main-title {
+    font-size: clamp(2.1rem, 7vw, 3.4rem);
+  }
+
+  .subtitle {
+    font-size: clamp(0.85rem, 2vw, 1.1rem);
+  }
+
+  .level-select-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .route-atlas {
+    display: none;
+  }
+
+  .level-container {
+    padding: clamp(0.7rem, 1.2vw, 1rem) clamp(1rem, 4vw, 2rem)
+      clamp(1rem, 1.8vw, 1.6rem);
+  }
+
+  .levels-grid {
+    gap: clamp(0.7rem, 1.2vw, 1rem);
+  }
+
+  .level-card {
+    padding: clamp(1rem, 1.8vw, 1.4rem);
+  }
+
+  .level-card:not(.is-active) .level-stats {
+    gap: 0.4rem;
+  }
+
+  .page-actions {
+    padding: 0.5rem 1rem;
+  }
+}
+
+@media (max-height: 600px) {
+  /* True mobile landscape. Collapse chrome. */
+  .header {
+    padding-top: clamp(0.5rem, 0.9vw, 0.8rem);
+    gap: 0.3rem;
+  }
+
+  .main-title {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+  }
+
+  .subtitle {
+    font-size: clamp(0.72rem, 1.6vw, 0.95rem);
+  }
+
+  .level-select-subtitle {
+    display: none;
+  }
+
+  .route-atlas {
+    display: none;
+  }
+
+  .header-hint {
+    display: none;
+  }
+
+  .level-container {
+    padding: clamp(0.5rem, 0.9vw, 0.8rem) clamp(1rem, 4vw, 2rem)
+      clamp(0.7rem, 1.2vw, 1rem);
+  }
+
+  .levels-grid {
+    gap: clamp(0.5rem, 0.9vw, 0.8rem);
+  }
+
+  .level-card {
+    padding: clamp(0.8rem, 1.4vw, 1.1rem);
+  }
+
+  .page-actions {
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-card.is-active .level-button::after {
+    animation: none;
+  }
+}
+
