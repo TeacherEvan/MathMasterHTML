@@ -1,8 +1,0 @@
-/* Line-1-transformer.css - Import hub (keeps existing references stable) */
-
-@import url("/src/styles/css/lock-components/Line-1-transformer.core.css");
-@import url("/src/styles/css/lock-components/Line-1-transformer.levels.css");
-@import url("/src/styles/css/lock-components/Line-1-transformer.mechanics.motion.css");
-@import url("/src/styles/css/lock-components/Line-1-transformer.mechanics.details.css");
-@import url("/src/styles/css/lock-components/Line-1-transformer.keyframes.css");
-@import url("/src/styles/css/lock-components/Line-1-transformer.controls.css");

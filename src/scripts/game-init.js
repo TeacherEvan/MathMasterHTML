@@ -26,17 +26,17 @@ console.log("🎮 Game initialization module loading...");
             ? requestedLevel
             : "beginner";
     const allowedLockComponents = new Set([
-      "Line-1-transformer.html",
+      "line-1-transformer.html",
       "line-2-transformer.html",
       "line-3-transformer.html",
       "line-4-transformer.html",
-      "Line-5-transformer.html",
+      "line-5-transformer.html",
       "line-6-transformer.html",
     ]);
     const requestedLockComponent = urlParams.get("lockComponent");
     const defaultLockComponent =
       window.LazyComponentLoader?.getLockComponentFilename?.(1) ||
-      "Line-1-transformer.html";
+      "line-1-transformer.html";
     const _lockComponent =
       requestedLockComponent &&
       allowedLockComponents.has(requestedLockComponent)

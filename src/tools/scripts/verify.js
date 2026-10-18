@@ -10,6 +10,7 @@ import { fileURLToPath } from "url";
 import {
   checkCriticalFiles,
   checkDocumentation,
+  checkLockComponentFilenamesLowercase,
   checkESLint,
   checkLineLimits,
   checkManifestScreenshots,
@@ -37,6 +38,8 @@ async function main() {
 
   const results = {
     criticalFiles: checkCriticalFiles(ROOT),
+    lockComponentFilenamesLowercase:
+      checkLockComponentFilenamesLowercase(ROOT),
     eslint: checkESLint(ROOT),
     toolingTests: checkToolingTests(ROOT),
     packageJson: checkPackageJson(ROOT),

@@ -8,11 +8,11 @@ console.log("🔒 LockManager loader helpers loading...");
   }
 
   const ALLOWED_LOCK_COMPONENTS = new Set([
-    "Line-1-transformer.html",
+    "line-1-transformer.html",
     "line-2-transformer.html",
     "line-3-transformer.html",
     "line-4-transformer.html",
-    "Line-5-transformer.html",
+    "line-5-transformer.html",
     "line-6-transformer.html",
   ]);
 
@@ -158,8 +158,8 @@ console.log("🔒 LockManager loader helpers loading...");
 
   // Normalize component naming to handle case variations
   proto.normalizeComponentName = function normalizeComponentName(level) {
-    if (level === 1) return "Line-1-transformer.html";
-    if (level === 5) return "Line-5-transformer.html";
+    if (level === 1) return "line-1-transformer.html";
+    if (level === 5) return "line-5-transformer.html";
     return `line-${level}-transformer.html`;
   };
 })();

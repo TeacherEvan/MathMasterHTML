@@ -120,11 +120,11 @@ class LazyComponentLoader {
    */
   getLockComponentFilename(level) {
     const filenameMap = {
-      1: "Line-1-transformer.html",
+      1: "line-1-transformer.html",
       2: "line-2-transformer.html",
       3: "line-3-transformer.html",
       4: "line-4-transformer.html",
-      5: "Line-5-transformer.html",
+      5: "line-5-transformer.html",
       6: "line-6-transformer.html",
     };
     return filenameMap[level] || `line-${level}-transformer.html`;
@@ -160,11 +160,11 @@ class LazyComponentLoader {
    */
   getAllLockComponentPaths() {
     return [
-      "/src/assets/components/lock-components/Line-1-transformer.html",
+      "/src/assets/components/lock-components/line-1-transformer.html",
       "/src/assets/components/lock-components/line-2-transformer.html",
       "/src/assets/components/lock-components/line-3-transformer.html",
       "/src/assets/components/lock-components/line-4-transformer.html",
-      "/src/assets/components/lock-components/Line-5-transformer.html",
+      "/src/assets/components/lock-components/line-5-transformer.html",
       "/src/assets/components/lock-components/line-6-transformer.html",
     ];
   }
