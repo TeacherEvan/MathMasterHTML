@@ -1,5 +1,17 @@
 # JOBCARD
 
+## Engineering Audit & Quality Hardening (2026-10-19)
+
+- **Root Clutter & Governance**: Cleaned up committed scratch files (`patch_display.cjs`, `patch_rain.cjs`, `list-failures.cjs`, `list-failures.js`), removed deprecated `.eslintrc.json` in favor of flat `eslint.config.js`, purged tracked `.tmp/` test run artifacts, and eliminated the 16 committed `.superpowers` markdown files along with the governance bypass in `documentation.js`.
+- **Missing Root Redirect**: Added missing root `life-stats.html` entrypoint matching `index.html`, `game.html`, and `level-select.html`, and extended `tests/redirect-entrypoints.spec.js` (5/5 PASS).
+- **Service Worker Type Safety**: Resolved unhandled `Promise.allSettled` rejection results and type narrowing in `service-worker.js`.
+- **UI HUD Clamp Regression**: Corrected broken HUD clamp in `src/scripts/worm-powerups.ui.js` (`[minY, Math.max(minY, maxY - displayHeight)]`).
+- **Daily Challenge Architecture**: Synchronized `daily-challenge.js` with `PlayerStorage`, hardened all storage access with `try/catch` degradation, aligned date comparison math with local seeds, fixed degenerate equation template generation, and created comprehensive tooling test suite `src/tools/scripts/verify/checks/daily-challenge.test.js` (9/9 tooling suites PASS).
+- **Physics & Framerate Delta Scaling**: Scaled worm velocity, devil rush, evasion bursts, and spider power-up velocities by `dtScale` in `worm-movement-core.js`, `worm-movement-behaviors.js`, `worm-powerups.effects.spider.js`, and `worm-system.powerups.effects.spider.js`.
+- **Reflow Storm & Memory Leak Remediation**: Cached layout measurements across candidate attempts in `src/scripts/3rdDISPLAY.js` (preventing 15x layout recalculations), guarded DOM opacity writes in `symbol-rain.animation.js`, fixed `SharedResizeObserver` source leaks in `display-manager.js` and `lock-responsive.js`, and cleaned up event listeners on destroy in `performance-monitor.js`.
+- **Test Suite Modernization**: Revived and modernized previously ignored unit test suites (`tests/unit/worm-movement.spec.js`, `tests/unit/worm-evasion.spec.js`, `tests/unit/worm-near-miss-ui.spec.js`) under Playwright, corrected zero-distance escape vector logic in `worm-evasion.js`, fixed `hasReachedTarget` boundary inequality (`<= threshold`), and re-enabled `**/unit/**` in `playwright.config.js` (63/63 PASS).
+- **Verification Gates**: Confirmed `npm run verify` (8/8 PASS), `npm run typecheck` (0 errors PASS), `npm run lint` (0 errors/warnings PASS), and Playwright `tests/gameplay-features.spec.js` (21 passed, 2 skipped).
+
 ## Audit closure (2026-08-20)
 
 - Ran the surgical-implementation dispatcher scan: found `HERMES_PLAN.ai.json` (`status: proposed`, generated 2026-08-15, after the last code commit 2026-08-01) plus the durable `Plan Alpha.md` / `Plan Beta.md` / `Plan Genesis.md` / `JOBCARD.md`. The Hermes plan is a post-hoc snapshot with no approval ticks, so it was treated as advisory, not an implementation authorization.
