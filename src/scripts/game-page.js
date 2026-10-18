@@ -36,7 +36,11 @@
       }
 
       lastHandledAt = now;
-      handler(event);
+      try {
+        handler(event);
+      } finally {
+        lastHandledAt = performance.now();
+      }
     };
 
     target.addEventListener("click", wrappedHandler);

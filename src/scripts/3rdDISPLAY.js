@@ -235,9 +235,14 @@ function initSymbolRain() {
         .filter(({ rect }) => Boolean(rect && rect.width > 0 && rect.height > 0));
     }
 
-    function isPlacementClear(candidateRect, excludeElement = null, clearance = SymbolRainConfig.minClearancePx || 4) {
-      const containerRect = getContainerBounds();
-      const panelRect = getPanelBounds();
+    function isPlacementClear(
+      candidateRect,
+      excludeElement = null,
+      clearance = SymbolRainConfig.minClearancePx || 4,
+      precomputedBounds = null,
+    ) {
+      const containerRect = precomputedBounds?.containerRect || getContainerBounds();
+      const panelRect = precomputedBounds?.panelRect || getPanelBounds();
 
       if (!containerRect || !panelRect) {
         return false;
@@ -259,7 +264,10 @@ function initSymbolRain() {
         return false;
       }
 
-      return !getVisibleSymbolRects(excludeElement).some(({ rect }) =>
+      const visibleRects =
+        precomputedBounds?.visibleRects || getVisibleSymbolRects(excludeElement);
+
+      return !visibleRects.some(({ rect }) =>
         rectIntersectsWithClearance(candidateRect, rect, clearance),
       );
     }
@@ -287,9 +295,16 @@ function initSymbolRain() {
       options = {},
     ) {
       const containerRect = getContainerBounds();
-      if (!containerRect) {
+      const panelRect = getPanelBounds();
+      if (!containerRect || !panelRect) {
         return null;
       }
+
+      const precomputedBounds = {
+        containerRect,
+        panelRect,
+        visibleRects: getVisibleSymbolRects(excludeElement),
+      };
 
       const previousPlacement = options.previousPlacement || null;
       const preferredClearance = SymbolRainConfig.minClearancePx || 4;
@@ -320,7 +335,14 @@ function initSymbolRain() {
             height: symbolHeight,
           };
 
-          if (isPlacementClear(candidateRect, excludeElement, attemptSet.clearance)) {
+          if (
+            isPlacementClear(
+              candidateRect,
+              excludeElement,
+              attemptSet.clearance,
+              precomputedBounds,
+            )
+          ) {
             const placement = {
               left: candidateRect.left - containerRect.left,
               top: candidateRect.top - containerRect.top,

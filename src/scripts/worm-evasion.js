@@ -21,9 +21,16 @@ class WormEvasion {
   }
 
   getCursorEscapeVector(worm, cursorState, baseSpeed) {
-    const dx = worm.x - cursorState.x;
-    const dy = worm.y - cursorState.y;
-    const distance = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+    let dx = worm.x - cursorState.x;
+    let dy = worm.y - cursorState.y;
+    let rawDist = Math.sqrt(dx * dx + dy * dy);
+    if (rawDist === 0) {
+      const dir = worm.direction || 0;
+      dx = Math.cos(dir);
+      dy = Math.sin(dir);
+      rawDist = 1;
+    }
+    const distance = Math.max(1, rawDist);
     const multiplier =
       distance <= this.cursorEscapeRadius ? this.cursorEscapeMultiplier : 1.0;
 
@@ -67,6 +74,10 @@ class WormEvasion {
 
     return { x: avoidX, y: avoidY };
   }
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = WormEvasion;
 }
 
 if (typeof window !== "undefined") {

@@ -333,7 +333,13 @@
         ),
       ),
       top: Math.round(
-        Math.min(context.minY, Math.max(0, maxTopFromControls)),
+        Math.max(
+          context.minY,
+          Math.min(
+            Math.max(context.minY, context.maxY - displayHeight),
+            maxTopFromControls,
+          ),
+        ),
       ),
     };
   };

@@ -86,6 +86,7 @@
       this.wormSystem.crossPanelContainer.appendChild(spider);
 
       let isIdleWaitingForWorms = false;
+      let lastFrameTime = 0;
 
       const scheduleNextMove = (delayMs = 0) => {
         if (!spiderData.active || spiderData.isHeart) return;
@@ -93,6 +94,7 @@
         if (delayMs > 0) {
           setTimeout(() => {
             if (!spiderData.active || spiderData.isHeart) return;
+            lastFrameTime = 0;
             moveSpider();
           }, delayMs);
           return;
@@ -103,6 +105,13 @@
 
       const moveSpider = () => {
         if (!spiderData.active || spiderData.isHeart) return;
+
+        const frameNow = performance.now();
+        const dtMs = lastFrameTime
+          ? Math.min(50, Math.max(8, frameNow - lastFrameTime))
+          : 16.667;
+        lastFrameTime = frameNow;
+        const dtScale = dtMs / 16.667;
 
         const now = Date.now();
         const timeAlive = now - spiderData.createdAt;
@@ -166,7 +175,7 @@
           }
           spiderData.active = false;
         } else {
-          const speed = 5;
+          const speed = 5 * dtScale;
           const dx = closest.x - spiderData.x;
           const dy = closest.y - spiderData.y;
           spiderData.x += (dx / dist) * speed;

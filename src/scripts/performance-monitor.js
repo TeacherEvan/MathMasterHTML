@@ -48,18 +48,14 @@ class PerformanceMonitor {
 
   /** @private */
   _initInputLatencyTracking() {
-    document.addEventListener(
-      "symbolClicked",
-      (e) => {
-        if (!this._isExtendedEnabled()) return;
-        this._pendingClickTimestamps.push(e.timeStamp ?? performance.now());
-        if (this._pendingClickTimestamps.length > this._inputLatencySize) {
-          this._pendingClickTimestamps.shift();
-        }
-      },
-      { capture: true },
-    );
-    document.addEventListener("symbolRevealed", () => {
+    this._onSymbolClicked = (e) => {
+      if (!this._isExtendedEnabled()) return;
+      this._pendingClickTimestamps.push(e.timeStamp ?? performance.now());
+      if (this._pendingClickTimestamps.length > this._inputLatencySize) {
+        this._pendingClickTimestamps.shift();
+      }
+    };
+    this._onSymbolRevealed = () => {
       if (!this._isExtendedEnabled()) return;
       const clickTimestamp = this._pendingClickTimestamps.shift();
       if (typeof clickTimestamp === "number") {
@@ -69,7 +65,11 @@ class PerformanceMonitor {
           this._inputLatencyBuffer.shift();
         }
       }
+    };
+    document.addEventListener("symbolClicked", this._onSymbolClicked, {
+      capture: true,
     });
+    document.addEventListener("symbolRevealed", this._onSymbolRevealed);
   }
 
   /**
@@ -79,6 +79,35 @@ class PerformanceMonitor {
    */
   destroy() {
     this._destroyed = true;
+    if (this._onSymbolClicked) {
+      document.removeEventListener("symbolClicked", this._onSymbolClicked, {
+        capture: true,
+      });
+      this._onSymbolClicked = null;
+    }
+    if (this._onSymbolRevealed) {
+      document.removeEventListener("symbolRevealed", this._onSymbolRevealed);
+      this._onSymbolRevealed = null;
+    }
+    if (this._onDragMove) {
+      document.removeEventListener("mousemove", this._onDragMove);
+      this._onDragMove = null;
+    }
+    if (this._onDragEnd) {
+      document.removeEventListener("mouseup", this._onDragEnd);
+      this._onDragEnd = null;
+    }
+    if (Array.isArray(this._wrappedMethods)) {
+      for (const { prototype, methodName, original } of this._wrappedMethods) {
+        if (prototype && typeof original === "function") {
+          prototype[methodName] = original;
+        }
+      }
+      this._wrappedMethods = [];
+    }
+    if (this.overlay?.parentNode) {
+      this.overlay.parentNode.removeChild(this.overlay);
+    }
     console.log("📊 PerformanceMonitor destroyed");
   }
 
@@ -102,8 +131,10 @@ class PerformanceMonitor {
         ? Math.round((budgetViolations / sorted.length) * 100 * 100) / 100
         : 0;
 
-    // DOM node count
-    const domNodeCount = document.querySelectorAll("*").length;
+    // DOM node count (use unwrapped querySelectorAll if available to avoid self-counting)
+    const rawQuerySelectorAll =
+      this._rawDocQuerySelectorAll || Document.prototype.querySelectorAll;
+    const domNodeCount = rawQuerySelectorAll.call(document, "*").length;
 
     // Input latency stats
     let inputLatencyAvg = null;
@@ -238,7 +269,7 @@ class PerformanceMonitor {
       initialY = e.clientY - element.offsetTop;
     });
 
-    document.addEventListener("mousemove", (e) => {
+    this._onDragMove = (e) => {
       if (isDragging) {
         e.preventDefault();
         currentX = e.clientX - initialX;
@@ -247,14 +278,22 @@ class PerformanceMonitor {
         element.style.top = currentY + "px";
         element.style.right = "auto";
       }
-    });
+    };
 
-    document.addEventListener("mouseup", () => {
+    this._onDragEnd = () => {
       isDragging = false;
-    });
+    };
+
+    document.addEventListener("mousemove", this._onDragMove);
+    document.addEventListener("mouseup", this._onDragEnd);
   }
 
   wrapDOMQueries() {
+    this._wrappedMethods = this._wrappedMethods || [];
+    if (!this._rawDocQuerySelectorAll && typeof Document !== "undefined") {
+      this._rawDocQuerySelectorAll = Document.prototype.querySelectorAll;
+    }
+
     const wrapMethod = (prototype, methodName) => {
       const original = prototype?.[methodName];
       // Only wrap if this is a function and hasn't already been wrapped
@@ -271,6 +310,7 @@ class PerformanceMonitor {
 
       wrapped.__perfWrapped = true;
       prototype[methodName] = wrapped;
+      this._wrappedMethods.push({ prototype, methodName, original });
     };
 
     wrapMethod(Document.prototype, "querySelectorAll");

@@ -43,8 +43,11 @@
       }
 
       const symbolState = symbolObj.element.dataset?.symbolState || "hidden";
-      symbolObj.element.style.opacity =
+      const targetOpacity =
         symbolState === "visible" ? "1" : symbolState === "fading" ? "0" : "0";
+      if (symbolObj.element.style.opacity !== targetOpacity) {
+        symbolObj.element.style.opacity = targetOpacity;
+      }
 
       if (symbolState === "hidden") {
         nextActiveSymbols.push(symbolObj);

@@ -193,7 +193,7 @@ class WormMovement {
     const dy = targetY - worm.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    return distance < threshold;
+    return distance <= threshold;
   }
 
   /**
