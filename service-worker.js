@@ -37,6 +37,23 @@ const DYNAMIC_GAME_MODULES = [
   "/src/scripts/game-state-manager.js",
 ];
 
+// Install retry tuning
+const INSTALL_RETRY_DELAY_MS = 300;
+const CRITICAL_INSTALL_RETRIES = 2;
+const NON_CRITICAL_INSTALL_RETRIES = 1;
+
+// Core gameplay scripts and runtime pages must be cached reliably for offline
+// gameplay. Non-critical assets (screenshots, secondary stylesheets) are
+// retried but never allowed to abort Service Worker activation.
+const CRITICAL_INSTALL_ASSETS = new Set([
+  ...ACTIVE_RUNTIME_PAGES,
+  ...DYNAMIC_GAME_MODULES,
+  "/src/scripts/game.js",
+  "/src/scripts/worm.js",
+  "/src/scripts/constants.js",
+  "/src/scripts/utils.js",
+]);
+
 // Assets to cache immediately on install
 const STATIC_ASSETS = [
   "/",
@@ -152,6 +169,40 @@ function normalizeCacheAssetPath(assetPath) {
   }
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Caches a single asset with retry logic so an individual failing non-critical
+ * asset (e.g. a screenshot) cannot abort Service Worker installation. Never
+ * throws: returns { assetPath, success, attempts, error? }.
+ *
+ * @param {Cache} cache
+ * @param {string} assetPath
+ * @param {number} maxRetries
+ * @returns {Promise<{ assetPath: string; success: boolean; attempts: number; error?: Error }>}
+ */
+async function cacheAssetWithRetry(cache, assetPath, maxRetries) {
+  let lastError;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      await cache.add(assetPath);
+      return { assetPath, success: true, attempts: attempt + 1 };
+    } catch (error) {
+      lastError = error;
+      if (attempt < maxRetries) {
+        await sleep(INSTALL_RETRY_DELAY_MS * (attempt + 1));
+      }
+    }
+  }
+  return { assetPath, success: false, attempts: maxRetries + 1, error: lastError };
+}
+
+function isCriticalInstallAsset(assetPath) {
+  return CRITICAL_INSTALL_ASSETS.has(assetPath);
+}
+
 function extractAssetReferences(html) {
   const assets = [];
   const assetPattern = /\b(?:src|href)=["']([^"']+)["']/g;
@@ -214,14 +265,55 @@ self.addEventListener("install", (event) => {
       .then(async (cache) => {
         console.log("[ServiceWorker] Caching static assets");
         const installAssets = await getInstallAssets();
-        const results = await Promise.allSettled(
-          installAssets.map((assetPath) => cache.add(assetPath)),
+
+        // Resilient batch installer: each asset is cached individually with
+        // retries (Promise.allSettled keeps the install going even if some
+        // assets fail). Core gameplay scripts get more retries; non-critical
+        // assets (screenshots, secondary stylesheets) are logged as warnings
+        // and never abort activation.
+        const installTasks = installAssets.map((assetPath) =>
+          cacheAssetWithRetry(
+            cache,
+            assetPath,
+            isCriticalInstallAsset(assetPath) ? CRITICAL_INSTALL_RETRIES : NON_CRITICAL_INSTALL_RETRIES,
+          ),
         );
-        const failed = results.filter((result) => result.status === "rejected");
-        if (failed.length > 0) {
-          console.warn(
-            `[ServiceWorker] ${failed.length} static assets failed to cache during install`,
+
+        const results = await Promise.allSettled(installTasks);
+
+        const failed = results
+          .filter(
+            (result) =>
+              result.status === "fulfilled" && result.value && !result.value.success,
+          )
+          .map((result) => result.value);
+
+        const criticalFailed = failed.filter((f) => isCriticalInstallAsset(f.assetPath));
+        const nonCriticalFailed = failed.filter(
+          (f) => !isCriticalInstallAsset(f.assetPath),
+        );
+
+        if (criticalFailed.length > 0) {
+          console.error(
+            `[ServiceWorker] ${criticalFailed.length} CRITICAL asset(s) failed to cache after retries:`,
           );
+          criticalFailed.forEach((f) => {
+            console.error(
+              `   ${f.assetPath} (${f.attempts} attempts): ${f.error?.message ?? String(f.error)}`,
+            );
+          });
+        }
+        if (nonCriticalFailed.length > 0) {
+          console.warn(
+            `[ServiceWorker] ${nonCriticalFailed.length} non-critical asset(s) failed to cache after retries (install continues):`,
+          );
+          nonCriticalFailed.forEach((f) => {
+            console.warn(`   ${f.assetPath} (${f.attempts} attempts)`);
+          });
+        }
+
+        if (failed.length === 0) {
+          console.log("[ServiceWorker] All static assets cached");
         }
       })
       .then(() => {

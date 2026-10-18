@@ -11,6 +11,7 @@ import {
   checkCriticalFiles,
   checkDocumentation,
   checkLockComponentFilenamesLowercase,
+  checkServiceWorkerPrecacheAssets,
   checkESLint,
   checkLineLimits,
   checkManifestScreenshots,
@@ -40,6 +41,7 @@ async function main() {
     criticalFiles: checkCriticalFiles(ROOT),
     lockComponentFilenamesLowercase:
       checkLockComponentFilenamesLowercase(ROOT),
+    serviceWorkerPrecacheAssets: checkServiceWorkerPrecacheAssets(ROOT),
     eslint: checkESLint(ROOT),
     toolingTests: checkToolingTests(ROOT),
     packageJson: checkPackageJson(ROOT),
