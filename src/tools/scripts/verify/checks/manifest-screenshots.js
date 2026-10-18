@@ -4,6 +4,34 @@ import { log, logSection } from "../verify.logging.js";
 
 const JPEG_MARKERS = new Set([0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf]);
 
+const PNG_MAGIC_BYTES = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const JPEG_MAGIC_BYTES = Buffer.from([0xff, 0xd8, 0xff]);
+
+/**
+ * Returns true when the file's extension matches its actual magic-byte content.
+ * .png files must start with the PNG signature (89 50 4E 47 ...).
+ * .jpg files must start with the JPEG SOI marker (FF D8 FF).
+ * Other extensions are not validated here.
+ */
+export function checkImageExtensionMatchesContent(filePath) {
+  if (typeof filePath !== "string" || filePath.length === 0) {
+    return false;
+  }
+
+  const buffer = readFileSync(filePath);
+  const lower = filePath.toLowerCase();
+
+  if (lower.endsWith(".png")) {
+    return buffer.length >= PNG_MAGIC_BYTES.length && buffer.subarray(0, PNG_MAGIC_BYTES.length).equals(PNG_MAGIC_BYTES);
+  }
+
+  if (lower.endsWith(".jpg")) {
+    return buffer.length >= JPEG_MAGIC_BYTES.length && buffer.subarray(0, JPEG_MAGIC_BYTES.length).equals(JPEG_MAGIC_BYTES);
+  }
+
+  return true;
+}
+
 function normalizeMimeType(type) {
   if (typeof type !== "string") {
     return null;
@@ -156,6 +184,12 @@ export function checkManifestScreenshots(rootDir, options = {}) {
 
       if (!existsSync(filePath)) {
         logFn(`❌ ${prefix} file not found: ${screenshot.src}`, "red");
+        passed = false;
+        continue;
+      }
+
+      if (!checkImageExtensionMatchesContent(filePath)) {
+        logFn(`❌ ${prefix} extension does not match content: ${screenshot.src}`, "red");
         passed = false;
         continue;
       }

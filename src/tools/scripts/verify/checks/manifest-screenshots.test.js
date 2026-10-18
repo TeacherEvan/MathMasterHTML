@@ -109,3 +109,22 @@ test("passes for JPG screenshots", () => {
     assert.equal(runCheck(rootDir), true);
   });
 });
+
+test("fails when .jpg file has PNG magic bytes (extension/content mismatch)", () => {
+  withTempRepo((rootDir) => {
+    // Disguised binary: .jpg extension but actual PNG content.
+    // Declared type matches the actual content (image/png), so only the
+    // extension-vs-content assertion should catch this.
+    writeRepoFile(rootDir, "shots/fake.jpg", createPngBuffer(2, 1));
+    writeManifest(rootDir, [{ src: "/shots/fake.jpg", sizes: "2x1", type: "image/png" }]);
+    assert.equal(runCheck(rootDir), false);
+  });
+});
+
+test("fails when .png file has JPEG magic bytes (extension/content mismatch)", () => {
+  withTempRepo((rootDir) => {
+    writeRepoFile(rootDir, "shots/fake.png", createJpegBuffer(2, 1));
+    writeManifest(rootDir, [{ src: "/shots/fake.png", sizes: "2x1", type: "image/png" }]);
+    assert.equal(runCheck(rootDir), false);
+  });
+});
