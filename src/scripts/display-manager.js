@@ -602,6 +602,9 @@ class DisplayManager {
         `;
     indicator.textContent = "DETECTING RESOLUTION...";
     document.body.appendChild(indicator);
+    if (this.domCache) {
+      this.domCache.resolutionIndicator = indicator;
+    }
 
     // Keep it hidden but functional
     // Indicator still exists for debugging if needed via console

@@ -282,7 +282,9 @@
     // Append to panel C (third display)
     // PERFORMANCE: Use cached element
     const panelC =
-      this.cachedPanelC || document.getElementById("third-display");
+      this.cachedPanelC ||
+      document.getElementById("panel-c") ||
+      document.getElementById("third-display");
     if (panelC) {
       panelC.appendChild(crack);
       console.log(`💥 Crack created at (${x}, ${y})`);
@@ -292,7 +294,9 @@
   proto.cleanupCracks = function () {
     // PERFORMANCE: Use cached element
     const panelC =
-      this.cachedPanelC || document.getElementById("third-display");
+      this.cachedPanelC ||
+      document.getElementById("panel-c") ||
+      document.getElementById("third-display");
     if (panelC) {
       const cracks = panelC.querySelectorAll(".worm-crack");
       cracks.forEach((crack) => crack.remove());

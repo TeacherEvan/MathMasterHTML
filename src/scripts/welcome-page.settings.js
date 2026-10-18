@@ -86,6 +86,8 @@
     const scope = root || document;
     scope.querySelectorAll('input[type="range"]').forEach((el) => {
       updateSliderFill(el);
+      if (el.dataset.sliderFillBound === "true") return;
+      el.dataset.sliderFillBound = "true";
       el.addEventListener("input", () => updateSliderFill(el));
     });
   }
@@ -192,7 +194,7 @@ function populateForm(settings = readSettings(), scope, idPrefix) {
     }
   }
 
-  function openSettings({ shell, dialog, openButton }) {
+  function openSettings({ shell, dialog, openButton, idPrefix }) {
     if (!shell || !dialog) {
       return;
     }
@@ -205,7 +207,7 @@ function populateForm(settings = readSettings(), scope, idPrefix) {
     if (openButton) {
       openButton.setAttribute("aria-expanded", "true");
     }
-    populateForm();
+    populateForm(readSettings(), shell, idPrefix);
     requestAnimationFrame(() => {
       dialog.focus();
     });
@@ -272,7 +274,7 @@ function populateForm(settings = readSettings(), scope, idPrefix) {
             ? document.activeElement
             : null;
         window.__mmLastSettingsFocus = lastFocused;
-        openSettings({ shell, dialog, openButton });
+        openSettings({ shell, dialog, openButton, idPrefix });
       },
       close() {
         closeSettings({ shell, openButton });

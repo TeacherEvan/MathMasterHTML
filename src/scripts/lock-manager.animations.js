@@ -169,7 +169,8 @@ console.log("🔒 LockManager animation helpers loading...");
 
   proto.progressLockLevel = function progressLockLevel() {
     if (this.isLoadingComponent) {
-      console.log("🔒 Lock component already loading, skipping progression");
+      console.log("🔒 Lock component already loading, queueing progression");
+      this._pendingProgressCheck = true;
       return;
     }
 
@@ -200,12 +201,20 @@ console.log("🔒 LockManager animation helpers loading...");
           setTimeout(() => {
             this.activateLockLevel(newLevel);
             this.isLoadingComponent = false;
+            if (this._pendingProgressCheck) {
+              this._pendingProgressCheck = false;
+              this.progressLockLevel();
+            }
           }, 300);
         })
         .catch((error) => {
           console.error(`❌ Failed to load level ${newLevel} lock:`, error);
           this.isLoadingComponent = false;
           this.activateLockLevel(newLevel);
+          if (this._pendingProgressCheck) {
+            this._pendingProgressCheck = false;
+            this.progressLockLevel();
+          }
         });
     }
   };

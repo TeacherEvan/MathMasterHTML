@@ -6,6 +6,12 @@ Plan Genesis is the durable engineering source of truth for MathMasterHTML. It a
 It complements the root README with the deeper engineering overview under the markdown policy.
 Under the markdown policy, this file is also the repository system guide that would otherwise live in a separate `ARCHITECTURE.md`.
 
+## Cross-references
+
+- [`README.md`](README.md): quick start, core pages, runtime notes, scripts, and validation.
+- [`docs/project-plan.md`](docs/project-plan.md): consolidated project plan and documentation index.
+- [`docs/index.md`](docs/index.md): documentation index and cross-reference map for all maintained docs.
+
 ## Repo Reality
 
 - Runtime: browser-native HTML, CSS, and JavaScript.

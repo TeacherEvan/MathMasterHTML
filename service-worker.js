@@ -302,6 +302,9 @@ self.addEventListener("install", (event) => {
               `   ${f.assetPath} (${f.attempts} attempts): ${f.error?.message ?? String(f.error)}`,
             );
           });
+          throw new Error(
+            `[ServiceWorker] Critical assets failed to cache: ${criticalFailed.map((f) => f.assetPath).join(", ")}`,
+          );
         }
         if (nonCriticalFailed.length > 0) {
           console.warn(
@@ -321,6 +324,7 @@ self.addEventListener("install", (event) => {
       })
       .catch((error) => {
         console.error("[ServiceWorker] Install failed:", error);
+        throw error;
       }),
   );
 });

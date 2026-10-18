@@ -461,6 +461,8 @@ test.describe("Service worker update flow", () => {
       localStorage.setItem("mathmaster_build_version_v1", "older-build");
       localStorage.setItem("mathmaster_onboarding_v1", JSON.stringify({ stale: true }));
       localStorage.setItem("mathmaster_console_beginner", JSON.stringify(["x"]));
+      localStorage.setItem("mathmaster_player_profile_v1", JSON.stringify({ version: 4, name: "Champion" }));
+      localStorage.setItem("mathmaster_life_stats_v1", JSON.stringify({ entries: [] }));
       localStorage.setItem("third-party-key", "keep");
 
       Object.defineProperty(window, "caches", {
@@ -527,6 +529,8 @@ test.describe("Service worker update flow", () => {
           buildVersion: localStorage.getItem("mathmaster_build_version_v1"),
           onboarding: localStorage.getItem("mathmaster_onboarding_v1"),
           consoleState: localStorage.getItem("mathmaster_console_beginner"),
+          playerName: JSON.parse(localStorage.getItem("mathmaster_player_profile_v1") || "{}").name,
+          lifeStats: localStorage.getItem("mathmaster_life_stats_v1"),
           thirdParty: localStorage.getItem("third-party-key"),
           deletedCaches: window.__branchFreshness.deletedCaches.slice(),
           unregisterCalls: window.__branchFreshness.unregisterCalls,
@@ -537,6 +541,8 @@ test.describe("Service worker update flow", () => {
         buildVersion: expect.any(String),
         onboarding: null,
         consoleState: null,
+        playerName: "Champion",
+        lifeStats: JSON.stringify({ entries: [] }),
         thirdParty: "keep",
         deletedCaches: [
           "math-master-static-legacy",

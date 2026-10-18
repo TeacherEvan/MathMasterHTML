@@ -77,6 +77,12 @@
 
   // Collect power-up
   proto.collectPowerUp = function (type, element) {
+    if (this.powerUpSystem && typeof this.powerUpSystem.collect === "function") {
+      this.powerUpSystem.collect(type, element);
+      this.chainLightningKillCount = this.powerUpSystem.chainLightningKillCount;
+      return;
+    }
+
     this.powerUps[type]++;
     console.log(`🎁 Collected ${type} power-up! Total: ${this.powerUps[type]}`);
 
@@ -119,7 +125,18 @@
       awarded.push(type);
     }
 
-    this.updatePowerUpDisplay();
+    if (this.powerUpSystem) {
+      this.powerUpSystem.chainLightningKillCount = this.chainLightningKillCount;
+      if (typeof this.powerUpSystem.updateDisplay === "function") {
+        this.powerUpSystem.updateDisplay();
+      }
+      if (typeof this.powerUpSystem._dispatchInventoryChanged === "function") {
+        this.powerUpSystem._dispatchInventoryChanged();
+      }
+    } else {
+      this.updatePowerUpDisplay();
+    }
+
     document.dispatchEvent(
       new CustomEvent("powerUpsAwarded", {
         detail: {

@@ -1,0 +1,666 @@
+## 1. Executive Scorecard & Quantitative Health Metrics
+
+   Metric                                                                                                              | Formula / Definition                                                                                                | Value                                                                                                               | Status
+  ---------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------
+   Implementation Effective LOC (L_{kLOC})                                                                             | Non-blank, non-comment implementation lines (27,226 LOC)                                                            | 27.226 kLOC                                                                                                         | Audited in 13 batches (≤ 5 files/turn)
+   Test Suite Effective LOC                                                                                            | Non-blank, non-comment test lines across 89 test files                                                              | 17.672 kLOC                                                                                                         | Audited in Pass 3
+   Defect Breakdown (N_{P0}, N_{P1}, N_{P2}, N_{P3})                                                                   | Verified defects with exact file:line coordinates                                                                   | P0: 4 | P1: 10 | P2: 10 | P3: 6                                                                                     | 30 verified findings
+   Raw Defect Density (D_{raw})                                                                                        | (25(4) + 10(10) + 3(10) + 1(6))/27.226                                                                              | 8.67 pts / kLOC                                                                                                     | Moderate-High structural debt
+   Mental Mutation Kill Rate (M_{kill}%)                                                                               | 21 killed/(40 mutants) × 100% across 10 core modules                                                                | 52.5%                                                                                                               | 19 / 40 mutants survive
+   Test Fragility Penalty (P_{test})                                                                                   | 20 × (1 - M_{kill}%)                                                                                                | 9.50                                                                                                                | Driven by state-bypass & mock-echo tests
+   Codebase Health Score (S_{health})                                                                                  | max(0, round(100 - D_{raw} - P_{test}))                                                                             | 82 / 100                                                                                                            | Production-capable with 4 P0 blockers
+  ──────
+  ## 2. Pass 1 — Preflight Telemetry & God-File Hotspots
+
+  Using preflight_telemetry.py (Risk = LOC_effective * (1 + BranchDensity) + 50 * N_silent_catches), the top implementation hotspots exceeding or approaching the 400 effective LOC modular ceiling are:
+
+   Rank                                                     | File                                                     | Effective LOC                                            | Total Lines                                              | Cyclomatic Branches (CC)                                 | Max Nesting Depth                                        | Hot-Loop DOM/Alloc Hits                                  | Risk Score
+  ----------------------------------------------------------|----------------------------------------------------------|----------------------------------------------------------|----------------------------------------------------------|----------------------------------------------------------|----------------------------------------------------------|----------------------------------------------------------|----------------------------------------------------------
+   1                                                        | 3rdDISPLAY.js:1-1358                                     | 1,132                                                    | 1,358                                                    | 16                                                       | 7                                                        | 9                                                        | 1,147.0
+   2                                                        | service-worker.js:1-674                                  | 565                                                      | 674                                                      | 27                                                       | 5                                                        | 12                                                       | 591.0
+   3                                                        | worm-powerups.ui.js:1-639                                | 556                                                      | 639                                                      | 1                                                        | 4                                                        | 1                                                        | 556.0
+   4                                                        | display-manager.js:1-720                                 | 540                                                      | 720                                                      | 1                                                        | 5                                                        | 5                                                        | 540.0
+   5                                                        | service-worker-register.js:1-509                         | 437                                                      | 509                                                      | 19                                                       | 5                                                        | 5                                                        | 455.0
+   6                                                        | symbol-rain.lifecycle.js:1-526                           | 437                                                      | 526                                                      | 14                                                       | 5                                                        | 5                                                        | 450.0
+   7                                                        | welcome-page.settings.js:1-407                           | 348                                                      | 407                                                      | 9                                                        | 5                                                        | 4                                                        | 406.0
+   8                                                        | performance-monitor.js:1-398                             | 314                                                      | 398                                                      | 20                                                       | 5                                                        | 3                                                        | 333.0
+   9                                                        | symbol-rain.interactions.js:1-397                        | 324                                                      | 397                                                      | 7                                                        | 6                                                        | 2                                                        | 330.0
+   10                                                       | symbol-rain.spawn.js:1-370                               | 307                                                      | 370                                                      | 12                                                       | 5                                                        | 3                                                        | 318.0
+  ──────
+  ## 3. Pass 2 — 10-Principal-Engineer Multi-Lens Deep Audit
+
+  ### Lens 1: Systems & Concurrency Architect
+
+  • [P0-1] Split-Brain Dual Power-Up Architecture & Broken Inventory HUD Sync
+      • Coordinates: game.html:204-216, worm.js:264-274, worm-system.powerups.js:79-166, worm-system.effects.js:152-153, worm-system.rewards.muffin.js:138-141
+      • Root Cause: game.html:204-216 loads two parallel power-up implementations onto the runtime:
+          1. Modern WormPowerUpSystem + worm-powerups.ui.js:525-638 (instantiated at worm.js:L266).
+          2. Legacy WormSystem.prototype methods (dropPowerUp, collectPowerUp, awardPowerUps, updatePowerUpDisplay, updatePowerUpItems).
+          During WormSystem.prototype.initialize, this.powerUpSystem.updateDisplay() creates <div id="power-up-display"> in document.body. Later, when a killed worm drops a power-up (worm-system.effects.js:L152) or a purple worm awards power-ups (worm-system.rewards.muffin.js:L139), execution enters WormSystem.prototype.collectPowerUp or WormSystem.prototype.awardPowerUps. Both call this.updatePowerUpDisplay() (L98, L122). Inside
+          WormSystem.prototype.updatePowerUpDisplay, document.getElementById("power-up-display") is already non-null, so the if (!powerUpDisplay) initialization block (L151-L161) is skipped, leaving this.cachedPowerUpItems permanently undefined. WormSystem.prototype.updatePowerUpItems then hits if (!items) return; and silently aborts. Furthermore, this.chainLightningKillCount += 2 (L87, L117) mutates WormSystem.chainLightningKillCount while
+          this.powerUpSystem.chainLightningKillCount stays frozen at 5.
+      • Failure Scenario: Every power-up earned in live gameplay (via dropped token click or purple worm kill) leaves the #power-up-display HUD showing 0 with .is-empty styling and fails to fire "powerUpInventoryChanged".
+  • [P1-8] LockManager.progressLockLevel Drops Level Transitions During Async Component Load Window
+      • Coordinates: lock-manager.animations.js:170-211
+      • Root Cause: progressLockLevel checks if (this.isLoadingComponent) { return; }. Meanwhile, updateLockProgression increments this.completedLinesCount++ before calling this.progressLockLevel(). Because this.isLoadingComponent remains true across both await this.loadLockComponent(targetLevel) and an unguarded setTimeout(..., 300) (L200-L203), any line completed during that ~350ms window is dropped and never re-evaluated when isLoadingComponent becomes false.
+  • [P1-9] Global Capture-Phase Input Lock in EvanPresenter Blocks Non-Evan Lock Contexts
+      • Coordinates: evan-helper.presenter.js:127-160
+      • Root Cause: guardLockedUserInput is registered on window in the capture phase (true) for pointerdown, click, and keydown. At L129-L131, it checks window.GameRuntimeCoordinator?.getState?.().inputLocked, which is true whenever any lock source is active (e.g., rotation-required in display-manager.js:L362 or game-module-loader in game.js:L142), swallowing trusted events across the entire document even when Evan Help is inactive (document.body.classList.
+      contains("evan-help-active") === false).
+  • [P2-9] Module-Global allProblems = {} Race Condition Across Concurrent loadProblemsForLevel Calls
+      • Coordinates: game-problem-manager.js:9-10, game-problem-manager.js:87-119
+      • Root Cause: loadProblemsForLevel mutates module-scoped allProblems[levelKey] across an await fetch(path) boundary without request cancellation or per-request scoping.
+
+  ──────
+  ### Lens 2: Performance & Frame-Budget Engineer
+
+  • [P1-2] Per-Frame 60–120Hz Heap Churn, Uncanceled RAF & SpatialGrid Rebuild in Stationary Symbol Rain Loop
+      • Coordinates: symbol-rain.animation.js:4-100
+      • Root Cause: Even though symbols in Panel C are stationary (symbolObj.speed = 0), animateSymbols(state) runs on every requestAnimationFrame:
+          • Calls state.symbolRainContainer.getBoundingClientRect() on L13.
+          • Allocates two fresh arrays (nextActiveSymbols = [], symbolsForGrid = []) on L36-L37.
+          • Writes symbolObj.element.style.opacity = "1" on every symbol (85–150 DOM style writes/frame) on L46.
+          • Clears and repopulates state.activeFallingSymbols via .push(...nextActiveSymbols) on L58-L59.
+          • Rebuilds state.spatialGrid.update(symbolsForGrid) (Clear + Map allocations) on L60.
+          • startAnimation never stores the RAF handle (state.animationFrameId), and stopAnimation never calls cancelAnimationFrame.
+
+  • [P1-3] Synchronous Reflow Storm in samplePlacement -> getVisibleSymbolRects
+      • Coordinates: 3rdDISPLAY.js:220-340, 3rdDISPLAY.js:640-643
+      • Root Cause: samplePlacement loops up to 15 attempts (placementSampleAttempts: 15, L92), calling isPlacementClear -> getVisibleSymbolRects on every attempt. getVisibleSymbolRects chains .filter().map().filter() and invokes symbolObj.element.getBoundingClientRect() on every visible symbol (15 * 85 = 1,275 live DOM rect queries per resurface) while ignoring symbolObj.x, symbolObj.y, and state.spatialGrid. Worse, populateInitialSymbols schedules all initial symbols
+      with identical visibleMs on the same tick, causing synchronized resurface spikes.
+  • [P1-4] Frame-Rate Dependent Worm & Spider Physics (dt Omission) + Read/Write Layout Thrashing in WormSystem.animate
+      • Coordinates: worm-system.movement.js:44-104, worm-movement-navigation.js:54-82, worm-movement-navigation.js:186-187, worm-system.powerups.effects.spider.js:105-182, worm-powerups.effects.spider.js:101-176
+      • Root Cause:
+          1. Neither WormSystem.prototype.animate nor moveSpider scales velocity by frame delta time (dt). On 120Hz/144Hz monitors, worms and spiders travel 2x–2.4x faster in wall-clock time than on 60Hz displays.
+          2. Inside the for (let i = 0; i < wormCount; i++) loop (worm-system.movement.js:L69-L103), each iteration queries getBoundingClientRect() (via updateWormTargetRush, checkAndStealSymbol, and applyCursorEvasion) and immediately writes worm.element.style.transform in _applyWormPosition(worm), causing O(W) interleaved read-write-read-write forced synchronous reflows per frame.
+
+  • [P1-10] Per-Frame requestAnimationFrame Full-DOM querySelectorAll & getBoundingClientRect Scan on Panel C Focus
+      • Coordinates: symbol-rain.interactions.js:115-132, symbol-rain.targets.js:136-232
+      • Root Cause: Whenever #panel-c holds focus, scheduleKeyboardSync re-arms itself on every animation frame, invoking syncSpatialKeyboardFocus -> getVisibleMatchingCandidates, which runs document.querySelectorAll, container.querySelectorAll('.falling-symbol[data-keyboard-Spatial-focus="true"]'), and getBoundingClientRect() twice per active symbol on every frame.
+
+ ### Lens 3: Memory, Resource & Lifecycle Engineer
+
+  • [P1-6] Broken Pause/Resume Clock Math in ScoreTimerModules & Duplicate Listener Leak in ScoreTimerManager.init
+      • Coordinates: score-timer.runtime.js:106-107, score-timer.runtime.js:134-145, score-timer-manager.js:102-109, score-timer-manager.js:218-226
+      • Root Cause:
+          1. In score-timer.runtime.js:L134-L145, pause(manager) sets manager._paused = true without recording _remainingMsAtPause. When resume(manager) runs, it computes remainingMs = getRemainingMs(manager) (which still subtracts Date.now() - manager._stepStartMs, including the paused time) and then calls startStep(manager) (L144), which unconditionally overwrites manager._stepStartMs = Date.now() at L106 — resetting the step timer back to full duration (60s).
+          2. In score-timer-manager.js:L102-L109, init() registers anonymous document.addEventListener handlers for PROBLEM_LINE_COMPLETED and PROBLEM_COMPLETED that destroy() never removes.
+
+  • [P1-7] Welcome Settings populateForm Omits idPrefix on Open & Multiplies Range Input Listeners
+      • Coordinates: welcome-page.settings.js:85-140, welcome-page.settings.js:145-151, welcome-page.settings.js:208, welcome-page.settings.js:332-337
+      • Root Cause:
+          1. openSettings calls populateForm() with no arguments (idPrefix = ""), so on index.html (where form IDs use welcome-settings-), doc.getElementById(prefix + ...) (L98-L105) returns null for all 8 controls and fails to sync the form when reopened.
+          2. populateForm calls attachSliderFillHandlers(root), which attaches a fresh anonymous el.addEventListener("input", ...) listener on every call without a guard flag. Because updateSettings triggers populateForm both via the "userSettingsChanged" listener (L335) and directly at L148, every setting change adds 2 more "input" listeners per slider.
+
+  • [P2-6] Asymmetric Event Listener, WebAudio Node, and Prototype Wrapper Leaks
+      • Coordinates: symbol-rain.interactions.js:329-333, symbol-rain.interactions.js:391-393, interaction-audio.cyberpunk.js:156-164, interaction-audio.cyberpunk.js:335-350, performance-monitor.js:80-83, performance-monitor.js:257-321, display-manager.js:65-80
+      • Root Cause:
+          • symbol-rain.interactions.js:L329-L333 binds both "click" and "touchstart" (handleFallbackClick), but dispose() only removes "click", leaking "touchstart".
+          • interaction-audio.cyberpunk.js:L156-L164 disconnects oscillator and gain on onended, but never disconnects the per-voice StereoPannerNode, nor does destroy() disconnect this.compressor.
+          • performance-monitor.js:L313-L321 destroy() never removes its document listeners (keydown, wormSpawned, wormCleanedUp) and never restores Document.prototype.querySelector / querySelectorAll wrapped in trackDOMQueries.
+          • display-manager.js:L75-L79 SharedResizeObserver.subscribe returns an unsubscribe closure that deletes callback from this.subscribers but never deletes it from this.sources.
+
+
+  ──────
+  ### Lens 4: Type Safety, Data Integrity & Contract Engineer
+
+  • [P0-2] Destructive localStorage Wipe (mathmaster_*) on Local/LAN Build Version Bump
+      • Coordinates: service-worker-register.js:9-10, service-worker-register.js:62-80, service-worker-register.js:102-117, service-worker-register.js:135-157, service-worker-register.js:369-378
+      • Root Cause: On window.load (L375), prepareRuntimeForCurrentBuild checks isLocalDevelopmentHost() (which matches localhost, .local, and all RFC1918 LAN addresses 10.x, 192.168.x, 172.16-31.x via isPrivateNetworkHost). Whenever previousBuildVersion !== currentBuildVersion, it executes clearMathMasterStorage(window.localStorage), deleting every key prefixed with "mathmaster_" — including mathmaster_player_profile_v1 (lifetime player stats & history),
+      mathmaster_life_stats_v1 (Life Stats financial/personal entries), mathmaster_user_settings_v1 (audio/motion settings), and mathmaster_streak_v1 — after DOMContentLoaded scripts have already loaded state into memory.
+  • [P2-4] Split-Brain Daily Challenge & Streak Persistence (DailyChallenge vs PlayerStorage) + UTC/Local Date Skew
+      • Coordinates: daily-challenge.js:5-17, player-storage.js:134-191, player-storage.helpers.js:5-17
+      • Root Cause: DailyChallenge writes to standalone keys mathmaster_daily_challenge_v1 and mathmaster_streak_v1, whereas PlayerStorage reads and writes profile.dailyChallenge inside mathmaster_player_profile_v1. Furthermore, DailyChallenge._getTodayKey() uses UTC (new Date().toISOString().split("T")[0]) while DailyChallenge._getYesterdayKey() uses local calendar getters (getFullYear(), getMonth(), getDate()), causing streak rollover failures for non-UTC timezones
+      between local midnight and UTC midnight.
+  • [P2-7] Disconnected Primitive Exports in GameSymbolHandlerCore
+      • Coordinates: game-symbol-handler.core.js:24-25, game-symbol-handler.core.js:226-227
+      • Root Cause: window.GameSymbolHandlerCore exports primitive value copies totalCorrectAnswers (0) and consecutiveWrongAnswers (0) at module load time (L226-L227). Subsequent increments in handleBasicSymbolReveal and onIncorrectAnswer mutate the closure variables, leaving window.GameSymbolHandlerCore.totalCorrectAnswers and consecutiveWrongAnswers permanently 0.
+
+  ──────
+  ### Lens 5: Security & Adversarial Input Specialist
+
+  • [P2-10] Unescaped options.className Attribute Interpolation in LifeStatsCharts & Unvalidated JSON Import in LifeStatsPage
+      • Coordinates: life-stats-charts.js:100, life-stats-charts.js:204, life-stats-charts.js:264, life-stats-page.controls.js:65-69
+      • Root Cause: While life-stats-charts.js:6-15 properly escapes title and label via esc(), options.className is interpolated raw into <svg class="ls-chart ... ${options.className || ""}"> at L100, L204, and L264. Additionally, life-stats-page.controls.js:L65-L69 accepts imported JSON files via JSON.parse(String(r.result)) and checks only Array.isArray(parsed.entries) before persisting Storage.saveStore(parsed), without sanitizing entry value, ts, field, or
+      prototype properties.
+
+  ──────
+  ### Lens 6: Error Handling, Resilience & Fault-Tolerance Engineer
+
+  • [P0-3] Service Worker install Swallows Critical Precache Failures & Activates Broken Offline Cache
+      • Coordinates: service-worker.js:186-200, service-worker.js:282-325, service-worker.js:340-358
+      • Root Cause: During the Service Worker install event (L262-L325):
+          1. cacheAssetWithRetry catches all fetch/cache errors and returns { asset, success: false }.
+          2. When critical assets (CRITICAL_ASSETS, L25-L34) fail to cache (criticalFailed.length > 0, L296-L305), the handler only calls console.error(...) and does not throw.
+          3. The outer .catch((error) => { console.error(...); }) (L322-L324) swallows any rejection inside event.waitUntil(...).
+          Consequently, a failed install resolves its waitUntil promise, activates, deletes the previously working math-master-static-* and math-master-runtime-* caches (L348), and leaves offline clients with a broken cache.
+
+  • [P0-4] Unguarded JSON.parse / localStorage Crash Loop & Algebraically Invalid Equations in DailyChallenge
+      • Coordinates: daily-challenge.js:30-36, daily-challenge.js:52-109, daily-challenge.js:134-138, daily-challenge.js:168-184
+      • Root Cause: getTodaysChallenge, getStreak, isDailyCompleted, and markDailyCompleted invoke localStorage.getItem / localStorage.setItem and JSON.parse without try/catch (unlike PlayerStorage), throwing uncaught exceptions if storage is corrupted or blocked in private browsing.
+
+  ──────
+  ### Lens 7: Architecture, Modularity & Dead-Code Surgeon
+
+  • [P2-5] Orphaned Dead Modules (worm-behavior.*.js & symbol-rain.spawn.js)
+      • Coordinates: symbol-rain.spawn.js:1-370, service-worker.js:111, game.html:190-235, src/scripts/worm-behavior.rush.js, src/scripts/worm-behavior.steal.js, src/scripts/worm-behavior.targeting.js, src/scripts/worm-behavior.utils.js
+      • Root Cause:
+          1. src/scripts/worm-behavior.rush.js, worm-behavior.steal.js, worm-behavior.targeting.js, and worm-behavior.utils.js are unreferenced anywhere in HTML, JS, or tests.
+          2. symbol-rain.spawn.js:1-370 (307 effective LOC) is **never loaded by game.html:190-235** (stationary symbol grids are populated directly by populateInitialSymbols in 3rdDISPLAY.js), yet it is still precached in service-worker.js:L111 and tested in isolation by symbol-rain.spawn.test.js:1-271.
+
+  • [P2-1] Wrong DOM Selector #third-display Causes Silent No-Op in WormSystem.createCrack / cleanupCracks
+      • Coordinates: worm.js:255, worm-system.effects.js:285-300
+      • Root Cause: WormSystem.prototype.initialize caches this.domCache.panelC = document.getElementById("third-display"), and createCrack / cleanupCracks fall back to document.getElementById("third-display"). In game.html:127, Panel C's ID is #panel-c (there is no #third-display element), so panelC is always null and screen-crack effects never render.
+  • [P2-2] Stale domCache.resolutionIndicator in DisplayManager Prevents Dynamic Resolution Badge Updates
+      • Coordinates: display-manager.js:135-170, display-manager.js:581-622
+      • Root Cause: DisplayManager.init() calls this.cacheDOMElements() (L137, which sets this.domCache.resolutionIndicator = document.getElementById("resolution-indicator") -> null) before calling this.showResolutionIndicator() (L153, which dynamically creates and appends #resolution-indicator at L595-L606 without updating this.domCache.resolutionIndicator). Consequently, updateResolutionIndicator() always sees indicator === null and never updates the badge on resize
+      or resolution change.
+
+  ### Lens 8: Algorithmic & Mathematical Correctness Specialist
+
+  • [P0-4b] Algebraically Broken Equation Generator in DailyChallenge.generateChallenge
+      • Coordinates: daily-challenge.js:52-109
+      • Root Cause: Out of 11 equation templates in generateChallenge, 6 templates generate mathematically false equations:
+          1. "A - X = B" (L54, L79-L80): sets C = A - X, but the template substitutes B (an unrelated random integer) on the right-hand side instead of C.
+          2. "X + A = B" (L55, L76-L77): sets C = A + X, leaving B random in "X + A = B".
+          3. "A × X = B" & "X × A = B" (L56, L59, L82-L83): sets C = A * X, leaving B random in "A × X = B".
+          4. "X ÷ A = B" (L60, L84-L87): sets A = X * B; C = B;, which satisfies A ÷ X = B, not X ÷ A = B (e.g., for X = 4, B = 3, A = 12, emitting "X ÷ 12 = 3" with answer X = 4 instead of 36).
+          5. "A × B ÷ X = C" (L66, L95-L96): computes C = Math.floor((A * B) / X) via integer truncation even when A × B is not divisible by X.
+
+  • [P1-1] Viewport vs. Container-Relative Coordinate Space Mismatch Breaks resolveControllerPlacement
+      • Coordinates: 3rdDISPLAY.js:238-265, 3rdDISPLAY.js:978-1040
+      • Root Cause: resolveControllerPlacement computes left (L1002) and top (L988) in container-relative coordinates ([0..width, 0..height]) and constructs candidateRect = { left, top, right: left + symbolWidth, bottom: top + symbolHeight } (L1014-L1019). It then passes candidateRect into isPlacementClear(candidateRect), which compares candidateRect.left >= containerRect.left + clearance and candidateRect.top >= containerRect.top + clearance (L246-L256) in viewport
+      coordinates ( unlike samplePlacement, which adds containerRect.left + left before calling isPlacementClear). Because #symbol-rain-container is positioned inside #panel-c (containerRect.left > 0), isPlacementClear(candidateRect) deterministically returns false, discarding caller-supplied column/initialY options and falling back to random samplePlacement().
+  • [P1-5] Unbounded Mutual Recursion (RangeError: Maximum call stack size exceeded) on Equal-Priority Overlap in UIBoundaryManager._checkAndReposition
+      • Coordinates: ui-boundary-manager.positioning.js:198-233
+      • Root Cause: When two non-fixed elements "A" and "B" have equal priority (including the default priority: 0 assigned at ui-boundary-manager.core.js:L116) and overlap, _checkAndReposition("A") filters higherPriorityOverlaps = overlaps.filter((o) => o.entry.priority > entry.priority) (L221-L223). Because 0 > 0 is false, higherPriorityOverlaps.length === 0, so "A" delegates to this._checkAndReposition("B") (L228), which likewise sees 0 > 0 === false and calls this.
+      _checkAndReposition("A"), recursing infinitely until RangeError: Maximum call stack size exceeded.
+  • [P2-3] Tautological Clamp in WormPowerUpSystem.getDisplayAnchorPosition
+      • Coordinates: worm-powerups.ui.js:335-337
+      • Root Cause: L335-L337 computes:
+        const preferredTop = Math.max(
+          context.minY,
+          Math.min(context.minY, maxTopFromControls),
+        );
+      Because min(a, b) ≤ a, max(a, min(a, b)) is a mathematical tautology that always evaluates to context.minY, completely ignoring maxTopFromControls and context.maxY.
+
+  ──────
+  ### Lens 9: Accessibility (a11y), Layout & UX Ergonomics Specialist
+
+  • [P2-8] Blocking window.confirm() Defeats 450ms Touch Deduplication Window in game-page.js
+      • Coordinates: game-page.js:15-51
+      • Root Cause: bindPressActivation binds both pointerup and click to #back-button and suppresses duplicate invocations using if (now - lastActivationAt < 450) return; (L22-L24). However, goBack() opens a synchronous blocking window.confirm(...) modal during pointerup. By the time the user reads the prompt and clicks "Cancel" (>450ms), the browser dispatches the synthesized click event, now - lastActivationAt >= 450 is true, and the confirmation dialog immediately
+      pops up a second time.
+
+  ──────
+  ### Lens 10: Test Architecture & Mutation Resilience Specialist
+
+  • Audited in detail in Pass 3 below.
+  ──────
+  ## 4. Pass 3 — Implementation vs. Test Suite Matrix & Mental Mutation Analysis
+
+  ### 4.1 Implementation vs. Test Coverage & Pathology Matrix
+
+   Implementation Module                                           | Paired Test File(s)                                                      | Defects Missed by Tests | Vibe-Coded Test Pathology Identified
+  -----------------------------------------------------------------|--------------------------------------------------------------------------|-------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   worm-system.powerups.js:79-234 + worm-powerups.ui.js:525-638    | powerups.spec.js:50-118, worm-rewards.spec.js:85-138                     | [P0-1], [P2-3]          | Pathology 2 (Mock-Echo Chamber) & Pathology 3 (Happy-Path Tunnel Vision): powerups.spec.js:L58-L62 bypasses collectPowerUp/awardPowerUps and directly mutates powerUpSystem.inventory + calls powerUpSystem.updateDisplay(). worm-rewards.spec.js:L121-L137 asserts on window.wormSystem.powerUps in memory
+                                                                   |                                                                          |                         | without asserting on #power-up-display DOM text.
+   service-worker-register.js:62-157                               | service-worker-update.spec.js:454-548                                    | [P0-2]                  | Pathology 5 (Implementation-Coupled Brittle Assertion): service-worker-update.spec.js:L461-L547 explicitly asserts that mathmaster_onboarding_v1 and mathmaster_console_beginner are wiped on build change, without seeding mathmaster_player_profile_v1 or mathmaster_life_stats_v1 to notice catastrophic
+                                                                   |                                                                          |                         | user data loss.
+   service-worker.js:262-358                                       | service-worker-update.spec.js:39-163                                     | [P0-3]                  | Pathology 3 (Happy-Path Tunnel Vision): runServiceWorkerScenario("install-activate") (L112-L121) uses an always-200 fetch stub and never tests a failing critical asset during install.
+   daily-challenge.js:1-189                                        | None (0 dedicated tests)                                                 | [P0-4], [P2-4]          | Untested Module: DailyChallenge has zero unit or E2E test coverage.
+   3rdDISPLAY.js:220-1040 + symbol-rain.spawn.js:1-370             | symbol-rain.spawn.test.js:16-271, symbol-rain.live-targets.spec.js:1-220 | [P1-1], [P1-3], [P2-5]  | Pathology 2 (Mock-Echo Chamber): symbol-rain.spawn.test.js runs in node:vm against an orphaned file (symbol-rain.spawn.js) with SymbolRainHelpers.createFallingSymbol mocked out (L140), never exercising resolveControllerPlacement in 3rdDISPLAY.js.
+   ui-boundary-manager.positioning.js:198-242                      | ui-boundary.spec.js:199-250                                              | [P1-5]                  | Pathology 3 (Happy-Path Tunnel Vision): ui-boundary.spec.js:L241-L249 registers two overlapping elements with distinct priorities (priority: 10, fixed: true vs priority: 1, fixed: false), never testing two movable elements with equal priority (priority: 0).
+   score-timer.runtime.js:134-145 + score-timer-manager.js:102-226 | worm-rewards.spec.js:16                                                  | [P1-6]                  | Pathology 1 (Existence/Render-Only Smoke Test): Tests call ScoreTimerManager.pause() in beforeEach (worm-rewards.spec.js:L16), but no test ever calls resume() and checks remaining seconds.
+   welcome-page.settings.js:85-215                                 | settings-storage.spec.js:1-172                                           | [P1-7]                  | Pathology 4 (Assertion-Free / Partial Side-Effect Check): settings-storage.spec.js tests window.UserSettings API in isolation on level-select.html without opening the Welcome Settings modal on index.html.
+  ──────
+  ### 4.2 4-Mutant Mental Execution Truth Table (M_{kill}% = 52.5%)
+
+   Module Under Audit                             | M1 (Boundary Flip < ↔ <=)                                                                               | M2 (Null / Empty Return)                                                                       | M3 (State / Side-Effect Removal)                                                                | M4 (Error / Exception Injection)                                        | Module Kill Score
+  ------------------------------------------------|---------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|-----------------------------------------------
+   1. worm-system.powerups.js:79-234              | SURVIVED (L226 count <= 0 flip not checked by worm-rewards.spec.js)                                     | SURVIVED (L216 updatePowerUpItems already returns early due to [P0-1])                         | SURVIVED (L87 removing chainLightningKillCount += 2 undetected)                                 | KILLED (L113 throw in awardPowerUps breaks worm-rewards.spec.js:L94)    | 1 / 4
+   2. service-worker.js:186-358                   | SURVIVED (L193 retry attempt <= retries flip passes in 200-OK stub)                                     | KILLED (L464 returning null in fetch breaks service-worker-update.spec.js:L418)                | SURVIVED (L296 removing criticalFailed check passes in service-worker-update.spec.js)           | SURVIVED (L322 throwing in install is swallowed by .catch() at L322!)   | 1 / 4
+   3. service-worker-register.js:62-157           | SURVIVED (L66 secondOctet >= 16 flip passes on localhost)                                               | KILLED (L135 returning early in prepareRuntimeForCurrentBuild breaks L524)                     | KILLED (L221 removing appUpdateAvailable dispatch breaks L375)                                  | KILLED (L307 throwing in register fails L361)                           | 3 / 4
+   4. 3rdDISPLAY.js:238-1040                      | SURVIVED (L246 isPlacementClear boundary flip in resolveControllerPlacement already bypassed by [P1-1]) | KILLED (L612 returning empty in populateInitialSymbols fails symbol-rain.live-targets.spec.js) | SURVIVED (L851 removing spatialGrid.update in applySymbolPlacement masked by per-frame rebuild) | KILLED (L504 throw in initSymbolRain fails E2E boot)                    | 2 / 4
+   5. daily-challenge.js:1-189                    | SURVIVED (0 tests)                                                                                      | SURVIVED (0 tests)                                                                             | SURVIVED (0 tests)                                                                              | SURVIVED (0 tests)                                                      | 0 / 4
+   6. ui-boundary-manager.positioning.js:20-242   | SURVIVED (L222 flipping > to >= in higherPriorityOverlaps passes all current tests)                     | KILLED (L20 returning null in calculateSafePosition fails ui-boundary-lifecycle.spec.js)       | KILLED (L186 removing uiElementRepositioned event fails ui-boundary-lifecycle.spec.js)          | KILLED (L198 throwing in _checkAndReposition fails ui-boundary.spec.js) | 3 / 4
+   7. score-timer.runtime.js:4-155                | KILLED (L80 remainingMs <= 0 flip breaks timer expiry test)                                             | SURVIVED (L139 making resume() a no-op survives because no test calls resume())                | SURVIVED (L143 removing _stepStartMs adjustment in resume() already overwritten at L106)        | KILLED (L33 throwing in update() breaks gameplay suites)                | 2 / 4
+   8. worm-movement.js:1-260                      | KILLED (constrainToBounds edge flips caught by tests/unit/worm-movement.spec.js:L153-L215)              | KILLED (calculateVelocityToTarget zero-return caught by L53-L151)                              | KILLED (direction inversion removal caught by L156-L214)                                        | KILLED (constructor throw caught by L14-L51)                            | 4 / 4
+   9. life-stats-charts.js:1-295                  | KILLED (barChart/lineChart branch checks caught by life-stats-charts.test.js)                           | KILLED (empty SVG return caught by tests/life-stats.spec.js:L23-L30)                           | KILLED (removing esc() HTML escaping caught by tests/life-stats.spec.js:L110-L140)              | KILLED (throw in pieChart caught by tests/life-stats.spec.js:L27)       | 4 / 4
+   10. welcome-page.settings.js:85-340            | SURVIVED (L26 clamp boundary flip not tested)                                                           | SURVIVED (L95 populateForm() with no args already fails to find prefixed IDs on index.html)    | SURVIVED (L208 removing populateForm() inside openSettings undetected)                          | KILLED (L290 throwing in init() fails welcome-page-redesign.spec.js)    | 1 / 4
+   Total                                          | 3 / 10 Killed                                                                                           | 6 / 10 Killed                                                                                  | 4 / 10 Killed                                                                                   | 8 / 10 Killed                                                           | 21 / 40 (52.5%)
+  ──────
+  ## 5. Surgical Refactoring Blueprints (Before / After Diffs for All P0 & P1 Findings)
+
+  ### Blueprint 1 — [P0-1] Delegate Legacy Power-Up Drops/Rewards to WormPowerUpSystem
+
+  File: worm-system.powerups.js:79-166
+
+    @@ -79,9 +79,13 @@
+       proto.collectPowerUp = function(element, type) {
+         if (element.dataset.collected === "true") return;
+         element.dataset.collected = "true";
+     
+    +    if (this.powerUpSystem && typeof this.powerUpSystem.awardPowerUp === "function") {
+    +      this.powerUpSystem.awardPowerUp(type, 1);
+    +      this.chainLightningKillCount = this.powerUpSystem.chainLightningKillCount;
+    +    } else {
+           this.powerUps[type] = (this.powerUps[type] || 0) + 1;
+           if (type === "chainLightning") {
+             this.chainLightningKillCount += 2;
+           }
+    +      this.updatePowerUpDisplay();
+    +    }
+    @@ -95,4 +99,2 @@
+         console.log(`✨ Collected power-up: ${this.powerUpTypes[type].name}`);
+    -
+    -    this.updatePowerUpDisplay();
+     
+         element.classList.add("power-up-collected");
+    @@ -112,13 +114,19 @@
+       proto.awardPowerUps = function(count = 1) {
+    +    if (this.powerUpSystem && typeof this.powerUpSystem.awardRandomPowerUps === "function") {
+    +      this.powerUpSystem.awardRandomPowerUps(count);
+    +      this.chainLightningKillCount = this.powerUpSystem.chainLightningKillCount;
+    +      return;
+    +    }
+         const types = Object.keys(this.powerUpTypes);
+         for (let i = 0; i < count; i++) {
+           const randomType = types[Math.floor(Math.random() * types.length)];
+           this.powerUps[randomType] = (this.powerUps[randomType] || 0) + 1;
+           if (randomType === "chainLightning") {
+             this.chainLightningKillCount += 2;
+           }
+         }
+         this.updatePowerUpDisplay();
+       };
+  ──────
+  ### Blueprint 2 — [P0-2] Preserve Persistent User Profile, Settings & Life Stats Across Build Version Bumps
+
+  File: service-worker-register.js:8-16, service-worker-register.js:102-117
+
+    @@ -8,4 +8,11 @@
+       const BUILD_VERSION_STORAGE_KEY = "mathmaster_build_version_v1";
+       const STORAGE_RESET_PREFIX = "mathmaster_";
+    +  const PRESERVED_USER_STORAGE_KEYS = new Set([
+    +    "mathmaster_player_profile_v1",
+    +    "mathmaster_user_settings_v1",
+    +    "mathmaster_life_stats_v1",
+    +    "mathmaster_daily_challenge_v1",
+    +    "mathmaster_streak_v1",
+    +  ]);
+       const CACHE_RESET_PREFIX = "math-master-";
+    @@ -102,11 +109,15 @@
+       function clearMathMasterStorage(storage, preserveUserData = false) {
+         if (!storage) return;
+     
+         try {
+           const keysToDelete = [];
+           for (let index = 0; index < storage.length; index += 1) {
+             const key = storage.key(index);
+    -        if (key && key.startsWith(STORAGE_RESET_PREFIX)) {
+    +        if (
+    +          key &&
+    +          key.startsWith(STORAGE_RESET_PREFIX) &&
+    +          (!preserveUserData || !PRESERVED_USER_STORAGE_KEYS.has(key))
+    +        ) {
+               keysToDelete.push(key);
+             }
+           }
+  ──────
+  ### Blueprint 3 — [P0-3] Fail Service Worker install When Any Critical Precache Asset Fails
+
+  File: service-worker.js:296-325
+
+    @@ -296,10 +296,13 @@
+             if (criticalFailed.length > 0) {
+               console.error(
+                 "[SW] Critical assets failed to cache:",
+                 criticalFailed.map((r) => r.asset),
+               );
+    +          throw new Error(
+    +            `[SW] Aborting install; critical assets failed: ${criticalFailed.map((r) => r.asset).join(", ")}`,
+    +          );
+             } else {
+               console.log("[SW] All critical assets cached successfully");
+             }
+    @@ -321,5 +324,6 @@
+    -      .catch((error) => {
+    +      .catch((error) => {
+             console.error("[SW] Failed to cache static assets:", error);
+    +        throw error;
+           }),
+       );
+     });
+  ──────
+  ### Blueprint 4 — [P0-4] Guard DailyChallenge Storage IO & Fix All 6 Broken Equation Templates
+
+  File: daily-challenge.js:29-109
+
+    @@ -29,8 +29,14 @@
+       static getTodaysChallenge() {
+         const today = this._getTodayKey();
+    -    const stored = localStorage.getItem(this.STORAGE_KEY);
+    -
+    -    if (stored) {
+    -      const data = JSON.parse(stored);
+    -      if (data.date === today) {
+    -        return data;
+    -      }
+    +    try {
+    +      const stored = localStorage.getItem(this.STORAGE_KEY);
+    +      if (stored) {
+    +        const data = JSON.parse(stored);
+    +        if (data && data.date === today) {
+    +          return data;
+    +        }
+    +      }
+    +    } catch (err) {
+    +      console.warn("Failed to read daily challenge from localStorage:", err);
+         }
+    @@ -75,22 +81,22 @@
+         if (template.includes("A + X") || template.includes("X + A")) {
+    -      C = A + X;
+    +      B = A + X;
+         } else if (template.includes("A - X")) {
+           A = X + rng.nextInt(5, 15);
+    -      C = A - X;
+    +      B = A - X;
+         } else if (template.includes("X - A")) {
+           X = A + B;
+         } else if (template.includes("A × X") || template.includes("X × A")) {
+           A = rng.nextInt(2, 10);
+           X = rng.nextInt(2, 10);
+    -      C = A * X;
+    +      B = A * X;
+         } else if (template.includes("X ÷ A")) {
+           A = rng.nextInt(2, 8);
+           B = rng.nextInt(2, 8);
+    -      A = X * B;
+    -      C = B;
+    +      X = A * B;
+         } else if (template.includes("A × X + B")) {
+           A = rng.nextInt(2, 6);
+           X = rng.nextInt(2, 8);
+           B = rng.nextInt(1, 10);
+           C = A * X + B;
+         } else if (template.includes("A × X - B")) {
+           A = rng.nextInt(2, 6);
+           X = rng.nextInt(3, 8);
+           B = rng.nextInt(1, A * X - 1);
+           C = A * X - B;
+         } else if (template.includes("A × B ÷ X")) {
+    -      C = Math.floor((A * B) / X);
+    +      X = rng.nextInt(2, 8);
+    +      C = rng.nextInt(2, 8);
+    +      B = X;
+    +      A = C;
+         }
+  ──────
+  ### Blueprint 5 — [P1-1] Normalize candidateRect to Viewport Coordinates Before Calling isPlacementClear
+
+  File: 3rdDISPLAY.js:1012-1029
+
+    @@ -1012,13 +1012,14 @@
+         const clampedLeft = Math.max(minX, Math.min(maxX, left));
+         const clampedTop = Math.max(minY, Math.min(maxY, top));
+         const candidateRect = {
+    -      left: clampedLeft,
+    -      top: clampedTop,
+    -      right: clampedLeft + symbolWidth,
+    -      bottom: clampedTop + symbolHeight,
+    +      left: containerRect.left + clampedLeft,
+    +      top: containerRect.top + clampedTop,
+    +      right: containerRect.left + clampedLeft + symbolWidth,
+    +      bottom: containerRect.top + clampedTop + symbolHeight,
+         };
+     
+         if (isPlacementClear(candidateRect)) {
+  ──────
+  ### Blueprint 6 — [P1-2] & [P1-3] Eliminate Per-Frame Stationary DOM Churn, Track RAF ID & Use Cached Coordinates in getVisibleSymbolRects
+
+  File: symbol-rain.animation.js:68-100 and 3rdDISPLAY.js:220-236
+
+    --- a/src/scripts/symbol-rain.animation.js
+    +++ b/src/scripts/symbol-rain.animation.js
+    @@ -72,15 +72,19 @@
+         state.isAnimationRunning = true;
+         const loop = () => {
+           if (!state.isAnimationRunning) return;
+           animateSymbols(state);
+    -      requestAnimationFrame(loop);
+    +      state.animationFrameId = requestAnimationFrame(loop);
+         };
+    -    requestAnimationFrame(loop);
+    +    state.animationFrameId = requestAnimationFrame(loop);
+       }
+     
+       function stopAnimation(state) {
+         state.isAnimationRunning = false;
+    +    if (state.animationFrameId) {
+    +      cancelAnimationFrame(state.animationFrameId);
+    +      state.animationFrameId = null;
+    +    }
+
+    --- a/src/scripts/3rdDISPLAY.js
+    +++ b/src/scripts/3rdDISPLAY.js
+    @@ -220,16 +220,23 @@
+       function getVisibleSymbolRects(excludeSymbolObj = null) {
+    +    const containerRect = getContainerRect();
+    +    const w = symbolRainState.config.symbolWidth;
+    +    const h = symbolRainState.config.symbolHeight;
+         return symbolRainState.activeFallingSymbols
+           .filter(
+             (symbolObj) =>
+               symbolObj !== excludeSymbolObj &&
+               symbolObj?.isVisible &&
+               symbolObj?.element?.isConnected &&
+    -          !symbolObj.element.classList.contains("clicked"),
+    +          !symbolObj.element.classList.contains("clicked") &&
+    +          Number.isFinite(symbolObj.x) &&
+    +          Number.isFinite(symbolObj.y),
+           )
+    -      .map((symbolObj) => symbolObj.element.getBoundingClientRect())
+    -      .filter((rect) => rect.width > 0 && rect.height > 0);
+    +      .map((symbolObj) => ({
+    +        left: containerRect.left + symbolObj.x,
+    +        top: containerRect.top + symbolObj.y,
+    +        right: containerRect.left + symbolObj.x + w,
+    +        bottom: containerRect.top + symbolObj.y + h,
+    +      }));
+       }
+  ──────
+  ### Blueprint 7 — [P1-4] Normalize Worm & Spider Physics by Frame Delta-Time (dt) & Batch DOM Writes After Reads
+
+  File: worm-system.movement.js:44-104
+
+    @@ -44,6 +44,11 @@
+       proto.animate = function() {
+         if (!this.isAnimating) return;
+    +    const now = performance.now();
+    +    const dtMs = this._lastFrameTime ? Math.min(50, now - this._lastFrameTime) : 16.667;
+    +    this._lastFrameTime = now;
+    +    this.dtScale = dtMs / 16.667;
+    @@ -98,6 +103,8 @@
+           worm.crawlPhase += this.CRAWL_PHASE_INCREMENT;
+    -      this._applyWormPosition(worm);
+         }
+    +    for (let i = 0; i < this.worms.length; i++) {
+    +      if (this.worms[i].active) this._applyWormPosition(this.worms[i]);
+    +    }
+  ──────
+  ### Blueprint 8 — [P1-5] Fix Infinite Mutual Recursion on Equal-Priority Overlap in UIBoundaryManager._checkAndReposition
+
+  File: ui-boundary-manager.positioning.js:198-233
+
+    @@ -198,7 +198,9 @@
+    -  proto._checkAndReposition = function _checkAndReposition(id) {
+    +  proto._checkAndReposition = function _checkAndReposition(id, visited = new Set()) {
+    +    if (visited.has(id)) return;
+    +    visited.add(id);
+         const overlaps = this.findOverlaps(id);
+    @@ -221,11 +223,11 @@
+         const higherPriorityOverlaps = overlaps.filter(
+           (o) => o.entry.priority > entry.priority,
+         );
+    -    if (higherPriorityOverlaps.length === 0) {
+    -      // This element has equal or higher priority, reposition the others
+    -      for (const overlap of overlaps) {
+    -        if (!overlap.entry.fixed) {
+    -          this._checkAndReposition(overlap.id);
+    +    const lowerPriorityOverlaps = overlaps.filter(
+    +      (o) => o.entry.priority < entry.priority && !o.entry.fixed,
+    +    );
+    +    if (higherPriorityOverlaps.length === 0 && lowerPriorityOverlaps.length > 0) {
+    +      for (const overlap of lowerPriorityOverlaps) {
+    +        this._checkAndReposition(overlap.id, visited);
+           }
+           return;
+         }
+  ──────
+  ### Blueprint 9 — [P1-6] Preserve Remaining Step Time Across pause() / resume() & Unbind Document Listeners in ScoreTimerManager.destroy()
+
+  File: score-timer.runtime.js:90-146
+
+    @@ -90,5 +90,5 @@
+    -  function startStep(manager) {
+    +  function startStep(manager, preserveStartMs = false) {
+    @@ -106,2 +106,4 @@
+    -    manager._stepStartMs = Date.now();
+    -    manager._scoreAtStepStart = manager._cfg.initialScore;
+    +    if (!preserveStartMs) {
+    +      manager._stepStartMs = Date.now();
+    +      manager._scoreAtStepStart = manager._cfg.initialScore;
+    +    }
+    @@ -134,12 +136,13 @@
+       function pause(manager) {
+    +    if (manager._paused) return;
+    +    manager._remainingMsAtPause = getRemainingMs(manager);
+         manager._paused = true;
+         clearIntervalId(manager);
+       }
+     
+       function resume(manager) {
+         if (!manager._paused) return;
+         manager._paused = false;
+    -    const remainingMs = getRemainingMs(manager);
+    +    const remainingMs = manager._remainingMsAtPause ?? getRemainingMs(manager);
+         manager._stepStartMs = Date.now() - (manager._stepDurationMs - remainingMs);
+    -    startStep(manager);
+    +    startStep(manager, true);
+       }
+  ──────
+  ### Blueprint 10 — [P1-7], [P1-8], [P1-9] & [P1-10] UI & Runtime Hardening Fixes
+
+  1. src/scripts/welcome-page.settings.js:L85-L91, L208: Guard slider listener registration with if (el.dataset.sliderFillBound === "true") return; el.dataset.sliderFillBound = "true"; and pass this._idPrefix || "welcome-settings-" into populateForm(document, this._idPrefix) inside openSettings().
+  2. src/scripts/lock-manager.animations.js:L170-L205: When this.isLoadingComponent is true, set this._pendingProgressCheck = true; and in the finally / timeout completion callback invoke if (this._pendingProgressCheck) { this._pendingProgressCheck = false; this.progressLockLevel(); }.
+  3. src/scripts/evan-helper.presenter.js:L127-L133: Scope guardLockedUserInput so it only intercepts events when document.body?.classList.contains("evan-help-active") is true.
+  4. src/scripts/symbol-rain.interactions.js:L115-L132: Replace the continuous 60Hz requestAnimationFrame(syncLoop) in scheduleKeyboardSync with event-driven invocation on symbol resurface/hide and step completion.
+  ──────
+  ## 6. Phased Remediation Roadmap & Copy-Paste Surgical Prompts
+
+  ### Phase 1 — P0 Data-Safety, Offline & Gameplay Integrity Blockers (Immediate)
+
+  • Prompt 1A (Fix [P0-1] & [P2-3] Power-Up Split-Brain & HUD Sync):
+  │ In src/scripts/worm-system.powerups.js, update collectPowerUp and awardPowerUps to delegate inventory updates and HUD rendering to this.powerUpSystem when present, keeping this.chainLightningKillCount synchronized with this.powerUpSystem.chainLightningKillCount. In src/scripts/worm-powerups.ui.js:L335, fix the tautological Math.max(context.minY, Math.min(context.minY, maxTopFromControls)) clamp to Math.max(context.minY, Math.min(context.maxY, maxTopFromControls)).
+  │ Add an E2E assertion in tests/worm-rewards.spec.js verifying that #power-up-display badge counts update after a purple worm kill.
+
+  • Prompt 1B (Fix [P0-2], [P0-3], [P0-4] Storage Wipe, SW Install & Daily Challenge):
+  │
+  │     1. In src/scripts/service-worker-register.js, exempt persistent user-data keys (mathmaster_player_profile_v1, mathmaster_user_settings_v1, mathmaster_life_stats_v1, mathmaster_daily_challenge_v1, mathmaster_streak_v1) from automatic deletion on local/LAN build version changes, and add a regression check in tests/service-worker-update.spec.js.
+  │     2. In service-worker.js, throw an error in the install event handler when criticalFailed.length > 0 and rethrow inside the outer .catch() so broken installs never transition to activate.
+  │     3. In src/scripts/daily-challenge.js, wrap all localStorage and JSON.parse calls in try/catch, unify _getTodayKey() and _getYesterdayKey() to use local calendar dates, and fix the 6 broken equation templates in generateChallenge.
+
+
+  ### Phase 2 — P1 Frame-Budget, Coordinate Math & Lifecycle Stabilization
+
+  • Prompt 2A (Fix [P1-1], [P1-2], [P1-3], [P1-10] Panel C Symbol Rain Engine):
+  │ In src/scripts/3rdDISPLAY.js, offset candidateRect by containerRect.left and containerRect.top inside resolveControllerPlacement before calling isPlacementClear, and update getVisibleSymbolRects to compute rects from cached symbolObj.x/symbolObj.y instead of calling getBoundingClientRect() inside the 15-attempt samplePlacement loop. In src/scripts/symbol-rain.animation.js, store state.animationFrameId and cancel it in stopAnimation. In src/scripts/symbol-
+  │ rain.interactions.js, convert scheduleKeyboardSync from a per-frame requestAnimationFrame loop to an event-driven sync.
+
+  • Prompt 2B (Fix [P1-4], [P1-5], [P1-6], [P1-7], [P1-8], [P1-9] Runtime Managers):
+  │
+  │     1. In src/scripts/ui-boundary-manager.positioning.js, add a visited recursion guard to _checkAndReposition and only delegate to strictly lower-priority overlapping elements (o.entry.priority < entry.priority).
+  │     2. In src/scripts/score-timer.runtime.js, record _remainingMsAtPause in pause() and pass preserveStartMs = true to startStep() in resume(), and unbind document listeners in ScoreTimerManager.prototype.destroy().
+  │     3. Normalize worm and spider movement steps by dt / 16.667 and batch _applyWormPosition DOM writes after all per-worm layout reads in src/scripts/worm-system.movement.js.
+  │     4. Fix WelcomeSettings.openSettings idPrefix forwarding and deduplicate slider input listeners in src/scripts/welcome-page.settings.js; queue pending lock transitions during isLoadingComponent in src/scripts/lock-manager.animations.js; and restrict EvanPresenter.guardLockedUserInput to evan-help-active in src/scripts/evan-helper.presenter.js.
+
+  Sources:
+    ▸ github.com
+    ▸ github.com
+
+  (ctrl+o to expand)
+
+> /model
+  ⎿  Model set to Gemini 3.8 Flash (High)
+
+> /model
+  ⎿  Model set to Gemini 3.8 Flash (Low)
+
+────────────────────────────────────────────────────────────
+> /surgical-orchestration is this the best you can do?
+
+● Ran 2 commands (git status && git log -n 5 --oneline · git diff origin/main...HEAD --stat 2>/dev/null || git diff main...HEAD --stat) (ctrl+o to expand)
+
+  No — that was the diagnostic baseline. Now we transition from passive audit to surgical orchestration.
+  ──────
+  ### Situation Assessment & Ground Truth
+
+  1. Verify-Then-Sync Check:
+      • Active branch: task-3-worm-dup-reconciliation.
+      • Feature commits 8c99e35, f4c176d, and b23e0ec already addressed Task 3 (dead OOP Layer 3 worm purge), asset magic-byte validation, and Task 5 (CSS barrel unrolling).
+      • Working tree has uncommitted docs/plans (Plan Alpha.md, Plan Beta.md, Plan Genesis.md, docs/plans/SurgicalAudit Matmaster.txt).
+      • The core algorithmic, state-synchronization, and data-loss defects identified in our deep audit ([P0-1] through [P0-4], [P1-1] through [P1-6]) remain unresolved in source code.
+  2. The 4 Orchestrated Work Streams (Isolated Scopes):
+
+                           [Orchestration Coordinator]
+                                        |
+         +-----------------+------------+------------+-----------------+
+         |                 |                         |                 |
+     [Worker A]       [Worker B]                [Worker C]        [Worker D]
+      Scope:           Scope:                    Scope:            Scope:
+      Power-Up Core    SW & LocalStorage         Panel C Engine    Runtime Math
+      & HUD Sync       Integrity & Precache      & Placement       & Recovery
+      ([P0-1], [P2-3]) ([P0-2], [P0-3])          ([P1-1], [P1-2])  ([P0-4], [P1-5], [P1-6])
+  ──────
+  ### Work Stream Breakdown & Execution Batches
+
+  #### Batch 1 (Concurrent Workers: A & B)
+
+  • Worker A: Power-Up System & HUD Reconciliation
+      • Scope: worm-system.powerups.js, worm-powerups.ui.js.
+      • Fixes:
+          • Bridge legacy WormSystem.prototype.collectPowerUp & awardPowerUps directly into this.powerUpSystem.awardPowerUp() so #power-up-display and chainLightningKillCount stay synchronized ([P0-1]).
+	  • Fix the tautological clamp in worm-powerups.ui.js:L335 from Math.min(context.minY, maxTopFromControls) to Math.min(context.maxY, maxTopFromControls) ([P2-3]).
+      • Verification: Run npx playwright test tests/powerups.spec.js tests/worm-rewards.spec.js.
+  • Worker B: Service Worker & Storage Safety
+      • Scope: service-worker-register.js, service-worker.js.
+      • Fixes:
+          • Whitelist user lifetime profile, life stats, settings, and streak keys in clearMathMasterStorage so version bumps on LAN/localhost do not destroy player data ([P0-2]).
+	  • Throw an error in service-worker.js during install if any critical asset fails precaching; do not swallow rejections in waitUntil ([P0-3]).
+      • Verification: Run npx playwright test tests/service-worker-update.spec.js.
+
+  ──────
+  #### Batch 2 (Concurrent Workers: C & D)
+
+  • Worker C: Panel C Spatial Grid & Placement Coordinates
+      • Scope: 3rdDISPLAY.js, symbol-rain.animation.js.
+      • Fixes:
+          • Convert candidateRect to viewport-relative coordinates (containerRect.left + left) before calling isPlacementClear in resolveControllerPlacement ([P1-1]).
+	  • Eliminate 60Hz DOM rect queries in getVisibleSymbolRects by reading cached symbolObj.x/y ([P1-3]).
+	  • Store and cancel requestAnimationFrame IDs in symbol-rain.animation.js ([P1-2]).
+      • Verification: Run npx playwright test tests/symbol-rain.live-targets.spec.js tests/e2e-full-game-critical.spec.js.
+  • Worker D: Daily Challenge Integrity & Algorithmic Guardrails
+      • Scope: daily-challenge.js, ui-boundary-manager.positioning.js, score-timer.runtime.js.
+      • Fixes:
+          • Correct the 6 invalid algebraic equation templates and add try/catch around localStorage and JSON.parse in DailyChallenge ([P0-4]).
+	  • Add recursion-cycle guards in UIBoundaryManager._checkAndReposition for equal-priority element collisions ([P1-5]).
+	  • Fix pause/resume clock math in score-timer.runtime.js to preserve remaining step time ([P1-6]).
+      • Verification: Run npm run test or verification checks (node src/tools/scripts/verify.js & npx playwright test tests/ui-boundary.spec.js).
+
+  ──────
+  ### Ready to Execute
+
+  Shall we begin Batch 1 (Worker A & Worker B) immediately to eliminate the P0 data-loss and broken power-up synchronization blockers?
+
+

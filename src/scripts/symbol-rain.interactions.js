@@ -389,6 +389,7 @@
         );
 
         if (handleFallbackClick) {
+          symbolRainContainer.removeEventListener("touchstart", handleFallbackClick);
           symbolRainContainer.removeEventListener("click", handleFallbackClick);
         }
 

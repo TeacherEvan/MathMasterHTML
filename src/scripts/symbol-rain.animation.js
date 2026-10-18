@@ -72,15 +72,20 @@
     function loop() {
       if (state.isAnimationRunning) {
         animateSymbols(state);
-        requestAnimationFrame(loop);
+        state.animationFrameId = requestAnimationFrame(loop);
       }
     }
 
-    loop();
+    state.animationFrameId = requestAnimationFrame(loop);
   }
 
   function stopAnimation(state) {
     state.isAnimationRunning = false;
+
+    if (state.animationFrameId) {
+      cancelAnimationFrame(state.animationFrameId);
+      state.animationFrameId = null;
+    }
 
     if (state.speedControllerId) {
       clearInterval(state.speedControllerId);

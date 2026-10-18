@@ -1009,11 +1009,12 @@ function initSymbolRain() {
         return null;
       }
 
+      const containerRect = getContainerBounds();
       const candidateRect = {
-        left,
-        top,
-        right: left + symbolWidth,
-        bottom: top + symbolHeight,
+        left: (containerRect?.left || 0) + left,
+        top: (containerRect?.top || 0) + top,
+        right: (containerRect?.left || 0) + left + symbolWidth,
+        bottom: (containerRect?.top || 0) + top + symbolHeight,
         width: symbolWidth,
         height: symbolHeight,
       };

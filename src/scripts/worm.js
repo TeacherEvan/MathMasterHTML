@@ -252,7 +252,7 @@ class WormSystem {
 
     this.cachedHelpButton = document.getElementById("help-button");
     this.cachedPowerUpDisplay = document.getElementById("power-up-display");
-    this.cachedPanelC = document.getElementById("third-display");
+    this.cachedPanelC = document.getElementById("panel-c") || document.getElementById("third-display");
     this.cachedGameOverModal = document.getElementById("game-over-modal");
 
     const eventCapableSelf =

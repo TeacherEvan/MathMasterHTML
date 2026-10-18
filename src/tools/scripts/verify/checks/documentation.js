@@ -17,6 +17,7 @@ const ROOT_GOVERNANCE_FILES = new Set([
 ]);
 const IGNORED_DIRECTORIES = new Set([
   ".git",
+  ".superpowers",
   ".worktrees",
   ".devcontainer",
   "cosmic-ui",

@@ -135,5 +135,15 @@ test.describe("Worm rewards", () => {
       return p.chainLightning + p.spider + p.devil;
     });
     expect(afterTotal).toBe(beforeTotal + 2);
+
+    // Verify HUD display reflects the awarded power-ups
+    const displayElement = page.locator("#power-up-display");
+    await expect(displayElement).toBeVisible();
+    const hudCounts = await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll("#power-up-display button[data-testid]"));
+      return buttons.map((b) => Number.parseInt(b.querySelector(".power-up-item-value")?.textContent?.replace(/[^\d]/g, "") || "0", 10));
+    });
+    const hudTotal = hudCounts.reduce((sum, n) => sum + n, 0);
+    expect(hudTotal).toBe(afterTotal);
   });
 });

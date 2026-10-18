@@ -333,7 +333,7 @@
         ),
       ),
       top: Math.round(
-        Math.max(context.minY, Math.min(context.minY, maxTopFromControls)),
+        Math.min(context.minY, Math.max(0, maxTopFromControls)),
       ),
     };
   };

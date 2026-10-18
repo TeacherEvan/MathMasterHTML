@@ -331,9 +331,9 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
         startTime + duration + release,
       );
 
-      oscillator.connect(filter);
+      let panner = null;
       if (typeof context.createStereoPanner === "function") {
-        const panner = context.createStereoPanner();
+        panner = context.createStereoPanner();
         panner.pan.value = layer.pan ?? 0;
         filter.connect(panner);
         panner.connect(gainNode);
@@ -344,9 +344,14 @@ console.log("🔊 Cyberpunk Interaction Audio core loading...");
       gainNode.connect(this.masterGain);
       oscillator.onended = () => {
         this.activeVoices = Math.max(0, this.activeVoices - 1);
-        oscillator.disconnect();
-        filter.disconnect();
-        gainNode.disconnect();
+        try {
+          oscillator.disconnect();
+          filter.disconnect();
+          panner?.disconnect();
+          gainNode.disconnect();
+        } catch {
+          // Ignore disconnection errors on closed context
+        }
       };
 
       oscillator.start(startTime);

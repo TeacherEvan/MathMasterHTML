@@ -87,7 +87,7 @@
     }
   }
 
-  function startStep(manager) {
+  function startStep(manager, preserveStartMs = false) {
     console.log(
       "⏱️ startStep() called - _paused:",
       manager._paused,
@@ -103,8 +103,10 @@
       return;
     }
 
-    manager._stepStartMs = Date.now();
-    manager._scoreAtStepStart = manager._cfg.initialScore;
+    if (!preserveStartMs) {
+      manager._stepStartMs = Date.now();
+      manager._scoreAtStepStart = manager._cfg.initialScore;
+    }
 
     clearIntervalId(manager);
 
@@ -132,6 +134,8 @@
   }
 
   function pause(manager) {
+    if (manager._paused) return;
+    manager._remainingMsAtPause = getRemainingMs(manager);
     manager._paused = true;
     clearIntervalId(manager);
   }
@@ -139,9 +143,9 @@
   function resume(manager) {
     if (!manager._paused) return;
     manager._paused = false;
-    const remainingMs = getRemainingMs(manager);
+    const remainingMs = manager._remainingMsAtPause ?? getRemainingMs(manager);
     manager._stepStartMs = Date.now() - (manager._stepDurationMs - remainingMs);
-    startStep(manager);
+    startStep(manager, true);
   }
 
   window.ScoreTimerModules = window.ScoreTimerModules || {};

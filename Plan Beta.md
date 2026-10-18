@@ -4,6 +4,12 @@
 
 Plan Beta is the roadmap and execution source of truth. It absorbs the old competition roadmap, execution matrix, recent superpower plans, brainstorm artifacts, and context maps.
 
+## Cross-references
+
+- [`README.md`](README.md): quick start, core pages, runtime notes, scripts, and validation.
+- [`docs/project-plan.md`](docs/project-plan.md): consolidated project plan and documentation index.
+- [`docs/index.md`](docs/index.md): documentation index and cross-reference map for all maintained docs.
+
 ## Active Product Priorities
 
 1. Android WebView remains the primary quality bar.

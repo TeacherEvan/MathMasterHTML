@@ -99,13 +99,22 @@ console.log("⏱️ ScoreTimerManager loading...");
         );
       }
 
-      document.addEventListener(GameEvents.PROBLEM_LINE_COMPLETED, (e) => {
-        this.completeStep(e?.detail);
-      });
+      if (this._onProblemLineCompleted) {
+        document.removeEventListener(GameEvents.PROBLEM_LINE_COMPLETED, this._onProblemLineCompleted);
+      }
+      if (this._onProblemCompleted) {
+        document.removeEventListener(GameEvents.PROBLEM_COMPLETED, this._onProblemCompleted);
+      }
 
-      document.addEventListener(GameEvents.PROBLEM_COMPLETED, () => {
+      this._onProblemLineCompleted = (e) => {
+        this.completeStep(e?.detail);
+      };
+      this._onProblemCompleted = () => {
         this.onProblemCompleted(level);
-      });
+      };
+
+      document.addEventListener(GameEvents.PROBLEM_LINE_COMPLETED, this._onProblemLineCompleted);
+      document.addEventListener(GameEvents.PROBLEM_COMPLETED, this._onProblemCompleted);
 
       if (modules.registerHudElements) {
         modules.registerHudElements(
@@ -220,6 +229,22 @@ console.log("⏱️ ScoreTimerManager loading...");
       this._manualPause = true;
       this._problemStarted = false;
       this._gameStarted = false;
+      if (this._onProblemLineCompleted) {
+        const GameEvents = window.GameEvents || {
+          PROBLEM_LINE_COMPLETED: "problemLineCompleted",
+          PROBLEM_COMPLETED: "problemCompleted",
+        };
+        document.removeEventListener(GameEvents.PROBLEM_LINE_COMPLETED, this._onProblemLineCompleted);
+        this._onProblemLineCompleted = null;
+      }
+      if (this._onProblemCompleted) {
+        const GameEvents = window.GameEvents || {
+          PROBLEM_LINE_COMPLETED: "problemLineCompleted",
+          PROBLEM_COMPLETED: "problemCompleted",
+        };
+        document.removeEventListener(GameEvents.PROBLEM_COMPLETED, this._onProblemCompleted);
+        this._onProblemCompleted = null;
+      }
       if (modules.clearIntervalId) {
         modules.clearIntervalId(this);
       }

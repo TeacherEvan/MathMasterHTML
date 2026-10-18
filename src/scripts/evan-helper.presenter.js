@@ -125,6 +125,7 @@
   }
 
   function guardLockedUserInput(event) {
+    if (!document.body?.classList.contains("evan-help-active")) return;
     const isLocked =
       window.GameRuntimeCoordinator?.getState?.().inputLocked ??
       document.body.classList.contains("evan-input-locked");

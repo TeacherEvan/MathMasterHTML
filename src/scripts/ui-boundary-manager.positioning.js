@@ -195,7 +195,10 @@ console.log("📐 UIBoundaryManager positioning loading...");
    * @param {string} id - Element ID to check
    * @private
    */
-  proto._checkAndReposition = function _checkAndReposition(id) {
+  proto._checkAndReposition = function _checkAndReposition(id, visited = new Set()) {
+    if (visited.has(id)) return;
+    visited.add(id);
+
     const overlaps = this.findOverlaps(id);
 
     if (overlaps.length === 0) return;
@@ -215,18 +218,20 @@ console.log("📐 UIBoundaryManager positioning loading...");
       });
     }
 
-    // Don't reposition if fixed or if we have higher priority
+    // Don't reposition if fixed
     if (entry.fixed) return;
 
     const higherPriorityOverlaps = overlaps.filter(
       (o) => o.entry.priority > entry.priority,
     );
-    if (higherPriorityOverlaps.length === 0) {
-      // This element has equal or higher priority, reposition the others
-      for (const overlap of overlaps) {
-        if (!overlap.entry.fixed) {
-          this._checkAndReposition(overlap.id);
-        }
+    const lowerPriorityOverlaps = overlaps.filter(
+      (o) => o.entry.priority < entry.priority && !o.entry.fixed,
+    );
+
+    if (higherPriorityOverlaps.length === 0 && lowerPriorityOverlaps.length > 0) {
+      // This element has strictly higher priority, reposition the lower ones
+      for (const overlap of lowerPriorityOverlaps) {
+        this._checkAndReposition(overlap.id, visited);
       }
       return;
     }

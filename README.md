@@ -42,6 +42,9 @@ Open `http://localhost:8000/game.html?level=beginner` after the server starts.
 - `Plan Beta.md`: roadmap and execution priorities
 - `Plan Alpha.md`: product, UX, and design rules
 - `JOBCARD.md`: rolling work log
+- `docs/project-plan.md`: consolidated project plan and doc index
+- `docs/index.md`: documentation index and cross-reference map
+- `docs/SECURITY.md`: canonical output-escaping rule (`window.DomSanitizer.escapeHTML`)
 
 ## Validation
 

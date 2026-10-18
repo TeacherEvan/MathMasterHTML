@@ -4,6 +4,12 @@
 
 Plan Alpha is the product, UX, and design source of truth. It absorbs the old task brief, UX research artifacts, and aesthetic/context maps.
 
+## Cross-references
+
+- [`README.md`](README.md): quick start, core pages, runtime notes, scripts, and validation.
+- [`docs/project-plan.md`](docs/project-plan.md): consolidated project plan and documentation index.
+- [`docs/index.md`](docs/index.md): documentation index and cross-reference map for all maintained docs.
+
 ## Users
 
 - Primary audience: solo algebra learners, especially teens and adult self-learners.

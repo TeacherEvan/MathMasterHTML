@@ -27,6 +27,8 @@ export const REQUIRED_DOCS = [
   "Plan Alpha.md",
   "README.md",
   "docs/SECURITY.md",
+  "docs/index.md",
+  "docs/project-plan.md",
 ];
 
 export const JS_DIRECTORIES = [

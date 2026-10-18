@@ -27,18 +27,26 @@ console.log("📅 DailyChallenge loading...");
   // Get today's challenge problem
   function getTodaysChallenge() {
     const today = todayStr();
-    const stored = localStorage.getItem(DAILY_CHALLENGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed.date === today) {
-        return parsed.challenge;
+    try {
+      const stored = localStorage.getItem(DAILY_CHALLENGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.date === today) {
+          return parsed.challenge;
+        }
       }
+    } catch (e) {
+      console.warn("⚠️ Failed to read daily challenge:", e);
     }
 
     // Generate new daily challenge
     const seed = dateSeed();
     const challenge = generateChallenge(seed, today);
-    localStorage.setItem(DAILY_CHALLENGE_KEY, JSON.stringify({ date: today, challenge }));
+    try {
+      localStorage.setItem(DAILY_CHALLENGE_KEY, JSON.stringify({ date: today, challenge }));
+    } catch (e) {
+      console.warn("⚠️ Failed to write daily challenge:", e);
+    }
     return challenge;
   }
 
@@ -78,33 +86,50 @@ console.log("📅 DailyChallenge loading...");
       A = Math.floor(rand() * 9) + 1; // 1-9
       B = Math.floor(rand() * 9) + 1;
       X = Math.floor(rand() * 9) + 1;
-      // Compute C to make equation valid
-      if (tmpl.template.includes("X")) {
-        if (tmpl.template === "A + B - X = C") C = A + B - X;
-        else if (tmpl.template === "A - X = B") C = A - X;
-        else if (tmpl.template === "X + A = B") C = X + A;
+      if (tmpl.template === "A + B - X = C") {
+        C = A + B - X;
+      } else if (tmpl.template === "A - X = B") {
+        A = X + Math.floor(rand() * 9) + 1;
+        B = A - X;
+        C = B;
+      } else if (tmpl.template === "X + A = B") {
+        B = X + A;
+        C = B;
       }
     } else if (level === "warrior") {
       A = Math.floor(rand() * 12) + 2; // 2-13
       B = Math.floor(rand() * 12) + 2;
       X = Math.floor(rand() * 12) + 2;
-      if (tmpl.template === "A × B - X = C") C = A * B - X;
-      else if (tmpl.template === "A × X = B") C = A * X;
-      else if (tmpl.template === "A × B + X = C") C = A * B + X;
-      else if (tmpl.template === "X × A = B") C = X * A;
+      if (tmpl.template === "A × B - X = C") {
+        C = A * B - X;
+      } else if (tmpl.template === "A × X = B") {
+        B = A * X;
+        C = B;
+      } else if (tmpl.template === "A × B + X = C") {
+        C = A * B + X;
+      } else if (tmpl.template === "X × A = B") {
+        B = X * A;
+        C = B;
+      }
     } else { // master
       // For division, ensure clean division
       X = Math.floor(rand() * 12) + 2;
       B = Math.floor(rand() * 12) + 2;
-      A = X * B; // ensures A ÷ B = X
-      if (tmpl.template === "A ÷ B = X") C = X;
-      else if (tmpl.template === "A ÷ X = B") C = B;
-      else if (tmpl.template === "X ÷ A = B") C = B;
-      else if (tmpl.template === "A × B ÷ X = C") {
+      if (tmpl.template === "A ÷ B = X") {
+        A = X * B;
+        C = X;
+      } else if (tmpl.template === "A ÷ X = B") {
+        A = X * B;
+        C = B;
+      } else if (tmpl.template === "X ÷ A = B") {
         A = Math.floor(rand() * 12) + 2;
+        X = A * B;
+        C = B;
+      } else if (tmpl.template === "A × B ÷ X = C") {
         B = Math.floor(rand() * 12) + 2;
-        X = Math.floor(rand() * 12) + 2;
-        C = Math.floor(A * B / X);
+        C = Math.floor(rand() * 12) + 2;
+        X = B;
+        A = C;
       }
     }
 

@@ -99,7 +99,15 @@ function writeStoredBuildVersion(buildVersion) {
   }
 }
 
-function clearMathMasterStorage(storage) {
+const PRESERVED_USER_STORAGE_KEYS = new Set([
+  "mathmaster_player_profile_v1",
+  "mathmaster_user_settings_v1",
+  "mathmaster_life_stats_v1",
+  "mathmaster_daily_challenge_v1",
+  "mathmaster_streak_v1",
+]);
+
+function clearMathMasterStorage(storage, preserveUserData = true) {
   if (!storage) {
     return;
   }
@@ -107,7 +115,11 @@ function clearMathMasterStorage(storage) {
   try {
     for (let index = storage.length - 1; index >= 0; index -= 1) {
       const key = storage.key(index);
-      if (key && key.startsWith(APP_STORAGE_PREFIX)) {
+      if (
+        key &&
+        key.startsWith(APP_STORAGE_PREFIX) &&
+        (!preserveUserData || !PRESERVED_USER_STORAGE_KEYS.has(key))
+      ) {
         storage.removeItem(key);
       }
     }
