@@ -2,14 +2,26 @@
  * tests/unit/worm-evasion.spec.js - Unit tests for WormEvasion class
  */
 
-import { describe, expect, test } from "@playwright/test";
-import { WormEvasion } from "../../src/scripts/worm-evasion.js";
+import { expect, test } from "@playwright/test";
+import fs from "node:fs";
+import vm from "node:vm";
 import { createWormMock } from "../mocks/worm-mock.js";
+
+const { describe } = test;
+
+const evasionCode = fs.readFileSync(
+  new URL("../../src/scripts/worm-evasion.js", import.meta.url),
+  "utf8",
+);
+const evasionContext = { console, window: {} };
+vm.createContext(evasionContext);
+vm.runInContext(evasionCode, evasionContext);
+const WormEvasion = evasionContext.window.WormEvasion || evasionContext.WormEvasion;
 
 describe("WormEvasion", () => {
   let evasion;
 
-  beforeEach(() => {
+  test.beforeEach(() => {
     evasion = new WormEvasion({
       cursorThreatRadius: 140,
       cursorEscapeRadius: 220,
@@ -146,7 +158,7 @@ describe("WormEvasion", () => {
       );
 
       // Escape should be in opposite direction (right)
-      expect(result.velocityX).toBePositive();
+      expect(result.velocityX).toBeGreaterThan(0);
       expect(result.velocityY).toBeCloseTo(0, 5);
       expect(result.direction).toBeCloseTo(0, 5);
     });
@@ -162,7 +174,7 @@ describe("WormEvasion", () => {
       );
 
       // Escape should be in opposite direction (left)
-      expect(result.velocityX).toBeNegative();
+      expect(result.velocityX).toBeLessThan(0);
       expect(result.velocityY).toBeCloseTo(0, 5);
       expect(result.direction).toBeCloseTo(Math.PI, 5);
     });
@@ -179,7 +191,7 @@ describe("WormEvasion", () => {
 
       // Escape should be in opposite direction (down)
       expect(result.velocityX).toBeCloseTo(0, 5);
-      expect(result.velocityY).toBePositive();
+      expect(result.velocityY).toBeGreaterThan(0);
       expect(result.direction).toBeCloseTo(Math.PI / 2, 5);
     });
 
@@ -195,7 +207,7 @@ describe("WormEvasion", () => {
 
       // Escape should be in opposite direction (up)
       expect(result.velocityX).toBeCloseTo(0, 5);
-      expect(result.velocityY).toBeNegative();
+      expect(result.velocityY).toBeLessThan(0);
       expect(result.direction).toBeCloseTo(-Math.PI / 2, 5);
     });
 
@@ -310,25 +322,25 @@ describe("WormEvasion", () => {
     });
 
     test("should calculate avoidance when worm is near obstacle edge", () => {
-      const worm = createWormMock({ x: 188, y: 150 }); // Just outside right edge of obstacle
+      const worm = createWormMock({ x: 88, y: 150 }); // Just outside left edge of obstacle
       const obstacles = [{ left: 100, top: 100, right: 200, bottom: 200 }];
 
       const result = evasion.applyObstacleAvoidance(worm, obstacles);
 
       // Should push worm left (negative x)
-      expect(result.x).toBeNegative();
+      expect(result.x).toBeLessThan(0);
       expect(result.y).toBeCloseTo(0, 5);
     });
 
     test("should calculate avoidance from closest point on obstacle", () => {
-      const worm = createWormMock({ x: 250, y: 150 }); // Outside right side
+      const worm = createWormMock({ x: 210, y: 150 }); // Outside right side
       const obstacles = [{ left: 100, top: 100, right: 200, bottom: 200 }];
 
       const result = evasion.applyObstacleAvoidance(worm, obstacles);
 
       // Closest point is (200, 150), so avoidance should be away from it
-      // Vector from (200, 150) to (250, 150) is (50, 0)
-      expect(result.x).toBePositive();
+      // Vector from (200, 150) to (210, 150) is (10, 0)
+      expect(result.x).toBeGreaterThan(0);
       expect(result.y).toBeCloseTo(0, 5);
     });
 
@@ -341,7 +353,7 @@ describe("WormEvasion", () => {
         obstaclePadding: 12,
       });
 
-      const worm = createWormMock({ x: 188, y: 150 });
+      const worm = createWormMock({ x: 88, y: 150 });
       const obstacles = [{ left: 100, top: 100, right: 200, bottom: 200 }];
 
       const result = customEvasion.applyObstacleAvoidance(worm, obstacles);
@@ -360,17 +372,16 @@ describe("WormEvasion", () => {
       const result = evasion.applyObstacleAvoidance(worm, obstacles);
 
       // Should have combined avoidance pushing down
-      expect(result.y).toBePositive();
+      expect(result.y).toBeGreaterThan(0);
     });
 
     test("should apply falloff for distant obstacles", () => {
-      const worm = createWormMock({ x: 280, y: 150 }); // Within 3x padding (36) from edge
+      const worm = createWormMock({ x: 220, y: 150 }); // Within 3x padding (36) from edge (right: 200)
       const obstacles = [{ left: 100, top: 100, right: 200, bottom: 200 }];
 
       const result = evasion.applyObstacleAvoidance(worm, obstacles);
 
-      // Distance from closest point (200, 150) to worm (280, 150) is 80
-      // Closest point on edge is (200, 150), which is at padding distance (12)
+      // Distance from closest point (200, 150) to worm (220, 150) is 20 (< 36)
       // So falloff should apply
       expect(Math.abs(result.x)).toBeGreaterThan(0);
     });

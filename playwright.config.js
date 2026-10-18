@@ -30,9 +30,8 @@ const shouldSerializeFocusedMobileA11yLane =
  */
 export default defineConfig({
   testDir: "./tests",
-  // Keep Playwright focused on browser E2E specs.
-  // Unit/integration suites under these folders use Jest-style mocks and APIs.
-  testIgnore: ["**/unit/**", "**/integration/**", "**/performance/**"],
+  // Integration and performance suites use specialized mock/bench runners.
+  testIgnore: ["**/integration/**", "**/performance/**"],
   outputDir: "test-results/default",
   /* Run tests in files in parallel */
   fullyParallel: true,
