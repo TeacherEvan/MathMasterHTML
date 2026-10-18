@@ -281,12 +281,25 @@ self.addEventListener("install", (event) => {
 
         const results = await Promise.allSettled(installTasks);
 
-        const failed = results
-          .filter(
-            (result) =>
-              result.status === "fulfilled" && result.value && !result.value.success,
-          )
-          .map((result) => result.value);
+        const failed = [];
+        for (let i = 0; i < results.length; i += 1) {
+          const result = results[i];
+          if (result.status === "fulfilled") {
+            if (result.value && !result.value.success) {
+              failed.push(result.value);
+            }
+          } else {
+            failed.push({
+              assetPath: installAssets[i] || "unknown",
+              success: false,
+              attempts: 1,
+              error:
+                result.reason instanceof Error
+                  ? result.reason
+                  : new Error(String(result.reason)),
+            });
+          }
+        }
 
         const criticalFailed = failed.filter((f) => isCriticalInstallAsset(f.assetPath));
         const nonCriticalFailed = failed.filter(

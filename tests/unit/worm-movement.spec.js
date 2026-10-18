@@ -3,11 +3,14 @@
  * Tests the actual browser implementation via page evaluation
  */
 
-import { describe, expect, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+
+const { describe } = test;
 
 describe("WormMovement", () => {
-  beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     // Load the movement module in the browser context
+    await page.setContent("<!DOCTYPE html><html><body></body></html>");
     await page.addScriptTag({ path: "./src/scripts/worm-movement.js" });
   });
 
@@ -424,9 +427,9 @@ describe("WormMovement", () => {
         return movement.applyCrawlEffect(worm);
       });
 
-      // At phase PI/2, sin is 1, offset should be CRAWL_AMPLITUDE
-      expect(result.x).toBeCloseTo(100 + 0.5, 5);
-      expect(result.y).toBeCloseTo(100, 5);
+      // At phase PI/2, sin is 1, perpendicular offset is along Y when moving along X (direction 0)
+      expect(result.x).toBeCloseTo(100, 5);
+      expect(result.y).toBeCloseTo(100 + 0.5, 5);
     });
 
     test("should handle zero crawl phase", async ({ page }) => {

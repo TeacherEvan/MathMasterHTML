@@ -31,11 +31,12 @@ console.log("🐛 Worm movement core loading...");
     targetY,
     speedMultiplier = 1,
   ) {
+    const scale = Number.isFinite(this.dtScale) ? this.dtScale : 1.0;
     return this.movement.calculateVelocityToTarget(
       worm,
       targetX,
       targetY,
-      speedMultiplier,
+      speedMultiplier * scale,
     );
   };
 

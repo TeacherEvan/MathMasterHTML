@@ -1,4 +1,6 @@
-import { describe, expect, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+
+const { describe } = test;
 
 describe("WormNearMissUI", () => {
   test("applies near-miss UI classes and urgency", async ({ page }) => {

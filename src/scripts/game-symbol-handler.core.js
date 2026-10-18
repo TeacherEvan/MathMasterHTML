@@ -223,8 +223,12 @@ console.log("🔤 Game symbol handler core loading...");
     checkLineCompletion,
     revealHelpSymbol,
     getCurrentStepIndex,
-    totalCorrectAnswers,
-    consecutiveWrongAnswers,
+    get totalCorrectAnswers() {
+      return totalCorrectAnswers;
+    },
+    get consecutiveWrongAnswers() {
+      return consecutiveWrongAnswers;
+    },
     PURPLE_WORM_THRESHOLD,
   };
 

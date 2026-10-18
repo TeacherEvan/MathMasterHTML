@@ -16,6 +16,11 @@ const redirectCases = [
     entrypoint: "/level-select.html?source=redirect-test#warrior",
     expected: /\/src\/pages\/level-select\.html\?source=redirect-test#warrior$/,
   },
+  {
+    name: "life-stats entrypoint preserves query parameters and hash fragments",
+    entrypoint: "/life-stats.html?source=redirect-test#stats",
+    expected: /\/src\/pages\/life-stats\.html\?source=redirect-test#stats$/,
+  },
 ];
 
 test.describe("root redirect entrypoints", () => {

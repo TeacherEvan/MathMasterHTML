@@ -50,7 +50,7 @@ class WormPathfinder {
       iterations++;
 
       let currentIndex = 0;
-      let currentKey = keyFor(open[0]);
+      const currentKey = keyFor(open[0]);
       let currentScore = fScore.get(currentKey) ?? Infinity;
 
       for (let i = 1; i < open.length; i++) {

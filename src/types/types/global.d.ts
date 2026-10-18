@@ -7,6 +7,7 @@ declare global {
   const WormFactory: any;
   const WormMovement: any;
   const WormSpawnManager: any;
+  const WormEvasion: any;
   function normalizeGameLevel(level: string | null | undefined): GameLevel;
   function getLevelFromURL(): GameLevel;
 

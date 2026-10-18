@@ -9,6 +9,7 @@ const resolveSharedResizeObserverHub =
     }
 
     const subscribers = new Set();
+    const subscriberSources = new Map();
     const sources =
       window.__sharedResizeObserverSources ||
       (window.__sharedResizeObserverSources = new Set());
@@ -64,6 +65,7 @@ const resolveSharedResizeObserverHub =
       observer: resizeObserver,
       subscribe(callback, { immediate = false, source = "anonymous" } = {}) {
         subscribers.add(callback);
+        subscriberSources.set(callback, source);
         sources.add(source);
         if (immediate) {
           callback({
@@ -72,7 +74,17 @@ const resolveSharedResizeObserverHub =
             height: window.innerHeight,
           });
         }
-        return () => subscribers.delete(callback);
+        return () => {
+          subscribers.delete(callback);
+          const removedSource = subscriberSources.get(callback);
+          subscriberSources.delete(callback);
+          if (
+            removedSource &&
+            !Array.from(subscriberSources.values()).includes(removedSource)
+          ) {
+            sources.delete(removedSource);
+          }
+        };
       },
       notify,
       getSubscriberCount() {

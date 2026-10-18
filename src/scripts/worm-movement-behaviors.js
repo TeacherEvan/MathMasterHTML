@@ -33,8 +33,9 @@ console.log("🐛 Worm movement behaviors loading...");
     const dy = worm.devilY - worm.y;
 
     if (distance > 5) {
-      // Rush toward devil at double speed
-      const rushSpeed = worm.baseSpeed * 2;
+      // Rush toward devil at double speed, normalized by frame dtScale
+      const scale = Number.isFinite(this.dtScale) ? this.dtScale : 1.0;
+      const rushSpeed = worm.baseSpeed * 2 * scale;
       worm.velocityX = (dx / distance) * rushSpeed;
       worm.velocityY = (dy / distance) * rushSpeed;
       worm.direction = Math.atan2(dy, dx);
@@ -45,6 +46,7 @@ console.log("🐛 Worm movement behaviors loading...");
       this._updateWormRotation(worm);
     }
 
+    this._applyWormPosition(worm);
     return true; // Handled, skip other behaviors
   };
 
@@ -61,14 +63,15 @@ console.log("🐛 Worm movement behaviors loading...");
     if (worm.escapeUntil && Date.now() <= worm.escapeUntil) return false;
     if (!this.evasion.isCursorThreat(worm, this.cursorState)) return false;
 
+    const scale = Number.isFinite(this.dtScale) ? this.dtScale : 1.0;
     const escape = this.evasion.getCursorEscapeVector(
       worm,
       this.cursorState,
       worm.baseSpeed,
     );
 
-    worm.velocityX = escape.velocityX;
-    worm.velocityY = escape.velocityY;
+    worm.velocityX = escape.velocityX * scale;
+    worm.velocityY = escape.velocityY * scale;
     worm.direction = escape.direction;
     worm.x += worm.velocityX;
     worm.y += worm.velocityY;
@@ -96,7 +99,8 @@ console.log("🐛 Worm movement behaviors loading...");
       return false;
     }
 
-    const speed = worm.baseSpeed * this.CURSOR_ESCAPE_MULTIPLIER;
+    const scale = Number.isFinite(this.dtScale) ? this.dtScale : 1.0;
+    const speed = worm.baseSpeed * this.CURSOR_ESCAPE_MULTIPLIER * scale;
     worm.velocityX = worm.escapeVector.x * speed;
     worm.velocityY = worm.escapeVector.y * speed;
     worm.direction = Math.atan2(worm.velocityY, worm.velocityX);
