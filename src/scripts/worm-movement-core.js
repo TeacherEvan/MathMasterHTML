@@ -96,13 +96,15 @@ console.log("🐛 Worm movement core loading...");
    * @private
    */
   proto._applyCrawlMovement = function (worm) {
-    worm.direction += (Math.random() - 0.5) * this.DIRECTION_CHANGE_RATE;
+    const scale = Number.isFinite(this.dtScale) ? this.dtScale : 1.0;
+    worm.direction +=
+      (Math.random() - 0.5) * this.DIRECTION_CHANGE_RATE * scale;
     const crawlOffset = Math.sin(worm.crawlPhase) * this.CRAWL_AMPLITUDE;
 
     worm.velocityX =
-      Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset);
+      Math.cos(worm.direction) * (worm.currentSpeed + crawlOffset) * scale;
     worm.velocityY =
-      Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset);
+      Math.sin(worm.direction) * (worm.currentSpeed + crawlOffset) * scale;
 
     worm.x += worm.velocityX;
     worm.y += worm.velocityY;

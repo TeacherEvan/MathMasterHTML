@@ -64,14 +64,22 @@ console.log("🐛 Worm movement animate loading...");
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     const now = Date.now();
+    const frameNow = performance.now();
+    const dtMs = this._lastFrameTime
+      ? Math.min(50, Math.max(8, frameNow - this._lastFrameTime))
+      : 16.667;
+    this._lastFrameTime = frameNow;
+    const dtScale = dtMs / 16.667;
+    this.dtScale = dtScale;
 
     // Iterate backwards so splice-removal inside handlers doesn't skip entries
     for (let i = this.worms.length - 1; i >= 0; i--) {
       const worm = this.worms[i];
       if (!worm || !worm.active) continue;
 
-      // Advance crawl phase each frame for the inchworm animation
-      worm.crawlPhase = (worm.crawlPhase + this.CRAWL_PHASE_INCREMENT) % TWO_PI;
+      // Advance crawl phase scaled by dt for smooth inchworm animation at 60Hz-144Hz
+      worm.crawlPhase =
+        (worm.crawlPhase + this.CRAWL_PHASE_INCREMENT * dtScale) % TWO_PI;
 
       // Transition from roaming to rushing once the roam timer expires
       if (
@@ -95,10 +103,18 @@ console.log("🐛 Worm movement animate loading...");
       } catch (err) {
         console.error(`🐛 Worm ${worm.id} behavior error:`, err);
       }
+    }
 
-      // Apply updated position to DOM (skip if worm was removed during this tick)
-      if (worm.active && worm.element && worm.element.parentNode) {
-        this._applyWormPosition(worm);
+    // Batched DOM write pass: commit all calculated coordinates without interleaving reads
+    for (let j = 0; j < this.worms.length; j++) {
+      const activeWorm = this.worms[j];
+      if (
+        activeWorm &&
+        activeWorm.active &&
+        activeWorm.element &&
+        activeWorm.element.parentNode
+      ) {
+        this._applyWormPosition(activeWorm);
       }
     }
   };

@@ -45,8 +45,6 @@ console.log("🐛 Worm movement behaviors loading...");
       this._updateWormRotation(worm);
     }
 
-    // Apply position
-    this._applyWormPosition(worm);
     return true; // Handled, skip other behaviors
   };
 
