@@ -79,3 +79,6 @@ cosmic-ui/dist/
 cosmic-ui/.cache/
 cosmic-ui/coverage/
 cosmic-ui/.vite/
+
+# Vercel deployment artifacts
+.vercel/
