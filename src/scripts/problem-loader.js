@@ -226,11 +226,52 @@ class ProblemLoader {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Backwards-compatible GameProblemLoader API
+//
+// game.html loads problem-loader.js (which exposes window.ProblemLoader) and
+// historically loaded game-problem-loader.js (which exposed
+// window.GameProblemLoader). The callback-based GameProblemLoader API lives
+// here now, delegating to the ProblemLoader class internals so that
+// loading/caching logic exists in a single module. Both
+// window.ProblemLoader and window.GameProblemLoader remain available.
+// ---------------------------------------------------------------------------
+function attachGameProblemLoader() {
+  const sharedLoader = new ProblemLoader();
+
+  window.GameProblemLoader = {
+    /**
+     * Load problems for a level using the callback-based GameProblemLoader API.
+     * Delegates to ProblemLoader internals (getProblemPath + loadProblems).
+     * @param {Object} options
+     * @param {string} options.level - Difficulty level
+     * @param {Function} [options.onLoaded] - Called with parsed problems
+     * @param {Function} [options.onError] - Called on load failure
+     * @param {Function} [options.showSkeleton] - Called with {level, problemPath}
+     */
+    loadProblems({ level, onLoaded, onError, showSkeleton } = {}) {
+      const problemPath = sharedLoader.getProblemPath(level);
+
+      showSkeleton?.({ level, problemPath });
+
+      sharedLoader
+        .loadProblems(level)
+        .then((problems) => {
+          onLoaded?.(problems);
+        })
+        .catch((error) => {
+          onError?.(error);
+        });
+    },
+  };
+}
+
 // Export for use in other modules
 if (typeof module !== "undefined" && module.exports) {
   module.exports = ProblemLoader;
 } else {
   window.ProblemLoader = ProblemLoader;
+  attachGameProblemLoader();
 }
 
 console.log("✅ Problem Loader Module Loaded");

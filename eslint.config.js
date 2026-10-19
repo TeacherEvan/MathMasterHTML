@@ -19,7 +19,6 @@ export default [
   {
     files: [
       "src/scripts/**/*.js",
-      "lock/**/*.js",
       "src/tools/middle-screen/**/*.js",
     ],
     languageOptions: {
