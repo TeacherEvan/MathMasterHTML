@@ -9,6 +9,7 @@ class LazyComponentLoader {
     this.loadingPromises = new Map();
     this.preloadQueue = [];
     this.isPreloading = false;
+    this.readyPromise = null;
   }
 
   /**
@@ -67,12 +68,27 @@ class LazyComponentLoader {
     console.log(`📥 Queuing ${componentPaths.length} components for preload`);
     this.preloadQueue = [...componentPaths];
 
+    // Create a ready promise that resolves when the preload queue is fully drained
+    // (all components fetched or failed — resilient to individual failures).
+    let readyResolve;
+    this.readyPromise = new Promise((resolve) => {
+      readyResolve = resolve;
+    });
+
+    const runPreload = async () => {
+      try {
+        await this.processPreloadQueue();
+      } finally {
+        readyResolve();
+      }
+    };
+
     // Use requestIdleCallback for non-blocking preload
     if ("requestIdleCallback" in window) {
-      requestIdleCallback(() => this.processPreloadQueue(), { timeout: 2000 });
+      requestIdleCallback(() => runPreload(), { timeout: 2000 });
     } else {
       // Fallback for browsers without requestIdleCallback
-      setTimeout(() => this.processPreloadQueue(), 100);
+      setTimeout(() => runPreload(), 100);
     }
   }
 
@@ -207,5 +223,6 @@ const lazyComponentLoader = new LazyComponentLoader();
 
 // Export to window for global access
 window.LazyComponentLoader = lazyComponentLoader;
+window.lazyComponentLoader = lazyComponentLoader;
 
 console.log("✨ Lazy Component Loader module loaded successfully");

@@ -8,7 +8,8 @@ const lazyLoaderState = {
 
 /**
  * Initialize lazy loading system
- * Creates global instance and begins non-critical preloading after gameplay is ready
+ * Starts non-critical preloading of all lock components immediately so that
+ * game-runtime-coordinator.bootstrap() can await readyPromise during boot.
  */
 function initializeLazyLoading() {
   if (lazyLoaderState.started) {
@@ -18,58 +19,18 @@ function initializeLazyLoading() {
   lazyLoaderState.started = true;
   console.log("🚀 Lazy Component Loader initialized");
 
-  // Preload lock components after gameplay is already interactive.
-  if ("requestIdleCallback" in window) {
-    requestIdleCallback(
-      () => {
-        window.LazyComponentLoader.preloadComponents(
-          window.LazyComponentLoader.getAllLockComponentPaths(),
-        );
-      },
-      { timeout: 3000 },
-    );
-  } else {
-    setTimeout(() => {
-      window.LazyComponentLoader.preloadComponents(
-        window.LazyComponentLoader.getAllLockComponentPaths(),
-      );
-    }, 2000);
-  }
-}
-
-function bindGameplayReadyPreload() {
-  const gameplayReady = window.GameRuntimeCoordinator?.isGameplayReady?.();
-  if (gameplayReady) {
-    initializeLazyLoading();
-    return;
-  }
-
-  const gameplayReadyEvent = window.GameEvents?.GAMEPLAY_READY_CHANGED;
-  if (!gameplayReadyEvent) {
-    window.deferExecution?.(() => {
-      initializeLazyLoading();
-    });
-    return;
-  }
-
-  document.addEventListener(
-    gameplayReadyEvent,
-    (event) => {
-      if (event.detail?.gameplayReady) {
-        initializeLazyLoading();
-      }
-    },
-    { once: true },
+  // Preload lock components immediately (not gated on gameplay ready).
+  // Bootstrap awaits lazyComponentLoader.readyPromise before marking preload complete.
+  window.LazyComponentLoader.preloadComponents(
+    window.LazyComponentLoader.getAllLockComponentPaths(),
   );
 }
 
-// Integrate with existing lock manager if available
+// Kick off preload as soon as the module is ready (deferred script runs after DOMContentLoaded).
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    bindGameplayReadyPreload();
-  });
+  document.addEventListener("DOMContentLoaded", initializeLazyLoading);
 } else {
-  bindGameplayReadyPreload();
+  initializeLazyLoading();
 }
 
 console.log("✨ Lazy Component Loader initialization complete");

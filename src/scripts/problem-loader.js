@@ -14,6 +14,7 @@ class ProblemLoader {
     this.assetBasePath = config.assetBasePath || "/src/assets/problems/Assets";
     this.problems = [];
     this.currentProblemIndex = 0;
+    this.readyPromise = null;
 
     console.log("📚 ProblemLoader initialized");
   }
@@ -43,6 +44,13 @@ class ProblemLoader {
     const problemPath = this.getProblemPath(level);
     console.log(`📚 Loading problems from: ${problemPath}`);
 
+    // Create a ready promise that resolves when loading completes
+    // (success or fallback — resilient to load failures).
+    let readyResolve;
+    this.readyPromise = new Promise((resolve) => {
+      readyResolve = resolve;
+    });
+
     try {
       const response = await fetch(problemPath);
 
@@ -64,6 +72,8 @@ class ProblemLoader {
       // Return fallback problem
       this.problems = [this.getFallbackProblem()];
       return this.problems;
+    } finally {
+      readyResolve();
     }
   }
 
@@ -235,10 +245,13 @@ class ProblemLoader {
 // here now, delegating to the ProblemLoader class internals so that
 // loading/caching logic exists in a single module. Both
 // window.ProblemLoader and window.GameProblemLoader remain available.
+//
+// A module-level shared loader instance is exposed as window.problemLoader so
+// that game-runtime-coordinator.bootstrap() can await its readyPromise.
 // ---------------------------------------------------------------------------
-function attachGameProblemLoader() {
-  const sharedLoader = new ProblemLoader();
+const sharedProblemLoader = new ProblemLoader();
 
+function attachGameProblemLoader() {
   window.GameProblemLoader = {
     /**
      * Load problems for a level using the callback-based GameProblemLoader API.
@@ -250,11 +263,11 @@ function attachGameProblemLoader() {
      * @param {Function} [options.showSkeleton] - Called with {level, problemPath}
      */
     loadProblems({ level, onLoaded, onError, showSkeleton } = {}) {
-      const problemPath = sharedLoader.getProblemPath(level);
+      const problemPath = sharedProblemLoader.getProblemPath(level);
 
       showSkeleton?.({ level, problemPath });
 
-      sharedLoader
+      sharedProblemLoader
         .loadProblems(level)
         .then((problems) => {
           onLoaded?.(problems);
@@ -265,6 +278,9 @@ function attachGameProblemLoader() {
     },
   };
 }
+
+// Expose shared loader globally for boot orchestration (bootstrap awaits its readyPromise)
+window.problemLoader = sharedProblemLoader;
 
 // Export for use in other modules
 if (typeof module !== "undefined" && module.exports) {
