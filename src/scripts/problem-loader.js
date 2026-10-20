@@ -7,8 +7,8 @@ console.log("📚 Problem Loader Module Loading...");
  */
 class ProblemLoader {
   /**
-   * @param {Object} config - Loader configuration
-   * @param {string} config.assetBasePath - Base path for problem assets
+   * @param {object} config - Loader configuration
+   * @param {string} [config.assetBasePath] - Base path for problem assets
    */
   constructor(config = {}) {
     this.assetBasePath = config.assetBasePath || "/src/assets/problems/Assets";
@@ -258,6 +258,13 @@ function attachGameProblemLoader() {
      * Delegates to ProblemLoader internals (getProblemPath + loadProblems).
      * @param {Object} options
      * @param {string} options.level - Difficulty level
+     * @param {Function} [options.onLoaded] - Called with parsed problems
+     * @param {Function} [options.onError] - Called on load failure
+     * @param {Function} [options.showSkeleton] - Called with {level, problemPath}
+     */
+    /**
+     * @param {object} options
+     * @param {string} [options.level] - Difficulty level
      * @param {Function} [options.onLoaded] - Called with parsed problems
      * @param {Function} [options.onError] - Called on load failure
      * @param {Function} [options.showSkeleton] - Called with {level, problemPath}

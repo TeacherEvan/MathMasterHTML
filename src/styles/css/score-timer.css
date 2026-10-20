@@ -77,6 +77,8 @@
   font-size: 20px;
   font-weight: 900;
   line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 .score-display {

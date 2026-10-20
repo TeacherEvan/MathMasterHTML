@@ -15,6 +15,14 @@ const ROOT_GOVERNANCE_FILES = new Set([
   "CLAUDE.md",
   "GEMINI.md",
 ]);
+// Advisory / runtime audit artifacts (gitignored, not project source).
+// review_findings.md is code-review output (.gitignore:66). The
+// surgical-implementation V2 debrief lives under docs/plans/ per the skill but
+// is scratch audit output, not a canonical project doc.
+const ADVISORY_MARKDOWN_FILES = new Set([
+  "review_findings.md",
+  "docs/plans/2026-10-20-mathmaster-v2-DEBRIEF.md",
+]);
 const IGNORED_DIRECTORIES = new Set([
   ".git",
   ".worktrees",
@@ -23,13 +31,15 @@ const IGNORED_DIRECTORIES = new Set([
   "node_modules",
   "playwright-report",
   "test-results",
+  ".scratch-audit",
 ]);
 
 function isAllowedMarkdownFile(file) {
   return (
     ALLOWED_MARKDOWN_FILES.has(file) ||
     CUSTOM_AGENT_FILE_RE.test(file) ||
-    ROOT_GOVERNANCE_FILES.has(file)
+    ROOT_GOVERNANCE_FILES.has(file) ||
+    ADVISORY_MARKDOWN_FILES.has(file)
   );
 }
 

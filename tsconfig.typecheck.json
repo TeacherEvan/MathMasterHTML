@@ -18,6 +18,7 @@
         "src/scripts/utils-core.js",
         "src/scripts/game-init.js",
         "src/scripts/game-onboarding.bootstrap.js",
+        "src/scripts/problem-loader.js",
         "src/scripts/console-manager.core.js",
         "src/scripts/worm.js",
         "src/scripts/worm-factory.js",

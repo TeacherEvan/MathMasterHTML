@@ -43,6 +43,9 @@ declare global {
     WormEvasion?: any;
     LazyComponentLoader?: any;
     PlayerStorage?: any;
+    ProblemLoader?: any;
+    GameProblemLoader?: any;
+    problemLoader?: any;
     ScoreTimerManager?: any;
     GameRuntimeCoordinator?: any;
     StartupPreload?: {

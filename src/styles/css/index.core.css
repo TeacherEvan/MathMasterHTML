@@ -6,17 +6,17 @@
 
 :root {
   color-scheme: dark;
-  --welcome-accent: rgba(122, 255, 187, 0.9);
-  --welcome-surface: rgba(8, 17, 14, 0.82);
-  --welcome-surface-strong: rgba(9, 22, 18, 0.94);
-  --welcome-border: rgba(122, 255, 187, 0.18);
-  --welcome-text: #e7fff0;
-  --welcome-muted: #b7d8c1;
-  --welcome-gold: #ffe08f;
-  --welcome-ember: rgba(199, 107, 82, 0.9);
+  --welcome-accent: oklch(0.88 0.18 90);
+  --welcome-surface: oklch(0.09 0.01 125);
+  --welcome-surface-strong: oklch(0.11 0.012 125);
+  --welcome-border: oklch(0.85 0.16 90 / 0.18);
+  --welcome-text: oklch(0.97 0.008 100);
+  --welcome-muted: oklch(0.72 0.012 100);
+  --welcome-gold: oklch(0.79 0.15 70);
+  --welcome-ember: oklch(0.68 0.19 25 / 0.9);
   /* Tiered-button tokens */
-  --btn-secondary-fg: #ebe5d8;
-  --btn-tertiary-fg: #c2c8bf;
+  --btn-secondary-fg: oklch(0.97 0.008 100);
+  --btn-tertiary-fg: oklch(0.72 0.012 100);
 }
 
 body {

@@ -42,10 +42,12 @@
     content: '';
     position: absolute;
     inset: 0;
-    width: var(--progress, 0%);
+    width: 100%;
     background: linear-gradient(90deg, #00ffff, #ffd700);
     border-radius: 3px;
-    transition: width 0.3s ease;
+    transform-origin: left center;
+    transform: scaleX(var(--progress-ratio, 0));
+    transition: transform 0.3s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -69,6 +69,7 @@
     if (progressEl && typeof progress === "number") {
       progressEl.setAttribute("aria-valuenow", String(progress));
       progressEl.style.setProperty("--progress", progress + "%");
+      progressEl.style.setProperty("--progress-ratio", progress / 100);
     }
     if (progressBar && typeof progress === "number") {
       try {

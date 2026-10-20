@@ -94,7 +94,7 @@ console.log("🎮 Game initialization module loading...");
 
     // Start problem loading early so bootstrap() can await its readyPromise.
     // Resolves with fallback on failure — never blocks boot indefinitely.
-    const problemLoader = window.problemLoader || new ProblemLoader();
+    const problemLoader = window.problemLoader || new window.ProblemLoader();
     problemLoader.loadProblems(level);
 
     // Bootstrap the runtime coordinator after startup preload completes, so

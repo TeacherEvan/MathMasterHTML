@@ -25,6 +25,7 @@ export const REQUIRED_DOCS = [
   "docs/plans/Plan Genesis.md",
   "docs/plans/Plan Beta.md",
   "docs/plans/Plan Alpha.md",
+  "docs/plans/Matmaster frontend audit.md",
   "README.md",
   "docs/SECURITY.md",
   "docs/index.md",
