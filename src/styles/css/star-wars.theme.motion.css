@@ -1,0 +1,146 @@
+/* ==========================================================================
+   star-wars.theme.motion.css — Math Master "Star Wars" visual skin
+   --------------------------------------------------------------------------
+   Telemetry, accessibility and motion safety.
+   tabular-nums metric locking, high-contrast mode, narrow-viewport
+   layout safety, and the reduced-motion guard.
+
+   Loaded as part of the Star Wars theme layer, after every page stylesheet,
+   so this file owns the cascade for the theme. Nothing here mutates DOM,
+   IDs, data-testid hooks, event bindings, or state — presentation only
+   (colours, surfaces, depth, motion, typography).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   7. TELEMETRY — lock every live readout to tabular figures
+   -------------------------------------------------------------------------- */
+.hud-value,
+.stat-value,
+.timer-display,
+.score-display,
+.ls-card .value {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* --------------------------------------------------------------------------
+   8. HIGH CONTRAST MODE
+   -------------------------------------------------------------------------- */
+body.user-high-contrast .level-card,
+body.user-high-contrast .welcome-container {
+  border-color: var(--sw-holo) !important;
+  box-shadow: 0 0 0 1px var(--sw-holo) !important;
+}
+
+body.user-high-contrast .level-card::after,
+body.user-high-contrast .welcome-container::after {
+  border-color: var(--sw-holo) !important;
+}
+
+/* The TAX badge is injected by the life-stats module. On pages that do not
+   load life-stats.css it would fall back to a default grey button, so give
+   it the Imperial crimson badge treatment here (the life-stats board keeps
+   its own fixed-position variant). */
+body:not(.ls-body) #tax-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  width: fit-content;
+  margin: 0 0 0 1.1rem;
+  background: var(--sw-crimson);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  box-shadow: 0 0 12px oklch(0.610 0.195 25 / 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   10. RESPONSIVE SAFETY
+   The welcome action band is a nowrap flex row; on narrow viewports its
+   intrinsic width (CTA + secondary row + hint + credit) exceeds the
+   viewport and stretches the whole page grid, clipping the hero title.
+   Let the band wrap and scale the display type to the viewport.
+   -------------------------------------------------------------------------- */
+@media (max-width: 560px) {
+  body.welcome-page .page-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  body.welcome-page .welcome-actions__row {
+    width: 100%;
+  }
+}
+
+/* The action band is a nowrap flex row. `btn--block` widths the primary CTA
+   to 100% of that row, which squeezes the secondary buttons into their
+   minimum and clips their labels. Give the CTA a bounded flex basis and
+   let the secondary grid tracks keep their content width. */
+body.welcome-page .page-actions > #begin-training-button {
+  width: auto;
+  flex: 1 1 18rem;
+  max-width: 30rem;
+}
+
+body.welcome-page .welcome-actions__row {
+  grid-template-columns: repeat(2, minmax(max-content, 1fr));
+}
+
+@media (max-width: 520px) {
+  body.welcome-page .welcome-actions__row {
+    grid-template-columns: minmax(max-content, 1fr);
+  }
+}
+
+@media (max-width: 560px) and (min-height: 601px) {
+  body.welcome-page .main-title {
+    font-size: clamp(1.95rem, 8.2vw, 2.5rem);
+    letter-spacing: 0.08em;
+  }
+
+  body.welcome-page .subtitle {
+    font-size: clamp(0.82rem, 3.4vw, 1rem);
+    letter-spacing: 0.1em;
+  }
+}
+
+/* Service-worker cache controls */
+.settings-update-clear-cache {
+  color: var(--sw-holo);
+  border-color: oklch(0.855 0.110 212 / 0.4);
+}
+
+.settings-update-refresh {
+  color: var(--sw-gold);
+  border-color: oklch(0.865 0.135 88 / 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   11. REDUCED MOTION — collapse spatial translation, keep gentle indicators
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn::after,
+  .icon-button,
+  #back-button,
+  #audio-toggle,
+  .start-game-button,
+  .console-slot,
+  .power-up-item,
+  .level-card,
+  .route-switcher-button {
+    transition-duration: 0.01ms !important;
+    transform: none !important;
+  }
+
+  .matrix-column {
+    animation: none !important;
+    opacity: 0.35;
+  }
+}

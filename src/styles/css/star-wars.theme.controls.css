@@ -1,0 +1,388 @@
+/* ==========================================================================
+   star-wars.theme.controls.css — Math Master "Star Wars" visual skin
+   --------------------------------------------------------------------------
+   Controls and gameplay chrome.
+   Six-state tactile button specification, the game HUD, panels, symbol
+   rain, and console surfaces.
+
+   Loaded as part of the Star Wars theme layer, after every page stylesheet,
+   so this file owns the cascade for the theme. Nothing here mutates DOM,
+   IDs, data-testid hooks, event bindings, or state — presentation only
+   (colours, surfaces, depth, motion, typography).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   5. SIX-STATE TACTILE CONTROLS
+   -------------------------------------------------------------------------- */
+.btn,
+button.btn,
+a.btn,
+.icon-button {
+  border-radius: 10px;
+  border: 1px solid var(--sw-line);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--sw-durasteel-hi) 94%, transparent),
+    color-mix(in oklch, var(--sw-void-deep) 94%, transparent)
+  );
+  color: var(--sw-text);
+  box-shadow:
+    inset 0 1px 0 0 oklch(1 0 0 / 0.13),
+    0 2px 6px -1px oklch(0 0 0 / 0.5),
+    0 8px 20px -6px oklch(0 0 0 / 0.45);
+  transition:
+    transform 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 140ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.icon-button {
+  border-radius: 10px;
+  border-color: var(--sw-line);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--sw-durasteel-hi) 92%, transparent),
+    color-mix(in oklch, var(--sw-void-deep) 92%, transparent)
+  );
+  color: var(--sw-text-dim);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover:not(:disabled):not([aria-disabled="true"]),
+  .icon-button:hover:not(:disabled):not([aria-disabled="true"]) {
+    transform: translate3d(0, -1px, 0);
+    border-color: var(--sw-line-strong);
+    box-shadow:
+      inset 0 1px 0 0 oklch(1 0 0 / 0.2),
+      0 0 0 1px oklch(0.855 0.110 212 / 0.18),
+      0 10px 24px -6px oklch(0 0 0 / 0.55),
+      var(--sw-glow-holo);
+    color: var(--sw-text);
+  }
+}
+
+.btn:active:not(:disabled):not([aria-disabled="true"]),
+.icon-button:active:not(:disabled):not([aria-disabled="true"]) {
+  transition-duration: 25ms;
+  transform: translate3d(0, 1px, 0) scale(0.985);
+  box-shadow:
+    inset 0 2px 5px 0 oklch(0 0 0 / 0.6),
+    0 1px 2px 0 oklch(0 0 0 / 0.4);
+}
+
+/* The game stylesheet ships a hard-coded Matrix-green focus ring with
+   !important; restate it in the theme palette so keyboard focus reads as
+   Alliance holo-cyan on every surface. */
+*:focus-visible {
+  outline: 2px solid var(--sw-holo) !important;
+  outline-offset: 2px;
+}
+
+.btn:focus-visible,
+.icon-button:focus-visible,
+#back-button:focus-visible,
+#audio-toggle:focus-visible,
+.start-game-button:focus-visible,
+.console-slot:focus-visible,
+.power-up-item:focus-visible {
+  outline: 2px solid var(--sw-holo);
+  outline-offset: 3px;
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"],
+.icon-button:disabled {
+  opacity: 0.45;
+  filter: grayscale(45%);
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none;
+}
+
+/* Primary — Republic gold, the single loudest control on the page */
+.btn.btn--primary {
+  color: var(--btn-primary-fg);
+  border-color: oklch(0.905 0.13 92 / 0.55);
+  background: linear-gradient(
+    160deg,
+    var(--btn-primary-bg-from) 0%,
+    var(--sw-gold) 52%,
+    var(--sw-gold-deep) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.42),
+    0 10px 26px -8px oklch(0 0 0 / 0.6),
+    var(--sw-glow-gold);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn.btn--primary:hover:not(:disabled):not([aria-disabled="true"]) {
+    border-color: oklch(0.94 0.12 94 / 0.85);
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.5),
+      0 14px 32px -8px oklch(0 0 0 / 0.65),
+      0 0 30px oklch(0.865 0.135 88 / 0.32);
+  }
+}
+
+/* Secondary — durasteel plate with a holo edge */
+.btn.btn--secondary {
+  color: var(--sw-text);
+  border-color: oklch(0.855 0.110 212 / 0.34);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--sw-durasteel-hi) 92%, transparent),
+    color-mix(in oklch, var(--sw-void-deep) 92%, transparent)
+  );
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.11),
+    0 8px 20px -8px oklch(0 0 0 / 0.5);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn.btn--secondary:hover:not(:disabled):not([aria-disabled="true"]) {
+    border-color: oklch(0.855 0.110 212 / 0.75);
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--sw-durasteel) 96%, transparent),
+      color-mix(in oklch, var(--sw-void) 96%, transparent)
+    );
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.16),
+      0 0 0 1px oklch(0.855 0.110 212 / 0.2),
+      0 10px 24px -8px oklch(0 0 0 / 0.55),
+      var(--sw-glow-holo);
+  }
+}
+
+/* Tertiary — quiet navigational text */
+.btn.btn--tertiary {
+  color: var(--sw-holo-dim);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn.btn--tertiary:hover:not(:disabled):not([aria-disabled="true"]) {
+    color: var(--sw-holo);
+    background: oklch(0.855 0.110 212 / 0.08);
+    box-shadow: none;
+  }
+}
+
+/* Danger — Imperial crimson */
+.btn.btn--danger {
+  color: var(--sw-crimson-lt);
+  border-color: oklch(0.610 0.195 25 / 0.55);
+  background: linear-gradient(180deg, oklch(0.20 0.045 20 / 0.95), oklch(0.10 0.025 20 / 0.95));
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.08),
+    0 8px 20px -8px oklch(0 0 0 / 0.55);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn.btn--danger:hover:not(:disabled):not([aria-disabled="true"]) {
+    border-color: oklch(0.610 0.195 25 / 0.95);
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.12),
+      0 0 0 1px oklch(0.610 0.195 25 / 0.32),
+      0 10px 24px -8px oklch(0 0 0 / 0.6),
+      0 0 18px oklch(0.610 0.195 25 / 0.24);
+  }
+}
+
+.icon-button:hover,
+.icon-button:focus-visible {
+  color: var(--sw-holo);
+}
+
+.icon-button[aria-expanded="true"] {
+  border-color: oklch(0.855 0.110 212 / 0.8);
+  color: var(--sw-holo);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--sw-holo-deep) 34%, transparent),
+    color-mix(in oklch, var(--sw-void) 92%, transparent)
+  );
+}
+
+/* --------------------------------------------------------------------------
+   6. GAMEPAGE — panels, HUD, telemetry, symbol rain
+   -------------------------------------------------------------------------- */
+body {
+  background:
+    radial-gradient(88% 66% at 14% 8%, color-mix(in oklch, var(--sw-nebula-blue) 16%, transparent), transparent 52%),
+    radial-gradient(74% 58% at 88% 12%, color-mix(in oklch, var(--sw-nebula-gold) 10%, transparent), transparent 44%),
+    linear-gradient(180deg, oklch(0.140 0.019 258) 0%, var(--sw-void) 52%, var(--sw-void-deep) 100%);
+}
+
+.grid-container {
+  background: transparent;
+}
+
+.display-panel {
+  border-radius: 1.35rem;
+  border: 1px solid oklch(0.855 0.110 212 / 0.14);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.06),
+    inset 0 0 0 1px oklch(0.855 0.110 212 / 0.05);
+}
+
+.hud-block,
+.power-up-display {
+  border-color: oklch(0.855 0.110 212 / 0.3);
+  background: linear-gradient(160deg, oklch(0.212 0.024 255 / 0.9), oklch(0.072 0.013 264 / 0.94));
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.08),
+    0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+.hud-block::before,
+.power-up-display::before {
+  background: linear-gradient(90deg, transparent, oklch(0.855 0.110 212 / 0.6), transparent);
+}
+
+.hud-label {
+  color: var(--sw-text-mute);
+  letter-spacing: 0.22em;
+}
+
+.hud-value {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: 0.06em;
+}
+
+.score-display {
+  color: var(--sw-gold);
+}
+
+.timer-display {
+  color: var(--sw-holo);
+}
+
+.streak-display {
+  color: var(--sw-plasma);
+}
+
+#problem-container {
+  border-color: oklch(0.855 0.110 212 / 0.3);
+  color: color-mix(in oklch, var(--sw-text) 78%, var(--sw-holo) 22%);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.07),
+    inset 0 0 0 1px oklch(0.855 0.110 212 / 0.06),
+    0 12px 34px rgba(0, 0, 0, 0.34);
+}
+
+#solution-container {
+  background:
+    linear-gradient(180deg, oklch(0.150 0.020 258 / 0.55), transparent 14%),
+    linear-gradient(180deg, oklch(0.095 0.014 264 / 0.8), oklch(0.055 0.010 264 / 0.92));
+  box-shadow:
+    inset 0 0 0 1px oklch(0.855 0.110 212 / 0.14),
+    inset 0 1px 0 oklch(1 0 0 / 0.05);
+}
+
+/* Symbols fall as holo transmissions */
+.falling-symbol {
+  color: var(--sw-holo);
+  text-shadow: 0 0 9px oklch(0.855 0.110 212 / 0.45);
+}
+
+.falling-symbol:hover {
+  color: oklch(0.94 0.07 200);
+  text-shadow: 0 0 14px oklch(0.855 0.110 212 / 0.8);
+}
+
+.falling-symbol.keyboard-target {
+  color: var(--sw-gold);
+  text-shadow: 0 0 16px oklch(0.865 0.135 88 / 0.7);
+}
+
+.falling-symbol:active {
+  color: oklch(0.96 0.05 195);
+  text-shadow: 0 0 18px oklch(0.855 0.110 212 / 0.9);
+}
+
+#back-button,
+#audio-toggle {
+  border-color: oklch(0.855 0.110 212 / 0.3);
+  background: linear-gradient(180deg, oklch(0.212 0.024 255 / 0.92), oklch(0.095 0.014 264 / 0.94));
+  color: var(--sw-text);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.1),
+    0 12px 30px rgba(0, 0, 0, 0.45);
+  transition:
+    transform 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 140ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #back-button:hover,
+  #audio-toggle:hover,
+  .start-game-button:hover,
+  .console-slot:hover,
+  .power-up-item:hover {
+    transform: translate3d(0, -1px, 0);
+    border-color: oklch(0.855 0.110 212 / 0.7);
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.16),
+      0 0 0 1px oklch(0.855 0.110 212 / 0.18),
+      0 16px 34px rgba(0, 0, 0, 0.5),
+      0 0 20px oklch(0.855 0.110 212 / 0.2);
+  }
+}
+
+#back-button:active,
+#audio-toggle:active,
+.start-game-button:active {
+  transition-duration: 25ms;
+  transform: translate3d(0, 1px, 0) scale(0.985);
+  box-shadow: inset 0 2px 5px 0 oklch(0 0 0 / 0.6);
+}
+
+.start-game-button,
+#help-button,
+#clarify-button {
+  border-color: oklch(0.905 0.13 92 / 0.5);
+  background: linear-gradient(160deg, var(--btn-primary-bg-from), var(--sw-gold) 54%, var(--btn-primary-bg-to));
+  color: var(--btn-primary-fg);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.4),
+    0 12px 28px -8px oklch(0 0 0 / 0.6),
+    0 0 22px oklch(0.865 0.135 88 / 0.2);
+}
+
+.how-to-play-content,
+.game-over-content,
+.settings-dialog {
+  border-color: oklch(0.855 0.110 212 / 0.22);
+  background: linear-gradient(180deg, oklch(0.175 0.023 255 / 0.97), oklch(0.072 0.013 264 / 0.98));
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.08),
+    0 30px 70px rgba(0, 0, 0 / 0.55);
+}
+
+.how-to-play-kicker {
+  color: var(--sw-holo);
+}
+
+.game-over-title {
+  color: var(--sw-crimson-lt);
+  text-shadow: 0 0 20px oklch(0.610 0.195 25 / 0.4);
+}
+
+.console-slot,
+.power-up-item {
+  border-color: oklch(0.855 0.110 212 / 0.24);
+  background: oklch(0.150 0.020 258 / 0.8);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.06);
+}
+
+.power-up-item.is-selected {
+  border-color: oklch(0.865 0.135 88 / 0.7);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.12), 0 0 18px oklch(0.865 0.135 88 / 0.28);
+}

@@ -4,13 +4,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#070b14" />
   <title>Life Stats — Math Master</title>
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self';">
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self';">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Orbitron:wght@400;700;900&display=swap" />
   <link rel="stylesheet" href="/src/styles/life-stats.css" />
+  <link rel="stylesheet" href="/src/styles/css/star-wars.theme.tokens.css" />
+  <link rel="stylesheet" href="/src/styles/css/star-wars.theme.surfaces.css" />
+  <link rel="stylesheet" href="/src/styles/css/star-wars.theme.controls.css" />
+  <link rel="stylesheet" href="/src/styles/css/star-wars.theme.motion.css" />
 </head>
 
-<body>
+<body class="ls-body">
   <main class="ls-page">
     <header class="ls-header">
       <h1 class="ls-title">Life Stats</h1>

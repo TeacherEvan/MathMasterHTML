@@ -15,7 +15,7 @@ test.describe("Welcome page redesign", () => {
     await expect(page).toHaveTitle("Math Master — Welcome");
     await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
       "content",
-      "#111714",
+      "#070b14",
     );
 
     await expect(page.locator(".welcome-stage__top .page-kicker")).toHaveText(

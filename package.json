@@ -1,7 +1,7 @@
 {
   "name": "mathmaster-html",
   "version": "1.0.0",
-  "description": "Educational math game with Matrix-themed UI where players solve algebra equations by clicking falling symbols",
+  "description": "Educational math game with a Star Wars-themed UI where players solve algebra equations by clicking falling symbols",
   "type": "module",
   "scripts": {
     "start": "http-server -p 8000 -c-1 --cors",
