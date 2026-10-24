@@ -92,71 +92,7 @@ console.log("🎯 SymbolRain helpers: spawn loading...");
     return symbol;
   };
 
-  helpers.populateInitialSymbols = function populateInitialSymbols(
-    {
-      config,
-      columnCount,
-      isMobileMode,
-      activeFallingSymbols,
-      symbols,
-      symbolRainContainer,
-      symbolPool,
-      lastSymbolSpawnTimestamp,
-      initialPopulationToken,
-    },
-    setInitialPopulationComplete,
-  ) {
-    const totalWaves = isMobileMode ? 4 : 8;
-
-    function isCancelled() {
-      return initialPopulationToken?.cancelled === true;
-    }
-
-    function spawnWave(waveNumber) {
-      if (isCancelled()) {
-        return;
-      }
-
-      if (waveNumber >= totalWaves) {
-        if (!isCancelled()) {
-          setInitialPopulationComplete();
-        }
-        return;
-      }
-
-      const columnsToUse = Math.min(columnCount, config.symbolsPerWave);
-      const columnStep = Math.floor(columnCount / columnsToUse);
-
-      for (let i = 0; i < config.symbolsPerWave && i < columnCount; i++) {
-        if (isCancelled()) {
-          return;
-        }
-
-        const column = (i * columnStep) % columnCount;
-        helpers.createFallingSymbol(
-          {
-            symbols,
-            symbolRainContainer,
-            config,
-            activeFallingSymbols,
-            symbolPool,
-            lastSymbolSpawnTimestamp,
-          },
-          { column, isInitialPopulation: true },
-        );
-      }
-
-      if (isCancelled()) {
-        return;
-      }
-
-      const timeoutId = setTimeout(
-        () => spawnWave(waveNumber + 1),
-        config.waveInterval,
-      );
-      initialPopulationToken?.timeoutIds?.push?.(timeoutId);
-    }
-
-    spawnWave(0);
-  };
+  // Initial population is owned by `3rdDISPLAY.js` (staggered roster against
+  // the slot grid). The wave-based copy that used to live here was never
+  // called, so it was removed instead of being kept as a second spawn policy.
 })();

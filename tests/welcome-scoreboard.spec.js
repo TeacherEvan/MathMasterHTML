@@ -115,7 +115,7 @@ test.describe("Welcome scoreboard", () => {
 
     await expect(page.locator("#scoreboard-player-name")).toHaveText("Ada");
     await expect(page.locator("#scoreboard-name-feedback")).toContainText(
-      "Saved as Ada.",
+      "Saved on this device only as Ada.",
     );
 
     const storedProfile = await page.evaluate((storageKey) => {

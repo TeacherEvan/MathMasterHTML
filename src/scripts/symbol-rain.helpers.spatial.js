@@ -64,83 +64,8 @@ console.log("🎯 SymbolRain helpers: spatial loading...");
     };
   };
 
-  helpers.checkCollision = function checkCollision(
-    { config, spatialGrid },
-    symbolObj,
-  ) {
-    // Unify all platforms under the responsive constraints
-    const symbolHeight = config.symbolHeight;
-    const symbolWidth = config.symbolWidth;
-    const collisionBuffer = config.collisionBuffer;
-    const baseHorizontalBuffer = config.horizontalBuffer;
-    const faceRevealBuffer = symbolObj.isInFaceReveal
-      ? config.faceRevealBuffer
-      : 0;
-    const horizontalBuffer = baseHorizontalBuffer + faceRevealBuffer;
-
-    const symbolLeft = symbolObj.x;
-    const symbolRight = symbolLeft + symbolWidth;
-    const symbolTop = symbolObj.y;
-    const symbolBottom = symbolTop + symbolHeight;
-
-    const neighbors = spatialGrid.getNeighbors(symbolObj.x, symbolObj.y);
-    for (const other of neighbors) {
-      if (other === symbolObj) continue;
-
-      const otherLeft = other.x;
-      const otherRight = otherLeft + symbolWidth;
-      const otherTop = other.y;
-
-      const horizontalOverlap = !(
-        symbolRight + horizontalBuffer < otherLeft ||
-        symbolLeft > otherRight + horizontalBuffer
-      );
-      const distance = otherTop - symbolTop;
-      const verticalConflict =
-        distance > 0 &&
-        symbolBottom > otherTop &&
-        distance < symbolHeight + collisionBuffer;
-
-      if (horizontalOverlap && verticalConflict) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  helpers.checkTouching = function checkTouching(
-    { config, spatialGrid },
-    symbolObj,
-  ) {
-    // Unified collision matching
-    const symbolHeight = config.symbolHeight;
-    const symbolWidth = config.symbolWidth;
-
-    const symbolLeft = symbolObj.x;
-    const symbolRight = symbolLeft + symbolWidth;
-    const symbolTop = symbolObj.y;
-    const symbolBottom = symbolTop + symbolHeight;
-
-    const neighbors = spatialGrid.getNeighbors(symbolObj.x, symbolObj.y);
-    for (const other of neighbors) {
-      if (other === symbolObj) continue;
-
-      const otherLeft = other.x;
-      const otherRight = otherLeft + symbolWidth;
-      const otherTop = other.y;
-      const otherBottom = otherTop + symbolHeight;
-
-      const horizontalOverlap = !(
-        symbolRight <= otherLeft || symbolLeft >= otherRight
-      );
-      const verticalOverlap = !(
-        symbolBottom <= otherTop || symbolTop >= otherBottom
-      );
-
-      if (horizontalOverlap && verticalOverlap) {
-        return other;
-      }
-    }
-    return null;
-  };
+  // Collision resolution is owned by the slot grid in
+  // `symbol-rain.placement.js` (a tile can never overlap its neighbour), so the
+  // old ad-hoc `checkCollision` / `checkTouching` pair was removed. The spatial
+  // grid above is still used for occupancy bookkeeping and hit lookups.
 })();

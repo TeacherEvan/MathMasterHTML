@@ -965,31 +965,37 @@ test.describe("Runtime boot orchestration", () => {
             });
             populationState.activeFallingSymbols.length = 0;
           },
+          // The wave spawner used to live in symbol-rain.helpers.spawn.js; it
+          // moved to the controller (slot grid + staggered roster), so this
+          // harness drives the same two-wave contract inline.
           populateInitialSymbols(initialPopulationToken) {
             populationCalls.populateInitialSymbols += 1;
-            window.SymbolRainHelpers.populateInitialSymbols(
-              {
-                config: populationConfig,
-                columnCount: 2,
-                isMobileMode: true,
-                activeFallingSymbols: populationState.activeFallingSymbols,
-                symbols: ["X", "Y"],
-                symbolRainContainer,
-                symbolPool: {
-                  get: () => document.createElement("span"),
-                },
-                lastSymbolSpawnTimestamp: {},
-                initialPopulationToken,
-              },
-              () => {
-                if (initialPopulationToken?.cancelled === true) {
-                  return;
-                }
 
+            const spawnWave = (waveNumber) => {
+              if (initialPopulationToken?.cancelled === true) {
+                return;
+              }
+
+              if (waveNumber >= 2) {
                 populationCalls.completed += 1;
                 populationState.isInitialPopulation = false;
-              },
-            );
+                return;
+              }
+
+              for (let index = 0; index < populationConfig.symbolsPerWave; index += 1) {
+                const element = document.createElement("span");
+                symbolRainContainer.appendChild(element);
+                populationState.activeFallingSymbols.push({ element });
+              }
+
+              const timeoutId = window.setTimeout(
+                () => spawnWave(waveNumber + 1),
+                populationConfig.waveInterval,
+              );
+              initialPopulationToken?.timeoutIds?.push?.(timeoutId);
+            };
+
+            spawnWave(0);
           },
           requestAnimationFrame(callback) {
             populationFrameCallbacks.push(callback);

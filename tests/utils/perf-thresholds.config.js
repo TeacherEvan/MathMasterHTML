@@ -132,6 +132,11 @@ export const PROJECT_POLICIES = {
         direction: "higher-is-better",
         catastrophicRatio: 0.35,
         catastrophicAbsolute: 1,
+        // The profile renders the game at roughly one frame per second, so
+        // a scenario window only collects a handful of samples and a single
+        // frame is a fifth of the measurement. A ratio verdict on that is
+        // noise, so require the same sample floor the other metrics use.
+        minSamples: 15,
       },
       frameTimeP95: {
         direction: "lower-is-better",
@@ -161,6 +166,12 @@ export const PROJECT_POLICIES = {
         direction: "higher-is-better",
         catastrophicRatio: 0.35,
         catastrophicAbsolute: 1,
+        // The stored baseline for this profile is 0.85-2 fps over five to
+        // ten samples: one frame is a fifth of the measurement, so the
+        // ratio threshold sits below the noise floor and the lane reported
+        // catastrophic regressions that were only frame drops. Require the
+        // same sample floor the other metrics on this profile already use.
+        minSamples: 15,
       },
       frameTimeP95: {
         direction: "lower-is-better",
