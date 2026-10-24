@@ -20,6 +20,10 @@
   gap: 16px; /* Minimum spacing between HUD elements */
   z-index: 10005;
   pointer-events: none;
+  /* Keep HUD within the reserved top band so it never paints over
+     the problem container, lock display, or back button. */
+  max-height: 108px;
+  box-sizing: border-box;
 }
 
 /* Reserved zone for powerup display (middle area) */

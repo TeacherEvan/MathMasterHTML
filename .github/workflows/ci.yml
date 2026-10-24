@@ -181,8 +181,10 @@ jobs:
           restore-keys: |
             playwright-${{ runner.os }}-
       - name: Install Playwright browsers
-        # Full default matrix covers chromium (chromium/pixel-7 projects) AND
-        # webkit (iphone-13 project — Device "iPhone 13" is WebKit). Install both.
+        # The default matrix runs on Chromium (the chromium, iphone-13 and
+        # pixel-7 projects). WebKit is still installed for the competition
+        # lane, whose qa-matrix-iphone-13-webkit project keeps the full
+        # Safari matrix runnable on a healthy WebKit build.
         run: npx playwright install --with-deps chromium webkit
       - name: Playwright full default matrix
         # CLI --workers overrides the config's CI workers:1 for the nightly batch.

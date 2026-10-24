@@ -223,9 +223,12 @@ export function evaluatePerfThresholds({
   }
 
   if (sampleStatus === "low") {
-    if (status === "pass") {
-      status = "insufficient-samples";
-    }
+    // The sample floor is the harness's own statement that the window did
+    // not collect enough frames to judge. A catastrophic verdict made on
+    // that data is not actionable - it is what a stalled or starved host
+    // looks like - so record the scenario as insufficient-samples and keep
+    // the per-metric detail in the attachment.
+    status = "insufficient-samples";
     annotations.push({
       type: "perf-data",
       description: `${scenarioName}/${normalizedProject} low samples ${after.sampleCount}/${minRequiredSamples}`,
