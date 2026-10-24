@@ -1,7 +1,7 @@
 /**
  * Service Worker - Production-Grade PWA Support
  * Enables offline gameplay and improves performance
- * Version: 20260501-symbol-rain-lifecycle-2
+ * Version: 20261024-gameplay-entity-obstruction-3
  */
 
 /** @typedef {{ waitUntil: (promise: PromiseLike<unknown>) => void }} ExtendableWorkerEvent */
@@ -17,7 +17,7 @@ const serviceWorkerScope = /** @type {{
   skipWaiting: () => Promise<void>;
 }} */ (/** @type {unknown} */ (self));
 
-const BUILD_VERSION = "20260501-symbol-rain-lifecycle-2";
+const BUILD_VERSION = "20261024-gameplay-entity-obstruction-3";
 const CACHE_PREFIX = "math-master";
 const CACHE_NAME = `${CACHE_PREFIX}-static-${BUILD_VERSION}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_VERSION}`;
@@ -113,9 +113,9 @@ const STATIC_ASSETS = [
   `/src/scripts/symbol-rain.helpers.spawn.js?v=${BUILD_VERSION}`,
   `/src/scripts/symbol-rain.helpers.interactions.js?v=${BUILD_VERSION}`,
   `/src/scripts/symbol-rain.config.js?v=${BUILD_VERSION}`,
-  `/src/scripts/symbol-rain.spawn.js?v=${BUILD_VERSION}`,
   `/src/scripts/symbol-rain.animation.js?v=${BUILD_VERSION}`,
   `/src/scripts/symbol-rain.interactions.js?v=${BUILD_VERSION}`,
+  `/src/scripts/symbol-rain.placement.js?v=${BUILD_VERSION}`,
   `/src/scripts/3rdDISPLAY.js?v=${BUILD_VERSION}`,
   "/src/scripts/problem-loader.js",
   "/src/scripts/symbol-validator.js",

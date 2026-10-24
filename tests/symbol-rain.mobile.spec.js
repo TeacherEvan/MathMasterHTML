@@ -560,7 +560,7 @@ test.describe("Symbol rain mobile interactions", () => {
       .poll(async () => {
         const sample = await readTrackedPanelCSymbol(page);
         return sample?.state;
-      }, { timeout: 5000 })
+      }, { timeout: 10000 })
       .toBe("hidden");
 
     await expect
@@ -723,7 +723,9 @@ test.describe("Symbol rain mobile interactions", () => {
     });
 
     expect(runtimeConfig.isMobileMode).toBe(true);
-    expect(runtimeConfig.visibleMs).toBe(2000);
+    // aedf4a1 raised the target visibility window from 2s to 7s on every
+    // viewport; the compact profile still uses the shared 7s window.
+    expect(runtimeConfig.visibleMs).toBe(7000);
     expect(runtimeConfig.fadeMs).toBe(1000);
     expect(runtimeConfig.hiddenMinMs).toBe(2000);
     expect(runtimeConfig.hiddenMaxMs).toBe(7000);
@@ -732,10 +734,16 @@ test.describe("Symbol rain mobile interactions", () => {
     expect(runtimeConfig.maxDomElements).toBe(150);
     expect(runtimeConfig.maxActiveSymbols).toBe(150);
 
-    await page.locator("#panel-c .falling-symbol").first().waitFor({
-      state: "visible",
-      timeout: 10000,
-    });
+    // A `.falling-symbol` node is always "visible" to Playwright (opacity 0 is
+    // not hidden), so the lifecycle state is the real gate here.
+    await page.waitForFunction(
+      () =>
+        document.querySelectorAll(
+          '#panel-c [data-symbol-state="visible"]:not(.clicked)',
+        ).length > 0,
+      undefined,
+      { timeout: 10000 },
+    );
 
     const tracked = await markFirstVisiblePanelCSymbol(page);
     expect(tracked).not.toBeNull();
@@ -759,7 +767,7 @@ test.describe("Symbol rain mobile interactions", () => {
       .poll(async () => {
         const sample = await readTrackedPanelCSymbol(page);
         return sample?.state;
-      }, { timeout: 5000 })
+      }, { timeout: 10000 })
       .toBe("hidden");
 
     await context.close();

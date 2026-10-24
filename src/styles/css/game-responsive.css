@@ -11,20 +11,15 @@
    TOUCH + INTERACTION RULES
 ------------------------------------------------------- */
 
-@media (hover: none) and (pointer: coarse) and (max-width: 1024px) {
-  /* Enlarge touch targets on tablet and mobile */
-  .falling-symbol {
-    padding: 18px;
-    margin: -18px;
-    font-size: 24px !important;
-  }
-}
-
+/* .falling-symbol geometry is owned in one place:
+   - font-size: display-manager.js injects `.falling-symbol { font-size: ... !important }`
+     from the viewport contract, so every `font-size` literal below used to lose anyway.
+   - hit box: `#panel-c .falling-symbol[data-symbol-state]` (game.css) owns the 44x44 box.
+     Any `padding`/`margin` written here is shadowed by that ID selector, which is how the
+     old 10px/22px "compaction" rules silently stopped applying and left 80x70 tap boxes.
+   Only the line-height that keeps compact glyphs from growing taller than their cell stays. */
 @media (hover: none) and (pointer: coarse) {
   body.viewport-compact.viewport-landscape .falling-symbol {
-    padding: 10px;
-    margin: -10px;
-    font-size: 18px !important;
     line-height: 1;
   }
 }
@@ -32,13 +27,6 @@
 /* Extra small devices / Mobile optimizations */
 @media (hover: none) and (pointer: coarse) and (max-width: 800px),
   (hover: none) and (pointer: coarse) and (max-height: 500px) {
-  .falling-symbol {
-    /* Keep mobile symbols finger-friendly without letting adjacent hitboxes swallow each other. */
-    padding: 22px;
-    margin: -22px;
-    font-size: 20px !important;
-  }
-
   /* Consoles slots need larger minimum hit areas */
   .console-slot {
     min-width: 44px !important;
@@ -342,6 +330,47 @@ body.automation.viewport-compact.viewport-portrait #audio-toggle {
   bottom: auto;
 }
 
+/* Compact portrait reserved bands: keep fixed HUD/back-button from
+   painting over panel content. Panel A gets a top safe zone for the HUD,
+   Panel C gets a bottom safe zone for the console, and the rain container
+   is clipped to its panel so glyphs never run behind the HUD or console. */
+body.viewport-compact.viewport-portrait #panel-a {
+  padding-top: 112px; /* Clear fixed HUD (~108px) + gap */
+}
+
+body.viewport-compact.viewport-portrait #panel-c {
+  padding: 124px 6px 128px; /* HUD band at top (~120px) + console band at bottom (~120px) */
+}
+
+body.viewport-compact.viewport-portrait #symbol-rain-container {
+  /* Rain stays inside Panel C's padded cell, below the fixed HUD band
+     (~120px) and above the console band (~120px), so glyphs never paint
+     over telemetry or the shortcut console. */
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body.viewport-compact.viewport-portrait #back-button {
+  /* Back button lives in Panel A's top-left corner, above problem content. */
+  top: 12px;
+  left: 12px;
+  bottom: auto;
+  z-index: 10020;
+}
+
+body.viewport-compact.viewport-portrait #problem-container {
+  /* Problem text sits below the back-button/HUD band. */
+  padding-top: 44px;
+}
+
+body.viewport-compact.viewport-portrait #symbol-console {
+  bottom: 14px;
+  left: 6px;
+  right: 6px;
+}
+
 body.viewport-compact.viewport-landscape {
   --compact-panel-inline-gap: 8px;
   --compact-panel-a-top-safe-zone: 96px; /* Clear compact HUD (~82px) + gap */
@@ -403,7 +432,7 @@ body.viewport-compact.viewport-landscape .grid-container > .wall:nth-child(4) {
 body.viewport-compact.viewport-landscape #panel-c {
   grid-column: 5 !important;
   grid-row: 1 !important;
-  padding: 0;
+  padding: 96px 2px 60px; /* HUD band at top (~96px) + console band at bottom (~60px) */
 }
 
 body.viewport-compact.viewport-landscape #problem-container {
@@ -494,6 +523,23 @@ body.viewport-compact.viewport-landscape .console-slot {
   min-height: 44px !important;
   font-size: 16px !important;
   border-radius: 0.55rem;
+}
+
+body.viewport-compact.viewport-landscape #symbol-rain-container {
+  /* Rain stays inside Panel C's padded cell, below the fixed HUD band
+     and above the console band, so glyphs never paint over telemetry. */
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body.viewport-compact.viewport-landscape .panel-c-brief {
+  /* Move the live-field brief below the fixed HUD band so it cannot
+     collide with the score/timer/streak telemetry. */
+  top: 112px !important;
+  left: 12px !important;
+  z-index: 3;
 }
 
 body.viewport-compact.viewport-landscape .panel-b-controls {
