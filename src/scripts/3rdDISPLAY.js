@@ -20,6 +20,7 @@ function initSymbolRain() {
     const SymbolRainAnimation = window.SymbolRainAnimation;
     const SymbolRainInteractions = window.SymbolRainInteractions;
     const SymbolRainLifecycle = window.SymbolRainLifecycle;
+    const SymbolRainPlacement = window.SymbolRainPlacement;
 
     if (
       !SymbolRainHelpers ||
@@ -27,7 +28,8 @@ function initSymbolRain() {
       !SymbolRainSymbols ||
       !SymbolRainAnimation ||
       !SymbolRainInteractions ||
-      !SymbolRainLifecycle
+      !SymbolRainLifecycle ||
+      !SymbolRainPlacement
     ) {
       console.error("❌ Symbol Rain modules not loaded");
       return;
@@ -100,6 +102,9 @@ function initSymbolRain() {
         columnCount: 0,
         containerHeight: 0,
       },
+      layout: null,
+      // Bound to the slot registry once the planner is constructed below.
+      slotOwners: [],
     };
 
     window.__symbolRainState = state;
@@ -189,6 +194,16 @@ function initSymbolRain() {
         containerHeight,
       };
 
+      if (layoutChanged) {
+        // A reflow invalidates every slot coordinate. Re-derive the grid and
+        // pull the live symbols back inside it so nothing is left stranded
+        // outside the rain window (or on top of the console after a resize).
+        // `reconcileVisibleSlots` rebuilds atomically: it never leaves the
+        // controller with a null grid, because the resurface timer only fires
+        // on a later tick and would have nothing to measure against.
+        reconcileVisibleSlots();
+      }
+
       return layoutChanged;
     }
 
@@ -196,169 +211,235 @@ function initSymbolRain() {
       return state.columnCount > 0 && state.cachedContainerHeight > 0;
     }
 
-    function getPanelBounds() {
-      return panelC?.getBoundingClientRect?.() || null;
-    }
-
     function getContainerBounds() {
       return symbolRainContainer?.getBoundingClientRect?.() || null;
     }
 
-    function rectIntersectsWithClearance(leftRect, rightRect, clearance) {
-      if (!leftRect || !rightRect) {
-        return false;
+    /* ---------------------------------------------------------------
+       Playable rain layout
+       ---------------------------------------------------------------
+       Placement used to be decided against a hard-coded 30x30 glyph that
+       actually renders at 44x44 (and at 80x70 before the hit-box fix),
+       which is why the field could not avoid overlapping itself.
+
+       The geometry now lives in `symbol-rain.placement.js` as pure
+       functions over measured rects: chrome bands -> slot grid -> slot
+       position. This file only owns the DOM adapter (measure once per
+       layout epoch) and the slot registry wiring. Because a cell can
+       never be smaller than a box, two visible symbols can never
+       intersect; when every slot is taken the symbol stays hidden until
+       one frees up (backpressure instead of stacking).
+    ---------------------------------------------------------------- */
+    const CHROME_SELECTORS = [
+      "#game-hud",
+      "#panel-c .panel-c-console-zone",
+      "#back-button",
+      "#audio-toggle",
+    ];
+    const slotRegistry = SymbolRainPlacement.createRegistry(0);
+    // Observability alias: `window.__symbolRainState.slotOwners` mirrors the
+    // registry without copying it, so debug tooling always sees live data.
+    state.slotOwners = slotRegistry.owners;
+
+    function readSymbolBox() {
+      // Prefer a live, visible glyph; fall back to any glyph in the container.
+      // A pooled element without data-symbol-state used to fall back to block
+      // layout and measure the full panel width, which turned the grid into a
+      // single column and starved every resurface.
+      const visibleProbe = state.activeFallingSymbols.find(
+        (symbolObj) =>
+          symbolObj?.element?.isConnected &&
+          symbolObj.element.dataset?.symbolState === "visible",
+      )?.element;
+      const probe =
+        visibleProbe || symbolRainContainer?.querySelector?.(".falling-symbol");
+      const containerWidth = getContainerBounds()?.width || Infinity;
+      const width = probe?.offsetWidth || 0;
+      const height = probe?.offsetHeight || 0;
+
+      if (width > 0 && height > 0 && width <= containerWidth * 0.5) {
+        const computed = window.getComputedStyle(probe);
+        return {
+          width,
+          height,
+          padX: Math.round(parseFloat(computed.paddingLeft) || 0),
+          padY: Math.round(parseFloat(computed.paddingTop) || 0),
+          measured: true,
+        };
       }
 
-      return !(
-        leftRect.right + clearance <= rightRect.left ||
-        leftRect.left >= rightRect.right + clearance ||
-        leftRect.bottom + clearance <= rightRect.top ||
-        leftRect.top >= rightRect.bottom + clearance
-      );
-    }
-
-    function getVisibleSymbolRects(excludeElement = null) {
-      return state.activeFallingSymbols
-        .filter((symbolObj) => {
-          const element = symbolObj?.element;
-          return (
-            element?.isConnected &&
-            element !== excludeElement &&
-            element.dataset?.symbolState === "visible" &&
-            !element.classList.contains("clicked")
-          );
-        })
-        .map((symbolObj) => ({
-          element: symbolObj.element,
-          rect: symbolObj.element.getBoundingClientRect(),
-        }))
-        .filter(({ rect }) => Boolean(rect && rect.width > 0 && rect.height > 0));
-    }
-
-    function isPlacementClear(
-      candidateRect,
-      excludeElement = null,
-      clearance = SymbolRainConfig.minClearancePx || 4,
-      precomputedBounds = null,
-    ) {
-      const containerRect = precomputedBounds?.containerRect || getContainerBounds();
-      const panelRect = precomputedBounds?.panelRect || getPanelBounds();
-
-      if (!containerRect || !panelRect) {
-        return false;
-      }
-
-      const insideContainer =
-        candidateRect.left >= containerRect.left + clearance &&
-        candidateRect.top >= containerRect.top + clearance &&
-        candidateRect.right <= containerRect.right - clearance &&
-        candidateRect.bottom <= containerRect.bottom - clearance;
-
-      const insidePanel =
-        candidateRect.left >= panelRect.left + clearance &&
-        candidateRect.top >= panelRect.top + clearance &&
-        candidateRect.right <= panelRect.right - clearance &&
-        candidateRect.bottom <= panelRect.bottom - clearance;
-
-      if (!insideContainer || !insidePanel) {
-        return false;
-      }
-
-      const visibleRects =
-        precomputedBounds?.visibleRects || getVisibleSymbolRects(excludeElement);
-
-      return !visibleRects.some(({ rect }) =>
-        rectIntersectsWithClearance(candidateRect, rect, clearance),
-      );
-    }
-
-    function hasMeaningfulPlacementShift(placement, previousPlacement, thresholdPx = 2) {
-      if (
-        !previousPlacement ||
-        !Number.isFinite(previousPlacement.left) ||
-        !Number.isFinite(previousPlacement.top)
-      ) {
-        return true;
-      }
-
-      return (
-        Math.abs(placement.left - previousPlacement.left) +
-          Math.abs(placement.top - previousPlacement.top) >
-        thresholdPx
-      );
-    }
-
-    function samplePlacement(
-      symbolWidth,
-      symbolHeight,
-      excludeElement = null,
-      options = {},
-    ) {
-      const containerRect = getContainerBounds();
-      const panelRect = getPanelBounds();
-      if (!containerRect || !panelRect) {
-        return null;
-      }
-
-      const precomputedBounds = {
-        containerRect,
-        panelRect,
-        visibleRects: getVisibleSymbolRects(excludeElement),
+      return {
+        width: Math.max(1, SymbolRainConfig.symbolWidth || 44),
+        height: Math.max(1, SymbolRainConfig.symbolHeight || 50),
+        padX: 0,
+        padY: 0,
+        measured: false,
       };
+    }
 
-      const previousPlacement = options.previousPlacement || null;
-      const preferredClearance = SymbolRainConfig.minClearancePx || 4;
-      const reducedClearance = Math.max(1, Math.floor(preferredClearance / 2));
-      const attemptSets = [
-        { attempts: 10, clearance: preferredClearance },
-        { attempts: 5, clearance: reducedClearance },
-      ];
+    function readChromeRects() {
+      const rects = [];
 
-      for (const attemptSet of attemptSets) {
-        for (let attempt = 0; attempt < attemptSet.attempts; attempt += 1) {
-          const maxLeft = Math.max(
-            0,
-            containerRect.width - symbolWidth - attemptSet.clearance * 2,
-          );
-          const maxTop = Math.max(
-            0,
-            containerRect.height - symbolHeight - attemptSet.clearance * 2,
-          );
-          const left = containerRect.left + attemptSet.clearance + Math.random() * maxLeft;
-          const top = containerRect.top + attemptSet.clearance + Math.random() * maxTop;
-          const candidateRect = {
-            left,
-            top,
-            right: left + symbolWidth,
-            bottom: top + symbolHeight,
-            width: symbolWidth,
-            height: symbolHeight,
-          };
-
-          if (
-            isPlacementClear(
-              candidateRect,
-              excludeElement,
-              attemptSet.clearance,
-              precomputedBounds,
-            )
-          ) {
-            const placement = {
-              left: candidateRect.left - containerRect.left,
-              top: candidateRect.top - containerRect.top,
-              clearance: attemptSet.clearance,
-            };
-
-            if (!hasMeaningfulPlacementShift(placement, previousPlacement)) {
-              continue;
-            }
-
-            return placement;
-          }
+      for (const selector of CHROME_SELECTORS) {
+        const element = document.querySelector(selector);
+        if (!element?.getBoundingClientRect) {
+          continue;
+        }
+        const rect = element.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          rects.push(rect);
         }
       }
 
-      return null;
+      return rects;
+    }
+
+    function rebuildPlacementLayout() {
+      const containerRect = getContainerBounds();
+      const box = readSymbolBox();
+      const bands = SymbolRainPlacement.computeChromeBands(
+        containerRect,
+        readChromeRects(),
+      );
+      const grid = SymbolRainPlacement.computeGrid({
+        containerRect,
+        box,
+        bands,
+      });
+
+      if (!grid) {
+        state.layout = null;
+        return false;
+      }
+
+      state.layout = grid;
+
+      if (slotRegistry.size !== grid.slotCount) {
+        slotRegistry.reset(grid.slotCount);
+      }
+
+      // Keep the legacy config readers honest: they now report the box that
+      // is actually on screen instead of the stale 30x30 assumption.
+      SymbolRainConfig.symbolWidth = box.width;
+      SymbolRainConfig.symbolHeight = box.height;
+
+      return true;
+    }
+
+    function getSlotPosition(slotIndex) {
+      const position = SymbolRainPlacement.slotPosition(
+        state.layout,
+        slotIndex,
+      );
+      if (!position || !state.layout) {
+        return null;
+      }
+
+      return {
+        left: position.left + (state.layout.box.padX || 0),
+        top: position.top + (state.layout.box.padY || 0),
+      };
+    }
+
+    function releaseSymbolSlot(symbolObj) {
+      if (!symbolObj || !Number.isInteger(symbolObj.slotIndex)) {
+        return;
+      }
+
+      slotRegistry.release(symbolObj.slotIndex, symbolObj);
+      symbolObj.slotIndex = null;
+    }
+
+    function claimSlot() {
+      // Rebuild when there is no grid yet, when the grid was derived from the
+      // config fallback because no glyph had rendered at measure time, or when
+      // the registry has no slots at all (a stopped controller resets it to 0).
+      const needsRebuild =
+        !state.layout ||
+        state.layout.box?.measured !== true ||
+        slotRegistry.size === 0;
+
+      if (needsRebuild && !rebuildPlacementLayout()) {
+        return null;
+      }
+
+      const token = { slotIndex: null };
+      const slotIndex = slotRegistry.claim(token);
+      if (slotIndex === null) {
+        return null;
+      }
+
+      token.slotIndex = slotIndex;
+      const position = getSlotPosition(slotIndex);
+
+      if (!position) {
+        slotRegistry.release(slotIndex, token);
+        return null;
+      }
+
+      return { slotIndex, token, left: position.left, top: position.top };
+    }
+
+    function bindSlotToSymbol(claim, symbolObj) {
+      if (!claim || !symbolObj) {
+        return;
+      }
+
+      if (slotRegistry.bind(claim.slotIndex, claim.token, symbolObj)) {
+        symbolObj.slotIndex = claim.slotIndex;
+      }
+    }
+
+    function releaseSlotClaim(claim) {
+      if (!claim) {
+        return;
+      }
+
+      slotRegistry.release(claim.slotIndex, claim.token);
+    }
+
+    function reconcileVisibleSlots() {
+      // Swap grids atomically. A reflow can be observed while the panel is
+      // momentarily zero-sized (modal/transition frames); nulling the layout
+      // first would leave the resurface path with no grid and no reason to
+      // retry, which strands hidden symbols forever.
+      const previousLayout = state.layout;
+      if (!rebuildPlacementLayout()) {
+        state.layout = previousLayout;
+        return;
+      }
+
+      for (const symbolObj of state.activeFallingSymbols) {
+        if (symbolObj?.element?.dataset?.symbolState !== "visible") {
+          continue;
+        }
+
+        const claim = claimSlot();
+        if (!claim) {
+          // The window shrank below the number of visible symbols: retire the
+          // surplus instead of leaving stale entities outside the rain window.
+          releaseSymbolSlot(symbolObj);
+          setSymbolLifecycleState(symbolObj, "hidden");
+          state.spatialGrid?.remove?.(symbolObj);
+          scheduleHiddenResurface(symbolObj);
+          continue;
+        }
+
+        releaseSymbolSlot(symbolObj);
+        bindSlotToSymbol(claim, symbolObj);
+        SymbolRainHelpers.setSymbolPosition(
+          symbolObj.element,
+          claim.left,
+          claim.top,
+        );
+        symbolObj.x = claim.left;
+        symbolObj.y = claim.top;
+        symbolObj.column = Math.max(
+          0,
+          Math.floor(claim.left / (SymbolRainConfig.columnWidth || symbolObj.x || 1)),
+        );
+        state.spatialGrid?.update?.([symbolObj]);
+      }
     }
 
     function clearSymbolLifecycle(symbolObj) {
@@ -431,47 +512,59 @@ function initSymbolRain() {
           }
 
           setSymbolLifecycleState(symbolObj, "hidden");
+          releaseSymbolSlot(symbolObj);
           state.spatialGrid?.remove?.(symbolObj);
           scheduleHiddenResurface(symbolObj);
         });
       });
     }
 
-    function scheduleHiddenResurface(symbolObj) {
+    /**
+     * Resurface a hidden symbol onto a free slot.
+     * @param {object} symbolObj
+     * @param {number|null} delayOverride - used to stagger the opening roster so
+     *   the whole field never becomes visible (or blank) at the same instant.
+     */
+    function scheduleHiddenResurface(symbolObj, delayOverride = null) {
       const hiddenMin = SymbolRainConfig.hiddenMinMs || 2000;
       const hiddenMax = SymbolRainConfig.hiddenMaxMs || hiddenMin;
-      const hiddenDelay =
-        hiddenMin + Math.random() * Math.max(0, hiddenMax - hiddenMin);
+      const hiddenDelay = Number.isFinite(delayOverride)
+        ? Math.max(0, delayOverride)
+        : hiddenMin + Math.random() * Math.max(0, hiddenMax - hiddenMin);
 
       scheduleSymbolTimer(symbolObj, hiddenDelay, () => {
         if (controllerDestroyed || symbolObj?.isCollected === true) {
           return;
         }
 
-        const symbolWidth = SymbolRainConfig.symbolWidth || 60;
-        const symbolHeight = SymbolRainConfig.symbolHeight || 42;
-        const placement = samplePlacement(symbolWidth, symbolHeight, symbolObj.element, {
-          previousPlacement: {
-            left: symbolObj.x,
-            top: symbolObj.y,
-          },
-        });
+        const claim = claimSlot();
+        if (!claim) {
+          // Field is saturated (or the layout is between epochs). Back off
+          // instead of spinning at a fixed 400ms, and never give up on the
+          // symbol: a hidden symbol that stops retrying is a lost target.
+          const attempts = (symbolObj.resurfaceAttempts || 0) + 1;
+          symbolObj.resurfaceAttempts = attempts;
+          const backoffMs = Math.min(3000, 300 * 2 ** Math.min(attempts, 4));
 
-        if (!placement) {
-          scheduleSymbolTimer(symbolObj, 500, () => scheduleHiddenResurface(symbolObj));
+          scheduleSymbolTimer(symbolObj, backoffMs, () =>
+            scheduleHiddenResurface(symbolObj),
+          );
           return;
         }
 
+        symbolObj.resurfaceAttempts = 0;
+
+        bindSlotToSymbol(claim, symbolObj);
         SymbolRainHelpers.setSymbolPosition(
           symbolObj.element,
-          placement.left,
-          placement.top,
+          claim.left,
+          claim.top,
         );
-        symbolObj.x = placement.left;
-        symbolObj.y = placement.top;
+        symbolObj.x = claim.left;
+        symbolObj.y = claim.top;
         symbolObj.column = Math.max(
           0,
-          Math.floor(placement.left / (SymbolRainConfig.columnWidth || symbolWidth)),
+          Math.floor(claim.left / (SymbolRainConfig.columnWidth || claim.left || 1)),
         );
         state.spatialGrid?.update?.([symbolObj]);
 
@@ -484,11 +577,10 @@ function initSymbolRain() {
       placementIndex = 0,
       options = {},
     ) {
-      const symbolWidth = SymbolRainConfig.symbolWidth || 60;
-      const symbolHeight = SymbolRainConfig.symbolHeight || 42;
       const initialState = options.initialState || "visible";
-      const placement =
-        options.placementOverride || samplePlacement(symbolWidth, symbolHeight);
+      const placementOverride = options.placementOverride || null;
+      const claim = placementOverride ? null : options.slotClaim || claimSlot();
+      const placement = placementOverride || claim;
 
       if (!placement) {
         return null;
@@ -508,17 +600,23 @@ function initSymbolRain() {
           isInitialPopulation: false,
           forcedSymbol: symbolText,
           initialY: placement.top,
-          horizontalOffset: placement.left,
+          horizontalOffset: 0,
         },
       );
 
       if (!createdSymbol) {
+        releaseSlotClaim(claim);
         return null;
       }
 
       const symbolObj = state.activeFallingSymbols.at(-1);
       if (!symbolObj) {
+        releaseSlotClaim(claim);
         return null;
+      }
+
+      if (claim) {
+        bindSlotToSymbol(claim, symbolObj);
       }
 
       symbolObj.lifecycleTimers = [];
@@ -533,11 +631,12 @@ function initSymbolRain() {
       symbolObj.y = placement.top;
       symbolObj.column = Math.max(
         0,
-        Math.floor(placement.left / (SymbolRainConfig.columnWidth || symbolWidth)),
+        Math.floor(placement.left / (SymbolRainConfig.columnWidth || 1)),
       );
       setSymbolLifecycleState(symbolObj, initialState);
 
       if (initialState === "hidden") {
+        releaseSymbolSlot(symbolObj);
         state.spatialGrid?.remove?.(symbolObj);
         scheduleHiddenResurface(symbolObj);
       } else {
@@ -580,10 +679,6 @@ function initSymbolRain() {
 
     function createInitialPopulationSymbol(symbolText, placementIndex = 0) {
       const columnCount = Math.max(state.columnCount || 1, 1);
-      const containerHeight = Math.max(
-        0,
-        state.cachedContainerHeight || symbolRainContainer.offsetHeight || 0,
-      );
 
       const createdSymbol = SymbolRainHelpers.createFallingSymbol(
         {
@@ -598,9 +693,10 @@ function initSymbolRain() {
           column: placementIndex % columnCount,
           isInitialPopulation: true,
           forcedSymbol: symbolText,
-          initialY: containerHeight > 0 ? Math.random() * containerHeight : 0,
-          horizontalOffset:
-            (Math.random() - 0.5) * (SymbolRainConfig.columnWidth || 50),
+          // The element is parked hidden: it only receives a slot (and a real
+          // position) when its staggered turn comes up in populateInitialSymbols.
+          initialY: 0,
+          horizontalOffset: 0,
         },
       );
 
@@ -614,21 +710,29 @@ function initSymbolRain() {
       }
 
       symbolObj.lifecycleTimers = [];
-      symbolObj.lifecycleState = "visible";
+      symbolObj.lifecycleState = "hidden";
       symbolObj.isCollected = false;
-      setSymbolLifecycleState(symbolObj, "visible");
-      state.spatialGrid?.update?.([symbolObj]);
+      setSymbolLifecycleState(symbolObj, "hidden");
+      state.spatialGrid?.remove?.(symbolObj);
       return symbolObj;
     }
 
     function populateInitialSymbols(initialPopulationToken) {
       const spawnOrder = [];
+      const instancesPerSymbol = SymbolRainConfig.instancesPerSymbol || 5;
 
-      state.symbols.forEach((symbolText) => {
-        for (let index = 0; index < (SymbolRainConfig.instancesPerSymbol || 5); index += 1) {
-          spawnOrder.push({ symbolText, placementIndex: index });
-        }
-      });
+      // Round-robin so the first N entries cover every distinct symbol before
+      // any symbol gets its second copy: the opening roster then guarantees one
+      // of each target within the first stagger window.
+      for (
+        let instanceIndex = 0;
+        instanceIndex < instancesPerSymbol;
+        instanceIndex += 1
+      ) {
+        state.symbols.forEach((symbolText) => {
+          spawnOrder.push({ symbolText, placementIndex: instanceIndex });
+        });
+      }
 
       const batchSize = 8;
       let cursor = 0;
@@ -660,8 +764,35 @@ function initSymbolRain() {
         }
 
         if (createdCount > 0) {
-          readySymbols.forEach((symbolObj) => {
-            scheduleVisibleCycle(symbolObj);
+          // Stagger the opening roster across one full lifecycle. Scheduling
+          // every symbol visible in the same tick is what produced the
+          // all-85-visible burst followed by a completely blank field two
+          // seconds later; a uniform phase offset keeps the visible count at
+          // its steady-state share from the very first frame.
+          const lifeCycleMs =
+            (SymbolRainConfig.visibleMs || 7000) +
+            (SymbolRainConfig.fadeMs || 1000) +
+            ((SymbolRainConfig.hiddenMinMs || 2000) +
+              (SymbolRainConfig.hiddenMaxMs || 7000)) /
+              2;
+          // The opening burst keeps the field playable from the first frame
+          // (capped by the slot grid so it can never oversubscribe it); the
+          // remainder is spread across one full lifecycle.
+          const initialBurst = Math.min(
+            readySymbols.length,
+            Math.max(1, Math.min(12, state.layout?.slotCount || 12)),
+          );
+          const remainingSymbols = Math.max(1, readySymbols.length - initialBurst);
+
+          readySymbols.forEach((symbolObj, symbolIndex) => {
+            const delayMs =
+              symbolIndex < initialBurst
+                ? 0
+                : Math.round(
+                    ((symbolIndex - initialBurst) / remainingSymbols) *
+                      lifeCycleMs,
+                  );
+            scheduleHiddenResurface(symbolObj, delayMs);
           });
           state.isInitialPopulation = false;
           state.initialPopulationToken = null;
@@ -685,6 +816,8 @@ function initSymbolRain() {
       populateInitialSymbols,
       stopControllers() {
         SymbolRainAnimation.stopAnimation(state);
+        state.layout = null;
+        slotRegistry.reset(0);
       },
       onFailure() {
         console.warn("⚠️ Symbol Rain layout never stabilized; skipping startup");
@@ -815,6 +948,7 @@ function initSymbolRain() {
         return false;
       }
 
+      releaseSymbolSlot(symbolObj);
       SymbolRainHelpers.cleanupSymbolObject({
         symbolObj,
         activeFaceReveals: state.activeFaceReveals,
@@ -843,27 +977,6 @@ function initSymbolRain() {
         0;
 
       return { width, height };
-    }
-
-    function clampVisibleAxis(position, windowSize, symbolSize) {
-      if (!Number.isFinite(windowSize) || windowSize <= 0) {
-        return null;
-      }
-
-      const resolvedSymbolSize = Math.max(
-        1,
-        Number.isFinite(symbolSize) ? symbolSize : 1,
-      );
-      const canFitWholeSymbol = windowSize >= resolvedSymbolSize;
-      const minPosition = canFitWholeSymbol
-        ? 0
-        : Math.min(0, windowSize - resolvedSymbolSize);
-      const maxPosition = canFitWholeSymbol
-        ? windowSize - resolvedSymbolSize
-        : Math.max(0, windowSize - 1);
-      const resolvedPosition = Number.isFinite(position) ? position : 0;
-
-      return Math.min(Math.max(resolvedPosition, minPosition), maxPosition);
     }
 
     function releaseSymbolForControllerSpawn() {
@@ -905,160 +1018,30 @@ function initSymbolRain() {
       return releaseSymbolForControllerSpawn();
     }
 
-    function getLeastOccupiedColumn() {
-      let selectedColumn = 0;
-      let selectedLoad = Number.POSITIVE_INFINITY;
-
-      for (
-        let columnIndex = 0;
-        columnIndex < state.columnCount;
-        columnIndex += 1
-      ) {
-        let columnLoad = 0;
-
-        for (const symbolObj of state.activeFallingSymbols) {
-          if (symbolObj.column === columnIndex) {
-            columnLoad += 1;
-          }
-        }
-
-        if (columnLoad < selectedLoad) {
-          selectedColumn = columnIndex;
-          selectedLoad = columnLoad;
-        }
-      }
-
-      return selectedColumn;
-    }
-
-    function resolveControllerSpawnColumn(options, effectiveColumnCount) {
-      if (effectiveColumnCount <= 0) {
-        return 0;
-      }
-
-      if (options.preferLeastOccupiedColumn === true) {
-        return getLeastOccupiedColumn();
-      }
-
-      const requestedColumn = Number.isInteger(options.column)
-        ? options.column
-        : Number.isInteger(options.targetColumn)
-          ? options.targetColumn
-          : 0;
-
-      return Math.min(
-        Math.max(requestedColumn, 0),
-        Math.max(effectiveColumnCount - 1, 0),
-      );
-    }
-
-    function resolveControllerSpawnY(options, rainMeasurements) {
-      const symbolHeight = state.config?.symbolHeight || 42;
-      if (Number.isFinite(options.initialY)) {
-        return clampVisibleAxis(
-          options.initialY,
-          rainMeasurements.height,
-          symbolHeight,
-        );
-      }
-
-      const containerHeight = rainMeasurements.height || symbolHeight * 4;
-      const maxY = Math.max(0, containerHeight - symbolHeight);
-      const preferredY = Math.max(symbolHeight, containerHeight * 0.35);
-
-      return clampVisibleAxis(
-        Math.min(preferredY, maxY),
-        rainMeasurements.height,
-        symbolHeight,
-      );
-    }
-
-    function resolveControllerHorizontalOffset(
-      options,
-      column,
-      rainMeasurements,
-    ) {
-      const symbolWidth = state.config?.symbolWidth || 60;
-      const columnWidth = state.config?.columnWidth || symbolWidth;
-      const requestedOffset = Number.isFinite(options.horizontalOffset)
-        ? options.horizontalOffset
-        : 0;
-      const baseX = column * columnWidth + columnWidth / 2;
-      const clampedX = clampVisibleAxis(
-        baseX + requestedOffset,
-        rainMeasurements.width,
-        symbolWidth,
-      );
-
-      if (clampedX === null) {
-        return null;
-      }
-
-      return clampedX - baseX;
-    }
-
     function resolveControllerPlacement(options, effectiveColumnCount) {
       const rainMeasurements = getRainWindowMeasurements();
       if (rainMeasurements.width <= 0 || rainMeasurements.height <= 0) {
         return null;
       }
 
-      const column = resolveControllerSpawnColumn(
-        options,
-        effectiveColumnCount,
-      );
-      const top = resolveControllerSpawnY(options, rainMeasurements);
-      const horizontalOffset = resolveControllerHorizontalOffset(
-        options,
-        column,
-        rainMeasurements,
-      );
-
-      if (top === null || horizontalOffset === null) {
+      const claim = claimSlot();
+      if (!claim) {
         return null;
       }
 
-      const symbolWidth = state.config?.symbolWidth || 60;
-      const symbolHeight = state.config?.symbolHeight || 42;
-      const columnWidth = state.config?.columnWidth || symbolWidth;
-      const left = clampVisibleAxis(
-        column * columnWidth + columnWidth / 2 + horizontalOffset,
-        rainMeasurements.width,
-        symbolWidth,
+      const columnWidth = Math.max(SymbolRainConfig.columnWidth || 1, 1);
+      const requestedColumn = Number.isInteger(options?.column)
+        ? options.column
+        : Math.floor(claim.left / columnWidth);
+      const column = Math.max(
+        0,
+        Math.min(requestedColumn, Math.max(effectiveColumnCount - 1, 0)),
       );
-
-      if (left === null) {
-        return null;
-      }
-
-      const containerRect = getContainerBounds();
-      const candidateRect = {
-        left: (containerRect?.left || 0) + left,
-        top: (containerRect?.top || 0) + top,
-        right: (containerRect?.left || 0) + left + symbolWidth,
-        bottom: (containerRect?.top || 0) + top + symbolHeight,
-        width: symbolWidth,
-        height: symbolHeight,
-      };
-
-      if (isPlacementClear(candidateRect)) {
-        return {
-          column,
-          placement: {
-            left,
-            top,
-          },
-        };
-      }
-
-      const sampledPlacement = samplePlacement(symbolWidth, symbolHeight);
-      if (!sampledPlacement) {
-        return null;
-      }
 
       return {
         column,
-        placement: sampledPlacement,
+        slotClaim: claim,
+        placement: { left: claim.left, top: claim.top },
       };
     }
 
@@ -1117,7 +1100,7 @@ function initSymbolRain() {
           controllerPlacement.column,
           {
             initialState: "visible",
-            placementOverride: controllerPlacement.placement,
+            slotClaim: controllerPlacement.slotClaim,
           },
         );
 

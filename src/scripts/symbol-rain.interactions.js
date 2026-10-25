@@ -117,7 +117,7 @@
         return;
       }
 
-      const loop = () => {
+      const syncOnce = () => {
         keyboardSyncFrameId = null;
 
         if (disposed || !panel.matches(":focus")) {
@@ -125,10 +125,9 @@
         }
 
         syncKeyboardTargetCandidate();
-        keyboardSyncFrameId = requestAnimationFrame(loop);
       };
 
-      keyboardSyncFrameId = requestAnimationFrame(loop);
+      keyboardSyncFrameId = requestAnimationFrame(syncOnce);
     };
 
     const cycleKeyboardTarget = (direction = 1) => {

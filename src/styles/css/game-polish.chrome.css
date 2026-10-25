@@ -1,13 +1,14 @@
 :root {
-  --shell-bg: oklch(0.12 0.014 122);
-  --shell-panel: oklch(0.16 0.016 122);
-  --shell-panel-strong: oklch(0.2 0.022 122);
-  --shell-copy: oklch(0.94 0.014 105);
-  --shell-copy-muted: oklch(0.79 0.018 105);
-  --shell-line: oklch(0.82 0.14 132);
+  --shell-bg: oklch(0.07 0.01 125);
+  --shell-panel: oklch(0.11 0.012 125);
+  --shell-panel-strong: oklch(0.15 0.015 125);
+  --shell-copy: oklch(0.97 0.008 100);
+  --shell-copy-muted: oklch(0.72 0.012 100);
+  --shell-line: oklch(0.85 0.16 90);
   --shell-line-soft: color-mix(in oklch, var(--shell-line) 40%, transparent);
-  --shell-signal: oklch(0.81 0.08 82);
-  --shell-alert: oklch(0.74 0.16 42);
+  --shell-signal: oklch(0.88 0.18 90);
+  --shell-alert: oklch(0.68 0.19 25);
+  --shell-accent: oklch(0.79 0.15 70);
   --shell-surface-raised: linear-gradient(160deg, color-mix(in oklch, var(--shell-panel-strong) 84%, transparent), color-mix(in oklch, var(--shell-bg) 92%, black 8%));
   --shell-surface-soft: linear-gradient(180deg, color-mix(in oklch, var(--shell-panel) 88%, transparent), color-mix(in oklch, var(--shell-bg) 94%, black 6%));
   --shell-border-subtle: color-mix(in oklch, var(--shell-copy) 8%, transparent);

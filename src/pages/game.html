@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Play Math Master - Solve algebra equations by collecting resurfacing targets in this Matrix-themed educational game.">
-    <meta name="theme-color" content="#000000">
+        content="Play Math Master - Solve algebra equations by collecting resurfacing targets in this Star Wars-themed educational game.">
+    <meta name="theme-color" content="#070b14">
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self';">
 
@@ -43,6 +43,10 @@
     <link rel="stylesheet" href="/src/styles/css/perf-smoke-mode.css">
     <link rel="stylesheet" href="/src/styles/css/service-worker-register.css">
     <link rel="stylesheet" href="/src/styles/css/game-polish.chrome.css?v=20260406-embedded-pane-2">
+    <link rel="stylesheet" href="/src/styles/css/star-wars.theme.tokens.css">
+    <link rel="stylesheet" href="/src/styles/css/star-wars.theme.surfaces.css">
+    <link rel="stylesheet" href="/src/styles/css/star-wars.theme.controls.css">
+    <link rel="stylesheet" href="/src/styles/css/star-wars.theme.motion.css">
 </head>
 
 <body>
@@ -291,14 +295,15 @@
     <script defer src="/src/scripts/symbol-rain.helpers.spatial.js?v=20260420-rotation-cache-bust-1"></script>
     <script defer src="/src/scripts/symbol-rain.helpers.face-reveal.js?v=20260420-rotation-cache-bust-1"></script>
     <script defer src="/src/scripts/symbol-rain.helpers.pool.js?v=20260420-rotation-cache-bust-1"></script>
-    <script defer src="/src/scripts/symbol-rain.helpers.spawn.js?v=20260501-symbol-rain-lifecycle-2"></script>
+    <script defer src="/src/scripts/symbol-rain.helpers.spawn.js?v=20261024-gameplay-entity-obstruction-3"></script>
     <script defer src="/src/scripts/symbol-rain.helpers.interactions.js?v=20260420-rotation-cache-bust-1"></script>
     <script defer src="/src/scripts/symbol-rain.config.js?v=20260420-rotation-cache-bust-1"></script>
-    <script defer src="/src/scripts/symbol-rain.targets.js?v=20260501-symbol-rain-lifecycle-2"></script>
+    <script defer src="/src/scripts/symbol-rain.targets.js?v=20261024-gameplay-entity-obstruction-3"></script>
     <script defer src="/src/scripts/symbol-rain.animation.js?v=20260422-local-freshness-evan-audio-1"></script>
     <script defer src="/src/scripts/symbol-rain.interactions.js?v=20260503-mobile-touch-accuracy-1"></script>
-    <script defer src="/src/scripts/symbol-rain.lifecycle.js?v=20260501-symbol-rain-lifecycle-2"></script>
-    <script defer src="/src/scripts/3rdDISPLAY.js?v=20260501-symbol-rain-lifecycle-2"></script>
+    <script defer src="/src/scripts/symbol-rain.lifecycle.js?v=20261024-gameplay-entity-obstruction-3"></script>
+    <script defer src="/src/scripts/symbol-rain.placement.js?v=20261024-gameplay-entity-obstruction-3"></script>
+    <script defer src="/src/scripts/3rdDISPLAY.js?v=20261024-gameplay-entity-obstruction-3"></script>
     <!-- Load before main game.js -->
     <script defer src="/src/scripts/problem-loader.js"></script>
     <script defer src="/src/scripts/symbol-validator.js?v=20260422-local-freshness-evan-audio-1"></script>
@@ -372,7 +377,6 @@
     <script defer src="/src/scripts/score-timer.boundary.js"></script>
     <script defer src="/src/scripts/score-timer.runtime.js"></script>
     <script defer src="/src/scripts/score-timer-manager.js"></script>
-    <script defer src="/src/scripts/game-problem-loader.js"></script>
     <script defer src="/src/scripts/game-symbol-helpers.js?v=20260422-local-freshness-evan-audio-1"></script>
     <script defer src="/src/scripts/game-effects.js"></script>
     <!-- Main game logic -->
@@ -384,7 +388,7 @@
     <script defer src="/src/scripts/evan-helper.pulse.js"></script>
     <script defer src="/src/scripts/game-tutorial-level.js"></script>
     <script defer src="/src/scripts/game-onboarding.controller.js"></script>
-    <script defer src="/src/scripts/evan-helper.controller.targets.js?v=20260501-symbol-rain-lifecycle-2"></script>
+    <script defer src="/src/scripts/evan-helper.controller.targets.js?v=20261024-gameplay-entity-obstruction-3"></script>
     <script defer src="/src/scripts/evan-helper.controller.runtime.js"></script>
     <script defer src="/src/scripts/evan-helper.controller.js"></script>
     <script src="/src/scripts/game-page.js?v=20260420-rotation-cache-bust-1" defer></script>
@@ -393,7 +397,7 @@
     <!-- Service Worker Registration + Install Prompt -->
     <script defer src="/src/scripts/build-version.js?v=20260503-mobile-touch-accuracy-1"></script>
     <script defer src="/src/scripts/install-prompt.js"></script>
-    <script defer src="/src/scripts/service-worker-register.js?v=20260501-symbol-rain-lifecycle-2"></script>
+    <script defer src="/src/scripts/service-worker-register.js?v=20261024-gameplay-entity-obstruction-3"></script>
 
 </body>
 

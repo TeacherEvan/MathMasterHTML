@@ -1,0 +1,151 @@
+/* ==========================================================================
+   star-wars.theme.tokens.css — Math Master "Star Wars" visual skin
+   --------------------------------------------------------------------------
+   Design tokens.
+   Primitive Star Wars palette (durasteel void, Alliance holo-cyan,
+   Republic gold, Imperial crimson, plasma green) plus the token bridge that
+   re-points the existing --shell-*, --level-*, --welcome-*, --btn-* and
+   --cosmic-* design systems at it.
+
+   Loaded as part of the Star Wars theme layer, after every page stylesheet,
+   so this file owns the cascade for the theme. Nothing here mutates DOM,
+   IDs, data-testid hooks, event bindings, or state — presentation only
+   (colours, surfaces, depth, motion, typography).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. PRIMITIVE TOKENS
+   -------------------------------------------------------------------------- */
+:root {
+  /* Space */
+  --sw-void: oklch(0.115 0.018 264);
+  --sw-void-deep: oklch(0.072 0.013 264);
+  --sw-nebula-blue: oklch(0.46 0.145 250);
+  --sw-nebula-violet: oklch(0.42 0.15 306);
+  --sw-nebula-gold: oklch(0.56 0.13 78);
+
+  /* Metal */
+  --sw-durasteel: oklch(0.225 0.020 256);
+  --sw-durasteel-hi: oklch(0.305 0.024 254);
+
+  /* Alliance holo (primary signal) */
+  --sw-holo: oklch(0.855 0.110 212);
+  --sw-holo-deep: oklch(0.600 0.145 238);
+  --sw-holo-dim: oklch(0.760 0.075 220);
+
+  /* Republic gold (warm accent) */
+  --sw-gold: oklch(0.865 0.135 88);
+  --sw-gold-deep: oklch(0.640 0.130 70);
+
+  /* Imperial crimson (danger) */
+  --sw-crimson: oklch(0.610 0.195 25);
+  --sw-crimson-lt: oklch(0.780 0.125 32);
+
+  /* Plasma green (success) */
+  --sw-plasma: oklch(0.865 0.180 150);
+
+  /* Tatooine sand (neutral) */
+  --sw-sand: oklch(0.820 0.038 82);
+
+  /* Type + stars */
+  --sw-star: oklch(0.975 0.008 250);
+  --sw-text: oklch(0.968 0.006 250);
+  --sw-text-dim: oklch(0.800 0.016 250);
+  --sw-text-mute: oklch(0.660 0.020 250);
+
+  /* Lines + glows */
+  --sw-line: oklch(0.855 0.110 212 / 0.30);
+  --sw-line-soft: oklch(0.855 0.110 212 / 0.16);
+  --sw-line-strong: oklch(0.855 0.110 212 / 0.55);
+  --sw-glow-holo: 0 0 18px oklch(0.855 0.110 212 / 0.28);
+  --sw-glow-gold: 0 0 18px oklch(0.865 0.135 88 / 0.24);
+
+  /* Multi-depth starfield (shared by every page surface) */
+  --sw-stars:
+    radial-gradient(1.7px 1.7px at 17% 23%, color-mix(in oklch, var(--sw-star) 92%, transparent) 50%, transparent 50%),
+    radial-gradient(1.2px 1.2px at 63% 71%, oklch(0.84 0.06 210 / 0.78) 50%, transparent 50%),
+    radial-gradient(1px 1px at 85% 33%, color-mix(in oklch, var(--sw-star) 62%, transparent) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 37% 57%, oklch(0.94 0.025 95 / 0.64) 50%, transparent 50%),
+    radial-gradient(0.9px 0.9px at 73% 12%, color-mix(in oklch, var(--sw-star) 50%, transparent) 50%, transparent 50%),
+    radial-gradient(1.3px 1.3px at 9% 82%, oklch(0.82 0.05 290 / 0.52) 50%, transparent 50%);
+  --sw-star-sizes:
+    190px 190px,
+    260px 260px,
+    330px 330px,
+    430px 430px,
+    520px 520px,
+    620px 620px;
+}
+
+/* --------------------------------------------------------------------------
+   2. TOKEN BRIDGE — re-point the existing design systems at Star Wars
+   -------------------------------------------------------------------------- */
+:root {
+  /* Game chrome shell (game.html) */
+  --shell-bg: var(--sw-void);
+  --shell-panel: oklch(0.150 0.020 258);
+  --shell-panel-strong: oklch(0.212 0.024 255);
+  --shell-copy: var(--sw-text);
+  --shell-copy-muted: var(--sw-text-dim);
+  --shell-line: var(--sw-holo);
+  --shell-line-soft: var(--sw-line-soft);
+  --shell-signal: var(--sw-holo);
+  --shell-alert: var(--sw-crimson-lt);
+  --shell-accent: var(--sw-gold);
+  --shell-surface-raised: linear-gradient(160deg, oklch(0.212 0.024 255 / 0.92), oklch(0.072 0.013 264 / 0.96));
+  --shell-surface-soft: linear-gradient(180deg, oklch(0.150 0.020 258 / 0.90), oklch(0.072 0.013 264 / 0.95));
+  --shell-border-subtle: oklch(0.968 0.006 250 / 0.08);
+  --shell-border-strong: oklch(0.855 0.110 212 / 0.32);
+  --shell-border-signal: oklch(0.855 0.110 212 / 0.42);
+  --shell-shadow-panel: inset 0 1px 0 oklch(1 0 0 / 0.07), 0 20px 48px rgba(0, 0, 0, 0.45);
+  --shell-shadow-control: inset 0 1px 0 oklch(1 0 0 / 0.09), 0 14px 30px rgba(0, 0, 0, 0.4);
+  --shell-ring-soft: 0 0 0 1px oklch(0.855 0.110 212 / 0.34);
+  --shell-scrollbar-thumb: oklch(0.855 0.110 212 / 0.34);
+  --shell-scrollbar-track: oklch(0.072 0.013 264 / 0.9);
+
+  /* Level select palette */
+  --level-ink-0: oklch(0.095 0.014 264);
+  --level-ink-1: oklch(0.140 0.019 258);
+  --level-ink-2: oklch(0.185 0.023 255);
+  --level-ink-3: oklch(0.250 0.026 254);
+  --level-ink-4: oklch(0.330 0.028 252);
+  --level-text-0: var(--sw-text);
+  --level-text-1: var(--sw-text-dim);
+  --level-text-2: var(--sw-text-mute);
+  --level-phosphor: var(--sw-holo);
+  --level-brass: var(--sw-gold);
+  --level-ember: var(--sw-crimson);
+  --level-focus: var(--sw-holo);
+  --level-panel-shadow: 0 30px 72px rgba(0, 0, 0, 0.5);
+  --level-panel-border: oklch(0.855 0.110 212 / 0.16);
+  --level-switcher-bg: oklch(0.968 0.006 250 / 0.04);
+
+  /* Welcome palette */
+  --welcome-accent: oklch(0.855 0.110 212 / 0.95);
+  --welcome-surface: oklch(0.135 0.019 258 / 0.86);
+  --welcome-surface-strong: oklch(0.175 0.023 255 / 0.94);
+  --welcome-border: oklch(0.855 0.110 212 / 0.22);
+  --welcome-text: var(--sw-text);
+  --welcome-muted: var(--sw-text-dim);
+  --welcome-gold: var(--sw-gold);
+  --welcome-ember: oklch(0.610 0.195 25 / 0.92);
+
+  /* Button tiers */
+  --btn-focus: var(--sw-holo);
+  --btn-primary-fg: oklch(0.140 0.022 262);
+  --btn-primary-bg-from: oklch(0.905 0.130 92);
+  --btn-primary-bg-to: oklch(0.655 0.135 68);
+  --btn-secondary-fg: var(--sw-text);
+  --btn-tertiary-fg: var(--sw-text-dim);
+  --btn-danger-fg: oklch(0.935 0.045 30);
+  --btn-danger-edge: oklch(0.610 0.195 25 / 0.55);
+
+  /* Cosmic console layer (opt-in overlay) */
+  --cosmic-void: oklch(0.072 0.013 264);
+  --cosmic-haze: oklch(0.180 0.024 256);
+  --cosmic-star: oklch(0.975 0.008 250);
+  --cosmic-signal: oklch(0.855 0.110 212);
+  --cosmic-amber: oklch(0.865 0.135 88);
+  --cosmic-magenta: oklch(0.700 0.170 320);
+  --cosmic-pulse-halo: oklch(0.855 0.110 212 / 0.55);
+}

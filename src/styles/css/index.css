@@ -13,20 +13,20 @@
   --btn-font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
   --btn-font-display: "Orbitron", monospace;
   --btn-radius-pill: 999px;
-  --btn-radius-control: 14px;
+  --btn-radius-control: 10px;
   --btn-min-h: 2.85rem;
   --btn-min-h-sm: 2.4rem;
-  --btn-focus: #edf7dd;
-  --btn-primary-fg: #0d100f;
-  --btn-primary-bg-from: rgba(237, 240, 189, 0.98);
-  --btn-primary-bg-to: rgba(154, 117, 45, 0.94);
-  --btn-secondary-fg: var(--level-text-0, #ebe5d8);
-  --btn-tertiary-fg: var(--level-text-1, #c2c8bf);
-  --btn-danger-fg: #fde7df;
-  --btn-danger-edge: rgba(199, 107, 82, 0.45);
+  --btn-focus: var(--shell-accent);
+  --btn-primary-fg: oklch(0.07 0.01 125);
+  --btn-primary-bg-from: var(--shell-accent);
+  --btn-primary-bg-to: oklch(0.68 0.13 70);
+  --btn-secondary-fg: var(--shell-copy);
+  --btn-tertiary-fg: var(--shell-copy-muted);
+  --btn-danger-fg: oklch(0.97 0.008 100);
+  --btn-danger-edge: oklch(0.68 0.19 25 / 0.45);
 }
 
-/* base — all clickable tiers share geometry */
+/* base — all clickable tiers share geometry (Star Wars tactile spec) */
 .btn,
 button.btn,
 a.btn {
@@ -37,7 +37,7 @@ a.btn {
   gap: 0.5rem;
   min-height: var(--btn-min-h);
   padding: 0.7rem 1.1rem;
-  border-radius: var(--btn-radius-pill);
+  border-radius: var(--btn-radius-control);
   border: 1px solid transparent;
   font-family: var(--btn-font-mono);
   font-size: 0.78rem;
@@ -48,12 +48,17 @@ a.btn {
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  /* Specular top-edge highlight (depth without resting GPU layer) */
+  box-shadow:
+    inset 0 1px 0 0 oklch(1 0 0 / 0.14),
+    0 4px 8px -2px oklch(0 0 0 / 0.25);
+  /* Compositor-only transitions; no resting translate3d to save VRAM */
   transition:
-    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 200ms ease,
-    background 200ms ease,
-    color 200ms ease,
-    box-shadow 200ms ease;
+    transform 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 140ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .btn > svg {
@@ -63,21 +68,54 @@ a.btn {
   stroke-width: 1.8;
 }
 
-.btn:disabled,
-.btn[aria-disabled="true"] {
-  cursor: not-allowed;
-  opacity: 0.45;
-  filter: saturate(0.4);
-  transform: none !important;
+/* Hover elevation — pointer/fine only, no sticky touch hover */
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover:not(:disabled):not([aria-disabled="true"]):not([data-loading="true"]) {
+    border-color: oklch(1 0 0 / 0.24);
+    transform: translate3d(0, -1px, 0) scale(1.005);
+    box-shadow:
+      inset 0 1px 0 0 oklch(1 0 0 / 0.22),
+      0 8px 16px -4px oklch(0 0 0 / 0.4);
+  }
+}
+
+/* Active press — <=16ms feel */
+.btn:active:not(:disabled):not([aria-disabled="true"]):not([data-loading="true"]) {
+  transition-duration: 25ms;
+  transform: translate3d(0, 1px, 0) scale(0.985);
+  box-shadow:
+    inset 0 2px 4px 0 oklch(0 0 0 / 0.65),
+    0 1px 1px 0 oklch(0 0 0 / 0.3);
 }
 
 .btn:focus-visible {
   outline: 2px solid var(--btn-focus);
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
 
-.btn:active {
-  transform: translateY(0) scale(0.97);
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.45;
+  filter: grayscale(40%);
+  box-shadow: none;
+  transform: none !important;
+}
+
+/* Loading state — width-locked */
+.btn[data-loading="true"] {
+  cursor: wait;
+}
+.btn[data-loading="true"] .btn-label {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn:hover:not(:disabled):not([aria-disabled="true"]):not([data-loading="true"]) {
+    transition-duration: 0.01ms !important;
+    transform: none !important;
+  }
 }
 
 /* Primary — filled gold gradient, dark text. Single primary per band. */

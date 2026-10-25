@@ -1,11 +1,11 @@
 {
   "name": "Math Master - Unlock Your Mind",
   "short_name": "Math Master",
-  "description": "An educational algebra game with Matrix-themed interface where players solve equations by clicking falling symbols",
+  "description": "An educational algebra game with a Star Wars-themed interface where players solve equations by clicking falling symbols",
   "start_url": "/",
   "display": "fullscreen",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#070b14",
+  "theme_color": "#070b14",
   "orientation": "landscape",
   "scope": "/",
   "icons": [

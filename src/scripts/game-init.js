@@ -92,6 +92,31 @@ console.log("🎮 Game initialization module loading...");
       _lockComponent,
     };
 
+    // Start problem loading early so bootstrap() can await its readyPromise.
+    // Resolves with fallback on failure — never blocks boot indefinitely.
+    const problemLoader = window.problemLoader || new window.ProblemLoader();
+    problemLoader.loadProblems(level);
+
+    // Bootstrap the runtime coordinator after startup preload completes, so
+    // STARTUP_PRELOAD_COMPLETE owns preloadComplete and bootstrap adds the
+    // gameplay-content-ready barrier (awaits lazy components + problems).
+    function bootstrapRuntime() {
+      window.GameRuntimeCoordinator?.bootstrap?.();
+    }
+
+    if (window.StartupPreload?.isComplete?.()) {
+      // Preload already complete (e.g. ?preload=off) — bootstrap now.
+      bootstrapRuntime();
+    } else if (GE?.STARTUP_PRELOAD_COMPLETE) {
+      document.addEventListener(
+        GE.STARTUP_PRELOAD_COMPLETE,
+        bootstrapRuntime,
+        { once: true },
+      );
+    } else {
+      bootstrapRuntime();
+    }
+
     console.log("✅ Game initialization complete");
 
     // Fail-fast: verify critical globals exist after a short delay (scripts load async)

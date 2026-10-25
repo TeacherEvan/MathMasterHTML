@@ -7,11 +7,22 @@
 
   function isVisible(el) {
     if (!el || !el.isConnected) return false;
+    // Defer DOM rect measurements until gameplay is ready
+    // (avoids measuring 0x0 unhydrated placeholder nodes before lock HTML resolves).
+    if (window.GameRuntimeCoordinator?.isGameplayReady?.() !== true) {
+      return false;
+    }
     const r = el.getBoundingClientRect();
     return r.width > 0 && r.height > 0;
   }
 
   function centerOf(el) {
+    if (!el || !el.isConnected) return { x: 0, y: 0 };
+    // Defer DOM rect measurements until gameplay is ready
+    // (avoids measuring 0x0 unhydrated placeholder nodes before lock HTML resolves).
+    if (window.GameRuntimeCoordinator?.isGameplayReady?.() !== true) {
+      return { x: 0, y: 0 };
+    }
     const r = el.getBoundingClientRect();
     return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
   }

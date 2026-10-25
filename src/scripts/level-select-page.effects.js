@@ -4,7 +4,7 @@
 
   const CONFIG = Object.freeze({
     MATRIX: {
-      COLUMN_WIDTH_PX: 24,
+      COLUMN_WIDTH_PX: 30,
       ANIMATION_DURATION_MIN_SEC: 9,
       ANIMATION_DURATION_RANGE_SEC: 5,
       ANIMATION_DELAY_MAX_SEC: 5,

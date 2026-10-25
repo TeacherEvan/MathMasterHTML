@@ -108,7 +108,7 @@
 
 .skip-link {
   position: absolute;
-  top: -100px;
+  top: 0;
   left: 0;
   background: #00ff00;
   color: #000;
@@ -118,11 +118,12 @@
   font-weight: 700;
   border-radius: 0 0 8px 0;
   text-decoration: none;
-  transition: top 0.3s;
+  transform: translateY(-100%);
+  transition: transform 0.3s;
 }
 
 .skip-link:focus {
-  top: 0;
+  transform: translateY(0);
 }
 
 /* ============================================

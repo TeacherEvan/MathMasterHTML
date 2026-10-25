@@ -965,31 +965,37 @@ test.describe("Runtime boot orchestration", () => {
             });
             populationState.activeFallingSymbols.length = 0;
           },
+          // The wave spawner used to live in symbol-rain.helpers.spawn.js; it
+          // moved to the controller (slot grid + staggered roster), so this
+          // harness drives the same two-wave contract inline.
           populateInitialSymbols(initialPopulationToken) {
             populationCalls.populateInitialSymbols += 1;
-            window.SymbolRainHelpers.populateInitialSymbols(
-              {
-                config: populationConfig,
-                columnCount: 2,
-                isMobileMode: true,
-                activeFallingSymbols: populationState.activeFallingSymbols,
-                symbols: ["X", "Y"],
-                symbolRainContainer,
-                symbolPool: {
-                  get: () => document.createElement("span"),
-                },
-                lastSymbolSpawnTimestamp: {},
-                initialPopulationToken,
-              },
-              () => {
-                if (initialPopulationToken?.cancelled === true) {
-                  return;
-                }
 
+            const spawnWave = (waveNumber) => {
+              if (initialPopulationToken?.cancelled === true) {
+                return;
+              }
+
+              if (waveNumber >= 2) {
                 populationCalls.completed += 1;
                 populationState.isInitialPopulation = false;
-              },
-            );
+                return;
+              }
+
+              for (let index = 0; index < populationConfig.symbolsPerWave; index += 1) {
+                const element = document.createElement("span");
+                symbolRainContainer.appendChild(element);
+                populationState.activeFallingSymbols.push({ element });
+              }
+
+              const timeoutId = window.setTimeout(
+                () => spawnWave(waveNumber + 1),
+                populationConfig.waveInterval,
+              );
+              initialPopulationToken?.timeoutIds?.push?.(timeoutId);
+            };
+
+            spawnWave(0);
           },
           requestAnimationFrame(callback) {
             populationFrameCallbacks.push(callback);
@@ -1113,6 +1119,75 @@ test.describe("Runtime boot orchestration", () => {
         inputLocks: expect.objectContaining({
           "evan-auto": true,
         }),
+      }),
+    );
+  });
+
+  test("bootstrap awaits delayed lock-component readyPromise before completing", async ({
+    page,
+  }) => {
+    // Delay every lock component fetch by 300ms via a fetch override installed
+    // before any page scripts run, so the lazy component loader's preload is
+    // genuinely delayed.
+    await page.addInitScript(() => {
+      const originalFetch = window.fetch.bind(window);
+      window.fetch = async function (input, init) {
+        const url = String(input);
+        if (
+          url.includes("lock-components") &&
+          url.includes("transformer.html")
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        }
+        return originalFetch(input, init);
+      };
+    });
+
+    await gotoGameRuntime(page, "?level=beginner&preload=off");
+    await waitForRuntimeCoordinator(page);
+
+    // With preload=off, STARTUP_PRELOAD_COMPLETE fires immediately and marks
+    // preload complete.
+    await page.waitForFunction(
+      () => window.GameRuntimeCoordinator.getState().preloadComplete === true,
+      { timeout: 10000 },
+    );
+
+    // readyPromise must exist (set by lazy-component-loader.init.js calling
+    // preloadComponents(getAllLockComponentPaths())).
+    const readyPromiseExists = await page.evaluate(() =>
+      Boolean(window.lazyComponentLoader?.readyPromise),
+    );
+    expect(readyPromiseExists).toBe(true);
+
+    // readyPromise must resolve despite the 300ms-per-component delay
+    // (6 components fetched sequentially = ~1800ms+).
+    const readyPromiseResolved = await page.evaluate(async () => {
+      if (!window.lazyComponentLoader?.readyPromise) {
+        return false;
+      }
+      try {
+        await Promise.race([
+          window.lazyComponentLoader.readyPromise,
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("readyPromise timeout")), 15000),
+          ),
+        ]);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+    expect(readyPromiseResolved).toBe(true);
+
+    // After readyPromise resolves and bootstrap() completes, preload should
+    // be complete and the runtime coordinator should be in a stable state.
+    const finalState = await page.evaluate(() =>
+      window.GameRuntimeCoordinator.getState(),
+    );
+    expect(finalState).toEqual(
+      expect.objectContaining({
+        preloadComplete: true,
       }),
     );
   });

@@ -195,25 +195,50 @@ body.automation {
     transition: color 0.15s ease, text-shadow 0.15s ease;
     user-select: none;
     z-index: 1;
-    /* PERFORMANCE: Expanded padding for touch targets (no ::before needed!) */
-    /* Reduces render layers from 200+ to 100 (5-8% FPS gain) */
-    padding: 20px;
-    margin: -20px;
+    /* One box recipe for every glyph, pooled or live.
+       The old `padding: 15px 20px; margin: -15px -20px` turned a 15x22 glyph
+       into an 80x70 tap target on touch (58x57 on desktop); in a 50px column
+       pitch every neighbour overlapped every other neighbour, so taps were
+       routed to whichever glyph sat later in DOM order. The touch layout also
+       forces `min-width/min-height: 40px` (modern-ux-enhancements), so padding
+       on top of that only inflated the target further.
+       A fixed 44x44 box (WCAG 2.5.5 baseline) with flex centring keeps the
+       glyph visually centred and gives the placement grid a predictable tile.
+       It lives on the base class, not an ID selector, because pooled elements
+       have no data-symbol-state: without this they fell back to block layout
+       and measured the whole panel width, which poisoned the grid maths. */
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     box-sizing: content-box;
     /* TOUCH FIX: Prevent 300ms click delay on mobile */
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(0, 255, 255, 0.3);
-    will-change: translate, transform, color, text-shadow;
+    /* Only compositor-accelerated properties may be promoted here: the rain
+       holds up to maxActiveSymbols nodes, and `color`/`text-shadow` do not
+       composite, so promoting them burns VRAM without saving a paint. */
+    will-change: translate, transform, opacity;
 }
 
+/* The box itself is owned by `.falling-symbol` above. This rule only carries
+   the panel-C font sizing, which display-manager.js later overrides with an
+   injected `!important` rule driven by the viewport contract. */
 #panel-c .falling-symbol[data-symbol-state] {
     font-size: 14px;
-    padding: 15px 20px;
-    margin: -15px -20px;
+}
+
+/* Hidden symbols keep their last slot position while they wait to resurface.
+   Without this they stay hit-testable at opacity 0 and silently swallow taps
+   aimed at a visible neighbour that happens to sit under them. */
+#panel-c .falling-symbol[data-symbol-state="hidden"] {
+    pointer-events: none;
 }
 
 /* PERFORMANCE: ::before pseudo-element removed - was creating double render layers */
-/* Touch target now handled by padding above */
 
 .falling-symbol:hover {
     color: #0ff;

@@ -3,7 +3,7 @@
   "use strict";
 
   const CONFIG = Object.freeze({
-    COLUMN_WIDTH_PX: 20,
+    COLUMN_WIDTH_PX: 28,
     ANIMATION_DURATION_MIN_SEC: 2,
     ANIMATION_DURATION_RANGE_SEC: 3,
     ANIMATION_DELAY_MAX_SEC: 2,

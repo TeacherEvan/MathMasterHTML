@@ -106,7 +106,7 @@ export function checkServiceWorkerPrecacheAssets(rootDir) {
 
   // Must match the BUILD_VERSION value used by service-worker.js so
   // `/src/...?v=${BUILD_VERSION}` entries resolve to their real file paths.
-  const BUILD_VERSION = "20260501-symbol-rain-lifecycle-2";
+  const BUILD_VERSION = "20261024-gameplay-entity-obstruction-3";
   const swSource = readFileSync(swPath, "utf8");
 
   const arrayMatch = swSource.match(/const\s+STATIC_ASSETS\s*=\s*\[\s*([\s\S]*?)\s*\]\s*;/);

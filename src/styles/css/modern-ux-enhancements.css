@@ -147,20 +147,12 @@
   content: "";
   position: absolute;
   top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
-  transition: left 0.5s;
+  transform: translateX(-100%);
+  transition: transform 0.5s;
 }
 
 .modern-button:hover::before {
-  left: 100%;
+  transform: translateX(100%);
 }
 
 /* ============================================
@@ -228,9 +220,11 @@
   height: 100%;
   background: linear-gradient(90deg, #00ff00, #00ff99);
   border-radius: 4px;
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
-  will-change: width;
+  will-change: transform;
 }
 
 .progress-bar-animated {
@@ -513,7 +507,7 @@
 
 .skip-link {
   position: absolute;
-  top: -100px;
+  top: 0;
   left: 0;
   background: #00ff00;
   color: #000;
@@ -523,11 +517,12 @@
   font-weight: 700;
   border-radius: 0 0 8px 0;
   text-decoration: none;
-  transition: top 0.3s;
+  transform: translateY(-100%);
+  transition: transform 0.3s;
 }
 
 .skip-link:focus {
-  top: 0;
+  transform: translateY(0);
 }
 
 /* ============================================

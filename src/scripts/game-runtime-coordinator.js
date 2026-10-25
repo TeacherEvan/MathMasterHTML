@@ -112,6 +112,29 @@
     return cloneState();
   }
 
+  /**
+   * Bootstrap the game runtime: await lazy component preload and problem
+   * loading, then mark preload complete and gameplay content ready.
+   * This is the sole orchestration entry point for the async boot barrier.
+   * @returns {Promise<Object>} Cloned state after bootstrapping
+   */
+  async function bootstrap() {
+    // Wait for all lock HTML partials to be fetched (or fail resiliently).
+    if (window.lazyComponentLoader?.readyPromise) {
+      await window.lazyComponentLoader.readyPromise;
+    }
+
+    // Wait for the active level problem dataset to load (or fall back).
+    if (window.problemLoader?.readyPromise) {
+      await window.problemLoader.readyPromise;
+    }
+
+    markPreloadComplete();
+    markGameplayContentReady(true);
+
+    return cloneState();
+  }
+
   document.addEventListener(GE?.STARTUP_PRELOAD_COMPLETE, (event) => {
     markPreloadComplete(event.detail?.reason || "complete");
   });
@@ -128,5 +151,6 @@
     markBriefingDismissed,
     markGameplayContentReady,
     setInputLock,
+    bootstrap,
   };
 })();
