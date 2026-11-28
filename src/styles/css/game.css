@@ -12,7 +12,10 @@ button:focus:not(:focus-visible),
 input:focus:not(:focus-visible),
 .falling-symbol:focus:not(:focus-visible),
 .console-slot:focus:not(:focus-visible) {
+    /* Mouse-only focus stays unringed; keyboard focus keeps the shared
+       --mm-focus ring from the theme layer (see *:focus-visible). */
     outline: none !important;
+    outline-color: var(--mm-focus);
 }
 
 /* FULLSCREEN FIX: Ensure black background in fullscreen mode across all browsers */

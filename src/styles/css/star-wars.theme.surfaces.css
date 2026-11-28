@@ -584,3 +584,131 @@ body.welcome-page .settings-dialog-actions {
   color: oklch(0.855 0.110 212 / 0.24);
   text-shadow: 0 0 18px oklch(0.855 0.110 212 / 0.16);
 }
+
+/* --------------------------------------------------------------------------
+    12. LIFE STATS DASHBOARD — holo plates, specular edges, compact empties
+    DOM, IDs, tabs, TAX badge and export hooks stay exactly as shipped.
+    -------------------------------------------------------------------------- */
+.ls-card,
+.ls-chart-card,
+.ls-feature {
+  border-color: oklch(0.855 0.110 212 / 0.22);
+  background:
+    linear-gradient(180deg, oklch(0.968 0.006 250 / 0.03), transparent 32%),
+    linear-gradient(160deg, oklch(0.185 0.023 255 / 0.94), oklch(0.072 0.013 264 / 0.96));
+  box-shadow:
+    var(--mm-specular-top),
+    0 1px 2px oklch(0 0 0 / 0.35),
+    0 12px 26px -8px oklch(0 0 0 / 0.32);
+  contain: layout style;
+}
+
+.ls-card h3,
+.ls-feature .label {
+  color: var(--sw-text-dim);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ls-card .sub {
+  color: var(--sw-text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.ls-chart-card h3 {
+  color: var(--sw-gold);
+  letter-spacing: 0.14em;
+}
+
+.ls-modal-content {
+  border-color: var(--sw-line);
+  background: linear-gradient(180deg, var(--sw-durasteel), var(--sw-void-deep));
+}
+
+.ls-modal-content h2 {
+  color: var(--sw-holo);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ls-field label {
+  color: var(--sw-text-dim);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+.ls-field input,
+.ls-field select {
+  min-height: 44px;
+  border-color: var(--sw-line);
+  border-radius: 10px;
+  background: var(--sw-void-deep);
+  color: var(--sw-text);
+}
+
+/* Short landscape phones: keep the whole logging form reachable. Without
+   this, flex-centred modal content taller than the viewport becomes
+   unreachable once the 44px touch fields are applied. */
+@media (max-height: 520px) {
+  .ls-modal {
+    align-items: flex-start;
+    overflow-y: auto;
+    padding: 0.75rem;
+  }
+
+  .ls-modal-content {
+    margin: auto;
+    padding: 0.9rem;
+  }
+
+  .ls-field {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.ls-empty {
+  margin: 0;
+  padding: 1.25rem;
+  border: 1px dashed oklch(0.855 0.110 212 / 0.3);
+  border-radius: 14px;
+  background: oklch(0.150 0.020 258 / 0.45);
+  box-shadow: var(--mm-specular-top);
+  color: var(--sw-text-dim);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+}
+
+/* Sticky action band on level select: keep the credit, settings and reset
+   controls legible instead of overlapping them on a 390px coarse viewport. */
+@media (max-width: 430px) {
+  body.level-page .page-actions.level-actions {
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+    padding: 0.45rem 0.6rem;
+  }
+
+  body.level-page .level-actions > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  body.level-page .level-actions__center {
+    display: grid;
+    gap: 0.2rem;
+    justify-items: stretch;
+  }
+
+  body.level-page .level-actions__center .creator-credit {
+    font-size: 0.52rem;
+    letter-spacing: 0.08em;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  body.level-page .level-actions .btn {
+    min-height: var(--mm-target-touch);
+    padding-inline: 0.4rem;
+    font-size: 0.66rem;
+  }
+}

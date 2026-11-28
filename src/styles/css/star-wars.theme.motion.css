@@ -143,4 +143,95 @@ body.welcome-page .welcome-actions__row {
     animation: none !important;
     opacity: 0.35;
   }
+
+  .ls-btn,
+  .ls-tab,
+  .ls-legend button,
+  .route-switcher-button,
+  input[type="range"] {
+    transition-duration: 0.01ms !important;
+    transform: none !important;
+  }
+
+  /* Functional blinks stay, but looped decorative motion collapses. */
+  .victory-banner,
+  .math-symbol {
+    animation: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+    12. FOCUS NOT OBSCURED (WCAG 2.2 SC 2.4.11) + CONTRAST TRIAD
+    Sticky top bars on the welcome/level pages must never cover an anchored
+    heading or a keyboard-focused control.
+    -------------------------------------------------------------------------- */
+html {
+  scroll-padding-top: var(--mm-sticky-clearance);
+}
+
+section[id],
+[data-focus-target],
+:target {
+  scroll-margin-top: var(--mm-sticky-clearance);
+}
+
+@media (prefers-contrast: more) {
+  .btn,
+  .icon-button,
+  .ls-btn,
+  .ls-tab,
+  .route-switcher-button,
+  .display-panel,
+  .ls-card,
+  .ls-chart-card {
+    border-color: var(--sw-text);
+  }
+
+  *:focus-visible,
+  .btn:focus-visible,
+  .ls-btn:focus-visible,
+  .ls-tab:focus-visible {
+    outline-width: 3px;
+  }
+}
+
+@media (forced-colors: active) {
+  .btn,
+  .icon-button,
+  .ls-btn,
+  .ls-tab,
+  .route-switcher-button,
+  .display-panel,
+  .ls-card,
+  .ls-chart-card {
+    border: 1px solid ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
+  }
+
+  *:focus-visible,
+  .btn:focus-visible,
+  .ls-btn:focus-visible,
+  .ls-tab:focus-visible {
+    outline: 2px solid Highlight;
+  }
+}
+
+/* HUD labels were 7.68px on mobile — below a comfortable all-audiences
+   reading size. Grow type only; panel A/B and console geometry untouched. */
+@media (max-width: 600px) {
+  .hud-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+  }
+}
+
+/* Every live metric on every board, not just the game HUD. */
+#streak-count,
+.ls-card .sub,
+.scoreboard-summary-grid dd,
+.scoreboard-history-list li {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }

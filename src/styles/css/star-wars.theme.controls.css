@@ -31,10 +31,10 @@ a.btn,
     0 2px 6px -1px oklch(0 0 0 / 0.5),
     0 8px 20px -6px oklch(0 0 0 / 0.45);
   transition:
-    transform 140ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 140ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 140ms cubic-bezier(0.22, 1, 0.36, 1),
-    color 140ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform var(--mm-dur-tactile) var(--mm-ease-tactile),
+    border-color var(--mm-dur-tactile) var(--mm-ease-tactile),
+    box-shadow var(--mm-dur-tactile) var(--mm-ease-tactile),
+    color var(--mm-dur-tactile) var(--mm-ease-tactile);
 }
 
 .icon-button {
@@ -75,7 +75,7 @@ a.btn,
    !important; restate it in the theme palette so keyboard focus reads as
    Alliance holo-cyan on every surface. */
 *:focus-visible {
-  outline: 2px solid var(--sw-holo) !important;
+  outline: 2px solid var(--mm-focus) !important;
   outline-offset: 2px;
 }
 
@@ -385,4 +385,119 @@ body {
 .power-up-item.is-selected {
   border-color: oklch(0.865 0.135 88 / 0.7);
   box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.12), 0 0 18px oklch(0.865 0.135 88 / 0.28);
+}
+
+/* --------------------------------------------------------------------------
+    7. MOBILE-FIRST TACTILE TARGETS (cross-page, presentation only)
+    The board controls below are static UI — no gameplay panel, worm, lock,
+    console geometry, or event contract is touched by these declarations.
+    -------------------------------------------------------------------------- */
+.ls-btn,
+.ls-tab,
+.route-switcher-button,
+.settings-dialog-close,
+.settings-reset-button {
+  min-height: 2.75rem;
+  touch-action: manipulation;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Keep the tab's original non-spatial transition. A transform transition on
+   touch makes WebKit's tap stability check never settle (pointer jitter), so
+   press/hover lift is gated to fine pointers below. */
+.ls-tab {
+  transition:
+    border-color var(--mm-dur-tactile) ease,
+    color var(--mm-dur-tactile) ease,
+    box-shadow var(--mm-dur-tactile) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ls-tab:hover:not([aria-selected="true"]),
+  .route-switcher-button:hover:not(.is-active) {
+    transform: translate3d(0, -1px, 0);
+    border-color: var(--sw-line-strong);
+    box-shadow: var(--mm-specular-strong), var(--sw-glow-holo);
+  }
+
+  .ls-tab:active,
+  .route-switcher-button:active {
+    transition-duration: 25ms;
+    transform: translate3d(0, 1px, 0) scale(0.985);
+    box-shadow: inset 0 2px 4px oklch(0 0 0 / 0.6);
+  }
+}
+
+.ls-btn:focus-visible,
+.ls-tab:focus-visible,
+.ls-legend button:focus-visible,
+.route-switcher-button:focus-visible {
+  outline: 2px solid var(--mm-focus);
+  outline-offset: 3px;
+}
+
+.ls-btn:disabled,
+.ls-btn[aria-disabled="true"] {
+  opacity: 0.45;
+  filter: grayscale(40%);
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none;
+}
+
+/* Range inputs: a 24px hit box with a 6px optical track (no layout shift).
+   The level-select source keeps the optical gradient; this adds hit area. */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 24px;
+  border-radius: 999px;
+  background: linear-gradient(
+      90deg,
+      var(--sw-holo) var(--p, 80%),
+      oklch(1 0 0 / 0.08) var(--p, 80%)
+    ) center / 100% 6px no-repeat;
+  touch-action: pan-y;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--sw-gold);
+  border: 2px solid var(--sw-holo);
+  box-shadow: var(--mm-specular-top), 0 0 10px oklch(0.855 0.110 212 / 0.35);
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--sw-gold);
+  border: 2px solid var(--sw-holo);
+  box-shadow: var(--mm-specular-top), 0 0 10px oklch(0.855 0.110 212 / 0.35);
+  cursor: pointer;
+}
+
+/* Coarse pointer: WCAG 2.2 SC 2.5.8 44x44px minimum. */
+@media (any-pointer: coarse) {
+  .icon-button,
+  .ls-btn,
+  .ls-tab,
+  .route-switcher-button,
+  .settings-dialog-close,
+  .settings-reset-button,
+  input[type="range"] {
+    min-height: var(--mm-target-touch);
+    min-width: var(--mm-target-touch);
+  }
+
+  input[type="range"]::-webkit-slider-thumb,
+  input[type="range"]::-moz-range-thumb {
+    width: var(--mm-target-touch);
+    height: var(--mm-target-touch);
+  }
 }

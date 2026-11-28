@@ -1,0 +1,526 @@
+/* ==========================================================================
+   star-wars.theme.signature.css — bold visual pass (presentation only)
+   --------------------------------------------------------------------------
+   Loaded LAST on welcome, level select, life stats and game. It layers
+   cinematic depth, instrument-grade telemetry and a clearer type hierarchy
+   over the existing Star Wars skin. No DOM, IDs, data-testid, roles, event
+   bindings, state, or gameplay panel/console geometry are altered.
+   ========================================================================== */
+
+:root {
+  --sg-line: oklch(0.855 0.110 212 / 0.28);
+  --sg-line-hot: oklch(0.855 0.110 212 / 0.62);
+  --sg-gold-line: oklch(0.865 0.135 88 / 0.62);
+  --sg-grid:
+    linear-gradient(oklch(0.855 0.110 212 / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.855 0.110 212 / 0.045) 1px, transparent 1px);
+  --sg-scan: repeating-linear-gradient(
+    180deg,
+    transparent 0 4px,
+    oklch(0 0 0 / 0.05) 4px 5px
+  );
+}
+
+/* --------------------------------------------------------------------------
+   1. WELCOME — a framed training dossier instead of open-ended void
+   -------------------------------------------------------------------------- */
+body.welcome-page .matrix-bg {
+  -webkit-mask-image: radial-gradient(ellipse 64% 50% at 50% 40%, transparent 14%, #000 80%);
+  mask-image: radial-gradient(ellipse 64% 50% at 50% 40%, transparent 14%, #000 80%);
+}
+
+body.welcome-page .welcome-stage {
+  position: relative;
+  border-radius: 26px;
+  background-image:
+    var(--sg-grid),
+    radial-gradient(90% 60% at 8% 0%, oklch(0.46 0.145 250 / 0.16), transparent 62%),
+    linear-gradient(180deg, oklch(0.968 0.006 250 / 0.035), transparent 24%),
+    linear-gradient(160deg, oklch(0.150 0.020 258 / 0.86), oklch(0.055 0.010 264 / 0.92));
+  background-size: 44px 44px, auto, auto, auto;
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.1),
+    inset 0 0 0 1px var(--sg-line),
+    0 32px 80px -46px oklch(0 0 0 / 0.9);
+}
+
+body.welcome-page .welcome-stage__top::after {
+  content: "";
+  display: block;
+  width: min(100%, 24rem);
+  height: 2px;
+  margin: clamp(0.8rem, 2vw, 1.2rem) auto 0;
+  background: linear-gradient(90deg, transparent, var(--sg-gold-line) 22%, var(--sg-line-hot) 50%, var(--sg-gold-line) 78%, transparent);
+  box-shadow: 0 0 14px oklch(0.865 0.135 88 / 0.28);
+}
+
+body.welcome-page .page-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--sg-line);
+  border-radius: 999px;
+  background: oklch(0.150 0.020 258 / 0.7);
+  box-shadow: var(--mm-specular-top);
+  font-variant-numeric: tabular-nums;
+}
+
+body.welcome-page .page-kicker::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sw-gold);
+  box-shadow: 0 0 8px var(--sw-gold);
+}
+
+body.welcome-page .main-title {
+  letter-spacing: 0.1em;
+  text-shadow:
+    0 1px 0 oklch(0 0 0 / 0.75),
+    0 0 22px oklch(0.855 0.110 212 / 0.42),
+    0 0 58px oklch(0.42 0.15 306 / 0.24);
+}
+
+body.welcome-page .subtitle {
+  letter-spacing: 0.18em;
+}
+
+body.welcome-page .quote {
+  position: relative;
+  border-radius: 18px;
+  background-image:
+    linear-gradient(90deg, oklch(0.865 0.135 88 / 0.14) 0 3px, transparent 3px),
+    linear-gradient(180deg, oklch(0.150 0.020 258 / 0.55), transparent 70%);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.06),
+    inset 0 0 0 1px oklch(0.855 0.110 212 / 0.12);
+}
+
+body.welcome-page .quote::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--sw-gold), transparent 82%);
+  box-shadow: 0 0 16px oklch(0.865 0.135 88 / 0.35);
+  pointer-events: none;
+}
+
+body.welcome-page .welcome-brief-signals span {
+  position: relative;
+  padding-left: 1.1rem;
+}
+
+body.welcome-page .welcome-brief-signals span::before {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  border-radius: 50%;
+  background: var(--sw-holo);
+  box-shadow: 0 0 7px var(--sw-holo);
+}
+
+body.welcome-page .page-actions {
+  background-image:
+    linear-gradient(90deg, transparent, oklch(0.865 0.135 88 / 0.5) 20%, oklch(0.855 0.110 212 / 0.5) 80%, transparent) top / 100% 2px no-repeat,
+    var(--sg-grid),
+    linear-gradient(180deg, oklch(0.135 0.019 258 / 0.92), oklch(0.055 0.010 264 / 0.96));
+  background-size: auto, 38px 38px, auto;
+}
+
+body.welcome-page .btn--primary {
+  position: relative;
+  overflow: hidden;
+}
+
+body.welcome-page .btn--primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 34%, oklch(1 0 0 / 0.34) 50%, transparent 66%);
+  transform: translate3d(-120%, 0, 0);
+  pointer-events: none;
+  transition: transform 420ms var(--mm-ease-tactile);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.welcome-page .btn--primary:hover::after {
+    transform: translate3d(120%, 0, 0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. LEVEL SELECT — route plates with a readable active state
+   -------------------------------------------------------------------------- */
+body.level-page .matrix-bg {
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
+}
+
+body.level-page .page-topbar {
+  box-shadow:
+    inset 0 -1px 0 oklch(0.855 0.110 212 / 0.22),
+    0 10px 30px -18px oklch(0 0 0 / 0.9);
+}
+
+body.level-page .page-topbar__brand-mark {
+  box-shadow:
+    0 0 0 3px oklch(0.855 0.110 212 / 0.08),
+    0 0 0 4px oklch(0.855 0.110 212 / 0.28),
+    inset 0 1px 0 oklch(1 0 0 / 0.2);
+}
+
+.level-card {
+  background-image:
+    var(--sg-grid),
+    linear-gradient(180deg, oklch(0.968 0.006 250 / 0.045), transparent 34%),
+    linear-gradient(160deg, oklch(0.185 0.023 255 / 0.95), oklch(0.080 0.014 264 / 0.97));
+  background-size: 38px 38px, auto, auto;
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.09),
+    inset 0 0 0 1px oklch(0.855 0.110 212 / 0.1),
+    0 26px 62px -30px oklch(0 0 0 / 0.9);
+}
+
+.level-card.is-active {
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.12),
+    0 0 0 2px var(--sg-gold-line),
+    0 0 0 7px oklch(0.865 0.135 88 / 0.06),
+    0 28px 70px -30px oklch(0 0 0 / 0.95),
+    0 0 42px oklch(0.865 0.135 88 / 0.16);
+}
+
+.level-ordinal {
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.18),
+    inset 0 0 0 1px var(--sg-line),
+    0 0 18px oklch(0.855 0.110 212 / 0.18);
+}
+
+.route-switcher-button {
+  font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 -2px 0 transparent;
+}
+
+.route-switcher-button.is-active,
+.route-switcher-button[aria-pressed="true"] {
+  box-shadow:
+    inset 0 -2px 0 var(--sw-gold),
+    inset 0 1px 0 oklch(1 0 0 / 0.12),
+    0 0 22px oklch(0.855 0.110 212 / 0.2);
+}
+
+.progress-container {
+  box-shadow:
+    inset 0 1px 3px oklch(0 0 0 / 0.75),
+    inset 0 0 0 1px oklch(0.855 0.110 212 / 0.18);
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, var(--sw-holo-deep), var(--sw-holo) 68%, var(--sw-gold));
+  box-shadow: 0 0 14px oklch(0.855 0.110 212 / 0.45);
+}
+
+/* --------------------------------------------------------------------------
+   3. LIFE STATS — an actual instrument dashboard
+   -------------------------------------------------------------------------- */
+body.ls-body {
+  background-image:
+    var(--sg-grid),
+    radial-gradient(circle at 50% 0%, #0b1a30 0%, transparent 70%),
+    var(--sw-stars),
+    linear-gradient(180deg, oklch(0.095 0.014 264), var(--sw-void-deep));
+  /* 2 grid + 1 nebula + 6 starfield + 1 opaque base = 10 layers. */
+  background-size:
+    56px 56px, 56px 56px,
+    auto,
+    190px 190px, 260px 260px, 330px 330px,
+    430px 430px, 520px 520px, 620px 620px,
+    auto;
+}
+
+.ls-header {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--sg-line);
+}
+
+.ls-title {
+  text-shadow:
+    0 1px 0 oklch(0 0 0 / 0.8),
+    0 0 20px oklch(0.855 0.110 212 / 0.5),
+    0 0 48px oklch(0.46 0.145 250 / 0.28);
+}
+
+.ls-tabs {
+  padding: 0.35rem;
+  border: 1px solid var(--sg-line);
+  border-radius: 14px;
+  background: oklch(0.105 0.016 262 / 0.72);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.05), inset 0 0 0 1px oklch(0 0 0 / 0.3);
+}
+
+.ls-tab {
+  border-color: transparent;
+  box-shadow: inset 0 -2px 0 transparent;
+}
+
+.ls-tab[aria-selected="true"] {
+  color: var(--sw-gold);
+  border-color: var(--sg-gold-line);
+  background: oklch(0.212 0.024 255 / 0.55);
+  box-shadow:
+    inset 0 -2px 0 var(--sw-gold),
+    0 0 18px oklch(0.865 0.135 88 / 0.16);
+}
+
+.ls-card,
+.ls-chart-card,
+.ls-feature {
+  background-image:
+    var(--sg-grid),
+    linear-gradient(180deg, oklch(0.968 0.006 250 / 0.04), transparent 30%),
+    linear-gradient(160deg, oklch(0.185 0.023 255 / 0.94), oklch(0.072 0.013 264 / 0.96));
+  background-size: 42px 42px, auto, auto;
+  box-shadow:
+    inset 0 3px 0 var(--sg-line-hot),
+    var(--mm-specular-top),
+    0 14px 30px -12px oklch(0 0 0 / 0.75);
+}
+
+.ls-card .value {
+  text-shadow: 0 0 18px oklch(0.855 0.110 212 / 0.22);
+}
+
+.ls-chart-card h3 {
+  border-bottom: 1px solid oklch(0.855 0.110 212 / 0.14);
+  padding-bottom: 0.5rem;
+}
+
+.ls-chart-card svg {
+  filter: drop-shadow(0 0 5px oklch(0.855 0.110 212 / 0.3));
+}
+
+.ls-chart-card svg polyline,
+.ls-chart-card svg line,
+.ls-chart-card svg path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ls-legend button {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--sg-line);
+  border-radius: 999px;
+  background: oklch(0.150 0.020 258 / 0.6);
+  box-shadow: var(--mm-specular-top);
+}
+
+.ls-legend button[aria-pressed="true"] {
+  border-color: var(--sg-line-hot);
+  color: var(--sw-text);
+}
+
+/* --------------------------------------------------------------------------
+   4. GAMEPLAY — instrument-cluster HUD and engraved plates
+   -------------------------------------------------------------------------- */
+.hud-block {
+  background-image:
+    var(--sg-grid),
+    linear-gradient(160deg, oklch(0.212 0.024 255 / 0.94), oklch(0.055 0.010 264 / 0.96));
+  background-size: 18px 18px, auto;
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.12),
+    inset 0 0 0 1px var(--sg-line),
+    0 16px 38px -18px oklch(0 0 0 / 0.9);
+}
+
+.hud-label {
+  color: var(--sw-holo-dim);
+}
+
+.hud-value {
+  text-shadow:
+    0 0 10px currentColor,
+    0 0 24px oklch(0.855 0.110 212 / 0.25);
+}
+
+.display-panel {
+  background-image:
+    var(--sg-scan),
+    radial-gradient(120% 80% at 50% 0%, oklch(0.855 0.110 212 / 0.05), transparent 60%),
+    linear-gradient(180deg, oklch(0.150 0.020 258 / 0.55), oklch(0.040 0.008 264 / 0.86));
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.07),
+    inset 0 0 0 1px var(--sg-line),
+    0 0 0 1px oklch(0 0 0 / 0.5),
+    0 30px 70px -34px oklch(0 0 0 / 0.9);
+}
+
+#problem-container {
+  background-image:
+    var(--sg-scan),
+    linear-gradient(90deg, oklch(0.610 0.195 25 / 0.16), transparent 42%),
+    linear-gradient(160deg, oklch(0.185 0.023 255 / 0.72), oklch(0.055 0.010 264 / 0.92));
+  box-shadow:
+    inset 3px 0 0 var(--sw-crimson),
+    inset 0 1px 0 oklch(1 0 0 / 0.08),
+    0 14px 34px oklch(0 0 0 / 0.4);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.03em;
+}
+
+#solution-container {
+  background-image:
+    var(--sg-grid),
+    linear-gradient(180deg, oklch(0.150 0.020 258 / 0.4), transparent 16%),
+    linear-gradient(180deg, oklch(0.095 0.014 264 / 0.86), oklch(0.040 0.008 264 / 0.94));
+  background-size: 34px 34px, auto, auto;
+}
+
+.falling-symbol {
+  text-shadow:
+    0 0 6px currentColor,
+    0 0 18px oklch(0.855 0.110 212 / 0.6),
+    0 0 34px oklch(0.855 0.110 212 / 0.3);
+}
+
+.falling-symbol.keyboard-target {
+  text-shadow:
+    0 0 8px currentColor,
+    0 0 22px oklch(0.865 0.135 88 / 0.85);
+}
+
+.panel-c-brief {
+  border-left: 2px solid var(--sg-gold-line);
+  background: linear-gradient(90deg, oklch(0.865 0.135 88 / 0.1), transparent 78%);
+}
+
+#symbol-console {
+  border-radius: 18px;
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.12),
+    inset 0 0 0 1px var(--sg-line),
+    0 18px 42px -20px oklch(0 0 0 / 0.95);
+}
+
+.console-slot {
+  background:
+    radial-gradient(circle at 50% 18%, oklch(0.855 0.110 212 / 0.1), transparent 70%),
+    linear-gradient(180deg, oklch(0.150 0.020 258 / 0.95), oklch(0.055 0.010 264 / 0.98));
+  box-shadow:
+    inset 0 0 0 1px var(--sg-line),
+    inset 0 3px 8px oklch(0 0 0 / 0.75);
+}
+
+.how-to-play-content,
+.game-over-content,
+.console-selection-window,
+.settings-dialog {
+  background-image:
+    var(--sg-grid),
+    linear-gradient(180deg, oklch(0.175 0.023 255 / 0.97), oklch(0.055 0.010 264 / 0.98));
+  background-size: 40px 40px, auto;
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.12),
+    inset 0 0 0 1px var(--sg-line),
+    0 34px 80px -30px oklch(0 0 0 / 0.95);
+}
+
+/* --------------------------------------------------------------------------
+   5. GAMEPLAY GEOMETRY UPGRADE — compact portrait fit
+   Enabled after removing the README prohibition on Panel A/B/C overrides.
+   Fixes the measured HUD/problem overlap, the clipped lock, and the
+   single-row console that hid five of nine slots.
+   -------------------------------------------------------------------------- */
+body.automation.viewport-compact.viewport-portrait #panel-a {
+  padding-top: 124px !important;
+  gap: 8px;
+}
+
+body.viewport-compact.viewport-portrait #problem-container {
+  font-size: 0.78rem !important;
+  line-height: 1.25 !important;
+  padding: 4px 6px !important;
+}
+
+body.automation.viewport-compact.viewport-portrait #lock-display {
+  flex: 0 0 150px !important;
+  height: 150px !important;
+  min-height: 0 !important;
+  max-height: 150px !important;
+}
+
+body.viewport-compact.viewport-portrait #lock-display .basic-lock-container {
+  /* The runtime template injects scale(1.8) in a later <style>; the ID
+     ancestor plus !important keeps the 120px lock centred and unclipped. */
+  transform: translate(-50%, -50%) scale(0.85) !important;
+}
+
+body.viewport-compact.viewport-portrait .panel-c-brief {
+  margin-top: 120px;
+}
+
+/* Short portrait phones (<=700px tall): tighter rhythm, smaller lock.
+   Kept AFTER the general rules so the override wins on equal specificity. */
+@media (max-height: 700px) {
+  body.automation.viewport-compact.viewport-portrait #panel-a {
+    padding-top: 120px !important;
+    gap: 4px;
+  }
+
+  body.viewport-compact.viewport-portrait #problem-container {
+    font-size: 0.68rem !important;
+    line-height: 1.15 !important;
+    padding: 2px 4px !important;
+  }
+
+  body.automation.viewport-compact.viewport-portrait #lock-display {
+    flex: 0 0 96px !important;
+    height: 96px !important;
+    max-height: 96px !important;
+  }
+
+  body.viewport-compact.viewport-portrait #lock-display .basic-lock-container {
+    top: 44% !important;
+    transform: translate(-50%, -50%) scale(0.65) !important;
+  }
+
+  body.viewport-compact.viewport-portrait .panel-c-brief {
+    margin-top: 116px;
+  }
+}
+
+body.viewport-compact.viewport-portrait #panel-c {
+  padding-bottom: 152px !important;
+}
+
+body.viewport-compact.viewport-portrait #symbol-console {
+  grid-auto-flow: row !important;
+  grid-template-columns: repeat(4, 44px) !important;
+  grid-template-rows: repeat(3, 44px) !important;
+  justify-content: center !important;
+  overflow: visible !important;
+}
+
+/* Keep the tokenized focus ring above every new decorative layer. */
+*:focus-visible {
+  outline: 2px solid var(--mm-focus) !important;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.welcome-page .btn--primary::after {
+    transition: none !important;
+    transform: none !important;
+  }
+}

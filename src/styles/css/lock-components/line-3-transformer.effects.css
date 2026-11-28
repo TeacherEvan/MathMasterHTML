@@ -220,15 +220,18 @@
 }
 
 @keyframes arc-discharge {
+  /* 60px -> 80px amplitude preserved as a compositor scaleY (1 -> 1.333).
+     Using the standalone `scale` property keeps each arc's rotate/translate
+     `transform` intact; no height/layout recalculation per frame. */
   0%,
   100% {
     opacity: 0.3;
-    height: 60px;
+    scale: 1 1;
     box-shadow: 0 0 10px rgba(138, 43, 226, 0.8);
   }
   50% {
     opacity: 1;
-    height: 80px;
+    scale: 1 1.333;
     box-shadow: 0 0 20px rgba(138, 43, 226, 1);
   }
 }

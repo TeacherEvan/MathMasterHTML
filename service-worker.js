@@ -17,7 +17,7 @@ const serviceWorkerScope = /** @type {{
   skipWaiting: () => Promise<void>;
 }} */ (/** @type {unknown} */ (self));
 
-const BUILD_VERSION = "20261024-gameplay-entity-obstruction-3";
+const BUILD_VERSION = "20261128-signature-visual-pass-1";
 const CACHE_PREFIX = "math-master";
 const CACHE_NAME = `${CACHE_PREFIX}-static-${BUILD_VERSION}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_VERSION}`;
@@ -84,6 +84,7 @@ const STATIC_ASSETS = [
   "/src/styles/css/star-wars.theme.surfaces.css",
   "/src/styles/css/star-wars.theme.controls.css",
   "/src/styles/css/star-wars.theme.motion.css",
+  "/src/styles/css/star-wars.theme.signature.css",
   "/src/styles/life-stats.css",
   "/src/scripts/service-worker-register.js",
   "/src/scripts/index-page.matrix.js",
@@ -594,7 +595,7 @@ function fallbackResponse(request) {
                         color: #00ff00;
                         cursor: pointer;
                         border-radius: 8px;
-                        transition: all 0.3s ease;
+                        transition: box-shadow 0.3s ease, transform 0.3s ease;
                     }
                     button:hover {
                         box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);

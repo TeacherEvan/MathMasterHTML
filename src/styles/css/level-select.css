@@ -144,17 +144,18 @@
 .settings-field--range input[type="range"] {
 	-webkit-appearance: none;
 	appearance: none;
-	height: 6px;
+	/* 24px hit box, 6px optical track — WCAG 2.2 SC 2.5.8. */
+	height: 24px;
 	border-radius: 999px;
-	background: linear-gradient(90deg, var(--level-phosphor) var(--p, 80%), rgba(255, 255, 255, 0.08) var(--p, 80%));
+	background: linear-gradient(90deg, var(--level-phosphor) var(--p, 80%), rgba(255, 255, 255, 0.08) var(--p, 80%)) center / 100% 6px no-repeat;
 	outline: none;
 }
 
 .settings-field--range input[type="range"]::-webkit-slider-thumb {
 	-webkit-appearance: none;
 	appearance: none;
-	width: 18px;
-	height: 18px;
+	width: 24px;
+	height: 24px;
 	border-radius: 50%;
 	background: #ffe9ae;
 	border: 2px solid var(--level-phosphor);
@@ -163,8 +164,8 @@
 }
 
 .settings-field--range input[type="range"]::-moz-range-thumb {
-	width: 18px;
-	height: 18px;
+	width: 24px;
+	height: 24px;
 	border-radius: 50%;
 	background: #ffe9ae;
 	border: 2px solid var(--level-phosphor);

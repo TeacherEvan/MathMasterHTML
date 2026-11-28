@@ -17,15 +17,18 @@
 }
 
 @keyframes level2-expansion {
+  /* Width stays at its 200px resting value; the 10% swell is a compositor
+     `scale` multiplied with the lock's existing transform (200->220px
+     visual amplitude, zero layout thrash). */
   0%,
   100% {
-    width: 200px;
+    scale: 1 1;
     box-shadow: 0 0 50px rgba(255, 165, 0, 0.9),
       inset 0 0 20px rgba(0, 0, 0, 0.6), 0 0 0 10px rgba(255, 165, 0, 0.3),
       0 0 0 20px rgba(255, 165, 0, 0.15);
   }
   50% {
-    width: 220px;
+    scale: 1.1 1;
     box-shadow: 0 0 70px rgba(255, 165, 0, 1), inset 0 0 25px rgba(0, 0, 0, 0.7),
       0 0 0 15px rgba(255, 165, 0, 0.4), 0 0 0 30px rgba(255, 165, 0, 0.2);
   }

@@ -21,7 +21,7 @@ Open `http://localhost:8000/game.html?level=beginner` after the server starts.
 
 - `src/styles/css/star-wars.theme.*.css` owns the visual skin (Star Wars palette, holo chrome, tactile controls, starfield void): `tokens` → `surfaces` → `controls` → `motion`, loaded last on every runtime page so they win the cascade. No DOM, state, or event contract changes live in those files.
 - `src/scripts/display-manager.js` owns panel sizing and compact/mobile classification.
-- Compact mobile console clearance is exposed through `body.console-compact-clearance`; Panel A and Panel B dimensions should not be overridden to make room for the floating console.
+- Compact mobile console clearance is exposed through `body.console-compact-clearance`. Panel A/B/C geometry is open to enhancement; when it changes, re-verify that the floating console still clears every panel with `tests/console-interactions.spec.js`, `tests/game-portrait-device-contract.spec.js`, and `tests/hud-mobile-viewport.spec.js` at 390px coarse-pointer and in landscape.
 - Console and symbol-choice touch latency is handled with CSS `touch-action` plus primary-pointer activation, while programmatic `click()` paths remain valid for tests and assistive tooling.
 - Symbol rain mobile targeting resolves against live `#symbol-rain-container` bounds and touch coordinates instead of stale panel-only geometry.
 - Problem content lives under `src/assets/problems/Assets/` as runtime JSON.
